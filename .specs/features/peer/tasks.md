@@ -69,9 +69,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `dbPath({})` é `<os.homedir()>/.squad-code-mcp.db` e `dbPath({ SQUAD_DB })` devolve o valor da variável
-- [ ] `port({})` é 7900 e `port({ SQUAD_PORT: "7955" })` é 7955
-- [ ] Gate: `bun test test/unit` - 5 testes
+- [x] `dbPath({})` é `<os.homedir()>/.squad-code-mcp.db` e `dbPath({ SQUAD_DB })` devolve o valor da variável
+- [x] `port({})` é 7900 e `port({ SQUAD_PORT: "7955" })` é 7955
+- [x] Gate: `bun test test/unit` - 5 testes
 
 **Tests**: unit
 **Gate**: quick

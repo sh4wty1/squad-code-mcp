@@ -215,8 +215,8 @@ PEER-05 a PEER-08.
 | PEER-16 | P1: Listagem sem credencial | Tasks | In Tasks |
 | PEER-17 | P1: Listagem sem credencial | Tasks | In Tasks |
 | PEER-18 | P1: Listagem sem credencial | Tasks | In Tasks |
-| PEER-19 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
-| PEER-20 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
+| PEER-19 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
+| PEER-20 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-21 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
 | PEER-22 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
 | PEER-23 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
