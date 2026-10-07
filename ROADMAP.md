@@ -72,4 +72,27 @@ só o que for decisão nova, apontando para o ADR quando existir um. Mensagens d
 seguem a convenção do repositório. Ao terminar, marque a fatia em ROADMAP.md.
 ```
 
+A fatia Peer é a primeira de código e precisa trazer o upstream antes. Para ela, use este
+prompt no lugar do modelo acima:
+
+```text
+/tlc-spec-driven
+
+Implemente a fatia Peer de .design/squad-mvp.md. É a primeira fatia de código: o
+repositório só tem documentos.
+
+Antes da fatia, traga o código do upstream para cá. O broker é um fork de
+https://github.com/louislva/claude-peers-mcp no commit 640183f (ADR-001): copie o código
+desse commit como primeiro commit de código, mantendo o aviso da licença MIT do autor
+original, e só depois comece a alterar.
+
+O design e os ADRs em docs/adr/ já estão decididos: a spec deriva da fatia, não reabra
+as decisões. docs/fase-0/ tem o que os testes com sessões reais mostraram. Registre no
+STATE.md só o que for decisão nova, apontando para o ADR quando existir um.
+
+Precisa rodar no Windows: a seção Work do design lista o que o upstream não faz aqui.
+Mensagens de commit seguem a convenção do repositório. Trabalhe num branch e abra um PR
+no fim. Ao terminar, marque a fatia Peer em ROADMAP.md.
+```
+
 Para parar no meio: `pause work`. Para voltar em outra sessão: `/tlc-spec-driven resume work`.
