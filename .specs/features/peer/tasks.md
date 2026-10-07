@@ -395,9 +395,9 @@ T14 → T15 → T16 → T17 → T18 → T19 → T20
 
 **Done when**:
 
-- [ ] O lockfile resolve o SDK em 1.32.0 ou mais novo
-- [ ] Os testes do ping pelo canal e do `ready` passam sem mudança
-- [ ] Gate: `bun x tsc --noEmit && bun test`
+- [x] O lockfile resolve o SDK em 1.32.0 ou mais novo
+- [x] Os testes do ping pelo canal e do `ready` passam sem mudança
+- [x] Gate: `bun x tsc --noEmit && bun test`
 
 **Tests**: integration
 **Gate**: build
