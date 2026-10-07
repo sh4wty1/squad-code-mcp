@@ -40,8 +40,9 @@ function listenerPids(): number[] {
     return [...new Set(pids)];
   }
 
-  // -sTCP:LISTEN: without it lsof also lists every client connected to the port, the CLI itself included
-  return run(["lsof", "-ti", `tcp:${BROKER_PORT}`, "-sTCP:LISTEN"])
+  // -sTCP:LISTEN: without it lsof also lists every client connected to the port, the CLI itself included.
+  // The address keeps out whoever listens on the same port of another interface.
+  return run(["lsof", "-ti", `tcp@127.0.0.1:${BROKER_PORT}`, "-sTCP:LISTEN"])
     .trim()
     .split("\n")
     .filter((p) => p)
@@ -67,10 +68,11 @@ switch (cmd) {
       const health = await brokerFetch<{ status: string; peers: number }>("/health");
       console.log(`Broker has ${health.peers} peer(s). Shutting down...`);
       // Find and kill the broker process on the port
-      for (const pid of listenerPids()) {
+      const pids = listenerPids();
+      for (const pid of pids) {
         process.kill(pid, "SIGTERM");
       }
-      console.log("Broker stopped.");
+      console.log(pids.length > 0 ? "Broker stopped." : "Could not find the broker process; it is still running.");
     } catch {
       console.log("Broker is not running.");
     }

@@ -53,7 +53,7 @@ T1 → T2 → T3 → T4
 ### Phase 2: Processos
 
 ```
-T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13
+T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13 → T14
 ```
 
 ---
@@ -292,6 +292,24 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13
 
 ---
 
+### T14: Correções da quinta verificação
+
+**What**: `kill-broker` procura quem escuta em `127.0.0.1` na porta, e não em qualquer endereço, e avisa quando não acha o processo. Testes que só discriminam fora do Windows: o broker iniciado pelo servidor lidera o próprio grupo de processos, o `/unregister` vem do fechamento da entrada padrão antes do `SIGTERM` do cliente, e um PID de outro usuário conta como vivo.
+**Where**: `broker/cli.ts`, `broker/test/`
+**Depends on**: T13
+**Requirement**: PEER-14, PEER-33, PEER-34, PEER-35
+
+**Done when**:
+
+- [x] Os mutantes L6 (`detached`), L3 (handlers de stdin) e L2 (`EPERM`) da quinta rodada têm teste
+- [x] `kill-broker` não sinaliza quem escuta na mesma porta em outro endereço
+- [x] Gate: `bun x tsc --noEmit && bun test` - 86 testes no Linux (85 no Windows, um pulado)
+
+**Tests**: integration
+**Gate**: build
+
+---
+
 ## Diagram-Definition Cross-Check
 
 | Task | Depends On (task body) | Diagram Shows | Status |
@@ -309,6 +327,7 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13
 | T11 | T10 | T10 → T11 | ✅ |
 | T12 | T11 | T11 → T12 | ✅ |
 | T13 | T12 | T12 → T13 | ✅ |
+| T14 | T13 | T13 → T14 | ✅ |
 
 ## Test Co-location Validation
 
@@ -327,3 +346,4 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13
 | T11 | Rotas HTTP | integration | integration | ✅ |
 | T12 | CLI | integration | integration | ✅ |
 | T13 | Servidor MCP, rotas HTTP, regras | integration | integration | ✅ |
+| T14 | CLI, servidor MCP, regras | integration | integration | ✅ |

@@ -216,9 +216,11 @@ test("PEER-33: when the session closes its stdin the server unregisters", async 
   await session.ready(await session.pingNumber());
   expect(readDb(broker.dbFile).peers.map((p) => p.name)).toEqual(["judge"]);
 
-  await session.client.close();
+  // close() sends SIGTERM 2 s after closing stdin; the unregister has to come from the stdin close alone
+  const closing = session.client.close();
   const b = broker;
-  await waitFor(() => readDb(b.dbFile).events.length === 2, "peer_left");
+  await waitFor(() => readDb(b.dbFile).events.length === 2, "peer_left", 1500);
+  await closing;
   const { peers, events } = readDb(b.dbFile);
   expect(peers).toEqual([]);
   expect(events.map((e) => [e.kind, e.data])).toEqual([
@@ -253,6 +255,12 @@ test("PEER-34: the server starts the broker from a path with a space, and the br
   expect(await isUp(url)).toBe(false);
   const session = await startSession(port, { ...env, SQUAD_NAME: "mother", SQUAD_ROLE: "mother" }, copy);
   expect(await isUp(url)).toBe(true);
+  if (process.platform !== "win32") {
+    // Detached: the broker leads its own process group. On POSIX a child outlives its parent either way.
+    const text = (cmd: string[]) => Bun.spawnSync(cmd).stdout.toString().trim();
+    const brokerPid = text(["lsof", "-ti", `tcp@127.0.0.1:${port}`, "-sTCP:LISTEN"]);
+    expect(text(["ps", "-o", "pgid=", "-p", brokerPid])).toBe(brokerPid);
+  }
 
   const serverPid = session.transport.pid!;
   await session.client.close();

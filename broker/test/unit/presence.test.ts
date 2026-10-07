@@ -1,5 +1,11 @@
 import { expect, test } from "bun:test";
+import { pidAlive } from "../../peers.ts";
 import { NOW, setup } from "./helpers.ts";
+
+// pid 1 belongs to root, so the signal is refused with EPERM. Windows has no such pid.
+test.skipIf(process.platform === "win32")("PEER-14: a pid that exists under another user is alive", () => {
+  expect(pidAlive(1)).toBe(true);
+});
 
 test("PEER-11: unregister removes the peer and logs peer_left with unregistered", () => {
   const b = setup();
