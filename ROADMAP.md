@@ -43,7 +43,8 @@ gate aprovado usando só o terminal da mother e a TUI.
 
 ## Pendências fora da ordem
 
-- [ ] Segunda rodada de frames no Claude Design, antes da fatia TUI leitura. O `/the-fool`
+- [x] Segunda rodada de frames no Claude Design, antes da fatia TUI leitura. Frames 22 a
+      25 importados; ver a seção 7 de `docs/claude-design-handoff/DESIGN-NOTES.md`. O `/the-fool`
       criou estados depois do primeiro pedido: modal de pedido de permissão (só se o
       spike A passar), agente `stalled`, ticket `planned`, ticket `dropped` e a linha de
       `refused` com contador.
