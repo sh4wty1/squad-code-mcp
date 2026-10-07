@@ -308,3 +308,18 @@ test("PEER-40: a tool that is not listed cannot be called", async () => {
   expect(await call(session, "ready", number)).toContain("Unknown tool: ready");
   expect(readDb(broker.dbFile).events).toHaveLength(1);
 });
+
+test("PEER-46: a registered session sends a heartbeat on the interval", async () => {
+  broker = await startBroker();
+  const b = broker;
+  const session = await startSession(b.port, {
+    SQUAD_NAME: "judge",
+    SQUAD_ROLE: "judge",
+    SQUAD_HEARTBEAT_INTERVAL_MS: "100",
+  });
+  expect((await session.ready(await session.pingNumber())).isError).toBeFalsy();
+  const { registered_at } = readDb(b.dbFile).peers[0]!;
+  await waitFor(() => readDb(b.dbFile).peers[0]!.last_seen > registered_at, "last_seen to move");
+  const first = readDb(b.dbFile).peers[0]!.last_seen;
+  await waitFor(() => readDb(b.dbFile).peers[0]!.last_seen > first, "last_seen to move again");
+});

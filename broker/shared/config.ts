@@ -19,6 +19,11 @@ export function pingIntervalMs(env: Env = process.env): number {
   return parseInt(env.SQUAD_PING_INTERVAL_MS ?? "10000", 10);
 }
 
+// How often a registered session tells the broker it is still there
+export function heartbeatIntervalMs(env: Env = process.env): number {
+  return parseInt(env.SQUAD_HEARTBEAT_INTERVAL_MS ?? "15000", 10);
+}
+
 // How often the broker removes peers whose process is gone
 export function cleanupIntervalMs(env: Env = process.env): number {
   return parseInt(env.SQUAD_CLEANUP_INTERVAL_MS ?? "30000", 10);

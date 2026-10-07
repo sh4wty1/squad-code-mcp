@@ -46,7 +46,7 @@ presença gravada como evento. O upstream também não roda inteiro no Windows.
 | Variáveis de ambiente e defaults | `SQUAD_NAME`, `SQUAD_ROLE`, `SQUAD_PORT` (7900), `SQUAD_DB` (`<home>/.squad-code-mcp.db`); servidor MCP e canal se chamam `squad` | O design pede porta e banco próprios e configuração por variável com default; o nome `squad` é o default 6 da fatia Papéis | n (STATE AD-003) |
 | Número do ping | Inteiro de 6 dígitos gerado uma vez por processo; a repetição reenvia o mesmo número | A fatia diz "repete o ping"; um número só aceita a resposta a qualquer das cópias | n |
 | Ping depois de `ready` correto com registro recusado | O ping para; `ready` continua exposta para tentar de novo | O canal já foi provado; repetir o ping gastaria um turno a cada 10 s por um problema que é do broker | n |
-| Intervalos em teste | `SQUAD_PING_INTERVAL_MS`, default 10000, e `SQUAD_CLEANUP_INTERVAL_MS`, default 30000 | Permite testar a repetição do ping e da limpeza sem esperar 10 s e 30 s | n |
+| Intervalos em teste | `SQUAD_PING_INTERVAL_MS`, default 10000, `SQUAD_HEARTBEAT_INTERVAL_MS`, default 15000, e `SQUAD_CLEANUP_INTERVAL_MS`, default 30000 | Permite testar a repetição do ping e da limpeza sem esperar 10 s e 30 s | n |
 | Formato do `id` | `crypto.randomUUID()` | O `id` virou credencial secreta (ADR-003); 8 caracteres de `Math.random` não servem para isso | n |
 | Tabela `events` nesta fatia | Criada com todas as colunas da fatia Event; índices e `deliveries` ficam para a Event | Presença já é evento; criar a tabela inteira evita migrar o log na fatia seguinte | n |
 | Registro repetido pelo mesmo PID | Se o novo é aceito, o anterior sai com `peer_left` `died` antes do `peer_joined`; se é recusado, o anterior fica | O upstream troca o registro do PID; cobre PID reutilizado pelo sistema antes da limpeza. Uma recusa não pode tirar do squad quem já estava nele |  n |
@@ -156,7 +156,7 @@ PEER-05 a PEER-08.
 6. **PEER-34** WHEN o servidor MCP sobe com papel e o broker não responde THEN o servidor SHALL iniciar o broker como processo destacado, com o mesmo executável que o roda, e o broker SHALL continuar respondendo `/health` depois de o servidor sair.
 7. **PEER-35** WHEN `cli.ts kill-broker` roda com o broker no ar THEN o processo do broker SHALL terminar e `/health` SHALL deixar de responder, sem depender de `lsof` no Windows.
 8. **PEER-36** WHEN `cli.ts status` roda com o broker no ar THEN o CLI SHALL imprimir `Broker: ok (<n> peer(s) registered)`.
-9. **PEER-44** IF `cli.ts kill-broker` roda com `/health` respondendo e o CLI não consegue achar ou sinalizar o processo do broker THEN o CLI SHALL imprimir `Could not stop the broker: <motivo>. It is still running.`, não imprimir `Broker is not running.` e sair com código 1.
+9. **PEER-44** IF `cli.ts kill-broker` roda com `/health` respondendo e o CLI não consegue achar ou sinalizar o processo do broker THEN o CLI SHALL imprimir na saída de erro `Could not stop the broker: <motivo>. It is still running.`, não imprimir `Broker stopped.` nem `Broker is not running.` e sair com código 1.
 10. **PEER-45** WHEN `cli.ts kill-broker` roda THEN o CLI SHALL sinalizar só o processo que escuta a porta em `127.0.0.1`, não o que escuta a mesma porta em outro endereço.
 
 **Independent Test**: subir o broker numa porta de teste, `status`, `kill-broker`, `status` de novo.
@@ -194,7 +194,8 @@ PEER-05 a PEER-08.
 6. **PEER-31** IF `ready` é chamada com o número do ping e o broker recusa o registro THEN o servidor MCP SHALL devolver erro com o `error` e o `hint` do broker, manter apenas a tool `ready` e parar o ping.
 7. **PEER-32** WHEN a tool `list_peers` é chamada THEN o servidor MCP SHALL devolver um texto com nome, papel e `online` ou `offline` de cada um dos outros nomes do squad, sem nenhum `id`.
 8. **PEER-33** WHEN a entrada padrão do servidor MCP fecha com o peer registrado THEN o servidor MCP SHALL chamar `/unregister`.
-9. **PEER-40** IF uma tool que não está na lista atual é chamada (`ready` sem papel ou depois do registro; `list_peers` antes do registro) THEN o servidor MCP SHALL responder erro `Unknown tool` sem chamar o broker.
+9. **PEER-46** WHILE o peer está registrado the servidor MCP SHALL chamar `/heartbeat` com o seu `id` a cada 15 s, ou a cada `SQUAD_HEARTBEAT_INTERVAL_MS` quando definida.
+10. **PEER-40** IF uma tool que não está na lista atual é chamada (`ready` sem papel ou depois do registro; `list_peers` antes do registro) THEN o servidor MCP SHALL responder erro `Unknown tool` sem chamar o broker.
 
 **Independent Test**: abrir o servidor com um cliente MCP de teste, receber o ping, chamar `ready` e listar as tools.
 
@@ -263,8 +264,9 @@ PEER-05 a PEER-08.
 | PEER-43 | P1: Presença na saída | Execute | Implementing |
 | PEER-44 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-45 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
+| PEER-46 | P1: Registro que prova o canal | Execute | Implementing |
 
-**Coverage:** 45 total, 45 mapped to tasks, 0 unmapped.
+**Coverage:** 46 total, 46 mapped to tasks, 0 unmapped.
 
 ---
 

@@ -50,6 +50,7 @@ The server does not register when it starts. It pushes a ping with a number thro
 | `SQUAD_PORT` | `7900` | Port of the broker |
 | `SQUAD_DB` | `~/.squad-code-mcp.db` | SQLite database |
 | `SQUAD_PING_INTERVAL_MS` | `10000` | Interval of the channel ping |
+| `SQUAD_HEARTBEAT_INTERVAL_MS` | `15000` | Interval of the heartbeat of a registered session |
 | `SQUAD_CLEANUP_INTERVAL_MS` | `30000` | Interval of the dead-session cleanup |
 
 Port and database differ from claude-peers (`7899`, `~/.claude-peers.db`), so both can run on the same machine.

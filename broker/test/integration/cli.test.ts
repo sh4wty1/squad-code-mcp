@@ -1,4 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
+import { chmodSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { join } from "node:path";
 import { BROKER_DIR, cleanEnv, isUp, post, removeDir, startBroker, tempDir, waitFor } from "./helpers.ts";
@@ -90,3 +91,29 @@ test.skipIf(!canListenOnDecoyHost)(
     }
   }
 );
+
+// A stand-in for lsof that answers what the test says. Windows looks the listener up with netstat.
+for (const [what, script, reason] of [
+  ["finds no listener", "exit 1", /no process found listening on 127\.0\.0\.1:\d+/],
+  ["cannot signal the listener it found", "echo $DEAD_PID", /ESRCH|No such process/i],
+] as const) {
+  test.skipIf(process.platform === "win32")(
+    `PEER-44: kill-broker that ${what} says the broker is still running and exits 1`,
+    async () => {
+      broker = await startBroker();
+      const bin = tempDir();
+      writeFileSync(join(bin, "lsof"), `#!/bin/sh\n${script}\n`);
+      chmodSync(join(bin, "lsof"), 0o755);
+      const dead = Bun.spawn([process.execPath, "-e", ""], { stdio: ["ignore", "ignore", "ignore"] });
+      await dead.exited;
+      const res = await cli(broker, "kill-broker", { PATH: bin, DEAD_PID: String(dead.pid) });
+      removeDir(bin);
+      expect(res.code).toBe(1);
+      expect(res.err).toMatch(/^Could not stop the broker: .+\. It is still running\.$/m);
+      expect(res.err).toMatch(reason);
+      expect(res.out + res.err).not.toContain("Broker is not running.");
+      expect(res.out).not.toContain("Broker stopped.");
+      expect(await isUp(broker.url)).toBe(true);
+    }
+  );
+}

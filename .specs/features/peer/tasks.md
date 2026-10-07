@@ -59,7 +59,7 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13 → T14
 ### Phase 3: Revisão do PR 2
 
 ```
-T14 → T15 → T16 → T17 → T18 → T19 → T20
+T14 → T15 → T16 → T17 → T18 → T19 → T20 → T21
 ```
 
 ---
@@ -422,6 +422,26 @@ T14 → T15 → T16 → T17 → T18 → T19 → T20
 
 ---
 
+### T21: Correções da sexta verificação
+
+**What**: Testes para os cinco mutantes que sobreviveram: o heartbeat do servidor MCP (PEER-46, com `SQUAD_HEARTBEAT_INTERVAL_MS`), `kill-broker` que não acha ou não consegue sinalizar o processo, a listagem de um nome sem heartbeat e o valor de 60 s.
+**Where**: `broker/shared/config.ts`, `broker/server.ts`, `broker/test/`, `broker/README.md`
+**Depends on**: T20
+**Requirement**: PEER-16, PEER-42, PEER-44, PEER-46
+
+**Done when**:
+
+- [x] Sem a chamada a `/heartbeat` no servidor MCP um teste falha
+- [x] `kill-broker` com busca vazia e com sinal recusado tem teste da mensagem e do código 1
+- [x] Nome com PID vivo e sem heartbeat há mais de 60 s é listado `offline`
+- [x] O limite de 60 s tem asserção com o valor literal
+- [x] Gate: `bun x tsc --noEmit && bun test` - 98 testes
+
+**Tests**: integration
+**Gate**: build
+
+---
+
 ## Diagram-Definition Cross-Check
 
 | Task | Depends On (task body) | Diagram Shows | Status |
@@ -446,6 +466,7 @@ T14 → T15 → T16 → T17 → T18 → T19 → T20
 | T18 | T17 | T17 → T18 | ✅ |
 | T19 | T18 | T18 → T19 | ✅ |
 | T20 | T19 | T19 → T20 | ✅ |
+| T21 | T20 | T20 → T21 | ✅ |
 
 ## Test Co-location Validation
 
@@ -471,3 +492,4 @@ T14 → T15 → T16 → T17 → T18 → T19 → T20
 | T18 | Configuração, rotas HTTP | unit, integration | integration | ✅ |
 | T19 | Servidor MCP (dependência) | integration | integration | ✅ |
 | T20 | Documentação | none | none | ✅ |
+| T21 | Servidor MCP, CLI, regras, configuração | integration | integration | ✅ |

@@ -29,13 +29,13 @@ import {
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { ListedPeer, Refusal, RegisterResponse } from "./peers.ts";
-import { brokerUrl, pingIntervalMs } from "./shared/config.ts";
+import { brokerUrl, heartbeatIntervalMs, pingIntervalMs } from "./shared/config.ts";
 import { getGitRoot } from "./shared/git.ts";
 
 // --- Configuration ---
 
 const BROKER_URL = brokerUrl();
-const HEARTBEAT_INTERVAL_MS = 15_000;
+const HEARTBEAT_INTERVAL_MS = heartbeatIntervalMs();
 const PING_INTERVAL_MS = pingIntervalMs();
 // fileURLToPath, not URL.pathname: on Windows the latter is "/C:/..." with spaces as %20
 const BROKER_SCRIPT = fileURLToPath(new URL("./broker.ts", import.meta.url));

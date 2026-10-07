@@ -239,3 +239,23 @@ test("PEER-43: a cleanup more than 60 s after the previous one counts the 60 s f
   b.peers.cleanStale();
   expect(b.rows()).toEqual([]);
 });
+
+test("PEER-42: the heartbeat limit is 60 s", () => {
+  expect(STALE_AFTER_MS).toBe(60000);
+});
+
+test("PEER-16: a registered name with a live pid and no heartbeat for more than 60 s is listed as offline", () => {
+  const b = setup();
+  const mother = b.join("mother", "mother", 100) as { id: string };
+  b.join("leader", "leader", 101);
+  b.clock.now = NOW + 30000;
+  b.peers.heartbeat(mother.id);
+  b.peers.cleanStale();
+  b.clock.now = NOW + 60000;
+  const before = b.peers.listPeers(mother.id) as { name: string; online: boolean }[];
+  expect(before.find((p) => p.name === "leader")!.online).toBe(true);
+
+  b.clock.now = NOW + 60001;
+  const after = b.peers.listPeers(mother.id) as { name: string; online: boolean }[];
+  expect(after.find((p) => p.name === "leader")!.online).toBe(false);
+});

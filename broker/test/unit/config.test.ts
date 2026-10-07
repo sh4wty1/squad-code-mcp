@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { brokerUrl, cleanupIntervalMs, dbPath, pingIntervalMs, port } from "../../shared/config.ts";
+import { brokerUrl, cleanupIntervalMs, dbPath, heartbeatIntervalMs, pingIntervalMs, port } from "../../shared/config.ts";
 
 test("PEER-19: default database is in the system home directory", () => {
   expect(dbPath({})).toBe(join(homedir(), ".squad-code-mcp.db"));
@@ -29,4 +29,9 @@ test("PEER-28: the ping repeats every 10 s unless SQUAD_PING_INTERVAL_MS says ot
 test("PEER-38: the cleanup runs every 30 s unless SQUAD_CLEANUP_INTERVAL_MS says otherwise", () => {
   expect(cleanupIntervalMs({})).toBe(30000);
   expect(cleanupIntervalMs({ SQUAD_CLEANUP_INTERVAL_MS: "250" })).toBe(250);
+});
+
+test("PEER-46: the heartbeat repeats every 15 s unless SQUAD_HEARTBEAT_INTERVAL_MS says otherwise", () => {
+  expect(heartbeatIntervalMs({})).toBe(15000);
+  expect(heartbeatIntervalMs({ SQUAD_HEARTBEAT_INTERVAL_MS: "250" })).toBe(250);
 });
