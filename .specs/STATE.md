@@ -38,3 +38,51 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
+Escrito em 2026-10-07. Para retomar: `git fetch && git checkout feat/peer`, depois `/tlc-spec-driven resume work`.
+
+- **Feature**: fatia Peer, `.specs/features/peer/`
+- **Phase / Task**: Execute, depois da T11. Código pronto; falta fechar a verificação.
+- **Completed**: T1 a T11 (a T11 sem verificação independente aprovada)
+- **In-progress** (file:line): nada pela metade
+- **Next step**: decidir entre os dois caminhos abaixo e aplicar as correções da rodada 4.
+- **Blockers**: decisão do Lucas sobre como fechar (abaixo).
+- **Uncommitted files**: none
+- **Branch**: `feat/peer`, no remoto. PR em rascunho: https://github.com/sh4wty1/squad-code-mcp/pull/2
+
+### Onde parou
+
+A verificação independente rodou quatro vezes e deu FAIL nas quatro. O relatório da rodada 4 está em `.specs/features/peer/validation.md`. Na rodada 4 não há defeito de código: a sondagem à mão fez 346 chamadas ao broker real sem nenhum 500 e sem resposta contrária à spec. O FAIL vem de duas asserções faltando:
+
+1. `broker/test/unit/register.test.ts`, teste de `cwd` em PEER-10: falta `expectRefusal` para `cwd: 5` e `cwd: { a: 1 }` (mutante X5 em `broker/peers.ts:100`).
+2. `broker/test/integration/broker.test.ts`, teste "PEER-12/18/21": falta `expect(listed.json.hint.length).toBeGreaterThan(0)` (mutante X1 em `broker/broker.ts:65`).
+
+Três comportamentos que a spec não define, achados na rodada 4 e ainda sem decisão:
+
+- `ready` sem argumentos termina em erro interno do JSON-RPC (TypeError em `broker/server.ts:220`) em vez da mensagem de erro normal. Não registra, mas por acidente.
+- `ready` aceita o número como texto ou como lista de um item, por causa da comparação por `String()`.
+- `POST //register` é roteado como `/register`; métodos que não são `POST` nas quatro rotas respondem 200 sem efeito.
+
+### Decisão pendente
+
+1. Fechar aqui (recomendado): as três asserções, endurecer `ready` sem argumento, commit, marcar a fatia em `ROADMAP.md`, tirar o PR de rascunho. `validate_state.py` continua acusando FAIL porque o último relatório gravado é o da rodada 4; dizer isso no PR. O portão passa a ser a revisão por `/the-judge`.
+2. Quinta rodada: mesmas correções e mais uma verificação (uns 20 minutos), com risco de outro FAIL por asserção faltando. Cada rodada injeta mutações diferentes.
+
+### Ainda por fazer em qualquer caminho
+
+- Marcar a fatia Peer em `ROADMAP.md` e atualizar a linha "Agora".
+- Atualizar a descrição do PR #2: ela fala em três rodadas e 85 testes.
+- Passar a traceability de `spec.md` de `Implementing` para `Verified` e o status de `tasks.md` para `Done`.
+
+### Ambiente
+
+- Precisa do Bun 1.3 ou mais novo. No PC onde isto foi escrito ele não estava instalado; foi usada uma cópia local em pasta temporária (`npm install bun@1.3.14` numa pasta fora do repositório).
+- De dentro de `broker/`: `bun install`, depois `bun x tsc --noEmit && bun test`. Esperado: 85 testes passando, uns 16 s.
+- Os testes de integração sobem processos reais em portas livres e sempre com `SQUAD_DB` temporário. Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB`: ele cria `~/.squad-code-mcp.db`.
+- No bun, `await expect(promessa).rejects...` trava o laço de eventos nos testes de integração; os testes evitam isso de propósito.
+- Mensagens de commit seguem a convenção do repositório (frase imperativa em minúsculas), não Conventional Commits.
+
+### Não verificado
+
+- Sessão real do Claude Code: os testes usam um cliente MCP de teste. Ninguém viu o ping chegar a um modelo nem `tools/list_changed` trocar as tools.
+- Sobrevivência do broker ao fechamento de uma janela de terminal real.
+- `SIGINT` e `SIGTERM` no servidor MCP, e os caminhos que não são Windows (`lsof`, `EPERM`, `homedir` em POSIX).

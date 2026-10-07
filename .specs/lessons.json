@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 11,
+  "next_id": 13,
   "lessons": [
     {
       "id": "L-001",
@@ -164,10 +164,11 @@
       "harmful": 0,
       "evidence": [
         "PEER-10 / validation.md spec-precision gap 1 (git_root object answers 500) (spec routes)",
-        "PEER-21 / validation.md spec-precision gap 1 (heartbeat id object answers 500) (spec routes)"
+        "PEER-21 / validation.md spec-precision gap 1 (heartbeat id object answers 500) (spec routes)",
+        "PEER-29 server.ts:220 (spec routes)"
       ],
       "created": "2026-10-07T19:20:35Z",
-      "last_seen": "2026-10-07T19:35:33Z"
+      "last_seen": "2026-10-07T20:24:49Z"
     },
     {
       "id": "L-010",
@@ -186,6 +187,42 @@
       ],
       "created": "2026-10-07T19:35:33Z",
       "last_seen": "2026-10-07T19:35:33Z"
+    },
+    {
+      "id": "L-011",
+      "key": "surviving_mutant::for each validated input field test a present value of the wrong type not only the absent field",
+      "text": "For each validated input field, test a present value of the wrong type, not only the absent field",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "X5 peers.ts:100 (PEER-10) (broker tests)"
+      ],
+      "created": "2026-10-07T20:24:49Z",
+      "last_seen": "2026-10-07T20:24:49Z"
+    },
+    {
+      "id": "L-012",
+      "key": "surviving_mutant::assert every element of a refusal hint included for each input class the ac names",
+      "text": "Assert every element of a refusal, hint included, for each input class the AC names",
+      "signal": "surviving_mutant",
+      "scope": "routes",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "X1 broker.ts:65 (PEER-18) (routes)"
+      ],
+      "created": "2026-10-07T20:24:49Z",
+      "last_seen": "2026-10-07T20:24:49Z"
     }
   ]
 }

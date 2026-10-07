@@ -65,14 +65,26 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-009 - State in the spec what a request answers when any field has the wrong type, not only the required fields
 - signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec routes` · harmful: 0
 - features: peer
-- evidence: PEER-10 / validation.md spec-precision gap 1 (git_root object answers 500) (spec routes) (+1 more)
-- last seen: 2026-10-07T19:35:33Z
+- evidence: PEER-10 / validation.md spec-precision gap 1 (git_root object answers 500) (spec routes) (+2 more)
+- last seen: 2026-10-07T20:24:49Z
 
 ### L-010 - When an AC lists several triggers, give each trigger its own assertion or a recorded platform skip
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
 - features: peer
 - evidence: mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server)
 - last seen: 2026-10-07T19:35:33Z
+
+### L-011 - For each validated input field, test a present value of the wrong type, not only the absent field
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: peer
+- evidence: X5 peers.ts:100 (PEER-10) (broker tests)
+- last seen: 2026-10-07T20:24:49Z
+
+### L-012 - Assert every element of a refusal, hint included, for each input class the AC names
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `routes` · harmful: 0
+- features: peer
+- evidence: X1 broker.ts:65 (PEER-18) (routes)
+- last seen: 2026-10-07T20:24:49Z
 
 ## Quarantined (failed when applied - ignore)
 
