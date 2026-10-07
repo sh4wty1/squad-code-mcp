@@ -133,6 +133,9 @@ test("PEER-29: ready with another number is an error, registers nothing and the 
   const number = await session.pingNumber();
   const result = await session.ready(number + 1);
   expect(result.isError).toBe(true);
+  // no arguments at all is a wrong number too, not a protocol error
+  const bare = (await session.client.callTool({ name: "ready" })) as { isError?: boolean };
+  expect(bare.isError).toBe(true);
   expect(await session.toolNames()).toEqual(["ready"]);
   expect(readDb(broker.dbFile)).toEqual({ events: [], peers: [] });
   const sent = session.pings().length;

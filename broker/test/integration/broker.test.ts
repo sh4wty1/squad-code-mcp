@@ -226,6 +226,7 @@ test("PEER-12/18/21: an id that is missing or not text is treated as an unknown 
     expect(listed.status).toBe(200);
     expect(listed.json.ok).toBe(false);
     expect(listed.json.error).toBe("unknown_peer");
+    expect(listed.json.hint.length).toBeGreaterThan(0);
   }
   expect(readDb(broker.dbFile)).toEqual(before);
 });

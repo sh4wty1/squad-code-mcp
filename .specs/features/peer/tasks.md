@@ -53,7 +53,7 @@ T1 → T2 → T3 → T4
 ### Phase 2: Processos
 
 ```
-T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11
+T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13
 ```
 
 ---
@@ -256,6 +256,42 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11
 
 ---
 
+### T12: `kill-broker` fora do Windows
+
+**What**: `lsof` passa a listar só quem escuta na porta. Sem isso ele devolvia também todo cliente conectado, e o `kill-broker` encerrava a própria CLI e qualquer sessão com conexão aberta; no Linux a suíte matava o próprio `bun test`.
+**Where**: `broker/cli.ts`
+**Depends on**: T11
+**Requirement**: PEER-35
+
+**Done when**:
+
+- [x] No Linux, o teste de PEER-35 e o de PEER-34 terminam e passam
+- [x] Gate: `bun x tsc --noEmit && bun test` - 85 testes
+
+**Tests**: integration
+**Gate**: build
+
+---
+
+### T13: Correções da quarta verificação
+
+**What**: As asserções que faltavam para os mutantes X5 e X1, e `ready` sem argumentos responde o erro normal de número errado em vez de um erro interno do JSON-RPC.
+**Where**: `broker/server.ts`, `broker/test/`
+**Depends on**: T12
+**Requirement**: PEER-10, PEER-12, PEER-29
+
+**Done when**:
+
+- [x] `cwd: 5` e `cwd: { a: 1 }` são recusados com `missing_field` (X5)
+- [x] A recusa `unknown_peer` de `/list-peers` traz `hint` não vazio (X1)
+- [x] `ready` sem argumentos devolve `isError` e não registra
+- [x] Gate: `bun x tsc --noEmit && bun test` - 85 testes
+
+**Tests**: integration
+**Gate**: build
+
+---
+
 ## Diagram-Definition Cross-Check
 
 | Task | Depends On (task body) | Diagram Shows | Status |
@@ -271,6 +307,8 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11
 | T9 | T8 | T8 → T9 | ✅ |
 | T10 | T9 | T9 → T10 | ✅ |
 | T11 | T10 | T10 → T11 | ✅ |
+| T12 | T11 | T11 → T12 | ✅ |
+| T13 | T12 | T12 → T13 | ✅ |
 
 ## Test Co-location Validation
 
@@ -287,3 +325,5 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11
 | T9 | Rotas HTTP, regras, servidor MCP | integration | integration | ✅ |
 | T10 | Regras do broker | unit | unit | ✅ |
 | T11 | Rotas HTTP | integration | integration | ✅ |
+| T12 | CLI | integration | integration | ✅ |
+| T13 | Servidor MCP, rotas HTTP, regras | integration | integration | ✅ |

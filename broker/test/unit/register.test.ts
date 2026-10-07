@@ -152,6 +152,8 @@ test("PEER-10: a cwd that is not a non-empty string is refused with missing_fiel
   const body = { pid: 100, git_root: null, name: "mother", role: "mother" };
   expectRefusal(b, () => b.peers.register({ ...body, cwd: "" }), "missing_field");
   expectRefusal(b, () => b.peers.register(body as never), "missing_field");
+  expectRefusal(b, () => b.peers.register({ ...body, cwd: 5 } as never), "missing_field");
+  expectRefusal(b, () => b.peers.register({ ...body, cwd: { a: 1 } } as never), "missing_field");
 });
 
 test("refusals are evaluated in the order missing_field, invalid_role, invalid_name", () => {

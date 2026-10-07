@@ -217,7 +217,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
 
   switch (name) {
     case "ready": {
-      if (String((args as { number?: unknown }).number) !== String(pingNumber)) {
+      if (String((args as { number?: unknown } | undefined)?.number) !== String(pingNumber)) {
         return text(
           'That is not the number of the ping. Wait for the <channel source="squad" kind="ping"> message and call ready with the number it carries.',
           true
