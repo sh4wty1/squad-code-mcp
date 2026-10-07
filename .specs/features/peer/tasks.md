@@ -141,9 +141,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Com o processo real: registro, recusa com status 200, heartbeat, listagem, unregister, health e 404 das rotas removidas
-- [ ] Sem `SQUAD_DB` e sem `HOME`, o banco nasce no diretório home do sistema
-- [ ] Gate: `bun test` - 44 testes
+- [x] Com o processo real: registro, recusa com status 200, heartbeat, listagem, unregister, health e 404 das rotas removidas
+- [x] Sem `SQUAD_DB` e sem `HOME`, o banco nasce no diretório home do sistema
+- [x] Gate: `bun test` - 49 testes
 
 **Tests**: integration
 **Gate**: full

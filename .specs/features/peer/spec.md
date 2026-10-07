@@ -44,7 +44,7 @@ presença gravada como evento. O upstream também não roda inteiro no Windows.
 | Variáveis de ambiente e defaults | `SQUAD_NAME`, `SQUAD_ROLE`, `SQUAD_PORT` (7900), `SQUAD_DB` (`<home>/.squad-code-mcp.db`); servidor MCP e canal se chamam `squad` | O design pede porta e banco próprios e configuração por variável com default; o nome `squad` é o default 6 da fatia Papéis | n (STATE AD-003) |
 | Número do ping | Inteiro de 6 dígitos gerado uma vez por processo; a repetição reenvia o mesmo número | A fatia diz "repete o ping"; um número só aceita a resposta a qualquer das cópias | n |
 | Ping depois de `ready` correto com registro recusado | O ping para; `ready` continua exposta para tentar de novo | O canal já foi provado; repetir o ping gastaria um turno a cada 10 s por um problema que é do broker | n |
-| Intervalo do ping em teste | `SQUAD_PING_INTERVAL_MS`, default 10000 | Permite testar a repetição sem esperar 10 s | n |
+| Intervalos em teste | `SQUAD_PING_INTERVAL_MS`, default 10000, e `SQUAD_CLEANUP_INTERVAL_MS`, default 30000 | Permite testar a repetição do ping e da limpeza sem esperar 10 s e 30 s | n |
 | Formato do `id` | `crypto.randomUUID()` | O `id` virou credencial secreta (ADR-003); 8 caracteres de `Math.random` não servem para isso | n |
 | Tabela `events` nesta fatia | Criada com todas as colunas da fatia Event; índices e `deliveries` ficam para a Event | Presença já é evento; criar a tabela inteira evita migrar o log na fatia seguinte | n |
 | Registro repetido pelo mesmo PID | O registro anterior daquele PID sai com `peer_left` `died` antes do novo | Comportamento do upstream; cobre PID reutilizado pelo sistema antes da limpeza | n |
@@ -217,9 +217,9 @@ PEER-05 a PEER-08.
 | PEER-18 | P1: Listagem sem credencial | Execute | Implementing |
 | PEER-19 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-20 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
-| PEER-21 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
-| PEER-22 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
-| PEER-23 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
+| PEER-21 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
+| PEER-22 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
+| PEER-23 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-24 | P1: Repositório comum entre worktrees | Tasks | In Tasks |
 | PEER-25 | P1: Repositório comum entre worktrees | Tasks | In Tasks |
 | PEER-26 | P1: Registro que prova o canal | Tasks | In Tasks |
@@ -233,8 +233,8 @@ PEER-05 a PEER-08.
 | PEER-34 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
 | PEER-35 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
 | PEER-36 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
-| PEER-37 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-38 | P1: Presença na saída | Tasks | In Tasks |
+| PEER-37 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-38 | P1: Presença na saída | Execute | Implementing |
 
 **Coverage:** 38 total, 38 mapped to tasks, 0 unmapped.
 
