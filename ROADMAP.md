@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** fatia Peer, a primeira da construção.
+**Agora:** fatia Event. A Peer está no PR 2.
 
 ## Decidir (concluído)
 
@@ -29,7 +29,7 @@ tarefas, implementação e verificação independente, com PR revisado por `/the
 
 | | Fatia | Fase do START | Entrega | Depende de |
 |---|---|---|---|---|
-| [ ] | Peer | 1 | Sessões entram no broker com nome e papel; presença vira evento | Fase 0 |
+| [x] | Peer | 1 | Sessões entram no broker com nome e papel; presença vira evento | Fase 0 |
 | [ ] | Event | 1 | Log append-only, envio com recusa por topologia, entrega, leitura por cursor | Peer |
 | [ ] | Feature | 1 | Abertura e encerramento de feature com workflow travado | Event |
 | [ ] | TUI leitura | 2 | Feed, agentes, tickets, topologia e detalhe de ticket | Feature, frames |

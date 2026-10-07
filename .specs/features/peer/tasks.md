@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.design/squad-mvp.md`, fatia Peer (sem `design.md` próprio)
-**Status**: In Progress (T15 a T20 feitas; falta a verificação independente)
+**Status**: Done (T1 a T21). Sem PASS da verificação independente: o último relatório é o da rodada 6, FAIL, e as lacunas dele foram fechadas na T21 sem nova rodada
 
 Todo o código fica em `broker/`; os comandos rodam de dentro dele. Mensagens de commit
 seguem a convenção do repositório (frase imperativa em minúsculas, sem prefixo), não
