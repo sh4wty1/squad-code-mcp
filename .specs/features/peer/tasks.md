@@ -53,7 +53,7 @@ T1 → T2 → T3 → T4
 ### Phase 2: Processos
 
 ```
-T4 → T5 → T6 → T7 → T8 → T9
+T4 → T5 → T6 → T7 → T8 → T9 → T10
 ```
 
 ---
@@ -221,6 +221,23 @@ T4 → T5 → T6 → T7 → T8 → T9
 
 ---
 
+### T10: Correções da segunda verificação
+
+**What**: Testes que fixam a listagem pedida por um worker e o segundo heartbeat; `/register` recusa `pid` não positivo e `git_root` de tipo errado; o teste de PEER-41 leva o id certo.
+**Where**: `broker/peers.ts`
+**Depends on**: T9
+**Requirement**: PEER-10, PEER-16, PEER-21, PEER-41
+
+**Done when**:
+
+- [x] As duas mutações sobreviventes da segunda rodada (N28 e N15) têm teste
+- [x] Gate: `bun x tsc --noEmit && bun test` - 82 testes
+
+**Tests**: unit
+**Gate**: build
+
+---
+
 ## Diagram-Definition Cross-Check
 
 | Task | Depends On (task body) | Diagram Shows | Status |
@@ -234,6 +251,7 @@ T4 → T5 → T6 → T7 → T8 → T9
 | T7 | T6 | T6 → T7 | ✅ |
 | T8 | T7 | T7 → T8 | ✅ |
 | T9 | T8 | T8 → T9 | ✅ |
+| T10 | T9 | T9 → T10 | ✅ |
 
 ## Test Co-location Validation
 
@@ -248,3 +266,4 @@ T4 → T5 → T6 → T7 → T8 → T9
 | T7 | CLI | integration | integration | ✅ |
 | T8 | Servidor MCP | integration | integration | ✅ |
 | T9 | Rotas HTTP, regras, servidor MCP | integration | integration | ✅ |
+| T10 | Regras do broker | unit | unit | ✅ |

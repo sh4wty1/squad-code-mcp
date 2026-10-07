@@ -71,6 +71,10 @@ test("PEER-21: /heartbeat answers ok and moves last_seen forward", async () => {
   expect(after.last_seen).toBeGreaterThan(before.last_seen);
   expect(after.last_seen).toBeLessThanOrEqual(Date.now());
   expect(after.registered_at).toBe(before.registered_at);
+
+  const unknown = await post(broker.url, "/heartbeat", { id: "not-an-id" });
+  expect(unknown.status).toBe(200);
+  expect(unknown.json).toEqual({ ok: true });
 });
 
 test("PEER-16/17/18: /list-peers answers the other names without ids, and refuses an unknown id", async () => {

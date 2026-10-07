@@ -137,9 +137,11 @@ test("PEER-09: a pid that registers again loses its earlier registration first",
   ]);
 });
 
-test("PEER-10: a pid that is not an integer is refused with missing_field", () => {
+test("PEER-10: a pid that is not a positive integer is refused with missing_field", () => {
   const b = setup();
   const body = { cwd: "/repo", git_root: null, name: "mother", role: "mother" };
+  expectRefusal(b, () => b.peers.register({ ...body, pid: 0 }), "missing_field");
+  expectRefusal(b, () => b.peers.register({ ...body, pid: -1 }), "missing_field");
   expectRefusal(b, () => b.peers.register({ ...body, pid: "100" as unknown as number }), "missing_field");
   expectRefusal(b, () => b.peers.register({ ...body, pid: 1.5 }), "missing_field");
   expectRefusal(b, () => b.peers.register(body as never), "missing_field");
@@ -176,7 +178,7 @@ test("PEER-09: a pid that registers again under the same name gets a new id afte
   ]);
 });
 
-test("PEER-09: a refused registration leaves the earlier registration of the pid in place", () => {
+test("PEER-41: a refused registration leaves the earlier registration of the pid in place", () => {
   const b = setup();
   b.join("worker-1", "worker", 100);
   b.join("mother", "mother", 101);
@@ -207,4 +209,16 @@ test("a refused registration still logs the peer_left of a dead peer found on th
     ["peer_joined", { peer: "worker-1", role: "worker" }],
     ["peer_left", { peer: "worker-1", reason: "died" }],
   ]);
+});
+
+test("PEER-10: a git_root that is neither a string nor null is refused with missing_field", () => {
+  const b = setup();
+  const body = { pid: 100, cwd: "/repo", name: "mother", role: "mother" };
+  expectRefusal(b, () => b.peers.register({ ...body, git_root: { a: 1 } as unknown as string }), "missing_field");
+  expectRefusal(b, () => b.peers.register({ ...body, git_root: 7 as unknown as string }), "missing_field");
+});
+
+test("PEER-01: the smallest valid pid is accepted", () => {
+  const b = setup();
+  expect(b.join("mother", "mother", 1)).toHaveProperty("id");
 });

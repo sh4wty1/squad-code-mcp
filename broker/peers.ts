@@ -94,8 +94,17 @@ export function createPeers(
   });
 
   const register = db.transaction((body: RegisterRequest): RegisterResponse | Refusal => {
-    if (!Number.isInteger(body.pid) || typeof body.cwd !== "string" || body.cwd === "") {
-      return refuse("missing_field", "Send pid as an integer and cwd as a non-empty string.");
+    if (
+      !Number.isInteger(body.pid) ||
+      body.pid <= 0 ||
+      typeof body.cwd !== "string" ||
+      body.cwd === "" ||
+      (body.git_root != null && typeof body.git_root !== "string")
+    ) {
+      return refuse(
+        "missing_field",
+        "Send pid as a positive integer, cwd as a non-empty string and git_root as a string or null."
+      );
     }
 
     const names = namesOf(body.role);

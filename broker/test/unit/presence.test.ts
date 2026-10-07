@@ -111,4 +111,31 @@ test("PEER-21: heartbeat moves last_seen to the current epoch ms", () => {
   b.peers.heartbeat(id);
   expect(b.rows()[0]!.last_seen).toBe(NOW + 15000);
   expect(b.rows()[0]!.registered_at).toBe(NOW);
+  b.clock.now = NOW + 30000;
+  b.peers.heartbeat(id);
+  expect(b.rows()[0]!.last_seen).toBe(NOW + 30000);
+  expect(b.rows()[0]!.registered_at).toBe(NOW);
+});
+
+test("PEER-21: a heartbeat with an unknown id changes no peer", () => {
+  const b = setup();
+  b.join("mother", "mother", 100);
+  b.clock.now = NOW + 15000;
+  b.peers.heartbeat("not-an-id");
+  expect(b.rows().map((p) => [p.name, p.last_seen])).toEqual([["mother", NOW]]);
+  expect(b.events().map((e) => e.kind)).toEqual(["peer_joined"]);
+});
+
+test("PEER-16: a worker lists the other workers and the three single roles, not itself", () => {
+  const b = setup();
+  const worker = b.join("worker-1", "worker", 100) as { id: string };
+  b.join("worker-3", "worker", 101);
+  b.join("judge", "judge", 102);
+  expect(b.peers.listPeers(worker.id)).toEqual([
+    { name: "mother", role: "mother", online: false },
+    { name: "leader", role: "leader", online: false },
+    { name: "judge", role: "judge", online: true },
+    { name: "worker-2", role: "worker", online: false },
+    { name: "worker-3", role: "worker", online: true },
+  ]);
 });

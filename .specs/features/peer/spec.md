@@ -39,7 +39,7 @@ presença gravada como evento. O upstream também não roda inteiro no Windows.
 | Onde fica o código do fork | Diretório `broker/` na raiz, cópia fiel do upstream no primeiro commit | A raiz já tem `README.md` e `.gitignore` do projeto; o design pede o plugin "em diretório separado do broker" | n (STATE AD-001) |
 | Nomes aceitos no registro | Lista fixa: `mother`, `leader`, `judge`, `worker-1` a `worker-3`. Papel único exige nome igual ao papel; `worker` exige `worker-N`. Fora disso, recusa `invalid_name` | ADR-003 fixa os seis nomes; a fatia não dá código para o nome inválido. Sem a lista fixa, `online: false` e "destinatário conhecido mas offline" não têm de onde vir, porque a linha do peer é apagada na saída | n (STATE AD-002) |
 | Credencial desconhecida em `/list-peers` | Recusa `unknown_peer` | A fatia exige `{ id }` e não nomeia o erro; o diagrama da Event prevê "credencial desconhecida" | n (STATE AD-002) |
-| Campo obrigatório ausente em `/register` (`pid` não inteiro, `cwd` vazio) | Recusa `missing_field` | Código já usado pelo design em outras rotas | n |
+| Campo obrigatório ausente ou de tipo errado em `/register` (`pid` que não é inteiro positivo, `cwd` vazio, `git_root` que não é texto nem nulo) | Recusa `missing_field` | Código já usado pelo design em outras rotas; sem a checagem o SQLite devolvia 500 e um `pid` 0 aparecia como vivo | n |
 | Ordem das recusas em `/register` | `missing_field` → `invalid_role` → `invalid_name` → `role_taken` ou `worker_limit` → `name_taken` | Mantém os quatro códigos da fatia alcançáveis com a lista fixa de nomes | n |
 | Variáveis de ambiente e defaults | `SQUAD_NAME`, `SQUAD_ROLE`, `SQUAD_PORT` (7900), `SQUAD_DB` (`<home>/.squad-code-mcp.db`); servidor MCP e canal se chamam `squad` | O design pede porta e banco próprios e configuração por variável com default; o nome `squad` é o default 6 da fatia Papéis | n (STATE AD-003) |
 | Número do ping | Inteiro de 6 dígitos gerado uma vez por processo; a repetição reenvia o mesmo número | A fatia diz "repete o ping"; um número só aceita a resposta a qualquer das cópias | n |
@@ -88,7 +88,7 @@ PEER-05 a PEER-08.
 8. **PEER-08** WHEN o nome pertence a um peer cujo PID não existe mais THEN o broker SHALL gravar `peer_left` com `data` `{ "peer": <name>, "reason": "died" }`, depois registrar a nova sessão e responder `{ id }` diferente do anterior.
 9. **PEER-09** WHEN o PID que registra já tem um registro e o novo registro é aceito THEN o broker SHALL remover o registro anterior gravando `peer_left` com `reason` `died` antes do `peer_joined` do novo, sem contar o registro anterior como ocupante de nome ou papel.
 10. **PEER-41** IF o PID que registra já tem um registro e o novo registro é recusado THEN o broker SHALL manter o registro anterior sem gravar evento.
-11. **PEER-10** IF `pid` não é inteiro ou `cwd` não é texto não vazio THEN o broker SHALL responder `{ ok: false, error: "missing_field", hint }` sem gravar peer nem evento.
+11. **PEER-10** IF `pid` não é inteiro maior que zero, `cwd` não é texto não vazio, ou `git_root` não é texto nem nulo THEN o broker SHALL responder `{ ok: false, error: "missing_field", hint }` sem gravar peer nem evento.
 12. **PEER-37** The broker SHALL responder toda recusa com status HTTP 200 e `hint` texto não vazio.
 13. **PEER-39** IF o corpo de um `POST` a `/register`, `/heartbeat`, `/list-peers` ou `/unregister` não é um objeto JSON (ausente, malformado, `null`, lista ou texto) THEN o broker SHALL responder `{ ok: false, error: "missing_field", hint }` sem gravar peer nem evento.
 
@@ -141,7 +141,7 @@ PEER-05 a PEER-08.
 
 1. **PEER-19** WHERE `SQUAD_DB` não está definida the broker SHALL abrir o banco em `<diretório home do usuário>/.squad-code-mcp.db`, obtido do sistema e não da variável `HOME`.
 2. **PEER-20** WHERE `SQUAD_PORT` não está definida the broker SHALL escutar na porta 7900, e em qualquer porta SHALL responder só em `127.0.0.1`, não nos outros endereços da máquina.
-3. **PEER-21** WHEN `POST /heartbeat` recebe o `id` de um peer registrado THEN o broker SHALL atualizar `last_seen` para o epoch ms atual e responder `{ ok: true }`.
+3. **PEER-21** WHEN `POST /heartbeat` recebe o `id` de um peer registrado THEN o broker SHALL atualizar `last_seen` para o epoch ms atual, manter `registered_at` e responder `{ ok: true }`; com `id` desconhecido ou ausente SHALL responder `{ ok: true }` sem alterar nenhum peer, como no upstream.
 4. **PEER-22** WHEN `GET /health` é chamado THEN o broker SHALL responder `{ status: "ok", peers: <número de peers registrados> }`.
 5. **PEER-23** IF um `POST` chega a uma rota que não é `/register`, `/heartbeat`, `/list-peers` ou `/unregister` (incluindo `/set-summary`, `/send-message` e `/poll-messages` do upstream) THEN o broker SHALL responder status 404, com qualquer corpo ou sem corpo.
 6. **PEER-34** WHEN o servidor MCP sobe com papel e o broker não responde THEN o servidor SHALL iniciar o broker como processo destacado, com o mesmo executável que o roda, e o broker SHALL continuar respondendo `/health` depois de o servidor sair.
