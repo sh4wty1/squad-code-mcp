@@ -8,7 +8,7 @@ Run Claude Code sessions as a squad (mother, leader, workers, judge) over a shar
 
 Each Claude Code session joins the broker with a role. Messages flow in a star: workers never talk to each other.
 
-```
+```text
 dev ⇄ Mother ⇄ Leader ⇄ Worker 1..N
                   ⇅
                 Judge
