@@ -64,17 +64,25 @@ switch (cmd) {
   }
 
   case "kill-broker": {
+    let health: { status: string; peers: number };
     try {
-      const health = await brokerFetch<{ status: string; peers: number }>("/health");
-      console.log(`Broker has ${health.peers} peer(s). Shutting down...`);
+      health = await brokerFetch("/health");
+    } catch {
+      console.log("Broker is not running.");
+      break;
+    }
+    console.log(`Broker has ${health.peers} peer(s). Shutting down...`);
+    try {
       // Find and kill the broker process on the port
       const pids = listenerPids();
+      if (pids.length === 0) throw new Error(`no process found listening on 127.0.0.1:${BROKER_PORT}`);
       for (const pid of pids) {
         process.kill(pid, "SIGTERM");
       }
-      console.log(pids.length > 0 ? "Broker stopped." : "Could not find the broker process; it is still running.");
-    } catch {
-      console.log("Broker is not running.");
+      console.log("Broker stopped.");
+    } catch (e) {
+      console.error(`Could not stop the broker: ${e instanceof Error ? e.message : String(e)}. It is still running.`);
+      process.exitCode = 1;
     }
     break;
   }

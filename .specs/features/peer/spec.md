@@ -261,7 +261,7 @@ PEER-05 a PEER-08.
 | PEER-41 | P1: Registro com nome e papel | Execute | Implementing |
 | PEER-42 | P1: Presença na saída | Execute | Implementing |
 | PEER-43 | P1: Presença na saída | Execute | Implementing |
-| PEER-44 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
+| PEER-44 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-45 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
 
 **Coverage:** 45 total, 45 mapped to tasks, 0 unmapped.

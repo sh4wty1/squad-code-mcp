@@ -344,8 +344,8 @@ T14 → T15 → T16 → T17 → T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Com o comando de busca fora do `PATH`, `kill-broker` sai com código 1, imprime a mensagem de PEER-44, não imprime `Broker is not running.` e `/health` continua respondendo
-- [ ] Gate: `bun test`
+- [x] Com o comando de busca fora do `PATH`, `kill-broker` sai com código 1, imprime a mensagem de PEER-44, não imprime `Broker is not running.` e `/health` continua respondendo
+- [x] Gate: `bun test`
 
 **Tests**: integration
 **Gate**: full
