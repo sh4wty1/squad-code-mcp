@@ -68,8 +68,11 @@ Sessão nova neste repositório:
 
 Implemente a fatia <nome> de .design/squad-mvp.md. O design e os ADRs em docs/adr/ já
 estão decididos: a spec deriva da fatia, não reabra as decisões. Registre no STATE.md
-só o que for decisão nova, apontando para o ADR quando existir um. Mensagens de commit
-seguem a convenção do repositório. Ao terminar, marque a fatia em ROADMAP.md.
+só o que for decisão nova, apontando para o ADR quando existir um.
+
+Precisa rodar no Windows e no Linux: rode a suíte nos dois antes de fechar, ou registre
+qual dos dois ficou sem rodar. Mensagens de commit seguem a convenção do repositório.
+Trabalhe num branch e abra um PR no fim. Ao terminar, marque a fatia em ROADMAP.md.
 ```
 
 A fatia Peer é a primeira de código e precisa trazer o upstream antes. Para ela, use este
