@@ -12,7 +12,7 @@ It is a fork of [louislva/claude-peers-mcp](https://github.com/louislva/claude-p
 - git 2.31 or newer
 - Claude Code with a claude.ai login, for the channel
 
-Runs on Windows, macOS and Linux.
+Runs on Windows and Linux. macOS is untested.
 
 ## Run
 
