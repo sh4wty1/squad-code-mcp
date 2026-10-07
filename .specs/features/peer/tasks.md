@@ -361,8 +361,8 @@ T14 → T15 → T16 → T17 → T18 → T19 → T20
 
 **Done when**:
 
-- [ ] O teste falha com o filtro `@127.0.0.1` de `broker/cli.ts` revertido para `tcp:<porta>`
-- [ ] Gate: `bun test`
+- [x] O teste falha com o filtro `@127.0.0.1` de `broker/cli.ts` revertido para `tcp:<porta>`
+- [x] Gate: `bun test`
 
 **Tests**: integration
 **Gate**: full

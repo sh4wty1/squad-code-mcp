@@ -1,4 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
+import { createServer } from "node:net";
 import { join } from "node:path";
 import { BROKER_DIR, cleanEnv, isUp, post, removeDir, startBroker, tempDir, waitFor } from "./helpers.ts";
 
@@ -9,6 +10,14 @@ let broker: Broker | undefined;
 afterEach(async () => {
   await broker?.stop();
   broker = undefined;
+});
+
+// A second loopback address to listen on. macOS has none unless one is configured.
+const DECOY_HOST = "127.0.0.2";
+const canListenOnDecoyHost = await new Promise<boolean>((resolve) => {
+  const server = createServer();
+  server.once("error", () => resolve(false));
+  server.listen(0, DECOY_HOST, () => server.close(() => resolve(true)));
 });
 
 async function cli(b: Broker, command: string, extraEnv: Record<string, string> = {}) {
@@ -51,3 +60,33 @@ test("PEER-44: kill-broker that cannot look up the broker process says it is sti
   expect(res.out + res.err).not.toContain("Broker is not running.");
   expect(await isUp(broker.url)).toBe(true);
 });
+
+test.skipIf(!canListenOnDecoyHost)(
+  "PEER-45: kill-broker does not signal a process listening on the same port of another address",
+  async () => {
+    broker = await startBroker();
+    const { url, port, proc } = broker;
+    const decoyUrl = `http://${DECOY_HOST}:${port}`;
+    const decoy = Bun.spawn(
+      [
+        process.execPath,
+        "-e",
+        `Bun.serve({ hostname: "${DECOY_HOST}", port: ${port}, fetch: () => new Response("decoy") })`,
+      ],
+      { stdio: ["ignore", "ignore", "ignore"] }
+    );
+    try {
+      await waitFor(() => isUp(decoyUrl), "the decoy to listen");
+      expect((await cli(broker, "kill-broker")).code).toBe(0);
+      await waitFor(async () => !(await isUp(url)), "the broker to stop answering");
+      await proc.exited;
+      // A signal sent to the decoy went out together with the one that stopped the broker
+      await Bun.sleep(300);
+      expect(decoy.exitCode).toBeNull();
+      expect(await (await fetch(decoyUrl)).text()).toBe("decoy");
+    } finally {
+      decoy.kill();
+      await decoy.exited;
+    }
+  }
+);
