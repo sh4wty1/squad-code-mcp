@@ -40,7 +40,8 @@ function listenerPids(): number[] {
     return [...new Set(pids)];
   }
 
-  return run(["lsof", "-ti", `:${BROKER_PORT}`])
+  // -sTCP:LISTEN: without it lsof also lists every client connected to the port, the CLI itself included
+  return run(["lsof", "-ti", `tcp:${BROKER_PORT}`, "-sTCP:LISTEN"])
     .trim()
     .split("\n")
     .filter((p) => p)
