@@ -168,36 +168,36 @@ T4 → T5 → T6 → T7 → T8
 
 ---
 
-### T7: Servidor MCP com ping e `ready`
+### T7: CLI no Windows
 
-**What**: `server.ts` não registra ao subir: empurra o ping, expõe `ready`, registra na resposta certa, troca as tools, sobe o broker destacado e chama `/unregister` na saída. `shared/summarize.ts` sai.
-**Where**: `broker/server.ts`
+**What**: `cli.ts` fica com `status` e `kill-broker`; `kill-broker` acha o PID por `netstat` no Windows e por `lsof` nos demais.
+**Where**: `broker/cli.ts`
 **Depends on**: T6
-**Requirement**: PEER-26 a PEER-34
+**Requirement**: PEER-35, PEER-36
 
 **Done when**:
 
-- [ ] Cada AC de PEER-26 a PEER-34 tem um teste com cliente MCP real
-- [ ] O broker iniciado pelo servidor continua no ar depois que o servidor sai
-- [ ] Gate: `bun test` - 54 testes
+- [x] `status` imprime `Broker: ok (0 peer(s) registered)` com o broker no ar
+- [x] Depois de `kill-broker`, `/health` não responde
+- [x] Gate: `bun test` - 53 testes
 
 **Tests**: integration
 **Gate**: full
 
 ---
 
-### T8: CLI no Windows
+### T8: Servidor MCP com ping e `ready`
 
-**What**: `cli.ts` fica com `status` e `kill-broker`; `kill-broker` acha o PID por `netstat` no Windows e por `lsof` nos demais.
-**Where**: `broker/cli.ts`
+**What**: `server.ts` não registra ao subir: empurra o ping, expõe `ready`, registra na resposta certa, troca as tools, sobe o broker destacado e chama `/unregister` na saída. `shared/summarize.ts` e `shared/types.ts` do upstream saem.
+**Where**: `broker/server.ts`
 **Depends on**: T7
-**Requirement**: PEER-35, PEER-36
+**Requirement**: PEER-26 a PEER-34
 
 **Done when**:
 
-- [ ] `status` imprime `Broker: ok (0 peer(s) registered)` com o broker no ar
-- [ ] Depois de `kill-broker`, `/health` não responde
-- [ ] Gate: `bun x tsc --noEmit && bun test` - 56 testes
+- [ ] Cada AC de PEER-26 a PEER-34 tem um teste com cliente MCP real
+- [ ] O broker iniciado pelo servidor continua no ar depois que o servidor sai
+- [ ] Gate: `bun x tsc --noEmit && bun test`
 
 **Tests**: integration
 **Gate**: build
@@ -227,5 +227,5 @@ T4 → T5 → T6 → T7 → T8
 | T4 | Regras do broker | unit | unit | ✅ |
 | T5 | Rotas HTTP | integration | integration | ✅ |
 | T6 | Configuração e git | unit | unit | ✅ |
-| T7 | Servidor MCP | integration | integration | ✅ |
-| T8 | CLI | integration | integration | ✅ |
+| T7 | CLI | integration | integration | ✅ |
+| T8 | Servidor MCP | integration | integration | ✅ |

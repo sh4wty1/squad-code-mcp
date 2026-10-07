@@ -231,8 +231,8 @@ PEER-05 a PEER-08.
 | PEER-32 | P1: Registro que prova o canal | Tasks | In Tasks |
 | PEER-33 | P1: Registro que prova o canal | Tasks | In Tasks |
 | PEER-34 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
-| PEER-35 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
-| PEER-36 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
+| PEER-35 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
+| PEER-36 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-37 | P1: Registro com nome e papel | Execute | Implementing |
 | PEER-38 | P1: Presença na saída | Execute | Implementing |
 
