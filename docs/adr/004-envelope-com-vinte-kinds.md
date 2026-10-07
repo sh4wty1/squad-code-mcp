@@ -1,7 +1,7 @@
 # ADR-004: Envelope com vinte kinds, com o kind como único discriminante
 
 - **Date**: 2026-10-07
-- **Status**: Accepted (os kinds `permission_request`, `permission_decision` e `turn_started` dependem dos spikes da Fase 0)
+- **Status**: Accepted (os vinte kinds confirmados pela Fase 0, 2026-10-07: o teste 1 não pediu kind nem aresta nova, e os spikes A e B confirmaram `permission_request`, `permission_decision` e `turn_started`)
 - **Deciders**: Lucas Fassi
 - **Tags**: contrato
 

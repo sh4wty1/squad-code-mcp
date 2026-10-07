@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** Fase 0, spikes técnicos.
+**Agora:** fatia Peer, a primeira da construção.
 
 ## Decidir (concluído)
 
@@ -20,7 +20,7 @@ e as decisões em [`docs/adr/`](docs/adr/).
 - [x] Teste 1, uma feature com quatro sessões reais: `docs/fase-0/teste-1.md`
 - [x] Spike A, relay de permissão pelo canal → decide o ADR-011: `docs/fase-0/spikes.md`
 - [x] Spike B, hook de início de turno → decide o ADR-006: `docs/fase-0/spikes.md`
-- [ ] Atualizar o status dos ADRs 004, 006 e 011 com o resultado dos spikes
+- [x] Atualizar o status dos ADRs 004, 006 e 011 com o resultado dos spikes
 
 ## Construir
 

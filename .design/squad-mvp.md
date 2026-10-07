@@ -69,7 +69,7 @@ A alternativa mais pesada é o broker como motor de workflow, que atribui ticket
 
 | Slice | Delivers | Status |
 |---|---|---|
-| [Fase 0](#fase-0) | Uma feature de dois tickets em texto livre sobre o claude-peers do upstream, e o spike do relay de permissão; o contrato só congela depois | spike |
+| [Fase 0](#fase-0) | Uma feature de dois tickets em texto livre sobre o claude-peers do upstream, e o spike do relay de permissão; o contrato só congela depois | done — `docs/fase-0/` |
 | [Peer](#peer) | Sessões entram no broker com nome e papel estáveis; presença vira evento | clear |
 | [Event](#event) | Log append-only, envio com recusa por topologia, entrega confirmada, leitura por cursor | clear |
 | [Feature](#feature) | Abertura e encerramento de feature com workflow travado | clear |
