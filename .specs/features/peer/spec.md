@@ -222,15 +222,15 @@ PEER-05 a PEER-08.
 | PEER-23 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-24 | P1: Repositório comum entre worktrees | Execute | Implementing |
 | PEER-25 | P1: Repositório comum entre worktrees | Execute | Implementing |
-| PEER-26 | P1: Registro que prova o canal | Tasks | In Tasks |
-| PEER-27 | P1: Registro que prova o canal | Tasks | In Tasks |
-| PEER-28 | P1: Registro que prova o canal | Tasks | In Tasks |
-| PEER-29 | P1: Registro que prova o canal | Tasks | In Tasks |
-| PEER-30 | P1: Registro que prova o canal | Tasks | In Tasks |
-| PEER-31 | P1: Registro que prova o canal | Tasks | In Tasks |
-| PEER-32 | P1: Registro que prova o canal | Tasks | In Tasks |
-| PEER-33 | P1: Registro que prova o canal | Tasks | In Tasks |
-| PEER-34 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
+| PEER-26 | P1: Registro que prova o canal | Execute | Implementing |
+| PEER-27 | P1: Registro que prova o canal | Execute | Implementing |
+| PEER-28 | P1: Registro que prova o canal | Execute | Implementing |
+| PEER-29 | P1: Registro que prova o canal | Execute | Implementing |
+| PEER-30 | P1: Registro que prova o canal | Execute | Implementing |
+| PEER-31 | P1: Registro que prova o canal | Execute | Implementing |
+| PEER-32 | P1: Registro que prova o canal | Execute | Implementing |
+| PEER-33 | P1: Registro que prova o canal | Execute | Implementing |
+| PEER-34 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-35 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-36 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-37 | P1: Registro com nome e papel | Execute | Implementing |

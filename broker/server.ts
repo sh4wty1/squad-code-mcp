@@ -1,44 +1,46 @@
 #!/usr/bin/env bun
 /**
- * claude-peers MCP server
+ * squad MCP server
  *
- * Spawned by Claude Code as a stdio MCP server (one per instance).
- * Connects to the shared broker daemon for peer discovery and messaging.
- * Declares claude/channel capability to push inbound messages immediately.
+ * Spawned by Claude Code as a stdio MCP server (one per session).
+ * A session launched with SQUAD_NAME and SQUAD_ROLE joins the squad; one
+ * without a role is a regular Claude Code session and gets nothing from here.
+ *
+ * The server does not register when it starts. It pushes a ping through the
+ * channel and exposes a single tool, `ready`. Only when the model calls
+ * `ready` with the number of the ping does it register with the broker and
+ * expose the tools of its role. So a registered peer is one whose channel
+ * works end to end (ADR-009).
  *
  * Usage:
- *   claude --dangerously-load-development-channels server:claude-peers
+ *   claude --dangerously-load-development-channels server:squad
  *
  * With .mcp.json:
- *   { "claude-peers": { "command": "bun", "args": ["./server.ts"] } }
+ *   { "squad": { "command": "bun", "args": ["./server.ts"] } }
  */
 
+import { spawn } from "node:child_process";
+import { randomInt } from "node:crypto";
+import { fileURLToPath } from "node:url";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import type {
-  PeerId,
-  Peer,
-  RegisterResponse,
-  PollMessagesResponse,
-  Message,
-} from "./shared/types.ts";
-import {
-  generateSummary,
-  getGitBranch,
-  getRecentFiles,
-} from "./shared/summarize.ts";
+import type { ListedPeer, Refusal, RegisterResponse } from "./peers.ts";
+import { brokerUrl } from "./shared/config.ts";
+import { getGitRoot } from "./shared/git.ts";
 
 // --- Configuration ---
 
-const BROKER_PORT = parseInt(process.env.CLAUDE_PEERS_PORT ?? "7899", 10);
-const BROKER_URL = `http://127.0.0.1:${BROKER_PORT}`;
-const POLL_INTERVAL_MS = 1000;
+const BROKER_URL = brokerUrl();
 const HEARTBEAT_INTERVAL_MS = 15_000;
-const BROKER_SCRIPT = new URL("./broker.ts", import.meta.url).pathname;
+const PING_INTERVAL_MS = parseInt(process.env.SQUAD_PING_INTERVAL_MS ?? "10000", 10);
+// fileURLToPath, not URL.pathname: on Windows the latter is "/C:/..." with spaces as %20
+const BROKER_SCRIPT = fileURLToPath(new URL("./broker.ts", import.meta.url));
+const NAME = process.env.SQUAD_NAME ?? "";
+const ROLE = process.env.SQUAD_ROLE ?? "";
 
 // --- Broker communication ---
 
@@ -71,10 +73,12 @@ async function ensureBroker(): Promise<void> {
   }
 
   log("Starting broker daemon...");
-  const proc = Bun.spawn(["bun", BROKER_SCRIPT], {
-    stdio: ["ignore", "ignore", "inherit"],
-    // Detach so the broker survives if this MCP server exits
-    // On macOS/Linux, the broker will keep running
+  // Same runtime that runs this server, so `bun` does not have to be on PATH.
+  // Detached with no inherited handles, so the broker survives this process.
+  const proc = spawn(process.execPath, [BROKER_SCRIPT], {
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true,
   });
 
   // Unref so this process can exit without waiting for the broker
@@ -95,302 +99,173 @@ async function ensureBroker(): Promise<void> {
 
 function log(msg: string) {
   // MCP stdio servers must only use stderr for logging (stdout is the MCP protocol)
-  console.error(`[claude-peers] ${msg}`);
+  console.error(`[squad] ${msg}`);
 }
 
-async function getGitRoot(cwd: string): Promise<string | null> {
-  try {
-    const proc = Bun.spawn(["git", "rev-parse", "--show-toplevel"], {
-      cwd,
-      stdout: "pipe",
-      stderr: "ignore",
-    });
-    const text = await new Response(proc.stdout).text();
-    const code = await proc.exited;
-    if (code === 0) {
-      return text.trim();
-    }
-  } catch {
-    // not a git repo
-  }
-  return null;
+function text(message: string, isError = false) {
+  return { content: [{ type: "text" as const, text: message }], isError };
 }
 
-function getTty(): string | null {
-  try {
-    // Try to get the parent's tty from the process tree
-    const ppid = process.ppid;
-    if (ppid) {
-      const proc = Bun.spawnSync(["ps", "-o", "tty=", "-p", String(ppid)]);
-      const tty = new TextDecoder().decode(proc.stdout).trim();
-      if (tty && tty !== "?" && tty !== "??") {
-        return tty;
-      }
-    }
-  } catch {
-    // ignore
-  }
-  return null;
+function isRefusal(result: unknown): result is Refusal {
+  return typeof result === "object" && result !== null && (result as Refusal).ok === false;
 }
 
 // --- State ---
 
-let myId: PeerId | null = null;
-let myCwd = process.cwd();
-let myGitRoot: string | null = null;
+// The credential the broker gave this session. Null until `ready` succeeds.
+let myId: string | null = null;
+const pingNumber = randomInt(100_000, 1_000_000);
+let pingTimer: ReturnType<typeof setInterval> | undefined;
+let heartbeatTimer: ReturnType<typeof setInterval> | undefined;
 
 // --- MCP Server ---
 
 const mcp = new Server(
-  { name: "claude-peers", version: "0.1.0" },
+  { name: "squad", version: "0.1.0" },
   {
     capabilities: {
-      experimental: { "claude/channel": {} },
-      tools: {},
+      // A session without a role is not a channel
+      ...(ROLE ? { experimental: { "claude/channel": {} } } : {}),
+      tools: { listChanged: true },
     },
-    instructions: `You are connected to the claude-peers network. Other Claude Code instances on this machine can see you and send you messages.
+    instructions: ROLE
+      ? `You are a member of a squad of Claude Code sessions. Your name is ${NAME} and your role is ${ROLE}.
 
-IMPORTANT: When you receive a <channel source="claude-peers" ...> message, RESPOND IMMEDIATELY. Do not wait until your current task is finished. Pause what you are doing, reply to the message using send_message, then resume your work. Treat incoming peer messages like a coworker tapping you on the shoulder — answer right away, even if you're in the middle of something.
+IMPORTANT: When a <channel source="squad" kind="ping" ...> message arrives, call the ready tool with the number it carries, right away. That registers this session in the squad. Until then the squad cannot reach you and ready is the only squad tool.
 
-Read the from_id, from_summary, and from_cwd attributes to understand who sent the message. Reply by calling send_message with their from_id.
-
-Available tools:
-- list_peers: Discover other Claude Code instances (scope: machine/directory/repo)
-- send_message: Send a message to another instance by ID
-- set_summary: Set a 1-2 sentence summary of what you're working on (visible to other peers)
-- check_messages: Manually check for new messages
-
-When you start, proactively call set_summary to describe what you're working on. This helps other instances understand your context.`,
+Available tools after ready:
+- list_peers: See the other members of the squad and whether each one is online`
+      : undefined,
   }
 );
 
 // --- Tool definitions ---
 
-const TOOLS = [
-  {
-    name: "list_peers",
-    description:
-      "List other Claude Code instances running on this machine. Returns their ID, working directory, git repo, and summary.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {
-        scope: {
-          type: "string" as const,
-          enum: ["machine", "directory", "repo"],
-          description:
-            'Scope of peer discovery. "machine" = all instances on this computer. "directory" = same working directory. "repo" = same git repository (including worktrees or subdirectories).',
-        },
+const READY_TOOL = {
+  name: "ready",
+  description:
+    'Answer the squad ping. Call it with the number from the <channel source="squad" kind="ping"> message to register this session in the squad.',
+  inputSchema: {
+    type: "object" as const,
+    properties: {
+      number: {
+        type: "integer" as const,
+        description: "The number carried by the ping",
       },
-      required: ["scope"],
     },
+    required: ["number"],
   },
-  {
-    name: "send_message",
-    description:
-      "Send a message to another Claude Code instance by peer ID. The message will be pushed into their session immediately via channel notification.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {
-        to_id: {
-          type: "string" as const,
-          description: "The peer ID of the target Claude Code instance (from list_peers)",
-        },
-        message: {
-          type: "string" as const,
-          description: "The message to send",
-        },
+};
+
+const LIST_PEERS_TOOL = {
+  name: "list_peers",
+  description:
+    "List the other members of the squad. Returns the name and role of each one and whether it is online.",
+  inputSchema: {
+    type: "object" as const,
+    properties: {},
+  },
+};
+
+// A session only sees the tools of its role (ADR-010)
+const ROLE_TOOLS: Record<string, (typeof LIST_PEERS_TOOL)[]> = {
+  mother: [LIST_PEERS_TOOL],
+  leader: [LIST_PEERS_TOOL],
+  worker: [LIST_PEERS_TOOL],
+  judge: [LIST_PEERS_TOOL],
+};
+
+function currentTools() {
+  if (!ROLE) return [];
+  if (!myId) return [READY_TOOL];
+  return ROLE_TOOLS[ROLE] ?? [];
+}
+
+// --- Channel ping ---
+
+async function pushPing() {
+  try {
+    await mcp.notification({
+      method: "notifications/claude/channel",
+      params: {
+        content: `Squad ping ${pingNumber}. Call the ready tool with number ${pingNumber} to join the squad as ${NAME} (${ROLE}).`,
+        meta: { kind: "ping", number: String(pingNumber) },
       },
-      required: ["to_id", "message"],
-    },
-  },
-  {
-    name: "set_summary",
-    description:
-      "Set a brief summary (1-2 sentences) of what you are currently working on. This is visible to other Claude Code instances when they list peers.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {
-        summary: {
-          type: "string" as const,
-          description: "A 1-2 sentence summary of your current work",
-        },
-      },
-      required: ["summary"],
-    },
-  },
-  {
-    name: "check_messages",
-    description:
-      "Manually check for new messages from other Claude Code instances. Messages are normally pushed automatically via channel notifications, but you can use this as a fallback.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {},
-    },
-  },
-];
+    });
+  } catch (e) {
+    log(`Ping error: ${e instanceof Error ? e.message : String(e)}`);
+  }
+}
+
+function stopPing() {
+  clearInterval(pingTimer);
+  pingTimer = undefined;
+}
 
 // --- Tool handlers ---
 
 mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: TOOLS,
+  tools: currentTools(),
 }));
 
 mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
   const { name, arguments: args } = req.params;
 
+  if (!currentTools().some((t) => t.name === name)) {
+    throw new Error(`Unknown tool: ${name}`);
+  }
+
   switch (name) {
-    case "list_peers": {
-      const scope = (args as { scope: string }).scope as "machine" | "directory" | "repo";
-      try {
-        const peers = await brokerFetch<Peer[]>("/list-peers", {
-          scope,
-          cwd: myCwd,
-          git_root: myGitRoot,
-          exclude_id: myId,
-        });
-
-        if (peers.length === 0) {
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: `No other Claude Code instances found (scope: ${scope}).`,
-              },
-            ],
-          };
-        }
-
-        const lines = peers.map((p) => {
-          const parts = [
-            `ID: ${p.id}`,
-            `PID: ${p.pid}`,
-            `CWD: ${p.cwd}`,
-          ];
-          if (p.git_root) parts.push(`Repo: ${p.git_root}`);
-          if (p.tty) parts.push(`TTY: ${p.tty}`);
-          if (p.summary) parts.push(`Summary: ${p.summary}`);
-          parts.push(`Last seen: ${p.last_seen}`);
-          return parts.join("\n  ");
-        });
-
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `Found ${peers.length} peer(s) (scope: ${scope}):\n\n${lines.join("\n\n")}`,
-            },
-          ],
-        };
-      } catch (e) {
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `Error listing peers: ${e instanceof Error ? e.message : String(e)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    }
-
-    case "send_message": {
-      const { to_id, message } = args as { to_id: string; message: string };
-      if (!myId) {
-        return {
-          content: [{ type: "text" as const, text: "Not registered with broker yet" }],
-          isError: true,
-        };
-      }
-      try {
-        const result = await brokerFetch<{ ok: boolean; error?: string }>("/send-message", {
-          from_id: myId,
-          to_id,
-          text: message,
-        });
-        if (!result.ok) {
-          return {
-            content: [{ type: "text" as const, text: `Failed to send: ${result.error}` }],
-            isError: true,
-          };
-        }
-        return {
-          content: [{ type: "text" as const, text: `Message sent to peer ${to_id}` }],
-        };
-      } catch (e) {
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `Error sending message: ${e instanceof Error ? e.message : String(e)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    }
-
-    case "set_summary": {
-      const { summary } = args as { summary: string };
-      if (!myId) {
-        return {
-          content: [{ type: "text" as const, text: "Not registered with broker yet" }],
-          isError: true,
-        };
-      }
-      try {
-        await brokerFetch("/set-summary", { id: myId, summary });
-        return {
-          content: [{ type: "text" as const, text: `Summary updated: "${summary}"` }],
-        };
-      } catch (e) {
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `Error setting summary: ${e instanceof Error ? e.message : String(e)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    }
-
-    case "check_messages": {
-      if (!myId) {
-        return {
-          content: [{ type: "text" as const, text: "Not registered with broker yet" }],
-          isError: true,
-        };
-      }
-      try {
-        const result = await brokerFetch<PollMessagesResponse>("/poll-messages", { id: myId });
-        if (result.messages.length === 0) {
-          return {
-            content: [{ type: "text" as const, text: "No new messages." }],
-          };
-        }
-        const lines = result.messages.map(
-          (m) => `From ${m.from_id} (${m.sent_at}):\n${m.text}`
+    case "ready": {
+      if (String((args as { number?: unknown }).number) !== String(pingNumber)) {
+        return text(
+          'That is not the number of the ping. Wait for the <channel source="squad" kind="ping"> message and call ready with the number it carries.',
+          true
         );
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `${result.messages.length} new message(s):\n\n${lines.join("\n\n---\n\n")}`,
-            },
-          ],
-        };
+      }
+      // The channel works. What can still fail is the broker, and ready can be called again for that.
+      stopPing();
+      try {
+        await ensureBroker();
+        const cwd = process.cwd();
+        const result = await brokerFetch<RegisterResponse | Refusal>("/register", {
+          pid: process.pid,
+          cwd,
+          git_root: await getGitRoot(cwd),
+          name: NAME,
+          role: ROLE,
+        });
+        if (isRefusal(result)) {
+          return text(`Registration refused: ${result.error}. ${result.hint}`, true);
+        }
+        myId = result.id;
       } catch (e) {
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `Error checking messages: ${e instanceof Error ? e.message : String(e)}`,
-            },
-          ],
-          isError: true,
-        };
+        return text(`Error registering: ${e instanceof Error ? e.message : String(e)}`, true);
+      }
+      log(`Registered as ${NAME} (${ROLE})`);
+
+      heartbeatTimer = setInterval(async () => {
+        try {
+          await brokerFetch("/heartbeat", { id: myId });
+        } catch {
+          // Non-critical
+        }
+      }, HEARTBEAT_INTERVAL_MS);
+
+      await mcp.sendToolListChanged();
+      return text(`Registered in the squad as ${NAME} (${ROLE}).`);
+    }
+
+    case "list_peers": {
+      try {
+        const result = await brokerFetch<ListedPeer[] | Refusal>("/list-peers", { id: myId });
+        if (isRefusal(result)) {
+          return text(`Failed to list peers: ${result.error}. ${result.hint}`, true);
+        }
+        const lines = result.map((p) => `${p.name} (${p.role}): ${p.online ? "online" : "offline"}`);
+        return text(`The other members of the squad:\n\n${lines.join("\n")}`);
+      } catch (e) {
+        return text(`Error listing peers: ${e instanceof Error ? e.message : String(e)}`, true);
       }
     }
 
@@ -399,140 +274,33 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
   }
 });
 
-// --- Polling loop for inbound messages ---
-
-async function pollAndPushMessages() {
-  if (!myId) return;
-
-  try {
-    const result = await brokerFetch<PollMessagesResponse>("/poll-messages", { id: myId });
-
-    for (const msg of result.messages) {
-      // Look up the sender's info for context
-      let fromSummary = "";
-      let fromCwd = "";
-      try {
-        const peers = await brokerFetch<Peer[]>("/list-peers", {
-          scope: "machine",
-          cwd: myCwd,
-          git_root: myGitRoot,
-        });
-        const sender = peers.find((p) => p.id === msg.from_id);
-        if (sender) {
-          fromSummary = sender.summary;
-          fromCwd = sender.cwd;
-        }
-      } catch {
-        // Non-critical, proceed without sender info
-      }
-
-      // Push as channel notification — this is what makes it immediate
-      await mcp.notification({
-        method: "notifications/claude/channel",
-        params: {
-          content: msg.text,
-          meta: {
-            from_id: msg.from_id,
-            from_summary: fromSummary,
-            from_cwd: fromCwd,
-            sent_at: msg.sent_at,
-          },
-        },
-      });
-
-      log(`Pushed message from ${msg.from_id}: ${msg.text.slice(0, 80)}`);
-    }
-  } catch (e) {
-    // Broker might be down temporarily, don't crash
-    log(`Poll error: ${e instanceof Error ? e.message : String(e)}`);
-  }
-}
-
 // --- Startup ---
 
 async function main() {
-  // 1. Ensure broker is running
-  await ensureBroker();
+  if (ROLE) {
+    // The ping proves the channel, so it only starts once the client is listening
+    mcp.oninitialized = () => {
+      pushPing();
+      pingTimer = setInterval(pushPing, PING_INTERVAL_MS);
+    };
 
-  // 2. Gather context
-  myCwd = process.cwd();
-  myGitRoot = await getGitRoot(myCwd);
-  const tty = getTty();
-
-  log(`CWD: ${myCwd}`);
-  log(`Git root: ${myGitRoot ?? "(none)"}`);
-  log(`TTY: ${tty ?? "(unknown)"}`);
-
-  // 3. Generate initial summary via gpt-5.4-nano (non-blocking, best-effort)
-  let initialSummary = "";
-  const summaryPromise = (async () => {
     try {
-      const branch = await getGitBranch(myCwd);
-      const recentFiles = await getRecentFiles(myCwd);
-      const summary = await generateSummary({
-        cwd: myCwd,
-        git_root: myGitRoot,
-        git_branch: branch,
-        recent_files: recentFiles,
-      });
-      if (summary) {
-        initialSummary = summary;
-        log(`Auto-summary: ${summary}`);
-      }
+      await ensureBroker();
     } catch (e) {
-      log(`Auto-summary failed (non-critical): ${e instanceof Error ? e.message : String(e)}`);
+      // ready tries again
+      log(e instanceof Error ? e.message : String(e));
     }
-  })();
-
-  // Wait briefly for summary, but don't block startup
-  await Promise.race([summaryPromise, new Promise((r) => setTimeout(r, 3000))]);
-
-  // 4. Register with broker
-  const reg = await brokerFetch<RegisterResponse>("/register", {
-    pid: process.pid,
-    cwd: myCwd,
-    git_root: myGitRoot,
-    tty,
-    summary: initialSummary,
-  });
-  myId = reg.id;
-  log(`Registered as peer ${myId}`);
-
-  // If summary generation is still running, update it when done
-  if (!initialSummary) {
-    summaryPromise.then(async () => {
-      if (initialSummary && myId) {
-        try {
-          await brokerFetch("/set-summary", { id: myId, summary: initialSummary });
-          log(`Late auto-summary applied: ${initialSummary}`);
-        } catch {
-          // Non-critical
-        }
-      }
-    });
+    log(`Name: ${NAME}, role: ${ROLE}`);
+  } else {
+    log("No SQUAD_ROLE: not a squad session");
   }
 
-  // 5. Connect MCP over stdio
-  await mcp.connect(new StdioServerTransport());
-  log("MCP connected");
-
-  // 6. Start polling for inbound messages
-  const pollTimer = setInterval(pollAndPushMessages, POLL_INTERVAL_MS);
-
-  // 7. Start heartbeat
-  const heartbeatTimer = setInterval(async () => {
-    if (myId) {
-      try {
-        await brokerFetch("/heartbeat", { id: myId });
-      } catch {
-        // Non-critical
-      }
-    }
-  }, HEARTBEAT_INTERVAL_MS);
-
-  // 8. Clean up on exit
+  // Clean up on exit. On Windows the session ends by closing stdin, not by a signal.
+  let exiting = false;
   const cleanup = async () => {
-    clearInterval(pollTimer);
+    if (exiting) return;
+    exiting = true;
+    stopPing();
     clearInterval(heartbeatTimer);
     if (myId) {
       try {
@@ -547,6 +315,11 @@ async function main() {
 
   process.on("SIGINT", cleanup);
   process.on("SIGTERM", cleanup);
+  process.stdin.on("end", cleanup);
+  process.stdin.on("close", cleanup);
+
+  await mcp.connect(new StdioServerTransport());
+  log("MCP connected");
 }
 
 main().catch((e) => {

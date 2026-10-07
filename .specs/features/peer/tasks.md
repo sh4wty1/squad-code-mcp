@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.design/squad-mvp.md`, fatia Peer (sem `design.md` próprio)
-**Status**: In Progress
+**Status**: Done
 
 Todo o código fica em `broker/`; os comandos rodam de dentro dele. Mensagens de commit
 seguem a convenção do repositório (frase imperativa em minúsculas, sem prefixo), não
@@ -195,9 +195,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Cada AC de PEER-26 a PEER-34 tem um teste com cliente MCP real
-- [ ] O broker iniciado pelo servidor continua no ar depois que o servidor sai
-- [ ] Gate: `bun x tsc --noEmit && bun test`
+- [x] Cada AC de PEER-26 a PEER-34 tem um teste com cliente MCP real
+- [x] O broker iniciado pelo servidor continua no ar depois que o servidor sai
+- [x] Gate: `bun x tsc --noEmit && bun test` - 63 testes
 
 **Tests**: integration
 **Gate**: build
