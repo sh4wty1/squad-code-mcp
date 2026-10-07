@@ -49,26 +49,27 @@ A alternativa mais pesada é o broker como motor de workflow, que atribui ticket
 
 ## Key decisions
 
-1. **O log é uma tabela única de eventos, append-only, com `seq` inteiro como único identificador; nenhum evento é alterado ou apagado.** Features, perguntas, gates e entregas pendentes são projeções gravadas na mesma transação do evento que as muda; um evento sem a sua projeção, ou o contrário, não existe. O upstream apaga mensagens não entregues quando o peer morre; não copiar isso.
+1. **O log é uma tabela única de eventos, append-only, com `seq` inteiro como único identificador; nenhum evento é alterado ou apagado.** Features, perguntas, gates e entregas pendentes são projeções gravadas na mesma transação do evento que as muda; um evento sem a sua projeção, ou o contrário, não existe. Features, perguntas e gates são reconstruíveis só a partir dos eventos, e um teste de replay prova isso: a TUI calcula o mesmo estado sem ler as tabelas, e as duas contas não podem divergir. Toda mensagem que responde a outra cita o `seq` ou o id do que responde, e o broker recusa a citação que não é a mais recente. O upstream apaga mensagens não entregues quando o peer morre; não copiar isso.
 
 2. **A identidade do peer vem do registro e nunca do corpo da chamada.** Nome e papel são dados no lançamento da sessão, são estáveis e são o endereço de entrega. O `id` aleatório do upstream passa a ser credencial secreta e deixa de aparecer em listagens. `from` e `role_from` são carimbados pelo broker. No upstream o remetente é um campo que quem chama preenche; não copiar isso.
 
-3. **O envelope tem sete kinds de mensagem e oito de registro, `feature_id` em todos, e nada de `thread` nem uuid.** Mensagem: `task`, `result`, `verdict`, `question`, `answer`, `gate`, `gate_decision`. Registro: `feature_opened`, `feature_closed`, `peer_joined`, `peer_left`, `blocked`, `unblocked`, `usage`, `question_merged`. O kind é o discriminante; nenhum consumidor decide o significado de um evento olhando campos opcionais. `answer` é toda resposta a uma pergunta; `result` é só entrega e relatório. O autor de um evento gerado pelo broker é `"broker"`.
+3. **O envelope tem nove kinds de mensagem e onze de registro, `feature_id` em todos, e nada de `thread` nem uuid.** Mensagem: `task`, `result`, `verdict`, `question`, `answer`, `gate`, `gate_decision`, `permission_request`, `permission_decision`. Registro: `feature_opened`, `feature_closed`, `peer_joined`, `peer_left`, `plan`, `turn_started`, `blocked`, `unblocked`, `usage`, `question_merged`, `refused`. O kind é o discriminante; nenhum consumidor decide o significado de um evento olhando campos opcionais. `answer` é toda resposta a uma pergunta; `result` é só entrega e relatório. O autor de um evento gerado pelo broker é `"broker"`.
 
 4. **A pergunta é uma entidade que nasce na origem com id dado pelo broker, mantém o id por toda a escalação e tem uma única resolução.** Não-bloqueante: o agente segue com o default na hora, e a pergunta fecha no primeiro de três fatos: resposta, timeout, ou o `result` do próprio agente para aquele ticket. O relógio do timeout começa quando a pergunta chega ao dev, não quando é criada. Bloqueante: só o agente de origem pausa, e espera sem prazo.
 
-5. **Status não é reportado: é derivado do log por uma função única, usada pela TUI e pelo broker.** As exceções são presença, que o broker emite, e bloqueio, que o agente declara. A regra de derivação faz parte do contrato e muda junto com ele.
+5. **Status não é reportado: é derivado do log por uma função única, usada pela TUI e pelo broker.** As exceções são presença, que o broker emite, bloqueio, que o agente declara, e turno, que os hooks da sessão marcam: `turn_started` no início e `usage` no fim. Sem o turno, o log só sabe o que o agente deve, não se ele está fazendo. A regra de derivação faz parte do contrato e muda junto com ele.
 
 6. **A topologia e os limites são recusas do broker, não convenções das skills.** Arestas permitidas por kind e papel, uma feature aberta, no máximo três workers, um ticket por worker e dois reworks por ticket. O servidor MCP só expõe a cada sessão as tools do seu papel.
 
 7. **Um gate tem exatamente uma decisão final, e a ação irreversível é executada só por quem a pediu, depois de `approve`, e exatamente como descrita.** `comment` não decide. O gate é um controle cooperativo, não uma barreira de segurança: um agente com shell alcança o broker em localhost. O que existe contra isso é uma credencial humana fora dos worktrees e a regra da skill. Segredos não passam pelo broker: uma pergunta nunca pede o valor de uma credencial, pede que o dev a coloque no lugar e confirme.
 
-8. **A entrega é ao menos uma vez, confirmada depois do push, e acordar uma sessão ociosa depende do canal do Claude Code.** O upstream marca a mensagem como entregue no polling, antes de ela chegar à sessão; não copiar isso. O canal exige login claude.ai e a flag de canais de desenvolvimento; sem ele, um agente à espera não acorda.
+8. **A entrega é ao menos uma vez até o transporte, e a única prova de que uma mensagem chegou ao modelo é o evento seguinte do destinatário.** O ack depois do push confirma que o servidor MCP escreveu no canal, não que o modelo leu: o Claude Code não confirma notificações e as descarta em silêncio quando a sessão não carregou o servidor como canal. Por isso o canal é provado uma vez, no registro (um peer só entra depois de responder a um ping que chegou pelo canal), e a TUI mostra a idade da mensagem mais antiga sem reação de cada agente. O upstream marca a mensagem como entregue no polling, antes de ela chegar à sessão; não copiar isso. O canal exige login claude.ai e a flag de canais de desenvolvimento; sem ele, um agente à espera não acorda.
 
 ## Work
 
 | Slice | Delivers | Status |
 |---|---|---|
+| [Fase 0](#fase-0) | Uma feature de dois tickets em texto livre sobre o claude-peers do upstream, e o spike do relay de permissão; o contrato só congela depois | spike |
 | [Peer](#peer) | Sessões entram no broker com nome e papel estáveis; presença vira evento | clear |
 | [Event](#event) | Log append-only, envio com recusa por topologia, entrega confirmada, leitura por cursor | clear |
 | [Feature](#feature) | Abertura e encerramento de feature com workflow travado | clear |
@@ -77,21 +78,34 @@ A alternativa mais pesada é o broker como motor de workflow, que atribui ticket
 | [Papéis](#papéis) | `roles.json`, quatro skills de papel, launcher, plugin com hooks de uso e de permissão | open — 6 defaults taken |
 | [Gate](#gate) | Pedido e decisão de gate; modal com texto e confirmação | design |
 
-Order: Peer → Event → Feature → TUI leitura → Question → Papéis → Gate. Peer, Event e Feature são a fase 1 do START.md; as demais são as fases 2 a 5, uma slice cada.
+Order: Fase 0 → Peer → Event → Feature → TUI leitura → Question → Papéis → Gate. Peer, Event e Feature são a fase 1 do START.md; as demais são as fases 2 a 5, uma slice cada. A Fase 0 vem antes porque as três primeiras slices carregam suposições sobre o comportamento de uma sessão real que, sem ela, só seriam testadas em Papéis.
 
-Derivable from the repository, left to the plan: nomes de rota em kebab-case com `POST` e corpo JSON; recusa como resposta `200` com `{ ok: false, error }`; `404` para rota desconhecida; configuração por variável de ambiente com default - tudo como o upstream faz em `/send-message`. O fork usa porta e caminho de banco próprios para conviver com um claude-peers instalado na mesma máquina.
+Derivable from the repository, left to the plan: nomes de rota em kebab-case com `POST` e corpo JSON; recusa como resposta `200` com `{ ok: false, error, hint }`, em que `hint` diz o próximo passo válido; `404` para rota desconhecida; configuração por variável de ambiente com default - tudo como o upstream faz em `/send-message`. O fork usa porta e caminho de banco próprios para conviver com um claude-peers instalado na mesma máquina.
 
 O fork precisa rodar no Windows, e o upstream não roda inteiro: o caminho do banco depende de `HOME`, a detecção de terminal usa `ps` e o comando de parar o broker usa `lsof`. O uso de `ps` some com a coluna `tty`; os outros dois são trabalho da fase 1.
 
 Glossário: **feature** é o nível de cima (o que o design chama de "thread tlc"); **ticket** é o nível de baixo, identificado por `ticket_ref`; **peer** é uma sessão registrada; **holder** é quem tem a pergunta no momento; **loadout** são as skills extras de um ticket.
 
+### Fase 0
+
+**Delivers** evidência, não código que fica. **Status: spike.** Nada daqui é reaproveitado; o que muda é o contrato, antes de congelar.
+
+- Spike: quatro sessões reais no Windows (mother, leader, um worker, judge) com o claude-peers do upstream instalado como está e um rascunho de meia página de cada skill de papel levam uma feature de dois tickets, o segundo dependendo do primeiro, até o pedido de gate, com mensagens em texto livre. Anotar: toda mensagem que um agente quis mandar e que não cabe num dos kinds ou numa aresta; todo turno encerrado sem a mensagem devida; se a sessão ociosa acorda com o push; e se o kickoff passa pela regra de git da slice Feature - se algum kind ou aresta faltar, entra no contrato antes da fase 1.
+- Spike: um servidor de canal mínimo declara `claude/channel/permission` e uma sessão lançada com a flag de canais de desenvolvimento para num pedido de permissão. O pedido chega ao servidor e o veredito devolvido libera a sessão? - se não, `permission_request` e `permission_decision` saem do contrato e o pedido de permissão parado volta a ser um `blocked` emitido por hook, com saída pelo terminal.
+- Spike: qual hook dispara no início de um turno aberto por um evento de canal, e não só por texto digitado? - se nenhum, `turn_started` é emitido pelo servidor MCP ao fazer o push e a regra de `stalled` ganha uma tolerância em segundos.
+
+Os desafios que geraram esta slice e as mudanças abaixo estão na sessão de pre-mortem de 2026-10-07.
+
 ### Peer
 
 **Delivers** o registro de uma sessão com nome e papel, e a presença como evento. **Status: clear.**
 
+O servidor MCP não registra ao subir. Ele empurra pelo canal um ping com um número que acabou de gerar e expõe uma única tool, `ready`; só quando o modelo chama `ready` com aquele número ele registra no broker e expõe as tools do papel. Assim `peer_joined` significa que o canal funciona de ponta a ponta naquela sessão, e uma sessão surda aparece como `offline` na TUI no lançamento, não no meio da feature.
+
 | State | What should happen | Caller sees |
 |---|---|---|
-| Sessão sobe com nome e papel | Peer registrado; evento `peer_joined` | `{ id }` |
+| Sessão sobe com nome e papel e o modelo devolve o ping | Peer registrado; evento `peer_joined` | `{ id }` |
+| Sessão sobe mas o ping não chega ao modelo | Não registra; o nome continua `offline` na TUI; o servidor MCP repete o ping a cada 10 s | nada |
 | Sessão sobe sem papel | Não registra e não expõe tools: é uma sessão comum do Claude Code | nada |
 | Papel fora dos quatro | Recusa | `invalid_role` |
 | Nome já usado por um peer vivo | Recusa | `name_taken` |
@@ -132,7 +146,7 @@ Envelope, presente em todo evento:
 |---|---|---|---|
 | `seq` | inteiro | broker | ordem total; cursor de leitura; é o `msg #0416` da tela |
 | `ts` | epoch ms | broker | |
-| `kind` | texto | quem chama | um dos quinze |
+| `kind` | texto | quem chama | um dos vinte |
 | `feature_id` | inteiro ou nulo | broker | a feature aberta; nulo só em presença e em `usage` fora de feature |
 | `from` | texto | broker | nome do peer, `"human"` ou `"broker"` |
 | `role_from` | texto | broker | papel, `"human"` ou `"broker"` |
@@ -146,34 +160,47 @@ Kinds de mensagem, com as arestas permitidas e os campos próprios:
 | Kind | De → para | Campos próprios |
 |---|---|---|
 | `task` | mother → leader | nenhum; sem `ticket_ref` (kickoff ou acréscimo de escopo) |
-| `task` | leader → worker | `ticket_ref`; `ticket_title` obrigatório no primeiro do ticket; `criteria?` (números na spec); `loadout` (skills extras) |
-| `result` | worker → judge | `ticket_ref`, `branch`, `commit` |
+| `task` | leader → worker | `ticket_ref`, que precisa estar no `plan`; `criteria?` (números na spec); `loadout` (skills extras) |
+| `result` | worker → judge | `ticket_ref`, `task_seq` (o `task` que ele entrega), `branch`, `commit` |
 | `result` | leader → mother | nenhum; relatório em lote, sem `ticket_ref` |
-| `verdict` | judge → leader | `ticket_ref`; `outcome`: `approve` \| `rework`; `criteria`: lista de `{ n, text, pass, note? }` |
+| `verdict` | judge → leader | `ticket_ref`; `result_seq` (o `result` que ele julga); `outcome`: `approve` \| `rework`; `criteria`: lista de `{ n, text, pass, note? }` |
 | `question` | worker → leader, judge → worker, judge → leader, leader → mother, mother → human | `question_id`, `asked_by`, `blocking`, `why`, `options?` (até 3), `default?`, `timeout_s?` |
 | `answer` | holder → `asked_by`; broker → `asked_by` | `question_id`, `answer`, `resolved_by`: `human` \| `agent` \| `timeout_default` \| `result_default` |
-| `gate` | mother → human | `gate_id`, `action`, `effect`, `diffstat?` (texto); o resumo vai no `body` |
+| `gate` | mother → human | `gate_id`; `scope`: `delivery` \| `action`; `commit` (obrigatório em `delivery`: o commit do branch da feature que será entregue); `action`, `effect`, `diffstat?` (texto); o resumo vai no `body` |
 | `gate_decision` | human → mother | `gate_id`; `decision`: `approve` \| `reject` \| `comment`; `text?` |
+| `permission_request` | qualquer peer → human | `request_id`, `tool_name`, `description`, `input_preview`, como o Claude Code os entrega; enviado pelo servidor MCP da sessão, não pelo modelo |
+| `permission_decision` | human → o peer do pedido | `request_seq` (o `seq` do pedido); `behavior`: `allow` \| `deny` |
 
 Kinds de registro:
 
 | Kind | Autor | `to` | Campos próprios |
 |---|---|---|---|
-| `feature_opened` | mother | `*` | `title`, `workflow`: `tlc` \| `matt-pocock`, `branch`, `base_branch`, `spec_ref` |
+| `feature_opened` | mother | `*` | `title`, `workflow`: `tlc` \| `matt-pocock`, `branch`, `base_branch`, `spec_ref`, `spec_commit` |
 | `feature_closed` | mother | `*` | `outcome`: `delivered` \| `abandoned` |
 | `peer_joined` | broker | nulo | `peer`, `role` |
 | `peer_left` | broker | nulo | `peer`, `reason`: `unregistered` \| `died` |
+| `plan` | leader | nulo | `tickets`: lista de `{ ticket_ref, title, depends_on?, dropped? }`; é a lista inteira, e o mais recente vale |
+| `turn_started` | a sessão, por hook | nulo | nenhum |
 | `blocked` | o agente | nulo | `ticket_ref?`, `reason` (curto), `detail`, `last_action` |
 | `unblocked` | o agente ou o broker | nulo | `peer` |
-| `usage` | a sessão, por hook | nulo | `model`, `input`, `output`, `cache_write`, `cache_read` (diferenças desde o último envio) |
+| `usage` | a sessão, por hook | nulo | `model`, `input`, `output`, `cache_write`, `cache_read` (acumulado da sessão para aquele `model`, não a diferença), `session_id`; enviado em todo fim de turno, porque é também a marca de fim de turno |
 | `question_merged` | mother | nulo | `question_id`, `into` |
+| `refused` | broker | nulo | `peer`, `attempted_kind`, `error` |
 
 Regras do contrato que não cabem numa célula:
 - `answer` é texto livre. Quem recebe não pode presumir que o valor é um dos `options`: a TUI sempre oferece "outra resposta".
 - `default` é obrigatório quando `blocking` é falso, e `timeout_s` só existe nesse caso; ausente, vale 240.
 - O broker emite `unblocked` sozinho quando o agente bloqueado envia o `result` do ticket ou sai.
 - O contador de rework de um ticket é o número de `verdict` com `outcome: rework`. O leader não reporta ticket fechado à mother: o `verdict` de `approve` é o fechamento, e o leader manda um `result` em lote.
-- O ticket não tem tabela nem evento de criação. Título e dono vêm do primeiro `task`; o dono é o `to` do `task` mais recente.
+- O ticket não tem tabela. Ele passa a existir no `plan`, que dá o título e a dependência; o dono é o `to` do `task` mais recente. O leader envia o `plan` antes do primeiro `task` e o reenvia inteiro para acrescentar tickets; a decomposição fica no log e sobrevive à sessão do leader.
+- Um ticket marcado `dropped` no `plan` conta como concluído: libera o worker dono, sai da conta de `done` e não aceita mais `task`. É a saída do ticket `escalated`: o leader o descarta e, se o dev pediu mais uma tentativa, planeja um ticket novo, com contador de rework próprio e visível no log.
+- Um ticket está aberto para um worker enquanto não foi aprovado nem descartado.
+- Um `result` cita em `task_seq` o `task` mais recente do ticket na feature aberta, e só vale enquanto não houver `verdict` depois desse `task`; o worker pode reenviar o `result` com outro commit antes do veredito. Um `verdict` cita em `result_seq` o `result` mais recente do ticket. Isso impede o veredito sobre um commit já substituído, o veredito repetido e a entrega atrasada de uma feature anterior com o mesmo `ticket_ref`.
+- Toda recusa a um peer registrado grava um `refused`, que vira linha de sistema no feed; o evento tentado continua não gravado. Nas tabelas abaixo, "nada gravado" quer dizer isso. O `refused` não conta como evento do peer em nenhuma regra de derivação.
+- `usage` é acumulado e, por isso, idempotente: um reenvio do hook não muda o total. O total de um agente é a soma, por `session_id` e `model`, do `usage` mais recente; o de uma feature é esse valor menos o último anterior ao `feature_opened`.
+- Um agente está em turno quando, entre os seus `turn_started` e `usage`, o mais recente é `turn_started`.
+- Um `permission_request` fica aberto até a sua `permission_decision` ou até qualquer evento posterior do mesmo peer, o que vier primeiro: o dev pode ter respondido no terminal, e o Claude Code não avisa o servidor MCP quando isso acontece.
+- A `permission_decision` é entregue ao servidor MCP do peer, que devolve o veredito ao Claude Code; ela não é empurrada ao modelo.
 
 | State | What should happen | Caller sees |
 |---|---|---|
@@ -183,23 +210,39 @@ Regras do contrato que não cabem numa célula:
 | Destinatário conhecido mas offline | Evento gravado; a entrega fica pendente até uma sessão registrar aquele nome | `{ ok: true, seq }` |
 | Sem feature aberta | Nada gravado | `no_open_feature` |
 | `task` para worker que tem outro ticket aberto | Nada gravado | `worker_busy` |
-| `task` de ticket novo sem `ticket_title` | Nada gravado | `missing_field` |
-| Terceiro `task` de rework no mesmo ticket | Nada gravado; o leader escala à mother com uma `question` | `rework_limit` |
-| `verdict` sem `outcome` ou sem `criteria` | Nada gravado | `missing_field` |
-| `result` de worker sem `branch` e `commit` | Nada gravado | `missing_field` |
+| `task` com `ticket_ref` que não está no `plan` | Nada gravado | `unplanned_ticket` |
+| `plan` de quem não é o leader | Nada gravado | `edge_not_allowed` |
+| `plan` que omite um ticket que já recebeu `task` | Nada gravado | `plan_drops_started_ticket` |
+| `plan` com `ticket_ref` repetido ou `depends_on` que não está na lista | Nada gravado | `invalid_plan` |
+| Sessão para num pedido de permissão | O servidor MCP grava `permission_request`; o agente aparece `blocked` e o pedido entra na TUI | `{ ok: true, seq }` |
+| Dev decide a permissão pela TUI | `permission_decision` gravada e entregue ao servidor MCP do peer | `{ ok: true, seq }` |
+| Decisão para pedido já fechado | Nada gravado; a TUI avisa que o pedido foi respondido no terminal | `permission_closed` |
+| Sessão pergunta o que deve | A feature aberta, o ticket atual, e o que o peer deve: `result`, `verdict`, `task` de rework, perguntas de que é holder, entregas pendentes | `{ feature, ticket, owed }` |
+| Terceiro `task` de rework no mesmo ticket | Nada gravado; o leader escala à mother com uma `question` e, com a resposta, descarta o ticket no `plan` | `rework_limit` |
+| `task` para ticket `dropped` | Nada gravado | `ticket_dropped` |
+| `verdict` sem `outcome`, sem `criteria` ou sem `result_seq` | Nada gravado | `missing_field` |
+| `result` de worker sem `branch`, `commit` ou `task_seq` | Nada gravado | `missing_field` |
+| `result` de quem não é o dono do ticket | Nada gravado | `not_owner` |
+| `result` cujo `task_seq` não é o `task` mais recente do ticket, ou que chega depois do `verdict` desse `task` | Nada gravado | `stale_reference` |
+| `verdict` cujo `result_seq` não é o `result` mais recente do ticket, ou de ticket que já tem `verdict` para esse `result` | Nada gravado; o judge avalia o `result` mais recente | `stale_reference` |
 | Sessão faz polling | Recebe as entregas pendentes do seu nome, em ordem de `seq` | lista de eventos |
 | Sessão confirma depois do push | Entregas marcadas | `{ ok: true }` |
 | Sessão cai entre o polling e a confirmação | As mesmas entregas voltam no polling seguinte; o `seq` permite reconhecer a repetição | - |
 | TUI lê depois de um cursor | Todos os eventos com `seq` maior, de qualquer feature | `{ events, last_seq }` |
 | Agente consulta o histórico de um ticket, pergunta ou gate | Os eventos daquele filtro, em ordem | lista de eventos |
 
-`POST /send` `{ id, kind, to, summary, body, ticket_ref?, ...campos do kind }` → `{ ok, seq }`
+`POST /send` `{ id, kind, to, summary, body, ticket_ref?, ...campos do kind }` → `{ ok, seq }` ou `{ ok: false, error, hint }`
 `POST /poll-messages` `{ id }` → `{ events }`
 `POST /ack` `{ id, seqs }` → `{ ok }`
 `POST /history` `{ id, ticket_ref? | question_id? | gate_id? }` → `{ events }`
 `POST /blocked` `{ id, ticket_ref?, reason, detail, last_action }` → `{ ok, seq }`
 `POST /unblocked` `{ id }` → `{ ok, seq }`
-`POST /usage` `{ id, model, input, output, cache_write, cache_read }` → `{ ok, seq }`
+`POST /usage` `{ id, session_id, model, input, output, cache_write, cache_read }` → `{ ok, seq }`
+`POST /turn-started` `{ id }` → `{ ok, seq }`
+`POST /plan` `{ id, tickets }` → `{ ok, seq }`
+`POST /state` `{ id }` → `{ feature, ticket, owed }`
+`POST /permission-request` `{ id, request_id, tool_name, description, input_preview }` → `{ ok, seq }`
+`POST /permission-decision` `{ human_token, request_seq, behavior }` → `{ ok, seq }`
 `GET /events?after=<seq>` → `{ events, last_seq }`
 
 Table `events`; substitui `messages`, que deixa de existir.
@@ -208,7 +251,7 @@ Table `events`; substitui `messages`, que deixa de existir.
 |---|---|---|---|---|
 | `seq` | integer | no | | PK autoincremento, como `messages.id` no upstream |
 | `ts` | integer | no | | epoch ms |
-| `kind` | text | no | | um dos quinze |
+| `kind` | text | no | | um dos vinte |
 | `feature_id` | integer | yes | `features.id` | |
 | `from_name` | text | no | | |
 | `role_from` | text | no | | |
@@ -261,20 +304,22 @@ Alternatives considered: JSONL em arquivo além do SQLite - ganha se outra ferra
 
 A feature é aberta quando a spec está pronta e a mother vai entregá-la ao leader, não quando a mother começa a conversar com o dev. A conversa de descoberta acontece no terminal da mother, fora do broker; o uso dessa fase é registrado sem `feature_id` e aparece no total da sessão, não no da feature. Assim não existe feature aberta sem spec. Isto troca a frase do START.md "o Leader trava [o workflow] no início do thread" por "a mother trava o workflow na abertura da feature", porque a spec já foi escrita num dos dois workflows.
 
+Regra de git, para que a spec e os branches existam em todo worktree: a mother cria o branch da feature a partir do branch base, commita a spec nele e volta ao branch base antes de abrir a feature; o checkout principal fica sempre no branch base, porque o branch da feature vai estar em checkout no worktree do leader e o git não admite o mesmo branch em dois worktrees. `spec_commit` é o commit que contém a spec, e todo papel a lê por `git show <spec_commit>:<spec_ref>`, que funciona em qualquer worktree. O branch de cada ticket é criado pelo worker, a partir do branch da feature, quando recebe o `task`.
+
 Uma feature tem dois estados, aberta e fechada, e só a mother a move.
 
 | State | What should happen | Caller sees |
 |---|---|---|
 | Mother abre com spec, workflow e branch | Feature criada; `feature_opened` entregue a todos | `{ ok: true, feature_id }` |
 | Já existe feature aberta | Recusa | `feature_already_open` |
-| Abertura sem `spec_ref` ou sem `workflow` | Recusa | `missing_field` |
+| Abertura sem `spec_ref`, sem `spec_commit` ou sem `workflow` | Recusa | `missing_field` |
 | Quem chama não é a mother | Recusa | `edge_not_allowed` |
-| Mother encerra como `delivered` com gate de entrega aprovado | Feature fechada; `feature_closed` entregue a todos | `{ ok: true }` |
-| Mother encerra como `delivered` sem gate aprovado | Recusa. A regra entra com a slice Gate; antes dela o encerramento é aceito | `gate_required` |
+| Mother encerra como `delivered` com um gate de `scope: delivery` aprovado | Feature fechada; `feature_closed` entregue a todos | `{ ok: true }` |
+| Mother encerra como `delivered` sem gate `delivery` aprovado; um gate `action` aprovado não serve | Recusa. A regra entra com a slice Gate; antes dela o encerramento é aceito | `gate_required` |
 | Mother encerra como `abandoned` | Feature fechada; perguntas abertas resolvidas pelo default ou descartadas; gates pendentes rejeitados | `{ ok: true }` |
 | Sem feature aberta | `ocioso desde` é o `ts` do último `feature_closed` | - |
 
-`POST /open-feature` `{ id, title, workflow, branch, base_branch, spec_ref }` → `{ ok, feature_id }`
+`POST /open-feature` `{ id, title, workflow, branch, base_branch, spec_ref, spec_commit }` → `{ ok, feature_id }`
 `POST /close-feature` `{ id, outcome, body }` → `{ ok }`
 
 Table `features`.
@@ -288,6 +333,7 @@ Table `features`.
 | `branch` | text | no | | |
 | `base_branch` | text | no | | |
 | `spec_ref` | text | no | | caminho da spec no repositório |
+| `spec_commit` | text | no | | commit do branch da feature que contém a spec |
 | `opened_seq` | integer | no | `events.seq` | |
 | `closed_seq` | integer | yes | `events.seq` | no máximo uma linha com nulo |
 | `outcome` | text | yes | | `delivered` \| `abandoned` |
@@ -305,16 +351,17 @@ Derivação do status do agente, por precedência:
 | Status | Regra |
 |---|---|
 | `offline` | o último evento de presença do nome é `peer_left`. Não está no design; ocupa o lugar dos cinco status |
-| `blocked` | há um `blocked` do agente sem `unblocked` depois |
+| `blocked` | há um `blocked` do agente sem `unblocked` depois, ou um `permission_request` dele ainda aberto |
 | `waiting ?` | o agente é `asked_by` de uma pergunta bloqueante aberta |
 | `waiting` | o agente escalou uma pergunta ainda aberta ou pediu um gate ainda pendente, e não tem ticket em andamento |
+| `stalled` | o agente deve um evento e não está em turno. Deve: o worker, o `result` de um ticket em `working`; o judge, o `verdict` de um `result`; o leader, o `task` depois de um `verdict` de `rework`, ou o `plan` depois do kickoff; qualquer agente, a resposta ou a escalação de uma pergunta aberta de que é holder. Não está no design |
 | `working` | worker com ticket em `working`; judge com `result` sem `verdict`; leader com algum ticket não concluído; mother com feature aberta e nada pendente com o dev |
-| `done` | todos os tickets da feature aberta estão aprovados |
+| `done` | existe `plan` e todos os tickets não descartados do `plan` mais recente estão aprovados |
 | `idle` | o resto: sem feature aberta, ou worker sem ticket |
 
 Um worker cujo ticket foi aprovado enquanto outros ainda trabalham fica `idle` com a atividade `TKT-14 ✓`; passa a `done` quando o último ticket é aprovado. Isso reproduz os dois cenários do mock.
 
-Derivação do status do ticket: `working` se o último evento do ticket é `task`; `review` se é `result`; `done` se é `verdict` de `approve`; `escalated` no terceiro `verdict` de `rework`; `waiting` e `blocked` quando o worker dono está nesse status por causa do ticket.
+Derivação do status do ticket. "Último evento do ticket" considera só `task`, `result` e `verdict`; `question`, `answer` e `blocked` também levam `ticket_ref` e não contam. `dropped` se o `plan` mais recente o marca assim, antes de qualquer outra regra; `planned` se está no `plan` e ainda não recebeu `task`; `working` se o último evento do ticket é `task`; `review` se é `result`; `done` se é `verdict` de `approve`; `escalated` no terceiro `verdict` de `rework`; `waiting` e `blocked` quando o worker dono está nesse status por causa do ticket.
 
 | State | What should happen |
 |---|---|
@@ -322,6 +369,9 @@ Derivação do status do ticket: `working` se o último evento do ticket é `tas
 | Evento de mensagem | Linha `hora de para kind corpo`, com `summary` no corpo. `answer` e `gate` têm cor e legenda próprias, que o design não tem |
 | `answer` com `resolved_by` de default | Linha de sistema amarela, sem `de → para` |
 | `blocked` | Linha de sistema vermelha; selo `⚠ N agente bloqueado`; detalhe com motivo, detalhe e última ação |
+| `refused` | Linha de sistema com o peer, o kind tentado e o erro; recusas repetidas do mesmo peer com o mesmo erro viram uma linha com contador. Não está no design |
+| Mensagem sem reação | Para cada agente, a idade da mensagem mais antiga endereçada a ele sem nenhum evento dele depois; aparece no painel de agentes a partir de 2 min. Não está no design |
+| `permission_request` aberto | Modal com tool, descrição e prévia do comando; `a` permite, `d` nega. Não está no design |
 | Aresta ativa | O par `de → para` do evento de mensagem mais recente. Explica os três cenários do mock |
 | Texto de atividade do agente | Montado pela TUI a partir da derivação; o agente não o reporta |
 | Sem feature aberta | Tela "tudo idle" com o resumo da última feature fechada |
@@ -337,7 +387,10 @@ Adotado do que é só de tela: painel "arestas" com volume por aresta (N22), pau
 - Design: kinds `answer`, `gate` e `gate_decision` - cor de cada um, a coluna de kind do feed com o nome mais longo, e a legenda sem `review`.
 - Design: ticket `escalated` - no painel de tickets e na tela de detalhe, depois do terceiro `rework`.
 - Design: rótulos do nível de cima - o que hoje diz "thread tlc" passa a mostrar a feature.
-- Design: agente bloqueado por permissão pendente no terminal - a variante da tela de erro em que a saída é o dev ir ao terminal, não responder uma pergunta.
+- Design: pedido de permissão - o modal com tool, descrição e prévia do comando, permitir e negar, e o aviso quando o pedido já foi respondido no terminal. Se o spike de relay da Fase 0 falhar, volta a ser a variante da tela de erro em que a saída é o dev ir ao terminal.
+- Design: agente `stalled` e a idade da mensagem sem reação - no painel de agentes e no nó da estrela.
+- Design: ticket `planned` - no painel de tickets, antes do primeiro `task`, com a dependência.
+- Design: ticket `dropped` e a linha de sistema de `refused` com contador.
 - Design: terminal menor que 120×40 - a mensagem.
 
 O pedido desses desenhos está em `docs/claude-design-handoff/PROMPT-estados-faltantes.md`.
@@ -360,10 +413,10 @@ Alternatives considered: Ink - ganha se a TUI precisar se adaptar a qualquer tam
 | Holder escala | Novo `question` com o mesmo id e novo `to`; holder muda | `{ ok, seq }` |
 | Escalação chega a `human` | O relógio do timeout começa aqui, se não-bloqueante; a pergunta entra na aba Perguntas | - |
 | Mother mescla uma pergunta em outra | `question_merged`; a mesclada sai da lista e segue a sorte da outra | `{ ok, seq }` |
-| Mesclar bloqueante em não-bloqueante | Recusa: quem está pausado não pode ser resolvido por um timeout | `merge_not_allowed` |
+| Mesclar perguntas com `blocking` diferente | Recusa: quem está pausado não pode ser resolvido por um timeout, e quem seguiu com o default não pode ficar preso a uma pergunta sem prazo | `merge_not_allowed` |
 | Dev responde pela TUI | `answer` com `resolved_by: human`, entregue ao `asked_by`, aos `asked_by` das mescladas e à mother | `{ ok, seq }` |
 | Timeout vence | Broker grava `answer` com o default e `resolved_by: timeout_default`; pergunta `defaulted` | - |
-| O `asked_by` envia o `result` do ticket com não-bloqueante aberta | Broker grava `answer` com o default e `resolved_by: result_default` | - |
+| O `asked_by` envia o `result` do ticket com não-bloqueante aberta ou mesclada | Broker grava `answer` com o default e `resolved_by: result_default`; a mesclada sai da mescla e fecha sozinha | - |
 | Resposta chega para pergunta já fechada | Nada gravado; a TUI avisa que o default foi aplicado | `question_closed` |
 | Resposta e timeout no mesmo instante | Vale o primeiro a gravar; o outro recebe a recusa acima | `question_closed` |
 | Quem responde não é o holder | Recusa | `not_holder` |
@@ -405,6 +458,7 @@ stateDiagram-v2
   open --> merged: merge-question (mother)
   merged --> answered: a pergunta de destino é respondida
   merged --> defaulted: a pergunta de destino recebe o default
+  merged --> defaulted: result do asked_by (broker)
   answered --> [*]
   defaulted --> [*]
 ```
@@ -449,13 +503,15 @@ Alternatives considered: a resposta do dev passar por mother e leader até o wor
 | State | What should happen |
 |---|---|
 | Dev lança um papel num terminal | O launcher define nome e papel no ambiente, cria o worktree se for o caso e abre o Claude Code com o canal do squad ligado e a skill do papel como primeira instrução |
-| Dev lança um worker | Worktree próprio num branch do ticket, criado a partir do branch da feature |
+| Dev lança um worker | Worktree próprio em HEAD destacado no branch da feature; o worker cria o branch de cada ticket ao receber o `task` |
 | Dev lança leader ou judge | Worktree próprio: o do leader no branch da feature, o do judge no commit sob avaliação |
 | Dev lança a mother | Sem worktree: ela fica no checkout principal |
 | Sessão morta é relançada com o mesmo nome | A skill do papel começa consultando o broker: feature aberta, ticket atual, perguntas e entregas pendentes |
 | Sessão sem papel no ambiente | O plugin não registra, não expõe tools e os hooks não fazem nada |
-| Fim de um turno | Hook lê o transcript, soma o uso novo por tipo de token, sem contar duas vezes a mesma mensagem, e envia `usage` |
-| Sessão para num pedido de permissão | Hook envia `blocked` com o motivo "permissão pendente"; a TUI mostra o agente como bloqueado |
+| Fim de um turno | Hook lê o transcript, soma o uso da sessão inteira por modelo e tipo de token, e envia `usage` com o acumulado |
+| Início de um turno | Hook envia `turn_started` |
+| Fim de um turno em que o agente deve um evento | Hook de parada consulta `/state` e devolve o agente ao trabalho dizendo o que falta, uma vez por turno; se ele parar de novo, fica `stalled` na TUI |
+| Sessão para num pedido de permissão | O servidor MCP recebe o pedido pelo relay de permissão do canal e grava `permission_request`; a decisão do dev na TUI volta como veredito ao Claude Code. O diálogo do terminal continua valendo |
 | Worker recebe `task` | Trabalha no ticket com as skills base do papel mais o `loadout` |
 | Worker termina | Faz commit e envia `result` com `branch` e `commit`; não faz merge |
 | Judge recebe `result` | Avalia o commit contra os critérios do ticket e as respostas às perguntas do ticket; envia `verdict` estruturado |
@@ -476,8 +532,9 @@ Open, default taken:
 5. Arquivos de ambiente não versionados - o launcher copia os `.env*` da raiz do repositório para o worktree novo. Sem isso todo worker começa sem credenciais, que é o cenário de erro do mock.
 6. Nome - o projeto continua `squad-code-mcp`, o servidor MCP e o comando se chamam `squad`, e a TUI é `squad tui`.
 
-- Spike: o hook de fim de turno recebe o caminho do transcript, e o hook de notificação dispara no pedido de permissão? - se o primeiro falhar, o uso passa a ser lido pelo broker a partir do diretório de transcripts; se o segundo falhar, o pedido de permissão parado fica invisível na TUI e o modo de permissão do default 3 precisa ser revisto - para quando os dois hooks tiverem sido vistos disparando numa sessão real.
-- Spike: o canal de desenvolvimento aceita um servidor MCP vindo de plugin? - se não, o servidor MCP é registrado à parte e o plugin leva só skills e hooks - para na primeira troca de mensagens entre duas sessões lançadas pelo launcher.
+- Spike: o hook de fim de turno recebe o caminho do transcript? - se não, o uso passa a ser lido pelo broker a partir do diretório de transcripts, e o fim de turno passa a ser marcado por um `usage` que repete o último acumulado - para quando o hook tiver sido visto disparando numa sessão real. O pedido de permissão saiu daqui: é o segundo spike da Fase 0.
+
+Resolvido pela documentação de canais: o canal de desenvolvimento aceita servidor MCP vindo de plugin, com `--dangerously-load-development-channels plugin:<nome>@<marketplace>`. Cada sessão mostra um diálogo de confirmação ao subir com a flag, e a flag é ignorada em modo não interativo.
 
 Alternatives considered: o agente reportar o próprio uso - não ganha em nenhuma condição: o modelo não sabe quantos tokens gastou.
 
@@ -488,7 +545,9 @@ Alternatives considered: o agente reportar o próprio uso - não ganha em nenhum
 | State | What should happen | Caller sees |
 |---|---|---|
 | Mother pede gate com ação e efeito | Gate `pending` com id; evento `gate`; selo `⚠ gate pendente` | `{ ok, gate_id }` |
-| Pedido sem `action` ou sem `effect` | Recusa | `missing_field` |
+| Pedido sem `action`, sem `effect` ou sem `scope`; `delivery` sem `commit` | Recusa | `missing_field` |
+| Gate `delivery` com ticket do `plan` nem aprovado nem descartado | Recusa | `tickets_open` |
+| Mother executa a entrega com o branch da feature num commit diferente do `commit` do gate | Regra da skill: não executa; pede um gate novo | - |
 | Quem pede não é a mother | Recusa | `edge_not_allowed` |
 | Dev aprova | Na TUI, `a` pede uma confirmação antes de enviar. Gate `approved`; `gate_decision` entregue à mother | `{ ok, seq }` |
 | Dev rejeita | Motivo obrigatório. Gate `rejected`; só um gate novo reabre o assunto | `{ ok, seq }` |
@@ -502,7 +561,7 @@ Alternatives considered: o agente reportar o próprio uso - não ganha em nenhum
 | Ação pedida por um worker | A mother abre o gate; aprovado, responde à pergunta bloqueante do worker, e é o worker que executa | - |
 | Dev fecha o modal com `esc` | Nada é enviado; o gate continua pendente | - |
 
-`POST /gate` `{ id, gate_id?, summary, body, action, effect, diffstat?, ticket_ref? }` → `{ ok, gate_id, seq }`
+`POST /gate` `{ id, gate_id?, scope, commit?, summary, body, action, effect, diffstat?, ticket_ref? }` → `{ ok, gate_id, seq }`
 `POST /gate-decision` `{ human_token, gate_id, decision, text? }` → `{ ok, seq }`
 
 Table `gates`.
@@ -512,6 +571,8 @@ Table `gates`.
 | `id` | integer | no | | PK; exibido como `G-n` |
 | `feature_id` | integer | no | `features.id` | |
 | `requested_by` | text | no | | |
+| `scope` | text | no | | `delivery` \| `action` |
+| `commit` | text | yes | | obrigatório em `delivery` |
 | `status` | text | no | | `pending` \| `approved` \| `rejected` |
 | `request_seq` | integer | no | `events.seq` | o `gate` mais recente |
 | `decision_seq` | integer | yes | `events.seq` | só a decisão final |
