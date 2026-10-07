@@ -123,9 +123,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Cada AC citado tem um teste que confere o valor da spec
-- [ ] A listagem não tem chave além de `name`, `role`, `online`
-- [ ] Gate: `bun x tsc --noEmit && bun test` - 39 testes
+- [x] Cada AC citado tem um teste que confere o valor da spec
+- [x] A listagem não tem chave além de `name`, `role`, `online`
+- [x] Gate: `bun x tsc --noEmit && bun test` - 36 testes
 
 **Tests**: unit
 **Gate**: build

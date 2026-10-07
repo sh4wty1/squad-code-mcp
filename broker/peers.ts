@@ -43,6 +43,12 @@ export interface RegisterResponse {
   id: string;
 }
 
+export interface ListedPeer {
+  name: string;
+  role: Role;
+  online: boolean;
+}
+
 interface PeerRow {
   id: string;
   name: string;
@@ -139,5 +145,33 @@ export function createPeers(
     return { id };
   });
 
-  return { register, cleanStale };
+  const unregister = db.transaction((id: string) => {
+    const peer = db.query("SELECT id, name, role, pid FROM peers WHERE id = ?").get(id) as PeerRow | null;
+    if (peer) remove(peer, "unregistered");
+  });
+
+  function heartbeat(id: string) {
+    db.run("UPDATE peers SET last_seen = ? WHERE id = ?", [now(), id]);
+  }
+
+  // The other positions of the squad, alive or not. Never the id of anyone.
+  function listPeers(id: string): ListedPeer[] | Refusal {
+    cleanStale();
+    const peers = db.query("SELECT id, name, role, pid FROM peers").all() as PeerRow[];
+    const caller = peers.find((p) => p.id === id);
+    if (!caller) {
+      return refuse("unknown_peer", "This id is not registered. Register again and use the id that comes back.");
+    }
+    return ROSTER.filter((r) => r.name !== caller.name).map((r) => ({
+      name: r.name,
+      role: r.role,
+      online: peers.some((p) => p.name === r.name),
+    }));
+  }
+
+  function count(): number {
+    return (db.query("SELECT COUNT(*) AS n FROM peers").get() as { n: number }).n;
+  }
+
+  return { register, unregister, heartbeat, listPeers, cleanStale, count };
 }

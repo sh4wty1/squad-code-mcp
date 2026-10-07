@@ -207,14 +207,14 @@ PEER-05 a PEER-08.
 | PEER-08 | P1: Registro com nome e papel | Execute | Implementing |
 | PEER-09 | P1: Registro com nome e papel | Execute | Implementing |
 | PEER-10 | P1: Registro com nome e papel | Execute | Implementing |
-| PEER-11 | P1: Presença na saída | Tasks | In Tasks |
-| PEER-12 | P1: Presença na saída | Tasks | In Tasks |
-| PEER-13 | P1: Presença na saída | Tasks | In Tasks |
-| PEER-14 | P1: Presença na saída | Tasks | In Tasks |
+| PEER-11 | P1: Presença na saída | Execute | Implementing |
+| PEER-12 | P1: Presença na saída | Execute | Implementing |
+| PEER-13 | P1: Presença na saída | Execute | Implementing |
+| PEER-14 | P1: Presença na saída | Execute | Implementing |
 | PEER-15 | P1: Presença na saída | Execute | Implementing |
-| PEER-16 | P1: Listagem sem credencial | Tasks | In Tasks |
-| PEER-17 | P1: Listagem sem credencial | Tasks | In Tasks |
-| PEER-18 | P1: Listagem sem credencial | Tasks | In Tasks |
+| PEER-16 | P1: Listagem sem credencial | Execute | Implementing |
+| PEER-17 | P1: Listagem sem credencial | Execute | Implementing |
+| PEER-18 | P1: Listagem sem credencial | Execute | Implementing |
 | PEER-19 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-20 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-21 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
