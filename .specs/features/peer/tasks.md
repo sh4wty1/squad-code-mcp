@@ -87,9 +87,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Dois eventos seguidos têm `seq` crescente e `ts` em epoch ms
-- [ ] `peers` tem exatamente as colunas da fatia; `messages` não existe
-- [ ] Gate: `bun test test/unit` - 9 testes
+- [x] Dois eventos seguidos têm `seq` crescente e `ts` em epoch ms
+- [x] `peers` tem exatamente as colunas da fatia; `messages` não existe
+- [x] Gate: `bun test test/unit` - 9 testes
 
 **Tests**: unit
 **Gate**: quick

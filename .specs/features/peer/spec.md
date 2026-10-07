@@ -211,7 +211,7 @@ PEER-05 a PEER-08.
 | PEER-12 | P1: Presença na saída | Tasks | In Tasks |
 | PEER-13 | P1: Presença na saída | Tasks | In Tasks |
 | PEER-14 | P1: Presença na saída | Tasks | In Tasks |
-| PEER-15 | P1: Presença na saída | Tasks | In Tasks |
+| PEER-15 | P1: Presença na saída | Execute | Implementing |
 | PEER-16 | P1: Listagem sem credencial | Tasks | In Tasks |
 | PEER-17 | P1: Listagem sem credencial | Tasks | In Tasks |
 | PEER-18 | P1: Listagem sem credencial | Tasks | In Tasks |
