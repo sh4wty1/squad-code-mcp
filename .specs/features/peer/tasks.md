@@ -159,9 +159,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Num repositório temporário, o valor do worktree é igual ao do checkout principal e é absoluto
-- [ ] Fora de um repositório, nulo
-- [ ] Gate: `bun test test/unit` - 2 testes novos
+- [x] Num repositório temporário, o valor do worktree é igual ao do checkout principal e é absoluto
+- [x] Fora de um repositório, nulo
+- [x] Gate: `bun test test/unit` - 2 testes novos
 
 **Tests**: unit
 **Gate**: quick

@@ -220,8 +220,8 @@ PEER-05 a PEER-08.
 | PEER-21 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-22 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-23 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
-| PEER-24 | P1: Repositório comum entre worktrees | Tasks | In Tasks |
-| PEER-25 | P1: Repositório comum entre worktrees | Tasks | In Tasks |
+| PEER-24 | P1: Repositório comum entre worktrees | Execute | Implementing |
+| PEER-25 | P1: Repositório comum entre worktrees | Execute | Implementing |
 | PEER-26 | P1: Registro que prova o canal | Tasks | In Tasks |
 | PEER-27 | P1: Registro que prova o canal | Tasks | In Tasks |
 | PEER-28 | P1: Registro que prova o canal | Tasks | In Tasks |
