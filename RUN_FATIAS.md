@@ -21,12 +21,14 @@ seguem a convenção do repositório. Ao terminar, marque a fatia em ROADMAP.md.
 
 Fatias, na ordem:
 
+**Próxima a rodar: Event.** A Peer está fechada no PR 2, pronto para revisão e ainda não mesclado: mesclar antes, para a Event partir do `main` (passo 1).
+
 ┌──────────────┬─────────────┬──────────────────────────────────────────────────────────────────────────────┐
 │              │    Fatia    │                                   Entrega                                    │
 ├──────────────┼─────────────┼──────────────────────────────────────────────────────────────────────────────┤
-│ em andamento │ Peer        │ Sessões entram no broker com nome e papel; presença vira evento              │
+│ feita (PR 2) │ Peer        │ Sessões entram no broker com nome e papel; presença vira evento              │
 ├──────────────┼─────────────┼──────────────────────────────────────────────────────────────────────────────┤
-│ falta        │ Event       │ Log append-only, envio com recusa por topologia, entrega, leitura por cursor │
+│ próxima      │ Event       │ Log append-only, envio com recusa por topologia, entrega, leitura por cursor │
 ├──────────────┼─────────────┼──────────────────────────────────────────────────────────────────────────────┤
 │ falta        │ Feature     │ Abertura e encerramento de feature com workflow travado                      │
 ├──────────────┼─────────────┼──────────────────────────────────────────────────────────────────────────────┤
