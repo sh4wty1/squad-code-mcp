@@ -71,8 +71,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-010 - When an AC lists several triggers, give each trigger its own assertion or a recorded platform skip
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
 - features: peer
-- evidence: mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server)
-- last seen: 2026-10-07T19:35:33Z
+- evidence: mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server) (+2 more)
+- last seen: 2026-10-07T22:57:31Z
 
 ### L-011 - For each validated input field, test a present value of the wrong type, not only the absent field
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
@@ -115,6 +115,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: peer
 - evidence: PEER-35 broker/cli.ts:44 (kill-broker signals listeners on other addresses of the port) (cli)
 - last seen: 2026-10-07T22:23:44Z
+
+### L-018 - When a new rule makes an existing background behavior load-bearing, write an AC and a test for that behavior
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: peer
+- evidence: mutant S3 broker/server.ts:249 (PEER-42 depends on a heartbeat no AC requires) (spec)
+- last seen: 2026-10-07T22:57:31Z
+
+### L-019 - When a shared rule gains a condition, test the new condition through every entry point that applies the rule
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker-rules` · harmful: 0
+- features: peer
+- evidence: mutant P13 broker/peers.ts:190 (PEER-16 listing vs heartbeat rule) (broker-rules)
+- last seen: 2026-10-07T22:57:31Z
+
+### L-020 - Assert a spec-defined limit with the literal value from the spec, not with the constant imported from the code under test
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: peer
+- evidence: mutant P11 broker/peers.ts:79 (PEER-14, PEER-42, PEER-43 60 s) (broker tests)
+- last seen: 2026-10-07T22:57:31Z
 
 ## Quarantined (failed when applied - ignore)
 

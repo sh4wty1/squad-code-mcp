@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 18,
+  "next_id": 21,
   "lessons": [
     {
       "id": "L-001",
@@ -183,10 +183,12 @@
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server)"
+        "mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server)",
+        "mutant C3 broker/cli.ts:78 (PEER-44 lookup finds nothing) (cli)",
+        "mutant C5 broker/cli.ts:80 (PEER-44 signal fails) (cli)"
       ],
       "created": "2026-10-07T19:35:33Z",
-      "last_seen": "2026-10-07T19:35:33Z"
+      "last_seen": "2026-10-07T22:57:31Z"
     },
     {
       "id": "L-011",
@@ -314,6 +316,60 @@
       ],
       "created": "2026-10-07T22:23:44Z",
       "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-018",
+      "key": "spec_precision_gap::when a new rule makes an existing background behavior load bearing write an ac and a test for that behavior",
+      "text": "When a new rule makes an existing background behavior load-bearing, write an AC and a test for that behavior",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant S3 broker/server.ts:249 (PEER-42 depends on a heartbeat no AC requires) (spec)"
+      ],
+      "created": "2026-10-07T22:57:31Z",
+      "last_seen": "2026-10-07T22:57:31Z"
+    },
+    {
+      "id": "L-019",
+      "key": "surviving_mutant::when a shared rule gains a condition test the new condition through every entry point that applies the rule",
+      "text": "When a shared rule gains a condition, test the new condition through every entry point that applies the rule",
+      "signal": "surviving_mutant",
+      "scope": "broker-rules",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant P13 broker/peers.ts:190 (PEER-16 listing vs heartbeat rule) (broker-rules)"
+      ],
+      "created": "2026-10-07T22:57:31Z",
+      "last_seen": "2026-10-07T22:57:31Z"
+    },
+    {
+      "id": "L-020",
+      "key": "surviving_mutant::assert a spec defined limit with the literal value from the spec not with the constant imported from the code under test",
+      "text": "Assert a spec-defined limit with the literal value from the spec, not with the constant imported from the code under test",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant P11 broker/peers.ts:79 (PEER-14, PEER-42, PEER-43 60 s) (broker tests)"
+      ],
+      "created": "2026-10-07T22:57:31Z",
+      "last_seen": "2026-10-07T22:57:31Z"
     }
   ]
 }
