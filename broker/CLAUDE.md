@@ -1,36 +1,34 @@
----
-description: Use Bun instead of Node.js, npm, pnpm, or vite.
-globs: "*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json"
-alwaysApply: false
----
+# squad broker
 
-# claude-peers
-
-Peer discovery and messaging MCP channel for Claude Code instances.
+Broker and MCP channel server of squad-code-mcp. A fork of claude-peers-mcp at `640183f`; see `README.md`.
 
 ## Architecture
 
-- `broker.ts` — Singleton HTTP daemon on localhost:7899 + SQLite. Auto-launched by the MCP server.
-- `server.ts` — MCP stdio server, one per Claude Code instance. Connects to broker, exposes tools, pushes channel notifications.
-- `shared/types.ts` — Shared TypeScript types for broker API.
-- `shared/summarize.ts` — Auto-summary generation via gpt-5.4-nano.
-- `cli.ts` — CLI utility for inspecting broker state.
+- `broker.ts` — Singleton HTTP daemon on 127.0.0.1:7900 + SQLite. Auto-launched by the MCP server.
+- `peers.ts` — Peer registry: registration with refusals, presence events, listing. The peer id is a credential and is never listed.
+- `db.ts` — Schema and the single write path of the append-only `events` table.
+- `server.ts` — MCP stdio server, one per Claude Code session. Pings through the channel and registers only when the model calls `ready`.
+- `shared/config.ts`, `shared/git.ts` — Settings (`SQUAD_*`) and the git common directory.
+- `cli.ts` — CLI utility for the broker.
+
+The design is in `../.design/squad-mvp.md`, the decisions in `../docs/adr/` and `../.specs/STATE.md`.
 
 ## Running
 
 ```bash
-# Start Claude Code with the channel:
-claude --dangerously-load-development-channels server:claude-peers
-
-# Or just add to .mcp.json and use as regular MCP (no channel push, but tools work):
-# { "claude-peers": { "command": "bun", "args": ["./server.ts"] } }
+# Start Claude Code as a squad member, with the channel:
+SQUAD_NAME=leader SQUAD_ROLE=leader claude --dangerously-load-development-channels server:squad
 
 # CLI:
 bun cli.ts status
-bun cli.ts peers
-bun cli.ts send <peer-id> <message>
 bun cli.ts kill-broker
+
+# Tests and types:
+bun test
+bun x tsc --noEmit
 ```
+
+It has to run on Windows: no `HOME`, `ps` or `lsof`, and paths may have spaces.
 
 ## Bun
 

@@ -1,120 +1,90 @@
-# claude-peers
+# squad broker
 
-Let your Claude Code instances find each other and talk. When you're running 5 sessions across different projects, any Claude can discover the others and send messages that arrive instantly.
+The broker of [squad-code-mcp](../README.md): a daemon on `127.0.0.1` with SQLite, and one MCP stdio server per Claude Code session. Sessions join it with a name and a role, and their presence is logged as events.
 
-```
-  Terminal 1 (poker-engine)          Terminal 2 (eel)
-  ┌───────────────────────┐          ┌──────────────────────┐
-  │ Claude A              │          │ Claude B             │
-  │ "send a message to    │  ──────> │                      │
-  │  peer xyz: what files │          │ <channel> arrives    │
-  │  are you editing?"    │  <────── │  instantly, Claude B │
-  │                       │          │  responds            │
-  └───────────────────────┘          └──────────────────────┘
-```
+It is a fork of [louislva/claude-peers-mcp](https://github.com/louislva/claude-peers-mcp) at commit `640183f`, by Louis Arge, under the MIT license in [`LICENSE`](LICENSE). The first commit of this directory is that code unchanged; `git diff 10e92d3 -- broker` shows everything the fork changed.
 
-## Quick start
-
-### 1. Install
-
-```bash
-git clone https://github.com/louislva/claude-peers-mcp.git ~/claude-peers-mcp   # or wherever you like
-cd ~/claude-peers-mcp
-bun install
-```
-
-### 2. Register the MCP server
-
-This makes claude-peers available in every Claude Code session, from any directory:
-
-```bash
-claude mcp add --scope user --transport stdio claude-peers -- bun ~/claude-peers-mcp/server.ts
-```
-
-Replace `~/claude-peers-mcp` with wherever you cloned it.
-
-### 3. Run Claude Code with the channel
-
-```bash
-claude --dangerously-skip-permissions --dangerously-load-development-channels server:claude-peers
-```
-
-That's it. The broker daemon starts automatically the first time.
-
-> **Tip:** Add it to an alias so you don't have to type it every time:
->
-> ```bash
-> alias claudepeers='claude --dangerously-load-development-channels server:claude-peers'
-> ```
-
-### 4. Open a second session and try it
-
-In another terminal, start Claude Code the same way. Then ask either one:
-
-> List all peers on this machine
-
-It'll show every running instance with their working directory, git repo, and a summary of what they're doing. Then:
-
-> Send a message to peer [id]: "what are you working on?"
-
-The other Claude receives it immediately and responds.
-
-## What Claude can do
-
-| Tool             | What it does                                                                   |
-| ---------------- | ------------------------------------------------------------------------------ |
-| `list_peers`     | Find other Claude Code instances — scoped to `machine`, `directory`, or `repo` |
-| `send_message`   | Send a message to another instance by ID (arrives instantly via channel push)  |
-| `set_summary`    | Describe what you're working on (visible to other peers)                       |
-| `check_messages` | Manually check for messages (fallback if not using channel mode)               |
-
-## How it works
-
-A **broker daemon** runs on `localhost:7899` with a SQLite database. Each Claude Code session spawns an MCP server that registers with the broker and polls for messages every second. Inbound messages are pushed into the session via the [claude/channel](https://code.claude.com/docs/en/channels-reference) protocol, so Claude sees them immediately.
-
-```
-                    ┌───────────────────────────┐
-                    │  broker daemon            │
-                    │  localhost:7899 + SQLite  │
-                    └──────┬───────────────┬────┘
-                           │               │
-                      MCP server A    MCP server B
-                      (stdio)         (stdio)
-                           │               │
-                      Claude A         Claude B
-```
-
-The broker auto-launches when the first session starts. It cleans up dead peers automatically. Everything is localhost-only.
-
-## Auto-summary
-
-If you set `OPENAI_API_KEY` in your environment, each instance generates a brief summary on startup using `gpt-5.4-nano` (costs fractions of a cent). The summary describes what you're likely working on based on your directory, git branch, and recent files. Other instances see this when they call `list_peers`.
-
-Without the API key, Claude sets its own summary via the `set_summary` tool.
-
-## CLI
-
-You can also inspect and interact from the command line:
-
-```bash
-cd ~/claude-peers-mcp
-
-bun cli.ts status            # broker status + all peers
-bun cli.ts peers             # list peers
-bun cli.ts send <id> <msg>   # send a message into a Claude session
-bun cli.ts kill-broker       # stop the broker
-```
-
-## Configuration
-
-| Environment variable | Default              | Description                           |
-| -------------------- | -------------------- | ------------------------------------- |
-| `CLAUDE_PEERS_PORT`  | `7899`               | Broker port                           |
-| `CLAUDE_PEERS_DB`    | `~/.claude-peers.db` | SQLite database path                  |
-| `OPENAI_API_KEY`     | —                    | Enables auto-summary via gpt-5.4-nano |
+> **Status:** the Peer slice. Sessions register and are listed. Sending and reading events comes with the Event slice.
 
 ## Requirements
 
-- [Bun](https://bun.sh)
-- Claude Code v2.1.80+
-- claude.ai login (channels require it — API key auth won't work)
+- [Bun](https://bun.sh) 1.3 or newer
+- git 2.31 or newer
+- Claude Code with a claude.ai login, for the channel
+
+Runs on Windows, macOS and Linux.
+
+## Run
+
+```bash
+cd broker
+bun install
+bun test
+```
+
+A session joins the squad when it is launched with a name and a role:
+
+```bash
+SQUAD_NAME=leader SQUAD_ROLE=leader claude --dangerously-load-development-channels server:squad
+```
+
+```powershell
+$env:SQUAD_NAME = "leader"; $env:SQUAD_ROLE = "leader"
+claude --dangerously-load-development-channels server:squad
+```
+
+`server:squad` is the entry in [`.mcp.json`](.mcp.json). The broker starts by itself the first time, and keeps running after the session ends.
+
+The names are `mother`, `leader`, `judge` and `worker-1` to `worker-3`. A session without `SQUAD_ROLE` is a regular Claude Code session: the server exposes no tools and does not register.
+
+## How a session joins
+
+The server does not register when it starts. It pushes a ping with a number through the channel, every 10 s, and exposes one tool, `ready`. When the model calls `ready` with that number, the server registers with the broker and swaps `ready` for the tools of the role. A registered peer is therefore one whose channel works end to end; a session that cannot hear the channel never shows up as online.
+
+## Settings
+
+| Variable | Default | What |
+| --- | --- | --- |
+| `SQUAD_NAME` | none | Name of the session in the squad |
+| `SQUAD_ROLE` | none | `mother`, `leader`, `worker` or `judge` |
+| `SQUAD_PORT` | `7900` | Port of the broker |
+| `SQUAD_DB` | `~/.squad-code-mcp.db` | SQLite database |
+| `SQUAD_PING_INTERVAL_MS` | `10000` | Interval of the channel ping |
+| `SQUAD_CLEANUP_INTERVAL_MS` | `30000` | Interval of the dead-session cleanup |
+
+Port and database differ from claude-peers (`7899`, `~/.claude-peers.db`), so both can run on the same machine.
+
+## Routes
+
+Every route is a `POST` with a JSON body, except `/health`. A refusal is a `200` with `{ ok: false, error, hint }`, where `hint` says the next valid step.
+
+| Route | Body | Answer |
+| --- | --- | --- |
+| `/register` | `{ pid, cwd, git_root, name, role }` | `{ id }`, or a refusal: `missing_field`, `invalid_role`, `invalid_name`, `role_taken`, `worker_limit`, `name_taken` |
+| `/list-peers` | `{ id }` | `[{ name, role, online }]` for the other five names, or `unknown_peer` |
+| `/heartbeat` | `{ id }` | `{ ok: true }` |
+| `/unregister` | `{ id }` | `{ ok: true }` |
+| `GET /health` | | `{ status: "ok", peers }` |
+
+The `id` is a credential: it comes back from `/register` and is never listed.
+
+A peer that registers writes a `peer_joined` event. One that unregisters, or whose process is gone at the cleanup, writes `peer_left` with `unregistered` or `died`.
+
+## CLI
+
+```bash
+bun cli.ts status        # broker state and number of registered peers
+bun cli.ts kill-broker   # stop the broker
+```
+
+## Files
+
+- `broker.ts`: the HTTP daemon
+- `peers.ts`: registration, refusals, presence and listing
+- `db.ts`: schema and the write path of the event log
+- `server.ts`: the MCP server of a session
+- `cli.ts`: status and stop
+- `shared/config.ts`, `shared/git.ts`: settings and the git common directory
+- `test/unit`, `test/integration`: `bun test`
+
+The design is in [`.design/squad-mvp.md`](../.design/squad-mvp.md) and the decisions in [`docs/adr/`](../docs/adr/).

@@ -1,7 +1,7 @@
 {
-  "name": "claude-peers",
+  "name": "squad-broker",
   "version": "0.1.0",
-  "description": "Peer discovery and messaging for Claude Code instances",
+  "description": "Peer registry and event log for a squad of Claude Code sessions",
   "module": "index.ts",
   "type": "module",
   "private": true,
