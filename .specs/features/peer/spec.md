@@ -259,8 +259,8 @@ PEER-05 a PEER-08.
 | PEER-39 | P1: Registro com nome e papel | Execute | Implementing |
 | PEER-40 | P1: Registro que prova o canal | Execute | Implementing |
 | PEER-41 | P1: Registro com nome e papel | Execute | Implementing |
-| PEER-42 | P1: Presença na saída | Tasks | In Tasks |
-| PEER-43 | P1: Presença na saída | Tasks | In Tasks |
+| PEER-42 | P1: Presença na saída | Execute | Implementing |
+| PEER-43 | P1: Presença na saída | Execute | Implementing |
 | PEER-44 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
 | PEER-45 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
 

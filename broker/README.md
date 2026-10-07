@@ -68,7 +68,7 @@ Every route is a `POST` with a JSON body, except `/health`. A refusal is a `200`
 
 The `id` is a credential: it comes back from `/register` and is never listed.
 
-A peer that registers writes a `peer_joined` event. One that unregisters, or whose process is gone at the cleanup, writes `peer_left` with `unregistered` or `died`.
+A peer that registers writes a `peer_joined` event. One that unregisters writes `peer_left` with `unregistered`. One whose process is gone at the cleanup, or whose last heartbeat is more than 60 s old, writes `peer_left` with `died`. The 60 s count from the start of the broker for a peer that was registered before it.
 
 ## CLI
 

@@ -325,10 +325,10 @@ T14 → T15 → T16 → T17 → T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Peer com PID vivo e sem heartbeat sai com `peer_left` `died` na limpeza depois de 60 s, e fica aos 60 s exatos
-- [ ] O papel de uma linha velha com PID vivo volta a aceitar registro depois de 60 s
-- [ ] Peer com `last_seen` velho fica quando o broker acabou de subir sobre o mesmo banco, e quando a limpeza anterior foi há mais de 60 s
-- [ ] Gate: `bun test test/unit` - 62 testes
+- [x] Peer com PID vivo e sem heartbeat sai com `peer_left` `died` na limpeza depois de 60 s, e fica aos 60 s exatos
+- [x] O papel de uma linha velha com PID vivo volta a aceitar registro depois de 60 s
+- [x] Peer com `last_seen` velho fica quando o broker acabou de subir sobre o mesmo banco, e quando a limpeza anterior foi há mais de 60 s
+- [x] Gate: `bun test test/unit` - 56 testes
 
 **Tests**: unit
 **Gate**: quick

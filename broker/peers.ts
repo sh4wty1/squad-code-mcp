@@ -75,6 +75,9 @@ export function pidAlive(pid: number): boolean {
   }
 }
 
+// Four heartbeats of the MCP server, which sends one every 15 s
+export const STALE_AFTER_MS = 60_000;
+
 export function createPeers(
   db: Database,
   isAlive: (pid: number) => boolean = pidAlive,
@@ -85,11 +88,26 @@ export function createPeers(
     appendBrokerEvent(db, "peer_left", { peer: peer.name, reason }, now());
   }
 
-  // Remove peers whose process no longer exists
+  // A heartbeat can only arrive while the broker is there to take it. The silence of a
+  // peer is counted from here when its last_seen is older: the start of the broker, or
+  // its return from a pause.
+  let listeningSince = now();
+  let lastCleanup = listeningSince;
+
+  // Remove peers whose process no longer exists, or whose heartbeat stopped: a pid alone
+  // can be a stale row whose pid the system gave to another process
   const cleanStale = db.transaction(() => {
-    const peers = db.query("SELECT id, name, role, pid FROM peers").all() as PeerRow[];
+    const t = now();
+    // A cleanup this late means the broker itself was stopped, as when the machine sleeps
+    if (t - lastCleanup > STALE_AFTER_MS) listeningSince = t;
+    lastCleanup = t;
+
+    const peers = db.query("SELECT id, name, role, pid, last_seen FROM peers").all() as (PeerRow & {
+      last_seen: number;
+    })[];
     for (const peer of peers) {
-      if (!isAlive(peer.pid)) remove(peer, "died");
+      const silentFor = t - Math.max(peer.last_seen, listeningSince);
+      if (!isAlive(peer.pid) || silentFor > STALE_AFTER_MS) remove(peer, "died");
     }
   });
 

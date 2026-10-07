@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { pidAlive } from "../../peers.ts";
+import { createPeers, pidAlive, STALE_AFTER_MS } from "../../peers.ts";
 import { NOW, setup } from "./helpers.ts";
 
 // pid 1 belongs to root, so the signal is refused with EPERM. Windows has no such pid.
@@ -144,4 +144,98 @@ test("PEER-16: a worker lists the other workers and the three single roles, not 
     { name: "worker-2", role: "worker", online: false },
     { name: "worker-3", role: "worker", online: true },
   ]);
+});
+
+test("PEER-14/42: a peer with a live pid stays for 60 s without a heartbeat and leaves after that", () => {
+  const b = setup();
+  b.join("judge", "judge", 100);
+  b.clock.now = NOW + 1;
+  b.peers.cleanStale();
+  b.clock.now = NOW + STALE_AFTER_MS;
+  b.peers.cleanStale();
+  expect(b.rows().map((p) => p.name)).toEqual(["judge"]);
+  expect(b.events().map((e) => e.kind)).toEqual(["peer_joined"]);
+
+  b.clock.now = NOW + STALE_AFTER_MS + 1;
+  b.peers.cleanStale();
+  expect(b.rows()).toEqual([]);
+  expect(b.events().map((e) => [e.kind, e.data, e.ts])).toEqual([
+    ["peer_joined", { peer: "judge", role: "judge" }, NOW],
+    ["peer_left", { peer: "judge", reason: "died" }, NOW + STALE_AFTER_MS + 1],
+  ]);
+});
+
+test("PEER-14: a heartbeat within the last 60 s keeps the peer", () => {
+  const b = setup();
+  const { id } = b.join("judge", "judge", 100) as { id: string };
+  for (const t of [30000, 60000, 90000]) {
+    b.clock.now = NOW + t;
+    if (t === 30000) b.peers.heartbeat(id);
+    b.peers.cleanStale();
+  }
+  expect(b.rows().map((p) => [p.name, p.last_seen])).toEqual([["judge", NOW + 30000]]);
+  expect(b.events().map((e) => e.kind)).toEqual(["peer_joined"]);
+});
+
+test("PEER-42/05: a role held by a silent row with a live pid is free again after 60 s", () => {
+  const b = setup();
+  b.join("leader", "leader", 100);
+  b.clock.now = NOW + 30000;
+  b.peers.cleanStale();
+  b.clock.now = NOW + STALE_AFTER_MS;
+  expect((b.join("leader", "leader", 200) as { error: string }).error).toBe("role_taken");
+
+  b.clock.now = NOW + STALE_AFTER_MS + 30000;
+  expect(typeof (b.join("leader", "leader", 200) as { id: string }).id).toBe("string");
+  expect(b.rows().map((p) => [p.name, p.pid])).toEqual([["leader", 200]]);
+  expect(b.events().map((e) => [e.kind, e.data])).toEqual([
+    ["peer_joined", { peer: "leader", role: "leader" }],
+    ["peer_left", { peer: "leader", reason: "died" }],
+    ["peer_joined", { peer: "leader", role: "leader" }],
+  ]);
+});
+
+test("PEER-43: a broker that starts over old rows counts the 60 s from its start", () => {
+  const b = setup();
+  const { id } = b.join("mother", "mother", 100) as { id: string };
+  b.join("leader", "leader", 101);
+
+  // The broker comes back an hour later over the same database
+  const start = NOW + 3600000;
+  b.clock.now = start;
+  const restarted = createPeers(b.db, (pid) => b.alive.has(pid), () => b.clock.now);
+  restarted.cleanStale();
+  expect(b.rows().map((p) => p.name)).toEqual(["leader", "mother"]);
+
+  b.clock.now = start + 30000;
+  restarted.heartbeat(id);
+  restarted.cleanStale();
+  b.clock.now = start + STALE_AFTER_MS;
+  restarted.cleanStale();
+  expect(b.rows().map((p) => p.name)).toEqual(["leader", "mother"]);
+
+  // leader never sent a heartbeat to the new broker
+  b.clock.now = start + STALE_AFTER_MS + 1;
+  restarted.cleanStale();
+  expect(b.rows().map((p) => p.name)).toEqual(["mother"]);
+  expect(b.events().slice(2).map((e) => [e.kind, e.data])).toEqual([
+    ["peer_left", { peer: "leader", reason: "died" }],
+  ]);
+});
+
+test("PEER-43: a cleanup more than 60 s after the previous one counts the 60 s from itself", () => {
+  const b = setup();
+  b.join("judge", "judge", 100);
+  // The machine slept: no cleanup ran and no heartbeat could arrive
+  const awake = NOW + STALE_AFTER_MS + 1;
+  b.clock.now = awake;
+  b.peers.cleanStale();
+  b.clock.now = awake + STALE_AFTER_MS;
+  b.peers.cleanStale();
+  expect(b.rows().map((p) => p.name)).toEqual(["judge"]);
+  expect(b.events().map((e) => e.kind)).toEqual(["peer_joined"]);
+
+  b.clock.now = awake + STALE_AFTER_MS + 1;
+  b.peers.cleanStale();
+  expect(b.rows()).toEqual([]);
 });
