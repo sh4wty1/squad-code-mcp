@@ -47,7 +47,9 @@ presença gravada como evento. O upstream também não roda inteiro no Windows.
 | Intervalos em teste | `SQUAD_PING_INTERVAL_MS`, default 10000, e `SQUAD_CLEANUP_INTERVAL_MS`, default 30000 | Permite testar a repetição do ping e da limpeza sem esperar 10 s e 30 s | n |
 | Formato do `id` | `crypto.randomUUID()` | O `id` virou credencial secreta (ADR-003); 8 caracteres de `Math.random` não servem para isso | n |
 | Tabela `events` nesta fatia | Criada com todas as colunas da fatia Event; índices e `deliveries` ficam para a Event | Presença já é evento; criar a tabela inteira evita migrar o log na fatia seguinte | n |
-| Registro repetido pelo mesmo PID | O registro anterior daquele PID sai com `peer_left` `died` antes do novo | Comportamento do upstream; cobre PID reutilizado pelo sistema antes da limpeza | n |
+| Registro repetido pelo mesmo PID | Se o novo é aceito, o anterior sai com `peer_left` `died` antes do `peer_joined`; se é recusado, o anterior fica | O upstream troca o registro do PID; cobre PID reutilizado pelo sistema antes da limpeza. Uma recusa não pode tirar do squad quem já estava nele |  n |
+| `SIGINT` e `SIGTERM` no servidor MCP | Os handlers do upstream continuam e chamam `/unregister`; não são requisito desta fatia | No Windows um processo não recebe esses sinais de outro, então não há como testar aqui. A sessão encerra fechando a entrada padrão (PEER-33) | n |
+| "Mesmo executável" em PEER-34 | `process.execPath` | Só se prova numa máquina com outro `bun` no `PATH`; o teste cobre o broker subir e sobreviver | n |
 | `/list-peers` e `/register` rodam a limpeza de PIDs mortos antes de responder | Sim. Em `/register` ela roda depois de `missing_field`, `invalid_role` e `invalid_name`; o `peer_left` de um morto achado ali fica gravado mesmo se o registro for recusado em seguida | O upstream já limpa na listagem; sem isso "nome de um peer que morreu" dependeria dos 30 s. A saída do morto é um fato à parte da recusa | n |
 | Parar o broker no Windows | `netstat -ano` para achar o PID que escuta a porta; `lsof` nos demais sistemas | Não muda `/health`, que o design lista em Unchanged | n |
 | Sobrevivência do daemon ao fechamento do terminal | Broker lançado destacado; o teste cobre a saída do processo pai, não o fechamento de uma janela real | ADR-001 marca como não verificado; fechar uma janela de terminal não é automatizável aqui | n |
@@ -84,9 +86,11 @@ PEER-05 a PEER-08.
 6. **PEER-06** IF o papel é `worker` e existem três workers vivos THEN o broker SHALL responder `{ ok: false, error: "worker_limit", hint }` sem gravar peer nem evento.
 7. **PEER-07** IF o nome pertence a um peer vivo THEN o broker SHALL responder `{ ok: false, error: "name_taken", hint }` sem gravar peer nem evento.
 8. **PEER-08** WHEN o nome pertence a um peer cujo PID não existe mais THEN o broker SHALL gravar `peer_left` com `data` `{ "peer": <name>, "reason": "died" }`, depois registrar a nova sessão e responder `{ id }` diferente do anterior.
-9. **PEER-09** WHEN o PID que registra já tem um registro THEN o broker SHALL remover o registro anterior gravando `peer_left` com `reason` `died` antes de avaliar o novo.
-10. **PEER-10** IF `pid` não é inteiro ou `cwd` não é texto não vazio THEN o broker SHALL responder `{ ok: false, error: "missing_field", hint }` sem gravar peer nem evento.
-11. **PEER-37** The broker SHALL responder toda recusa com status HTTP 200 e `hint` texto não vazio.
+9. **PEER-09** WHEN o PID que registra já tem um registro e o novo registro é aceito THEN o broker SHALL remover o registro anterior gravando `peer_left` com `reason` `died` antes do `peer_joined` do novo, sem contar o registro anterior como ocupante de nome ou papel.
+10. **PEER-41** IF o PID que registra já tem um registro e o novo registro é recusado THEN o broker SHALL manter o registro anterior sem gravar evento.
+11. **PEER-10** IF `pid` não é inteiro ou `cwd` não é texto não vazio THEN o broker SHALL responder `{ ok: false, error: "missing_field", hint }` sem gravar peer nem evento.
+12. **PEER-37** The broker SHALL responder toda recusa com status HTTP 200 e `hint` texto não vazio.
+13. **PEER-39** IF o corpo de um `POST` a `/register`, `/heartbeat`, `/list-peers` ou `/unregister` não é um objeto JSON (ausente, malformado, `null`, lista ou texto) THEN o broker SHALL responder `{ ok: false, error: "missing_field", hint }` sem gravar peer nem evento.
 
 **Independent Test**: registrar `mother` num broker vazio e ler `peers` e `events`.
 
@@ -136,10 +140,10 @@ PEER-05 a PEER-08.
 **Acceptance Criteria**:
 
 1. **PEER-19** WHERE `SQUAD_DB` não está definida the broker SHALL abrir o banco em `<diretório home do usuário>/.squad-code-mcp.db`, obtido do sistema e não da variável `HOME`.
-2. **PEER-20** WHERE `SQUAD_PORT` não está definida the broker SHALL escutar em `127.0.0.1:7900`.
+2. **PEER-20** WHERE `SQUAD_PORT` não está definida the broker SHALL escutar na porta 7900, e em qualquer porta SHALL responder só em `127.0.0.1`, não nos outros endereços da máquina.
 3. **PEER-21** WHEN `POST /heartbeat` recebe o `id` de um peer registrado THEN o broker SHALL atualizar `last_seen` para o epoch ms atual e responder `{ ok: true }`.
 4. **PEER-22** WHEN `GET /health` é chamado THEN o broker SHALL responder `{ status: "ok", peers: <número de peers registrados> }`.
-5. **PEER-23** IF um `POST` chega a uma rota que não é `/register`, `/heartbeat`, `/list-peers` ou `/unregister` (incluindo `/set-summary`, `/send-message` e `/poll-messages` do upstream) THEN o broker SHALL responder status 404.
+5. **PEER-23** IF um `POST` chega a uma rota que não é `/register`, `/heartbeat`, `/list-peers` ou `/unregister` (incluindo `/set-summary`, `/send-message` e `/poll-messages` do upstream) THEN o broker SHALL responder status 404, com qualquer corpo ou sem corpo.
 6. **PEER-34** WHEN o servidor MCP sobe com papel e o broker não responde THEN o servidor SHALL iniciar o broker como processo destacado, com o mesmo executável que o roda, e o broker SHALL continuar respondendo `/health` depois de o servidor sair.
 7. **PEER-35** WHEN `cli.ts kill-broker` roda com o broker no ar THEN o processo do broker SHALL terminar e `/health` SHALL deixar de responder, sem depender de `lsof` no Windows.
 8. **PEER-36** WHEN `cli.ts status` roda com o broker no ar THEN o CLI SHALL imprimir `Broker: ok (<n> peer(s) registered)`.
@@ -172,13 +176,14 @@ PEER-05 a PEER-08.
 **Acceptance Criteria**:
 
 1. **PEER-26** IF `SQUAD_ROLE` está ausente ou vazia THEN o servidor MCP SHALL listar zero tools, não empurrar ping e não registrar no broker.
-2. **PEER-27** WHEN o servidor MCP sobe com `SQUAD_NAME` e `SQUAD_ROLE` THEN o servidor SHALL empurrar pelo canal (`notifications/claude/channel`) um ping com um número gerado no processo, listar apenas a tool `ready` e não registrar no broker.
+2. **PEER-27** WHEN o servidor MCP sobe com `SQUAD_NAME` e `SQUAD_ROLE` THEN o servidor SHALL empurrar pelo canal (`notifications/claude/channel`) um ping com um número inteiro de 100000 a 999999 sorteado no processo, presente no texto e em `meta.number`, listar apenas a tool `ready` e não registrar no broker.
 3. **PEER-28** WHILE `ready` não foi chamada com o número do ping the servidor MCP SHALL reenviar o mesmo ping a cada 10 s, ou a cada `SQUAD_PING_INTERVAL_MS` quando definida.
 4. **PEER-29** IF `ready` é chamada com um número diferente do ping THEN o servidor MCP SHALL devolver erro, não registrar no broker e manter apenas a tool `ready`.
 5. **PEER-30** WHEN `ready` é chamada com o número do ping e o broker aceita THEN o servidor MCP SHALL registrar com `pid`, `cwd`, `git_root`, `name` e `role`, parar o ping, enviar `notifications/tools/list_changed` e passar a listar as tools do papel (`list_peers`) sem `ready`.
 6. **PEER-31** IF `ready` é chamada com o número do ping e o broker recusa o registro THEN o servidor MCP SHALL devolver erro com o `error` e o `hint` do broker, manter apenas a tool `ready` e parar o ping.
 7. **PEER-32** WHEN a tool `list_peers` é chamada THEN o servidor MCP SHALL devolver um texto com nome, papel e `online` ou `offline` de cada um dos outros nomes do squad, sem nenhum `id`.
-8. **PEER-33** WHEN a sessão encerra (entrada padrão fechada, `SIGINT` ou `SIGTERM`) com o peer registrado THEN o servidor MCP SHALL chamar `/unregister`.
+8. **PEER-33** WHEN a entrada padrão do servidor MCP fecha com o peer registrado THEN o servidor MCP SHALL chamar `/unregister`.
+9. **PEER-40** IF uma tool que não está na lista atual é chamada (`ready` sem papel ou depois do registro; `list_peers` antes do registro) THEN o servidor MCP SHALL responder erro `Unknown tool` sem chamar o broker.
 
 **Independent Test**: abrir o servidor com um cliente MCP de teste, receber o ping, chamar `ready` e listar as tools.
 
@@ -190,6 +195,8 @@ PEER-05 a PEER-08.
 - WHEN três workers estão registrados e um deles morreu THEN o broker SHALL aceitar um novo worker com o nome do morto (PEER-06, PEER-08).
 - IF uma recusa acontece e nenhum peer registrado morreu THEN o broker SHALL deixar a contagem de linhas de `peers` e de `events` inalterada (PEER-03 a PEER-07, PEER-10).
 - WHEN o caminho do repositório tem espaço THEN o servidor MCP SHALL iniciar o broker assim mesmo (PEER-34).
+- WHEN um registro é recusado por `role_taken`, `worker_limit` ou `name_taken` e a limpeza feita antes achou um peer morto THEN o broker SHALL manter gravado o `peer_left` desse peer.
+- IF a gravação do evento falha THEN o broker SHALL não gravar o peer (PEER-02).
 
 ---
 
@@ -235,8 +242,11 @@ PEER-05 a PEER-08.
 | PEER-36 | P1: Broker próprio e rodando no Windows | Execute | Implementing |
 | PEER-37 | P1: Registro com nome e papel | Execute | Implementing |
 | PEER-38 | P1: Presença na saída | Execute | Implementing |
+| PEER-39 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-40 | P1: Registro que prova o canal | Execute | Implementing |
+| PEER-41 | P1: Registro com nome e papel | Execute | Implementing |
 
-**Coverage:** 38 total, 38 mapped to tasks, 0 unmapped.
+**Coverage:** 41 total, 41 mapped to tasks, 0 unmapped.
 
 ---
 

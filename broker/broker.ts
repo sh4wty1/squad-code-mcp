@@ -9,20 +9,20 @@
  * Run directly: bun broker.ts
  */
 
-import { dbPath, port } from "./shared/config.ts";
+import { cleanupIntervalMs, dbPath, port } from "./shared/config.ts";
 import { openDatabase } from "./db.ts";
 import { createPeers, type RegisterRequest } from "./peers.ts";
 
 const PORT = port();
 const DB_PATH = dbPath();
-const CLEANUP_INTERVAL_MS = parseInt(process.env.SQUAD_CLEANUP_INTERVAL_MS ?? "30000", 10);
+const ROUTES = ["/register", "/heartbeat", "/list-peers", "/unregister"];
 
 const db = openDatabase(DB_PATH);
 const peers = createPeers(db);
 
 // Clean up stale peers (PIDs that no longer exist) on startup, then periodically
 peers.cleanStale();
-setInterval(peers.cleanStale, CLEANUP_INTERVAL_MS);
+setInterval(peers.cleanStale, cleanupIntervalMs());
 
 // --- HTTP Server ---
 
@@ -40,10 +40,18 @@ Bun.serve({
       return new Response("squad broker", { status: 200 });
     }
 
-    try {
-      const body = await req.json();
+    // Before reading the body: an unknown route is a 404 whatever it carries
+    if (!ROUTES.includes(path)) {
+      return Response.json({ error: "not found" }, { status: 404 });
+    }
 
+    try {
       // A refusal is a 200 with { ok: false, error, hint }
+      const body: unknown = await req.json().catch(() => null);
+      if (typeof body !== "object" || body === null || Array.isArray(body)) {
+        return Response.json({ ok: false, error: "missing_field", hint: "Send a JSON object as the body." });
+      }
+
       switch (path) {
         case "/register":
           return Response.json(peers.register(body as RegisterRequest));

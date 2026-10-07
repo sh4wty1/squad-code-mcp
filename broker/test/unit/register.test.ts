@@ -161,3 +161,50 @@ test("refusals are evaluated in the order missing_field, invalid_role, invalid_n
   );
   expectRefusal(b, () => b.join("bob", "boss", 100), "invalid_role");
 });
+
+test("PEER-09: a pid that registers again under the same name gets a new id after its peer_left", () => {
+  const b = setup();
+  const first = b.join("mother", "mother", 100) as { id: string };
+  const second = b.join("mother", "mother", 100) as { id: string };
+  expect(typeof second.id).toBe("string");
+  expect(second.id).not.toBe(first.id);
+  expect(b.rows().map((p) => p.id)).toEqual([second.id]);
+  expect(b.events().map((e) => [e.kind, e.data])).toEqual([
+    ["peer_joined", { peer: "mother", role: "mother" }],
+    ["peer_left", { peer: "mother", reason: "died" }],
+    ["peer_joined", { peer: "mother", role: "mother" }],
+  ]);
+});
+
+test("PEER-09: a refused registration leaves the earlier registration of the pid in place", () => {
+  const b = setup();
+  b.join("worker-1", "worker", 100);
+  b.join("mother", "mother", 101);
+  expectRefusal(b, () => b.join("mother", "mother", 100), "role_taken");
+  expect(b.rows().map((p) => [p.name, p.pid]).sort()).toEqual([
+    ["mother", 101],
+    ["worker-1", 100],
+  ]);
+});
+
+test("PEER-02: when the event cannot be written the peer is not stored either", () => {
+  const b = setup();
+  b.db.run("DROP TABLE events");
+  expect(() => b.join("mother", "mother", 100)).toThrow();
+  expect(b.rows()).toEqual([]);
+});
+
+test("a refused registration still logs the peer_left of a dead peer found on the way", () => {
+  const b = setup();
+  b.join("mother", "mother", 100);
+  b.join("worker-1", "worker", 101);
+  b.alive.delete(101);
+  const result = b.join("mother", "mother", 102) as { error: string };
+  expect(result.error).toBe("role_taken");
+  expect(b.rows().map((p) => p.name)).toEqual(["mother"]);
+  expect(b.events().map((e) => [e.kind, e.data])).toEqual([
+    ["peer_joined", { peer: "mother", role: "mother" }],
+    ["peer_joined", { peer: "worker-1", role: "worker" }],
+    ["peer_left", { peer: "worker-1", reason: "died" }],
+  ]);
+});

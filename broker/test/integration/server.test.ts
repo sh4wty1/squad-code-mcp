@@ -31,13 +31,25 @@ afterEach(async () => {
   broker = undefined;
 });
 
+function scratch(): string {
+  const dir = tempDir();
+  cleanups.push(() => removeDir(dir));
+  return dir;
+}
+
 // A real server.ts process driven by an MCP client over stdio, the way Claude Code drives it
 async function startSession(port: number, env: Record<string, string>, serverDir = BROKER_DIR) {
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: [join(serverDir, "server.ts")],
     cwd: BROKER_DIR,
-    env: cleanEnv({ SQUAD_PORT: String(port), SQUAD_PING_INTERVAL_MS: String(PING_MS), ...env }),
+    // SQUAD_DB always set: a server that starts a broker by mistake must not touch the real database
+    env: cleanEnv({
+      SQUAD_PORT: String(port),
+      SQUAD_DB: join(scratch(), "squad.db"),
+      SQUAD_PING_INTERVAL_MS: String(PING_MS),
+      ...env,
+    }),
     stderr: "ignore",
   });
   const client = new Client({ name: "squad-test", version: "0.0.0" });
@@ -83,6 +95,9 @@ test("PEER-27: with name and role the server pings through the channel, lists on
   const ping = session.pings()[0]!;
   expect(ping.method).toBe("notifications/claude/channel");
   expect(Number.isInteger(number)).toBe(true);
+  expect(number).toBeGreaterThanOrEqual(100000);
+  expect(number).toBeLessThanOrEqual(999999);
+  expect(ping.params.meta.number).toBe(String(number));
   expect(ping.params.content).toContain(String(number));
   expect(await session.toolNames()).toEqual(["ready"]);
   expect(readDb(broker.dbFile)).toEqual({ events: [], peers: [] });
@@ -248,4 +263,37 @@ test("PEER-34: the server starts the broker from a path with a space, and the br
   }, "the server process to exit");
   await Bun.sleep(500);
   expect(await isUp(url)).toBe(true);
+});
+
+test("PEER-27: each server process generates its own ping number", async () => {
+  broker = await startBroker();
+  const numbers = new Set<number>();
+  for (const name of ["mother", "leader", "judge"]) {
+    const session = await startSession(broker.port, { SQUAD_NAME: name, SQUAD_ROLE: name });
+    numbers.add(await session.pingNumber());
+  }
+  expect(numbers.size).toBeGreaterThan(1);
+});
+
+test("PEER-40: a tool that is not listed cannot be called", async () => {
+  broker = await startBroker();
+  // The message of the error a call ends with, or "answered" if the server ran the tool
+  const call = (s: Awaited<ReturnType<typeof startSession>>, name: string, number = 0) =>
+    s.client.callTool({ name, arguments: { number } }).then(
+      () => "answered",
+      (e) => String(e)
+    );
+
+  const plain = await startSession(broker.port, {});
+  expect(await call(plain, "ready")).toContain("Unknown tool: ready");
+  expect(await call(plain, "list_peers")).toContain("Unknown tool: list_peers");
+
+  const session = await startSession(broker.port, { SQUAD_NAME: "leader", SQUAD_ROLE: "leader" });
+  const number = await session.pingNumber();
+  expect(await call(session, "list_peers")).toContain("Unknown tool: list_peers");
+  expect(readDb(broker.dbFile)).toEqual({ events: [], peers: [] });
+
+  await session.ready(number);
+  expect(await call(session, "ready", number)).toContain("Unknown tool: ready");
+  expect(readDb(broker.dbFile).events).toHaveLength(1);
 });

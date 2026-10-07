@@ -1,5 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
+import { networkInterfaces } from "node:os";
 import { join } from "node:path";
 import { openDatabase } from "../../db.ts";
 import { createPeers } from "../../peers.ts";
@@ -162,3 +163,46 @@ test("PEER-38/13: the cleanup runs again on its interval and logs the peer that 
     ["peer_left", { peer: "judge", reason: "died" }],
   ]);
 });
+
+for (const [what, body] of [["no body", undefined], ["a body that is not JSON", "xx"]] as const) {
+  test(`PEER-23: POST to an unknown route with ${what} answers 404`, async () => {
+    broker = await startBroker();
+    const res = await fetch(`${broker.url}/send-message`, { method: "POST", body });
+    expect(res.status).toBe(404);
+  });
+}
+
+for (const path of ["/register", "/heartbeat", "/list-peers", "/unregister"]) {
+  test(`PEER-39: POST ${path} without a JSON object is refused with missing_field`, async () => {
+    broker = await startBroker();
+    for (const body of [undefined, "xx", "null", "[]", JSON.stringify("id")]) {
+      const res = await fetch(`${broker.url}${path}`, { method: "POST", body });
+      expect(res.status).toBe(200);
+      const json = (await res.json()) as { ok: boolean; error: string; hint: string };
+      expect(json.ok).toBe(false);
+      expect(json.error).toBe("missing_field");
+      expect(json.hint.length).toBeGreaterThan(0);
+    }
+    expect(readDb(broker.dbFile)).toEqual({ events: [], peers: [] });
+  });
+}
+
+test("PEER-20: the broker answers on 127.0.0.1 and not on the other addresses of the machine", async () => {
+  broker = await startBroker();
+  expect((await fetch(`http://127.0.0.1:${broker.port}/health`)).status).toBe(200);
+  const others = Object.values(networkInterfaces())
+    .flat()
+    .filter((a) => a && a.family === "IPv4" && !a.internal)
+    .map((a) => a!.address);
+  // a machine with no network has nothing else to answer on
+  const { port } = broker;
+  const reached = await Promise.all(
+    others.map((address) =>
+      fetch(`http://${address}:${port}/health`, { signal: AbortSignal.timeout(3000) }).then(
+        () => address,
+        () => null
+      )
+    )
+  );
+  expect(reached.filter((address) => address !== null)).toEqual([]);
+}, 10000);

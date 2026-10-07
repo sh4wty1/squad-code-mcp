@@ -114,10 +114,13 @@ export function createPeers(
 
     // From here on every row left in peers belongs to a live session
     cleanStale();
+    // A pid holds one registration. Its earlier one does not count against the new
+    // one, and only leaves if the new one is accepted.
     const previous = db.query("SELECT id, name, role, pid FROM peers WHERE pid = ?").get(body.pid) as PeerRow | null;
-    if (previous) remove(previous, "died");
 
-    const sameRole = db.query("SELECT name FROM peers WHERE role = ?").all(body.role) as { name: string }[];
+    const sameRole = db.query("SELECT name FROM peers WHERE role = ? AND pid != ?").all(body.role, body.pid) as {
+      name: string;
+    }[];
     if (sameRole.length >= names.length) {
       return body.role === "worker"
         ? refuse("worker_limit", "Three workers are already registered. Close one of them before launching another.")
@@ -134,6 +137,7 @@ export function createPeers(
       );
     }
 
+    if (previous) remove(previous, "died");
     const id = crypto.randomUUID();
     const ts = now();
     db.run(

@@ -53,7 +53,7 @@ T1 → T2 → T3 → T4
 ### Phase 2: Processos
 
 ```
-T4 → T5 → T6 → T7 → T8
+T4 → T5 → T6 → T7 → T8 → T9
 ```
 
 ---
@@ -204,6 +204,23 @@ T4 → T5 → T6 → T7 → T8
 
 ---
 
+### T9: Correções da primeira verificação
+
+**What**: Fecha o que o Verifier apontou em `validation.md`: rota desconhecida responde 404 antes de ler o corpo; corpo que não é objeto JSON vira recusa `missing_field`; o registro anterior de um PID só sai quando o novo é aceito; os intervalos de ping e de limpeza passam a ter default testado; os testes passam a fixar o endereço de escuta, a faixa do número do ping, a chamada de tool não listada e a atomicidade de peer e evento.
+**Where**: `broker/broker.ts`
+**Depends on**: T8
+**Requirement**: PEER-09, PEER-20, PEER-23, PEER-27, PEER-28, PEER-33, PEER-38, PEER-39, PEER-40, PEER-41
+
+**Done when**:
+
+- [x] Cada lacuna numerada de 1 a 13 do relatório tem teste ou virou suposição registrada na spec
+- [x] Gate: `bun x tsc --noEmit && bun test` - 78 testes
+
+**Tests**: integration
+**Gate**: build
+
+---
+
 ## Diagram-Definition Cross-Check
 
 | Task | Depends On (task body) | Diagram Shows | Status |
@@ -216,6 +233,7 @@ T4 → T5 → T6 → T7 → T8
 | T6 | T5 | T5 → T6 | ✅ |
 | T7 | T6 | T6 → T7 | ✅ |
 | T8 | T7 | T7 → T8 | ✅ |
+| T9 | T8 | T8 → T9 | ✅ |
 
 ## Test Co-location Validation
 
@@ -229,3 +247,4 @@ T4 → T5 → T6 → T7 → T8
 | T6 | Configuração e git | unit | unit | ✅ |
 | T7 | CLI | integration | integration | ✅ |
 | T8 | Servidor MCP | integration | integration | ✅ |
+| T9 | Rotas HTTP, regras, servidor MCP | integration | integration | ✅ |
