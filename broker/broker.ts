@@ -52,16 +52,19 @@ Bun.serve({
         return Response.json({ ok: false, error: "missing_field", hint: "Send a JSON object as the body." });
       }
 
+      // An id that is missing or not a string is an id nobody has
+      const id = "id" in body && typeof body.id === "string" ? body.id : "";
+
       switch (path) {
         case "/register":
           return Response.json(peers.register(body as RegisterRequest));
         case "/heartbeat":
-          peers.heartbeat((body as { id: string }).id);
+          peers.heartbeat(id);
           return Response.json({ ok: true });
         case "/list-peers":
-          return Response.json(peers.listPeers((body as { id: string }).id));
+          return Response.json(peers.listPeers(id));
         case "/unregister":
-          peers.unregister((body as { id: string }).id);
+          peers.unregister(id);
           return Response.json({ ok: true });
         default:
           return Response.json({ error: "not found" }, { status: 404 });

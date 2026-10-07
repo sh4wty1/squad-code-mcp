@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.design/squad-mvp.md`, fatia Peer (sem `design.md` próprio)
-**Status**: Done
+**Status**: In Progress (falta a verificação independente de T11)
 
 Todo o código fica em `broker/`; os comandos rodam de dentro dele. Mensagens de commit
 seguem a convenção do repositório (frase imperativa em minúsculas, sem prefixo), não
@@ -53,7 +53,7 @@ T1 → T2 → T3 → T4
 ### Phase 2: Processos
 
 ```
-T4 → T5 → T6 → T7 → T8 → T9 → T10
+T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11
 ```
 
 ---
@@ -238,6 +238,24 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10
 
 ---
 
+### T11: Correções da terceira verificação
+
+**What**: `id` ausente ou que não é texto vale como desconhecido nas três rotas que o recebem; testes fixam isso e a ordem da limpeza em `/register`.
+**Where**: `broker/broker.ts`
+**Depends on**: T10
+**Requirement**: PEER-03, PEER-04, PEER-10, PEER-12, PEER-18, PEER-21
+
+**Done when**:
+
+- [x] As mutações M11 e M12 da terceira rodada têm teste
+- [x] Gate: `bun x tsc --noEmit && bun test` - 85 testes
+- [ ] Verificação independente depois desta correção (a terceira rodada foi a última automática)
+
+**Tests**: integration
+**Gate**: build
+
+---
+
 ## Diagram-Definition Cross-Check
 
 | Task | Depends On (task body) | Diagram Shows | Status |
@@ -252,6 +270,7 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10
 | T8 | T7 | T7 → T8 | ✅ |
 | T9 | T8 | T8 → T9 | ✅ |
 | T10 | T9 | T9 → T10 | ✅ |
+| T11 | T10 | T10 → T11 | ✅ |
 
 ## Test Co-location Validation
 
@@ -267,3 +286,4 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10
 | T8 | Servidor MCP | integration | integration | ✅ |
 | T9 | Rotas HTTP, regras, servidor MCP | integration | integration | ✅ |
 | T10 | Regras do broker | unit | unit | ✅ |
+| T11 | Rotas HTTP | integration | integration | ✅ |

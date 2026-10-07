@@ -210,3 +210,22 @@ test("PEER-20: the broker answers on 127.0.0.1 and not on the other addresses of
   );
   expect(reached.filter((address) => address !== null)).toEqual([]);
 }, 10000);
+
+test("PEER-12/18/21: an id that is missing or not text is treated as an unknown id", async () => {
+  broker = await startBroker();
+  await register(broker, "judge", "judge");
+  const before = readDb(broker.dbFile);
+  for (const body of [{}, { id: null }, { id: 5 }, { id: { a: 1 } }, { id: ["x"] }]) {
+    const heartbeat = await post(broker.url, "/heartbeat", body);
+    expect(heartbeat.status).toBe(200);
+    expect(heartbeat.json).toEqual({ ok: true });
+    const unregister = await post(broker.url, "/unregister", body);
+    expect(unregister.status).toBe(200);
+    expect(unregister.json).toEqual({ ok: true });
+    const listed = await post(broker.url, "/list-peers", body);
+    expect(listed.status).toBe(200);
+    expect(listed.json.ok).toBe(false);
+    expect(listed.json.error).toBe("unknown_peer");
+  }
+  expect(readDb(broker.dbFile)).toEqual(before);
+});

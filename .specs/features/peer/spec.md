@@ -39,6 +39,8 @@ presença gravada como evento. O upstream também não roda inteiro no Windows.
 | Onde fica o código do fork | Diretório `broker/` na raiz, cópia fiel do upstream no primeiro commit | A raiz já tem `README.md` e `.gitignore` do projeto; o design pede o plugin "em diretório separado do broker" | n (STATE AD-001) |
 | Nomes aceitos no registro | Lista fixa: `mother`, `leader`, `judge`, `worker-1` a `worker-3`. Papel único exige nome igual ao papel; `worker` exige `worker-N`. Fora disso, recusa `invalid_name` | ADR-003 fixa os seis nomes; a fatia não dá código para o nome inválido. Sem a lista fixa, `online: false` e "destinatário conhecido mas offline" não têm de onde vir, porque a linha do peer é apagada na saída | n (STATE AD-002) |
 | Credencial desconhecida em `/list-peers` | Recusa `unknown_peer` | A fatia exige `{ id }` e não nomeia o erro; o diagrama da Event prevê "credencial desconhecida" | n (STATE AD-002) |
+| `id` ausente ou que não é texto em `/heartbeat`, `/list-peers` e `/unregister` | Vale como `id` desconhecido: `{ ok: true }` nas duas primeiras de efeito nulo, `unknown_peer` na listagem | Sem isso o SQLite devolvia 500 para um `id` objeto ou lista | n |
+| `git_root` ausente em `/register` | Vale como nulo | O campo é opcional na tabela da fatia | n |
 | Campo obrigatório ausente ou de tipo errado em `/register` (`pid` que não é inteiro positivo, `cwd` vazio, `git_root` que não é texto nem nulo) | Recusa `missing_field` | Código já usado pelo design em outras rotas; sem a checagem o SQLite devolvia 500 e um `pid` 0 aparecia como vivo | n |
 | Ordem das recusas em `/register` | `missing_field` → `invalid_role` → `invalid_name` → `role_taken` ou `worker_limit` → `name_taken` | Mantém os quatro códigos da fatia alcançáveis com a lista fixa de nomes | n |
 | Variáveis de ambiente e defaults | `SQUAD_NAME`, `SQUAD_ROLE`, `SQUAD_PORT` (7900), `SQUAD_DB` (`<home>/.squad-code-mcp.db`); servidor MCP e canal se chamam `squad` | O design pede porta e banco próprios e configuração por variável com default; o nome `squad` é o default 6 da fatia Papéis | n (STATE AD-003) |
@@ -105,7 +107,7 @@ PEER-05 a PEER-08.
 **Acceptance Criteria**:
 
 1. **PEER-11** WHEN `POST /unregister` recebe o `id` de um peer registrado THEN o broker SHALL apagar a linha do peer, gravar `peer_left` com `from_name` `broker` e `data` `{ "peer": <name>, "reason": "unregistered" }`, e responder `{ ok: true }`.
-2. **PEER-12** IF `POST /unregister` recebe um `id` desconhecido THEN o broker SHALL responder `{ ok: true }` sem gravar evento.
+2. **PEER-12** IF `POST /unregister` recebe um `id` desconhecido, ausente ou que não é texto THEN o broker SHALL responder `{ ok: true }` sem gravar evento.
 3. **PEER-13** WHEN a limpeza roda e o PID de um peer não existe mais THEN o broker SHALL apagar a linha do peer e gravar `peer_left` com `data` `{ "peer": <name>, "reason": "died" }`.
 4. **PEER-14** WHILE o PID de um peer existe the broker SHALL manter a linha do peer na limpeza sem gravar evento.
 5. **PEER-15** The broker SHALL dar a cada evento um `seq` inteiro maior que o de todo evento anterior e um `ts` em epoch ms.
@@ -125,7 +127,7 @@ PEER-05 a PEER-08.
 
 1. **PEER-16** WHEN `POST /list-peers` recebe o `id` de um peer registrado THEN o broker SHALL responder uma lista com os outros cinco nomes do squad, cada item `{ name, role, online }`, com `online` verdadeiro só para nome registrado com PID vivo.
 2. **PEER-17** The broker SHALL responder `/list-peers` sem nenhum campo além de `name`, `role` e `online` em cada item.
-3. **PEER-18** IF `POST /list-peers` recebe um `id` desconhecido THEN o broker SHALL responder `{ ok: false, error: "unknown_peer", hint }`.
+3. **PEER-18** IF `POST /list-peers` recebe um `id` desconhecido, ausente ou que não é texto THEN o broker SHALL responder `{ ok: false, error: "unknown_peer", hint }`.
 
 **Independent Test**: registrar `mother` e `leader`, listar como `mother` e conferir que `leader` está `online` e os workers não.
 
@@ -141,7 +143,7 @@ PEER-05 a PEER-08.
 
 1. **PEER-19** WHERE `SQUAD_DB` não está definida the broker SHALL abrir o banco em `<diretório home do usuário>/.squad-code-mcp.db`, obtido do sistema e não da variável `HOME`.
 2. **PEER-20** WHERE `SQUAD_PORT` não está definida the broker SHALL escutar na porta 7900, e em qualquer porta SHALL responder só em `127.0.0.1`, não nos outros endereços da máquina.
-3. **PEER-21** WHEN `POST /heartbeat` recebe o `id` de um peer registrado THEN o broker SHALL atualizar `last_seen` para o epoch ms atual, manter `registered_at` e responder `{ ok: true }`; com `id` desconhecido ou ausente SHALL responder `{ ok: true }` sem alterar nenhum peer, como no upstream.
+3. **PEER-21** WHEN `POST /heartbeat` recebe o `id` de um peer registrado THEN o broker SHALL atualizar `last_seen` para o epoch ms atual, manter `registered_at` e responder `{ ok: true }`; com `id` desconhecido, ausente ou que não é texto SHALL responder `{ ok: true }` sem alterar nenhum peer, como no upstream.
 4. **PEER-22** WHEN `GET /health` é chamado THEN o broker SHALL responder `{ status: "ok", peers: <número de peers registrados> }`.
 5. **PEER-23** IF um `POST` chega a uma rota que não é `/register`, `/heartbeat`, `/list-peers` ou `/unregister` (incluindo `/set-summary`, `/send-message` e `/poll-messages` do upstream) THEN o broker SHALL responder status 404, com qualquer corpo ou sem corpo.
 6. **PEER-34** WHEN o servidor MCP sobe com papel e o broker não responde THEN o servidor SHALL iniciar o broker como processo destacado, com o mesmo executável que o roda, e o broker SHALL continuar respondendo `/health` depois de o servidor sair.
@@ -197,6 +199,7 @@ PEER-05 a PEER-08.
 - WHEN o caminho do repositório tem espaço THEN o servidor MCP SHALL iniciar o broker assim mesmo (PEER-34).
 - WHEN um registro é recusado por `role_taken`, `worker_limit` ou `name_taken` e a limpeza feita antes achou um peer morto THEN o broker SHALL manter gravado o `peer_left` desse peer.
 - IF a gravação do evento falha THEN o broker SHALL não gravar o peer (PEER-02).
+- IF um registro é recusado por `missing_field`, `invalid_role` ou `invalid_name` e existe um peer morto ainda não limpo THEN o broker SHALL não gravar o `peer_left` desse peer nessa chamada.
 
 ---
 

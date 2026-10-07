@@ -222,3 +222,22 @@ test("PEER-01: the smallest valid pid is accepted", () => {
   const b = setup();
   expect(b.join("mother", "mother", 1)).toHaveProperty("id");
 });
+
+test("PEER-03/04/10: a refusal decided before the cleanup does not log a dead peer", () => {
+  const b = setup();
+  b.join("worker-1", "worker", 100);
+  b.alive.delete(100);
+  expectRefusal(b, () => b.peers.register({ pid: 0, cwd: "/repo", git_root: null, name: "mother", role: "mother" }), "missing_field");
+  expectRefusal(b, () => b.join("boss", "boss", 101), "invalid_role");
+  expectRefusal(b, () => b.join("bob", "worker", 102), "invalid_name");
+  expect(b.rows().map((p) => p.name)).toEqual(["worker-1"]);
+  expect(b.events().map((e) => e.kind)).toEqual(["peer_joined"]);
+});
+
+test("PEER-01: a registration without the git_root key stores a null git_root", () => {
+  const b = setup();
+  b.alive.add(100);
+  const result = b.peers.register({ pid: 100, cwd: "/repo", name: "judge", role: "judge" } as never);
+  expect(result).toHaveProperty("id");
+  expect(b.rows()[0]!.git_root).toBeNull();
+});
