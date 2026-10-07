@@ -86,6 +86,36 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: X1 broker.ts:65 (PEER-18) (routes)
 - last seen: 2026-10-07T20:24:49Z
 
+### L-013 - Assert the mechanism an AC names on every supported platform, not only an outcome one platform reaches without it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
+- features: peer
+- evidence: mutant L6 broker/server.ts:79 (PEER-34 detached, survives on Linux) (mcp-server) (+1 more)
+- last seen: 2026-10-07T22:23:44Z
+
+### L-014 - Test each OS error code a helper branches on with a real case that raises it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker-rules` · harmful: 0
+- features: peer
+- evidence: mutant L2 broker/peers.ts:74 (PEER-14 EPERM) (broker-rules)
+- last seen: 2026-10-07T22:23:44Z
+
+### L-015 - Word an AC per platform when the OS API it relies on behaves differently on each
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: peer
+- evidence: PEER-19 broker/shared/config.ts:29 (os.homedir reads HOME on POSIX) (spec)
+- last seen: 2026-10-07T22:23:44Z
+
+### L-016 - Revisit an assumption justified by one platform's limits when a second platform enters scope
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: peer
+- evidence: Assumptions row SIGINT/SIGTERM, mutant L4 broker/server.ts:316 (spec)
+- last seen: 2026-10-07T22:23:44Z
+
+### L-017 - When a command stops a process it looks up, state in the AC that nothing else is signalled and test it with a decoy
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `cli` · harmful: 0
+- features: peer
+- evidence: PEER-35 broker/cli.ts:44 (kill-broker signals listeners on other addresses of the port) (cli)
+- last seen: 2026-10-07T22:23:44Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

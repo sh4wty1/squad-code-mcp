@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 13,
+  "next_id": 18,
   "lessons": [
     {
       "id": "L-001",
@@ -223,6 +223,97 @@
       ],
       "created": "2026-10-07T20:24:49Z",
       "last_seen": "2026-10-07T20:24:49Z"
+    },
+    {
+      "id": "L-013",
+      "key": "surviving_mutant::assert the mechanism an ac names on every supported platform not only an outcome one platform reaches without it",
+      "text": "Assert the mechanism an AC names on every supported platform, not only an outcome one platform reaches without it",
+      "signal": "surviving_mutant",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant L6 broker/server.ts:79 (PEER-34 detached, survives on Linux) (mcp-server)",
+        "mutant L3 broker/server.ts:318 (PEER-33 stdin close, passes through the client SIGTERM on Linux) (mcp-server)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-014",
+      "key": "surviving_mutant::test each os error code a helper branches on with a real case that raises it",
+      "text": "Test each OS error code a helper branches on with a real case that raises it",
+      "signal": "surviving_mutant",
+      "scope": "broker-rules",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant L2 broker/peers.ts:74 (PEER-14 EPERM) (broker-rules)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-015",
+      "key": "spec_precision_gap::word an ac per platform when the os api it relies on behaves differently on each",
+      "text": "Word an AC per platform when the OS API it relies on behaves differently on each",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PEER-19 broker/shared/config.ts:29 (os.homedir reads HOME on POSIX) (spec)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-016",
+      "key": "spec_precision_gap::revisit an assumption justified by one platform s limits when a second platform enters scope",
+      "text": "Revisit an assumption justified by one platform's limits when a second platform enters scope",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Assumptions row SIGINT/SIGTERM, mutant L4 broker/server.ts:316 (spec)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-017",
+      "key": "spec_precision_gap::when a command stops a process it looks up state in the ac that nothing else is signalled and test it with a decoy",
+      "text": "When a command stops a process it looks up, state in the AC that nothing else is signalled and test it with a decoy",
+      "signal": "spec_precision_gap",
+      "scope": "cli",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PEER-35 broker/cli.ts:44 (kill-broker signals listeners on other addresses of the port) (cli)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
     }
   ]
 }
