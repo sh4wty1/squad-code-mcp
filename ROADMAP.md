@@ -30,20 +30,21 @@ tarefas, implementação e verificação independente, com PR revisado por `/the
 | | Fatia | Fase do START | Entrega | Depende de |
 |---|---|---|---|---|
 | [ ] | Peer | 1 | Sessões entram no broker com nome e papel; presença vira evento | Fase 0 |
+| [ ] | TUI telas | 2 | Grid de 120×40, funções de desenho portadas do protótipo e um teste por frame, com estado fixo e sem broker | Peer, frames |
 | [ ] | Event | 1 | Log append-only, envio com recusa por topologia, entrega, leitura por cursor | Peer |
 | [ ] | Feature | 1 | Abertura e encerramento de feature com workflow travado | Event |
-| [ ] | TUI leitura | 2 | Feed, agentes, tickets, topologia e detalhe de ticket | Feature, frames |
-| [ ] | Question | 3 | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas | TUI leitura |
+| [ ] | TUI ao vivo | 2 | Log lido por cursor e derivação ligados às telas: feed, agentes, tickets, topologia e detalhe de ticket | Feature, TUI telas |
+| [ ] | Question | 3 | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas | TUI ao vivo |
 | [ ] | Papéis | 4 | `roles.json`, quatro skills de papel, launcher, plugin com hooks | Question |
 | [ ] | Gate | 5 | Pedido e decisão de gate; modal com texto e confirmação | Papéis |
 
 **Marco do broker:** com Peer, Event e Feature prontas, duas sessões trocam mensagens pelo
-fork. **Marco do MVP:** com as sete prontas, uma feature de dois tickets vai do kickoff ao
+fork. **Marco do MVP:** com as oito prontas, uma feature de dois tickets vai do kickoff ao
 gate aprovado usando só o terminal da mother e a TUI.
 
 ## Pendências fora da ordem
 
-- [x] Segunda rodada de frames no Claude Design, antes da fatia TUI leitura. Frames 22 a
+- [x] Segunda rodada de frames no Claude Design, antes da fatia TUI telas. Frames 22 a
       25 importados; ver a seção 7 de `docs/claude-design-handoff/DESIGN-NOTES.md`. O `/the-fool`
       criou estados depois do primeiro pedido: modal de pedido de permissão (só se o
       spike A passar), agente `stalled`, ticket `planned`, ticket `dropped` e a linha de

@@ -71,14 +71,15 @@ A alternativa mais pesada é o broker como motor de workflow, que atribui ticket
 |---|---|---|
 | [Fase 0](#fase-0) | Uma feature de dois tickets em texto livre sobre o claude-peers do upstream, e o spike do relay de permissão; o contrato só congela depois | done — `docs/fase-0/` |
 | [Peer](#peer) | Sessões entram no broker com nome e papel estáveis; presença vira evento | clear |
+| [TUI telas](#tui-leitura) | Buffer de 120×40 e funções de desenho portadas do protótipo; cada frame de leitura do handoff é um teste com estado fixo, sem broker | clear |
 | [Event](#event) | Log append-only, envio com recusa por topologia, entrega confirmada, leitura por cursor | clear |
 | [Feature](#feature) | Abertura e encerramento de feature com workflow travado | clear |
-| [TUI leitura](#tui-leitura) | Feed, agentes, tickets, topologia estrela e detalhe de ticket a partir do log | design |
+| [TUI ao vivo](#tui-leitura) | Leitura do log por cursor e derivação ligadas às telas: feed, agentes, tickets, topologia estrela e detalhe de ticket | clear |
 | [Question](#question) | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas e modais | design |
 | [Papéis](#papéis) | `roles.json`, quatro skills de papel, launcher, plugin com hooks de uso e de permissão | open — 6 defaults taken |
 | [Gate](#gate) | Pedido e decisão de gate; modal com texto e confirmação | design |
 
-Order: Fase 0 → Peer → Event → Feature → TUI leitura → Question → Papéis → Gate. Peer, Event e Feature são a fase 1 do START.md; as demais são as fases 2 a 5, uma slice cada. A Fase 0 vem antes porque as três primeiras slices carregam suposições sobre o comportamento de uma sessão real que, sem ela, só seriam testadas em Papéis.
+Order: Fase 0 → Peer → TUI telas → Event → Feature → TUI ao vivo → Question → Papéis → Gate. Peer, Event e Feature são a fase 1 do START.md; TUI telas e TUI ao vivo são a fase 2, partida em duas; as demais são as fases 3 a 5, uma slice cada. TUI telas vem antes de Event porque não lê o broker: desenha a partir de um estado derivado fixo, e os frames do handoff já estão completos. A Fase 0 vem antes porque as três primeiras slices carregam suposições sobre o comportamento de uma sessão real que, sem ela, só seriam testadas em Papéis.
 
 Derivable from the repository, left to the plan: nomes de rota em kebab-case com `POST` e corpo JSON; recusa como resposta `200` com `{ ok: false, error, hint }`, em que `hint` diz o próximo passo válido; `404` para rota desconhecida; configuração por variável de ambiente com default - tudo como o upstream faz em `/send-message`. O fork usa porta e caminho de banco próprios para conviver com um claude-peers instalado na mesma máquina.
 
@@ -340,7 +341,9 @@ Table `features`.
 
 ### TUI leitura
 
-**Delivers** as telas 01, 02, 03, 09, 10 e 11 do handoff, lendo o log por cursor. **Status: design.** As telas estão em `docs/claude-design-handoff/`; o que segue é o que elas não decidem.
+**Delivers** as telas 01, 02, 03, 09, 10 e 11 do handoff, lendo o log por cursor. **Status: clear.** As telas estão em `docs/claude-design-handoff/`; o que segue é o que elas não decidem.
+
+A entrega é em duas slices. **TUI telas**, depois de Peer: o buffer de células, o teste de largura de glifo, as funções de desenho portadas do protótipo e um teste por frame de leitura (01, 02, 03, 09 a 13, 15, 21, 23 a 25), cada um com o estado derivado escrito à mão. Ela fixa o tipo do estado derivado, que é a entrada das telas. **TUI ao vivo**, depois de Feature: a leitura de `GET /events`, a função de derivação que produz esse estado a partir do log, o teclado e o indicador de conexão. Os frames de escrita (04 a 08, 14, 16 a 20 e 22) ficam com Question, Gate e o modal de permissão.
 
 A TUI não lê o banco: lê `GET /events` a cada segundo e calcula o estado com a função de derivação (Key decision 5). Ela é escrita em TypeScript sobre o mesmo runtime do broker, para compartilhar os tipos do contrato e essa função; por isso Textual está fora.
 
@@ -393,7 +396,7 @@ Adotado do que é só de tela: painel "arestas" com volume por aresta (N22), pau
 - Design: ticket `dropped` e a linha de sistema de `refused` com contador.
 - Design: terminal menor que 120×40 - a mensagem.
 
-O pedido desses desenhos está em `docs/claude-design-handoff/PROMPT-estados-faltantes.md`.
+Todos esses desenhos já existem: são os frames 12 a 25 do handoff, descritos na seção 7 de `docs/claude-design-handoff/DESIGN-NOTES.md`. As linhas acima que dizem "Não está no design" são anteriores a eles. Os pedidos estão em `docs/claude-design-handoff/PROMPT-estados-faltantes.md` e `PROMPT-estados-faltantes-2.md`.
 
 Open, default taken:
 1. `⚠` e `⟳` ocupam uma célula no Windows Terminal? - o buffer trata todo glifo como uma célula; se algum sair com largura dupla, ele é trocado por um glifo estreito em configuração. É a primeira coisa a ver funcionando, antes de qualquer tela.

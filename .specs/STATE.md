@@ -36,6 +36,14 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 - **Date**: 2026-10-07
 - **Status**: active
 
+### AD-005
+- **Decision**: A slice TUI leitura do design é entregue em duas: TUI telas, logo depois de Peer, e TUI ao vivo, depois de Feature. A ordem passa a ser Peer → TUI telas → Event → Feature → TUI ao vivo → Question → Papéis → Gate.
+- **Reason**: Os frames do handoff ficaram completos em 2026-10-07 (seção 7 de `docs/claude-design-handoff/DESIGN-NOTES.md`), e o design já define cada tela como função pura do estado derivado para um buffer de 120×40, com cada frame como caso de teste. Essa parte não lê o broker e não precisa esperar Event e Feature.
+- **Trade-off**: TUI telas fixa o tipo do estado derivado antes de existir a função de derivação e o log. Se Event ou Feature mudarem o contrato, os estados escritos à mão nos testes mudam junto.
+- **Scope**: Ordem das fatias em `.design/squad-mvp.md`, `ROADMAP.md` e `RUN_FATIAS.md`. O conteúdo da seção TUI leitura do design não muda.
+- **Date**: 2026-10-07
+- **Status**: active
+
 ## Handoff
 
 Escrito em 2026-10-07. Para retomar: `git fetch && git checkout feat/peer`, depois `/tlc-spec-driven resume work`.

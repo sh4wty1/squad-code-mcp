@@ -5,7 +5,6 @@
 **Como:** leitura do projeto `342a75e9-…` pelo `DesignSync` (depois de `/design-login`). `Squad TUI.dc.html` (938 linhas) substituiu o de 786 dentro de `docs/claude-design-handoff/TUI de observabilidade de squad Claude (1).zip`; `support.js` é idêntico ao que já estava lá. Seção 7 acrescentada a `docs/claude-design-handoff/DESIGN-NOTES.md`: frames 12 a 25, permissão, `stalled`, plano, recusas, o que o design decidiu por conta própria e o que deixou de ser "Não está no design" em `.design/squad-mvp.md`.
 **Verificação:** o HTML dentro do zip é byte a byte o do projeto remoto (`cmp`); a resposta do `get_file` veio com `truncated: false`. Os números de linha citados na seção 7 foram conferidos por `grep` no arquivo. O protótipo não foi aberto num navegador: os frames foram lidos no código, não vistos.
 **Pendências:**
-- Implementar a TUI: fatia TUI leitura, via `/tlc-spec-driven`, depois de Event e Feature.
-- `.design/squad-mvp.md` ainda diz "Não está no design" em oito linhas da fatia TUI leitura; não foi alterado.
+- Implementar a TUI: fatias TUI telas e TUI ao vivo, via `/tlc-spec-driven` (ver `2026-10-07-dividir-fatia-tui.md`).
 - Decidir D2 a D5 da seção 7.6 (id `P-01`, trava do `a`, linhas de sistema sintetizadas pela TUI) antes da spec da fatia.
 - A lista do que o Claude Design decidiu por conta própria na primeira rodada continua pendente no `ROADMAP.md`: ela está na conversa do Claude Design, não nos arquivos do projeto.
