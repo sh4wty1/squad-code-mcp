@@ -536,6 +536,12 @@ Open, default taken:
 
 Resolvido pela documentação de canais: o canal de desenvolvimento aceita servidor MCP vindo de plugin, com `--dangerously-load-development-channels plugin:<nome>@<marketplace>`. Cada sessão mostra um diálogo de confirmação ao subir com a flag, e a flag é ignorada em modo não interativo.
 
+Resolvido pelo teste 1 da Fase 0 (`docs/fase-0/teste-1.md`):
+- A aceitação automática de edição não cobre as tools do servidor MCP: a lista de permitidos do launcher inclui as tools do squad, senão toda sessão para no primeiro envio.
+- O launcher limpa as variáveis `CLAUDE*` do ambiente antes de abrir a sessão. Uma sessão lançada de dentro de outra herda `CLAUDE_CODE_CHILD_SESSION` e não grava transcript, que é a fonte do hook de uso.
+- As skills de papel proíbem aviso de recebimento: sem regra, cinco de treze mensagens foram só "recebi", e cada uma custa um turno do destinatário. O broker as recusa de qualquer forma, porque não há kind para elas.
+- O `verdict` não é entregue ao dono do ticket, e não existe pergunta de cima para baixo. Os agentes sentiram falta das duas coisas no teste; a decisão foi não mudar o contrato.
+
 Alternatives considered: o agente reportar o próprio uso - não ganha em nenhuma condição: o modelo não sabe quantos tokens gastou.
 
 ### Gate
