@@ -125,7 +125,7 @@ for (const path of ["/set-summary", "/send-message", "/poll-messages", "/nope"])
   });
 }
 
-test("PEER-19: without SQUAD_DB and HOME the database is created in the system home directory", async () => {
+test("PEER-19: without SQUAD_DB the database is created in the home directory the system reports", async () => {
   const home = tempDir();
   // os.homedir() reads USERPROFILE on Windows and HOME elsewhere
   const env: Record<string, string> =

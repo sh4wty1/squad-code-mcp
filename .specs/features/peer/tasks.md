@@ -378,8 +378,8 @@ T14 → T15 → T16 → T17 → T18 → T19 → T20
 
 **Done when**:
 
-- [ ] PEER-19 continua com um teste de unidade do default e um de integração com o home trocado
-- [ ] Gate: `bun test`
+- [x] PEER-19 continua com um teste de unidade do default e um de integração com o home trocado
+- [x] Gate: `bun test`
 
 **Tests**: integration
 **Gate**: full

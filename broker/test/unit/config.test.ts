@@ -7,10 +7,6 @@ test("PEER-19: default database is in the system home directory", () => {
   expect(dbPath({})).toBe(join(homedir(), ".squad-code-mcp.db"));
 });
 
-test("PEER-19: the default database does not come from HOME", () => {
-  expect(dbPath({ HOME: "/not/the/home" })).toBe(join(homedir(), ".squad-code-mcp.db"));
-});
-
 test("PEER-19: SQUAD_DB overrides the default database", () => {
   expect(dbPath({ SQUAD_DB: "/tmp/other.db" })).toBe("/tmp/other.db");
 });
