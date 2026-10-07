@@ -55,6 +55,11 @@ presença gravada como evento. O upstream também não roda inteiro no Windows.
 | `/list-peers` e `/register` rodam a limpeza de PIDs mortos antes de responder | Sim. Em `/register` ela roda depois de `missing_field`, `invalid_role` e `invalid_name`; o `peer_left` de um morto achado ali fica gravado mesmo se o registro for recusado em seguida | O upstream já limpa na listagem; sem isso "nome de um peer que morreu" dependeria dos 30 s. A saída do morto é um fato à parte da recusa | n |
 | Parar o broker no Windows | `netstat -ano` para achar o PID que escuta a porta; `lsof` nos demais sistemas | Não muda `/health`, que o design lista em Unchanged | n |
 | Sobrevivência do daemon ao fechamento do terminal | Broker lançado destacado; o teste cobre a saída do processo pai, não o fechamento de uma janela real | ADR-001 marca como não verificado; fechar uma janela de terminal não é automatizável aqui | n |
+| Quando um peer conta como vivo | PID existe **e** `last_seen` tem 60 s ou menos (quatro heartbeats de 15 s). A idade conta a partir do maior entre `last_seen` e o instante em que o broker subiu ou voltou de uma pausa (limpeza rodando mais de 60 s depois da anterior) | Só o PID prende a posição para sempre quando o sistema reutiliza o PID de uma linha velha (revisão do PR 2, F1). Contar do instante em que o broker voltou evita derrubar a sessão viva que atravessou uma queda do broker ou a suspensão da máquina: ela não tem mais `ready` para voltar | n |
+| Sessão viva cujo heartbeat falha por mais de 60 s com o broker no ar | Sai com `peer_left` `died` e não volta sozinha | Só acontece com a sessão congelada; relançar a sessão resolve. Reentrada automática fica para quando aparecer | n |
+| `SQUAD_CLEANUP_INTERVAL_MS` acima de 60000 | Cada limpeza conta como volta de pausa, e a saída por heartbeat velho só acontece nas limpezas feitas por `/register` e `/list-peers` | O default é 30000; o valor maior só existe para teste | n |
+| Falha de `kill-broker` depois de `/health` responder | Mensagem própria e código de saída 1; `Broker is not running.` só quando `/health` não responde | Antes qualquer falha (sem `lsof`, sinal recusado) saía com 0 dizendo que o broker não estava no ar (revisão do PR 2, F2) | n |
+| Diretório home em PEER-19 | `os.homedir()`: lê `USERPROFILE` no Windows e `HOME` nos demais | O requisito é não depender de `HOME` no Windows, onde ela não existe; em POSIX `HOME` é a fonte do sistema (revisão do PR 2, F4) | n |
 | Testes | `bun test`, unidade com SQLite em memória e integração com processos reais | O upstream não tem testes nem diretriz; vale o default forte da skill | n |
 
 **Open questions:** none - all resolved or logged above.
@@ -63,8 +68,8 @@ Implicit-requirement dimensions: validação de entrada → PEER-03, PEER-04, PE
 parcial → PEER-02 (peer e evento na mesma transação). Idempotência → PEER-12, PEER-09.
 Fronteira de autenticação → PEER-17, PEER-18. Limite de taxa → N/A porque o broker só
 escuta em `127.0.0.1` para até seis sessões. Concorrência → N/A porque os handlers são
-síncronos num processo único sobre SQLite. Ciclo de vida do dado → PEER-11, PEER-13
-(a linha do peer sai; o evento fica). Observabilidade → PEER-02, PEER-11, PEER-13.
+síncronos num processo único sobre SQLite. Ciclo de vida do dado → PEER-11, PEER-13,
+PEER-42 (a linha do peer sai; o evento fica). Observabilidade → PEER-02, PEER-11, PEER-13.
 Falha de dependência externa → PEER-34 (broker fora do ar). Integridade de transição →
 PEER-05 a PEER-08.
 
@@ -109,9 +114,11 @@ PEER-05 a PEER-08.
 1. **PEER-11** WHEN `POST /unregister` recebe o `id` de um peer registrado THEN o broker SHALL apagar a linha do peer, gravar `peer_left` com `from_name` `broker` e `data` `{ "peer": <name>, "reason": "unregistered" }`, e responder `{ ok: true }`.
 2. **PEER-12** IF `POST /unregister` recebe um `id` desconhecido, ausente ou que não é texto THEN o broker SHALL responder `{ ok: true }` sem gravar evento.
 3. **PEER-13** WHEN a limpeza roda e o PID de um peer não existe mais THEN o broker SHALL apagar a linha do peer e gravar `peer_left` com `data` `{ "peer": <name>, "reason": "died" }`.
-4. **PEER-14** WHILE o PID de um peer existe the broker SHALL manter a linha do peer na limpeza sem gravar evento.
-5. **PEER-15** The broker SHALL dar a cada evento um `seq` inteiro maior que o de todo evento anterior e um `ts` em epoch ms.
-6. **PEER-38** The broker SHALL rodar a limpeza ao subir e a cada 30 s.
+4. **PEER-14** WHILE o PID de um peer existe e seu `last_seen` tem 60 s ou menos the broker SHALL manter a linha do peer na limpeza sem gravar evento.
+5. **PEER-42** WHEN a limpeza roda e o `last_seen` de um peer tem mais de 60 s THEN o broker SHALL apagar a linha do peer e gravar `peer_left` com `data` `{ "peer": <name>, "reason": "died" }`, mesmo que o PID exista.
+6. **PEER-43** WHEN o broker sobe, ou a limpeza roda mais de 60 s depois da limpeza anterior, THEN o broker SHALL contar os 60 s de PEER-42 a partir desse instante para todo peer cujo `last_seen` é anterior a ele.
+7. **PEER-15** The broker SHALL dar a cada evento um `seq` inteiro maior que o de todo evento anterior e um `ts` em epoch ms.
+8. **PEER-38** The broker SHALL rodar a limpeza ao subir e a cada 30 s.
 
 **Independent Test**: registrar, chamar `/unregister` e ler o último evento.
 
@@ -125,7 +132,7 @@ PEER-05 a PEER-08.
 
 **Acceptance Criteria**:
 
-1. **PEER-16** WHEN `POST /list-peers` recebe o `id` de um peer registrado THEN o broker SHALL responder uma lista com os outros cinco nomes do squad, cada item `{ name, role, online }`, com `online` verdadeiro só para nome registrado com PID vivo.
+1. **PEER-16** WHEN `POST /list-peers` recebe o `id` de um peer registrado THEN o broker SHALL responder uma lista com os outros cinco nomes do squad, cada item `{ name, role, online }`, com `online` verdadeiro só para nome registrado que a limpeza mantém (PEER-14).
 2. **PEER-17** The broker SHALL responder `/list-peers` sem nenhum campo além de `name`, `role` e `online` em cada item.
 3. **PEER-18** IF `POST /list-peers` recebe um `id` desconhecido, ausente ou que não é texto THEN o broker SHALL responder `{ ok: false, error: "unknown_peer", hint }`.
 
@@ -141,7 +148,7 @@ PEER-05 a PEER-08.
 
 **Acceptance Criteria**:
 
-1. **PEER-19** WHERE `SQUAD_DB` não está definida the broker SHALL abrir o banco em `<diretório home do usuário>/.squad-code-mcp.db`, obtido do sistema e não da variável `HOME`.
+1. **PEER-19** WHERE `SQUAD_DB` não está definida the broker SHALL abrir o banco em `<diretório home do usuário>/.squad-code-mcp.db`, obtido de `os.homedir()`, que não depende da variável `HOME` no Windows.
 2. **PEER-20** WHERE `SQUAD_PORT` não está definida the broker SHALL escutar na porta 7900, e em qualquer porta SHALL responder só em `127.0.0.1`, não nos outros endereços da máquina.
 3. **PEER-21** WHEN `POST /heartbeat` recebe o `id` de um peer registrado THEN o broker SHALL atualizar `last_seen` para o epoch ms atual, manter `registered_at` e responder `{ ok: true }`; com `id` desconhecido, ausente ou que não é texto SHALL responder `{ ok: true }` sem alterar nenhum peer, como no upstream.
 4. **PEER-22** WHEN `GET /health` é chamado THEN o broker SHALL responder `{ status: "ok", peers: <número de peers registrados> }`.
@@ -149,6 +156,8 @@ PEER-05 a PEER-08.
 6. **PEER-34** WHEN o servidor MCP sobe com papel e o broker não responde THEN o servidor SHALL iniciar o broker como processo destacado, com o mesmo executável que o roda, e o broker SHALL continuar respondendo `/health` depois de o servidor sair.
 7. **PEER-35** WHEN `cli.ts kill-broker` roda com o broker no ar THEN o processo do broker SHALL terminar e `/health` SHALL deixar de responder, sem depender de `lsof` no Windows.
 8. **PEER-36** WHEN `cli.ts status` roda com o broker no ar THEN o CLI SHALL imprimir `Broker: ok (<n> peer(s) registered)`.
+9. **PEER-44** IF `cli.ts kill-broker` roda com `/health` respondendo e o CLI não consegue achar ou sinalizar o processo do broker THEN o CLI SHALL imprimir `Could not stop the broker: <motivo>. It is still running.`, não imprimir `Broker is not running.` e sair com código 1.
+10. **PEER-45** WHEN `cli.ts kill-broker` roda THEN o CLI SHALL sinalizar só o processo que escuta a porta em `127.0.0.1`, não o que escuta a mesma porta em outro endereço.
 
 **Independent Test**: subir o broker numa porta de teste, `status`, `kill-broker`, `status` de novo.
 
@@ -198,6 +207,8 @@ PEER-05 a PEER-08.
 - IF uma recusa acontece e nenhum peer registrado morreu THEN o broker SHALL deixar a contagem de linhas de `peers` e de `events` inalterada (PEER-03 a PEER-07, PEER-10).
 - WHEN o caminho do repositório tem espaço THEN o servidor MCP SHALL iniciar o broker assim mesmo (PEER-34).
 - WHEN um registro é recusado por `role_taken`, `worker_limit` ou `name_taken` e a limpeza feita antes achou um peer morto THEN o broker SHALL manter gravado o `peer_left` desse peer.
+- WHEN o PID de uma linha velha passou a ser de outro processo THEN o broker SHALL aceitar o registro do papel dessa linha depois de 60 s sem heartbeat (PEER-42, PEER-05).
+- WHEN um peer vivo manda heartbeat depois de o broker voltar de uma queda mais longa que 60 s THEN o broker SHALL manter a linha do peer (PEER-43).
 - IF a gravação do evento falha THEN o broker SHALL não gravar o peer (PEER-02).
 - IF um registro é recusado por `missing_field`, `invalid_role` ou `invalid_name` e existe um peer morto ainda não limpo THEN o broker SHALL não gravar o `peer_left` desse peer nessa chamada.
 
@@ -248,8 +259,12 @@ PEER-05 a PEER-08.
 | PEER-39 | P1: Registro com nome e papel | Execute | Implementing |
 | PEER-40 | P1: Registro que prova o canal | Execute | Implementing |
 | PEER-41 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-42 | P1: Presença na saída | Tasks | In Tasks |
+| PEER-43 | P1: Presença na saída | Tasks | In Tasks |
+| PEER-44 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
+| PEER-45 | P1: Broker próprio e rodando no Windows | Tasks | In Tasks |
 
-**Coverage:** 41 total, 41 mapped to tasks, 0 unmapped.
+**Coverage:** 45 total, 45 mapped to tasks, 0 unmapped.
 
 ---
 

@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.design/squad-mvp.md`, fatia Peer (sem `design.md` próprio)
-**Status**: In Progress (falta a verificação independente de T11)
+**Status**: In Progress (T15 a T20: correções da revisão do PR 2)
 
 Todo o código fica em `broker/`; os comandos rodam de dentro dele. Mensagens de commit
 seguem a convenção do repositório (frase imperativa em minúsculas, sem prefixo), não
@@ -54,6 +54,12 @@ T1 → T2 → T3 → T4
 
 ```
 T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13 → T14
+```
+
+### Phase 3: Revisão do PR 2
+
+```
+T14 → T15 → T16 → T17 → T18 → T19 → T20
 ```
 
 ---
@@ -310,6 +316,112 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13 → T14
 
 ---
 
+### T15: Peer vivo por PID e heartbeat (F1)
+
+**What**: A limpeza também tira o peer cujo `last_seen` tem mais de 60 s, contados do maior entre `last_seen` e o instante em que o broker subiu ou voltou de uma pausa. Uma linha velha cujo PID passou a ser de outro processo deixa de prender a posição.
+**Where**: `broker/peers.ts`, `broker/test/unit/presence.test.ts`, `broker/README.md`
+**Depends on**: T14
+**Requirement**: PEER-14, PEER-42, PEER-43
+
+**Done when**:
+
+- [ ] Peer com PID vivo e sem heartbeat sai com `peer_left` `died` na limpeza depois de 60 s, e fica aos 60 s exatos
+- [ ] O papel de uma linha velha com PID vivo volta a aceitar registro depois de 60 s
+- [ ] Peer com `last_seen` velho fica quando o broker acabou de subir sobre o mesmo banco, e quando a limpeza anterior foi há mais de 60 s
+- [ ] Gate: `bun test test/unit` - 62 testes
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T16: `kill-broker` diz quando não parou o broker (F2)
+
+**What**: Só a consulta a `/health` decide `Broker is not running.`. Falha ao achar ou sinalizar o processo imprime `Could not stop the broker: <motivo>. It is still running.` e sai com código 1.
+**Where**: `broker/cli.ts`, `broker/test/integration/cli.test.ts`
+**Depends on**: T15
+**Requirement**: PEER-44
+
+**Done when**:
+
+- [ ] Com o comando de busca fora do `PATH`, `kill-broker` sai com código 1, imprime a mensagem de PEER-44, não imprime `Broker is not running.` e `/health` continua respondendo
+- [ ] Gate: `bun test`
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T17: Teste do filtro de endereço do `kill-broker` (F3)
+
+**What**: Um processo de isca escuta a porta do broker em `127.0.0.2`; `kill-broker` derruba o broker e a isca continua no ar.
+**Where**: `broker/test/integration/cli.test.ts`
+**Depends on**: T16
+**Requirement**: PEER-45
+
+**Done when**:
+
+- [ ] O teste falha com o filtro `@127.0.0.1` de `broker/cli.ts` revertido para `tcp:<porta>`
+- [ ] Gate: `bun test`
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T18: Testes de PEER-19 dizem o que conferem (F4)
+
+**What**: Sai o teste de unidade "does not come from HOME", que não tinha como falhar. O teste de integração passa a se chamar pelo que confere: o banco fica no diretório home que o sistema informa.
+**Where**: `broker/test/unit/config.test.ts`, `broker/test/integration/broker.test.ts`
+**Depends on**: T17
+**Requirement**: PEER-19
+
+**Done when**:
+
+- [ ] PEER-19 continua com um teste de unidade do default e um de integração com o home trocado
+- [ ] Gate: `bun test`
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T19: SDK do MCP em 1.32 (F6)
+
+**What**: `@modelcontextprotocol/sdk` sai de 1.27.1, dentro da faixa de quatro advisories corrigidos em 1.31.0 e 1.32.0.
+**Where**: `broker/package.json`, `broker/bun.lock`
+**Depends on**: T18
+**Requirement**: PEER-27, PEER-28, PEER-30
+
+**Done when**:
+
+- [ ] O lockfile resolve o SDK em 1.32.0 ou mais novo
+- [ ] Os testes do ping pelo canal e do `ready` passam sem mudança
+- [ ] Gate: `bun x tsc --noEmit && bun test`
+
+**Tests**: integration
+**Gate**: build
+
+---
+
+### T20: README e CLAUDE.md do broker (F5, F7)
+
+**What**: O README deixa de afirmar macOS, onde nada rodou. O `broker/CLAUDE.md` perde o texto do `bun init` sobre Redis, Postgres, React e HTML imports.
+**Where**: `broker/README.md`, `broker/CLAUDE.md`
+**Depends on**: T19
+**Requirement**: PEER-35
+
+**Done when**:
+
+- [ ] O README lista Windows e Linux e diz que macOS não foi testado
+- [ ] `broker/CLAUDE.md` termina na seção do Bun, sem as seções APIs, Testing e Frontend
+- [ ] Gate: `bun x tsc --noEmit && bun test`
+
+**Tests**: none
+**Gate**: build
+
+---
+
 ## Diagram-Definition Cross-Check
 
 | Task | Depends On (task body) | Diagram Shows | Status |
@@ -328,6 +440,12 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13 → T14
 | T12 | T11 | T11 → T12 | ✅ |
 | T13 | T12 | T12 → T13 | ✅ |
 | T14 | T13 | T13 → T14 | ✅ |
+| T15 | T14 | T14 → T15 | ✅ |
+| T16 | T15 | T15 → T16 | ✅ |
+| T17 | T16 | T16 → T17 | ✅ |
+| T18 | T17 | T17 → T18 | ✅ |
+| T19 | T18 | T18 → T19 | ✅ |
+| T20 | T19 | T19 → T20 | ✅ |
 
 ## Test Co-location Validation
 
@@ -347,3 +465,9 @@ T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13 → T14
 | T12 | CLI | integration | integration | ✅ |
 | T13 | Servidor MCP, rotas HTTP, regras | integration | integration | ✅ |
 | T14 | CLI, servidor MCP, regras | integration | integration | ✅ |
+| T15 | Regras do broker | unit | unit | ✅ |
+| T16 | CLI | integration | integration | ✅ |
+| T17 | CLI | integration | integration | ✅ |
+| T18 | Configuração, rotas HTTP | unit, integration | integration | ✅ |
+| T19 | Servidor MCP (dependência) | integration | integration | ✅ |
+| T20 | Documentação | none | none | ✅ |
