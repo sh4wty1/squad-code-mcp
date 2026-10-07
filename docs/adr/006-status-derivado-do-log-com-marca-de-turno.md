@@ -1,7 +1,7 @@
 # ADR-006: Status derivado do log por uma função única, com marca de turno
 
 - **Date**: 2026-10-07
-- **Status**: Accepted (a marca de início de turno depende de um spike da Fase 0)
+- **Status**: Accepted (marca de início de turno confirmada pelo spike B da Fase 0, 2026-10-07)
 - **Deciders**: Lucas Fassi
 - **Tags**: contrato, TUI
 
@@ -40,11 +40,12 @@ Status novo `stalled`: o agente deve um evento (o `result`, o `verdict`, o `task
 
 ### Consequências negativas
 
-- Depende de dois hooks do Claude Code. Se nenhum disparar no início de um turno aberto por canal, `turn_started` passa a ser emitido pelo servidor MCP no push e `stalled` ganha uma tolerância em segundos, o que o torna impreciso.
+- Depende de dois hooks do Claude Code, `UserPromptSubmit` e `Stop`. O spike B viu os dois dispararem em turnos abertos por canal; não testou eventos que chegam com a sessão ocupada.
 - Mudar a regra de derivação é mudar o contrato.
 - `stalled` não está no design do handoff e precisa de desenho.
 
 ## Links
 
 - `.design/squad-mvp.md`, Key decision 5, slices TUI leitura e Fase 0
+- `docs/fase-0/spikes.md`, spike B
 - ADR-004, ADR-007

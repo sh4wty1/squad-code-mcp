@@ -1,7 +1,7 @@
 # ADR-011: Pedido de permissão respondido pela TUI, via relay do canal
 
 - **Date**: 2026-10-07
-- **Status**: Proposed (depende do spike de relay da Fase 0)
+- **Status**: Accepted (relay confirmado pelo spike A da Fase 0, 2026-10-07)
 - **Deciders**: Lucas Fassi
 - **Tags**: contrato, permissões, canais
 
@@ -36,12 +36,14 @@ Opção escolhida: **relay pelo canal**.
 
 ### Consequências negativas
 
-- Exige Claude Code v2.1.234 ou mais novo e canal carregado; não foi testado com canal de desenvolvimento.
+- Exige Claude Code v2.1.234 ou mais novo e canal carregado. Testado com canal de desenvolvimento na v2.1.292, só com a tool Bash; a resposta no terminal antes do veredito não foi testada.
+- `description` é o resumo escrito pelo modelo e não traz o comando; o modal precisa mostrar `input_preview`.
 - Um agente com shell pode aprovar o próprio pedido lendo a credencial humana: mesmo limite cooperativo do ADR-008.
 - Diálogos de confiança do projeto e de consentimento de servidor MCP não passam pelo relay.
 
 ## Links
 
 - `.design/squad-mvp.md`, slices Fase 0, Event e Papéis
+- `docs/fase-0/spikes.md`, spike A
 - https://code.claude.com/docs/en/channels-reference#relay-permission-prompts
 - ADR-004, ADR-008
