@@ -105,9 +105,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Cada AC de PEER-01 a PEER-10 tem um teste que confere o valor da spec
-- [ ] Toda recusa deixa `peers` e `events` com a mesma contagem e traz `hint` não vazio
-- [ ] Gate: `bun test test/unit` - 25 testes
+- [x] Cada AC de PEER-01 a PEER-10 tem um teste que confere o valor da spec
+- [x] Toda recusa deixa `peers` e `events` com a mesma contagem e traz `hint` não vazio
+- [x] Gate: `bun test test/unit` - 26 testes
 
 **Tests**: unit
 **Gate**: quick
@@ -125,7 +125,7 @@ T4 → T5 → T6 → T7 → T8
 
 - [ ] Cada AC citado tem um teste que confere o valor da spec
 - [ ] A listagem não tem chave além de `name`, `role`, `online`
-- [ ] Gate: `bun x tsc --noEmit && bun test` - 36 testes
+- [ ] Gate: `bun x tsc --noEmit && bun test` - 39 testes
 
 **Tests**: unit
 **Gate**: build

@@ -48,7 +48,7 @@ presença gravada como evento. O upstream também não roda inteiro no Windows.
 | Formato do `id` | `crypto.randomUUID()` | O `id` virou credencial secreta (ADR-003); 8 caracteres de `Math.random` não servem para isso | n |
 | Tabela `events` nesta fatia | Criada com todas as colunas da fatia Event; índices e `deliveries` ficam para a Event | Presença já é evento; criar a tabela inteira evita migrar o log na fatia seguinte | n |
 | Registro repetido pelo mesmo PID | O registro anterior daquele PID sai com `peer_left` `died` antes do novo | Comportamento do upstream; cobre PID reutilizado pelo sistema antes da limpeza | n |
-| `/list-peers` e `/register` rodam a limpeza de PIDs mortos antes de responder | Sim | O upstream já limpa na listagem; sem isso "nome de um peer que morreu" dependeria dos 30 s | n |
+| `/list-peers` e `/register` rodam a limpeza de PIDs mortos antes de responder | Sim. Em `/register` ela roda depois de `missing_field`, `invalid_role` e `invalid_name`; o `peer_left` de um morto achado ali fica gravado mesmo se o registro for recusado em seguida | O upstream já limpa na listagem; sem isso "nome de um peer que morreu" dependeria dos 30 s. A saída do morto é um fato à parte da recusa | n |
 | Parar o broker no Windows | `netstat -ano` para achar o PID que escuta a porta; `lsof` nos demais sistemas | Não muda `/health`, que o design lista em Unchanged | n |
 | Sobrevivência do daemon ao fechamento do terminal | Broker lançado destacado; o teste cobre a saída do processo pai, não o fechamento de uma janela real | ADR-001 marca como não verificado; fechar uma janela de terminal não é automatizável aqui | n |
 | Testes | `bun test`, unidade com SQLite em memória e integração com processos reais | O upstream não tem testes nem diretriz; vale o default forte da skill | n |
@@ -188,7 +188,7 @@ PEER-05 a PEER-08.
 
 - IF o papel é válido e o nome é de outro papel (`name: "mother"`, `role: "worker"`) THEN o broker SHALL responder `invalid_name` (PEER-04).
 - WHEN três workers estão registrados e um deles morreu THEN o broker SHALL aceitar um novo worker com o nome do morto (PEER-06, PEER-08).
-- IF uma recusa acontece THEN o broker SHALL deixar a contagem de linhas de `peers` e de `events` inalterada (PEER-03 a PEER-07, PEER-10).
+- IF uma recusa acontece e nenhum peer registrado morreu THEN o broker SHALL deixar a contagem de linhas de `peers` e de `events` inalterada (PEER-03 a PEER-07, PEER-10).
 - WHEN o caminho do repositório tem espaço THEN o servidor MCP SHALL iniciar o broker assim mesmo (PEER-34).
 
 ---
@@ -197,16 +197,16 @@ PEER-05 a PEER-08.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| PEER-01 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-02 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-03 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-04 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-05 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-06 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-07 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-08 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-09 | P1: Registro com nome e papel | Tasks | In Tasks |
-| PEER-10 | P1: Registro com nome e papel | Tasks | In Tasks |
+| PEER-01 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-02 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-03 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-04 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-05 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-06 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-07 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-08 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-09 | P1: Registro com nome e papel | Execute | Implementing |
+| PEER-10 | P1: Registro com nome e papel | Execute | Implementing |
 | PEER-11 | P1: Presença na saída | Tasks | In Tasks |
 | PEER-12 | P1: Presença na saída | Tasks | In Tasks |
 | PEER-13 | P1: Presença na saída | Tasks | In Tasks |
