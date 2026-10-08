@@ -414,9 +414,9 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Nenhuma chamada do helper antigo no arquivo
-- [ ] Mesma contagem de testes do arquivo; nenhuma comparação enfraquecida (6 testes afetados)
-- [ ] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test` (fim de fase)
+- [x] Nenhuma chamada do helper antigo no arquivo
+- [x] Mesma contagem de testes do arquivo; nenhuma comparação enfraquecida (6 testes afetados)
+- [x] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test` (fim de fase)
 
 **Tests**: unit
 **Gate**: build
