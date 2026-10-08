@@ -62,16 +62,16 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-08. A fatia Event está fechada; a próxima é a Feature.
+Escrito em 2026-10-08. A fatia Event está fechada e mesclada; a Feature está especificada.
 
-- **Feature**: fatia Event, `.specs/features/event/`, fechada
-- **Phase / Task**: Execute concluído. T1 a T25 feitas. Fechada sem PASS da verificação independente, por decisão do Lucas, como a Peer; não houve quarta rodada.
-- **Completed**: T1 a T25, mais os três commits de teste que respondem às rodadas 1, 2 e 3
+- **Feature**: fatia Feature, `.specs/features/feature/`
+- **Phase / Task**: Specify concluído e confirmado pelo Lucas em 2026-10-08. `validate_spec.py feature` sai com 0.
+- **Completed**: spec com FEAT-01 a FEAT-33
 - **In-progress** (file:line): nada
-- **Next step**: mesclar o PR 3 (Event). Depois, a fatia Feature em branch novo, saído da `main`.
+- **Next step**: Design da fatia Feature.
 - **Blockers**: nenhum
 - **Uncommitted files**: none
-- **Branch**: `feat/event`, saído de `feat/peer`. O PR 2 (Peer) foi mesclado; a `main` entrou em `feat/event` por merge (`7e43b18`), sem rebase, para os hashes citados na spec continuarem valendo. O branch está no `origin` e o PR 3 está aberto.
+- **Branch**: `feat/feature`, saído da `main` em `61e1411` (merge do PR 3). Ainda não está no `origin`.
 
 ### Como a verificação ficou
 
