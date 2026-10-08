@@ -2,12 +2,16 @@ import { expect } from "bun:test";
 import { openDatabase } from "../../db.ts";
 import { createLog, type FeatureRow } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
+import { createPermission } from "../../permission.ts";
 import { createPlan } from "../../plan.ts";
 import { createSend, type Caller } from "../../send.ts";
 import { createSession } from "../../session.ts";
 import type { PlannedTicket } from "../../shared/contract.ts";
 
 export const NOW = 1791331200000;
+
+// The human credential of the broker under test. No file is read or written for it.
+export const HUMAN_TOKEN = "0123456789abcdef0123456789abcdef";
 
 // What `find` answers for the id of each position of the squad
 export const MOTHER: Caller = { name: "mother", role: "mother" };
@@ -27,6 +31,7 @@ export function setup() {
   const { send } = createSend(log);
   const { plan } = createPlan(log);
   const session = createSession(log);
+  const permission = createPermission(log, HUMAN_TOKEN);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
@@ -144,6 +149,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, plan, session, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
+    db, peers, log, send, plan, session, permission, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
   };
 }

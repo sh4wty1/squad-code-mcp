@@ -367,12 +367,12 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Um teste por AC de EVT-60 a EVT-66, com evento, entrega e código de erro da spec
-- [ ] `loadHumanToken` cria o arquivo com 32 caracteres ou mais quando não existe e devolve o mesmo valor numa segunda chamada
-- [ ] `invalid_token` vem antes de qualquer outra recusa e não grava evento nem `refused`
-- [ ] Edge cases: `turn_started` do peer depois do pedido fecha; `refused` para o peer não fecha; `peer_left` do peer fecha; segunda decisão recebe `permission_closed`
-- [ ] `summary` de pedido e de decisão cortados em 80 caracteres
-- [ ] Gate: `bun test test/unit`
+- [x] Um teste por AC de EVT-60 a EVT-66, com evento, entrega e código de erro da spec
+- [x] `loadHumanToken` cria o arquivo com 32 caracteres ou mais quando não existe e devolve o mesmo valor numa segunda chamada
+- [x] `invalid_token` vem antes de qualquer outra recusa e não grava evento nem `refused`
+- [x] Edge cases: `turn_started` do peer depois do pedido fecha; `refused` para o peer não fecha; `peer_left` do peer fecha; segunda decisão recebe `permission_closed`
+- [x] `summary` de pedido e de decisão cortados em 80 caracteres
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
