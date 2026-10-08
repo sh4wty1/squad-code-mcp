@@ -94,6 +94,8 @@ que sobrevive à queda da sessão, e da leitura do log por cursor, que é a font
 | Arquivo de credencial vazio ou só com espaços | Vale como inexistente e é recriado; o conteúdo é lido sem os espaços das pontas | Sem isso `human_token` vazio seria aceito | n |
 | `after` em `GET /events` | Só dígitos; vazio, `1e2`, `0x1`, `1.5` e `-1` recebem `invalid_field` | "Inteiro maior ou igual a zero" sem ambiguidade de notação | n |
 | Primeiro polling e falha no meio do ciclo | O primeiro ciclo roda um intervalo depois do registro. Falha de push, de ack, de veredito ou do próprio polling encerra o ciclo; o seguinte retoma | EVT-83 só fala do push | n |
+| Recusa do broker a `/poll-messages` ou `/ack` no laço de entrega | Vale como falha da chamada: em EVT-83 e EVT-84, um `/ack` respondido com `ok` falso é um `/ack` que falhou | Achado da verificação, rodada 2: sem isso um ack recusado contava como confirmado | n |
+| Sessão cujo registro foi recusado | Não faz polling nem outra chamada ao broker até um `ready` aceito | "Antes do registro" em EVT-81 inclui o registro recusado; achado da rodada 2 | n |
 | "Ignora" o pedido de permissão antes do registro | O servidor MCP não faz nenhuma chamada ao broker antes do registro, nem de polling nem de pedido de permissão | Achado da verificação, rodada 1: um pedido enviado com `id` nulo era recusado em silêncio e passava nos testes | n |
 | Pedido de permissão que o broker recusa | O servidor MCP registra no stderr e descarta; vale o diálogo do terminal | Não há a quem devolver a recusa; sem teste | n |
 | Texto devolvido pelas tools | `Recorded with seq N.` nas rotas que respondem `seq`; o JSON da resposta em `state` e `history`; `<tool> refused: <error>. <hint>` na recusa | EVT-90 a EVT-92 só pedem "em texto" | n |

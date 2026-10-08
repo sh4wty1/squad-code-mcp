@@ -32,6 +32,24 @@ async function mother(b: Broker): Promise<(summary: string, body?: string) => Pr
   return async (summary, body) => (await post(b.url, "/send", { id: json.id, kind: "task", to: "leader", summary, body })).json.seq;
 }
 
+const REFUSED = { ok: false, error: "unknown_peer", hint: "-" };
+
+// A stand-in broker: answers /health, so the server starts none, and records the path of every POST
+function standIn(answer: (path: string) => unknown) {
+  const posts: string[] = [];
+  const server = Bun.serve({
+    port: 0,
+    hostname: "127.0.0.1",
+    fetch(req) {
+      const path = new URL(req.url).pathname;
+      if (req.method !== "POST") return Response.json({ status: "ok", peers: 0 });
+      posts.push(path);
+      return Response.json(answer(path));
+    },
+  });
+  return { port: server.port!, posts, stop: () => server.stop(true) };
+}
+
 const pending = (b: Broker) => readDeliveries(b.dbFile).filter((d) => d.acked_at === null).map((d) => d.event_seq);
 
 test("EVT-81/82/83: what was sent to the session is pushed through the channel with its seq, once, and then confirmed", async () => {
@@ -199,31 +217,84 @@ test("EVT-86: a permission request that arrives before the registration is ignor
 });
 
 test("EVT-81/86: before ready the server sends the broker no request, with or without a permission request", async () => {
-  // A stand-in broker that answers /health, so the server starts none, and records every POST
-  const posts: string[] = [];
-  const fake = Bun.serve({
-    port: 0,
-    hostname: "127.0.0.1",
-    fetch(req) {
-      const path = new URL(req.url).pathname;
-      if (req.method === "POST") posts.push(path);
-      return Response.json(path === "/health" ? { status: "ok", peers: 0 } : { ok: false, error: "unknown_peer", hint: "-" });
-    },
-  });
+  const fake = standIn(() => REFUSED);
   try {
-    const judge = await startSession(fake.port!, {
-      SQUAD_NAME: "judge",
-      SQUAD_ROLE: "judge",
-      SQUAD_POLL_INTERVAL_MS: String(POLL_MS),
-    });
+    const judge = await startSession(fake.port, { SQUAD_NAME: "judge", SQUAD_ROLE: "judge", SQUAD_POLL_INTERVAL_MS: String(POLL_MS) });
     await judge.pingNumber();
     await judge.client.notification({ method: "notifications/claude/channel/permission_request", params: REQUEST });
     await Bun.sleep(POLL_MS * 8);
-    expect(posts).toEqual([]);
+    expect(fake.posts).toEqual([]);
   } finally {
     await closeSessions();
-    await fake.stop(true);
+    await fake.stop();
   }
+});
+
+test("EVT-81: a session whose registration was refused asks the broker for nothing else", async () => {
+  const fake = standIn(() => ({ ok: false, error: "role_taken", hint: "Close the other judge." }));
+  try {
+    const judge = await startSession(fake.port, { SQUAD_NAME: "judge", SQUAD_ROLE: "judge", SQUAD_POLL_INTERVAL_MS: String(POLL_MS) });
+    const answer = await judge.ready(await judge.pingNumber());
+    expect(answer.isError).toBe(true);
+    await Bun.sleep(POLL_MS * 8);
+    expect(fake.posts).toEqual(["/register"]);
+  } finally {
+    await closeSessions();
+    await fake.stop();
+  }
+});
+
+test("EVT-84: an ack the broker refuses is a failed ack: the cycle stops there and the seq is not pushed again", async () => {
+  const event = (seq: number) => ({
+    seq,
+    ts: 1,
+    kind: "task",
+    feature_id: 1,
+    from: "mother",
+    role_from: "mother",
+    to: "leader",
+    summary: `task ${seq}`,
+    body: "",
+    ticket_ref: null,
+  });
+  const fake = standIn((path) => {
+    if (path === "/register") return { id: "the-id" };
+    if (path === "/poll-messages") return { events: [event(3), event(4)] };
+    return REFUSED;
+  });
+  try {
+    const leader = await startSession(fake.port, { SQUAD_NAME: "leader", SQUAD_ROLE: "leader", SQUAD_POLL_INTERVAL_MS: String(POLL_MS) });
+    await leader.register();
+    await waitFor(() => fake.posts.filter((p) => p === "/ack").length >= 3, "three refused acks");
+    expect(leader.pushed().map((p) => p.params.meta.seq)).toEqual(["3"]);
+  } finally {
+    await closeSessions();
+    await fake.stop();
+  }
+});
+
+test("EVT-86: a notification that is not a permission request is not relayed to the broker", async () => {
+  broker = await startBroker();
+  const b = broker;
+  const worker = await session(b, "worker-1");
+  await worker.register();
+  await worker.client.notification({ method: "notifications/claude/channel/other", params: REQUEST });
+  await Bun.sleep(300);
+  expect(readDb(b.dbFile).events.map((e) => e.kind)).toEqual(["peer_joined"]);
+});
+
+test("EVT-81: what was already pending at the registration waits for the first interval", async () => {
+  broker = await startBroker();
+  const b = broker;
+  openFeature(b.dbFile);
+  const send = await mother(b);
+  await send("kick off");
+  const leader = await session(b, "leader", { SQUAD_POLL_INTERVAL_MS: "" });
+  await leader.register();
+
+  await Bun.sleep(500);
+  expect(leader.pushed()).toEqual([]);
+  await waitFor(() => leader.pushed().length === 1, "the push of the task", 2500);
 });
 
 test("EVT-81: when its stdin closes the server stops polling and exits", async () => {
