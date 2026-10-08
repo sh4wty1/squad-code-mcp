@@ -128,6 +128,14 @@ export function openFeature(file: string): number {
   }
 }
 
+// Opens a feature by the route, as the mother of the id: the feature_opened takes a seq and
+// waits for each of the other five. Returns the id of the feature.
+export async function openByRoute(url: string, motherId: string): Promise<number> {
+  const { json } = await post(url, "/open-feature", { id: motherId, ...FEATURE });
+  if (!json.ok) throw new Error(`the feature was not opened: ${json.error}`);
+  return json.feature_id;
+}
+
 // A real broker process on a free port, over a database in a temp directory.
 // The human credential goes to the same directory, never to the home of whoever runs the tests.
 export async function startBroker(extraEnv: Record<string, string> = {}, dir = tempDir()) {
