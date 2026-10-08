@@ -4,6 +4,7 @@ import { createLog, type FeatureRow } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
 import { createPlan } from "../../plan.ts";
 import { createSend, type Caller } from "../../send.ts";
+import { createSession } from "../../session.ts";
 import type { PlannedTicket } from "../../shared/contract.ts";
 
 export const NOW = 1791331200000;
@@ -25,6 +26,7 @@ export function setup() {
   const log = createLog(db, () => clock.now);
   const { send } = createSend(log);
   const { plan } = createPlan(log);
+  const session = createSession(log);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
@@ -142,6 +144,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, plan, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
+    db, peers, log, send, plan, session, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
   };
 }

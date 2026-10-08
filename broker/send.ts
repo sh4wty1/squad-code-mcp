@@ -48,7 +48,7 @@ function isListOf(value: unknown, isItem: (item: unknown) => boolean): boolean {
 
 const isString = (value: unknown) => typeof value === "string";
 
-function isText(value: unknown): value is string {
+export function isText(value: unknown): value is string {
   return typeof value === "string" && value !== "";
 }
 

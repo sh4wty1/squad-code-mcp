@@ -346,11 +346,11 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Um teste por AC, com o evento conferido campo a campo
-- [ ] Sem feature aberta os quatro eventos têm `feature_id` nulo; com feature, o id dela
-- [ ] `/unblocked` de peer não bloqueado grava o evento; `/usage` repetido grava de novo
-- [ ] Cada recusa grava `refused` com `attempted_kind` `blocked` ou `usage`
-- [ ] Gate: `bun test test/unit`
+- [x] Um teste por AC, com o evento conferido campo a campo
+- [x] Sem feature aberta os quatro eventos têm `feature_id` nulo; com feature, o id dela
+- [x] `/unblocked` de peer não bloqueado grava o evento; `/usage` repetido grava de novo
+- [x] Cada recusa grava `refused` com `attempted_kind` `blocked` ou `usage`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
