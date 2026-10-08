@@ -202,10 +202,10 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] `find` do id de uma sessão registrada devolve o `cwd` e o `git_root` que ela mandou no `/register`
-- [ ] `git_root` nulo no registro volta nulo
-- [ ] Id desconhecido continua devolvendo nulo
-- [ ] Gate: `bun test test/unit`
+- [x] `find` do id de uma sessão registrada devolve o `cwd` e o `git_root` que ela mandou no `/register`
+- [x] `git_root` nulo no registro volta nulo
+- [x] Id desconhecido continua devolvendo nulo
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

@@ -49,6 +49,14 @@ export interface ListedPeer {
   online: boolean;
 }
 
+// Who a credential belongs to, and where its session runs
+export interface FoundPeer {
+  name: string;
+  role: Role;
+  cwd: string;
+  git_root: string | null;
+}
+
 interface PeerRow {
   id: string;
   name: string;
@@ -197,9 +205,9 @@ export function createPeers(
   });
 
   // Who holds this credential. What comes in a request body may be anything.
-  function find(id: unknown): { name: string; role: Role } | null {
+  function find(id: unknown): FoundPeer | null {
     if (typeof id !== "string") return null;
-    return db.query("SELECT name, role FROM peers WHERE id = ?").get(id) as { name: string; role: Role } | null;
+    return db.query("SELECT name, role, cwd, git_root FROM peers WHERE id = ?").get(id) as FoundPeer | null;
   }
 
   function heartbeat(id: string) {

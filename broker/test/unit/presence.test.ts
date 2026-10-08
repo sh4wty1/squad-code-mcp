@@ -405,16 +405,22 @@ test("EVT-45: a new session of the name gets what was pending for the earlier on
 
   const second = b.join("leader", "leader", 200) as { id: string };
   expect(second.id).not.toBe(first.id);
-  expect(b.peers.find(second.id)).toEqual({ name: "leader", role: "leader" });
+  expect(b.peers.find(second.id)).toEqual({ name: "leader", role: "leader", cwd: "/repo", git_root: "/repo/.git" });
   expect(b.log.pending(b.peers.find(second.id)!.name).map((e) => e.seq)).toEqual([offline, whileAway]);
 });
 
-test("find answers the name and the role of the id, and nothing else", () => {
+test("FEAT-11: find answers the name, the role, the cwd and the git_root the session registered, and nothing else", () => {
   const b = setup();
   b.join("mother", "mother", 100);
-  const { id } = b.join("worker-2", "worker", 101) as { id: string };
-  expect(b.peers.find(id)).toEqual({ name: "worker-2", role: "worker" });
-  expect(Object.keys(b.peers.find(id)!).sort()).toEqual(["name", "role"]);
+  const { id } = b.join("worker-2", "worker", 101, { cwd: "C:\\work\\wt-2", git_root: "C:/work/repo/.git" }) as { id: string };
+  expect(b.peers.find(id)).toEqual({ name: "worker-2", role: "worker", cwd: "C:\\work\\wt-2", git_root: "C:/work/repo/.git" });
+  expect(Object.keys(b.peers.find(id)!).sort()).toEqual(["cwd", "git_root", "name", "role"]);
+});
+
+test("FEAT-11: find answers git_root null for a session registered outside a repository", () => {
+  const b = setup();
+  const { id } = b.join("mother", "mother", 100, { cwd: "/home/dev/proj", git_root: null }) as { id: string };
+  expect(b.peers.find(id)).toEqual({ name: "mother", role: "mother", cwd: "/home/dev/proj", git_root: null });
 });
 
 test("EVT-03: find answers null for an id that is unknown, absent, not a text or of a peer that left", () => {
