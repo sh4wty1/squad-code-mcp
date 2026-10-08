@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** fatia Feature. A Peer está no PR 2; a Event está em `feat/event`, ainda sem PR.
+**Agora:** fatia Feature. A Peer foi mesclada pelo PR 2; a Event está no PR 3.
 
 ## Decidir (concluído)
 

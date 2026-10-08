@@ -68,10 +68,10 @@ Escrito em 2026-10-08. A fatia Event está fechada; a próxima é a Feature.
 - **Phase / Task**: Execute concluído. T1 a T25 feitas. Fechada sem PASS da verificação independente, por decisão do Lucas, como a Peer; não houve quarta rodada.
 - **Completed**: T1 a T25, mais os três commits de teste que respondem às rodadas 1, 2 e 3
 - **In-progress** (file:line): nada
-- **Next step**: abrir o PR da Event, que ainda não foi pedido, depois de mesclar o PR 2 (Peer). Depois, a fatia Feature em branch novo.
+- **Next step**: mesclar o PR 3 (Event). Depois, a fatia Feature em branch novo, saído da `main`.
 - **Blockers**: nenhum
 - **Uncommitted files**: none
-- **Branch**: `feat/event`, saído de `feat/peer`. `origin/feat/event` existe e está em `4aec8d9`; os commits do fechamento são só locais. O PR 2 (Peer) continua aberto: mesclá-lo antes do PR da Event, senão o diff dela carrega a Peer.
+- **Branch**: `feat/event`, saído de `feat/peer`. O PR 2 (Peer) foi mesclado; a `main` entrou em `feat/event` por merge (`7e43b18`), sem rebase, para os hashes citados na spec continuarem valendo. O branch está no `origin` e o PR 3 está aberto.
 
 ### Como a verificação ficou
 
