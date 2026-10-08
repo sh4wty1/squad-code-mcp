@@ -344,7 +344,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-05 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
 | EVT-06 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
 | EVT-07 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
-| EVT-08 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
+| EVT-08 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-09 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
 | EVT-10 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
 | EVT-11 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
@@ -377,7 +377,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-38 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-39 | P1: Entrega até o transporte | Tasks | In Tasks |
 | EVT-40 | P1: Entrega até o transporte | Tasks | In Tasks |
-| EVT-41 | P1: Entrega até o transporte | Tasks | In Tasks |
+| EVT-41 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-42 | P1: Entrega até o transporte | Tasks | In Tasks |
 | EVT-43 | P1: Entrega até o transporte | Tasks | In Tasks |
 | EVT-44 | P1: Entrega até o transporte | Tasks | In Tasks |
@@ -403,7 +403,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-64 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
 | EVT-65 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
 | EVT-66 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
-| EVT-67 | P1: Leitura do log | Tasks | In Tasks |
+| EVT-67 | P1: Leitura do log | Execute | Implementing |
 | EVT-68 | P1: Leitura do log | Tasks | In Tasks |
 | EVT-69 | P1: Leitura do log | Tasks | In Tasks |
 | EVT-70 | P1: Leitura do log | Tasks | In Tasks |

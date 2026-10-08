@@ -9,7 +9,9 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/event/design.md`
-**Status**: Draft
+**Status**: In Progress
+
+Linha de base no Windows antes da T1, com Bun 1.4.2: 98 testes, 95 passam, 3 pulados, 0 falhas.
 
 Todo o código fica em `broker/`; os comandos rodam de dentro dele. Mensagens de commit
 seguem a convenção do repositório (frase imperativa em minúsculas, sem prefixo), não
@@ -78,9 +80,9 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] `toRead` de uma linha `task` devolve exatamente `seq`, `ts`, `kind`, `feature_id`, `from`, `role_from`, `to`, `summary`, `body`, `ticket_ref` e os campos de `data`, sem `from_name`, `to_name` nem `data`
-- [ ] `EDGES` tem os cinco trios da spec e nenhum outro
-- [ ] Gate: `bun test test/unit`
+- [x] `toRead` de uma linha `task` devolve exatamente `seq`, `ts`, `kind`, `feature_id`, `from`, `role_from`, `to`, `summary`, `body`, `ticket_ref` e os campos de `data`, sem `from_name`, `to_name` nem `data`
+- [x] `EDGES` tem os cinco trios da spec e nenhum outro
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
