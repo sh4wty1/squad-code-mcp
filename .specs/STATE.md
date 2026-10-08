@@ -62,24 +62,24 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-08. Para retomar: `git checkout feat/event`, depois `/tlc-spec-driven resume work`.
+Escrito em 2026-10-08. A fatia Event está fechada; a próxima é a Feature.
 
-- **Feature**: fatia Event, `.specs/features/event/`
-- **Phase / Task**: Execute. T1 a T24 feitas; verificação independente em FAIL depois de três rodadas, que é o limite. Falta a decisão do Lucas sobre como fechar.
-- **Completed**: T1 a T24, mais três commits de teste que respondem às rodadas 1, 2 e 3
+- **Feature**: fatia Event, `.specs/features/event/`, fechada
+- **Phase / Task**: Execute concluído. T1 a T25 feitas. Fechada sem PASS da verificação independente, por decisão do Lucas, como a Peer; não houve quarta rodada.
+- **Completed**: T1 a T25, mais os três commits de teste que respondem às rodadas 1, 2 e 3
 - **In-progress** (file:line): nada
-- **Next step**: decidir (a) o que vale `ticket_ref` vazio em `/blocked` (`broker/session.ts:39`, lacuna 9 do relatório) e (b) se a fatia fecha como está ou ganha uma ferramenta de mutação. Depois: marcar a Event em `ROADMAP.md`, push e PR, que ainda não foram pedidos.
-- **Blockers**: decisão humana, acima
+- **Next step**: abrir o PR da Event, que ainda não foi pedido, depois de mesclar o PR 2 (Peer). Depois, a fatia Feature em branch novo.
+- **Blockers**: nenhum
 - **Uncommitted files**: none
-- **Branch**: `feat/event`, só local, saído de `feat/peer`. O PR 2 (Peer) continua aberto: mesclá-lo antes do PR da Event, senão o diff dela carrega a Peer.
+- **Branch**: `feat/event`, saído de `feat/peer`. `origin/feat/event` existe e está em `4aec8d9`; os commits do fechamento são só locais. O PR 2 (Peer) continua aberto: mesclá-lo antes do PR da Event, senão o diff dela carrega a Peer.
 
 ### Como a verificação ficou
 
-Relatório em `.specs/features/event/validation.md`, verificado em `53ffdf4`. Nas três rodadas nenhum comportamento do código contrariou a spec; todo FAIL veio de mutação que a suíte não matava.
+Relatório em `.specs/features/event/validation.md`, verificado em `53ffdf4`, FAIL. É o estado aceito. Nas três rodadas nenhum comportamento do código contrariou a spec; todo FAIL veio de mutação que a suíte não matava.
 
 - Rodada 1 (`8d1ac88`): 127 mutações, 2 sobreviventes reais. Fechadas em `bb7054a`.
 - Rodada 2 (`bb7054a`): 16 novas, 4 sobreviventes, todas em `server.ts`. Fechadas em `53ffdf4`.
-- Rodada 3 (`53ffdf4`): 20 novas, 3 sobreviventes. Duas ganharam teste no commit seguinte, sem nova rodada: ninguém reaplicou os mutantes R14 e R20 depois dele. A terceira (R16) espera a decisão (a).
+- Rodada 3 (`53ffdf4`): 20 novas, 3 sobreviventes. R14 e R20 ganharam teste em `4aec8d9`. R16 esperava uma decisão: o Lucas decidiu que `ticket_ref` vazio em `/blocked` recebe `missing_field`, como em `/send` (T25, `3c8ef86`, linha nova em Assumptions). Ninguém reaplicou os três mutantes.
 - Total: 158 de 163 mutações mortas, 2 equivalentes. O verificador diz que a amostragem dirigida acha um sobrevivente a cada seis, com gravidade caindo, e que mais rodadas à mão não convergem a zero.
 - `validate_state.py event` sai com 1 por causa do FAIL gravado. A rastreabilidade da spec ficou em `Implementing`.
 - Lições candidatas L-021 a L-036 em `.specs/lessons.json`; nenhuma confirmada.
@@ -95,7 +95,8 @@ Relatório em `.specs/features/event/validation.md`, verificado em `53ffdf4`. Na
 
 ### Ambiente
 
-- Bun 1.4.2 em `~/.bun/bin`, instalado nesta sessão; pode não estar no `PATH` de um terminal antigo. De dentro de `broker/`: `bun x tsc --noEmit && bun test`. No Windows: 423 testes, 420 passam, 3 pulados, uns 40 s.
+- Bun 1.4.2 em `~/.bun/bin`, instalado nesta sessão; pode não estar no `PATH` de um terminal antigo. De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. No Windows: 424 testes, 421 passam, 3 pulados, uns 40 s.
+- `bun x tsc` passou a baixar um `tsc` 7.0.2 em vez de usar o TypeScript 5.9.3 instalado, e ele acusa centenas de erros de tipo global (`Bun`, `Response`, `console`). Com o 5.9.3 o projeto compila limpo.
 - Os testes de integração sobem processos reais, sempre com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Nunca subir `broker.ts` ou `server.ts` à mão sem os dois: ele cria `~/.squad-code-mcp.db` e `~/.squad-code-mcp.token`.
 - No bun, `await expect(promessa).rejects...` trava o laço de eventos nos testes de integração.
 - Mensagens de commit seguem a convenção do repositório (frase imperativa em minúsculas), não Conventional Commits.

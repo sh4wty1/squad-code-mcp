@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/event/design.md`
-**Status**: Done (T1 a T24). Sem PASS da verificação independente: três rodadas, FAIL nas três por mutações sobreviventes, nenhuma por código contrário à spec; ver `validation.md` e o Handoff do `STATE.md`
+**Status**: Done (T1 a T25). Fechada sem PASS da verificação independente, por decisão do Lucas: três rodadas, FAIL nas três por mutações sobreviventes, nenhuma por código contrário à spec; ver "Fechamento" abaixo e `validation.md`
 
 Linha de base no Windows antes da T1, com Bun 1.4.2: 98 testes, 95 passam, 3 pulados, 0 falhas.
 
@@ -577,6 +577,16 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24 → T25
 
 **Tests**: unit
 **Gate**: build
+
+---
+
+## Fechamento
+
+A fatia fecha sem PASS da verificação independente, por decisão do Lucas em 2026-10-08, como a Peer. O relatório vigente é o da rodada 3 (`validation.md`, FAIL, verificado em `53ffdf4`); não houve quarta rodada.
+
+- Nas três rodadas nenhum comportamento contrariou a spec: todo FAIL veio de mutação que a suíte não matava. Total: 158 de 163 mortas, 2 equivalentes.
+- Os três sobreviventes da rodada 3 ganharam teste depois dela: R14 e R20 em `4aec8d9`, R16 na T25 (`3c8ef86`). Ninguém reaplicou os três mutantes.
+- `validate_state.py event` sai com 1 por causa do FAIL gravado, e a rastreabilidade da spec fica em `Implementing`. É o estado aceito.
 
 ---
 
