@@ -118,11 +118,11 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] `UPDATE events ...` e `DELETE FROM events ...` lançam erro e a linha fica igual
-- [ ] `features` e `deliveries` têm exatamente as colunas do design
-- [ ] `appendEvent` grava `feature_id`, `to_name`, `summary`, `body`, `ticket_ref` e `data` recebidos e devolve o `seq`
-- [ ] Os testes de presença da Peer continuam passando
-- [ ] Gate: `bun test test/unit`
+- [x] `UPDATE events ...` e `DELETE FROM events ...` lançam erro e a linha fica igual
+- [x] `features` e `deliveries` têm exatamente as colunas do design
+- [x] `appendEvent` grava `feature_id`, `to_name`, `summary`, `body`, `ticket_ref` e `data` recebidos e devolve o `seq`
+- [x] Os testes de presença da Peer continuam passando
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
