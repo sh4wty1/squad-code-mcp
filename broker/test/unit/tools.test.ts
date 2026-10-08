@@ -11,8 +11,34 @@ function tool(role: string, name: string) {
   return found;
 }
 
-test("EVT-89: the mother has the common tools and send_task, and no other", () => {
-  expect(names("mother")).toEqual([...COMMON, "send_task"]);
+test("EVT-89/FEAT-29: the mother has the common tools, send_task, open_feature and close_feature, and no other", () => {
+  expect(names("mother")).toEqual([...COMMON, "send_task", "open_feature", "close_feature"]);
+});
+
+test("FEAT-29: no other role has open_feature or close_feature", () => {
+  for (const role of ["leader", "worker", "judge"]) {
+    expect(names(role)).not.toContain("open_feature");
+    expect(names(role)).not.toContain("close_feature");
+  }
+});
+
+test("FEAT-29: open_feature requires the six fields of a feature, and workflow is tlc or matt-pocock", () => {
+  const schema = tool("mother", "open_feature").inputSchema as any;
+  const fields = ["title", "workflow", "branch", "base_branch", "spec_ref", "spec_commit"];
+  expect(schema.type).toBe("object");
+  expect(Object.keys(schema.properties)).toEqual(fields);
+  for (const field of fields) expect(schema.properties[field].type).toBe("string");
+  expect(schema.properties.workflow.enum).toEqual(["tlc", "matt-pocock"]);
+  expect(schema.required).toEqual(fields);
+});
+
+test("FEAT-29: close_feature requires only outcome, which is delivered or abandoned, and takes a body", () => {
+  const schema = tool("mother", "close_feature").inputSchema as any;
+  expect(schema.type).toBe("object");
+  expect(Object.keys(schema.properties)).toEqual(["outcome", "body"]);
+  expect(schema.properties.outcome).toMatchObject({ type: "string", enum: ["delivered", "abandoned"] });
+  expect(schema.properties.body.type).toBe("string");
+  expect(schema.required).toEqual(["outcome"]);
 });
 
 test("EVT-89: the leader has the common tools, plan, send_task and send_result, and no other", () => {
@@ -113,6 +139,8 @@ test("EVT-90/92: each tool but list_peers has its route, and each tool that send
     unblocked: { path: "/unblocked" },
     state: { path: "/state" },
     history: { path: "/history" },
+    open_feature: { path: "/open-feature" },
+    close_feature: { path: "/close-feature" },
   });
   const listed = new Set(["mother", "leader", "worker", "judge"].flatMap(names));
   expect([...listed].sort()).toEqual(["list_peers", ...Object.keys(ROUTE_OF)].sort());

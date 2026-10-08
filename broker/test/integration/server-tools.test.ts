@@ -36,10 +36,10 @@ function seqOf(answer: { isError: boolean; text: string }): number {
 }
 
 const COMMON = ["list_peers", "state", "history", "blocked", "unblocked"];
-const SENDING = ["send_task", "send_result", "send_verdict", "plan"];
+const SENDING = ["send_task", "send_result", "send_verdict", "plan", "open_feature", "close_feature"];
 
 for (const [name, own] of [
-  ["mother", ["send_task"]],
+  ["mother", ["send_task", "open_feature", "close_feature"]],
   ["leader", ["plan", "send_task", "send_result"]],
   ["worker-2", ["send_result"]],
   ["judge", ["send_verdict"]],

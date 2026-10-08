@@ -571,11 +571,11 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] `toolsFor("mother")` lista as duas além das de EVT-89; `leader`, `worker` e `judge` não listam nenhuma
-- [ ] `open_feature` tem `required` com os seis campos e `workflow` com `enum` `tlc`, `matt-pocock`
-- [ ] `close_feature` tem `required` só com `outcome`, com `enum` `delivered`, `abandoned`
-- [ ] `ROUTE_OF` leva `open_feature` a `/open-feature` e `close_feature` a `/close-feature`, sem `kind`
-- [ ] Gate: `bun test test/unit`
+- [x] `toolsFor("mother")` lista as duas além das de EVT-89; `leader`, `worker` e `judge` não listam nenhuma
+- [x] `open_feature` tem `required` com os seis campos e `workflow` com `enum` `tlc`, `matt-pocock`
+- [x] `close_feature` tem `required` só com `outcome`, com `enum` `delivered`, `abandoned`
+- [x] `ROUTE_OF` leva `open_feature` a `/open-feature` e `close_feature` a `/close-feature`, sem `kind`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
