@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { createPeers, pidAlive, STALE_AFTER_MS } from "../../peers.ts";
-import { NOW, setup } from "./helpers.ts";
+import { NOW, setup, toOthers } from "./helpers.ts";
 
 // pid 1 belongs to root, so the signal is refused with EPERM. Windows has no such pid.
 test.skipIf(process.platform === "win32")("PEER-14: a pid that exists under another user is alive", () => {
@@ -301,20 +301,20 @@ test("EVT-55: a blocked peer that unregisters is unblocked by the broker, with t
 
 test("EVT-55: a blocked peer removed by the cleanup is unblocked by the broker, in the open feature", () => {
   const b = setup();
-  const feature = b.openFeature();
+  const feature = b.openByRule();
   b.join("worker-2", "worker", 100);
   b.join("worker-3", "worker", 101);
   block(b, "worker-2");
   b.alive.delete(100);
   b.clock.now = NOW + 5000;
   b.peers.cleanStale();
-  expect(b.events().slice(3).map((e) => [e.kind, e.data])).toEqual([
+  expect(b.events().slice(4).map((e) => [e.kind, e.data])).toEqual([
     ["peer_left", { peer: "worker-2", reason: "died" }],
     ["unblocked", { peer: "worker-2" }],
   ]);
-  expect(b.events()[4]).toEqual({
+  expect(b.events()[5]).toEqual({
     ...BROKER_UNBLOCKED,
-    seq: 5,
+    seq: 6,
     ts: NOW + 5000,
     feature_id: feature,
     data: { peer: "worker-2" },
@@ -367,7 +367,7 @@ const TASK_TO_LEADER = { kind: "task", from: "mother", role_from: "mother", to: 
 
 test("EVT-46: the deliveries of a peer that unregisters stay as they were", () => {
   const b = setup();
-  b.openFeature();
+  b.openByRule();
   const { id } = b.join("leader", "leader", 100) as { id: string };
   const confirmed = b.log.record(TASK_TO_LEADER);
   b.log.ack("leader", [confirmed]);
@@ -378,6 +378,7 @@ test("EVT-46: the deliveries of a peer that unregisters stay as they were", () =
   expect(b.rows()).toEqual([]);
   expect(b.deliveries()).toEqual(before);
   expect(before).toEqual([
+    ...toOthers(1),
     { event_seq: confirmed, recipient: "leader", acked_at: NOW },
     { event_seq: waiting, recipient: "leader", acked_at: null },
   ]);
@@ -385,28 +386,28 @@ test("EVT-46: the deliveries of a peer that unregisters stay as they were", () =
 
 test("EVT-46: the deliveries of a peer removed by the cleanup stay as they were", () => {
   const b = setup();
-  b.openFeature();
+  b.openByRule();
   b.join("leader", "leader", 100);
   const waiting = b.log.record(TASK_TO_LEADER);
   b.alive.delete(100);
   b.peers.cleanStale();
   expect(b.rows()).toEqual([]);
-  expect(b.deliveries()).toEqual([{ event_seq: waiting, recipient: "leader", acked_at: null }]);
+  expect(b.deliveries()).toEqual([...toOthers(1), { event_seq: waiting, recipient: "leader", acked_at: null }]);
 });
 
 test("EVT-45: a new session of the name gets what was pending for the earlier one", () => {
   const b = setup();
-  b.openFeature();
+  b.openByRule();
   const first = b.join("leader", "leader", 100) as { id: string };
   const offline = b.log.record(TASK_TO_LEADER);
-  expect(b.log.pending("leader").map((e) => e.seq)).toEqual([offline]);
+  expect(b.log.pending("leader").map((e) => e.seq)).toEqual([1, offline]);
   b.peers.unregister(first.id);
   const whileAway = b.log.record(TASK_TO_LEADER);
 
   const second = b.join("leader", "leader", 200) as { id: string };
   expect(second.id).not.toBe(first.id);
   expect(b.peers.find(second.id)).toEqual({ name: "leader", role: "leader", cwd: "/repo", git_root: "/repo/.git" });
-  expect(b.log.pending(b.peers.find(second.id)!.name).map((e) => e.seq)).toEqual([offline, whileAway]);
+  expect(b.log.pending(b.peers.find(second.id)!.name).map((e) => e.seq)).toEqual([1, offline, whileAway]);
 });
 
 test("FEAT-11: find answers the name, the role, the cwd and the git_root the session registered, and nothing else", () => {
