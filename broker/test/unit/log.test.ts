@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { appendEvent } from "../../db.ts";
 import type { NewRecord } from "../../log.ts";
-import { NOW, setup } from "./helpers.ts";
+import { MOTHER, NOW, setup } from "./helpers.ts";
 
 const TASK: NewRecord = {
   kind: "task",
@@ -407,4 +407,97 @@ test("FEAT-07: an event of the mother to * gets a pending delivery for each of t
     { event_seq: seq, recipient: "worker-2", acked_at: null },
     { event_seq: seq, recipient: "worker-3", acked_at: null },
   ]);
+});
+
+const FIELDS = {
+  title: "the feature",
+  workflow: "matt-pocock",
+  branch: "feat/x",
+  base_branch: "main",
+  spec_ref: ".specs/features/x/spec.md",
+  spec_commit: "abc1234",
+};
+
+const OTHER_FIVE = ["judge", "leader", "worker-1", "worker-2", "worker-3"];
+
+function featureRows(b: ReturnType<typeof setup>) {
+  return b.db.query("SELECT * FROM features ORDER BY id").all() as Record<string, unknown>[];
+}
+
+test("FEAT-01: open stores the row with the six fields, the project and the seq of its event", () => {
+  const b = setup();
+  b.log.record({ kind: "turn_started", from: "mother", role_from: "mother" });
+  const opened = b.log.open(MOTHER, "repo", FIELDS);
+  expect(opened).toEqual({ feature_id: 1, seq: 2 });
+  expect(featureRows(b)).toEqual([
+    { id: 1, project: "repo", ...FIELDS, opened_seq: 2, closed_seq: null, outcome: null },
+  ]);
+});
+
+test("FEAT-01: open records a feature_opened of the mother to *, with the id of the row and only the six fields in data", () => {
+  const b = setup();
+  b.clock.now = NOW + 300;
+  const { feature_id, seq } = b.log.open(MOTHER, "repo", { ...FIELDS, project: "other", feature_id: 9 } as typeof FIELDS);
+  expect(b.events()).toEqual([
+    {
+      seq,
+      ts: NOW + 300,
+      kind: "feature_opened",
+      feature_id,
+      from_name: "mother",
+      role_from: "mother",
+      to_name: "*",
+      summary: "",
+      body: "",
+      ticket_ref: null,
+      question_id: null,
+      gate_id: null,
+      data: FIELDS,
+    },
+  ]);
+  expect(featureRows(b)[0]!.id).toBe(feature_id);
+});
+
+test("FEAT-07: open leaves a pending delivery of the feature_opened for each of the other five, and none for the mother", () => {
+  const b = setup();
+  const { seq } = b.log.open(MOTHER, "repo", FIELDS);
+  expect(b.deliveries()).toEqual(OTHER_FIVE.map((recipient) => ({ event_seq: seq, recipient, acked_at: null })));
+});
+
+test("FEAT-12: a feature gets an id greater than every feature_id of the log, even after a row is deleted", () => {
+  const b = setup();
+  const first = b.log.open(MOTHER, "repo", FIELDS);
+  b.db.run("UPDATE features SET closed_seq = ?, outcome = 'abandoned' WHERE id = ?", [first.seq, first.feature_id]);
+  const second = b.log.open(MOTHER, "repo", FIELDS);
+  b.db.run("UPDATE features SET closed_seq = ?, outcome = 'abandoned' WHERE id = ?", [second.seq, second.feature_id]);
+  b.db.run("DELETE FROM features");
+  const third = b.log.open(MOTHER, "repo", FIELDS);
+  expect([first.feature_id, second.feature_id, third.feature_id]).toEqual([1, 2, 3]);
+  expect(b.events().map((e) => e.feature_id)).toEqual([1, 2, 3]);
+  expect(featureRows(b).map((f) => [f.id, f.opened_seq])).toEqual([[3, third.seq]]);
+});
+
+for (const table of ["features", "deliveries"]) {
+  test(`FEAT-08: when the write in ${table} fails, open stores no event, row or delivery`, () => {
+    const b = setup();
+    const kept = b.log.record(TASK);
+    b.db.run(`CREATE TRIGGER fail BEFORE INSERT ON ${table} BEGIN SELECT RAISE(ABORT, 'no write'); END`);
+    expect(() => b.log.open(MOTHER, "repo", FIELDS)).toThrow("no write");
+    expect(b.events().map((e) => [e.seq, e.kind])).toEqual([[kept, "task"]]);
+    expect(featureRows(b)).toEqual([]);
+    expect(b.deliveries()).toEqual([{ event_seq: kept, recipient: "worker-1", acked_at: null }]);
+  });
+}
+
+test("FEAT-09: with a feature open, open is aborted by the index and nothing is stored", () => {
+  const b = setup();
+  b.log.open(MOTHER, "repo", FIELDS);
+  const events = b.events();
+  const rows = featureRows(b);
+  const deliveries = b.deliveries();
+  expect(() => b.log.open(MOTHER, "repo", { ...FIELDS, title: "the second" })).toThrow("UNIQUE constraint failed");
+  expect(b.events()).toEqual(events);
+  expect(featureRows(b)).toEqual(rows);
+  expect(b.deliveries()).toEqual(deliveries);
+  expect(rows).toHaveLength(1);
 });

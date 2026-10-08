@@ -157,13 +157,13 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] A linha tem os seis campos, `project`, `opened_seq` igual ao `seq` devolvido, `closed_seq` e `outcome` nulos
-- [ ] O evento tem `from_name` `mother`, `role_from` `mother`, `to_name` `*`, `summary` e `body` vazios, `ticket_ref` nulo, `feature_id` igual ao `id` da linha e `data` com exatamente os seis campos
-- [ ] Cinco entregas pendentes, nenhuma para `mother`
-- [ ] FEAT-12: depois de abrir, fechar e apagar a linha de `features` por fora, a abertura seguinte recebe um `id` maior que todo `feature_id` de `events`
-- [ ] FEAT-08: com um gatilho temporário que aborta o `INSERT` em `features`, `open` lança erro e não há evento, linha nem entrega novos; o mesmo com o gatilho em `deliveries`
-- [ ] Com uma feature aberta, `open` lança erro pelo índice e nada é gravado
-- [ ] Gate: `bun test test/unit`
+- [x] A linha tem os seis campos, `project`, `opened_seq` igual ao `seq` devolvido, `closed_seq` e `outcome` nulos
+- [x] O evento tem `from_name` `mother`, `role_from` `mother`, `to_name` `*`, `summary` e `body` vazios, `ticket_ref` nulo, `feature_id` igual ao `id` da linha e `data` com exatamente os seis campos
+- [x] Cinco entregas pendentes, nenhuma para `mother`
+- [x] FEAT-12: depois de abrir, fechar e apagar a linha de `features` por fora, a abertura seguinte recebe um `id` maior que todo `feature_id` de `events`
+- [x] FEAT-08: com um gatilho temporário que aborta o `INSERT` em `features`, `open` lança erro e não há evento, linha nem entrega novos; o mesmo com o gatilho em `deliveries`
+- [x] Com uma feature aberta, `open` lança erro pelo índice e nada é gravado
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

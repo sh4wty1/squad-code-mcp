@@ -9,6 +9,7 @@
 import type { Database } from "bun:sqlite";
 import { appendEvent, isBlocked } from "./db.ts";
 import { refuse, ROSTER, type Refusal } from "./peers.ts";
+import type { Caller } from "./send.ts";
 import { toRead, type EventRow, type Kind, type SquadEvent } from "./shared/contract.ts";
 
 export interface FeatureRow {
@@ -23,6 +24,16 @@ export interface FeatureRow {
   opened_seq: number;
   closed_seq: number | null;
   outcome: string | null;
+}
+
+// What the mother sends to open a feature, already validated
+export interface FeatureFields {
+  title: string;
+  workflow: string;
+  branch: string;
+  base_branch: string;
+  spec_ref: string;
+  spec_commit: string;
 }
 
 // What a rule hands over to be recorded. seq, ts and feature_id are the log's.
@@ -88,6 +99,31 @@ export function createLog(db: Database, now: () => number = Date.now) {
   // Event and delivery in one transaction: if the delivery fails, the event is not
   // stored. The recipient does not have to be registered. Returns the seq.
   const record = db.transaction((event: NewRecord): number => write(event));
+
+  // Opens a feature: the feature_opened, its row and the deliveries, together or not at
+  // all. The event needs the id of the feature and the row needs the seq of the event,
+  // so the id is reserved first. It comes from `events`, which is append-only: an id
+  // an event already carries is never given to another feature.
+  const open = db.transaction((by: Caller, project: string, fields: FeatureFields) => {
+    const { title, workflow, branch, base_branch, spec_ref, spec_commit } = fields;
+    const { id } = db.query("SELECT COALESCE(MAX(feature_id), 0) + 1 AS id FROM events").get() as { id: number };
+    const seq = write(
+      {
+        kind: "feature_opened",
+        from: by.name,
+        role_from: by.role,
+        to: "*",
+        data: { title, workflow, branch, base_branch, spec_ref, spec_commit },
+      },
+      id
+    );
+    db.run(
+      `INSERT INTO features (id, project, title, workflow, branch, base_branch, spec_ref, spec_commit, opened_seq)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, project, title, workflow, branch, base_branch, spec_ref, spec_commit, seq]
+    );
+    return { feature_id: id, seq };
+  });
 
   // What `write` records is stored together or not at all
   function transaction<T>(write: () => T): T {
@@ -164,7 +200,7 @@ export function createLog(db: Database, now: () => number = Date.now) {
     return rows.map(toRead);
   }
 
-  return { openFeature, featureEvents, record, transaction, blocked, refused, pending, ack, after, lastSeq, history };
+  return { openFeature, featureEvents, record, open, transaction, blocked, refused, pending, ack, after, lastSeq, history };
 }
 
 export type Log = ReturnType<typeof createLog>;
