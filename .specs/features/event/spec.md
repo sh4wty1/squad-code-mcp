@@ -381,8 +381,8 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-42 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-43 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-44 | P1: Entrega até o transporte | Tasks | In Tasks |
-| EVT-45 | P1: Entrega até o transporte | Tasks | In Tasks |
-| EVT-46 | P1: Entrega até o transporte | Tasks | In Tasks |
+| EVT-45 | P1: Entrega até o transporte | Execute | Implementing |
+| EVT-46 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-47 | P1: Recusa com rastro | Execute | Implementing |
 | EVT-48 | P1: Recusa com rastro | Tasks | In Tasks |
 | EVT-49 | P1: Recusa com rastro | Tasks | In Tasks |
@@ -391,7 +391,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-52 | P1: Registros da sessão | Tasks | In Tasks |
 | EVT-53 | P1: Registros da sessão | Tasks | In Tasks |
 | EVT-54 | P1: Registros da sessão | Tasks | In Tasks |
-| EVT-55 | P1: Registros da sessão | Tasks | In Tasks |
+| EVT-55 | P1: Registros da sessão | Execute | Implementing |
 | EVT-56 | P1: Registros da sessão | Tasks | In Tasks |
 | EVT-57 | P1: Registros da sessão | Tasks | In Tasks |
 | EVT-58 | P1: Registros da sessão | Tasks | In Tasks |

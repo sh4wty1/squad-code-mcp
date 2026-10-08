@@ -259,3 +259,173 @@ test("PEER-16: a registered name with a live pid and no heartbeat for more than 
   const after = b.peers.listPeers(mother.id) as { name: string; online: boolean }[];
   expect(after.find((p) => p.name === "leader")!.online).toBe(false);
 });
+
+// The agent says it is blocked, the way /blocked will record it
+function block(b: ReturnType<typeof setup>, name: string) {
+  return b.log.record({
+    kind: "blocked",
+    from: name,
+    role_from: "worker",
+    data: { reason: "no access", detail: "", last_action: "" },
+  });
+}
+
+const BROKER_UNBLOCKED = {
+  kind: "unblocked",
+  from_name: "broker",
+  role_from: "broker",
+  to_name: null,
+  summary: "",
+  body: "",
+  ticket_ref: null,
+  question_id: null,
+  gate_id: null,
+};
+
+test("EVT-55: a blocked peer that unregisters is unblocked by the broker, with the peer_left", () => {
+  const b = setup();
+  const { id } = b.join("worker-1", "worker", 100) as { id: string };
+  block(b, "worker-1");
+  b.clock.now = NOW + 5000;
+  b.peers.unregister(id);
+  expect(b.events().map((e) => e.kind)).toEqual(["peer_joined", "blocked", "peer_left", "unblocked"]);
+  expect(b.events()[2]!.data).toEqual({ peer: "worker-1", reason: "unregistered" });
+  expect(b.events()[3]).toEqual({
+    ...BROKER_UNBLOCKED,
+    seq: 4,
+    ts: NOW + 5000,
+    feature_id: null,
+    data: { peer: "worker-1" },
+  });
+});
+
+test("EVT-55: a blocked peer removed by the cleanup is unblocked by the broker, in the open feature", () => {
+  const b = setup();
+  const feature = b.openFeature();
+  b.join("worker-2", "worker", 100);
+  b.join("worker-3", "worker", 101);
+  block(b, "worker-2");
+  b.alive.delete(100);
+  b.clock.now = NOW + 5000;
+  b.peers.cleanStale();
+  expect(b.events().slice(3).map((e) => [e.kind, e.data])).toEqual([
+    ["peer_left", { peer: "worker-2", reason: "died" }],
+    ["unblocked", { peer: "worker-2" }],
+  ]);
+  expect(b.events()[4]).toEqual({
+    ...BROKER_UNBLOCKED,
+    seq: 5,
+    ts: NOW + 5000,
+    feature_id: feature,
+    data: { peer: "worker-2" },
+  });
+});
+
+test("EVT-55: a peer that leaves without an open blocked is not unblocked", () => {
+  const b = setup();
+  const one = b.join("worker-1", "worker", 100) as { id: string };
+  const two = b.join("worker-2", "worker", 101) as { id: string };
+  b.join("worker-3", "worker", 102);
+  // worker-1 was blocked and said it no longer is; worker-3 is blocked and stays
+  block(b, "worker-1");
+  b.log.record({ kind: "unblocked", from: "worker-1", role_from: "worker", data: { peer: "worker-1" } });
+  block(b, "worker-3");
+  b.peers.unregister(one.id);
+  b.peers.unregister(two.id);
+  expect(b.events().slice(6).map((e) => [e.kind, e.data])).toEqual([
+    ["peer_left", { peer: "worker-1", reason: "unregistered" }],
+    ["peer_left", { peer: "worker-2", reason: "unregistered" }],
+  ]);
+});
+
+test("EVT-55: a blocked the broker already closed is not closed again by the next leave", () => {
+  const b = setup();
+  const first = b.join("worker-1", "worker", 100) as { id: string };
+  block(b, "worker-1");
+  b.peers.unregister(first.id);
+  const second = b.join("worker-1", "worker", 101) as { id: string };
+  b.peers.unregister(second.id);
+  expect(b.events().map((e) => e.kind)).toEqual([
+    "peer_joined", "blocked", "peer_left", "unblocked", "peer_joined", "peer_left",
+  ]);
+});
+
+test("EVT-55: the unblocked is in the transaction of the peer_left: if it cannot be written the peer stays", () => {
+  const b = setup();
+  const { id } = b.join("worker-1", "worker", 100) as { id: string };
+  block(b, "worker-1");
+  b.db.run(`
+    CREATE TRIGGER unblocked_fails BEFORE INSERT ON events WHEN NEW.kind = 'unblocked'
+    BEGIN SELECT RAISE(ABORT, 'no unblocked'); END
+  `);
+  expect(() => b.peers.unregister(id)).toThrow("no unblocked");
+  expect(b.rows().map((p) => p.name)).toEqual(["worker-1"]);
+  expect(b.events().map((e) => e.kind)).toEqual(["peer_joined", "blocked"]);
+});
+
+const TASK_TO_LEADER = { kind: "task", from: "mother", role_from: "mother", to: "leader", summary: "kickoff" } as const;
+
+test("EVT-46: the deliveries of a peer that unregisters stay as they were", () => {
+  const b = setup();
+  b.openFeature();
+  const { id } = b.join("leader", "leader", 100) as { id: string };
+  const confirmed = b.log.record(TASK_TO_LEADER);
+  b.log.ack("leader", [confirmed]);
+  const waiting = b.log.record(TASK_TO_LEADER);
+  const before = b.deliveries();
+  b.clock.now = NOW + 5000;
+  b.peers.unregister(id);
+  expect(b.rows()).toEqual([]);
+  expect(b.deliveries()).toEqual(before);
+  expect(before).toEqual([
+    { event_seq: confirmed, recipient: "leader", acked_at: NOW },
+    { event_seq: waiting, recipient: "leader", acked_at: null },
+  ]);
+});
+
+test("EVT-46: the deliveries of a peer removed by the cleanup stay as they were", () => {
+  const b = setup();
+  b.openFeature();
+  b.join("leader", "leader", 100);
+  const waiting = b.log.record(TASK_TO_LEADER);
+  b.alive.delete(100);
+  b.peers.cleanStale();
+  expect(b.rows()).toEqual([]);
+  expect(b.deliveries()).toEqual([{ event_seq: waiting, recipient: "leader", acked_at: null }]);
+});
+
+test("EVT-45: a new session of the name gets what was pending for the earlier one", () => {
+  const b = setup();
+  b.openFeature();
+  const first = b.join("leader", "leader", 100) as { id: string };
+  const offline = b.log.record(TASK_TO_LEADER);
+  expect(b.log.pending("leader").map((e) => e.seq)).toEqual([offline]);
+  b.peers.unregister(first.id);
+  const whileAway = b.log.record(TASK_TO_LEADER);
+
+  const second = b.join("leader", "leader", 200) as { id: string };
+  expect(second.id).not.toBe(first.id);
+  expect(b.peers.find(second.id)).toEqual({ name: "leader", role: "leader" });
+  expect(b.log.pending(b.peers.find(second.id)!.name).map((e) => e.seq)).toEqual([offline, whileAway]);
+});
+
+test("find answers the name and the role of the id, and nothing else", () => {
+  const b = setup();
+  b.join("mother", "mother", 100);
+  const { id } = b.join("worker-2", "worker", 101) as { id: string };
+  expect(b.peers.find(id)).toEqual({ name: "worker-2", role: "worker" });
+  expect(Object.keys(b.peers.find(id)!).sort()).toEqual(["name", "role"]);
+});
+
+test("EVT-03: find answers null for an id that is unknown, absent, not a text or of a peer that left", () => {
+  const b = setup();
+  const { id } = b.join("mother", "mother", 100) as { id: string };
+  expect(b.peers.find("not-an-id")).toBeNull();
+  expect(b.peers.find("")).toBeNull();
+  expect(b.peers.find(undefined)).toBeNull();
+  expect(b.peers.find(null)).toBeNull();
+  expect(b.peers.find(100)).toBeNull();
+  b.peers.unregister(id);
+  expect(b.peers.find(id)).toBeNull();
+  expect(b.events().map((e) => e.kind)).toEqual(["peer_joined", "peer_left"]);
+});

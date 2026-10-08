@@ -223,10 +223,10 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Peer bloqueado sai por `unregister` e pela limpeza: o log ganha `unblocked` com `from_name` `broker` e `data` `{ peer }`; sem `blocked` aberto, não ganha
-- [ ] As entregas pendentes do nome continuam pendentes depois da saída, e `log.pending` as devolve depois de um novo registro do nome
-- [ ] `find` com `id` desconhecido devolve nulo
-- [ ] Gate: `bun x tsc --noEmit && bun test`
+- [x] Peer bloqueado sai por `unregister` e pela limpeza: o log ganha `unblocked` com `from_name` `broker` e `data` `{ peer }`; sem `blocked` aberto, não ganha
+- [x] As entregas pendentes do nome continuam pendentes depois da saída, e `log.pending` as devolve depois de um novo registro do nome
+- [x] `find` com `id` desconhecido devolve nulo
+- [x] Gate: `bun x tsc --noEmit && bun test`
 
 **Tests**: unit
 **Gate**: build

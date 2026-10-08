@@ -6,11 +6,11 @@
  * it is returned once, by register, and never listed.
  *
  * Every row that enters or leaves `peers` writes a presence event in the
- * same transaction.
+ * same transaction, and a peer that leaves blocked is unblocked there too.
  */
 
 import type { Database } from "bun:sqlite";
-import { appendBrokerEvent } from "./db.ts";
+import { appendBrokerEvent, appendEvent } from "./db.ts";
 
 export type Role = "mother" | "leader" | "worker" | "judge";
 
@@ -83,9 +83,36 @@ export function createPeers(
   isAlive: (pid: number) => boolean = pidAlive,
   now: () => number = Date.now
 ) {
+  // Blocked is the agent's: a blocked of the name with no unblocked for it afterwards
+  function isBlocked(name: string): boolean {
+    const last = db
+      .query(
+        `SELECT kind FROM events
+         WHERE (kind = 'blocked' AND from_name = ?) OR (kind = 'unblocked' AND json_extract(data, '$.peer') = ?)
+         ORDER BY seq DESC LIMIT 1`
+      )
+      .get(name, name) as { kind: string } | null;
+    return last?.kind === "blocked";
+  }
+
+  // Always called inside a transaction: the row, the peer_left and the unblocked of a
+  // peer that leaves blocked go together. What is still to be delivered to the name
+  // stays in `deliveries` for its next session.
   function remove(peer: PeerRow, reason: "unregistered" | "died") {
+    const ts = now();
     db.run("DELETE FROM peers WHERE id = ?", [peer.id]);
-    appendBrokerEvent(db, "peer_left", { peer: peer.name, reason }, now());
+    appendBrokerEvent(db, "peer_left", { peer: peer.name, reason }, ts);
+    if (isBlocked(peer.name)) {
+      const feature = db.query("SELECT id FROM features WHERE closed_seq IS NULL").get() as { id: number } | null;
+      appendEvent(db, {
+        ts,
+        kind: "unblocked",
+        feature_id: feature?.id,
+        from_name: "broker",
+        role_from: "broker",
+        data: { peer: peer.name },
+      });
+    }
   }
 
   // A heartbeat can only arrive while the broker is there to take it. The silence of a
@@ -181,6 +208,12 @@ export function createPeers(
     if (peer) remove(peer, "unregistered");
   });
 
+  // Who holds this credential. What comes in a request body may be anything.
+  function find(id: unknown): { name: string; role: Role } | null {
+    if (typeof id !== "string") return null;
+    return db.query("SELECT name, role FROM peers WHERE id = ?").get(id) as { name: string; role: Role } | null;
+  }
+
   function heartbeat(id: string) {
     db.run("UPDATE peers SET last_seen = ? WHERE id = ?", [now(), id]);
   }
@@ -204,5 +237,5 @@ export function createPeers(
     return (db.query("SELECT COUNT(*) AS n FROM peers").get() as { n: number }).n;
   }
 
-  return { register, unregister, heartbeat, listPeers, cleanStale, count };
+  return { register, unregister, find, heartbeat, listPeers, cleanStale, count };
 }
