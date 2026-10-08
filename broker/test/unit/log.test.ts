@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { appendEvent } from "../../db.ts";
 import type { NewRecord } from "../../log.ts";
 import { NOW, setup } from "./helpers.ts";
 
@@ -198,4 +199,192 @@ test("EVT-47: refused without an open feature has feature_id null", () => {
   expect(refused!.kind).toBe("refused");
   expect(refused!.feature_id).toBeNull();
   expect(refused!.data).toEqual({ peer: "mother", attempted_kind: "", error: "no_open_feature" });
+});
+
+// The read format of TASK, recorded with the given seq in the given feature
+function readTask(seq: number, feature_id: number | null, fields: Record<string, unknown> = {}) {
+  return {
+    seq,
+    ts: NOW,
+    kind: "task",
+    feature_id,
+    from: "leader",
+    role_from: "leader",
+    to: "worker-1",
+    summary: "build the parser",
+    body: "the whole brief",
+    ticket_ref: "T-1",
+    loadout: ["tdd"],
+    ...fields,
+  };
+}
+
+test("EVT-41: pending are the events still to be delivered to the name, in ascending seq and in the read format", () => {
+  const b = setup();
+  const id = b.openFeature();
+  const first = b.log.record(TASK);
+  b.log.record({ kind: "result", from: "worker-1", role_from: "worker", to: "judge", summary: "done" });
+  b.log.record({ kind: "blocked", from: "worker-1", role_from: "worker", data: { reason: "r" } });
+  const second = b.log.record({ ...TASK, summary: "the second", ticket_ref: "T-2" });
+  expect(b.log.pending("worker-1") as object[]).toEqual([
+    readTask(first, id),
+    readTask(second, id, { summary: "the second", ticket_ref: "T-2" }),
+  ]);
+  expect(b.log.pending("worker-2")).toEqual([]);
+});
+
+test("EVT-42: without an ack a second pending answers the same events", () => {
+  const b = setup();
+  b.openFeature();
+  b.log.record(TASK);
+  b.log.record({ ...TASK, summary: "the second" });
+  const first = b.log.pending("worker-1");
+  expect(first.map((e) => e.seq)).toEqual([1, 2]);
+  expect(b.log.pending("worker-1")).toEqual(first);
+  expect(b.deliveries().map((d) => d.acked_at)).toEqual([null, null]);
+});
+
+test("EVT-43: ack confirms the pending deliveries of the name with the current epoch ms, and only those in seqs", () => {
+  const b = setup();
+  b.openFeature();
+  const first = b.log.record(TASK);
+  const second = b.log.record({ ...TASK, summary: "the second" });
+  b.clock.now = NOW + 4000;
+  b.log.ack("worker-1", [first]);
+  expect(b.deliveries()).toEqual([
+    { event_seq: first, recipient: "worker-1", acked_at: NOW + 4000 },
+    { event_seq: second, recipient: "worker-1", acked_at: null },
+  ]);
+  expect(b.log.pending("worker-1").map((e) => e.seq)).toEqual([second]);
+});
+
+test("EVT-43: ack leaves the delivery of another name pending", () => {
+  const b = setup();
+  b.openFeature();
+  const mine = b.log.record(TASK);
+  const theirs = b.log.record({ ...TASK, to: "worker-2" });
+  b.log.ack("worker-1", [mine, theirs]);
+  expect(b.deliveries()).toEqual([
+    { event_seq: mine, recipient: "worker-1", acked_at: NOW },
+    { event_seq: theirs, recipient: "worker-2", acked_at: null },
+  ]);
+  expect(b.log.pending("worker-2").map((e) => e.seq)).toEqual([theirs]);
+});
+
+test("EVT-43: ack leaves a delivery already confirmed as it was", () => {
+  const b = setup();
+  b.openFeature();
+  const seq = b.log.record(TASK);
+  b.clock.now = NOW + 1000;
+  b.log.ack("worker-1", [seq]);
+  b.clock.now = NOW + 9000;
+  b.log.ack("worker-1", [seq]);
+  expect(b.deliveries()).toEqual([{ event_seq: seq, recipient: "worker-1", acked_at: NOW + 1000 }]);
+});
+
+test("EVT-43: ack of a seq with no delivery, or of no seq, changes nothing", () => {
+  const b = setup();
+  b.openFeature();
+  const seq = b.log.record(TASK);
+  b.log.ack("worker-1", [seq + 50]);
+  b.log.ack("worker-1", []);
+  expect(b.deliveries()).toEqual([{ event_seq: seq, recipient: "worker-1", acked_at: null }]);
+});
+
+test("EVT-67: after answers the events past the cursor, of any feature and of none, and lastSeq the greatest seq", () => {
+  const b = setup();
+  expect(b.log.lastSeq()).toBe(0);
+  expect(b.log.after(0)).toEqual([]);
+
+  // one event without a feature, one in a feature that closed, one in the open feature
+  b.log.record({ kind: "turn_started", from: "mother", role_from: "mother" });
+  const old = b.openFeature();
+  b.log.record(TASK);
+  b.closeFeature(old);
+  const id = b.openFeature();
+  b.log.record({ ...TASK, summary: "the third" });
+
+  expect(b.log.lastSeq()).toBe(3);
+  expect(b.log.after(1) as object[]).toEqual([readTask(2, old), readTask(3, id, { summary: "the third" })]);
+  expect(b.log.after(0).map((e) => [e.seq, e.kind, e.feature_id])).toEqual([
+    [1, "turn_started", null],
+    [2, "task", old],
+    [3, "task", id],
+  ]);
+});
+
+test("EVT-67: after a cursor past the last seq answers nothing, and lastSeq stays", () => {
+  const b = setup();
+  b.log.record({ kind: "turn_started", from: "mother", role_from: "mother" });
+  expect(b.log.after(1)).toEqual([]);
+  expect(b.log.after(99)).toEqual([]);
+  expect(b.log.lastSeq()).toBe(1);
+});
+
+test("EVT-69: history by ticket_ref answers the events of the open feature with that ticket_ref, in ascending seq", () => {
+  const b = setup();
+  const old = b.openFeature();
+  b.log.record(TASK);
+  b.closeFeature(old);
+  const id = b.openFeature();
+  const task = b.log.record(TASK);
+  b.log.record({ ...TASK, ticket_ref: "T-2" });
+  b.log.record({ kind: "plan", from: "leader", role_from: "leader", data: { tickets: [] } });
+  const blocked = b.log.record({ kind: "blocked", from: "worker-1", role_from: "worker", ticket_ref: "T-1" });
+  expect(b.log.history({ ticket_ref: "T-1" }) as object[]).toEqual([
+    readTask(task, id),
+    {
+      seq: blocked,
+      ts: NOW,
+      kind: "blocked",
+      feature_id: id,
+      from: "worker-1",
+      role_from: "worker",
+      to: null,
+      summary: "",
+      body: "",
+      ticket_ref: "T-1",
+    },
+  ]);
+  expect(b.log.history({ ticket_ref: "T-9" })).toEqual([]);
+});
+
+test("EVT-69: history by ticket_ref is empty without an open feature", () => {
+  const b = setup();
+  const old = b.openFeature();
+  b.log.record(TASK);
+  b.closeFeature(old);
+  expect(b.log.history({ ticket_ref: "T-1" })).toEqual([]);
+});
+
+test("EVT-69: history by question_id and by gate_id filters by the column, in any feature", () => {
+  const b = setup();
+  const event = { ts: NOW, from_name: "judge", role_from: "judge" };
+  const old = b.openFeature();
+  const asked = appendEvent(b.db, { ...event, kind: "question", feature_id: old, question_id: 5, ticket_ref: "T-1" });
+  appendEvent(b.db, { ...event, kind: "question", feature_id: old, question_id: 6 });
+  const gate = appendEvent(b.db, { ...event, kind: "gate", feature_id: old, gate_id: 5 });
+  b.closeFeature(old);
+  const answered = appendEvent(b.db, { ...event, kind: "answer", question_id: 5, data: { answer: "yes" } });
+
+  expect(b.log.history({ question_id: 5 }).map((e) => [e.seq, e.kind])).toEqual([
+    [asked, "question"],
+    [answered, "answer"],
+  ]);
+  expect(b.log.history({ question_id: 5 })[1] as object).toEqual({
+    seq: answered,
+    ts: NOW,
+    kind: "answer",
+    feature_id: null,
+    from: "judge",
+    role_from: "judge",
+    to: null,
+    summary: "",
+    body: "",
+    ticket_ref: null,
+    answer: "yes",
+  });
+  expect(b.log.history({ gate_id: 5 }).map((e) => [e.seq, e.kind])).toEqual([[gate, "gate"]]);
+  expect(b.log.history({ gate_id: 6 })).toEqual([]);
+  expect(b.log.history({ question_id: 7 })).toEqual([]);
 });

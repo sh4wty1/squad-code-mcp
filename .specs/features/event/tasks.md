@@ -202,11 +202,11 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] `pending` devolve as entregas do nome em ordem de `seq`, e as mesmas numa segunda chamada sem `ack`
-- [ ] `ack` preenche `acked_at` só nas entregas pendentes do nome; a de outro nome e a já confirmada ficam como estavam
-- [ ] `after(1)` com três eventos devolve os dois últimos, de qualquer feature e sem feature; `lastSeq()` é 3, e 0 com o log vazio
-- [ ] `history` por `ticket_ref` só traz a feature aberta e vem vazio sem ela; por `question_id` e `gate_id` filtra pela coluna
-- [ ] Gate: `bun test test/unit`
+- [x] `pending` devolve as entregas do nome em ordem de `seq`, e as mesmas numa segunda chamada sem `ack`
+- [x] `ack` preenche `acked_at` só nas entregas pendentes do nome; a de outro nome e a já confirmada ficam como estavam
+- [x] `after(1)` com três eventos devolve os dois últimos, de qualquer feature e sem feature; `lastSeq()` é 3, e 0 com o log vazio
+- [x] `history` por `ticket_ref` só traz a feature aberta e vem vazio sem ela; por `question_id` e `gate_id` filtra pela coluna
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

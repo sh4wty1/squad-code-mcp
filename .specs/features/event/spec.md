@@ -378,8 +378,8 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-39 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-40 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-41 | P1: Entrega até o transporte | Execute | Implementing |
-| EVT-42 | P1: Entrega até o transporte | Tasks | In Tasks |
-| EVT-43 | P1: Entrega até o transporte | Tasks | In Tasks |
+| EVT-42 | P1: Entrega até o transporte | Execute | Implementing |
+| EVT-43 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-44 | P1: Entrega até o transporte | Tasks | In Tasks |
 | EVT-45 | P1: Entrega até o transporte | Tasks | In Tasks |
 | EVT-46 | P1: Entrega até o transporte | Tasks | In Tasks |
@@ -405,7 +405,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-66 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
 | EVT-67 | P1: Leitura do log | Execute | Implementing |
 | EVT-68 | P1: Leitura do log | Tasks | In Tasks |
-| EVT-69 | P1: Leitura do log | Tasks | In Tasks |
+| EVT-69 | P1: Leitura do log | Execute | Implementing |
 | EVT-70 | P1: Leitura do log | Tasks | In Tasks |
 | EVT-71 | P1: Leitura do log | Tasks | In Tasks |
 | EVT-72 | P1: Leitura do log | Tasks | In Tasks |
