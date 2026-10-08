@@ -349,7 +349,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-10 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
 | EVT-11 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
 | EVT-12 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
-| EVT-13 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
+| EVT-13 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-14 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-15 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-16 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
@@ -375,15 +375,15 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-36 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-37 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-38 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-39 | P1: Entrega até o transporte | Tasks | In Tasks |
-| EVT-40 | P1: Entrega até o transporte | Tasks | In Tasks |
+| EVT-39 | P1: Entrega até o transporte | Execute | Implementing |
+| EVT-40 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-41 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-42 | P1: Entrega até o transporte | Tasks | In Tasks |
 | EVT-43 | P1: Entrega até o transporte | Tasks | In Tasks |
 | EVT-44 | P1: Entrega até o transporte | Tasks | In Tasks |
 | EVT-45 | P1: Entrega até o transporte | Tasks | In Tasks |
 | EVT-46 | P1: Entrega até o transporte | Tasks | In Tasks |
-| EVT-47 | P1: Recusa com rastro | Tasks | In Tasks |
+| EVT-47 | P1: Recusa com rastro | Execute | Implementing |
 | EVT-48 | P1: Recusa com rastro | Tasks | In Tasks |
 | EVT-49 | P1: Recusa com rastro | Tasks | In Tasks |
 | EVT-50 | P1: Registros da sessão | Tasks | In Tasks |
@@ -415,7 +415,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-76 | P1: Leitura do log | Execute | Implementing |
 | EVT-77 | P1: Leitura do log | Execute | Implementing |
 | EVT-78 | P1: Leitura do log | Tasks | In Tasks |
-| EVT-79 | P1: Leitura do log | Tasks | In Tasks |
+| EVT-79 | P1: Leitura do log | Execute | Implementing |
 | EVT-80 | P1: Leitura do log | Execute | Implementing |
 | EVT-81 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
 | EVT-82 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |

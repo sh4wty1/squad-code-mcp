@@ -180,12 +180,12 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] `record` de um `task` grava a linha de `deliveries` com `recipient` igual ao `to` e `acked_at` nulo, com o destinatário offline
-- [ ] `record` de `plan`, `blocked` e `permission_request` não grava entrega
-- [ ] Com a escrita em `deliveries` forçada a falhar, `events` fica sem o evento
-- [ ] `refused` grava `from_name` e `role_from` `broker`, `to_name` nulo, `summary` vazio, `feature_id` da feature aberta ou nulo e `data` `{ peer, attempted_kind, error }`, e devolve `{ ok: false, error, hint }`
-- [ ] `openFeature` devolve a linha com `closed_seq` nulo, ou nulo
-- [ ] Gate: `bun test test/unit`
+- [x] `record` de um `task` grava a linha de `deliveries` com `recipient` igual ao `to` e `acked_at` nulo, com o destinatário offline
+- [x] `record` de `plan`, `blocked` e `permission_request` não grava entrega
+- [x] Com a escrita em `deliveries` forçada a falhar, `events` fica sem o evento
+- [x] `refused` grava `from_name` e `role_from` `broker`, `to_name` nulo, `summary` vazio, `feature_id` da feature aberta ou nulo e `data` `{ peer, attempted_kind, error }`, e devolve `{ ok: false, error, hint }`
+- [x] `openFeature` devolve a linha com `closed_seq` nulo, ou nulo
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

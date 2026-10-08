@@ -56,7 +56,7 @@ interface PeerRow {
   pid: number;
 }
 
-function refuse(error: string, hint: string): Refusal {
+export function refuse(error: string, hint: string): Refusal {
   return { ok: false, error, hint };
 }
 
