@@ -537,9 +537,9 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Toda rota da fatia aparece com corpo e resposta
-- [ ] O README diz que `task`, `result`, `verdict` e `plan` recebem `no_open_feature` até a fatia Feature
-- [ ] Gate: `bun x tsc --noEmit && bun test`
+- [x] Toda rota da fatia aparece com corpo e resposta
+- [x] O README diz que `task`, `result`, `verdict` e `plan` recebem `no_open_feature` até a fatia Feature
+- [x] Gate: `bun x tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build
