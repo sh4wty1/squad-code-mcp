@@ -405,6 +405,15 @@ test("FEAT-26: the features come in ascending id, each closed by its own feature
   expect(features([...log].reverse())).toEqual(expected);
 });
 
+// A log the broker does not write: it tells the order by id from the order of opening,
+// and the feature of the feature_id from the one opened last
+test("FEAT-26: with a smaller id opened later, the order is still by id and the feature_closed closes the one of its feature_id", () => {
+  expect(features([opened(1, 2), opened(2, 1), closed(3, 2, "delivered")])).toEqual([
+    { id: 1, ...SPEC, opened_seq: 2, closed_seq: null, outcome: null },
+    { id: 2, ...SPEC, opened_seq: 1, closed_seq: 3, outcome: "delivered" },
+  ]);
+});
+
 test("FEAT-26: a refused and the other kinds are no feature", () => {
   const log = [
     event(1, { kind: "refused", feature_id: null, from: "broker", role_from: "broker", peer: "mother", attempted_kind: "feature_closed", error: "no_open_feature" }),

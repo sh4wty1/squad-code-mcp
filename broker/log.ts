@@ -133,9 +133,9 @@ export function createLog(db: Database, now: () => number = Date.now) {
     return seq;
   });
 
-  // What `write` records is stored together or not at all
-  function transaction<T>(write: () => T): T {
-    return db.transaction(write)();
+  // What `fn` records is stored together or not at all
+  function transaction<T>(fn: () => T): T {
+    return db.transaction(fn)();
   }
 
   // The name has a blocked with no unblocked for it afterwards, in any feature or in none
