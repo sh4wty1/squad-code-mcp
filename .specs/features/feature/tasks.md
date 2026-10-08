@@ -548,13 +548,13 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Testes em `broker/test/integration/feature.test.ts`, contra o processo real, com a `mother` registrada por `/register`
-- [ ] Por rota: caminho feliz, uma recusa de regra com o seu `refused`, `unknown_peer` sem `refused`, e corpo que não é objeto
-- [ ] O `task` mother → leader, recusado com `no_open_feature` antes, é aceito depois de `/open-feature` (teste independente da história 1)
-- [ ] `leader` offline na abertura recebe o `feature_opened` no primeiro `/poll-messages` depois de registrar; o `/poll-messages` da `mother` não traz o `feature_opened` nem o `feature_closed`
-- [ ] FEAT-27: abrir, fechar como `abandoned`, tentar fechar de novo, abrir outra; `features` aplicada a `GET /events` devolve as duas linhas da tabela sem `project`
-- [ ] FEAT-28: o broker parado e erguido sobre o mesmo banco responde `feature_already_open` com feature aberta e `no_open_feature` sem
-- [ ] Gate: `bun test`
+- [x] Testes em `broker/test/integration/feature.test.ts`, contra o processo real, com a `mother` registrada por `/register`
+- [x] Por rota: caminho feliz, uma recusa de regra com o seu `refused`, `unknown_peer` sem `refused`, e corpo que não é objeto
+- [x] O `task` mother → leader, recusado com `no_open_feature` antes, é aceito depois de `/open-feature` (teste independente da história 1)
+- [x] `leader` offline na abertura recebe o `feature_opened` no primeiro `/poll-messages` depois de registrar; o `/poll-messages` da `mother` não traz o `feature_opened` nem o `feature_closed`
+- [x] FEAT-27: abrir, fechar como `abandoned`, tentar fechar de novo, abrir outra; `features` aplicada a `GET /events` devolve as duas linhas da tabela sem `project`
+- [x] FEAT-28: o broker parado e erguido sobre o mesmo banco responde `feature_already_open` com feature aberta e `no_open_feature` sem
+- [x] Gate: `bun test`
 
 **Tests**: integration
 **Gate**: full
