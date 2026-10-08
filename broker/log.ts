@@ -7,7 +7,7 @@
  */
 
 import type { Database } from "bun:sqlite";
-import { appendEvent } from "./db.ts";
+import { appendEvent, isBlocked } from "./db.ts";
 import { refuse, type Refusal } from "./peers.ts";
 import { toRead, type EventRow, type Kind, type SquadEvent } from "./shared/contract.ts";
 
@@ -79,6 +79,16 @@ export function createLog(db: Database, now: () => number = Date.now) {
     return seq;
   });
 
+  // What `write` records is stored together or not at all
+  function transaction<T>(write: () => T): T {
+    return db.transaction(write)();
+  }
+
+  // The name has a blocked with no unblocked for it afterwards, in any feature or in none
+  function blocked(name: string): boolean {
+    return isBlocked(db, name);
+  }
+
   // The trace of a refusal to a registered peer (ADR-010): the attempted event is not
   // stored, this one is. Returns the refusal to answer with.
   function refused(peer: string, attemptedKind: string, error: string, hint: string): Refusal {
@@ -144,7 +154,7 @@ export function createLog(db: Database, now: () => number = Date.now) {
     return rows.map(toRead);
   }
 
-  return { openFeature, featureEvents, record, refused, pending, ack, after, lastSeq, history };
+  return { openFeature, featureEvents, record, transaction, blocked, refused, pending, ack, after, lastSeq, history };
 }
 
 export type Log = ReturnType<typeof createLog>;

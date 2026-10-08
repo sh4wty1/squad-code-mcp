@@ -306,10 +306,10 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Um teste por AC de EVT-28 a EVT-32, com o código de erro ou o `data` da spec
-- [ ] `result` de worker bloqueado grava `unblocked` do broker com `seq` maior que o do `result`; de worker não bloqueado, não grava
-- [ ] Edge cases: `result` de quem não é dono; `result` citando `task` de outra feature recebe `stale_reference`; segundo `result` para o mesmo `task` antes do `verdict` é aceito
-- [ ] Gate: `bun test test/unit`
+- [x] Um teste por AC de EVT-28 a EVT-32, com o código de erro ou o `data` da spec
+- [x] `result` de worker bloqueado grava `unblocked` do broker com `seq` maior que o do `result`; de worker não bloqueado, não grava
+- [x] Edge cases: `result` de quem não é dono; `result` citando `task` de outra feature recebe `stale_reference`; segundo `result` para o mesmo `task` antes do `verdict` é aceito
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

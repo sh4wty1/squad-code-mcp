@@ -10,7 +10,7 @@
  */
 
 import type { Database } from "bun:sqlite";
-import { appendBrokerEvent, appendEvent } from "./db.ts";
+import { appendBrokerEvent, appendEvent, isBlocked } from "./db.ts";
 
 export type Role = "mother" | "leader" | "worker" | "judge";
 
@@ -83,18 +83,6 @@ export function createPeers(
   isAlive: (pid: number) => boolean = pidAlive,
   now: () => number = Date.now
 ) {
-  // Blocked is the agent's: a blocked of the name with no unblocked for it afterwards
-  function isBlocked(name: string): boolean {
-    const last = db
-      .query(
-        `SELECT kind FROM events
-         WHERE (kind = 'blocked' AND from_name = ?) OR (kind = 'unblocked' AND json_extract(data, '$.peer') = ?)
-         ORDER BY seq DESC LIMIT 1`
-      )
-      .get(name, name) as { kind: string } | null;
-    return last?.kind === "blocked";
-  }
-
   // Always called inside a transaction: the row, the peer_left and the unblocked of a
   // peer that leaves blocked go together. What is still to be delivered to the name
   // stays in `deliveries` for its next session.
@@ -102,7 +90,7 @@ export function createPeers(
     const ts = now();
     db.run("DELETE FROM peers WHERE id = ?", [peer.id]);
     appendBrokerEvent(db, "peer_left", { peer: peer.name, reason }, ts);
-    if (isBlocked(peer.name)) {
+    if (isBlocked(db, peer.name)) {
       const feature = db.query("SELECT id FROM features WHERE closed_seq IS NULL").get() as { id: number } | null;
       appendEvent(db, {
         ts,

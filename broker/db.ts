@@ -130,6 +130,18 @@ export function appendEvent(db: Database, event: NewEvent): number {
   return Number(result.lastInsertRowid);
 }
 
+// Blocked is the agent's: a blocked of the name with no unblocked for it afterwards
+export function isBlocked(db: Database, name: string): boolean {
+  const last = db
+    .query(
+      `SELECT kind FROM events
+       WHERE (kind = 'blocked' AND from_name = ?) OR (kind = 'unblocked' AND json_extract(data, '$.peer') = ?)
+       ORDER BY seq DESC LIMIT 1`
+    )
+    .get(name, name) as { kind: string } | null;
+  return last?.kind === "blocked";
+}
+
 // Records an event authored by the broker itself. Returns its seq.
 export function appendBrokerEvent(
   db: Database,

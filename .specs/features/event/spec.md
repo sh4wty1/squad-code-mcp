@@ -364,11 +364,11 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-25 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-26 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-27 | P1: Plano e ciclo do ticket | Execute | Implementing |
-| EVT-28 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-29 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-30 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-31 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-32 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
+| EVT-28 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-29 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-30 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-31 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-32 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-33 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-34 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-35 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
@@ -390,7 +390,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-51 | P1: Registros da sessão | Tasks | In Tasks |
 | EVT-52 | P1: Registros da sessão | Tasks | In Tasks |
 | EVT-53 | P1: Registros da sessão | Tasks | In Tasks |
-| EVT-54 | P1: Registros da sessão | Tasks | In Tasks |
+| EVT-54 | P1: Registros da sessão | Execute | Implementing |
 | EVT-55 | P1: Registros da sessão | Execute | Implementing |
 | EVT-56 | P1: Registros da sessão | Tasks | In Tasks |
 | EVT-57 | P1: Registros da sessão | Tasks | In Tasks |

@@ -48,6 +48,10 @@ function isListOf(value: unknown, isItem: (item: unknown) => boolean): boolean {
 
 const isString = (value: unknown) => typeof value === "string";
 
+function isText(value: unknown): value is string {
+  return typeof value === "string" && value !== "";
+}
+
 export function createSend(log: Log) {
   // task mother → leader and result leader → mother: no ticket and no field of their own
   function untracked(body: Record<string, unknown>): Ruling {
@@ -64,8 +68,7 @@ export function createSend(log: Log) {
   function assignment(to: string, body: Record<string, unknown>): Ruling {
     const { ticket_ref, loadout, criteria } = body;
     if (
-      typeof ticket_ref !== "string" ||
-      ticket_ref === "" ||
+      !isText(ticket_ref) ||
       !isListOf(loadout, isString) ||
       (criteria !== undefined && !isListOf(criteria, Number.isInteger))
     ) {
@@ -106,10 +109,45 @@ export function createSend(log: Log) {
     return { ticket_ref, data: { loadout, ...(criteria !== undefined && { criteria }) } };
   }
 
+  // result worker → judge: from the owner of the ticket, about its latest task
+  function delivery(peer: Caller, body: Record<string, unknown>): Ruling {
+    const { ticket_ref, task_seq, branch, commit } = body;
+    if (!isText(ticket_ref) || !isText(branch) || !isText(commit) || !Number.isInteger(task_seq)) {
+      return {
+        error: "missing_field",
+        hint: "A result to the judge takes ticket_ref, branch and commit as non-empty strings and task_seq as the integer seq of the task it answers.",
+      };
+    }
+
+    const events = log.featureEvents();
+    const ticket = tickets(events).get(ticket_ref);
+    if (!ticket || ticket.owner !== peer.name) {
+      return {
+        error: "not_owner",
+        hint: `${ticket_ref} is not yours: its latest task did not come to you. Call state to see the ticket you have.`,
+      };
+    }
+    if (ticket.dropped) {
+      return { error: "ticket_dropped", hint: `${ticket_ref} was dropped. Stop working on it and wait for the next task.` };
+    }
+    // The task cited has to be the latest, and not judged yet
+    const judged = events.some((e) => e.kind === "verdict" && e.ticket_ref === ticket_ref && e.seq > (task_seq as number));
+    if (task_seq !== ticket.taskSeq || judged) {
+      return {
+        error: "stale_reference",
+        hint: judged
+          ? `The task ${task_seq} of ${ticket_ref} already has a verdict. Wait for the next task of the ticket.`
+          : `The latest task of ${ticket_ref} is ${ticket.taskSeq}. Deliver what it asks and cite it in task_seq.`,
+      };
+    }
+    return { ticket_ref, data: { task_seq, branch, commit } };
+  }
+
   function rule(kind: SentKind, peer: Caller, to: string, body: Record<string, unknown>): Ruling {
     if (kind === "task" && peer.role === "mother") return untracked(body);
     if (kind === "result" && peer.role === "leader") return untracked(body);
     if (kind === "task") return assignment(to, body);
+    if (kind === "result") return delivery(peer, body);
     throw new Error(`no rule for ${kind} from ${peer.role}`);
   }
 
@@ -160,17 +198,23 @@ export function createSend(log: Log) {
     const ruling = rule(kind as SentKind, peer, to, body);
     if ("error" in ruling) return no(ruling.error, ruling.hint);
 
-    const seq = log.record({
-      kind: kind as SentKind,
-      from: peer.name,
-      role_from: peer.role,
-      to,
-      summary,
-      body: body.body as string | undefined,
-      ticket_ref: ruling.ticket_ref,
-      data: ruling.data,
+    return log.transaction(() => {
+      const seq = log.record({
+        kind: kind as SentKind,
+        from: peer.name,
+        role_from: peer.role,
+        to,
+        summary,
+        body: body.body as string | undefined,
+        ticket_ref: ruling.ticket_ref,
+        data: ruling.data,
+      });
+      // A worker that delivers is no longer blocked, whatever its blocked was about
+      if (kind === "result" && peer.role === "worker" && log.blocked(peer.name)) {
+        log.record({ kind: "unblocked", from: "broker", role_from: "broker", data: { peer: peer.name } });
+      }
+      return { ok: true, seq };
     });
-    return { ok: true, seq };
   }
 
   return { send };
