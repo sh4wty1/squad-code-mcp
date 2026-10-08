@@ -592,14 +592,14 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Testes em `broker/test/integration/server-feature.test.ts`, com clientes MCP reais
-- [ ] FEAT-29: a sessão da `mother` lista `open_feature` e `close_feature`; a do `leader` não
-- [ ] FEAT-30: `open_feature` devolve `Feature <id> opened with seq <n>.`, com o `id` e o `seq` gravados
-- [ ] FEAT-31: `close_feature` devolve `Recorded with seq <n>.`
-- [ ] FEAT-32: `open_feature` com feature aberta devolve erro com `feature_already_open` e o `hint` do broker
-- [ ] FEAT-33: o `leader` recebe pelo canal a notificação com `kind` `feature_opened` e, no `content`, os seis campos; a entrega dele fica confirmada e o polling seguinte vem vazio; o mesmo para `feature_closed` com `outcome`
-- [ ] Critério de sucesso 1: `mother` e `leader` vão de `open_feature` a `close_feature` passando por um `send_task` e um `plan`, sem escrita em `features` por fora
-- [ ] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test` (fim de fase)
+- [x] Testes em `broker/test/integration/server-feature.test.ts`, com clientes MCP reais
+- [x] FEAT-29: a sessão da `mother` lista `open_feature` e `close_feature`; a do `leader` não
+- [x] FEAT-30: `open_feature` devolve `Feature <id> opened with seq <n>.`, com o `id` e o `seq` gravados
+- [x] FEAT-31: `close_feature` devolve `Recorded with seq <n>.`
+- [x] FEAT-32: `open_feature` com feature aberta devolve erro com `feature_already_open` e o `hint` do broker
+- [x] FEAT-33: o `leader` recebe pelo canal a notificação com `kind` `feature_opened` e, no `content`, os seis campos; a entrega dele fica confirmada e o polling seguinte vem vazio; o mesmo para `feature_closed` com `outcome`
+- [x] Critério de sucesso 1: `mother` e `leader` vão de `open_feature` a `close_feature` passando por um `send_task` e um `plan`, sem escrita em `features` por fora
+- [x] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test` (fim de fase)
 
 **Tests**: integration
 **Gate**: build
