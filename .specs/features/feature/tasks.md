@@ -222,12 +222,12 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] `/repo/.git` → `repo`; `C:/Fassi/squad-code-mcp/.git` → `squad-code-mcp`
-- [ ] `git_root` que não termina em `.git` (`/srv/repo.git`) → o último segmento, `repo.git`
-- [ ] `git_root` nulo com `cwd` `C:\Users\Dev\proj` → `proj`; com `cwd` `/home/dev/proj` → `proj`
-- [ ] `git_root` nulo com `cwd` `C:\` → texto vazio
-- [ ] Testes em `broker/test/unit/feature-open.test.ts`
-- [ ] Gate: `bun test test/unit`
+- [x] `/repo/.git` → `repo`; `C:/Fassi/squad-code-mcp/.git` → `squad-code-mcp`
+- [x] `git_root` que não termina em `.git` (`/srv/repo.git`) → o último segmento, `repo.git`
+- [x] `git_root` nulo com `cwd` `C:\Users\Dev\proj` → `proj`; com `cwd` `/home/dev/proj` → `proj`
+- [x] `git_root` nulo com `cwd` `C:\` → texto vazio
+- [x] Testes em `broker/test/unit/feature-open.test.ts`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
