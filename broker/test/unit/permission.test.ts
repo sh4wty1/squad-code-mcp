@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "no
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadHumanToken } from "../../permission.ts";
-import { HUMAN_TOKEN, JUDGE, NOW, setup, WORKER_1, WORKER_2 } from "./helpers.ts";
+import { HUMAN_TOKEN, JUDGE, NOW, setup, storedOpened, toOthers, WORKER_1, WORKER_2 } from "./helpers.ts";
 
 const REQUEST = {
   request_id: "abcde",
@@ -79,13 +79,14 @@ test("EVT-62: loadHumanToken reuses the token of a file that exists, and replace
 
 test("EVT-60: a permission request is stored addressed to the human, with its four fields in data and no delivery", () => {
   const b = setup();
-  const id = b.openFeature();
+  const id = b.openByRule();
   b.clock.now = NOW + 25;
   const answer = b.permission.request(WORKER_1, { ...REQUEST, to: "leader", summary: "s", body: "b", ticket_ref: "A", extra: 1 });
-  expect(answer).toEqual({ ok: true, seq: 1 });
+  expect(answer).toEqual({ ok: true, seq: 2 });
   expect(b.events()).toEqual([
+    storedOpened(1, id),
     {
-      seq: 1,
+      seq: 2,
       ts: NOW + 25,
       kind: "permission_request",
       feature_id: id,
@@ -100,7 +101,8 @@ test("EVT-60: a permission request is stored addressed to the human, with its fo
       data: REQUEST,
     },
   ]);
-  expect(b.deliveries()).toEqual([]);
+  // only the deliveries of the feature_opened
+  expect(b.deliveries()).toEqual(toOthers(1));
 });
 
 test("EVT-60: the summary of a request is the first 80 characters of tool_name and description", () => {
@@ -135,13 +137,13 @@ test("EVT-61: a request without request_id and tool_name as non-empty strings, o
 
 test("EVT-66: a decision with the human credential is stored from the human to the peer of the request, with a pending delivery", () => {
   const b = setup();
-  const id = b.openFeature();
+  const id = b.openByRule();
   const asked = b.permission.request(WORKER_1, REQUEST) as { seq: number };
   b.clock.now = NOW + 3000;
   const answer = decide(b, asked.seq, "allow", { to: "leader", from: "worker-1", summary: "s", body: "b", ticket_ref: "A" });
-  expect(answer).toEqual({ ok: true, seq: 2 });
-  expect(b.events()[1]).toEqual({
-    seq: 2,
+  expect(answer).toEqual({ ok: true, seq: 3 });
+  expect(b.events()[2]).toEqual({
+    seq: 3,
     ts: NOW + 3000,
     kind: "permission_decision",
     feature_id: id,
@@ -153,10 +155,10 @@ test("EVT-66: a decision with the human credential is stored from the human to t
     ticket_ref: null,
     question_id: null,
     gate_id: null,
-    data: { request_seq: 1, behavior: "allow" },
+    data: { request_seq: 2, behavior: "allow" },
   });
-  expect(b.deliveries()).toEqual([{ event_seq: 2, recipient: "worker-1", acked_at: null }]);
-  expect(b.log.pending("worker-1").map((e) => e.seq)).toEqual([2]);
+  expect(b.deliveries()).toEqual([...toOthers(1), { event_seq: 3, recipient: "worker-1", acked_at: null }]);
+  expect(b.log.pending("worker-1").map((e) => e.seq)).toEqual([1, 3]);
 });
 
 test("EVT-66: a decision of deny is stored, with the first 80 characters of behavior and tool_name as summary", () => {
@@ -179,14 +181,16 @@ test("EVT-59: without an open feature the request and the decision are stored wi
   expect(b.permission.request(WORKER_1, REQUEST)).toEqual({ ok: true, seq: 1 });
   expect(decide(b, 1)).toEqual({ ok: true, seq: 2 });
   // and a request of a feature that closed is decided in none
-  const old = b.openFeature();
-  expect(b.permission.request(WORKER_2, REQUEST)).toEqual({ ok: true, seq: 3 });
-  b.closeFeature(old);
-  expect(decide(b, 3, "deny")).toEqual({ ok: true, seq: 4 });
+  const old = b.openByRule();
+  expect(b.permission.request(WORKER_2, REQUEST)).toEqual({ ok: true, seq: 4 });
+  b.closeByRule();
+  expect(decide(b, 4, "deny")).toEqual({ ok: true, seq: 6 });
   expect(b.events().map((e) => [e.kind, e.feature_id])).toEqual([
     ["permission_request", null],
     ["permission_decision", null],
+    ["feature_opened", old],
     ["permission_request", old],
+    ["feature_closed", old],
     ["permission_decision", null],
   ]);
 });
