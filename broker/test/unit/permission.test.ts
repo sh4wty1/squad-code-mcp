@@ -255,6 +255,15 @@ test("EVT-63: a request_seq that is not the seq of a permission_request is refus
   }
 });
 
+test("EVT-63: a request_seq below the first seq is not taken for the request that opens the log", () => {
+  const b = setup();
+  b.permission.request(WORKER_1, REQUEST);
+  for (const request_seq of [0, -1, -50]) {
+    refusedDecision(b, () => decide(b, request_seq), "invalid_field");
+  }
+  expect(decide(b, 1)).toEqual({ ok: true, seq: 2 });
+});
+
 test("EVT-63: the missing_field of a decision comes before its invalid_field, and this before permission_closed", () => {
   const b = setup();
   b.session.turnStarted(WORKER_1);
