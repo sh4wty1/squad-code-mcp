@@ -300,9 +300,9 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] FEAT-26 em `broker/test/unit/derive.test.ts`: log vazio → lista vazia; uma aberta com `closed_seq` e `outcome` nulos; uma fechada com o `seq` e o `outcome` do `feature_closed` de mesmo `feature_id`; duas features em ordem de `id`; `refused` e os outros kinds não geram item
-- [ ] FEAT-27 em `broker/test/unit/replay.test.ts`: depois de abrir, recusar uma segunda abertura, fechar como `abandoned`, recusar um segundo encerramento e abrir outra, `features(log.after(0))` é igual a `SELECT` de `features` sem `project`
-- [ ] Gate: `bun test test/unit`
+- [x] FEAT-26 em `broker/test/unit/derive.test.ts`: log vazio → lista vazia; uma aberta com `closed_seq` e `outcome` nulos; uma fechada com o `seq` e o `outcome` do `feature_closed` de mesmo `feature_id`; duas features em ordem de `id`; `refused` e os outros kinds não geram item
+- [x] FEAT-27 em `broker/test/unit/replay.test.ts`: depois de abrir, recusar uma segunda abertura, fechar como `abandoned`, recusar um segundo encerramento e abrir outra, `features(log.after(0))` é igual a `SELECT` de `features` sem `project`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
