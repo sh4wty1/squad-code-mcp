@@ -409,13 +409,13 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Cada uma das onze rotas tem, contra o processo real: caminho feliz, `unknown_peer` com `id` desconhecido, ausente e não texto, e corpo que não é objeto JSON
-- [ ] Toda recusa responde status 200 com `ok` falso e `hint` não vazio; `unknown_peer` e corpo inválido não aumentam `events`
-- [ ] `/ack` com `seqs` que não é lista de inteiros recebe `missing_field`; `/history` com zero ou dois filtros recebe `missing_field`; nenhum dos dois grava `refused`
-- [ ] Uma recusa de `/send` aumenta `events` em uma linha, o `refused`, e não altera `deliveries`
-- [ ] Sessão que cai entre o polling e o `/ack`: o novo `id` do mesmo nome recebe os mesmos eventos
-- [ ] Um `POST` a rota desconhecida continua respondendo 404
-- [ ] Gate: `bun test`
+- [x] Cada uma das onze rotas tem, contra o processo real: caminho feliz, `unknown_peer` com `id` desconhecido, ausente e não texto, e corpo que não é objeto JSON
+- [x] Toda recusa responde status 200 com `ok` falso e `hint` não vazio; `unknown_peer` e corpo inválido não aumentam `events`
+- [x] `/ack` com `seqs` que não é lista de inteiros recebe `missing_field`; `/history` com zero ou dois filtros recebe `missing_field`; nenhum dos dois grava `refused`
+- [x] Uma recusa de `/send` aumenta `events` em uma linha, o `refused`, e não altera `deliveries`
+- [x] Sessão que cai entre o polling e o `/ack`: o novo `id` do mesmo nome recebe os mesmos eventos
+- [x] Um `POST` a rota desconhecida continua respondendo 404
+- [x] Gate: `bun test`
 
 **Tests**: integration
 **Gate**: full

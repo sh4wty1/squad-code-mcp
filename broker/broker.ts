@@ -3,26 +3,107 @@
  * squad broker daemon
  *
  * A singleton HTTP server on 127.0.0.1 (port 7900 by default) backed by SQLite.
- * Tracks the peers of the squad and logs their presence as events.
+ * Tracks the peers of the squad and keeps the event log: what they send to each
+ * other, what is still to be delivered and what each one owes.
  *
  * Auto-launched by the MCP server if not already running.
  * Run directly: bun broker.ts
  */
 
-import { cleanupIntervalMs, dbPath, port } from "./shared/config.ts";
+import { cleanupIntervalMs, dbPath, port, tokenPath } from "./shared/config.ts";
 import { openDatabase } from "./db.ts";
-import { createPeers, type RegisterRequest } from "./peers.ts";
+import { createLog, type HistoryFilter } from "./log.ts";
+import { createPeers, refuse, type RegisterRequest } from "./peers.ts";
+import { createPermission, loadHumanToken } from "./permission.ts";
+import { createPlan } from "./plan.ts";
+import { createSend, type Caller } from "./send.ts";
+import { createSession } from "./session.ts";
+import { createState } from "./state.ts";
 
 const PORT = port();
 const DB_PATH = dbPath();
-const ROUTES = ["/register", "/heartbeat", "/list-peers", "/unregister"];
+const PEER_ROUTES = ["/register", "/heartbeat", "/list-peers", "/unregister"];
+// The routes that only a registered peer calls: its id says who it is
+const CREDENTIAL_ROUTES = [
+  "/send",
+  "/plan",
+  "/poll-messages",
+  "/ack",
+  "/history",
+  "/state",
+  "/blocked",
+  "/unblocked",
+  "/usage",
+  "/turn-started",
+  "/permission-request",
+];
+const ROUTES = [...PEER_ROUTES, ...CREDENTIAL_ROUTES];
 
 const db = openDatabase(DB_PATH);
 const peers = createPeers(db);
+const log = createLog(db);
+const { send } = createSend(log);
+const { plan } = createPlan(log);
+const session = createSession(log);
+const permission = createPermission(log, loadHumanToken(tokenPath()));
+const { state } = createState(log);
 
 // Clean up stale peers (PIDs that no longer exist) on startup, then periodically
 peers.cleanStale();
 setInterval(peers.cleanStale, cleanupIntervalMs());
+
+// Exactly one of the three filters, of its type. A filter that is null was not sent.
+function historyFilter(body: Record<string, unknown>): HistoryFilter | null {
+  const { ticket_ref, question_id, gate_id } = body;
+  if ([ticket_ref, question_id, gate_id].filter((f) => f != null).length !== 1) return null;
+  if (typeof ticket_ref === "string") return { ticket_ref };
+  if (Number.isInteger(question_id)) return { question_id: question_id as number };
+  if (Number.isInteger(gate_id)) return { gate_id: gate_id as number };
+  return null;
+}
+
+// What a route with credential answers to `peer`, the holder of the id of the request.
+// The refusals of /ack and /history are of transport and reading: they leave no trace in the log.
+function answer(path: string, peer: Caller, body: Record<string, unknown>): unknown {
+  switch (path) {
+    case "/send":
+      return send(peer, body);
+    case "/plan":
+      return plan(peer, body);
+    case "/poll-messages":
+      return { events: log.pending(peer.name) };
+    case "/ack": {
+      const { seqs } = body;
+      if (!Array.isArray(seqs) || !seqs.every(Number.isInteger)) {
+        return refuse("missing_field", "Send seqs as the list of the integer seq of each event received.");
+      }
+      log.ack(peer.name, seqs);
+      return { ok: true };
+    }
+    case "/history": {
+      const filter = historyFilter(body);
+      if (!filter) {
+        return refuse(
+          "missing_field",
+          "Send exactly one of ticket_ref as a string, question_id as an integer or gate_id as an integer."
+        );
+      }
+      return { events: log.history(filter) };
+    }
+    case "/state":
+      return state(peer);
+    case "/blocked":
+      return session.blocked(peer, body);
+    case "/unblocked":
+      return session.unblocked(peer);
+    case "/usage":
+      return session.usage(peer, body);
+    case "/turn-started":
+      return session.turnStarted(peer);
+    default:
+      return permission.request(peer, body);
+  }
+}
 
 // --- HTTP Server ---
 
@@ -50,6 +131,17 @@ Bun.serve({
       const body: unknown = await req.json().catch(() => null);
       if (typeof body !== "object" || body === null || Array.isArray(body)) {
         return Response.json({ ok: false, error: "missing_field", hint: "Send a JSON object as the body." });
+      }
+
+      if (CREDENTIAL_ROUTES.includes(path)) {
+        // Before any rule: who is not registered leaves no event, not even a refused
+        const peer = peers.find((body as Record<string, unknown>).id);
+        if (!peer) {
+          return Response.json(
+            refuse("unknown_peer", "This id is not registered. Register again and use the id that comes back.")
+          );
+        }
+        return Response.json(answer(path, peer, body as Record<string, unknown>));
       }
 
       // An id that is missing or not a string is an id nobody has

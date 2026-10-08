@@ -39,14 +39,17 @@ function scratch(): string {
 
 // A real server.ts process driven by an MCP client over stdio, the way Claude Code drives it
 async function startSession(port: number, env: Record<string, string>, serverDir = BROKER_DIR) {
+  const dir = scratch();
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: [join(serverDir, "server.ts")],
     cwd: BROKER_DIR,
-    // SQUAD_DB always set: a server that starts a broker by mistake must not touch the real database
+    // SQUAD_DB and SQUAD_TOKEN_FILE always set: a server that starts a broker by mistake must not
+    // touch the real database nor the real human credential
     env: cleanEnv({
       SQUAD_PORT: String(port),
-      SQUAD_DB: join(scratch(), "squad.db"),
+      SQUAD_DB: join(dir, "squad.db"),
+      SQUAD_TOKEN_FILE: join(dir, "squad.token"),
       SQUAD_PING_INTERVAL_MS: String(PING_MS),
       ...env,
     }),
@@ -234,7 +237,21 @@ test("PEER-34: the server starts the broker from a path with a space, and the br
   const dir = tempDir();
   const copy = join(dir, "squad fork");
   mkdirSync(copy);
-  for (const file of ["server.ts", "broker.ts", "cli.ts", "db.ts", "peers.ts", "shared", "package.json"]) {
+  for (const file of [
+    "server.ts",
+    "broker.ts",
+    "cli.ts",
+    "db.ts",
+    "peers.ts",
+    "log.ts",
+    "send.ts",
+    "plan.ts",
+    "session.ts",
+    "permission.ts",
+    "state.ts",
+    "shared",
+    "package.json",
+  ]) {
     cpSync(join(BROKER_DIR, file), join(copy, file), { recursive: true });
   }
   symlinkSync(join(BROKER_DIR, "node_modules"), join(copy, "node_modules"), "junction");

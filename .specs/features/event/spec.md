@@ -339,7 +339,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | -------------- | ----- | ----- | ------ |
 | EVT-01 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-02 | P1: Envio pelas arestas da estrela | Execute | Implementing |
-| EVT-03 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
+| EVT-03 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-04 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-05 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-06 | P1: Envio pelas arestas da estrela | Execute | Implementing |
@@ -347,8 +347,8 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-08 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-09 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-10 | P1: Envio pelas arestas da estrela | Execute | Implementing |
-| EVT-11 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
-| EVT-12 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
+| EVT-11 | P1: Envio pelas arestas da estrela | Execute | Implementing |
+| EVT-12 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-13 | P1: Envio pelas arestas da estrela | Execute | Implementing |
 | EVT-14 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-15 | P1: Plano e ciclo do ticket | Execute | Implementing |
@@ -380,12 +380,12 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-41 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-42 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-43 | P1: Entrega até o transporte | Execute | Implementing |
-| EVT-44 | P1: Entrega até o transporte | Tasks | In Tasks |
+| EVT-44 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-45 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-46 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-47 | P1: Recusa com rastro | Execute | Implementing |
 | EVT-48 | P1: Recusa com rastro | Execute | Implementing |
-| EVT-49 | P1: Recusa com rastro | Tasks | In Tasks |
+| EVT-49 | P1: Recusa com rastro | Execute | Implementing |
 | EVT-50 | P1: Registros da sessão | Execute | Implementing |
 | EVT-51 | P1: Registros da sessão | Execute | Implementing |
 | EVT-52 | P1: Registros da sessão | Execute | Implementing |
@@ -406,7 +406,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-67 | P1: Leitura do log | Execute | Implementing |
 | EVT-68 | P1: Leitura do log | Tasks | In Tasks |
 | EVT-69 | P1: Leitura do log | Execute | Implementing |
-| EVT-70 | P1: Leitura do log | Tasks | In Tasks |
+| EVT-70 | P1: Leitura do log | Execute | Implementing |
 | EVT-71 | P1: Leitura do log | Execute | Implementing |
 | EVT-72 | P1: Leitura do log | Execute | Implementing |
 | EVT-73 | P1: Leitura do log | Execute | Implementing |
