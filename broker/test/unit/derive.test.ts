@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { PlannedTicket, SquadEvent } from "../../shared/contract.ts";
-import { tickets } from "../../shared/derive.ts";
+import { owed, tickets } from "../../shared/derive.ts";
 
 // Events of the open feature in the read format, with the seq given
 function event(seq: number, fields: Record<string, unknown>): SquadEvent {
@@ -207,4 +207,152 @@ test("a task and a result without ticket_ref belong to no ticket", () => {
     event(2, { kind: "result", from: "leader", role_from: "leader", to: "mother", summary: "batch" }),
   ]);
   expect(state.size).toBe(0);
+});
+
+function kickoff(seq: number): SquadEvent {
+  return event(seq, { kind: "task", from: "mother", role_from: "mother", to: "leader", summary: "kickoff" });
+}
+
+const ONE_TICKET = [plan(1, [{ ticket_ref: "A", title: "a" }]), task(2, "A", "worker-1")];
+
+test("EVT-73: a worker whose ticket has a task as its latest event owes the result, with the seq of the task", () => {
+  expect(owed("worker-1", "worker", ONE_TICKET, [])).toEqual([{ owes: "result", ticket_ref: "A", seq: 2 }]);
+});
+
+test("EVT-73: after the result the worker owes nothing, and owes again after the task of the rework", () => {
+  const delivered = [...ONE_TICKET, result(3, "A", "worker-1", 2)];
+  expect(owed("worker-1", "worker", delivered, [])).toEqual([]);
+  const rework = [...delivered, verdict(4, "A", 3, "rework")];
+  expect(owed("worker-1", "worker", rework, [])).toEqual([]);
+  expect(owed("worker-1", "worker", [...rework, task(5, "A", "worker-1")], [])).toEqual([
+    { owes: "result", ticket_ref: "A", seq: 5 },
+  ]);
+});
+
+test("EVT-73: a worker owes no result for a ticket of another worker, a dropped one or one handed to another", () => {
+  expect(owed("worker-2", "worker", ONE_TICKET, [])).toEqual([]);
+
+  const dropped = [...ONE_TICKET, plan(3, [{ ticket_ref: "A", title: "a", dropped: true }])];
+  expect(owed("worker-1", "worker", dropped, [])).toEqual([]);
+
+  const handed = [...ONE_TICKET, task(3, "A", "worker-2")];
+  expect(owed("worker-1", "worker", handed, [])).toEqual([]);
+  expect(owed("worker-2", "worker", handed, [])).toEqual([{ owes: "result", ticket_ref: "A", seq: 3 }]);
+});
+
+test("EVT-74: the judge owes a verdict for each ticket not dropped whose latest event is a result, with the seq of the result", () => {
+  const events = [
+    plan(1, [
+      { ticket_ref: "A", title: "a" },
+      { ticket_ref: "B", title: "b" },
+      { ticket_ref: "C", title: "c" },
+      { ticket_ref: "D", title: "d" },
+    ]),
+    task(2, "A", "worker-1"),
+    task(3, "B", "worker-2"),
+    task(4, "C", "worker-3"),
+    result(5, "B", "worker-2", 3),
+    result(6, "A", "worker-1", 2),
+    result(7, "A", "worker-1", 2),
+  ];
+  // C is still with its worker and D never started
+  expect(owed("judge", "judge", events, [])).toEqual([
+    { owes: "verdict", ticket_ref: "B", seq: 5 },
+    { owes: "verdict", ticket_ref: "A", seq: 7 },
+  ]);
+});
+
+test("EVT-74: the judge owes no verdict for a judged ticket nor for a dropped one", () => {
+  const judged = [...ONE_TICKET, result(3, "A", "worker-1", 2), verdict(4, "A", 3, "approve")];
+  expect(owed("judge", "judge", judged, [])).toEqual([]);
+
+  const dropped = [
+    ...ONE_TICKET,
+    result(3, "A", "worker-1", 2),
+    plan(4, [{ ticket_ref: "A", title: "a", dropped: true }]),
+  ];
+  expect(owed("judge", "judge", dropped, [])).toEqual([]);
+});
+
+// plan, then `rounds` times task, result and verdict of rework for ticket A
+function reworked(rounds: number): SquadEvent[] {
+  const events = [plan(1, [{ ticket_ref: "A", title: "a" }])];
+  for (let i = 0; i < rounds; i++) {
+    const seq = 2 + i * 3;
+    events.push(task(seq, "A", "worker-1"), result(seq + 1, "A", "worker-1", seq), verdict(seq + 2, "A", seq + 1, "rework"));
+  }
+  return events;
+}
+
+test("EVT-75: the leader owes a task after a verdict of rework, with the seq of the verdict", () => {
+  expect(owed("leader", "leader", reworked(1), [])).toEqual([{ owes: "task", ticket_ref: "A", seq: 4 }]);
+  expect(owed("leader", "leader", reworked(2), [])).toEqual([{ owes: "task", ticket_ref: "A", seq: 7 }]);
+});
+
+test("EVT-75: the leader owes no task after the third rework", () => {
+  expect(owed("leader", "leader", reworked(3), [])).toEqual([]);
+});
+
+test("EVT-75: the leader owes no task once it sent it, after an approve or for a dropped ticket", () => {
+  expect(owed("leader", "leader", [...reworked(1), task(5, "A", "worker-1")], [])).toEqual([]);
+
+  const approved = [...ONE_TICKET, result(3, "A", "worker-1", 2), verdict(4, "A", 3, "approve")];
+  expect(owed("leader", "leader", approved, [])).toEqual([]);
+
+  const dropped = [...reworked(1), plan(5, [{ ticket_ref: "A", title: "a", dropped: true }])];
+  expect(owed("leader", "leader", dropped, [])).toEqual([]);
+});
+
+test("EVT-76: the leader owes the plan when the mother sent a task and the feature has no plan, with the seq of the first task", () => {
+  expect(owed("leader", "leader", [kickoff(3)], [])).toEqual([{ owes: "plan", seq: 3 }]);
+  expect(owed("leader", "leader", [kickoff(3), kickoff(6)], [])).toEqual([{ owes: "plan", seq: 3 }]);
+});
+
+test("EVT-76: with a plan in the feature the leader owes no plan, even for a later task of the mother", () => {
+  expect(owed("leader", "leader", [kickoff(1), plan(2, [{ ticket_ref: "A", title: "a" }])], [])).toEqual([]);
+  expect(owed("leader", "leader", [kickoff(1), plan(2, [{ ticket_ref: "A", title: "a" }]), kickoff(3)], [])).toEqual([]);
+});
+
+test("EVT-76: without a task of the mother the leader owes no plan, and nobody else owes it", () => {
+  expect(owed("leader", "leader", [], [])).toEqual([]);
+  expect(owed("mother", "mother", [kickoff(1)], [])).toEqual([]);
+  expect(owed("judge", "judge", [kickoff(1)], [])).toEqual([]);
+  expect(owed("worker-1", "worker", [kickoff(1)], [])).toEqual([]);
+});
+
+test("EVT-80: every pending delivery of the name is a debt of delivery, without ticket_ref", () => {
+  const debts = owed("mother", "mother", [], [9, 4]);
+  expect(debts).toEqual([
+    { owes: "delivery", seq: 4 },
+    { owes: "delivery", seq: 9 },
+  ]);
+  expect(debts.map((d) => Object.keys(d).sort())).toEqual([["owes", "seq"], ["owes", "seq"]]);
+});
+
+test("EVT-80: the debts of a peer come in ascending order of seq, deliveries among the others", () => {
+  const events = [
+    kickoff(1),
+    ...reworked(1).map((e) => event(e.seq + 1, { ...e, seq: e.seq + 1 })),
+  ];
+  // seq 1 kickoff, 2 plan, 3 task, 4 result, 5 verdict of rework
+  expect(owed("leader", "leader", events, [6, 1])).toEqual([
+    { owes: "delivery", seq: 1 },
+    { owes: "task", ticket_ref: "A", seq: 5 },
+    { owes: "delivery", seq: 6 },
+  ]);
+
+  const two = [
+    plan(1, [{ ticket_ref: "A", title: "a" }, { ticket_ref: "B", title: "b" }]),
+    task(2, "B", "worker-2"),
+    task(3, "A", "worker-1"),
+    result(4, "A", "worker-1", 3),
+    result(5, "B", "worker-2", 2),
+  ];
+  // A comes first in the plan and B first in the log
+  expect(owed("judge", "judge", two, [5, 4])).toEqual([
+    { owes: "delivery", seq: 4 },
+    { owes: "verdict", ticket_ref: "A", seq: 4 },
+    { owes: "delivery", seq: 5 },
+    { owes: "verdict", ticket_ref: "B", seq: 5 },
+  ]);
 });

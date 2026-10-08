@@ -158,12 +158,12 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Worker com ticket cujo último evento é `task` deve `result` com o `seq` do `task`; depois do `result` não deve
-- [ ] Judge deve um `verdict` por ticket não descartado em `result`, com o `seq` do `result`
-- [ ] Leader deve `task` depois de `verdict` de `rework` com menos de três reworks, e não deve no terceiro
-- [ ] Leader deve `plan` com `task` mother → leader e sem `plan`, com o `seq` do primeiro `task`; com `plan`, não deve
-- [ ] Toda entrega pendente vira `{ owes: "delivery", seq }` e a lista sai ordenada por `seq`
-- [ ] Gate: `bun test test/unit`
+- [x] Worker com ticket cujo último evento é `task` deve `result` com o `seq` do `task`; depois do `result` não deve
+- [x] Judge deve um `verdict` por ticket não descartado em `result`, com o `seq` do `result`
+- [x] Leader deve `task` depois de `verdict` de `rework` com menos de três reworks, e não deve no terceiro
+- [x] Leader deve `plan` com `task` mother → leader e sem `plan`, com o `seq` do primeiro `task`; com `plan`, não deve
+- [x] Toda entrega pendente vira `{ owes: "delivery", seq }` e a lista sai ordenada por `seq`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

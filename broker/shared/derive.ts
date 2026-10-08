@@ -1,11 +1,12 @@
 /**
  * squad derivation
  *
- * The state of the tickets, computed from the events of the open feature and
- * from nothing else (ADR-002, ADR-006). Pure functions: no database, no clock.
- * The broker decides with them and the TUI shows the same thing.
+ * The state of the tickets and what each peer owes, computed from the events of
+ * the open feature and from nothing else (ADR-002, ADR-006). Pure functions: no
+ * database, no clock. The broker decides with them and the TUI shows the same thing.
  */
 
+import type { Role } from "../peers.ts";
 import type { SquadEvent } from "./contract.ts";
 
 export interface Ticket {
@@ -86,4 +87,45 @@ export function tickets(events: SquadEvent[]): Map<string, Ticket> {
     t.approved = t.last?.kind === "verdict" && t.last.outcome === "approve";
   }
   return all;
+}
+
+export interface Owed {
+  owes: "result" | "verdict" | "task" | "plan" | "delivery";
+  ticket_ref?: string;
+  // the event that created the debt
+  seq: number;
+}
+
+// A ticket takes two reworks: the third verdict of rework leaves it to the leader to drop
+export const REWORK_LIMIT = 3;
+
+// What a peer owes, in ascending order of seq. `events` are those of the open feature
+// and `pendingSeqs` the events still to be delivered to the name.
+export function owed(name: string, role: Role, events: SquadEvent[], pendingSeqs: number[]): Owed[] {
+  // A delivery comes before the debt its own event creates: the peer has to read the
+  // task before it can owe the result
+  const debts: Owed[] = pendingSeqs.map((seq) => ({ owes: "delivery", seq }));
+
+  for (const t of tickets(events).values()) {
+    if (t.dropped || !t.last) continue;
+    const { kind, seq, outcome } = t.last;
+    if (role === "worker" && t.owner === name && kind === "task") {
+      debts.push({ owes: "result", ticket_ref: t.ticket_ref, seq });
+    }
+    if (role === "judge" && kind === "result") {
+      debts.push({ owes: "verdict", ticket_ref: t.ticket_ref, seq });
+    }
+    if (role === "leader" && kind === "verdict" && outcome === "rework" && t.reworks < REWORK_LIMIT) {
+      debts.push({ owes: "task", ticket_ref: t.ticket_ref, seq });
+    }
+  }
+
+  // The plan after the kickoff. With a plan in the feature, a later task of the mother
+  // adds scope and does not oblige the leader to plan again.
+  if (role === "leader" && !events.some((e) => e.kind === "plan")) {
+    const kickoffs = events.filter((e) => e.kind === "task" && e.role_from === "mother").map((e) => e.seq);
+    if (kickoffs.length > 0) debts.push({ owes: "plan", seq: Math.min(...kickoffs) });
+  }
+
+  return debts.sort((a, b) => a.seq - b.seq);
 }
