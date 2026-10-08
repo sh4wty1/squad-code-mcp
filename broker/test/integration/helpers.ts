@@ -111,26 +111,9 @@ export const FEATURE = {
   spec_commit: "abc1234",
 };
 
-// Opens a feature the way the Feature slice will: a row with closed_seq NULL, written
-// straight into the database file of a running broker. Returns its id.
-export function openFeature(file: string): number {
-  const db = new Database(file);
-  try {
-    db.run("PRAGMA busy_timeout = 3000");
-    const result = db.run(
-      `INSERT INTO features (project, title, workflow, branch, base_branch, spec_ref, spec_commit, opened_seq)
-       VALUES ('/repo', ?, ?, ?, ?, ?, ?, 0)`,
-      [FEATURE.title, FEATURE.workflow, FEATURE.branch, FEATURE.base_branch, FEATURE.spec_ref, FEATURE.spec_commit]
-    );
-    return Number(result.lastInsertRowid);
-  } finally {
-    db.close();
-  }
-}
-
 // Opens a feature by the route, as the mother of the id: the feature_opened takes a seq and
 // waits for each of the other five. Returns the id of the feature.
-export async function openByRoute(url: string, motherId: string): Promise<number> {
+export async function openFeature(url: string, motherId: string): Promise<number> {
   const { json } = await post(url, "/open-feature", { id: motherId, ...FEATURE });
   if (!json.ok) throw new Error(`the feature was not opened: ${json.error}`);
   return json.feature_id;

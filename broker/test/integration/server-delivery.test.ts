@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { closeSessions, openByRoute, post, readDb, readDeliveries, startBroker, startSession, waitFor } from "./helpers.ts";
+import { closeSessions, openFeature, post, readDb, readDeliveries, startBroker, startSession, waitFor } from "./helpers.ts";
 
 type Broker = Awaited<ReturnType<typeof startBroker>>;
 
@@ -68,7 +68,7 @@ test("EVT-81/82/83: what was sent to the session is pushed through the channel w
   broker = await startBroker();
   const b = broker;
   const { id, send } = await mother(b);
-  await openByRoute(b.url, id);
+  await openFeature(b.url, id);
   const leader = await session(b, "leader");
   await leader.register();
 
@@ -98,7 +98,7 @@ test("EVT-81: before ready the server does not ask the broker for anything, and 
   broker = await startBroker();
   const b = broker;
   const { id, send } = await mother(b);
-  await openByRoute(b.url, id);
+  await openFeature(b.url, id);
   const first = await send("kick off");
   const second = await send("more scope", "one more page");
 
@@ -125,7 +125,7 @@ test("EVT-81: without SQUAD_POLL_INTERVAL_MS the server polls every second", asy
   broker = await startBroker();
   const b = broker;
   const { id, send } = await mother(b);
-  await openByRoute(b.url, id);
+  await openFeature(b.url, id);
   const leader = await session(b, "leader", { SQUAD_POLL_INTERVAL_MS: "" });
   await leader.register();
   const registered = Date.now();
@@ -142,7 +142,7 @@ test("EVT-81: without SQUAD_POLL_INTERVAL_MS the server polls every second", asy
 test("EVT-82: the push of an event of a ticket carries the fields of its kind and the ticket_ref", async () => {
   broker = await startBroker();
   const b = broker;
-  await openByRoute(b.url, (await mother(b, process.ppid)).id);
+  await openFeature(b.url, (await mother(b, process.ppid)).id);
   const leader = await post(b.url, "/register", { pid: process.pid, cwd: "/repo", git_root: null, name: "leader", role: "leader" });
   await post(b.url, "/plan", { id: leader.json.id, tickets: [{ ticket_ref: "T1", title: "first" }] });
   const task = { id: leader.json.id, kind: "task", to: "worker-1", ticket_ref: "T1", summary: "do the first", loadout: ["tdd"], criteria: [1, 2] };
@@ -308,7 +308,7 @@ test("EVT-81: what was already pending at the registration waits for the first i
   broker = await startBroker();
   const b = broker;
   const { id, send } = await mother(b);
-  await openByRoute(b.url, id);
+  await openFeature(b.url, id);
   await send("kick off");
   const leader = await session(b, "leader", { SQUAD_POLL_INTERVAL_MS: "" });
   await leader.register();
@@ -323,7 +323,7 @@ test("EVT-81: when its stdin closes the server stops polling and exits", async (
   broker = await startBroker();
   const b = broker;
   const { id, send } = await mother(b);
-  await openByRoute(b.url, id);
+  await openFeature(b.url, id);
   const leader = await session(b, "leader");
   await leader.register();
   await waitFor(() => pending(b).length === 4, "the ack of the feature_opened");

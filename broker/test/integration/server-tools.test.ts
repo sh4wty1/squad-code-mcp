@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { FEATURE, closeSessions, openByRoute, post, readDb, readDeliveries, startBroker, startSession, waitFor } from "./helpers.ts";
+import { FEATURE, closeSessions, openFeature, post, readDb, readDeliveries, startBroker, startSession, waitFor } from "./helpers.ts";
 
 type Broker = Awaited<ReturnType<typeof startBroker>>;
 type Session = Awaited<ReturnType<typeof startSession>>;
@@ -66,7 +66,7 @@ for (const [name, own] of [
 test("EVT-90: send_task of the mother with an open feature answers the seq, and the event is of the mother", async () => {
   broker = await startBroker();
   const mother = await joined(broker, "mother");
-  const feature = await openByRoute(broker.url, readDb(broker.dbFile).peers[0]!.id);
+  const feature = await openFeature(broker.url, readDb(broker.dbFile).peers[0]!.id);
 
   // The kind is the tool's and the id is the session's, whatever the arguments carry
   const answer = await mother.call("send_task", {
@@ -119,7 +119,7 @@ test("EVT-91: send_task of the mother without an open feature is an error with n
 
 test("EVT-90/92: plan, send_task, send_result and send_verdict take a ticket from the plan to the verdict, each one with its kind", async () => {
   broker = await startBroker();
-  const feature = await openByRoute(broker.url, await motherId(broker));
+  const feature = await openFeature(broker.url, await motherId(broker));
   const leader = await joined(broker, "leader");
   const worker = await joined(broker, "worker-1");
   const judge = await joined(broker, "judge");
@@ -157,7 +157,7 @@ test("EVT-90/92: plan, send_task, send_result and send_verdict take a ticket fro
 
 test("EVT-91: plan refused by the broker is an error with the error and the hint", async () => {
   broker = await startBroker();
-  await openByRoute(broker.url, await motherId(broker));
+  await openFeature(broker.url, await motherId(broker));
   const leader = await joined(broker, "leader");
   const answer = await leader.call("plan", { tickets: [] });
   expect(answer.isError).toBe(true);
@@ -191,7 +191,7 @@ test("EVT-92: blocked and unblocked call their routes with the id of the session
 test("EVT-92: state and history call their routes with the id of the session and answer the content", async () => {
   broker = await startBroker();
   const b = broker;
-  const feature = await openByRoute(broker.url, await motherId(broker));
+  const feature = await openFeature(broker.url, await motherId(broker));
   const leader = await joined(broker, "leader");
   const worker = await joined(broker, "worker-1");
   await leader.call("plan", { tickets: [{ ticket_ref: "T1", title: "first" }] });

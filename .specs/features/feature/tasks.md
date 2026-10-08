@@ -710,10 +710,10 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Nenhum `openByRoute` em `broker/test/`
-- [ ] Nenhum `INSERT INTO features` em `broker/test/integration/`, e o helper não abre mais o arquivo do banco para escrita
-- [ ] Mesma contagem de testes do fim da T29
-- [ ] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] Nenhum `openByRoute` em `broker/test/`
+- [x] Nenhum `INSERT INTO features` em `broker/test/integration/`, e o helper não abre mais o arquivo do banco para escrita
+- [x] Mesma contagem de testes do fim da T29
+- [x] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build

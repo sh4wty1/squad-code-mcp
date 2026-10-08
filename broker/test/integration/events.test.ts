@@ -1,7 +1,7 @@
 import { afterEach, expect, test } from "bun:test";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join as joinPath } from "node:path";
-import { FEATURE, get, openByRoute, post, readDb, readDeliveries, startBroker, tempDir } from "./helpers.ts";
+import { FEATURE, get, openFeature, post, readDb, readDeliveries, startBroker, tempDir } from "./helpers.ts";
 
 type Broker = Awaited<ReturnType<typeof startBroker>>;
 
@@ -51,7 +51,7 @@ test("EVT-67: GET /events answers the events after the cursor, of any feature an
   broker = await startBroker();
   // 1 with no feature open, 2 to 4 in the feature
   const { mother } = await join(broker, "mother");
-  const feature = await openByRoute(broker.url, mother!);
+  const feature = await openFeature(broker.url, mother!);
   await post(broker.url, "/turn-started", { id: mother });
   await post(broker.url, "/send", { id: mother, kind: "task", to: "leader", summary: "kick off", body: "go" });
 
@@ -232,7 +232,7 @@ test("EVT-78: a broker started again over the same database answers the same and
   // The mother opens the feature and leaves: a pid of this test would not survive as hers,
   // and the two live ones go to the leader and to the worker
   const { mother } = await join(first, "mother");
-  const feature = await openByRoute(first.url, mother!);
+  const feature = await openFeature(first.url, mother!);
   await post(first.url, "/unregister", { id: mother });
   const ids = await join(first, "leader", "worker-1");
   const leader = ids.leader!;

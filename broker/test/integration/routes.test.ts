@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import { Database } from "bun:sqlite";
-import { FEATURE, openByRoute, post, readDb, readDeliveries, startBroker } from "./helpers.ts";
+import { FEATURE, openFeature, post, readDb, readDeliveries, startBroker } from "./helpers.ts";
 
 type Broker = Awaited<ReturnType<typeof startBroker>>;
 
@@ -110,7 +110,7 @@ for (const [path, valid] of Object.entries(ROUTES)) {
     broker = await startBroker();
     // A pending delivery and live peers: the request would be accepted from any of them
     const ids = await join(broker, "mother", "leader");
-    const feature = await openByRoute(broker.url, ids.mother!);
+    const feature = await openFeature(broker.url, ids.mother!);
     await post(broker.url, "/send", { id: ids.mother, kind: "task", to: "leader", summary: "kick off" });
     const before = snapshot(broker, feature);
 
@@ -140,7 +140,7 @@ test("EVT-12: a POST to a route that does not exist still answers 404", async ()
 test("EVT-01/02/13: /send stores the event with the sender of the id and its delivery, with the recipient offline", async () => {
   broker = await startBroker();
   const { mother } = await join(broker, "mother");
-  const feature = await openByRoute(broker.url, mother!);
+  const feature = await openFeature(broker.url, mother!);
   const res = await post(broker.url, "/send", {
     id: mother,
     kind: "task",
@@ -174,7 +174,7 @@ test("EVT-01/02/13: /send stores the event with the sender of the id and its del
 test("EVT-11/47: a refusal of /send adds one row to events, the refused, and changes no delivery", async () => {
   broker = await startBroker();
   const ids = await join(broker, "mother", "worker-1");
-  const feature = await openByRoute(broker.url, ids.mother!);
+  const feature = await openFeature(broker.url, ids.mother!);
   await post(broker.url, "/send", { id: ids.mother, kind: "task", to: "leader", summary: "kick off" });
   const before = snapshot(broker, feature);
   expect(before.deliveries).toHaveLength(6);
@@ -194,7 +194,7 @@ test("EVT-09/47: /send without an open feature is refused with no_open_feature a
 
 test("EVT-15: /plan stores the plan of the leader and answers its seq", async () => {
   broker = await startBroker();
-  const feature = await openByRoute(broker.url, await motherOf(broker));
+  const feature = await openFeature(broker.url, await motherOf(broker));
   const { leader } = await join(broker, "leader");
   const tickets = [
     { ticket_ref: "T1", title: "first" },
@@ -213,7 +213,7 @@ test("EVT-15: /plan stores the plan of the leader and answers its seq", async ()
 test("EVT-16/47: /plan from who is not the leader is refused with edge_not_allowed and leaves a refused of plan", async () => {
   broker = await startBroker();
   const { mother } = await join(broker, "mother");
-  const feature = await openByRoute(broker.url, mother!);
+  const feature = await openFeature(broker.url, mother!);
   const before = snapshot(broker, feature);
   expectRefusal(await post(broker.url, "/plan", { id: mother, ...ROUTES["/plan"] }), "edge_not_allowed");
   expectRefused(broker, before, "mother", "plan", "edge_not_allowed");
@@ -222,7 +222,7 @@ test("EVT-16/47: /plan from who is not the leader is refused with edge_not_allow
 test("EVT-41/42: /poll-messages answers what is pending for the name in ascending seq, again while it is not confirmed", async () => {
   broker = await startBroker();
   const ids = await join(broker, "mother", "leader");
-  const feature = await openByRoute(broker.url, ids.mother!);
+  const feature = await openFeature(broker.url, ids.mother!);
   await post(broker.url, "/send", { id: ids.mother, kind: "task", to: "leader", summary: "kick off" });
   await post(broker.url, "/send", { id: ids.mother, kind: "task", to: "leader", summary: "more scope", body: "one more page" });
   const before = snapshot(broker, feature);
@@ -248,7 +248,7 @@ test("EVT-41/42: /poll-messages answers what is pending for the name in ascendin
 test("EVT-43: /ack confirms the pending deliveries of the caller among seqs, and no other", async () => {
   broker = await startBroker();
   const ids = await join(broker, "mother", "leader");
-  await openByRoute(broker.url, ids.mother!);
+  await openFeature(broker.url, ids.mother!);
   await post(broker.url, "/send", { id: ids.mother, kind: "task", to: "leader", summary: "kick off" });
   await post(broker.url, "/send", { id: ids.mother, kind: "task", to: "leader", summary: "more scope" });
   await post(broker.url, "/send", { id: ids.leader, kind: "result", to: "mother", summary: "delivered" });
@@ -286,7 +286,7 @@ test("EVT-43: /ack confirms the pending deliveries of the caller among seqs, and
 test("EVT-44/49: /ack with seqs that is not a list of integers is refused with missing_field, with no refused and no delivery changed", async () => {
   broker = await startBroker();
   const ids = await join(broker, "mother", "leader");
-  const feature = await openByRoute(broker.url, ids.mother!);
+  const feature = await openFeature(broker.url, ids.mother!);
   await post(broker.url, "/send", { id: ids.mother, kind: "task", to: "leader", summary: "kick off" });
   const before = snapshot(broker, feature);
   for (const seqs of [undefined, null, 3, "3", { 0: 3 }, [3, "4"], [3.5], ["3"], [null]]) {
@@ -298,7 +298,7 @@ test("EVT-44/49: /ack with seqs that is not a list of integers is refused with m
 test("EVT-42/45: a session that falls between the polling and the ack leaves the same events to the next id of the name", async () => {
   broker = await startBroker();
   const ids = await join(broker, "mother", "leader");
-  await openByRoute(broker.url, ids.mother!);
+  await openFeature(broker.url, ids.mother!);
   await post(broker.url, "/send", { id: ids.mother, kind: "task", to: "leader", summary: "kick off" });
   const polled = (await post(broker.url, "/poll-messages", { id: ids.leader })).json;
   expect(polled.events.map((e: any) => [e.seq, e.kind, e.summary])).toEqual([
@@ -317,7 +317,7 @@ test("EVT-42/45: a session that falls between the polling and the ack leaves the
 // the event 2, the plan the event 5 and the task the event 6
 async function planned(b: Broker) {
   const mother = await motherOf(b);
-  const feature = await openByRoute(b.url, mother);
+  const feature = await openFeature(b.url, mother);
   const ids = await join(b, "leader", "worker-1");
   await post(b.url, "/plan", {
     id: ids.leader,
@@ -481,7 +481,7 @@ test("EVT-71: /state without an open feature answers feature null, ticket null a
 
 test("EVT-50: /blocked stores the blocked of the peer with its ticket and answers its seq", async () => {
   broker = await startBroker();
-  const feature = await openByRoute(broker.url, await motherOf(broker));
+  const feature = await openFeature(broker.url, await motherOf(broker));
   const ids = await join(broker, "worker-2");
   const res = await post(broker.url, "/blocked", { id: ids["worker-2"], ticket_ref: "T1", ...ROUTES["/blocked"] });
   expect(res.status).toBe(200);
@@ -548,7 +548,7 @@ test("EVT-56/47: /usage with a count that is not an integer is refused with miss
 test("EVT-58: /turn-started stores the turn_started of the peer with the open feature", async () => {
   broker = await startBroker();
   const { mother } = await join(broker, "mother");
-  const feature = await openByRoute(broker.url, mother!);
+  const feature = await openFeature(broker.url, mother!);
   const res = await post(broker.url, "/turn-started", { id: mother });
   expect(res.status).toBe(200);
   expect(res.json).toEqual({ ok: true, seq: 3 });
