@@ -1,7 +1,7 @@
 import { afterEach, expect, test } from "bun:test";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join as joinPath } from "node:path";
-import { FEATURE, get, openFeature, post, readDb, readDeliveries, startBroker, tempDir } from "./helpers.ts";
+import { FEATURE, get, openByRoute, post, readDb, readDeliveries, startBroker, tempDir } from "./helpers.ts";
 
 type Broker = Awaited<ReturnType<typeof startBroker>>;
 
@@ -49,16 +49,17 @@ test("EVT-67: GET /events on an empty log answers no events and last_seq 0", asy
 
 test("EVT-67: GET /events answers the events after the cursor, of any feature and of none, and the last seq of the log", async () => {
   broker = await startBroker();
-  // 1 with no feature open, 2 and 3 in the feature
+  // 1 with no feature open, 2 to 4 in the feature
   const { mother } = await join(broker, "mother");
-  const feature = openFeature(broker.dbFile);
+  const feature = await openByRoute(broker.url, mother!);
   await post(broker.url, "/turn-started", { id: mother });
   await post(broker.url, "/send", { id: mother, kind: "task", to: "leader", summary: "kick off", body: "go" });
 
   const joined = read({ seq: 1, kind: "peer_joined", from: "broker", role_from: "broker", peer: "mother", role: "mother" });
-  const turn = read({ seq: 2, kind: "turn_started", feature_id: feature, from: "mother", role_from: "mother" });
+  const opened = read({ seq: 2, kind: "feature_opened", feature_id: feature, from: "mother", role_from: "mother", to: "*", ...FEATURE });
+  const turn = read({ seq: 3, kind: "turn_started", feature_id: feature, from: "mother", role_from: "mother" });
   const task = read({
-    seq: 3,
+    seq: 4,
     kind: "task",
     feature_id: feature,
     from: "mother",
@@ -70,16 +71,16 @@ test("EVT-67: GET /events answers the events after the cursor, of any feature an
 
   const afterOne = await get(broker.url, "/events?after=1");
   expect(afterOne.status).toBe(200);
-  expect(afterOne.json).toEqual({ events: [turn, task], last_seq: 3 });
+  expect(afterOne.json).toEqual({ events: [opened, turn, task], last_seq: 4 });
   // without after the cursor is 0
-  expect((await get(broker.url, "/events")).json).toEqual({ events: [joined, turn, task], last_seq: 3 });
-  expect((await get(broker.url, "/events?after=0")).json).toEqual({ events: [joined, turn, task], last_seq: 3 });
-  expect((await get(broker.url, "/events?after=2")).json).toEqual({ events: [task], last_seq: 3 });
+  expect((await get(broker.url, "/events")).json).toEqual({ events: [joined, opened, turn, task], last_seq: 4 });
+  expect((await get(broker.url, "/events?after=0")).json).toEqual({ events: [joined, opened, turn, task], last_seq: 4 });
+  expect((await get(broker.url, "/events?after=3")).json).toEqual({ events: [task], last_seq: 4 });
   // at the last seq and beyond it there is nothing to read, and the cursor is still the last seq
-  expect((await get(broker.url, "/events?after=3")).json).toEqual({ events: [], last_seq: 3 });
-  expect((await get(broker.url, "/events?after=50")).json).toEqual({ events: [], last_seq: 3 });
+  expect((await get(broker.url, "/events?after=4")).json).toEqual({ events: [], last_seq: 4 });
+  expect((await get(broker.url, "/events?after=50")).json).toEqual({ events: [], last_seq: 4 });
   // reading writes nothing
-  expect(readDb(broker.dbFile).events).toHaveLength(3);
+  expect(readDb(broker.dbFile).events).toHaveLength(4);
 });
 
 test("EVT-68/49: GET /events with after that is not an integer of zero or more answers 200 invalid_field, with no refused", async () => {
@@ -228,13 +229,17 @@ test("EVT-12: POST /permission-decision without a JSON object is refused with mi
 test("EVT-78: a broker started again over the same database answers the same and applies the same refusals of state", async () => {
   const first = await startBroker();
   broker = first;
-  const feature = openFeature(first.dbFile);
+  // The mother opens the feature and leaves: a pid of this test would not survive as hers,
+  // and the two live ones go to the leader and to the worker
+  const { mother } = await join(first, "mother");
+  const feature = await openByRoute(first.url, mother!);
+  await post(first.url, "/unregister", { id: mother });
   const ids = await join(first, "leader", "worker-1");
   const leader = ids.leader!;
   const worker = ids["worker-1"]!;
   await post(first.url, "/plan", { id: leader, tickets: [{ ticket_ref: "T1", title: "first" }] });
   const task = { id: leader, kind: "task", to: "worker-1", ticket_ref: "T1", loadout: [] };
-  // 4 is the task and 5 the task that replaces it
+  // 7 is the task and 8 the task that replaces it
   await post(first.url, "/send", { ...task, summary: "do the first" });
   await post(first.url, "/send", { ...task, summary: "do the first, and the page too" });
 
@@ -246,15 +251,16 @@ test("EVT-78: a broker started again over the same database answers the same and
   const before = await answers(first);
   expect(before.state).toEqual({
     feature: { id: feature, ...FEATURE },
-    ticket: { ticket_ref: "T1", title: "first", task_seq: 5, reworks: 0 },
+    ticket: { ticket_ref: "T1", title: "first", task_seq: 8, reworks: 0 },
     owed: [
-      { owes: "delivery", seq: 4 },
-      { owes: "delivery", seq: 5 },
-      { owes: "result", ticket_ref: "T1", seq: 5 },
+      { owes: "delivery", seq: 2 },
+      { owes: "delivery", seq: 7 },
+      { owes: "delivery", seq: 8 },
+      { owes: "result", ticket_ref: "T1", seq: 8 },
     ],
   });
-  expect(before.polled.events.map((e: any) => e.seq)).toEqual([4, 5]);
-  expect(before.log.last_seq).toBe(5);
+  expect(before.polled.events.map((e: any) => e.seq)).toEqual([2, 7, 8]);
+  expect(before.log.last_seq).toBe(8);
 
   // Stops the process and keeps its files
   first.proc.kill();
@@ -265,6 +271,6 @@ test("EVT-78: a broker started again over the same database answers the same and
   expect(await answers(second)).toEqual(before);
 
   const result = { id: worker, kind: "result", to: "judge", summary: "done", ticket_ref: "T1", branch: "squad/t1", commit: "abc1234" };
-  expectRefusal(await post(second.url, "/send", { ...result, task_seq: 4 }), "stale_reference");
-  expect((await post(second.url, "/send", { ...result, task_seq: 5 })).json).toEqual({ ok: true, seq: 7 });
+  expectRefusal(await post(second.url, "/send", { ...result, task_seq: 7 }), "stale_reference");
+  expect((await post(second.url, "/send", { ...result, task_seq: 8 })).json).toEqual({ ok: true, seq: 10 });
 });
