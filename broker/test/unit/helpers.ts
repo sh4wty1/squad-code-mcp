@@ -1,8 +1,18 @@
+import { expect } from "bun:test";
 import { openDatabase } from "../../db.ts";
 import { createLog, type FeatureRow } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
+import { createSend, type Caller } from "../../send.ts";
 
 export const NOW = 1791331200000;
+
+// What `find` answers for the id of each position of the squad
+export const MOTHER: Caller = { name: "mother", role: "mother" };
+export const LEADER: Caller = { name: "leader", role: "leader" };
+export const JUDGE: Caller = { name: "judge", role: "judge" };
+export const WORKER_1: Caller = { name: "worker-1", role: "worker" };
+export const WORKER_2: Caller = { name: "worker-2", role: "worker" };
+export const WORKER_3: Caller = { name: "worker-3", role: "worker" };
 
 // A broker over an in-memory database, with fake liveness and a fixed clock
 export function setup() {
@@ -11,6 +21,7 @@ export function setup() {
   const clock = { now: NOW };
   const peers = createPeers(db, (pid) => alive.has(pid), () => clock.now);
   const log = createLog(db, () => clock.now);
+  const { send } = createSend(log);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
@@ -65,5 +76,37 @@ export function setup() {
     }[];
   }
 
-  return { db, peers, log, alive, clock, join, events, rows, openFeature, closeFeature, deliveries };
+  // Runs a call that has to be refused (EVT-47): the answer is the refusal with a hint, the
+  // log gains its `refused` and nothing else, and no delivery changes. Returns the answer.
+  function refusedWith(call: () => unknown, peer: string, attempted_kind: string, error: string) {
+    const before = events();
+    const deliveriesBefore = deliveries();
+    const answer = call() as { ok: boolean; error: string; hint: string };
+    expect({ ...answer, hint: typeof answer.hint }).toEqual({ ok: false, error, hint: "string" });
+    expect(answer.hint).not.toBe("");
+    expect(events()).toEqual([
+      ...before,
+      {
+        seq: before.length + 1,
+        ts: clock.now,
+        kind: "refused",
+        feature_id: log.openFeature()?.id ?? null,
+        from_name: "broker",
+        role_from: "broker",
+        to_name: null,
+        summary: "",
+        body: "",
+        ticket_ref: null,
+        question_id: null,
+        gate_id: null,
+        data: { peer, attempted_kind, error },
+      },
+    ]);
+    expect(deliveries()).toEqual(deliveriesBefore);
+    return answer;
+  }
+
+  return {
+    db, peers, log, send, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith,
+  };
 }

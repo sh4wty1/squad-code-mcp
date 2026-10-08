@@ -243,12 +243,12 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Um teste por AC de EVT-01 a EVT-10 (sem EVT-03) e EVT-26, conferindo o código de erro ou os campos gravados da spec
-- [ ] Um corpo com `from`, `role_from`, `seq`, `ts` e `feature_id` falsos grava os valores do broker
-- [ ] Cada um dos cinco trios é aceito ou chega à regra do kind, e um trio fora deles recebe `edge_not_allowed`
-- [ ] Um envio que falha em duas regras recebe o erro da primeira da ordem, para cada par vizinho da ordem
-- [ ] Toda recusa grava um `refused` com `attempted_kind` igual ao `kind` recebido, e vazio quando o `kind` não é texto ou passa de 40 caracteres
-- [ ] Gate: `bun test test/unit`
+- [x] Um teste por AC de EVT-01 a EVT-10 (sem EVT-03) e EVT-26, conferindo o código de erro ou os campos gravados da spec
+- [x] Um corpo com `from`, `role_from`, `seq`, `ts` e `feature_id` falsos grava os valores do broker
+- [x] Cada um dos cinco trios é aceito ou chega à regra do kind, e um trio fora deles recebe `edge_not_allowed`
+- [x] Um envio que falha em duas regras recebe o erro da primeira da ordem, para cada par vizinho da ordem
+- [x] Toda recusa grava um `refused` com `attempted_kind` igual ao `kind` recebido, e vazio quando o `kind` não é texto ou passa de 40 caracteres
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
