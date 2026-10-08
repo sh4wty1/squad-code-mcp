@@ -99,9 +99,9 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] `tokenPath({})` é o default e `tokenPath({ SQUAD_TOKEN_FILE })` devolve a variável
-- [ ] `pollIntervalMs({})` é 1000 e lê `SQUAD_POLL_INTERVAL_MS`
-- [ ] Gate: `bun test test/unit`
+- [x] `tokenPath({})` é o default e `tokenPath({ SQUAD_TOKEN_FILE })` devolve a variável
+- [x] `pollIntervalMs({})` é 1000 e lê `SQUAD_POLL_INTERVAL_MS`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

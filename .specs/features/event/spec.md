@@ -398,7 +398,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-59 | P1: Registros da sessão | Tasks | In Tasks |
 | EVT-60 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
 | EVT-61 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
-| EVT-62 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
+| EVT-62 | P1: Permissão decidida fora do terminal | Execute | Implementing |
 | EVT-63 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
 | EVT-64 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
 | EVT-65 | P1: Permissão decidida fora do terminal | Tasks | In Tasks |
@@ -417,7 +417,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-78 | P1: Leitura do log | Tasks | In Tasks |
 | EVT-79 | P1: Leitura do log | Tasks | In Tasks |
 | EVT-80 | P1: Leitura do log | Tasks | In Tasks |
-| EVT-81 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
+| EVT-81 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
 | EVT-82 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
 | EVT-83 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
 | EVT-84 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
