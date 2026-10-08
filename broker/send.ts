@@ -8,7 +8,7 @@
 
 import type { Log } from "./log.ts";
 import { ROSTER, type Refusal, type Role } from "./peers.ts";
-import { EDGES } from "./shared/contract.ts";
+import { EDGES, type Criterion } from "./shared/contract.ts";
 import { REWORK_LIMIT, tickets } from "./shared/derive.ts";
 
 // Who holds the credential of the request: what `find` of the peer registry answers
@@ -50,6 +50,17 @@ const isString = (value: unknown) => typeof value === "string";
 
 function isText(value: unknown): value is string {
   return typeof value === "string" && value !== "";
+}
+
+function isCriterion(value: unknown): value is Criterion {
+  if (typeof value !== "object" || value === null) return false;
+  const { n, text, pass, note } = value as Record<string, unknown>;
+  return (
+    Number.isInteger(n) &&
+    typeof text === "string" &&
+    typeof pass === "boolean" &&
+    (note === undefined || typeof note === "string")
+  );
 }
 
 export function createSend(log: Log) {
@@ -143,12 +154,61 @@ export function createSend(log: Log) {
     return { ticket_ref, data: { task_seq, branch, commit } };
   }
 
+  // verdict judge → leader: about the latest result of the ticket, with nothing after it
+  function judgement(body: Record<string, unknown>): Ruling {
+    const { ticket_ref, result_seq, outcome, criteria } = body;
+    if (
+      !isText(ticket_ref) ||
+      !Number.isInteger(result_seq) ||
+      typeof outcome !== "string" ||
+      !Array.isArray(criteria) ||
+      criteria.length === 0 ||
+      !criteria.every(isCriterion)
+    ) {
+      return {
+        error: "missing_field",
+        hint: "A verdict takes ticket_ref as a non-empty string, result_seq as the integer seq of the result it judges, outcome as a string and criteria as a non-empty list of { n: integer, text: string, pass: boolean, note?: string }.",
+      };
+    }
+    if (outcome !== "approve" && outcome !== "rework") {
+      return { error: "invalid_field", hint: "outcome must be approve or rework." };
+    }
+
+    const events = log.featureEvents();
+    const ticket = tickets(events).get(ticket_ref);
+    if (ticket?.dropped) {
+      return { error: "ticket_dropped", hint: `${ticket_ref} was dropped and takes no verdict. There is nothing to judge.` };
+    }
+    // The result cited has to be the latest, with no verdict and no task after it
+    const seq = result_seq as number;
+    const judged = events.some((e) => e.kind === "verdict" && e.ticket_ref === ticket_ref && e.seq > seq);
+    const superseded = ticket != null && ticket.taskSeq !== null && ticket.taskSeq > seq;
+    if (!ticket || seq !== ticket.resultSeq || judged || superseded) {
+      return {
+        error: "stale_reference",
+        hint: judged
+          ? `The result ${seq} of ${ticket_ref} already has a verdict. Wait for the next result of the ticket.`
+          : superseded
+            ? `A task came for ${ticket_ref} after the result ${seq}. Wait for the result of that task.`
+            : `${seq} is not the latest result of ${ticket_ref}. Call history with the ticket_ref and judge its latest result.`,
+      };
+    }
+    // Only the keys of the contract are stored
+    const stored = (criteria as Criterion[]).map((c) => ({
+      n: c.n,
+      text: c.text,
+      pass: c.pass,
+      ...(c.note !== undefined && { note: c.note }),
+    }));
+    return { ticket_ref, data: { result_seq, outcome, criteria: stored } };
+  }
+
   function rule(kind: SentKind, peer: Caller, to: string, body: Record<string, unknown>): Ruling {
     if (kind === "task" && peer.role === "mother") return untracked(body);
     if (kind === "result" && peer.role === "leader") return untracked(body);
     if (kind === "task") return assignment(to, body);
     if (kind === "result") return delivery(peer, body);
-    throw new Error(`no rule for ${kind} from ${peer.role}`);
+    return judgement(body);
   }
 
   // `peer` is who the id of the request belongs to and `body` the JSON object received.

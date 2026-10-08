@@ -326,10 +326,10 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Um teste por AC de EVT-33 a EVT-38, com o código de erro ou o `data` da spec
-- [ ] Edge cases: segundo `verdict` para o mesmo `result`; `verdict` de `result` substituído por `task` posterior
-- [ ] Ciclo inteiro: `plan`, `task`, `result`, `verdict` de `rework` três vezes; o `task` depois do segundo `rework` é aceito e o depois do terceiro recebe `rework_limit`
-- [ ] Gate: `bun test test/unit`
+- [x] Um teste por AC de EVT-33 a EVT-38, com o código de erro ou o `data` da spec
+- [x] Edge cases: segundo `verdict` para o mesmo `result`; `verdict` de `result` substituído por `task` posterior
+- [x] Ciclo inteiro: `plan`, `task`, `result`, `verdict` de `rework` três vezes; o `task` depois do segundo `rework` é aceito e o depois do terceiro recebe `rework_limit`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

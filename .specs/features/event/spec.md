@@ -369,12 +369,12 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-30 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-31 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-32 | P1: Plano e ciclo do ticket | Execute | Implementing |
-| EVT-33 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-34 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-35 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-36 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-37 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-38 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
+| EVT-33 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-34 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-35 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-36 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-37 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-38 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-39 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-40 | P1: Entrega até o transporte | Execute | Implementing |
 | EVT-41 | P1: Entrega até o transporte | Execute | Implementing |
