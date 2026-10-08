@@ -26,7 +26,7 @@ function stored(seq: number, kind: string, fields: Record<string, unknown> = {})
 
 test("EVT-50: a blocked is stored with its ticket_ref and reason, detail and last_action in data", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   b.clock.now = NOW + 10;
   const answer = b.session.blocked(WORKER_1, { ...BLOCKED, ticket_ref: "A", peer: "worker-2", to: "leader", summary: "s" });
   expect(answer).toEqual({ ok: true, seq: 2 });
@@ -87,7 +87,7 @@ test("EVT-51/52: the missing_field of a blocked comes before the invalid_field o
 
 test("EVT-53: an unblocked is stored with the name of the peer in data", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   b.session.blocked(WORKER_1, BLOCKED);
   b.clock.now = NOW + 30;
   expect(b.session.unblocked(WORKER_1)).toEqual({ ok: true, seq: 3 });
@@ -127,7 +127,7 @@ test("EVT-56: a usage with a count that is not an integer of zero or more is ref
 
 test("EVT-57: a usage is stored with its six fields in data, zeros included", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   b.clock.now = NOW + 77;
   expect(b.session.usage(WORKER_1, { ...USAGE, cost: 3, ticket_ref: "A", to: "leader", summary: "s" })).toEqual({ ok: true, seq: 2 });
   const zeros = { session_id: "s", model: "m", input: 0, output: 0, cache_write: 0, cache_read: 0 };
@@ -150,7 +150,7 @@ test("EVT-57: a usage that repeats the one before is stored again", () => {
 
 test("EVT-58: a turn_started is stored with empty data", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   b.clock.now = NOW + 5;
   expect(b.session.turnStarted(WORKER_1)).toEqual({ ok: true, seq: 2 });
   expect(b.session.turnStarted(JUDGE)).toEqual({ ok: true, seq: 3 });
@@ -170,10 +170,10 @@ test("EVT-59: without an open feature the four records are stored with feature_i
     b.session.turnStarted(WORKER_1),
   ];
   expect(record().map((a) => a.ok)).toEqual([true, true, true, true]);
-  const old = b.openByRule();
-  b.closeByRule();
+  const old = b.openFeature();
+  b.closeFeature();
   expect(record().map((a) => a.ok)).toEqual([true, true, true, true]);
-  const id = b.openByRule();
+  const id = b.openFeature();
   expect(record().map((a) => a.ok)).toEqual([true, true, true, true]);
 
   const kinds = ["blocked", "unblocked", "usage", "turn_started"];
@@ -191,7 +191,7 @@ test("EVT-48: a refused blocked or usage is traced with its kind, with and witho
   const b = setup();
   b.refusedWith(() => b.session.blocked(JUDGE, {}), "judge", "blocked", "missing_field");
   b.refusedWith(() => b.session.usage(JUDGE, {}), "judge", "usage", "missing_field");
-  b.openByRule();
+  b.openFeature();
   b.refusedWith(() => b.session.blocked(LEADER, { ...BLOCKED, reason: "r".repeat(200) }), "leader", "blocked", "invalid_field");
   b.refusedWith(() => b.session.usage(LEADER, { ...USAGE, input: -5 }), "leader", "usage", "missing_field");
 });

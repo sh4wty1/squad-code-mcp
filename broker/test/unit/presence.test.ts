@@ -301,7 +301,7 @@ test("EVT-55: a blocked peer that unregisters is unblocked by the broker, with t
 
 test("EVT-55: a blocked peer removed by the cleanup is unblocked by the broker, in the open feature", () => {
   const b = setup();
-  const feature = b.openByRule();
+  const feature = b.openFeature();
   b.join("worker-2", "worker", 100);
   b.join("worker-3", "worker", 101);
   block(b, "worker-2");
@@ -367,7 +367,7 @@ const TASK_TO_LEADER = { kind: "task", from: "mother", role_from: "mother", to: 
 
 test("EVT-46: the deliveries of a peer that unregisters stay as they were", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   const { id } = b.join("leader", "leader", 100) as { id: string };
   const confirmed = b.log.record(TASK_TO_LEADER);
   b.log.ack("leader", [confirmed]);
@@ -386,7 +386,7 @@ test("EVT-46: the deliveries of a peer that unregisters stay as they were", () =
 
 test("EVT-46: the deliveries of a peer removed by the cleanup stay as they were", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.join("leader", "leader", 100);
   const waiting = b.log.record(TASK_TO_LEADER);
   b.alive.delete(100);
@@ -397,7 +397,7 @@ test("EVT-46: the deliveries of a peer removed by the cleanup stay as they were"
 
 test("EVT-45: a new session of the name gets what was pending for the earlier one", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   const first = b.join("leader", "leader", 100) as { id: string };
   const offline = b.log.record(TASK_TO_LEADER);
   expect(b.log.pending("leader").map((e) => e.seq)).toEqual([1, offline]);

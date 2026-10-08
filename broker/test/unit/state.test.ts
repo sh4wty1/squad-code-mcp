@@ -12,8 +12,8 @@ test("EVT-71: without an open feature the state has feature null, no ticket and 
   for (const peer of EVERYONE) {
     expect(b.state(peer)).toEqual({ feature: null, ticket: null, owed: [] });
   }
-  b.openByRule();
-  b.closeByRule();
+  b.openFeature();
+  b.closeFeature();
   expect(b.state(LEADER)).toEqual({
     feature: null,
     ticket: null,
@@ -27,9 +27,9 @@ test("EVT-71: without an open feature the state has feature null, no ticket and 
 
 test("EVT-71: with an open feature the state has exactly its seven fields", () => {
   const b = setup();
-  b.openByRule({ title: "the old one" });
-  b.closeByRule();
-  const id = b.openByRule({
+  b.openFeature({ title: "the old one" });
+  b.closeFeature();
+  const id = b.openFeature({
     title: "the importer",
     workflow: "matt-pocock",
     branch: "feat/importer",
@@ -61,7 +61,7 @@ test("EVT-71: with an open feature the state has exactly its seven fields", () =
 
 test("EVT-72: a worker with a ticket open has it in the state, with the title of the current plan and the seq of its latest task", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.given.plan([A, B]);
   const first = b.given.task("A", "worker-1");
   expect(b.state(WORKER_1).ticket).toEqual({ ticket_ref: "A", title: "the parser", task_seq: first, reworks: 0 });
@@ -82,7 +82,7 @@ test("EVT-72: a worker with a ticket open has it in the state, with the title of
 
 test("EVT-72: each worker has its own ticket, and the other roles have none", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.given.plan([A, B]);
   const a = b.given.task("A", "worker-1");
   const second = b.given.task("B", "worker-2");
@@ -97,21 +97,21 @@ test("EVT-72: each worker has its own ticket, and the other roles have none", ()
 
 test("EVT-72: an approved ticket, a dropped one, one handed to another worker and one of a feature that closed are not open for the worker", () => {
   const approved = setup();
-  approved.openByRule();
+  approved.openFeature();
   approved.given.plan([A]);
   const task = approved.given.task("A", "worker-1");
   approved.given.verdict("A", approved.given.result("A", "worker-1", task), "approve");
   expect(approved.state(WORKER_1).ticket).toBeNull();
 
   const dropped = setup();
-  dropped.openByRule();
+  dropped.openFeature();
   dropped.given.plan([A]);
   dropped.given.task("A", "worker-1");
   dropped.given.plan([{ ...A, dropped: true }]);
   expect(dropped.state(WORKER_1).ticket).toBeNull();
 
   const handed = setup();
-  handed.openByRule();
+  handed.openFeature();
   handed.given.plan([A]);
   handed.given.task("A", "worker-1");
   const again = handed.given.task("A", "worker-2");
@@ -119,18 +119,18 @@ test("EVT-72: an approved ticket, a dropped one, one handed to another worker an
   expect(handed.state(WORKER_2).ticket).toEqual({ ticket_ref: "A", title: "the parser", task_seq: again, reworks: 0 });
 
   const closed = setup();
-  closed.openByRule();
+  closed.openFeature();
   closed.given.plan([A]);
   closed.given.task("A", "worker-1");
-  closed.closeByRule();
+  closed.closeFeature();
   expect(closed.state(WORKER_1).ticket).toBeNull();
-  closed.openByRule();
+  closed.openFeature();
   expect(closed.state(WORKER_1).ticket).toBeNull();
 });
 
 test("EVT-76: the leader owes the plan after the task of the mother, with the seq of that task, until it plans", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.session.turnStarted(MOTHER);
   expect(b.send(MOTHER, { kind: "task", to: "leader", summary: "kickoff" })).toEqual({ ok: true, seq: 3 });
   expect(b.send(MOTHER, { kind: "task", to: "leader", summary: "one more thing" })).toEqual({ ok: true, seq: 4 });
@@ -152,7 +152,7 @@ test("EVT-76: the leader owes the plan after the task of the mother, with the se
 
 test("EVT-73/74/75/80: what each role owes along a plan, a task, a result and a verdict of rework", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   const criteria = [{ n: 1, text: "works", pass: false }];
   const result = { kind: "result", to: "judge", summary: "done", branch: "squad/x", commit: "abc1234" };
 

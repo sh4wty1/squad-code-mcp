@@ -1,7 +1,7 @@
 import { expect } from "bun:test";
 import { openDatabase } from "../../db.ts";
 import { createFeature } from "../../feature.ts";
-import { createLog, type FeatureFields, type FeatureRow } from "../../log.ts";
+import { createLog, type FeatureFields } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
 import { createPermission } from "../../permission.ts";
 import { createPlan } from "../../plan.ts";
@@ -23,7 +23,7 @@ export const WORKER_1: Caller = { name: "worker-1", role: "worker" };
 export const WORKER_2: Caller = { name: "worker-2", role: "worker" };
 export const WORKER_3: Caller = { name: "worker-3", role: "worker" };
 
-// The fields `openByRule` opens a feature with, unless the test gives others
+// The fields `openFeature` opens a feature with, unless the test gives others
 export const OPENED = {
   title: "the feature",
   workflow: "tlc",
@@ -42,7 +42,7 @@ export function toOthers(seq: number) {
   }));
 }
 
-// The feature_opened of `openByRule`, as stored
+// The feature_opened of `openFeature`, as stored
 export function storedOpened(seq: number, feature_id: number, fields: Record<string, unknown> = {}) {
   return {
     seq,
@@ -110,37 +110,9 @@ export function setup() {
     return db.query("SELECT * FROM peers ORDER BY registered_at, name").all() as Record<string, unknown>[];
   }
 
-  // Opens a feature the way the Feature slice will: a row with closed_seq NULL. Returns its id.
-  function openFeature(fields: Partial<FeatureRow> = {}): number {
-    const f = {
-      project: "/repo",
-      title: "the feature",
-      workflow: "tlc",
-      branch: "feat/x",
-      base_branch: "main",
-      spec_ref: ".specs/features/x/spec.md",
-      spec_commit: "abc1234",
-      opened_seq: 0,
-      ...fields,
-    };
-    const result = db.run(
-      `INSERT INTO features (project, title, workflow, branch, base_branch, spec_ref, spec_commit, opened_seq)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [f.project, f.title, f.workflow, f.branch, f.base_branch, f.spec_ref, f.spec_commit, f.opened_seq]
-    );
-    return Number(result.lastInsertRowid);
-  }
-
-  function closeFeature(id: number) {
-    db.run(
-      "UPDATE features SET closed_seq = (SELECT COALESCE(MAX(seq), 0) FROM events), outcome = 'delivered' WHERE id = ?",
-      [id]
-    );
-  }
-
   // Opens a feature by the rule, as the mother: the feature_opened takes a seq and leaves
   // five pending deliveries, which nothing here confirms. Returns its id.
-  function openByRule(fields: Partial<FeatureFields> = {}): number {
+  function openFeature(fields: Partial<FeatureFields> = {}): number {
     const answer = feature.open(
       { ...MOTHER, cwd: "/repo", git_root: "/repo/.git" },
       { ...OPENED, ...fields }
@@ -150,7 +122,7 @@ export function setup() {
   }
 
   // Closes the open feature by the rule, as delivered. Returns the seq of the feature_closed.
-  function closeByRule(): number {
+  function closeFeature(): number {
     const answer = feature.close(MOTHER, { outcome: "delivered" });
     if (!answer.ok) throw new Error(`the feature was not closed: ${answer.error}`);
     return answer.seq;
@@ -227,6 +199,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, plan, session, permission, state, feature, alive, clock, join, events, rows, openFeature, closeFeature, openByRule, closeByRule, deliveries, refusedWith, given,
+    db, peers, log, send, plan, session, permission, state, feature, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
   };
 }

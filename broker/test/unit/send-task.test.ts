@@ -12,7 +12,7 @@ function task(ticket_ref: unknown, to = "worker-1", fields: Record<string, unkno
 // A broker with a feature open and A and B in its plan
 function planned() {
   const b = setup();
-  const feature = b.openByRule();
+  const feature = b.openFeature();
   b.given.plan([A, B]);
   return { ...b, feature };
 }
@@ -80,10 +80,10 @@ test("EVT-20: a task for a ticket outside the current plan is refused with unpla
 
 test("EVT-20: without a plan in the open feature a task is refused with unplanned_ticket", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.given.plan([A]);
-  b.closeByRule();
-  b.openByRule();
+  b.closeFeature();
+  b.openFeature();
   b.refusedWith(() => b.send(LEADER, task("A")), "leader", "task", "unplanned_ticket");
 });
 
@@ -164,16 +164,16 @@ test("EVT-24: the plan that drops the open ticket of a worker frees it", () => {
 
 test("EVT-20/22/23/24: the tickets of a feature that closed do not count, even with the same ticket_ref", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.given.plan([A, B, { ticket_ref: "C", title: "c" }, { ticket_ref: "D", title: "d", dropped: true }]);
   // there A was approved, B had three reworks, C is open for worker-3 and D was dropped
   const first = b.given.task("A", "worker-1");
   b.given.verdict("A", b.given.result("A", "worker-1", first), "approve");
   b.given.reworks("B", "worker-2", 3);
   b.given.task("C", "worker-3");
-  b.closeByRule();
+  b.closeFeature();
 
-  const id = b.openByRule();
+  const id = b.openFeature();
   b.given.plan([A, B, { ticket_ref: "D", title: "d" }]);
   const answers = [
     b.send(LEADER, task("A", "worker-1")),

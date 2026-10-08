@@ -27,7 +27,7 @@ function stored(seq: number, feature_id: number | null, fields: Record<string, u
 
 test("EVT-01: a task of the mother to the leader is stored with its envelope and answered with its seq", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   b.clock.now = NOW + 700;
   const answer = b.send(MOTHER, KICKOFF);
   expect(answer).toEqual({ ok: true, seq: 2 });
@@ -37,7 +37,7 @@ test("EVT-01: a task of the mother to the leader is stored with its envelope and
 
 test("EVT-01: a result of the leader to the mother is stored with its envelope and answered with its seq", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   b.send(MOTHER, KICKOFF);
   const answer = b.send(LEADER, BATCH);
   expect(answer).toEqual({ ok: true, seq: 3 });
@@ -60,7 +60,7 @@ test("EVT-01: a result of the leader to the mother is stored with its envelope a
 
 test("EVT-01: an absent body is stored empty and an absent ticket_ref null", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   expect(b.send(MOTHER, { kind: "task", to: "leader", summary: "go" })).toEqual({ ok: true, seq: 2 });
   expect(b.send(MOTHER, { kind: "task", to: "leader", summary: "go on", body: "", ticket_ref: null })).toEqual({
     ok: true,
@@ -75,7 +75,7 @@ test("EVT-01: an absent body is stored empty and an absent ticket_ref null", () 
 
 test("EVT-01: data holds only the fields of the kind, and these two edges have none", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   const extra = { loadout: ["tdd"], criteria: [1], task_seq: 1, branch: "b", commit: "c", anything: { at: "all" } };
   expect(b.send(MOTHER, { ...KICKOFF, ...extra })).toEqual({ ok: true, seq: 2 });
   expect(b.send(LEADER, { ...BATCH, ...extra })).toEqual({ ok: true, seq: 3 });
@@ -85,9 +85,9 @@ test("EVT-01: data holds only the fields of the kind, and these two edges have n
 
 test("EVT-02: from, role_from, seq, ts and feature_id of the body are ignored: the broker stamps its own", () => {
   const b = setup();
-  b.openByRule();
-  b.closeByRule();
-  const id = b.openByRule();
+  b.openFeature();
+  b.closeFeature();
+  const id = b.openFeature();
   b.send(MOTHER, KICKOFF);
   b.clock.now = NOW + 60;
   const answer = b.send(LEADER, {
@@ -115,7 +115,7 @@ test("EVT-02: from, role_from, seq, ts and feature_id of the body are ignored: t
 
 test("EVT-04: kind or to absent or not a string is refused with missing_field", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   const { kind, ...noKind } = KICKOFF;
   const { to, ...noTo } = KICKOFF;
   b.refusedWith(() => b.send(MOTHER, noKind), "mother", "", "missing_field");
@@ -130,7 +130,7 @@ test("EVT-04: kind or to absent or not a string is refused with missing_field", 
 
 test("EVT-04: summary absent, not a string or empty is refused with missing_field", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   const { summary, ...noSummary } = KICKOFF;
   b.refusedWith(() => b.send(MOTHER, noSummary), "mother", "task", "missing_field");
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, summary: 12 }), "mother", "task", "missing_field");
@@ -140,7 +140,7 @@ test("EVT-04: summary absent, not a string or empty is refused with missing_fiel
 
 test("EVT-04: a body that is present and not a string is refused with missing_field", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, body: 5 }), "mother", "task", "missing_field");
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, body: { text: "x" } }), "mother", "task", "missing_field");
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, body: null }), "mother", "task", "missing_field");
@@ -148,7 +148,7 @@ test("EVT-04: a body that is present and not a string is refused with missing_fi
 
 test("EVT-05: a kind that is not task, result or verdict is refused with invalid_kind", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   for (const kind of ["question", "answer", "gate", "plan", "blocked", "refused", "peer_joined", "nonsense", "", "Task"]) {
     b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, kind }), "mother", kind, "invalid_kind");
   }
@@ -173,7 +173,7 @@ test("EVT-05: the hint of invalid_kind points to the route of a kind that has on
 
 test("EVT-06: a summary of more than 80 characters is refused with invalid_field, and one of 80 is stored", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, summary: "x".repeat(81) }), "mother", "task", "invalid_field");
   expect(b.send(MOTHER, { ...KICKOFF, summary: "x".repeat(80) })).toEqual({ ok: true, seq: 3 });
   expect(b.events()[2]).toEqual(stored(3, id, { summary: "x".repeat(80) }));
@@ -181,7 +181,7 @@ test("EVT-06: a summary of more than 80 characters is refused with invalid_field
 
 test("EVT-07: a recipient that is not a name of the squad nor human is refused with unknown_recipient", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   for (const to of ["*", "worker-4", "worker", "Leader", "broker", "", "nobody"]) {
     b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, to }), "mother", "task", "unknown_recipient");
   }
@@ -189,7 +189,7 @@ test("EVT-07: a recipient that is not a name of the squad nor human is refused w
 
 test("EVT-07: the six names of the squad and human are known recipients", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   // known, and a task of the mother only goes to the leader
   for (const to of ["mother", "judge", "worker-1", "worker-2", "worker-3", "human"]) {
     b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, to }), "mother", "task", "edge_not_allowed");
@@ -227,8 +227,8 @@ test("EVT-08: only the five trios of kind, sender and recipient pass the edge", 
 test("EVT-09: without an open feature a send is refused with no_open_feature", () => {
   const b = setup();
   b.refusedWith(() => b.send(MOTHER, KICKOFF), "mother", "task", "no_open_feature");
-  const id = b.openByRule();
-  b.closeByRule();
+  const id = b.openFeature();
+  b.closeFeature();
   b.refusedWith(() => b.send(LEADER, BATCH), "leader", "result", "no_open_feature");
   expect(b.events().map((e) => [e.kind, e.feature_id])).toEqual([
     ["refused", null],
@@ -286,7 +286,7 @@ test("EVT-10: no_open_feature comes before the invalid_field of the fields of th
 
 test("EVT-13: a send to a name of the squad with no registered session is stored", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   expect(b.rows()).toEqual([]);
   expect(b.send(MOTHER, KICKOFF)).toEqual({ ok: true, seq: 2 });
   expect(b.events()).toEqual([storedOpened(1, id), stored(2, id)]);
@@ -295,7 +295,7 @@ test("EVT-13: a send to a name of the squad with no registered session is stored
 
 test("EVT-26: a task of the mother to the leader with a ticket_ref is refused with invalid_field", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, ticket_ref: "T-1" }), "mother", "task", "invalid_field");
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, ticket_ref: "" }), "mother", "task", "invalid_field");
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, ticket_ref: 4 }), "mother", "task", "invalid_field");
@@ -303,13 +303,13 @@ test("EVT-26: a task of the mother to the leader with a ticket_ref is refused wi
 
 test("EVT-26: a result of the leader to the mother with a ticket_ref is refused with invalid_field", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.refusedWith(() => b.send(LEADER, { ...BATCH, ticket_ref: "T-1" }), "leader", "result", "invalid_field");
 });
 
 test("EVT-48: the refused keeps a kind of up to 40 characters, and is empty for a longer one or one that is not a string", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   const kept = "k".repeat(40);
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, kind: kept }), "mother", kept, "invalid_kind");
   b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, kind: "k".repeat(41) }), "mother", "", "invalid_kind");

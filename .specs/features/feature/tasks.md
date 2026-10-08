@@ -528,10 +528,10 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Nenhum `openByRule` nem `closeByRule` em `broker/test/`
-- [ ] Nenhum `INSERT INTO features` nem `UPDATE features` em `broker/test/unit/helpers.ts`
-- [ ] Mesma contagem de testes de unidade do fim da T20
-- [ ] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] Nenhum `openByRule` nem `closeByRule` em `broker/test/`
+- [x] Nenhum `INSERT INTO features` nem `UPDATE features` em `broker/test/unit/helpers.ts`
+- [x] Mesma contagem de testes de unidade do fim da T20
+- [x] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build

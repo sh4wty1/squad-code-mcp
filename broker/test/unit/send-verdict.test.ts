@@ -27,7 +27,7 @@ function verdict(ticket_ref: unknown, result_seq: unknown, fields: Record<string
 // A broker with a feature open, A and B in its plan and A in review: task 3, result 4
 function inReview() {
   const b = setup();
-  const feature = b.openByRule();
+  const feature = b.openFeature();
   b.given.plan([A, B]);
   b.given.result("A", "worker-1", b.given.task("A", "worker-1"));
   return { ...b, feature };
@@ -153,8 +153,8 @@ test("EVT-35: a verdict of a ticket without a result is refused with stale_refer
 
 test("EVT-35: a verdict that cites the result of a feature that closed is refused with stale_reference", () => {
   const b = inReview();
-  b.closeByRule();
-  b.openByRule();
+  b.closeFeature();
+  b.openFeature();
   b.given.plan([A]);
   b.refusedWith(() => b.send(JUDGE, verdict("A", 4)), "judge", "verdict", "stale_reference");
   b.given.task("A", "worker-1");
@@ -219,7 +219,7 @@ test("EVT-10: the invalid_field of the fields of the kind comes before the refus
 
 test("EVT-23: the whole cycle: the task after the second rework is accepted and the one after the third gets rework_limit", () => {
   const b = setup();
-  const id = b.openByRule();
+  const id = b.openFeature();
   const task = { kind: "task", to: "worker-1", summary: "build the parser", ticket_ref: "A", loadout: [] };
   const result = { kind: "result", to: "judge", summary: "done", ticket_ref: "A", branch: "squad/a", commit: "0f3c9aa" };
 

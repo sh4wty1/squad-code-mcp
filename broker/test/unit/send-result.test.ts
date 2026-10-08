@@ -22,7 +22,7 @@ function result(ticket_ref: unknown, task_seq: unknown, fields: Record<string, u
 // A broker with a feature open, A and B in its plan and A with worker-1: the task is seq 3
 function working() {
   const b = setup();
-  const feature = b.openByRule();
+  const feature = b.openFeature();
   b.given.plan([A, B]);
   b.given.task("A", "worker-1");
   return { ...b, feature };
@@ -93,11 +93,11 @@ test("EVT-29: a result of a worker that is not the owner of the ticket is refuse
 
 test("EVT-29: a result of a ticket that received no task in the open feature is refused with not_owner", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.given.plan([A, B]);
   const before = b.given.task("B", "worker-1");
-  b.closeByRule();
-  b.openByRule();
+  b.closeFeature();
+  b.openFeature();
   b.given.plan([A, B]);
   // planned and never started, not in the plan at all, and started only in a feature that closed
   b.refusedWith(() => b.send(WORKER_1, result("A", 1)), "worker-1", "result", "not_owner");
@@ -123,11 +123,11 @@ test("EVT-30: a result whose task_seq is not the seq of the latest task of the t
 
 test("EVT-30: a result that cites the task of a feature that closed is refused with stale_reference", () => {
   const b = setup();
-  b.openByRule();
+  b.openFeature();
   b.given.plan([A]);
   const before = b.given.task("A", "worker-1");
-  b.closeByRule();
-  b.openByRule();
+  b.closeFeature();
+  b.openFeature();
   b.given.plan([A]);
   const now = b.given.task("A", "worker-1");
   b.refusedWith(() => b.send(WORKER_1, result("A", before)), "worker-1", "result", "stale_reference");
@@ -221,7 +221,7 @@ test("EVT-54: a blocked about another ticket, about none or from before the feat
 
   const b = setup();
   b.log.record({ ...BLOCKED, from: "worker-1" });
-  b.openByRule();
+  b.openFeature();
   b.given.plan([A]);
   const task = b.given.task("A", "worker-1");
   b.send(WORKER_1, result("A", task));
