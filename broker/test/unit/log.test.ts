@@ -396,3 +396,15 @@ test("EVT-69: history by question_id and by gate_id filters by the column, in an
   expect(b.log.history({ gate_id: 6 })).toEqual([]);
   expect(b.log.history({ question_id: 7 })).toEqual([]);
 });
+
+test("FEAT-07: an event of the mother to * gets a pending delivery for each of the other five, and none for her", () => {
+  const b = setup();
+  const seq = b.log.record({ kind: "feature_closed", from: "mother", role_from: "mother", to: "*" });
+  expect(b.deliveries()).toEqual([
+    { event_seq: seq, recipient: "judge", acked_at: null },
+    { event_seq: seq, recipient: "leader", acked_at: null },
+    { event_seq: seq, recipient: "worker-1", acked_at: null },
+    { event_seq: seq, recipient: "worker-2", acked_at: null },
+    { event_seq: seq, recipient: "worker-3", acked_at: null },
+  ]);
+});

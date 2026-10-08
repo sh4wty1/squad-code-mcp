@@ -136,11 +136,11 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] `record` de um evento da `mother` com `to` `*` deixa exatamente cinco entregas, `leader`, `judge`, `worker-1`, `worker-2` e `worker-3`, com `acked_at` nulo, e nenhuma para `mother`
-- [ ] `task`, `result`, `verdict` e `permission_decision` continuam com uma entrega, para o `to`
-- [ ] Um kind sem entrega (`plan`, `refused`) continua sem nenhuma
-- [ ] Sem `feature_id` informado, o evento leva o da feature aberta, como antes
-- [ ] Gate: `bun test test/unit`
+- [x] `record` de um evento da `mother` com `to` `*` deixa exatamente cinco entregas, `leader`, `judge`, `worker-1`, `worker-2` e `worker-3`, com `acked_at` nulo, e nenhuma para `mother`
+- [x] `task`, `result`, `verdict` e `permission_decision` continuam com uma entrega, para o `to`
+- [x] Um kind sem entrega (`plan`, `refused`) continua sem nenhuma
+- [x] Sem `feature_id` informado, o evento leva o da feature aberta, como antes
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

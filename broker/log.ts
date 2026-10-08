@@ -8,7 +8,7 @@
 
 import type { Database } from "bun:sqlite";
 import { appendEvent, isBlocked } from "./db.ts";
-import { refuse, type Refusal } from "./peers.ts";
+import { refuse, ROSTER, type Refusal } from "./peers.ts";
 import { toRead, type EventRow, type Kind, type SquadEvent } from "./shared/contract.ts";
 
 export interface FeatureRow {
@@ -58,13 +58,13 @@ export function createLog(db: Database, now: () => number = Date.now) {
     return rows.map(toRead);
   }
 
-  // Event and delivery in one transaction: if the delivery fails, the event is not
-  // stored. The recipient does not have to be registered. Returns the seq.
-  const record = db.transaction((event: NewRecord): number => {
+  // An event to "*" waits for every position of the squad but its author. Without a
+  // feature_id from the caller, the event takes the one of the open feature.
+  function write(event: NewRecord, feature_id?: number): number {
     const seq = appendEvent(db, {
       ts: now(),
       kind: event.kind,
-      feature_id: openFeature()?.id ?? null,
+      feature_id: feature_id ?? openFeature()?.id ?? null,
       from_name: event.from,
       role_from: event.role_from,
       to_name: event.to,
@@ -73,11 +73,21 @@ export function createLog(db: Database, now: () => number = Date.now) {
       ticket_ref: event.ticket_ref,
       data: event.data,
     });
-    if (DELIVERED.includes(event.kind)) {
-      db.run("INSERT INTO deliveries (event_seq, recipient) VALUES (?, ?)", [seq, event.to ?? null]);
+    const recipients =
+      event.to === "*"
+        ? ROSTER.map((r) => r.name).filter((name) => name !== event.from)
+        : DELIVERED.includes(event.kind)
+          ? [event.to ?? null]
+          : [];
+    for (const recipient of recipients) {
+      db.run("INSERT INTO deliveries (event_seq, recipient) VALUES (?, ?)", [seq, recipient]);
     }
     return seq;
-  });
+  }
+
+  // Event and delivery in one transaction: if the delivery fails, the event is not
+  // stored. The recipient does not have to be registered. Returns the seq.
+  const record = db.transaction((event: NewRecord): number => write(event));
 
   // What `write` records is stored together or not at all
   function transaction<T>(write: () => T): T {
