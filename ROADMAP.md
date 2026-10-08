@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** fatia Peer, a primeira da construção.
+**Agora:** fatia Event. A Peer está no PR 2.
 
 ## Decidir (concluído)
 
@@ -29,7 +29,7 @@ tarefas, implementação e verificação independente, com PR revisado por `/the
 
 | | Fatia | Fase do START | Entrega | Depende de |
 |---|---|---|---|---|
-| [ ] | Peer | 1 | Sessões entram no broker com nome e papel; presença vira evento | Fase 0 |
+| [x] | Peer | 1 | Sessões entram no broker com nome e papel; presença vira evento | Fase 0 |
 | [ ] | Event | 1 | Log append-only, envio com recusa por topologia, entrega, leitura por cursor | Peer |
 | [ ] | Feature | 1 | Abertura e encerramento de feature com workflow travado | Event |
 | [ ] | TUI leitura | 2 | Feed, agentes, tickets, topologia e detalhe de ticket | Feature, frames |
@@ -68,8 +68,11 @@ Sessão nova neste repositório:
 
 Implemente a fatia <nome> de .design/squad-mvp.md. O design e os ADRs em docs/adr/ já
 estão decididos: a spec deriva da fatia, não reabra as decisões. Registre no STATE.md
-só o que for decisão nova, apontando para o ADR quando existir um. Mensagens de commit
-seguem a convenção do repositório. Ao terminar, marque a fatia em ROADMAP.md.
+só o que for decisão nova, apontando para o ADR quando existir um.
+
+Precisa rodar no Windows e no Linux: rode a suíte nos dois antes de fechar, ou registre
+qual dos dois ficou sem rodar. Mensagens de commit seguem a convenção do repositório.
+Trabalhe num branch e abra um PR no fim. Ao terminar, marque a fatia em ROADMAP.md.
 ```
 
 A fatia Peer é a primeira de código e precisa trazer o upstream antes. Para ela, use este

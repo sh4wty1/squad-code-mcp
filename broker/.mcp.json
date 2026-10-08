@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "squad": {
+      "command": "bun",
+      "args": ["./server.ts"]
+    }
+  }
+}

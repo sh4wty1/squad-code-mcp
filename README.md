@@ -2,7 +2,7 @@
 
 Run Claude Code sessions as a squad (mother, leader, workers, judge) over a shared MCP broker, with a terminal UI to watch them work and answer their open questions.
 
-> **Status: design phase.** There is no code yet. The spec is being closed from [`docs/start-document/START.md`](docs/start-document/START.md); nothing here is installable.
+> **Status: under construction.** The broker registers sessions by name and role ([`broker/`](broker/README.md)); it does not carry messages yet. Progress is in [`ROADMAP.md`](ROADMAP.md).
 
 ## How it works
 

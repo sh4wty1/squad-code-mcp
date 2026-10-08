@@ -1,0 +1,375 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 21,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "surviving_mutant::when an ac fixes the order of two steps test a scenario whose result differs if the steps are swapped",
+      "text": "When an AC fixes the order of two steps, test a scenario whose result differs if the steps are swapped",
+      "signal": "surviving_mutant",
+      "scope": "broker-rules",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "P7 broker/peers.ts:117 (PEER-09) (broker-rules)",
+        "mutant M11 broker/peers.ts:110 (cleanup order vs input refusals) (broker-rules)"
+      ],
+      "created": "2026-10-07T18:54:22Z",
+      "last_seen": "2026-10-07T19:35:33Z"
+    },
+    {
+      "id": "L-002",
+      "key": "surviving_mutant::assert the listen address of a server on the real socket not on a url helper",
+      "text": "Assert the listen address of a server on the real socket, not on a URL helper",
+      "signal": "surviving_mutant",
+      "scope": "routes",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "B4 broker/broker.ts:31 (PEER-20) (routes)"
+      ],
+      "created": "2026-10-07T18:54:23Z",
+      "last_seen": "2026-10-07T18:54:23Z"
+    },
+    {
+      "id": "L-003",
+      "key": "surviving_mutant::assert range and variation of a generated secret not just its type",
+      "text": "Assert range and variation of a generated secret, not just its type",
+      "signal": "surviving_mutant",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "S15 broker/server.ts:117 (PEER-27) (mcp-server)"
+      ],
+      "created": "2026-10-07T18:54:23Z",
+      "last_seen": "2026-10-07T18:54:23Z"
+    },
+    {
+      "id": "L-004",
+      "key": "surviving_mutant::put every spec defined default in the config module and unit test the default value",
+      "text": "Put every spec-defined default in the config module and unit-test the default value",
+      "signal": "surviving_mutant",
+      "scope": "config",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "B3 broker/broker.ts:18, S7 broker/server.ts:39 (PEER-38, PEER-28) (config)"
+      ],
+      "created": "2026-10-07T18:54:23Z",
+      "last_seen": "2026-10-07T18:54:23Z"
+    },
+    {
+      "id": "L-005",
+      "key": "ac_gap::test every http route with an empty body and a malformed body not only with valid json",
+      "text": "Test every HTTP route with an empty body and a malformed body, not only with valid JSON",
+      "signal": "ac_gap",
+      "scope": "routes",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PEER-23 broker/broker.ts:44 (routes)"
+      ],
+      "created": "2026-10-07T18:54:23Z",
+      "last_seen": "2026-10-07T18:54:23Z"
+    },
+    {
+      "id": "L-006",
+      "key": "ac_gap::when an ac lists several triggers give each trigger its own assertion or a recorded platform skip",
+      "text": "When an AC lists several triggers, give each trigger its own assertion or a recorded platform skip",
+      "signal": "ac_gap",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PEER-33 broker/test/integration/server.test.ts:195 (mcp-server)"
+      ],
+      "created": "2026-10-07T18:54:23Z",
+      "last_seen": "2026-10-07T18:54:23Z"
+    },
+    {
+      "id": "L-007",
+      "key": "spec_precision_gap::before tasks check every edge case against every ac that writes on the refusal path and state which rule wins",
+      "text": "Before tasks, check every edge case against every AC that writes on the refusal path and state which rule wins",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PEER-09 vs edge case 3, broker/peers.ts:117 (spec)"
+      ],
+      "created": "2026-10-07T18:54:23Z",
+      "last_seen": "2026-10-07T18:54:23Z"
+    },
+    {
+      "id": "L-008",
+      "key": "surviving_mutant::test a caller relative result from a caller whose group has several members not only from a singleton",
+      "text": "Test a caller-relative result from a caller whose group has several members, not only from a singleton",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant N28 broker/peers.ts:169 (PEER-16) (broker tests)"
+      ],
+      "created": "2026-10-07T19:20:35Z",
+      "last_seen": "2026-10-07T19:20:35Z"
+    },
+    {
+      "id": "L-009",
+      "key": "spec_precision_gap::state in the spec what a request answers when any field has the wrong type not only the required fields",
+      "text": "State in the spec what a request answers when any field has the wrong type, not only the required fields",
+      "signal": "spec_precision_gap",
+      "scope": "spec routes",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PEER-10 / validation.md spec-precision gap 1 (git_root object answers 500) (spec routes)",
+        "PEER-21 / validation.md spec-precision gap 1 (heartbeat id object answers 500) (spec routes)",
+        "PEER-29 server.ts:220 (spec routes)"
+      ],
+      "created": "2026-10-07T19:20:35Z",
+      "last_seen": "2026-10-07T20:24:49Z"
+    },
+    {
+      "id": "L-010",
+      "key": "surviving_mutant::when an ac lists several triggers give each trigger its own assertion or a recorded platform skip",
+      "text": "When an AC lists several triggers, give each trigger its own assertion or a recorded platform skip",
+      "signal": "surviving_mutant",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server)",
+        "mutant C3 broker/cli.ts:78 (PEER-44 lookup finds nothing) (cli)",
+        "mutant C5 broker/cli.ts:80 (PEER-44 signal fails) (cli)"
+      ],
+      "created": "2026-10-07T19:35:33Z",
+      "last_seen": "2026-10-07T22:57:31Z"
+    },
+    {
+      "id": "L-011",
+      "key": "surviving_mutant::for each validated input field test a present value of the wrong type not only the absent field",
+      "text": "For each validated input field, test a present value of the wrong type, not only the absent field",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "X5 peers.ts:100 (PEER-10) (broker tests)"
+      ],
+      "created": "2026-10-07T20:24:49Z",
+      "last_seen": "2026-10-07T20:24:49Z"
+    },
+    {
+      "id": "L-012",
+      "key": "surviving_mutant::assert every element of a refusal hint included for each input class the ac names",
+      "text": "Assert every element of a refusal, hint included, for each input class the AC names",
+      "signal": "surviving_mutant",
+      "scope": "routes",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "X1 broker.ts:65 (PEER-18) (routes)"
+      ],
+      "created": "2026-10-07T20:24:49Z",
+      "last_seen": "2026-10-07T20:24:49Z"
+    },
+    {
+      "id": "L-013",
+      "key": "surviving_mutant::assert the mechanism an ac names on every supported platform not only an outcome one platform reaches without it",
+      "text": "Assert the mechanism an AC names on every supported platform, not only an outcome one platform reaches without it",
+      "signal": "surviving_mutant",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant L6 broker/server.ts:79 (PEER-34 detached, survives on Linux) (mcp-server)",
+        "mutant L3 broker/server.ts:318 (PEER-33 stdin close, passes through the client SIGTERM on Linux) (mcp-server)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-014",
+      "key": "surviving_mutant::test each os error code a helper branches on with a real case that raises it",
+      "text": "Test each OS error code a helper branches on with a real case that raises it",
+      "signal": "surviving_mutant",
+      "scope": "broker-rules",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant L2 broker/peers.ts:74 (PEER-14 EPERM) (broker-rules)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-015",
+      "key": "spec_precision_gap::word an ac per platform when the os api it relies on behaves differently on each",
+      "text": "Word an AC per platform when the OS API it relies on behaves differently on each",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PEER-19 broker/shared/config.ts:29 (os.homedir reads HOME on POSIX) (spec)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-016",
+      "key": "spec_precision_gap::revisit an assumption justified by one platform s limits when a second platform enters scope",
+      "text": "Revisit an assumption justified by one platform's limits when a second platform enters scope",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Assumptions row SIGINT/SIGTERM, mutant L4 broker/server.ts:316 (spec)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-017",
+      "key": "spec_precision_gap::when a command stops a process it looks up state in the ac that nothing else is signalled and test it with a decoy",
+      "text": "When a command stops a process it looks up, state in the AC that nothing else is signalled and test it with a decoy",
+      "signal": "spec_precision_gap",
+      "scope": "cli",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PEER-35 broker/cli.ts:44 (kill-broker signals listeners on other addresses of the port) (cli)"
+      ],
+      "created": "2026-10-07T22:23:44Z",
+      "last_seen": "2026-10-07T22:23:44Z"
+    },
+    {
+      "id": "L-018",
+      "key": "spec_precision_gap::when a new rule makes an existing background behavior load bearing write an ac and a test for that behavior",
+      "text": "When a new rule makes an existing background behavior load-bearing, write an AC and a test for that behavior",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant S3 broker/server.ts:249 (PEER-42 depends on a heartbeat no AC requires) (spec)"
+      ],
+      "created": "2026-10-07T22:57:31Z",
+      "last_seen": "2026-10-07T22:57:31Z"
+    },
+    {
+      "id": "L-019",
+      "key": "surviving_mutant::when a shared rule gains a condition test the new condition through every entry point that applies the rule",
+      "text": "When a shared rule gains a condition, test the new condition through every entry point that applies the rule",
+      "signal": "surviving_mutant",
+      "scope": "broker-rules",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant P13 broker/peers.ts:190 (PEER-16 listing vs heartbeat rule) (broker-rules)"
+      ],
+      "created": "2026-10-07T22:57:31Z",
+      "last_seen": "2026-10-07T22:57:31Z"
+    },
+    {
+      "id": "L-020",
+      "key": "surviving_mutant::assert a spec defined limit with the literal value from the spec not with the constant imported from the code under test",
+      "text": "Assert a spec-defined limit with the literal value from the spec, not with the constant imported from the code under test",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "peer"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "mutant P11 broker/peers.ts:79 (PEER-14, PEER-42, PEER-43 60 s) (broker tests)"
+      ],
+      "created": "2026-10-07T22:57:31Z",
+      "last_seen": "2026-10-07T22:57:31Z"
+    }
+  ]
+}
