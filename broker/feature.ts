@@ -8,7 +8,7 @@
 import { win32 } from "node:path";
 import type { Log } from "./log.ts";
 import type { Refusal } from "./peers.ts";
-import { isText, type Caller } from "./send.ts";
+import { isText, type Answer, type Caller } from "./send.ts";
 
 // Where the session of a peer runs
 export type Where = { cwd: string; git_root: string | null };
@@ -22,6 +22,7 @@ export function projectOf(git_root: string | null, cwd: string): string {
 }
 
 const WORKFLOWS: readonly string[] = ["tlc", "matt-pocock"];
+const OUTCOMES: readonly string[] = ["delivered", "abandoned"];
 
 export function createFeature(log: Log) {
   // `peer` is who the id of the request belongs to and `body` the JSON object received
@@ -67,5 +68,25 @@ export function createFeature(log: Log) {
     return { ok: true, ...opened };
   }
 
-  return { open };
+  // No gate is read here: the rule of the delivery gate comes with the Gate slice
+  function close(peer: Caller, body: Record<string, unknown>): Answer {
+    const no = (error: string, hint: string) => log.refused(peer.name, "feature_closed", error, hint);
+
+    if (peer.role !== "mother") {
+      return no("edge_not_allowed", "Only the mother closes a feature. Ask the mother for what you need.");
+    }
+    if (!log.openFeature()) {
+      return no("no_open_feature", "No feature is open. There is nothing to close.");
+    }
+    const { outcome } = body;
+    if (typeof outcome !== "string" || (body.body !== undefined && typeof body.body !== "string")) {
+      return no("missing_field", "Send outcome as a string and body, if any, as a string.");
+    }
+    if (!OUTCOMES.includes(outcome)) {
+      return no("invalid_field", "outcome must be delivered or abandoned.");
+    }
+    return { ok: true, seq: log.close(peer, outcome, body.body ?? "") };
+  }
+
+  return { open, close };
 }

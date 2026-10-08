@@ -271,19 +271,19 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] FEAT-14: `delivered` e `abandoned` são aceitos e respondem `{ ok: true, seq }`; sem `body` o evento leva `body` vazio
-- [ ] FEAT-15: cada um dos outros três papéis recebe `edge_not_allowed`
-- [ ] FEAT-16: sem feature aberta, `no_open_feature`; a segunda chamada seguida recebe `no_open_feature` e `closed_seq` e `outcome` da primeira ficam
-- [ ] FEAT-17: `outcome` ausente, `null` ou não texto, e `body` presente e não texto → `missing_field`
-- [ ] FEAT-18: `outcome` texto fora dos dois → `invalid_field`
-- [ ] FEAT-19: `leader` sem feature aberta → `edge_not_allowed`; `mother` sem feature e sem `outcome` → `no_open_feature`; `outcome` inválido com `body` não texto → `missing_field`
-- [ ] FEAT-20: toda recusa passa por `refusedWith(..., "feature_closed", ...)` e a linha fica igual
-- [ ] FEAT-22: fechar com um peer bloqueado não grava `unblocked`; `/blocked`, `/usage` e `/turn-started` depois do encerramento gravam `feature_id` nulo
-- [ ] FEAT-23: `delivered` é aceito sem nenhum gate no log
-- [ ] FEAT-24: depois de fechar, `/send` e `/plan` recebem `no_open_feature`; `/state` do worker que tinha ticket vem com `feature` e `ticket` nulos e sem dívida de `result`, `verdict`, `task` ou `plan`
-- [ ] FEAT-25: uma nova abertura é aceita; nela, `worker-1`, que tinha o ticket `T` aberto na anterior, recebe `task` de outro `ticket_ref`, e um `plan` com um `T` novo é aceito
-- [ ] Testes em `broker/test/unit/feature-close.test.ts`
-- [ ] Gate: `bun test test/unit`
+- [x] FEAT-14: `delivered` e `abandoned` são aceitos e respondem `{ ok: true, seq }`; sem `body` o evento leva `body` vazio
+- [x] FEAT-15: cada um dos outros três papéis recebe `edge_not_allowed`
+- [x] FEAT-16: sem feature aberta, `no_open_feature`; a segunda chamada seguida recebe `no_open_feature` e `closed_seq` e `outcome` da primeira ficam
+- [x] FEAT-17: `outcome` ausente, `null` ou não texto, e `body` presente e não texto → `missing_field`
+- [x] FEAT-18: `outcome` texto fora dos dois → `invalid_field`
+- [x] FEAT-19: `leader` sem feature aberta → `edge_not_allowed`; `mother` sem feature e sem `outcome` → `no_open_feature`; `outcome` inválido com `body` não texto → `missing_field`
+- [x] FEAT-20: toda recusa passa por `refusedWith(..., "feature_closed", ...)` e a linha fica igual
+- [x] FEAT-22: fechar com um peer bloqueado não grava `unblocked`; `/blocked`, `/usage` e `/turn-started` depois do encerramento gravam `feature_id` nulo
+- [x] FEAT-23: `delivered` é aceito sem nenhum gate no log
+- [x] FEAT-24: depois de fechar, `/send` e `/plan` recebem `no_open_feature`; `/state` do worker que tinha ticket vem com `feature` e `ticket` nulos e sem dívida de `result`, `verdict`, `task` ou `plan`
+- [x] FEAT-25: uma nova abertura é aceita; nela, `worker-1`, que tinha o ticket `T` aberto na anterior, recebe `task` de outro `ticket_ref`, e um `plan` com um `T` novo é aceito
+- [x] Testes em `broker/test/unit/feature-close.test.ts`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
