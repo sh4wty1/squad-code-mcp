@@ -62,16 +62,16 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-08. A fatia Feature está implementada e verificada no branch `feat/feature`; falta o push e o PR, que esperam o aval do Lucas.
+Escrito em 2026-10-08. A fatia Feature está implementada e verificada no branch `feat/feature`, com o PR 4 aberto (https://github.com/sh4wty1/squad-code-mcp/pull/4).
 
 - **Feature**: fatia Feature, `.specs/features/feature/`
 - **Phase / Task**: Execute concluído. T1 a T31, um commit por tarefa, de `c76e70b` a `ae14f01`.
 - **Completed**: FEAT-01 a FEAT-33, todos verificados. `validate_state.py feature` sai com 0.
 - **In-progress** (file:line): nada
-- **Next step**: push do `feat/feature` e PR, com revisão por `/the-judge`. Depois, a fatia TUI leitura, que pede antes a segunda rodada de frames (`ROADMAP.md`, Pendências).
+- **Next step**: revisão do PR 4 por `/the-judge` e merge. Depois, a fatia TUI leitura, que pede antes a segunda rodada de frames (`ROADMAP.md`, Pendências).
 - **Blockers**: nenhum
 - **Uncommitted files**: none
-- **Branch**: `feat/feature`, saído da `main` em `61e1411`. Ainda não está no `origin`.
+- **Branch**: `feat/feature`, saído da `main` em `61e1411`. Está no `origin`.
 
 ### Como a verificação ficou
 
