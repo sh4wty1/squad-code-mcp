@@ -68,8 +68,8 @@ Escrito em 2026-10-08, depois do merge. A fatia Feature está na `main` pelo PR 
 - **Phase / Task**: concluída e mesclada. T1 a T31, de `c76e70b` a `ae14f01`, mais `47af274`, da revisão do `/the-judge`.
 - **Completed**: FEAT-01 a FEAT-33, todos verificados.
 - **In-progress** (file:line): nada
-- **Next step**: mandar ao Claude Design a terceira rodada de frames (os estados sem feature aberta, abaixo) e, com eles no handoff, abrir a fatia TUI leitura.
-- **Blockers**: os frames da terceira rodada, para a fatia TUI leitura.
+- **Next step**: abrir a fatia TUI leitura. Os frames que ela pede estão todos no handoff.
+- **Blockers**: nenhum
 - **Uncommitted files**: none
 - **Branch**: `main` em `4b59c12`. `feat/feature` foi mesclado.
 
@@ -87,7 +87,8 @@ Relatório em `.specs/features/feature/validation.md`, verificado em `ae14f01`, 
 ### O que a fatia TUI leitura precisa saber
 
 - A segunda rodada de frames já está no handoff: `docs/claude-design-handoff/Handoff-Design.zip` (`1d1ae45`) tem os frames 22 a 25, com o modal de permissão, o agente `stalled`, a mensagem sem reação, os tickets `planned` e `dropped` e a linha de `refused` com contador. O pedido que os gerou é `PROMPT-estados-faltantes-2.md`.
-- O que ainda não tem frame é o que a fatia Feature criou: a linha 0 sem feature aberta (o cabeçalho é fixo em todos os frames, inclusive no 09), a linha de sistema de `feature_opened`, a feature encerrada como `abandoned`, o broker sem nenhuma feature no log e o squad sem feature com um agente `blocked` ou `offline`. O frame 09 só cobre a feature entregue com todos `[idle]`, e o resumo dele cita um gate, que só existe a partir da fatia Gate.
+- A terceira rodada também: os frames 09a, 09b, 11 e 26 a 30 cobrem o que a fatia Feature criou (a linha 0 dependente do estado, a linha de sistema de `feature_opened`, a feature `abandoned`, o broker sem nenhuma feature no log, o squad sem feature com um agente `blocked` ou `offline`, e os tokens da feature e da sessão). O pedido é `PROMPT-estados-faltantes-3.md`.
+- O Claude Design decidiu coisas que a spec não tem, listadas em `docs/claude-design-handoff/DECISOES-rodada-3.md`. As que tocam a derivação: o rótulo `[não lançado]` para o nome que nunca entrou, a tecla `t` que alterna os tokens entre feature e sessão, e a linha 0 sem o nome do projeto. A spec da TUI leitura precisa adotar ou cortar cada uma.
 - `features(events)` em `broker/shared/derive.ts` devolve as linhas de `features` sem `project`, a partir de `GET /events`. `project` não está em nenhum evento: a TUI que quiser o nome do projeto não o tem pelo log.
 - `feature_opened` e `feature_closed` têm `to` `*` e uma entrega para cada um dos cinco nomes que não são `mother`, com sessão ou não. Um nome nunca lançado acumula duas entregas por feature.
 - Encerrar não grava nada além do `feature_closed`: um `blocked` aberto continua aberto e as entregas pendentes continuam pendentes.
