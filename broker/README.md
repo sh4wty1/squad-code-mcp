@@ -1,10 +1,10 @@
 # squad broker
 
-The broker of [squad-code-mcp](../README.md): a daemon on `127.0.0.1` with SQLite, and one MCP stdio server per Claude Code session. Sessions join it with a name and a role, and their presence is logged as events.
+The broker of [squad-code-mcp](../README.md): a daemon on `127.0.0.1` with SQLite, and one MCP stdio server per Claude Code session. Sessions join it with a name and a role. What they send to each other, their presence and every refusal are events of one append-only log.
 
 It is a fork of [louislva/claude-peers-mcp](https://github.com/louislva/claude-peers-mcp) at commit `640183f`, by Louis Arge, under the MIT license in [`LICENSE`](LICENSE). The first commit of this directory is that code unchanged; `git diff 10e92d3 -- broker` shows everything the fork changed.
 
-> **Status:** the Peer slice. Sessions register and are listed. Sending and reading events comes with the Event slice.
+> **Status:** the Peer and Event slices. Sessions register, send `task`, `result` and `verdict` along the edges of the squad, receive them through the channel and read the log. Nothing opens a feature yet: that is the Feature slice, and until then `task`, `result`, `verdict` and `plan` are refused with `no_open_feature`.
 
 ## Requirements
 
@@ -41,6 +41,18 @@ The names are `mother`, `leader`, `judge` and `worker-1` to `worker-3`. A sessio
 
 The server does not register when it starts. It pushes a ping with a number through the channel, every 10 s, and exposes one tool, `ready`. When the model calls `ready` with that number, the server registers with the broker and swaps `ready` for the tools of the role. A registered peer is therefore one whose channel works end to end; a session that cannot hear the channel never shows up as online.
 
+## How a session receives
+
+Once registered, the server asks the broker every second for what was sent to its name. It pushes each event through the channel, in order of `seq`, and only then confirms it with `/ack`. What is not confirmed comes back in the next polling, also to the next session of that name: a session that falls loses nothing.
+
+The push carries the summary, the body and the fields of the kind as text, and `kind`, `seq`, `from` and `ticket_ref` as attributes. The `seq` is what the answer cites: `task_seq` in a result, `result_seq` in a verdict.
+
+## Permission prompts
+
+A session with a role declares `claude/channel/permission`. When Claude Code asks for a permission, the server records a `permission_request` addressed to `human`. The decision goes to `/permission-decision` with the human credential, and reaches the session as the verdict of that request, not as a message to the model. A request is closed once it is decided, or once its session wrote another event or left.
+
+The human credential is a token in a file, `~/.squad-code-mcp.token` by default. The broker creates it when it starts and it is in no answer and no event. Any process of the user can read the file: it keeps an agent from approving its own request by mistake, not on purpose.
+
 ## Settings
 
 | Variable | Default | What |
@@ -49,15 +61,19 @@ The server does not register when it starts. It pushes a ping with a number thro
 | `SQUAD_ROLE` | none | `mother`, `leader`, `worker` or `judge` |
 | `SQUAD_PORT` | `7900` | Port of the broker |
 | `SQUAD_DB` | `~/.squad-code-mcp.db` | SQLite database |
+| `SQUAD_TOKEN_FILE` | `~/.squad-code-mcp.token` | File of the human credential. Created by the broker if it is not there |
 | `SQUAD_PING_INTERVAL_MS` | `10000` | Interval of the channel ping |
 | `SQUAD_HEARTBEAT_INTERVAL_MS` | `15000` | Interval of the heartbeat of a registered session |
 | `SQUAD_CLEANUP_INTERVAL_MS` | `30000` | Interval of the dead-session cleanup |
+| `SQUAD_POLL_INTERVAL_MS` | `1000` | Interval at which a registered session asks for what was sent to it |
 
 Port and database differ from claude-peers (`7899`, `~/.claude-peers.db`), so both can run on the same machine.
 
 ## Routes
 
-Every route is a `POST` with a JSON body, except `/health`. A refusal is a `200` with `{ ok: false, error, hint }`, where `hint` says the next valid step.
+Every route is a `POST` with a JSON body, except `/health` and `/events`. A refusal is a `200` with `{ ok: false, error, hint }`, where `hint` says the next valid step. A body that is not a JSON object is refused with `missing_field`.
+
+### Peers
 
 | Route | Body | Answer |
 | --- | --- | --- |
@@ -69,7 +85,69 @@ Every route is a `POST` with a JSON body, except `/health`. A refusal is a `200`
 
 The `id` is a credential: it comes back from `/register` and is never listed.
 
-A peer that registers writes a `peer_joined` event. One that unregisters writes `peer_left` with `unregistered`. One whose process is gone at the cleanup, or whose last heartbeat is more than 60 s old, writes `peer_left` with `died`. The 60 s count from the start of the broker for a peer that was registered before it.
+### Events
+
+These routes take the `id` of a registered peer. An `id` that is unknown, absent or not a string is refused with `unknown_peer`, and nothing is written.
+
+| Route | Body | Answer |
+| --- | --- | --- |
+| `/send` | `{ id, kind, to, summary, body?, ticket_ref?, ...fields of the kind }` | `{ ok: true, seq }`, or a refusal, in this order: `missing_field`, `invalid_kind`, `invalid_field`, `unknown_recipient`, `edge_not_allowed`, `no_open_feature`, then the ones of the kind |
+| `/plan` | `{ id, tickets: [{ ticket_ref, title, depends_on?, dropped? }] }` | `{ ok: true, seq }`, or `edge_not_allowed`, `no_open_feature`, `missing_field`, `invalid_plan`, `plan_drops_started_ticket` |
+| `/poll-messages` | `{ id }` | `{ events }`: what is still to be delivered to the name, in order of `seq` |
+| `/ack` | `{ id, seqs }` | `{ ok: true }`, or `missing_field`. Confirms only the pending deliveries of the caller |
+| `/history` | `{ id }` and exactly one of `ticket_ref`, `question_id`, `gate_id` | `{ events }`, or `missing_field`. By `ticket_ref` only the open feature is read |
+| `/state` | `{ id }` | `{ feature, ticket, owed }` |
+| `/blocked` | `{ id, reason, detail, last_action, ticket_ref? }` | `{ ok: true, seq }`, or `missing_field`, `invalid_field` |
+| `/unblocked` | `{ id }` | `{ ok: true, seq }` |
+| `/usage` | `{ id, session_id, model, input, output, cache_write, cache_read }` | `{ ok: true, seq }`, or `missing_field` |
+| `/turn-started` | `{ id }` | `{ ok: true, seq }` |
+| `/permission-request` | `{ id, request_id, tool_name, description, input_preview }` | `{ ok: true, seq }`, or `missing_field` |
+
+Two routes take no `id`:
+
+| Route | Body | Answer |
+| --- | --- | --- |
+| `/permission-decision` | `{ human_token, request_seq, behavior }`, `behavior` being `allow` or `deny` | `{ ok: true, seq }`, or `invalid_token`, `missing_field`, `invalid_field`, `permission_closed` |
+| `GET /events?after=<seq>` | | `{ events, last_seq }`: every event after the cursor, the whole log without `after`. `invalid_field` if `after` is not an integer of zero or more |
+
+An event is read as a flat object: `{ seq, ts, kind, feature_id, from, role_from, to, summary, body, ticket_ref }` plus the fields of its kind.
+
+`/send` takes three kinds, each along its edges. Any other kind is refused with `invalid_kind`.
+
+| Kind | Edge | Fields of the kind | Refusals of the kind |
+| --- | --- | --- | --- |
+| `task` | mother to leader | none, and no `ticket_ref` | `invalid_field` |
+| `task` | leader to worker | `ticket_ref`, `loadout`, `criteria?` | `missing_field`, `unplanned_ticket`, `ticket_dropped`, `ticket_closed`, `rework_limit`, `worker_busy` |
+| `result` | worker to judge | `ticket_ref`, `task_seq`, `branch`, `commit` | `missing_field`, `not_owner`, `ticket_dropped`, `stale_reference` |
+| `result` | leader to mother | none, and no `ticket_ref` | `invalid_field` |
+| `verdict` | judge to leader | `ticket_ref`, `result_seq`, `outcome`, `criteria` | `missing_field`, `invalid_field`, `ticket_dropped`, `stale_reference` |
+
+`summary` takes up to 80 characters. The broker fills `from`, `role_from`, `seq`, `ts` and `feature_id` itself, whatever the body says.
+
+`task`, `result`, `verdict` and `plan` need an open feature. No route opens one before the Feature slice, so until then the four are refused with `no_open_feature`. The other routes work without a feature and write their events with `feature_id` null.
+
+A refusal of `/send`, `/plan`, `/blocked`, `/unblocked`, `/usage`, `/turn-started` or `/permission-request` to a registered peer writes a `refused` event with the peer, the kind it tried and the error. The other refusals write nothing.
+
+`task`, `result`, `verdict` and `permission_decision` are delivered: each one waits for its recipient in `/poll-messages` until it is confirmed, whether the recipient is online or not. The other kinds are only recorded.
+
+`events` is append-only. Two triggers abort any `UPDATE` or `DELETE` on it, from any connection.
+
+### Presence
+
+A peer that registers writes a `peer_joined` event. One that unregisters writes `peer_left` with `unregistered`. One whose process is gone at the cleanup, or whose last heartbeat is more than 60 s old, writes `peer_left` with `died`. The 60 s count from the start of the broker for a peer that was registered before it. A peer that leaves while blocked also writes an `unblocked`. What was still to be delivered to its name stays pending.
+
+## Tools
+
+After `ready` a session lists `list_peers`, `state`, `history`, `blocked` and `unblocked`, and the tools that send for its role:
+
+| Role | Tools |
+| --- | --- |
+| `mother` | `send_task` |
+| `leader` | `plan`, `send_task`, `send_result` |
+| `worker` | `send_result` |
+| `judge` | `send_verdict` |
+
+Each tool calls the route of the same name with the `id` of the session; the three `send_*` call `/send` with their kind. A refusal comes back as an error with the `error` and the `hint` of the broker.
 
 ## CLI
 
@@ -80,11 +158,16 @@ bun cli.ts kill-broker   # stop the broker
 
 ## Files
 
-- `broker.ts`: the HTTP daemon
+- `broker.ts`: the HTTP daemon and its routes
 - `peers.ts`: registration, refusals, presence and listing
 - `db.ts`: schema and the write path of the event log
+- `log.ts`: writes an event with its delivery and the trace of a refusal, and reads
+- `send.ts`, `plan.ts`, `session.ts`, `permission.ts`, `state.ts`: the rules of the routes
 - `server.ts`: the MCP server of a session
+- `tools.ts`: the tools of each role
+- `delivery.ts`: the loop of poll, push and ack of a session
 - `cli.ts`: status and stop
+- `shared/contract.ts`, `shared/derive.ts`: the event contract, and the state of the tickets derived from the events
 - `shared/config.ts`, `shared/git.ts`: settings and the git common directory
 - `test/unit`, `test/integration`: `bun test`
 

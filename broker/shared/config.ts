@@ -29,7 +29,17 @@ export function cleanupIntervalMs(env: Env = process.env): number {
   return parseInt(env.SQUAD_CLEANUP_INTERVAL_MS ?? "30000", 10);
 }
 
+// How often a registered session asks the broker for what was sent to it
+export function pollIntervalMs(env: Env = process.env): number {
+  return parseInt(env.SQUAD_POLL_INTERVAL_MS ?? "1000", 10);
+}
+
 export function dbPath(env: Env = process.env): string {
   // os.homedir() instead of $HOME, which is not set on Windows
   return env.SQUAD_DB ?? join(homedir(), ".squad-code-mcp.db");
+}
+
+// The file of the human credential: next to the database, outside any worktree
+export function tokenPath(env: Env = process.env): string {
+  return env.SQUAD_TOKEN_FILE ?? join(homedir(), ".squad-code-mcp.token");
 }

@@ -3,6 +3,8 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 export const BROKER_DIR = join(import.meta.dir, "..", "..");
 
@@ -65,6 +67,11 @@ export async function post(url: string, path: string, body: unknown): Promise<{ 
   return { status: res.status, json: await res.json() };
 }
 
+export async function get(url: string, path: string): Promise<{ status: number; json: any }> {
+  const res = await fetch(`${url}${path}`);
+  return { status: res.status, json: await res.json() };
+}
+
 // What the broker wrote, read straight from its database file
 export function readDb(file: string) {
   const db = new Database(file, { readonly: true });
@@ -80,13 +87,56 @@ export function readDb(file: string) {
   }
 }
 
-// A real broker process on a free port, over a database in a temp directory
+// The deliveries the broker wrote, read straight from its database file
+export function readDeliveries(file: string) {
+  const db = new Database(file, { readonly: true });
+  try {
+    return db.query("SELECT * FROM deliveries ORDER BY event_seq, recipient").all() as {
+      event_seq: number;
+      recipient: string;
+      acked_at: number | null;
+    }[];
+  } finally {
+    db.close();
+  }
+}
+
+// What /state answers about the feature `openFeature` opens, besides its id
+export const FEATURE = {
+  title: "the feature",
+  workflow: "tlc",
+  branch: "feat/x",
+  base_branch: "main",
+  spec_ref: ".specs/features/x/spec.md",
+  spec_commit: "abc1234",
+};
+
+// Opens a feature the way the Feature slice will: a row with closed_seq NULL, written
+// straight into the database file of a running broker. Returns its id.
+export function openFeature(file: string): number {
+  const db = new Database(file);
+  try {
+    db.run("PRAGMA busy_timeout = 3000");
+    const result = db.run(
+      `INSERT INTO features (project, title, workflow, branch, base_branch, spec_ref, spec_commit, opened_seq)
+       VALUES ('/repo', ?, ?, ?, ?, ?, ?, 0)`,
+      [FEATURE.title, FEATURE.workflow, FEATURE.branch, FEATURE.base_branch, FEATURE.spec_ref, FEATURE.spec_commit]
+    );
+    return Number(result.lastInsertRowid);
+  } finally {
+    db.close();
+  }
+}
+
+// A real broker process on a free port, over a database in a temp directory.
+// The human credential goes to the same directory, never to the home of whoever runs the tests.
 export async function startBroker(extraEnv: Record<string, string> = {}, dir = tempDir()) {
   const port = await freePort();
   const dbFile = join(dir, "squad.db");
+  const tokenFile = join(dir, "squad.token");
   const url = `http://127.0.0.1:${port}`;
   const proc = Bun.spawn([process.execPath, join(BROKER_DIR, "broker.ts")], {
-    env: cleanEnv({ SQUAD_PORT: String(port), SQUAD_DB: dbFile, ...extraEnv }),
+    env: cleanEnv({ SQUAD_PORT: String(port), SQUAD_DB: dbFile, SQUAD_TOKEN_FILE: tokenFile, ...extraEnv }),
     stdio: ["ignore", "ignore", "ignore"],
   });
   await waitFor(() => isUp(url), "the broker to answer /health");
@@ -97,5 +147,69 @@ export async function startBroker(extraEnv: Record<string, string> = {}, dir = t
     removeDir(dir);
   }
 
-  return { url, port, dbFile, dir, proc, stop };
+  return { url, port, dbFile, tokenFile, dir, proc, stop };
+}
+
+type Notification = { method: string; params?: any };
+type ToolResult = { isError?: boolean; content: { text: string }[] };
+
+export const PING_MS = 100;
+
+const sessionCleanups: (() => Promise<void> | void)[] = [];
+
+// Closes every session `startSession` started. For the afterEach of a test file, before the broker stops.
+export async function closeSessions() {
+  for (const cleanup of sessionCleanups.splice(0).reverse()) await cleanup();
+}
+
+// A real server.ts process driven by an MCP client over stdio, the way Claude Code drives it
+export async function startSession(port: number, env: Record<string, string>, serverDir = BROKER_DIR) {
+  const dir = tempDir();
+  sessionCleanups.push(() => removeDir(dir));
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [join(serverDir, "server.ts")],
+    cwd: BROKER_DIR,
+    // SQUAD_DB and SQUAD_TOKEN_FILE always set: a server that starts a broker by mistake must not
+    // touch the real database nor the real human credential
+    env: cleanEnv({
+      SQUAD_PORT: String(port),
+      SQUAD_DB: join(dir, "squad.db"),
+      SQUAD_TOKEN_FILE: join(dir, "squad.token"),
+      SQUAD_PING_INTERVAL_MS: String(PING_MS),
+      ...env,
+    }),
+    stderr: "ignore",
+  });
+  const client = new Client({ name: "squad-test", version: "0.0.0" });
+  const notifications: Notification[] = [];
+  client.fallbackNotificationHandler = async (n) => {
+    notifications.push(n as Notification);
+  };
+  await client.connect(transport);
+  sessionCleanups.push(() => client.close());
+
+  const channel = () => notifications.filter((n) => n.method === "notifications/claude/channel");
+  const pings = () => channel().filter((n) => n.params.meta.kind === "ping");
+  // What the channel pushed besides the ping: the events sent to the session
+  const pushed = () => channel().filter((n) => n.params.meta.kind !== "ping");
+  const toolNames = async () => (await client.listTools()).tools.map((t) => t.name);
+  const ready = (number: number) => client.callTool({ name: "ready", arguments: { number } }) as Promise<ToolResult>;
+  // The number the model would read in the ping
+  async function pingNumber(): Promise<number> {
+    await waitFor(() => pings().length > 0, "the first ping");
+    return Number(pings()[0]!.params.meta.number);
+  }
+  // Answers the ping, as the model would, and fails if the broker refuses the session
+  async function register() {
+    const result = await ready(await pingNumber());
+    if (result.isError) throw new Error(result.content[0]!.text);
+  }
+  // Calls a tool and returns its text and whether it is an error
+  async function call(name: string, args: Record<string, unknown> = {}) {
+    const result = (await client.callTool({ name, arguments: args })) as ToolResult;
+    return { isError: result.isError === true, text: result.content[0]!.text };
+  }
+
+  return { client, transport, notifications, pings, pushed, toolNames, ready, pingNumber, register, call };
 }

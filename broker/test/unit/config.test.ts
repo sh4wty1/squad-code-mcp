@@ -1,7 +1,16 @@
 import { expect, test } from "bun:test";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { brokerUrl, cleanupIntervalMs, dbPath, heartbeatIntervalMs, pingIntervalMs, port } from "../../shared/config.ts";
+import {
+  brokerUrl,
+  cleanupIntervalMs,
+  dbPath,
+  heartbeatIntervalMs,
+  pingIntervalMs,
+  pollIntervalMs,
+  port,
+  tokenPath,
+} from "../../shared/config.ts";
 
 test("PEER-19: default database is in the system home directory", () => {
   expect(dbPath({})).toBe(join(homedir(), ".squad-code-mcp.db"));
@@ -34,4 +43,17 @@ test("PEER-38: the cleanup runs every 30 s unless SQUAD_CLEANUP_INTERVAL_MS says
 test("PEER-46: the heartbeat repeats every 15 s unless SQUAD_HEARTBEAT_INTERVAL_MS says otherwise", () => {
   expect(heartbeatIntervalMs({})).toBe(15000);
   expect(heartbeatIntervalMs({ SQUAD_HEARTBEAT_INTERVAL_MS: "250" })).toBe(250);
+});
+
+test("EVT-62: the default file of the human credential is in the system home directory", () => {
+  expect(tokenPath({})).toBe(join(homedir(), ".squad-code-mcp.token"));
+});
+
+test("EVT-62: SQUAD_TOKEN_FILE overrides the default file of the human credential", () => {
+  expect(tokenPath({ SQUAD_TOKEN_FILE: "/tmp/other.token" })).toBe("/tmp/other.token");
+});
+
+test("EVT-81: the polling repeats every 1 s unless SQUAD_POLL_INTERVAL_MS says otherwise", () => {
+  expect(pollIntervalMs({})).toBe(1000);
+  expect(pollIntervalMs({ SQUAD_POLL_INTERVAL_MS: "250" })).toBe(250);
 });

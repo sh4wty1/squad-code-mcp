@@ -117,7 +117,8 @@ test("PEER-11/12: /unregister answers ok, logs peer_left once and accepts an unk
   ]);
 });
 
-for (const path of ["/set-summary", "/send-message", "/poll-messages", "/nope"]) {
+// /poll-messages left this list with the Event slice, which made it a route again (EVT-41)
+for (const path of ["/set-summary", "/send-message", "/set-id", "/nope"]) {
   test(`PEER-23: POST ${path} answers 404`, async () => {
     broker = await startBroker();
     const res = await post(broker.url, path, { id: "x", summary: "s", from_id: "a", to_id: "b", text: "t" });

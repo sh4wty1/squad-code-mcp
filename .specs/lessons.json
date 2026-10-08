@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 21,
+  "next_id": 37,
   "lessons": [
     {
       "id": "L-001",
@@ -370,6 +370,295 @@
       ],
       "created": "2026-10-07T22:57:31Z",
       "last_seen": "2026-10-07T22:57:31Z"
+    },
+    {
+      "id": "L-021",
+      "key": "surviving_mutant::assert that a client makes no call with a fake server that counts requests not with the state a real server leaves",
+      "text": "Assert that a client makes no call with a fake server that counts requests, not with the state a real server leaves",
+      "signal": "surviving_mutant",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M127 broker/server.ts:341 (EVT-81) (mcp-server)",
+        "M107 broker/server.ts:226 (Assumptions: pedido de permissao antes do registro) (mcp-server)"
+      ],
+      "created": "2026-10-08T04:22:30Z",
+      "last_seen": "2026-10-08T04:22:30Z"
+    },
+    {
+      "id": "L-022",
+      "key": "spec_precision_gap::list a route in a refusal requirement only when the spec defines a refusal that route can reach",
+      "text": "List a route in a refusal requirement only when the spec defines a refusal that route can reach",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EVT-47, EVT-48 (/unblocked, /turn-started) (spec)"
+      ],
+      "created": "2026-10-08T04:22:30Z",
+      "last_seen": "2026-10-08T04:22:30Z"
+    },
+    {
+      "id": "L-023",
+      "key": "spec_precision_gap::write the order of refusals for every route and kind that has more than one not only for the main one",
+      "text": "Write the order of refusals for every route and kind that has more than one, not only for the main one",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EVT-10, EVT-16 (result, verdict, /plan); broker/test/unit/send-result.test.ts:158, broker/test/unit/plan.test.ts:138 (spec)"
+      ],
+      "created": "2026-10-08T04:22:31Z",
+      "last_seen": "2026-10-08T04:22:31Z"
+    },
+    {
+      "id": "L-024",
+      "key": "spec_precision_gap::state for every optional field whether null counts as absent or as a present value of the wrong type",
+      "text": "State for every optional field whether null counts as absent or as a present value of the wrong type",
+      "signal": "spec_precision_gap",
+      "scope": "spec routes",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EVT-51 vs EVT-04; broker/session.ts:24 (spec routes)"
+      ],
+      "created": "2026-10-08T04:22:31Z",
+      "last_seen": "2026-10-08T04:22:31Z"
+    },
+    {
+      "id": "L-025",
+      "key": "spec_precision_gap::when an assumption says a state never comes back write the ac over the whole history not only over the current state",
+      "text": "When an assumption says a state never comes back, write the AC over the whole history, not only over the current state",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EVT-17 vs Assumptions (ticket que volta de dropped); broker/plan.ts:69 (spec)"
+      ],
+      "created": "2026-10-08T04:22:31Z",
+      "last_seen": "2026-10-08T04:22:31Z"
+    },
+    {
+      "id": "L-026",
+      "key": "spec_precision_gap::when two acs each say their refusal comes first state which one wins",
+      "text": "When two ACs each say their refusal comes first, state which one wins",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EVT-65 vs EVT-12; broker/broker.ts:146 (spec)"
+      ],
+      "created": "2026-10-08T04:22:31Z",
+      "last_seen": "2026-10-08T04:22:31Z"
+    },
+    {
+      "id": "L-027",
+      "key": "spec_precision_gap::state whether an absent optional key is stored omitted or with its default",
+      "text": "State whether an absent optional key is stored omitted or with its default",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EVT-15; broker/plan.ts:85 (spec)"
+      ],
+      "created": "2026-10-08T04:22:31Z",
+      "last_seen": "2026-10-08T04:22:31Z"
+    },
+    {
+      "id": "L-028",
+      "key": "spec_precision_gap::when a spec says a component ignores an input state whether a call that gets refused downstream still counts as ignoring",
+      "text": "When a spec says a component ignores an input, state whether a call that gets refused downstream still counts as ignoring",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Assumptions: pedido de permissao antes do registro (M107) (spec)"
+      ],
+      "created": "2026-10-08T04:22:31Z",
+      "last_seen": "2026-10-08T04:22:31Z"
+    },
+    {
+      "id": "L-029",
+      "key": "surviving_mutant::when a handler acts on one named input send it a different input and assert nothing happens",
+      "text": "When a handler acts on one named input, send it a different input and assert nothing happens",
+      "signal": "surviving_mutant",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N02 broker/server.ts:224 (EVT-86) (mcp-server)"
+      ],
+      "created": "2026-10-08T04:43:21Z",
+      "last_seen": "2026-10-08T04:43:21Z"
+    },
+    {
+      "id": "L-030",
+      "key": "surviving_mutant::test a must not happen until x rule on the path where x was tried and refused not only before x is tried",
+      "text": "Test a must-not-happen-until-X rule on the path where X was tried and refused, not only before X is tried",
+      "signal": "surviving_mutant",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N03 broker/server.ts:264 (EVT-81) (mcp-server)"
+      ],
+      "created": "2026-10-08T04:43:21Z",
+      "last_seen": "2026-10-08T04:43:21Z"
+    },
+    {
+      "id": "L-031",
+      "key": "surviving_mutant::to assert that a timer waits one interval before its first run have the work already pending when the timer starts",
+      "text": "To assert that a timer waits one interval before its first run, have the work already pending when the timer starts",
+      "signal": "surviving_mutant",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N04 broker/server.ts:292 (Assumptions: primeiro polling) (mcp-server)"
+      ],
+      "created": "2026-10-08T04:43:21Z",
+      "last_seen": "2026-10-08T04:43:21Z"
+    },
+    {
+      "id": "L-032",
+      "key": "surviving_mutant::test at the wiring layer that a refusal answer from the server counts as a failed call not only with an injected call that throws",
+      "text": "Test at the wiring layer that a refusal answer from the server counts as a failed call, not only with an injected call that throws",
+      "signal": "surviving_mutant",
+      "scope": "mcp-server",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N01 broker/server.ts:208 (EVT-84) (mcp-server)"
+      ],
+      "created": "2026-10-08T04:43:22Z",
+      "last_seen": "2026-10-08T04:43:22Z"
+    },
+    {
+      "id": "L-033",
+      "key": "surviving_mutant::when a read is scoped to the current container test a row that belongs to no container not only a row of another container",
+      "text": "When a read is scoped to the current container, test a row that belongs to no container, not only a row of another container",
+      "signal": "surviving_mutant",
+      "scope": "broker-rules",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R14 broker/log.ts:147 (EVT-69) (broker-rules)"
+      ],
+      "created": "2026-10-08T04:58:15Z",
+      "last_seen": "2026-10-08T04:58:15Z"
+    },
+    {
+      "id": "L-034",
+      "key": "surviving_mutant::when code reuses an existing value or else creates one test the reuse with a value the creator would never produce",
+      "text": "When code reuses an existing value or else creates one, test the reuse with a value the creator would never produce",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R20 broker/permission.ts:19 (EVT-62) (broker tests)"
+      ],
+      "created": "2026-10-08T04:58:15Z",
+      "last_seen": "2026-10-08T04:58:15Z"
+    },
+    {
+      "id": "L-035",
+      "key": "surviving_mutant::test the empty string for every optional text field of a request",
+      "text": "Test the empty string for every optional text field of a request",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R16 broker/session.ts:39 (EVT-50) (broker tests)"
+      ],
+      "created": "2026-10-08T04:58:15Z",
+      "last_seen": "2026-10-08T04:58:15Z"
+    },
+    {
+      "id": "L-036",
+      "key": "spec_precision_gap::state for every optional text field what the empty string means refused absent or stored as sent",
+      "text": "State for every optional text field what the empty string means: refused, absent or stored as sent",
+      "signal": "spec_precision_gap",
+      "scope": "spec routes",
+      "status": "candidate",
+      "features": [
+        "event"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)"
+      ],
+      "created": "2026-10-08T04:58:15Z",
+      "last_seen": "2026-10-08T04:58:15Z"
     }
   ]
 }
