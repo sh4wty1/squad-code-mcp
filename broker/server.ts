@@ -12,6 +12,11 @@
  * expose the tools of its role. So a registered peer is one whose channel
  * works end to end (ADR-009).
  *
+ * Once registered it asks the broker, on an interval, for what was sent to the
+ * session, pushes each event through the channel and confirms it. It also
+ * relays the permission prompts of the session: the request goes to the log
+ * and the decision of the dev comes back as its verdict (ADR-011).
+ *
  * Usage:
  *   claude --dangerously-load-development-channels server:squad
  *
@@ -28,8 +33,10 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { createDelivery } from "./delivery.ts";
 import type { ListedPeer, Refusal, RegisterResponse } from "./peers.ts";
-import { brokerUrl, heartbeatIntervalMs, pingIntervalMs } from "./shared/config.ts";
+import { brokerUrl, heartbeatIntervalMs, pingIntervalMs, pollIntervalMs } from "./shared/config.ts";
+import type { SquadEvent } from "./shared/contract.ts";
 import { getGitRoot } from "./shared/git.ts";
 import { ROUTE_OF, toolsFor } from "./tools.ts";
 
@@ -38,6 +45,7 @@ import { ROUTE_OF, toolsFor } from "./tools.ts";
 const BROKER_URL = brokerUrl();
 const HEARTBEAT_INTERVAL_MS = heartbeatIntervalMs();
 const PING_INTERVAL_MS = pingIntervalMs();
+const POLL_INTERVAL_MS = pollIntervalMs();
 // fileURLToPath, not URL.pathname: on Windows the latter is "/C:/..." with spaces as %20
 const BROKER_SCRIPT = fileURLToPath(new URL("./broker.ts", import.meta.url));
 const NAME = process.env.SQUAD_NAME ?? "";
@@ -118,6 +126,7 @@ let myId: string | null = null;
 const pingNumber = randomInt(100_000, 1_000_000);
 let pingTimer: ReturnType<typeof setInterval> | undefined;
 let heartbeatTimer: ReturnType<typeof setInterval> | undefined;
+let pollTimer: ReturnType<typeof setInterval> | undefined;
 
 // --- MCP Server ---
 
@@ -125,14 +134,17 @@ const mcp = new Server(
   { name: "squad", version: "0.1.0" },
   {
     capabilities: {
-      // A session without a role is not a channel
-      ...(ROLE ? { experimental: { "claude/channel": {} } } : {}),
+      // A session without a role is not a channel. One with a role also answers the
+      // permission prompts of its session through it.
+      ...(ROLE ? { experimental: { "claude/channel": {}, "claude/channel/permission": {} } } : {}),
       tools: { listChanged: true },
     },
     instructions: ROLE
       ? `You are a member of a squad of Claude Code sessions. Your name is ${NAME} and your role is ${ROLE}.
 
 IMPORTANT: When a <channel source="squad" kind="ping" ...> message arrives, call the ready tool with the number it carries, right away. That registers this session in the squad. Until then the squad cannot reach you and ready is the only squad tool.
+
+After ready, what the squad sends you arrives as <channel source="squad" kind="task|result|verdict" seq="..." from="..." ticket_ref="..."> messages. The seq is what you cite when you answer: task_seq in a result, result_seq in a verdict.
 
 Available tools after ready:
 ${toolsFor(ROLE)
@@ -188,6 +200,45 @@ function stopPing() {
   pingTimer = undefined;
 }
 
+// --- Delivery and permission relay ---
+
+// A refusal here is a failed call: the cycle stops and the next one tries again
+async function brokerCall<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  const result = await brokerFetch<T | Refusal>(path, { ...body, id: myId });
+  if (isRefusal(result)) throw new Error(`${path} refused: ${result.error}`);
+  return result;
+}
+
+const delivery = createDelivery({
+  poll: async () => (await brokerCall<{ events: SquadEvent[] }>("/poll-messages", {})).events,
+  push: (message) => mcp.notification({ method: "notifications/claude/channel", params: { ...message } }),
+  ack: async (seqs) => {
+    await brokerCall("/ack", { seqs });
+  },
+  verdict: (request_id, behavior) =>
+    mcp.notification({ method: "notifications/claude/channel/permission", params: { request_id, behavior } }),
+});
+
+// A permission prompt of this session. Not a schema of the SDK, so it comes here.
+mcp.fallbackNotificationHandler = async (notification) => {
+  if (notification.method !== "notifications/claude/channel/permission_request") return;
+  // Before the registration there is no id to record it with: the dialog of the terminal stands
+  if (!myId) return;
+  const { request_id, tool_name, description, input_preview } = notification.params ?? {};
+  try {
+    const { seq } = await brokerCall<{ seq: number }>("/permission-request", {
+      request_id,
+      tool_name,
+      description,
+      input_preview,
+    });
+    // The decision cites the seq, and the verdict has to cite the request_id
+    delivery.remember(seq, request_id as string);
+  } catch (e) {
+    log(`Permission request error: ${e instanceof Error ? e.message : String(e)}`);
+  }
+};
+
 // --- Tool handlers ---
 
 mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -237,6 +288,8 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
           // Non-critical
         }
       }, HEARTBEAT_INTERVAL_MS);
+      // Only from here on: before the registration nothing is asked of the broker
+      pollTimer = setInterval(delivery.cycle, POLL_INTERVAL_MS);
 
       await mcp.sendToolListChanged();
       return text(`Registered in the squad as ${NAME} (${ROLE}).`);
@@ -306,6 +359,7 @@ async function main() {
     exiting = true;
     stopPing();
     clearInterval(heartbeatTimer);
+    clearInterval(pollTimer);
     if (myId) {
       try {
         await brokerFetch("/unregister", { id: myId });

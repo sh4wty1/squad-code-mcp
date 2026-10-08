@@ -516,12 +516,12 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] `mother` envia `task`; o cliente do `leader` recebe um `notifications/claude/channel` com `meta.seq` igual ao `seq`, e a entrega fica confirmada no banco
-- [ ] Antes de `ready` nenhuma chamada a `/poll-messages` acontece: um evento pendente para o nome não chega ao cliente
-- [ ] A capacidade `claude/channel/permission` aparece nas capacidades do servidor com papel
-- [ ] O cliente envia `notifications/claude/channel/permission_request`; o log ganha `permission_request` do peer; a decisão feita por HTTP chega ao cliente como `notifications/claude/channel/permission` com o mesmo `request_id` e o `behavior`, e não como `notifications/claude/channel`
-- [ ] Ao fechar a entrada padrão o servidor para o laço e sai
-- [ ] Gate: `bun test`
+- [x] `mother` envia `task`; o cliente do `leader` recebe um `notifications/claude/channel` com `meta.seq` igual ao `seq`, e a entrega fica confirmada no banco
+- [x] Antes de `ready` nenhuma chamada a `/poll-messages` acontece: um evento pendente para o nome não chega ao cliente
+- [x] A capacidade `claude/channel/permission` aparece nas capacidades do servidor com papel
+- [x] O cliente envia `notifications/claude/channel/permission_request`; o log ganha `permission_request` do peer; a decisão feita por HTTP chega ao cliente como `notifications/claude/channel/permission` com o mesmo `request_id` e o `behavior`, e não como `notifications/claude/channel`
+- [x] Ao fechar a entrada padrão o servidor para o laço e sai
+- [x] Gate: `bun test`
 
 **Tests**: integration
 **Gate**: full
