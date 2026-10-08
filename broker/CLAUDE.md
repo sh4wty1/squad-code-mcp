@@ -7,9 +7,10 @@ Broker and MCP channel server of squad-code-mcp. A fork of claude-peers-mcp at `
 - `broker.ts` — Singleton HTTP daemon on 127.0.0.1:7900 + SQLite. Auto-launched by the MCP server. Finds the peer of the `id` and hands the request to the module of the route.
 - `peers.ts` — Peer registry: registration with refusals, presence events, listing. The peer id is a credential and is never listed.
 - `db.ts` — Schema and the single write path of the append-only `events` table.
-- `log.ts` — The event log: writes an event with its delivery in one transaction, writes the `refused` of a refusal, and reads (pending, cursor, history).
+- `log.ts` — The event log: writes an event with its delivery in one transaction, opens and closes the row of `features` with its event, writes the `refused` of a refusal, and reads (pending, cursor, history).
 - `send.ts` — `/send`: the envelope, the edges and the rules of `task`, `result` and `verdict`.
 - `plan.ts` — `/plan`: the list of tickets of the leader.
+- `feature.ts` — `/open-feature` and `/close-feature`: the mother opens the feature and closes it, one at a time.
 - `session.ts` — `/blocked`, `/unblocked`, `/usage` and `/turn-started`.
 - `permission.ts` — `/permission-request`, `/permission-decision` and the file of the human credential.
 - `state.ts` — `/state`: the open feature, the ticket of a worker and what the peer owes.
@@ -17,7 +18,7 @@ Broker and MCP channel server of squad-code-mcp. A fork of claude-peers-mcp at `
 - `delivery.ts` — The loop of a session: poll, push in order, ack after the push. No MCP and no HTTP: the calls are injected.
 - `tools.ts` — The MCP tools of each role and the route each one calls.
 - `shared/contract.ts` — The event envelope, the twenty kinds, the edges and the read format.
-- `shared/derive.ts` — The state of the tickets and what each peer owes, from the events alone. Pure functions.
+- `shared/derive.ts` — The state of the tickets, what each peer owes and the features, from the events alone. Pure functions.
 - `shared/config.ts`, `shared/git.ts` — Settings (`SQUAD_*`) and the git common directory.
 - `cli.ts` — CLI utility for the broker.
 

@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { FEATURE, closeSessions, openFeature, post, readDb, readDeliveries, startBroker, startSession } from "./helpers.ts";
+import { FEATURE, closeSessions, openFeature, post, readDb, readDeliveries, startBroker, startSession, waitFor } from "./helpers.ts";
 
 type Broker = Awaited<ReturnType<typeof startBroker>>;
 type Session = Awaited<ReturnType<typeof startSession>>;
@@ -19,6 +19,11 @@ async function joined(b: Broker, name: string): Promise<Session> {
   return session;
 }
 
+// The id of a mother registered over HTTP, for the tests whose sessions are of other names
+async function motherId(b: Broker): Promise<string> {
+  return (await post(b.url, "/register", { pid: process.pid, cwd: "/repo", git_root: null, name: "mother", role: "mother" })).json.id;
+}
+
 // The message of the error a call ends with, or "answered" if the server ran the tool
 function attempt(session: Session, name: string): Promise<string> {
   return session.client.callTool({ name, arguments: {} }).then(
@@ -36,10 +41,10 @@ function seqOf(answer: { isError: boolean; text: string }): number {
 }
 
 const COMMON = ["list_peers", "state", "history", "blocked", "unblocked"];
-const SENDING = ["send_task", "send_result", "send_verdict", "plan"];
+const SENDING = ["send_task", "send_result", "send_verdict", "plan", "open_feature", "close_feature"];
 
 for (const [name, own] of [
-  ["mother", ["send_task"]],
+  ["mother", ["send_task", "open_feature", "close_feature"]],
   ["leader", ["plan", "send_task", "send_result"]],
   ["worker-2", ["send_result"]],
   ["judge", ["send_verdict"]],
@@ -60,8 +65,8 @@ for (const [name, own] of [
 
 test("EVT-90: send_task of the mother with an open feature answers the seq, and the event is of the mother", async () => {
   broker = await startBroker();
-  const feature = openFeature(broker.dbFile);
   const mother = await joined(broker, "mother");
+  const feature = await openFeature(broker.url, readDb(broker.dbFile).peers[0]!.id);
 
   // The kind is the tool's and the id is the session's, whatever the arguments carry
   const answer = await mother.call("send_task", {
@@ -71,9 +76,9 @@ test("EVT-90: send_task of the mother with an open feature answers the seq, and 
     kind: "verdict",
     id: "not-an-id",
   });
-  expect(seqOf(answer)).toBe(2);
-  expect(readDb(broker.dbFile).events[1]).toEqual({
-    seq: 2,
+  expect(seqOf(answer)).toBe(3);
+  expect(readDb(broker.dbFile).events[2]).toEqual({
+    seq: 3,
     ts: expect.any(Number),
     kind: "task",
     feature_id: feature,
@@ -87,7 +92,14 @@ test("EVT-90: send_task of the mother with an open feature answers the seq, and 
     gate_id: null,
     data: {},
   });
-  expect(readDeliveries(broker.dbFile)).toEqual([{ event_seq: 2, recipient: "leader", acked_at: null }]);
+  expect(readDeliveries(broker.dbFile)).toEqual([
+    { event_seq: 2, recipient: "judge", acked_at: null },
+    { event_seq: 2, recipient: "leader", acked_at: null },
+    { event_seq: 2, recipient: "worker-1", acked_at: null },
+    { event_seq: 2, recipient: "worker-2", acked_at: null },
+    { event_seq: 2, recipient: "worker-3", acked_at: null },
+    { event_seq: 3, recipient: "leader", acked_at: null },
+  ]);
 });
 
 test("EVT-91: send_task of the mother without an open feature is an error with no_open_feature and the hint of the broker", async () => {
@@ -107,7 +119,7 @@ test("EVT-91: send_task of the mother without an open feature is an error with n
 
 test("EVT-90/92: plan, send_task, send_result and send_verdict take a ticket from the plan to the verdict, each one with its kind", async () => {
   broker = await startBroker();
-  const feature = openFeature(broker.dbFile);
+  const feature = await openFeature(broker.url, await motherId(broker));
   const leader = await joined(broker, "leader");
   const worker = await joined(broker, "worker-1");
   const judge = await joined(broker, "judge");
@@ -131,28 +143,28 @@ test("EVT-90/92: plan, send_task, send_result and send_verdict take a ticket fro
   const verdict = seqOf(
     await judge.call("send_verdict", { to: "leader", summary: "approved", ticket_ref: "T1", result_seq: result, outcome: "approve", criteria })
   );
-  // 1 to 3 are the three sessions joining
-  expect([plan, task, result, verdict]).toEqual([4, 5, 6, 7]);
+  // 1 and 2 are the mother joining and the feature_opened, 3 to 5 the three sessions joining
+  expect([plan, task, result, verdict]).toEqual([6, 7, 8, 9]);
 
-  const stored = readDb(broker.dbFile).events.slice(3);
+  const stored = readDb(broker.dbFile).events.slice(5);
   expect(stored.map((e) => [e.seq, e.kind, e.feature_id, e.from_name, e.role_from, e.to_name, e.ticket_ref, e.summary, e.data])).toEqual([
-    [4, "plan", feature, "leader", "leader", null, null, "", { tickets }],
-    [5, "task", feature, "leader", "leader", "worker-1", "T1", "do the first", { loadout: ["tdd"], criteria: [1] }],
-    [6, "result", feature, "worker-1", "worker", "judge", "T1", "first done", { task_seq: 5, branch: "squad/t1", commit: "abc1234" }],
-    [7, "verdict", feature, "judge", "judge", "leader", "T1", "approved", { result_seq: 6, outcome: "approve", criteria }],
+    [6, "plan", feature, "leader", "leader", null, null, "", { tickets }],
+    [7, "task", feature, "leader", "leader", "worker-1", "T1", "do the first", { loadout: ["tdd"], criteria: [1] }],
+    [8, "result", feature, "worker-1", "worker", "judge", "T1", "first done", { task_seq: 7, branch: "squad/t1", commit: "abc1234" }],
+    [9, "verdict", feature, "judge", "judge", "leader", "T1", "approved", { result_seq: 8, outcome: "approve", criteria }],
   ]);
 });
 
 test("EVT-91: plan refused by the broker is an error with the error and the hint", async () => {
   broker = await startBroker();
-  openFeature(broker.dbFile);
+  await openFeature(broker.url, await motherId(broker));
   const leader = await joined(broker, "leader");
   const answer = await leader.call("plan", { tickets: [] });
   expect(answer.isError).toBe(true);
   expect(answer.text).toContain("missing_field");
   // the hint of plan.ts for a list that is not one of tickets
   expect(answer.text).toContain("Send tickets as a non-empty list of");
-  expect(readDb(broker.dbFile).events.map((e) => e.kind)).toEqual(["peer_joined", "refused"]);
+  expect(readDb(broker.dbFile).events.map((e) => e.kind)).toEqual(["peer_joined", "feature_opened", "peer_joined", "refused"]);
 });
 
 test("EVT-92: blocked and unblocked call their routes with the id of the session and answer the seq", async () => {
@@ -178,12 +190,13 @@ test("EVT-92: blocked and unblocked call their routes with the id of the session
 
 test("EVT-92: state and history call their routes with the id of the session and answer the content", async () => {
   broker = await startBroker();
-  const feature = openFeature(broker.dbFile);
+  const b = broker;
+  const feature = await openFeature(broker.url, await motherId(broker));
   const leader = await joined(broker, "leader");
   const worker = await joined(broker, "worker-1");
   await leader.call("plan", { tickets: [{ ticket_ref: "T1", title: "first" }] });
   const task = seqOf(await leader.call("send_task", { to: "worker-1", summary: "do the first", ticket_ref: "T1", loadout: [] }));
-  expect(task).toBe(4);
+  expect(task).toBe(6);
   // What the worker reads does not depend on the delivery having been confirmed or not
   const owed = (answer: { text: string }) => JSON.parse(answer.text).owed.filter((o: any) => o.owes !== "delivery");
 
@@ -192,9 +205,14 @@ test("EVT-92: state and history call their routes with the id of the session and
   const said = JSON.parse(state.text);
   expect(Object.keys(said)).toEqual(["feature", "ticket", "owed"]);
   expect(said.feature).toEqual({ id: feature, ...FEATURE });
-  expect(said.ticket).toEqual({ ticket_ref: "T1", title: "first", task_seq: 4, reworks: 0 });
-  expect(owed(state)).toEqual([{ owes: "result", ticket_ref: "T1", seq: 4 }]);
-  // the state is of who asks
+  expect(said.ticket).toEqual({ ticket_ref: "T1", title: "first", task_seq: 6, reworks: 0 });
+  expect(owed(state)).toEqual([{ owes: "result", ticket_ref: "T1", seq: 6 }]);
+  // the state is of who asks: the leader owes nothing once its session has read the feature_opened
+  await waitFor(
+    () => readDeliveries(b.dbFile).some((d) => d.recipient === "leader" && d.acked_at !== null),
+    "the leader to confirm the feature_opened",
+    3000
+  );
   expect(JSON.parse((await leader.call("state")).text)).toEqual({ feature: { id: feature, ...FEATURE }, ticket: null, owed: [] });
 
   const history = await worker.call("history", { ticket_ref: "T1" });
@@ -202,7 +220,7 @@ test("EVT-92: state and history call their routes with the id of the session and
   expect(JSON.parse(history.text)).toEqual({
     events: [
       {
-        seq: 4,
+        seq: 6,
         ts: expect.any(Number),
         kind: "task",
         feature_id: feature,

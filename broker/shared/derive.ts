@@ -6,6 +6,7 @@
  * database, no clock. The broker decides with them and the TUI shows the same thing.
  */
 
+import type { FeatureFields } from "../log.ts";
 import type { Role } from "../peers.ts";
 import type { SquadEvent } from "./contract.ts";
 
@@ -128,4 +129,42 @@ export function owed(name: string, role: Role, events: SquadEvent[], pendingSeqs
   }
 
   return debts.sort((a, b) => a.seq - b.seq);
+}
+
+// A row of `features` without `project`, which is not a field of the event
+export interface DerivedFeature extends FeatureFields {
+  id: number;
+  opened_seq: number;
+  closed_seq: number | null;
+  outcome: string | null;
+}
+
+// Every feature of the log, in ascending id. `events` are the whole log, not only those
+// of the open feature.
+export function features(events: SquadEvent[]): DerivedFeature[] {
+  const all = new Map<number, DerivedFeature>();
+  for (const e of [...events].sort((a, b) => a.seq - b.seq)) {
+    if (e.kind === "feature_opened") {
+      const id = e.feature_id as number;
+      all.set(id, {
+        id,
+        title: e.title,
+        workflow: e.workflow,
+        branch: e.branch,
+        base_branch: e.base_branch,
+        spec_ref: e.spec_ref,
+        spec_commit: e.spec_commit,
+        opened_seq: e.seq,
+        closed_seq: null,
+        outcome: null,
+      });
+    } else if (e.kind === "feature_closed") {
+      const feature = all.get(e.feature_id as number);
+      if (feature) {
+        feature.closed_seq = e.seq;
+        feature.outcome = e.outcome;
+      }
+    }
+  }
+  return [...all.values()].sort((a, b) => a.id - b.id);
 }

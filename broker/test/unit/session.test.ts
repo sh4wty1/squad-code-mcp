@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { JUDGE, LEADER, MOTHER, NOW, setup, WORKER_1, WORKER_2 } from "./helpers.ts";
+import { JUDGE, LEADER, MOTHER, NOW, setup, storedOpened, toOthers, WORKER_1, WORKER_2 } from "./helpers.ts";
 
 const BLOCKED = { reason: "the test database is down", detail: "connection refused on 5432", last_action: "ran bun test" };
 const USAGE = { session_id: "s-123", model: "opus", input: 1200, output: 340, cache_write: 50, cache_read: 9000 };
@@ -29,9 +29,13 @@ test("EVT-50: a blocked is stored with its ticket_ref and reason, detail and las
   const id = b.openFeature();
   b.clock.now = NOW + 10;
   const answer = b.session.blocked(WORKER_1, { ...BLOCKED, ticket_ref: "A", peer: "worker-2", to: "leader", summary: "s" });
-  expect(answer).toEqual({ ok: true, seq: 1 });
-  expect(b.events()).toEqual([stored(1, "blocked", { ts: NOW + 10, feature_id: id, ticket_ref: "A", data: BLOCKED })]);
-  expect(b.deliveries()).toEqual([]);
+  expect(answer).toEqual({ ok: true, seq: 2 });
+  expect(b.events()).toEqual([
+    storedOpened(1, id),
+    stored(2, "blocked", { ts: NOW + 10, feature_id: id, ticket_ref: "A", data: BLOCKED }),
+  ]);
+  // only the deliveries of the feature_opened
+  expect(b.deliveries()).toEqual(toOthers(1));
 });
 
 test("EVT-50: a blocked without ticket_ref is stored with ticket_ref null, and detail and last_action may be empty", () => {
@@ -86,8 +90,8 @@ test("EVT-53: an unblocked is stored with the name of the peer in data", () => {
   const id = b.openFeature();
   b.session.blocked(WORKER_1, BLOCKED);
   b.clock.now = NOW + 30;
-  expect(b.session.unblocked(WORKER_1)).toEqual({ ok: true, seq: 2 });
-  expect(b.events()[1]).toEqual(stored(2, "unblocked", { ts: NOW + 30, feature_id: id, data: { peer: "worker-1" } }));
+  expect(b.session.unblocked(WORKER_1)).toEqual({ ok: true, seq: 3 });
+  expect(b.events()[2]).toEqual(stored(3, "unblocked", { ts: NOW + 30, feature_id: id, data: { peer: "worker-1" } }));
   expect(b.log.blocked("worker-1")).toBe(false);
 });
 
@@ -125,14 +129,16 @@ test("EVT-57: a usage is stored with its six fields in data, zeros included", ()
   const b = setup();
   const id = b.openFeature();
   b.clock.now = NOW + 77;
-  expect(b.session.usage(WORKER_1, { ...USAGE, cost: 3, ticket_ref: "A", to: "leader", summary: "s" })).toEqual({ ok: true, seq: 1 });
+  expect(b.session.usage(WORKER_1, { ...USAGE, cost: 3, ticket_ref: "A", to: "leader", summary: "s" })).toEqual({ ok: true, seq: 2 });
   const zeros = { session_id: "s", model: "m", input: 0, output: 0, cache_write: 0, cache_read: 0 };
-  expect(b.session.usage(MOTHER, zeros)).toEqual({ ok: true, seq: 2 });
+  expect(b.session.usage(MOTHER, zeros)).toEqual({ ok: true, seq: 3 });
   expect(b.events()).toEqual([
-    stored(1, "usage", { ts: NOW + 77, feature_id: id, data: USAGE }),
-    stored(2, "usage", { ts: NOW + 77, feature_id: id, from_name: "mother", role_from: "mother", data: zeros }),
+    storedOpened(1, id),
+    stored(2, "usage", { ts: NOW + 77, feature_id: id, data: USAGE }),
+    stored(3, "usage", { ts: NOW + 77, feature_id: id, from_name: "mother", role_from: "mother", data: zeros }),
   ]);
-  expect(b.deliveries()).toEqual([]);
+  // only the deliveries of the feature_opened
+  expect(b.deliveries()).toEqual(toOthers(1));
 });
 
 test("EVT-57: a usage that repeats the one before is stored again", () => {
@@ -146,11 +152,12 @@ test("EVT-58: a turn_started is stored with empty data", () => {
   const b = setup();
   const id = b.openFeature();
   b.clock.now = NOW + 5;
-  expect(b.session.turnStarted(WORKER_1)).toEqual({ ok: true, seq: 1 });
-  expect(b.session.turnStarted(JUDGE)).toEqual({ ok: true, seq: 2 });
+  expect(b.session.turnStarted(WORKER_1)).toEqual({ ok: true, seq: 2 });
+  expect(b.session.turnStarted(JUDGE)).toEqual({ ok: true, seq: 3 });
   expect(b.events()).toEqual([
-    stored(1, "turn_started", { ts: NOW + 5, feature_id: id }),
-    stored(2, "turn_started", { ts: NOW + 5, feature_id: id, from_name: "judge", role_from: "judge" }),
+    storedOpened(1, id),
+    stored(2, "turn_started", { ts: NOW + 5, feature_id: id }),
+    stored(3, "turn_started", { ts: NOW + 5, feature_id: id, from_name: "judge", role_from: "judge" }),
   ]);
 });
 
@@ -163,7 +170,8 @@ test("EVT-59: without an open feature the four records are stored with feature_i
     b.session.turnStarted(WORKER_1),
   ];
   expect(record().map((a) => a.ok)).toEqual([true, true, true, true]);
-  b.closeFeature(b.openFeature());
+  const old = b.openFeature();
+  b.closeFeature();
   expect(record().map((a) => a.ok)).toEqual([true, true, true, true]);
   const id = b.openFeature();
   expect(record().map((a) => a.ok)).toEqual([true, true, true, true]);
@@ -171,7 +179,10 @@ test("EVT-59: without an open feature the four records are stored with feature_i
   const kinds = ["blocked", "unblocked", "usage", "turn_started"];
   expect(b.events().map((e) => [e.kind, e.feature_id])).toEqual([
     ...kinds.map((k) => [k, null]),
+    ["feature_opened", old],
+    ["feature_closed", old],
     ...kinds.map((k) => [k, null]),
+    ["feature_opened", id],
     ...kinds.map((k) => [k, id]),
   ]);
 });

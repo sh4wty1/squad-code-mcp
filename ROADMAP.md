@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** fatia Feature. A Peer foi mesclada pelo PR 2; a Event está no PR 3.
+**Agora:** fatia Feature implementada e verificada no branch `feat/feature` (31 tarefas, relatório em `.specs/features/feature/validation.md`, PASS); PR 4 aberto, esperando a revisão do `/the-judge`. A Peer foi mesclada pelo PR 2 e a Event pelo PR 3. A próxima é a TUI leitura, que pede antes a segunda rodada de frames.
 
 ## Decidir (concluído)
 
@@ -31,7 +31,7 @@ tarefas, implementação e verificação independente, com PR revisado por `/the
 |---|---|---|---|---|
 | [x] | Peer | 1 | Sessões entram no broker com nome e papel; presença vira evento | Fase 0 |
 | [x] | Event | 1 | Log append-only, envio com recusa por topologia, entrega, leitura por cursor | Peer |
-| [ ] | Feature | 1 | Abertura e encerramento de feature com workflow travado | Event |
+| [x] | Feature | 1 | Abertura e encerramento de feature com workflow travado | Event |
 | [ ] | TUI leitura | 2 | Feed, agentes, tickets, topologia e detalhe de ticket | Feature, frames |
 | [ ] | Question | 3 | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas | TUI leitura |
 | [ ] | Papéis | 4 | `roles.json`, quatro skills de papel, launcher, plugin com hooks | Question |

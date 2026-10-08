@@ -12,6 +12,7 @@
 
 import { cleanupIntervalMs, dbPath, port, tokenPath } from "./shared/config.ts";
 import { openDatabase } from "./db.ts";
+import { createFeature, type Where } from "./feature.ts";
 import { createLog, type HistoryFilter } from "./log.ts";
 import { createPeers, refuse, type RegisterRequest } from "./peers.ts";
 import { createPermission, loadHumanToken } from "./permission.ts";
@@ -36,6 +37,8 @@ const CREDENTIAL_ROUTES = [
   "/usage",
   "/turn-started",
   "/permission-request",
+  "/open-feature",
+  "/close-feature",
 ];
 // The human is not a peer: the decision of a permission is authorized by its own credential
 const ROUTES = [...PEER_ROUTES, ...CREDENTIAL_ROUTES, "/permission-decision"];
@@ -49,6 +52,7 @@ const session = createSession(log);
 // Read once, here, and created if it is not there. No answer and no event carries it.
 const permission = createPermission(log, loadHumanToken(tokenPath()));
 const { state } = createState(log);
+const feature = createFeature(log);
 
 // Clean up stale peers (PIDs that no longer exist) on startup, then periodically
 peers.cleanStale();
@@ -75,7 +79,7 @@ function eventsAfter(after: string | null): unknown {
 
 // What a route with credential answers to `peer`, the holder of the id of the request.
 // The refusals of /ack and /history are of transport and reading: they leave no trace in the log.
-function answer(path: string, peer: Caller, body: Record<string, unknown>): unknown {
+function answer(path: string, peer: Caller & Where, body: Record<string, unknown>): unknown {
   switch (path) {
     case "/send":
       return send(peer, body);
@@ -111,6 +115,10 @@ function answer(path: string, peer: Caller, body: Record<string, unknown>): unkn
       return session.usage(peer, body);
     case "/turn-started":
       return session.turnStarted(peer);
+    case "/open-feature":
+      return feature.open(peer, body);
+    case "/close-feature":
+      return feature.close(peer, body);
     default:
       return permission.request(peer, body);
   }

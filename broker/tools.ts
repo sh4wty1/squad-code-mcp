@@ -185,12 +185,43 @@ const PLAN_TOOL: Tool = {
   },
 };
 
+const OPEN_FEATURE_TOOL: Tool = {
+  name: "open_feature",
+  description:
+    "Open the feature the squad will work on, with its spec and workflow locked. Only one feature is open at a time: close the open one first.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      title: string("What the feature delivers, in one line"),
+      workflow: { type: "string", enum: ["tlc", "matt-pocock"], description: "tlc or matt-pocock" },
+      branch: string("The branch of the feature"),
+      base_branch: string("The branch the feature leaves from and goes back to"),
+      spec_ref: string("The path of the spec in the repository"),
+      spec_commit: string("The commit that has the spec the squad follows"),
+    },
+    required: ["title", "workflow", "branch", "base_branch", "spec_ref", "spec_commit"],
+  },
+};
+
+const CLOSE_FEATURE_TOOL: Tool = {
+  name: "close_feature",
+  description: "Close the open feature as delivered or abandoned. The squad is then free for the next one.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      outcome: { type: "string", enum: ["delivered", "abandoned"], description: "delivered or abandoned" },
+      body: string("What there is to say about the closing. Optional."),
+    },
+    required: ["outcome"],
+  },
+};
+
 // What every registered session has
 const COMMON = [LIST_PEERS_TOOL, STATE_TOOL, HISTORY_TOOL, BLOCKED_TOOL, UNBLOCKED_TOOL];
 
 // What each role sends, after the edges of the star
 const OF_ROLE: Record<string, Tool[]> = {
-  mother: [SEND_TASK_TOOL],
+  mother: [SEND_TASK_TOOL, OPEN_FEATURE_TOOL, CLOSE_FEATURE_TOOL],
   leader: [PLAN_TOOL, SEND_TASK_TOOL, SEND_RESULT_TOOL],
   worker: [SEND_RESULT_TOOL],
   judge: [SEND_VERDICT_TOOL],
@@ -212,4 +243,6 @@ export const ROUTE_OF: Record<string, { path: string; kind?: "task" | "result" |
   unblocked: { path: "/unblocked" },
   state: { path: "/state" },
   history: { path: "/history" },
+  open_feature: { path: "/open-feature" },
+  close_feature: { path: "/close-feature" },
 };

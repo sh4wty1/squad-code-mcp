@@ -77,6 +77,9 @@ export function openDatabase(path: string): Database {
   db.run("CREATE INDEX IF NOT EXISTS events_question ON events (question_id)");
   db.run("CREATE INDEX IF NOT EXISTS events_gate ON events (gate_id)");
 
+  // At most one open feature, for every connection: every open row falls on the same key
+  db.run("CREATE UNIQUE INDEX IF NOT EXISTS features_one_open ON features ((1)) WHERE closed_seq IS NULL");
+
   // Append-only for every connection, not only for this code (ADR-002)
   db.run(`
     CREATE TRIGGER IF NOT EXISTS events_no_update BEFORE UPDATE ON events

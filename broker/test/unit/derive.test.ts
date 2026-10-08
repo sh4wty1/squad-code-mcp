@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { PlannedTicket, SquadEvent } from "../../shared/contract.ts";
-import { owed, tickets } from "../../shared/derive.ts";
+import { features, owed, tickets } from "../../shared/derive.ts";
 
 // Events of the open feature in the read format, with the seq given
 function event(seq: number, fields: Record<string, unknown>): SquadEvent {
@@ -355,4 +355,73 @@ test("EVT-80: the debts of a peer come in ascending order of seq, deliveries amo
     { owes: "delivery", seq: 5 },
     { owes: "verdict", ticket_ref: "B", seq: 5 },
   ]);
+});
+
+const SPEC = {
+  title: "the importer",
+  workflow: "tlc",
+  branch: "feat/importer",
+  base_branch: "develop",
+  spec_ref: ".specs/features/importer/spec.md",
+  spec_commit: "9f8e7d6",
+};
+
+function opened(seq: number, feature_id: number, fields: Record<string, unknown> = {}): SquadEvent {
+  return event(seq, { kind: "feature_opened", feature_id, from: "mother", role_from: "mother", to: "*", ...SPEC, ...fields });
+}
+
+function closed(seq: number, feature_id: number, outcome: string): SquadEvent {
+  return event(seq, { kind: "feature_closed", feature_id, from: "mother", role_from: "mother", to: "*", outcome });
+}
+
+test("FEAT-26: an empty log has no feature", () => {
+  expect(features([])).toEqual([]);
+});
+
+test("FEAT-26: a feature_opened is a feature with the id and the seq of the event, still open", () => {
+  expect(features([opened(4, 2)])).toEqual([{ id: 2, ...SPEC, opened_seq: 4, closed_seq: null, outcome: null }]);
+});
+
+test("FEAT-26: a closed feature has the seq and the outcome of the feature_closed of its feature_id", () => {
+  expect(features([opened(4, 2), task(5, "A", "worker-1"), closed(9, 2, "abandoned")])).toEqual([
+    { id: 2, ...SPEC, opened_seq: 4, closed_seq: 9, outcome: "abandoned" },
+  ]);
+});
+
+test("FEAT-26: the features come in ascending id, each closed by its own feature_closed", () => {
+  const log = [
+    opened(1, 1),
+    closed(3, 1, "delivered"),
+    opened(4, 2, { title: "the exporter", workflow: "matt-pocock" }),
+    closed(7, 2, "abandoned"),
+    opened(8, 3, { title: "the third" }),
+  ];
+  const expected = [
+    { id: 1, ...SPEC, opened_seq: 1, closed_seq: 3, outcome: "delivered" },
+    { id: 2, ...SPEC, title: "the exporter", workflow: "matt-pocock", opened_seq: 4, closed_seq: 7, outcome: "abandoned" },
+    { id: 3, ...SPEC, title: "the third", opened_seq: 8, closed_seq: null, outcome: null },
+  ];
+  expect(features(log)).toEqual(expected);
+  expect(features([...log].reverse())).toEqual(expected);
+});
+
+// A log the broker does not write: it tells the order by id from the order of opening,
+// and the feature of the feature_id from the one opened last
+test("FEAT-26: with a smaller id opened later, the order is still by id and the feature_closed closes the one of its feature_id", () => {
+  expect(features([opened(1, 2), opened(2, 1), closed(3, 2, "delivered")])).toEqual([
+    { id: 1, ...SPEC, opened_seq: 2, closed_seq: null, outcome: null },
+    { id: 2, ...SPEC, opened_seq: 1, closed_seq: 3, outcome: "delivered" },
+  ]);
+});
+
+test("FEAT-26: a refused and the other kinds are no feature", () => {
+  const log = [
+    event(1, { kind: "refused", feature_id: null, from: "broker", role_from: "broker", peer: "mother", attempted_kind: "feature_closed", error: "no_open_feature" }),
+    opened(2, 1),
+    event(3, { kind: "refused", from: "broker", role_from: "broker", peer: "mother", attempted_kind: "feature_opened", error: "feature_already_open" }),
+    plan(4, [{ ticket_ref: "A", title: "the parser" }]),
+    task(5, "A", "worker-1"),
+    event(6, { kind: "turn_started", from: "leader", role_from: "leader" }),
+  ];
+  expect(features(log)).toEqual([{ id: 1, ...SPEC, opened_seq: 2, closed_seq: null, outcome: null }]);
 });
