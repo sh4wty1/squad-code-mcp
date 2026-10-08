@@ -407,8 +407,8 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-68 | P1: Leitura do log | Tasks | In Tasks |
 | EVT-69 | P1: Leitura do log | Execute | Implementing |
 | EVT-70 | P1: Leitura do log | Tasks | In Tasks |
-| EVT-71 | P1: Leitura do log | Tasks | In Tasks |
-| EVT-72 | P1: Leitura do log | Tasks | In Tasks |
+| EVT-71 | P1: Leitura do log | Execute | Implementing |
+| EVT-72 | P1: Leitura do log | Execute | Implementing |
 | EVT-73 | P1: Leitura do log | Execute | Implementing |
 | EVT-74 | P1: Leitura do log | Execute | Implementing |
 | EVT-75 | P1: Leitura do log | Execute | Implementing |

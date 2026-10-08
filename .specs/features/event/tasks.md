@@ -389,10 +389,10 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] `feature` nulo sem feature aberta; com ela, exatamente as sete chaves de EVT-71
-- [ ] `ticket` de worker com ticket aberto traz `ticket_ref`, `title`, `task_seq` e `reworks`; nulo para worker sem ticket e para os outros papéis
-- [ ] `owed` de cada papel num cenário com `plan`, `task`, `result` e `verdict` de `rework` confere com EVT-73 a EVT-76 e EVT-80
-- [ ] Gate: `bun x tsc --noEmit && bun test`
+- [x] `feature` nulo sem feature aberta; com ela, exatamente as sete chaves de EVT-71
+- [x] `ticket` de worker com ticket aberto traz `ticket_ref`, `title`, `task_seq` e `reworks`; nulo para worker sem ticket e para os outros papéis
+- [x] `owed` de cada papel num cenário com `plan`, `task`, `result` e `verdict` de `rework` confere com EVT-73 a EVT-76 e EVT-80
+- [x] Gate: `bun x tsc --noEmit && bun test`
 
 **Tests**: unit
 **Gate**: build

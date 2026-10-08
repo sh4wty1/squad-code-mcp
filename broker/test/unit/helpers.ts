@@ -6,6 +6,7 @@ import { createPermission } from "../../permission.ts";
 import { createPlan } from "../../plan.ts";
 import { createSend, type Caller } from "../../send.ts";
 import { createSession } from "../../session.ts";
+import { createState } from "../../state.ts";
 import type { PlannedTicket } from "../../shared/contract.ts";
 
 export const NOW = 1791331200000;
@@ -32,6 +33,7 @@ export function setup() {
   const { plan } = createPlan(log);
   const session = createSession(log);
   const permission = createPermission(log, HUMAN_TOKEN);
+  const { state } = createState(log);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
@@ -149,6 +151,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, plan, session, permission, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
+    db, peers, log, send, plan, session, permission, state, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
   };
 }
