@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** fatia Feature, no branch `feat/feature`: spec confirmada em `.specs/features/feature/spec.md`; Design aprovado em `.specs/features/feature/design.md`; falta quebrar em tarefas. A Peer foi mesclada pelo PR 2 e a Event pelo PR 3.
+**Agora:** fatia Feature, no branch `feat/feature`: spec confirmada em `.specs/features/feature/spec.md`; Design aprovado em `.specs/features/feature/design.md`; tarefas aprovadas em `.specs/features/feature/tasks.md` (31, em 5 fases); falta executar, a partir da T1. A Peer foi mesclada pelo PR 2 e a Event pelo PR 3.
 
 ## Decidir (concluído)
 
