@@ -501,3 +501,80 @@ test("FEAT-09: with a feature open, open is aborted by the index and nothing is 
   expect(b.deliveries()).toEqual(deliveries);
   expect(rows).toHaveLength(1);
 });
+
+test("FEAT-14: close records a feature_closed of the mother to *, with the id of the feature it closes, the body and the outcome", () => {
+  const b = setup();
+  const { feature_id } = b.log.open(MOTHER, "repo", FIELDS);
+  b.clock.now = NOW + 700;
+  const seq = b.log.close(MOTHER, "abandoned", "the spec was wrong");
+  expect(b.events()[1]).toEqual({
+    seq,
+    ts: NOW + 700,
+    kind: "feature_closed",
+    feature_id,
+    from_name: "mother",
+    role_from: "mother",
+    to_name: "*",
+    summary: "",
+    body: "the spec was wrong",
+    ticket_ref: null,
+    question_id: null,
+    gate_id: null,
+    data: { outcome: "abandoned" },
+  });
+  expect(b.events()).toHaveLength(2);
+});
+
+test("FEAT-14: close fills closed_seq with the seq of its event and the outcome, and no feature stays open", () => {
+  const b = setup();
+  const opened = b.log.open(MOTHER, "repo", FIELDS);
+  const seq = b.log.close(MOTHER, "delivered", "");
+  expect(seq).toBe(opened.seq + 1);
+  expect(featureRows(b)).toEqual([
+    { id: opened.feature_id, project: "repo", ...FIELDS, opened_seq: opened.seq, closed_seq: seq, outcome: "delivered" },
+  ]);
+  expect(b.log.openFeature()).toBeNull();
+});
+
+test("FEAT-21: close leaves a pending delivery of the feature_closed for each of the other five, and none for the mother", () => {
+  const b = setup();
+  b.log.open(MOTHER, "repo", FIELDS);
+  const seq = b.log.close(MOTHER, "delivered", "");
+  expect(b.deliveries().filter((d) => d.event_seq === seq)).toEqual(
+    OTHER_FIVE.map((recipient) => ({ event_seq: seq, recipient, acked_at: null }))
+  );
+});
+
+for (const [table, action] of [["features", "UPDATE"], ["deliveries", "INSERT"]]) {
+  test(`FEAT-21: when the ${action} in ${table} fails, close stores no event or delivery and the feature stays open`, () => {
+    const b = setup();
+    b.log.open(MOTHER, "repo", FIELDS);
+    const events = b.events();
+    const rows = featureRows(b);
+    const deliveries = b.deliveries();
+    b.db.run(`CREATE TRIGGER fail BEFORE ${action} ON ${table} BEGIN SELECT RAISE(ABORT, 'no write'); END`);
+    expect(() => b.log.close(MOTHER, "delivered", "")).toThrow("no write");
+    expect(b.events()).toEqual(events);
+    expect(featureRows(b)).toEqual(rows);
+    expect(b.deliveries()).toEqual(deliveries);
+    expect(rows[0]!.closed_seq).toBeNull();
+  });
+}
+
+test("FEAT-22: close keeps the events and the deliveries of the feature, pending ones too, and adds one event", () => {
+  const b = setup();
+  const opened = b.log.open(MOTHER, "repo", FIELDS);
+  const task = b.log.record(TASK);
+  b.log.ack("leader", [opened.seq]);
+  const events = b.events();
+  const deliveries = b.deliveries();
+  const seq = b.log.close(MOTHER, "abandoned", "");
+  expect(b.events().slice(0, -1)).toEqual(events);
+  expect(b.events().map((e) => [e.seq, e.kind])).toEqual([
+    [opened.seq, "feature_opened"],
+    [task, "task"],
+    [seq, "feature_closed"],
+  ]);
+  expect(b.deliveries().filter((d) => d.event_seq !== seq)).toEqual(deliveries);
+  expect(deliveries).toContainEqual({ event_seq: task, recipient: "worker-1", acked_at: null });
+});

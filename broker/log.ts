@@ -125,6 +125,14 @@ export function createLog(db: Database, now: () => number = Date.now) {
     return { feature_id: id, seq };
   });
 
+  // Closes the open feature: the feature_closed, written while the feature is still the
+  // open one, its deliveries and the row, together or not at all. Returns the seq.
+  const close = db.transaction((by: Caller, outcome: string, body: string): number => {
+    const seq = write({ kind: "feature_closed", from: by.name, role_from: by.role, to: "*", body, data: { outcome } });
+    db.run("UPDATE features SET closed_seq = ?, outcome = ? WHERE closed_seq IS NULL", [seq, outcome]);
+    return seq;
+  });
+
   // What `write` records is stored together or not at all
   function transaction<T>(write: () => T): T {
     return db.transaction(write)();
@@ -200,7 +208,7 @@ export function createLog(db: Database, now: () => number = Date.now) {
     return rows.map(toRead);
   }
 
-  return { openFeature, featureEvents, record, open, transaction, blocked, refused, pending, ack, after, lastSeq, history };
+  return { openFeature, featureEvents, record, open, close, transaction, blocked, refused, pending, ack, after, lastSeq, history };
 }
 
 export type Log = ReturnType<typeof createLog>;

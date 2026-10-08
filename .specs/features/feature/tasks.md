@@ -180,12 +180,12 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] O evento tem `from_name` `mother`, `role_from` `mother`, `to_name` `*`, `summary` vazio, o `body` recebido, `ticket_ref` nulo, `feature_id` da feature que fecha e `data` `{ outcome }`
-- [ ] A linha fica com `closed_seq` igual ao `seq` devolvido e `outcome`; `openFeature()` passa a devolver nulo
-- [ ] Cinco entregas pendentes do `feature_closed`, nenhuma para `mother`
-- [ ] FEAT-21: com um gatilho temporário que aborta o `UPDATE` em `features`, `close` lança erro e não há evento nem entrega novos e a linha fica aberta; o mesmo com o gatilho em `deliveries`
-- [ ] FEAT-22: os eventos e as entregas anteriores, inclusive as pendentes, ficam iguais, e o log ganha um evento só
-- [ ] Gate: `bun test test/unit`
+- [x] O evento tem `from_name` `mother`, `role_from` `mother`, `to_name` `*`, `summary` vazio, o `body` recebido, `ticket_ref` nulo, `feature_id` da feature que fecha e `data` `{ outcome }`
+- [x] A linha fica com `closed_seq` igual ao `seq` devolvido e `outcome`; `openFeature()` passa a devolver nulo
+- [x] Cinco entregas pendentes do `feature_closed`, nenhuma para `mother`
+- [x] FEAT-21: com um gatilho temporário que aborta o `UPDATE` em `features`, `close` lança erro e não há evento nem entrega novos e a linha fica aberta; o mesmo com o gatilho em `deliveries`
+- [x] FEAT-22: os eventos e as entregas anteriores, inclusive as pendentes, ficam iguais, e o log ganha um evento só
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
