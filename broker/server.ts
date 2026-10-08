@@ -31,6 +31,7 @@ import {
 import type { ListedPeer, Refusal, RegisterResponse } from "./peers.ts";
 import { brokerUrl, heartbeatIntervalMs, pingIntervalMs } from "./shared/config.ts";
 import { getGitRoot } from "./shared/git.ts";
+import { LIST_PEERS_TOOL } from "./tools.ts";
 
 // --- Configuration ---
 
@@ -154,16 +155,6 @@ const READY_TOOL = {
       },
     },
     required: ["number"],
-  },
-};
-
-const LIST_PEERS_TOOL = {
-  name: "list_peers",
-  description:
-    "List the other members of the squad. Returns the name and role of each one and whether it is online.",
-  inputSchema: {
-    type: "object" as const,
-    properties: {},
   },
 };
 

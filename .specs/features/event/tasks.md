@@ -454,9 +454,9 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] `toolsFor` de cada papel devolve exatamente os nomes de EVT-89, e lista vazia para papel desconhecido
-- [ ] Cada tool de envio declara no schema os campos do seu kind
-- [ ] Gate: `bun test test/unit`
+- [x] `toolsFor` de cada papel devolve exatamente os nomes de EVT-89, e lista vazia para papel desconhecido
+- [x] Cada tool de envio declara no schema os campos do seu kind
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

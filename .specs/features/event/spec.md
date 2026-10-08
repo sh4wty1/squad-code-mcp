@@ -425,7 +425,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-86 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
 | EVT-87 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
 | EVT-88 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
-| EVT-89 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
+| EVT-89 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
 | EVT-90 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
 | EVT-91 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
 | EVT-92 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
