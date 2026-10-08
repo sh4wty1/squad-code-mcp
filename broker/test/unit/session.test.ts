@@ -62,6 +62,12 @@ test("EVT-51: a blocked with a ticket_ref that is not a string is refused with m
   }
 });
 
+test("EVT-51: a blocked with an empty ticket_ref is refused with missing_field, as in /send, and stores no blocked", () => {
+  const b = setup();
+  b.refusedWith(() => b.session.blocked(WORKER_1, { ...BLOCKED, ticket_ref: "" }), "worker-1", "blocked", "missing_field");
+  expect(b.events().map((e) => e.kind)).toEqual(["refused"]);
+});
+
 test("EVT-52: a reason of more than 80 characters is refused with invalid_field, and one of 80 is stored", () => {
   const b = setup();
   b.refusedWith(() => b.session.blocked(WORKER_1, { ...BLOCKED, reason: "r".repeat(81) }), "worker-1", "blocked", "invalid_field");

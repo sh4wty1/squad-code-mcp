@@ -21,11 +21,11 @@ export function createSession(log: Log) {
       !isText(reason) ||
       typeof detail !== "string" ||
       typeof last_action !== "string" ||
-      (ticket_ref != null && typeof ticket_ref !== "string")
+      (ticket_ref != null && !isText(ticket_ref))
     ) {
       return no(
         "missing_field",
-        "Send reason as a non-empty string, detail and last_action as strings and ticket_ref, if any, as a string."
+        "Send reason as a non-empty string, detail and last_action as strings and ticket_ref, if any, as a non-empty string."
       );
     }
     // reason is short, like a summary
