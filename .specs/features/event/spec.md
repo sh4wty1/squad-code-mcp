@@ -418,13 +418,13 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-79 | P1: Leitura do log | Execute | Implementing |
 | EVT-80 | P1: Leitura do log | Execute | Implementing |
 | EVT-81 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
-| EVT-82 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
-| EVT-83 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
-| EVT-84 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
+| EVT-82 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
+| EVT-83 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
+| EVT-84 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
 | EVT-85 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
 | EVT-86 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
-| EVT-87 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
-| EVT-88 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
+| EVT-87 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
+| EVT-88 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
 | EVT-89 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |
 | EVT-90 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |
 | EVT-91 | P1: Polling, push e tools no servidor MCP | Tasks | In Tasks |

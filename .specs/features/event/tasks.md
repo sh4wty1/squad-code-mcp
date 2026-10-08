@@ -473,12 +473,12 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Três eventos: três pushes em ordem de `seq`, cada `content` com `summary`, `body` e os campos próprios, `meta` com `kind`, `seq` e `from` como texto e `ticket_ref` só quando não nulo; ack de cada `seq` depois do seu push
-- [ ] Push do segundo falha: ack só do primeiro, o terceiro não é empurrado naquele ciclo
-- [ ] Ack falha: o ciclo seguinte confirma o mesmo `seq` e não chama `push` para ele
-- [ ] `permission_decision` de pedido lembrado: `verdict` chamado com o `request_id` e o `behavior`, `push` não chamado, ack feito; de pedido desconhecido: só ack
-- [ ] Dois ciclos não rodam ao mesmo tempo
-- [ ] Gate: `bun test test/unit`
+- [x] Três eventos: três pushes em ordem de `seq`, cada `content` com `summary`, `body` e os campos próprios, `meta` com `kind`, `seq` e `from` como texto e `ticket_ref` só quando não nulo; ack de cada `seq` depois do seu push
+- [x] Push do segundo falha: ack só do primeiro, o terceiro não é empurrado naquele ciclo
+- [x] Ack falha: o ciclo seguinte confirma o mesmo `seq` e não chama `push` para ele
+- [x] `permission_decision` de pedido lembrado: `verdict` chamado com o `request_id` e o `behavior`, `push` não chamado, ack feito; de pedido desconhecido: só ack
+- [x] Dois ciclos não rodam ao mesmo tempo
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
