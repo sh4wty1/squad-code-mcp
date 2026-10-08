@@ -139,9 +139,9 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Um teste por definição: plano vigente é o de maior `seq`; dono é o `to` do `task` mais recente; aprovado só quando o último evento do ticket é `verdict` `approve`; `reworks` conta os `verdict` de `rework`; `dropped` vem do plano vigente
-- [ ] `question`, `answer` e `blocked` com `ticket_ref` não contam como evento do ticket
-- [ ] Gate: `bun test test/unit`
+- [x] Um teste por definição: plano vigente é o de maior `seq`; dono é o `to` do `task` mais recente; aprovado só quando o último evento do ticket é `verdict` `approve`; `reworks` conta os `verdict` de `rework`; `dropped` vem do plano vigente
+- [x] `question`, `answer` e `blocked` com `ticket_ref` não contam como evento do ticket
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

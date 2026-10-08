@@ -356,11 +356,11 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-17 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-18 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-19 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-20 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-21 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-22 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-23 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-24 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
+| EVT-20 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-21 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-22 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-23 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-24 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-25 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-26 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-27 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
