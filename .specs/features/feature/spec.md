@@ -14,11 +14,11 @@ linha de `features` gravados juntos.
 
 ## Goals
 
-- [ ] A mother abre uma feature por `/open-feature`, e a partir daí `/send` e `/plan` deixam de responder `no_open_feature`.
-- [ ] A mother encerra a feature por `/close-feature`, e o squad volta a não ter feature aberta.
-- [ ] Nunca há duas features abertas: o broker recusa a segunda e o banco também.
-- [ ] `feature_opened` e `feature_closed` chegam às outras cinco posições do squad pelo canal.
-- [ ] `features` é reconstruível só a partir de `events`, e um teste de replay prova isso.
+- [x] A mother abre uma feature por `/open-feature`, e a partir daí `/send` e `/plan` deixam de responder `no_open_feature`.
+- [x] A mother encerra a feature por `/close-feature`, e o squad volta a não ter feature aberta.
+- [x] Nunca há duas features abertas: o broker recusa a segunda e o banco também.
+- [x] `feature_opened` e `feature_closed` chegam às outras cinco posições do squad pelo canal.
+- [x] `features` é reconstruível só a partir de `events`, e um teste de replay prova isso.
 
 ## Out of Scope
 
@@ -195,47 +195,47 @@ Valem as da spec da Event. Mais:
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| FEAT-01 | P1: Abrir a feature | - | Pending |
-| FEAT-02 | P1: Abrir a feature | - | Pending |
-| FEAT-03 | P1: Abrir a feature | - | Pending |
-| FEAT-04 | P1: Abrir a feature | - | Pending |
-| FEAT-05 | P1: Abrir a feature | - | Pending |
-| FEAT-06 | P1: Abrir a feature | - | Pending |
-| FEAT-07 | P1: Abrir a feature | - | Pending |
-| FEAT-08 | P1: Abrir a feature | - | Pending |
-| FEAT-09 | P1: Abrir a feature | - | Pending |
-| FEAT-10 | P1: Abrir a feature | - | Pending |
-| FEAT-11 | P1: Abrir a feature | - | Pending |
-| FEAT-12 | P1: Abrir a feature | - | Pending |
-| FEAT-13 | P1: Abrir a feature | - | Pending |
-| FEAT-14 | P1: Encerrar a feature | - | Pending |
-| FEAT-15 | P1: Encerrar a feature | - | Pending |
-| FEAT-16 | P1: Encerrar a feature | - | Pending |
-| FEAT-17 | P1: Encerrar a feature | - | Pending |
-| FEAT-18 | P1: Encerrar a feature | - | Pending |
-| FEAT-19 | P1: Encerrar a feature | - | Pending |
-| FEAT-20 | P1: Encerrar a feature | - | Pending |
-| FEAT-21 | P1: Encerrar a feature | - | Pending |
-| FEAT-22 | P1: Encerrar a feature | - | Pending |
-| FEAT-23 | P1: Encerrar a feature | - | Pending |
-| FEAT-24 | P1: Encerrar a feature | - | Pending |
-| FEAT-25 | P1: Encerrar a feature | - | Pending |
-| FEAT-26 | P1: Features reconstruíveis do log | - | Pending |
-| FEAT-27 | P1: Features reconstruíveis do log | - | Pending |
-| FEAT-28 | P1: Features reconstruíveis do log | - | Pending |
-| FEAT-29 | P1: Tools da mother e entrega pelo canal | - | Pending |
-| FEAT-30 | P1: Tools da mother e entrega pelo canal | - | Pending |
-| FEAT-31 | P1: Tools da mother e entrega pelo canal | - | Pending |
-| FEAT-32 | P1: Tools da mother e entrega pelo canal | - | Pending |
-| FEAT-33 | P1: Tools da mother e entrega pelo canal | - | Pending |
+| FEAT-01 | P1: Abrir a feature | Execute | Verified |
+| FEAT-02 | P1: Abrir a feature | Execute | Verified |
+| FEAT-03 | P1: Abrir a feature | Execute | Verified |
+| FEAT-04 | P1: Abrir a feature | Execute | Verified |
+| FEAT-05 | P1: Abrir a feature | Execute | Verified |
+| FEAT-06 | P1: Abrir a feature | Execute | Verified |
+| FEAT-07 | P1: Abrir a feature | Execute | Verified |
+| FEAT-08 | P1: Abrir a feature | Execute | Verified |
+| FEAT-09 | P1: Abrir a feature | Execute | Verified |
+| FEAT-10 | P1: Abrir a feature | Execute | Verified |
+| FEAT-11 | P1: Abrir a feature | Execute | Verified |
+| FEAT-12 | P1: Abrir a feature | Execute | Verified |
+| FEAT-13 | P1: Abrir a feature | Execute | Verified |
+| FEAT-14 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-15 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-16 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-17 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-18 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-19 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-20 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-21 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-22 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-23 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-24 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-25 | P1: Encerrar a feature | Execute | Verified |
+| FEAT-26 | P1: Features reconstruíveis do log | Execute | Verified |
+| FEAT-27 | P1: Features reconstruíveis do log | Execute | Verified |
+| FEAT-28 | P1: Features reconstruíveis do log | Execute | Verified |
+| FEAT-29 | P1: Tools da mother e entrega pelo canal | Execute | Verified |
+| FEAT-30 | P1: Tools da mother e entrega pelo canal | Execute | Verified |
+| FEAT-31 | P1: Tools da mother e entrega pelo canal | Execute | Verified |
+| FEAT-32 | P1: Tools da mother e entrega pelo canal | Execute | Verified |
+| FEAT-33 | P1: Tools da mother e entrega pelo canal | Execute | Verified |
 
-**Coverage:** 33 total, 0 mapped to tasks, 33 unmapped.
+**Coverage:** 33 total, 33 mapped to tasks, 0 unmapped. Verificados em `ae14f01`, relatório em `validation.md`.
 
 ---
 
 ## Success Criteria
 
-- [ ] Dois clientes MCP de teste, `mother` e `leader`, vão de `open_feature` a `close_feature` passando por um `task` e um `plan`, sem nenhuma linha escrita em `features` por fora das rotas.
-- [ ] Depois de qualquer sequência de aberturas e encerramentos, a função de derivação aplicada a `GET /events` devolve as linhas de `features`.
-- [ ] Nenhum caminho, do broker ou de outra conexão, deixa duas features abertas.
-- [ ] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows, e a spec registra se o Linux ficou sem rodar.
+- [x] Dois clientes MCP de teste, `mother` e `leader`, vão de `open_feature` a `close_feature` passando por um `task` e um `plan`, sem nenhuma linha escrita em `features` por fora das rotas.
+- [x] Depois de qualquer sequência de aberturas e encerramentos, a função de derivação aplicada a `GET /events` devolve as linhas de `features`.
+- [x] Nenhum caminho, do broker ou de outra conexão, deixa duas features abertas.
+- [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows, e a spec registra se o Linux ficou sem rodar. Windows 11, bun 1.3.14: 539 testes, 536 passam, 3 pulados. O Linux ficou sem rodar: o WSL Debian da máquina não tem bun.

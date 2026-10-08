@@ -62,48 +62,53 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-08. A fatia Event está fechada e mesclada; a Feature está especificada, desenhada e quebrada em tarefas.
+Escrito em 2026-10-08. A fatia Feature está implementada e verificada no branch `feat/feature`; falta o push e o PR, que esperam o aval do Lucas.
 
 - **Feature**: fatia Feature, `.specs/features/feature/`
-- **Phase / Task**: Specify concluído e confirmado pelo Lucas em 2026-10-08. `validate_spec.py feature` sai com 0.
-- **Completed**: spec com FEAT-01 a FEAT-33
+- **Phase / Task**: Execute concluído. T1 a T31, um commit por tarefa, de `c76e70b` a `ae14f01`.
+- **Completed**: FEAT-01 a FEAT-33, todos verificados. `validate_state.py feature` sai com 0.
 - **In-progress** (file:line): nada
-- **Next step**: Execute a partir da T1. As tarefas em `.specs/features/feature/tasks.md` (31, em 5 fases; `validate_tasks.py feature` sai com 0) foram aprovadas pelo Lucas em 2026-10-08. O Design foi aprovado pelo Lucas em 2026-10-08 e commitado em `af3534d`.
+- **Next step**: push do `feat/feature` e PR, com revisão por `/the-judge`. Depois, a fatia TUI leitura, que pede antes a segunda rodada de frames (`ROADMAP.md`, Pendências).
 - **Blockers**: nenhum
 - **Uncommitted files**: none
-- **Branch**: `feat/feature`, saído da `main` em `61e1411` (merge do PR 3). Ainda não está no `origin`.
+- **Branch**: `feat/feature`, saído da `main` em `61e1411`. Ainda não está no `origin`.
 
 ### Como a verificação ficou
 
-Relatório em `.specs/features/event/validation.md`, verificado em `53ffdf4`, FAIL. É o estado aceito. Nas três rodadas nenhum comportamento do código contrariou a spec; todo FAIL veio de mutação que a suíte não matava.
+Relatório em `.specs/features/feature/validation.md`, verificado em `ae14f01`, PASS.
 
-- Rodada 1 (`8d1ac88`): 127 mutações, 2 sobreviventes reais. Fechadas em `bb7054a`.
-- Rodada 2 (`bb7054a`): 16 novas, 4 sobreviventes, todas em `server.ts`. Fechadas em `53ffdf4`.
-- Rodada 3 (`53ffdf4`): 20 novas, 3 sobreviventes. R14 e R20 ganharam teste em `4aec8d9`. R16 esperava uma decisão: o Lucas decidiu que `ticket_ref` vazio em `/blocked` recebe `missing_field`, como em `/send` (T25, `3c8ef86`, linha nova em Assumptions). Ninguém reaplicou os três mutantes.
-- Total: 158 de 163 mutações mortas, 2 equivalentes. O verificador diz que a amostragem dirigida acha um sobrevivente a cada seis, com gravidade caindo, e que mais rodadas à mão não convergem a zero.
-- `validate_state.py event` sai com 1 por causa do FAIL gravado. A rastreabilidade da spec ficou em `Implementing`.
-- Lições candidatas L-021 a L-036 em `.specs/lessons.json`; nenhuma confirmada.
+- 33 de 33 ACs e os 10 edge cases com evidência `file:line` e valor igual ao da spec.
+- 57 mutações, 55 mortas. As duas sobreviventes estão em `features()` de `broker/shared/derive.ts` e foram classificadas como equivalentes: só um log que viole FEAT-09 ou FEAT-12 as distingue. Um caso de unidade com log malformado mataria as duas, se o Lucas quiser.
+- Auditoria da migração dos testes: mesma contagem por arquivo, nenhum teste apagado, pulado ou afrouxado.
+- Lacunas não bloqueantes anotadas no relatório: o edge case de `/open-feature` com feature aberta só é exercitado com o `leader`, não com um worker; FEAT-09 "por qualquer conexão" é provado com SQL cru e arquivo reaberto, não com duas conexões simultâneas.
+- Nenhuma lição nova.
 
-### O que a fatia Feature precisa saber
+### O que a fatia TUI leitura precisa saber
 
-- A tabela `features` já existe (AD-006). `/open-feature` precisa gravar a linha e o `feature_opened` na mesma transação; `log.openFeature()` lê a linha com `closed_seq` nulo.
-- Não há índice único que impeça duas features abertas: é da Feature.
-- `events` é append-only por gatilho. Fechar feature grava `closed_seq` em `features`, não em `events`.
-- O formato de leitura não traz `question_id` nem `gate_id`; `log.record` também não os recebe.
-- Brecha conhecida, registrada na spec: ticket descartado que nunca recebeu `task` pode sumir de um `plan` e voltar no seguinte.
+- `features(events)` em `broker/shared/derive.ts` devolve as linhas de `features` sem `project`, a partir de `GET /events`. `project` não está em nenhum evento: a TUI que quiser o nome do projeto não o tem pelo log.
+- `feature_opened` e `feature_closed` têm `to` `*` e uma entrega para cada um dos cinco nomes que não são `mother`, com sessão ou não. Um nome nunca lançado acumula duas entregas por feature.
+- Encerrar não grava nada além do `feature_closed`: um `blocked` aberto continua aberto e as entregas pendentes continuam pendentes.
+- `/close-feature` ainda não confere gate (`gate_required` entra com a fatia Gate).
+- O comentário sobre a tabela `features` em `broker/db.ts` ainda diz que a fatia Feature é quem a preenche; ficou desatualizado.
+- Brecha conhecida da Event, ainda aberta: ticket descartado que nunca recebeu `task` pode sumir de um `plan` e voltar no seguinte.
 - `SQUAD_POLL_INTERVAL_MS` não numérica vira `NaN` em `broker/shared/config.ts`; ninguém tratou.
 
 ### Ambiente
 
-- Bun 1.4.2 em `~/.bun/bin`, instalado nesta sessão; pode não estar no `PATH` de um terminal antigo. De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. No Windows: 424 testes, 421 passam, 3 pulados, uns 40 s.
-- `bun x tsc` passou a baixar um `tsc` 7.0.2 em vez de usar o TypeScript 5.9.3 instalado, e ele acusa centenas de erros de tipo global (`Bun`, `Response`, `console`). Com o 5.9.3 o projeto compila limpo.
+- O `bun` do `PATH` é o 1.3.14 (WinGet). O 1.4.2 de `~/.bun/bin` não existe mais. A fatia Feature rodou inteira no 1.3.14.
+- De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. No Windows: 539 testes, 536 passam, 3 pulados, uns 45 s. Só `test/unit`: 400 testes.
+- `bun x tsc` baixa um `tsc` 7 em vez de usar o TypeScript 5.9.3 instalado, e ele acusa centenas de erros de tipo global. `broker/CLAUDE.md` ainda mostra `bun x tsc --noEmit`.
+- Teste instável: `EVT-43: /ack confirms...` em `broker/test/integration/routes.test.ts` compara `Date.now()` do teste com o relógio do processo do broker e falha de vez em quando por poucos ms. Rodar de novo.
+- `broker/test/integration/server.test.ts` (`PEER-34`) copia uma lista fixa de fontes: módulo novo importado pelo `broker.ts` ou pelo `server.ts` tem de entrar nela.
 - Os testes de integração sobem processos reais, sempre com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Nunca subir `broker.ts` ou `server.ts` à mão sem os dois: ele cria `~/.squad-code-mcp.db` e `~/.squad-code-mcp.token`.
 - No bun, `await expect(promessa).rejects...` trava o laço de eventos nos testes de integração.
+- No Git Bash desta máquina, um heredoc pode trocar `\\` por `\` ao gravar um arquivo.
+- Python é `py -3`; `python3` não está instalado.
 - Mensagens de commit seguem a convenção do repositório (frase imperativa em minúsculas), não Conventional Commits.
 
 ### Não verificado
 
-- Linux: a suíte da Event não rodou lá. O WSL Debian desta máquina não tem bun.
-- Sessão real do Claude Code: push de evento e veredito de permissão só foram vistos por cliente MCP de teste.
+- Linux: nem a suíte da Event nem a da Feature rodaram lá. O WSL Debian desta máquina não tem bun.
+- Sessão real do Claude Code: abertura e encerramento de feature, push de evento e veredito de permissão só foram vistos por cliente MCP de teste.
 - O intervalo padrão de 1 s é testado por tempo de relógio.
 - Da Peer, continuam sem verificar: macOS e a sobrevivência do broker ao fechamento de uma janela de terminal real.
