@@ -730,9 +730,9 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Nenhuma frase do README diz que nada abre uma feature
-- [ ] As ordens de recusa escritas são as de FEAT-06 e FEAT-19
-- [ ] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] Nenhuma frase do README diz que nada abre uma feature
+- [x] As ordens de recusa escritas são as de FEAT-06 e FEAT-19
+- [x] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build

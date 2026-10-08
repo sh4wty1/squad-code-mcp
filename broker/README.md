@@ -4,7 +4,7 @@ The broker of [squad-code-mcp](../README.md): a daemon on `127.0.0.1` with SQLit
 
 It is a fork of [louislva/claude-peers-mcp](https://github.com/louislva/claude-peers-mcp) at commit `640183f`, by Louis Arge, under the MIT license in [`LICENSE`](LICENSE). The first commit of this directory is that code unchanged; `git diff 10e92d3 -- broker` shows everything the fork changed.
 
-> **Status:** the Peer and Event slices. Sessions register, send `task`, `result` and `verdict` along the edges of the squad, receive them through the channel and read the log. Nothing opens a feature yet: that is the Feature slice, and until then `task`, `result`, `verdict` and `plan` are refused with `no_open_feature`.
+> **Status:** the Peer, Event and Feature slices. Sessions register, the mother opens and closes the feature, and inside it the squad sends `task`, `result` and `verdict` along its edges, receives them through the channel and reads the log.
 
 ## Requirements
 
@@ -102,6 +102,8 @@ These routes take the `id` of a registered peer. An `id` that is unknown, absent
 | `/usage` | `{ id, session_id, model, input, output, cache_write, cache_read }` | `{ ok: true, seq }`, or `missing_field` |
 | `/turn-started` | `{ id }` | `{ ok: true, seq }` |
 | `/permission-request` | `{ id, request_id, tool_name, description, input_preview }` | `{ ok: true, seq }`, or `missing_field` |
+| `/open-feature` | `{ id, title, workflow, branch, base_branch, spec_ref, spec_commit }`, `workflow` being `tlc` or `matt-pocock` | `{ ok: true, feature_id, seq }`, or a refusal, in this order: `edge_not_allowed`, `feature_already_open`, `missing_field`, `invalid_field` |
+| `/close-feature` | `{ id, outcome, body? }`, `outcome` being `delivered` or `abandoned` | `{ ok: true, seq }`, or a refusal, in this order: `edge_not_allowed`, `no_open_feature`, `missing_field`, `invalid_field` |
 
 Two routes take no `id`:
 
@@ -124,13 +126,15 @@ An event is read as a flat object: `{ seq, ts, kind, feature_id, from, role_from
 
 `summary` takes up to 80 characters. The broker fills `from`, `role_from`, `seq`, `ts` and `feature_id` itself, whatever the body says.
 
-`task`, `result`, `verdict` and `plan` need an open feature. No route opens one before the Feature slice, so until then the four are refused with `no_open_feature`. The other routes work without a feature and write their events with `feature_id` null.
+`task`, `result`, `verdict` and `plan` need an open feature: without one the four are refused with `no_open_feature`. The other routes work without a feature and write their events with `feature_id` null.
 
-A refusal of `/send`, `/plan`, `/blocked`, `/unblocked`, `/usage`, `/turn-started` or `/permission-request` to a registered peer writes a `refused` event with the peer, the kind it tried and the error. The other refusals write nothing.
+Only the mother opens and closes a feature, and one is open at a time. `/open-feature` writes a `feature_opened` with the six fields and the row of `features`, with the project taken from the git directory of the mother. `/close-feature` writes a `feature_closed` with the outcome and closes the row; it asks for no gate yet. Closing writes nothing else: the tickets of a closed feature stop counting, a blocked peer stays blocked and what was pending stays pending. `features` can be rebuilt from the log alone: `features()` in `shared/derive.ts` gives its rows, without the project, from what `GET /events` answers.
 
-`task`, `result`, `verdict` and `permission_decision` are delivered: each one waits for its recipient in `/poll-messages` until it is confirmed, whether the recipient is online or not. The other kinds are only recorded.
+A refusal of `/send`, `/plan`, `/blocked`, `/unblocked`, `/usage`, `/turn-started`, `/permission-request`, `/open-feature` or `/close-feature` to a registered peer writes a `refused` event with the peer, the kind it tried and the error. The other refusals write nothing.
 
-`events` is append-only. Two triggers abort any `UPDATE` or `DELETE` on it, from any connection.
+`task`, `result`, `verdict` and `permission_decision` are delivered: each one waits for its recipient in `/poll-messages` until it is confirmed, whether the recipient is online or not. `feature_opened` and `feature_closed` are delivered to everyone: each waits for the five names that are not the mother. The other kinds are only recorded.
+
+`events` is append-only. Two triggers abort any `UPDATE` or `DELETE` on it, from any connection. A unique index keeps a second open row out of `features`, from any connection too.
 
 ### Presence
 
@@ -142,12 +146,12 @@ After `ready` a session lists `list_peers`, `state`, `history`, `blocked` and `u
 
 | Role | Tools |
 | --- | --- |
-| `mother` | `send_task` |
+| `mother` | `send_task`, `open_feature`, `close_feature` |
 | `leader` | `plan`, `send_task`, `send_result` |
 | `worker` | `send_result` |
 | `judge` | `send_verdict` |
 
-Each tool calls the route of the same name with the `id` of the session; the three `send_*` call `/send` with their kind. A refusal comes back as an error with the `error` and the `hint` of the broker.
+Each tool calls the route of the same name with the `id` of the session; the three `send_*` call `/send` with their kind. `open_feature` answers the id of the feature along with the seq. A refusal comes back as an error with the `error` and the `hint` of the broker.
 
 ## CLI
 
@@ -162,12 +166,12 @@ bun cli.ts kill-broker   # stop the broker
 - `peers.ts`: registration, refusals, presence and listing
 - `db.ts`: schema and the write path of the event log
 - `log.ts`: writes an event with its delivery and the trace of a refusal, and reads
-- `send.ts`, `plan.ts`, `session.ts`, `permission.ts`, `state.ts`: the rules of the routes
+- `send.ts`, `plan.ts`, `feature.ts`, `session.ts`, `permission.ts`, `state.ts`: the rules of the routes
 - `server.ts`: the MCP server of a session
 - `tools.ts`: the tools of each role
 - `delivery.ts`: the loop of poll, push and ack of a session
 - `cli.ts`: status and stop
-- `shared/contract.ts`, `shared/derive.ts`: the event contract, and the state of the tickets derived from the events
+- `shared/contract.ts`, `shared/derive.ts`: the event contract, and the state of the tickets and the features derived from the events
 - `shared/config.ts`, `shared/git.ts`: settings and the git common directory
 - `test/unit`, `test/integration`: `bun test`
 
