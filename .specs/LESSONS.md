@@ -134,6 +134,102 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: mutant P11 broker/peers.ts:79 (PEER-14, PEER-42, PEER-43 60 s) (broker tests)
 - last seen: 2026-10-07T22:57:31Z
 
+### L-021 - Assert that a client makes no call with a fake server that counts requests, not with the state a real server leaves
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
+- features: event
+- evidence: M127 broker/server.ts:341 (EVT-81) (mcp-server) (+1 more)
+- last seen: 2026-10-08T04:22:30Z
+
+### L-022 - List a route in a refusal requirement only when the spec defines a refusal that route can reach
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: event
+- evidence: EVT-47, EVT-48 (/unblocked, /turn-started) (spec)
+- last seen: 2026-10-08T04:22:30Z
+
+### L-023 - Write the order of refusals for every route and kind that has more than one, not only for the main one
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: event
+- evidence: EVT-10, EVT-16 (result, verdict, /plan); broker/test/unit/send-result.test.ts:158, broker/test/unit/plan.test.ts:138 (spec)
+- last seen: 2026-10-08T04:22:31Z
+
+### L-024 - State for every optional field whether null counts as absent or as a present value of the wrong type
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec routes` · harmful: 0
+- features: event
+- evidence: EVT-51 vs EVT-04; broker/session.ts:24 (spec routes)
+- last seen: 2026-10-08T04:22:31Z
+
+### L-025 - When an assumption says a state never comes back, write the AC over the whole history, not only over the current state
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: event
+- evidence: EVT-17 vs Assumptions (ticket que volta de dropped); broker/plan.ts:69 (spec)
+- last seen: 2026-10-08T04:22:31Z
+
+### L-026 - When two ACs each say their refusal comes first, state which one wins
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: event
+- evidence: EVT-65 vs EVT-12; broker/broker.ts:146 (spec)
+- last seen: 2026-10-08T04:22:31Z
+
+### L-027 - State whether an absent optional key is stored omitted or with its default
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: event
+- evidence: EVT-15; broker/plan.ts:85 (spec)
+- last seen: 2026-10-08T04:22:31Z
+
+### L-028 - When a spec says a component ignores an input, state whether a call that gets refused downstream still counts as ignoring
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: event
+- evidence: Assumptions: pedido de permissao antes do registro (M107) (spec)
+- last seen: 2026-10-08T04:22:31Z
+
+### L-029 - When a handler acts on one named input, send it a different input and assert nothing happens
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
+- features: event
+- evidence: N02 broker/server.ts:224 (EVT-86) (mcp-server)
+- last seen: 2026-10-08T04:43:21Z
+
+### L-030 - Test a must-not-happen-until-X rule on the path where X was tried and refused, not only before X is tried
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
+- features: event
+- evidence: N03 broker/server.ts:264 (EVT-81) (mcp-server)
+- last seen: 2026-10-08T04:43:21Z
+
+### L-031 - To assert that a timer waits one interval before its first run, have the work already pending when the timer starts
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
+- features: event
+- evidence: N04 broker/server.ts:292 (Assumptions: primeiro polling) (mcp-server)
+- last seen: 2026-10-08T04:43:21Z
+
+### L-032 - Test at the wiring layer that a refusal answer from the server counts as a failed call, not only with an injected call that throws
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
+- features: event
+- evidence: N01 broker/server.ts:208 (EVT-84) (mcp-server)
+- last seen: 2026-10-08T04:43:22Z
+
+### L-033 - When a read is scoped to the current container, test a row that belongs to no container, not only a row of another container
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker-rules` · harmful: 0
+- features: event
+- evidence: R14 broker/log.ts:147 (EVT-69) (broker-rules)
+- last seen: 2026-10-08T04:58:15Z
+
+### L-034 - When code reuses an existing value or else creates one, test the reuse with a value the creator would never produce
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: event
+- evidence: R20 broker/permission.ts:19 (EVT-62) (broker tests)
+- last seen: 2026-10-08T04:58:15Z
+
+### L-035 - Test the empty string for every optional text field of a request
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: event
+- evidence: R16 broker/session.ts:39 (EVT-50) (broker tests)
+- last seen: 2026-10-08T04:58:15Z
+
+### L-036 - State for every optional text field what the empty string means: refused, absent or stored as sent
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec routes` · harmful: 0
+- features: event
+- evidence: EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)
+- last seen: 2026-10-08T04:58:15Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

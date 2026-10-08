@@ -62,41 +62,47 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-07. Para retomar: `git fetch && git checkout feat/peer`, depois `/tlc-spec-driven resume work`.
+Escrito em 2026-10-08. Para retomar: `git checkout feat/event`, depois `/tlc-spec-driven resume work`.
 
-- **Feature**: fatia Peer, `.specs/features/peer/`
-- **Phase / Task**: fechada. T1 a T21 feitas; PR 2 pronto para revisão.
-- **Completed**: T1 a T21
+- **Feature**: fatia Event, `.specs/features/event/`
+- **Phase / Task**: Execute. T1 a T24 feitas; verificação independente em FAIL depois de três rodadas, que é o limite. Falta a decisão do Lucas sobre como fechar.
+- **Completed**: T1 a T24, mais três commits de teste que respondem às rodadas 1, 2 e 3
 - **In-progress** (file:line): nada
-- **Next step**: fatia Event, em branch nova a partir de `feat/peer` (ou de `main` depois do merge do PR 2).
-- **Blockers**: nenhum
+- **Next step**: decidir (a) o que vale `ticket_ref` vazio em `/blocked` (`broker/session.ts:39`, lacuna 9 do relatório) e (b) se a fatia fecha como está ou ganha uma ferramenta de mutação. Depois: marcar a Event em `ROADMAP.md`, push e PR, que ainda não foram pedidos.
+- **Blockers**: decisão humana, acima
 - **Uncommitted files**: none
-- **Branch**: `feat/peer`, no remoto. PR: https://github.com/sh4wty1/squad-code-mcp/pull/2
+- **Branch**: `feat/event`, só local, saído de `feat/peer`. O PR 2 (Peer) continua aberto: mesclá-lo antes do PR da Event, senão o diff dela carrega a Peer.
 
-### Como a Peer fechou
+### Como a verificação ficou
 
-A verificação independente rodou seis vezes e deu FAIL nas seis; a fatia foi fechada por decisão do Lucas sem um PASS. Nenhuma das duas últimas rodadas achou resposta do código contrária à spec: o FAIL veio de mutações que a suíte não matava.
+Relatório em `.specs/features/event/validation.md`, verificado em `53ffdf4`. Nas três rodadas nenhum comportamento do código contrariou a spec; todo FAIL veio de mutação que a suíte não matava.
 
-- Rodada 6 (`.specs/features/peer/validation.md`, verificada em `ec2aba6`): 27 mutações, 20 mortas, 5 sobreviventes. As cinco foram fechadas em `a247e09` e reaplicadas pelo autor numa cópia: todas morrem. Uma sétima rodada foi iniciada e interrompida antes de dar veredito.
-- `validate_state.py peer` continua saindo com 1 por causa do FAIL gravado.
-- A rastreabilidade de `spec.md` ficou em `Implementing`, não `Verified`, pelo mesmo motivo.
+- Rodada 1 (`8d1ac88`): 127 mutações, 2 sobreviventes reais. Fechadas em `bb7054a`.
+- Rodada 2 (`bb7054a`): 16 novas, 4 sobreviventes, todas em `server.ts`. Fechadas em `53ffdf4`.
+- Rodada 3 (`53ffdf4`): 20 novas, 3 sobreviventes. Duas ganharam teste no commit seguinte, sem nova rodada: ninguém reaplicou os mutantes R14 e R20 depois dele. A terceira (R16) espera a decisão (a).
+- Total: 158 de 163 mutações mortas, 2 equivalentes. O verificador diz que a amostragem dirigida acha um sobrevivente a cada seis, com gravidade caindo, e que mais rodadas à mão não convergem a zero.
+- `validate_state.py event` sai com 1 por causa do FAIL gravado. A rastreabilidade da spec ficou em `Implementing`.
+- Lições candidatas L-021 a L-036 em `.specs/lessons.json`; nenhuma confirmada.
 
-### O que a fatia Event precisa saber
+### O que a fatia Feature precisa saber
 
-- Peer vivo é PID existente e heartbeat nos últimos 60 s (PEER-14, PEER-42, PEER-43). O servidor MCP manda `/heartbeat` a cada 15 s (PEER-46).
-- `/heartbeat` com `id` desconhecido responde `{ ok: true }` sem efeito. Uma sessão tirada pela limpeza não fica sabendo e não volta sozinha.
-- AD-004: o laço de polling do servidor MCP saiu na Peer e precisa ser recriado sobre `/poll-messages` e `/ack`.
+- A tabela `features` já existe (AD-006). `/open-feature` precisa gravar a linha e o `feature_opened` na mesma transação; `log.openFeature()` lê a linha com `closed_seq` nulo.
+- Não há índice único que impeça duas features abertas: é da Feature.
+- `events` é append-only por gatilho. Fechar feature grava `closed_seq` em `features`, não em `events`.
+- O formato de leitura não traz `question_id` nem `gate_id`; `log.record` também não os recebe.
+- Brecha conhecida, registrada na spec: ticket descartado que nunca recebeu `task` pode sumir de um `plan` e voltar no seguinte.
+- `SQUAD_POLL_INTERVAL_MS` não numérica vira `NaN` em `broker/shared/config.ts`; ninguém tratou.
 
 ### Ambiente
 
-- Bun 1.3 ou mais novo. De dentro de `broker/`: `bun install`, depois `bun x tsc --noEmit && bun test`. Esperado no Linux: 98 testes passando, uns 12 s.
-- Os testes de integração sobem processos reais em portas livres e sempre com `SQUAD_DB` temporário. Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB`: ele cria `~/.squad-code-mcp.db`.
-- No bun, `await expect(promessa).rejects...` trava o laço de eventos nos testes de integração; os testes evitam isso de propósito.
+- Bun 1.4.2 em `~/.bun/bin`, instalado nesta sessão; pode não estar no `PATH` de um terminal antigo. De dentro de `broker/`: `bun x tsc --noEmit && bun test`. No Windows: 423 testes, 420 passam, 3 pulados, uns 40 s.
+- Os testes de integração sobem processos reais, sempre com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Nunca subir `broker.ts` ou `server.ts` à mão sem os dois: ele cria `~/.squad-code-mcp.db` e `~/.squad-code-mcp.token`.
+- No bun, `await expect(promessa).rejects...` trava o laço de eventos nos testes de integração.
 - Mensagens de commit seguem a convenção do repositório (frase imperativa em minúsculas), não Conventional Commits.
 
 ### Não verificado
 
-- Sessão real do Claude Code: os testes usam um cliente MCP de teste. Ninguém viu o ping chegar a um modelo nem `tools/list_changed` trocar as tools, nem antes nem depois do SDK 1.32.1.
-- A suíte no Windows depois de `2f50812`. Os testes novos de `kill-broker` com `lsof` falso são pulados lá; o que esvazia o `PATH` não foi rodado lá.
-- macOS: nada rodou. O teste de PEER-45 é pulado onde `127.0.0.2` não aceita escuta.
-- Sobrevivência do broker ao fechamento de uma janela de terminal real.
+- Linux: a suíte da Event não rodou lá. O WSL Debian desta máquina não tem bun.
+- Sessão real do Claude Code: push de evento e veredito de permissão só foram vistos por cliente MCP de teste.
+- O intervalo padrão de 1 s é testado por tempo de relógio.
+- Da Peer, continuam sem verificar: macOS e a sobrevivência do broker ao fechamento de uma janela de terminal real.

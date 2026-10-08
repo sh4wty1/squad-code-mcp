@@ -65,6 +65,11 @@ test("EVT-62: loadHumanToken reuses the token of a file that exists, and replace
     expect(loadHumanToken(path)).toBe("a-token-the-dev-put-there-0123456789");
     expect(readFileSync(path, "utf8")).toBe("a-token-the-dev-put-there-0123456789\n");
 
+    // whatever its length: the 32 characters are of the token the broker creates
+    writeFileSync(path, "short-token");
+    expect(loadHumanToken(path)).toBe("short-token");
+    expect(readFileSync(path, "utf8")).toBe("short-token");
+
     writeFileSync(path, "\n");
     const token = loadHumanToken(path);
     expect(token.length).toBeGreaterThanOrEqual(32);

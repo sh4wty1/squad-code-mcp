@@ -349,6 +349,14 @@ test("EVT-69: history by ticket_ref answers the events of the open feature with 
   expect(b.log.history({ ticket_ref: "T-9" })).toEqual([]);
 });
 
+test("EVT-69: history by ticket_ref leaves out an event recorded with that ticket_ref while no feature was open", () => {
+  const b = setup();
+  b.log.record({ kind: "blocked", from: "worker-1", role_from: "worker", ticket_ref: "T-1" });
+  b.openFeature();
+  const task = b.log.record(TASK);
+  expect(b.log.history({ ticket_ref: "T-1" }).map((e) => [e.seq, e.kind])).toEqual([[task, "task"]]);
+});
+
 test("EVT-69: history by ticket_ref is empty without an open feature", () => {
   const b = setup();
   const old = b.openFeature();

@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/event/design.md`
-**Status**: Done (T1 a T24); falta a verificação independente
+**Status**: Done (T1 a T24). Sem PASS da verificação independente: três rodadas, FAIL nas três por mutações sobreviventes, nenhuma por código contrário à spec; ver `validation.md` e o Handoff do `STATE.md`
 
 Linha de base no Windows antes da T1, com Bun 1.4.2: 98 testes, 95 passam, 3 pulados, 0 falhas.
 
