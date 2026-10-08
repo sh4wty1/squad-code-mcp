@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { appendEvent } from "../../db.ts";
 import type { NewRecord } from "../../log.ts";
-import { MOTHER, NOW, setup } from "./helpers.ts";
+import { MOTHER, NOW, readOpened, setup, storedOpened, toOthers } from "./helpers.ts";
 
 const TASK: NewRecord = {
   kind: "task",
@@ -14,40 +14,9 @@ const TASK: NewRecord = {
   data: { loadout: ["tdd"] },
 };
 
-// The fields the helper opens a feature with
-const OPENED = {
-  title: "the feature",
-  workflow: "tlc",
-  branch: "feat/x",
-  base_branch: "main",
-  spec_ref: ".specs/features/x/spec.md",
-  spec_commit: "abc1234",
-};
-
 const OTHER_FIVE = ["judge", "leader", "worker-1", "worker-2", "worker-3"];
 
-// The deliveries an event to * leaves pending: one for each of the other five
-function toOthers(seq: number) {
-  return OTHER_FIVE.map((recipient) => ({ event_seq: seq, recipient, acked_at: null }));
-}
-
-// The feature_opened and the feature_closed of the helper, in the read format
-function readOpened(seq: number, feature_id: number) {
-  return {
-    seq,
-    ts: NOW,
-    kind: "feature_opened",
-    feature_id,
-    from: "mother",
-    role_from: "mother",
-    to: "*",
-    summary: "",
-    body: "",
-    ticket_ref: null,
-    ...OPENED,
-  };
-}
-
+// The feature_closed of the helper, in the read format
 function readClosed(seq: number, feature_id: number) {
   return {
     seq,
@@ -61,25 +30,6 @@ function readClosed(seq: number, feature_id: number) {
     body: "",
     ticket_ref: null,
     outcome: "delivered",
-  };
-}
-
-// The feature_opened of the helper, as stored
-function storedOpened(seq: number, feature_id: number) {
-  return {
-    seq,
-    ts: NOW,
-    kind: "feature_opened",
-    feature_id,
-    from_name: "mother",
-    role_from: "mother",
-    to_name: "*",
-    summary: "",
-    body: "",
-    ticket_ref: null,
-    question_id: null,
-    gate_id: null,
-    data: OPENED,
   };
 }
 

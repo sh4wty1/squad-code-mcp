@@ -23,6 +23,62 @@ export const WORKER_1: Caller = { name: "worker-1", role: "worker" };
 export const WORKER_2: Caller = { name: "worker-2", role: "worker" };
 export const WORKER_3: Caller = { name: "worker-3", role: "worker" };
 
+// The fields `openByRule` opens a feature with, unless the test gives others
+export const OPENED = {
+  title: "the feature",
+  workflow: "tlc",
+  branch: "feat/x",
+  base_branch: "main",
+  spec_ref: ".specs/features/x/spec.md",
+  spec_commit: "abc1234",
+};
+
+// The deliveries an event to * leaves pending: one for each of the other five
+export function toOthers(seq: number) {
+  return ["judge", "leader", "worker-1", "worker-2", "worker-3"].map((recipient) => ({
+    event_seq: seq,
+    recipient,
+    acked_at: null as number | null,
+  }));
+}
+
+// The feature_opened of `openByRule`, as stored
+export function storedOpened(seq: number, feature_id: number, fields: Record<string, unknown> = {}) {
+  return {
+    seq,
+    ts: NOW,
+    kind: "feature_opened",
+    feature_id,
+    from_name: "mother",
+    role_from: "mother",
+    to_name: "*",
+    summary: "",
+    body: "",
+    ticket_ref: null,
+    question_id: null,
+    gate_id: null,
+    data: OPENED,
+    ...fields,
+  };
+}
+
+// The same event in the read format
+export function readOpened(seq: number, feature_id: number) {
+  return {
+    seq,
+    ts: NOW,
+    kind: "feature_opened",
+    feature_id,
+    from: "mother",
+    role_from: "mother",
+    to: "*",
+    summary: "",
+    body: "",
+    ticket_ref: null,
+    ...OPENED,
+  };
+}
+
 // A broker over an in-memory database, with fake liveness and a fixed clock
 export function setup() {
   const db = openDatabase(":memory:");
@@ -87,15 +143,7 @@ export function setup() {
   function openByRule(fields: Partial<FeatureFields> = {}): number {
     const answer = feature.open(
       { ...MOTHER, cwd: "/repo", git_root: "/repo/.git" },
-      {
-        title: "the feature",
-        workflow: "tlc",
-        branch: "feat/x",
-        base_branch: "main",
-        spec_ref: ".specs/features/x/spec.md",
-        spec_commit: "abc1234",
-        ...fields,
-      }
+      { ...OPENED, ...fields }
     );
     if (!answer.ok) throw new Error(`the feature was not opened: ${answer.error}`);
     return answer.feature_id;
