@@ -319,9 +319,9 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] `openByRule` e `closeByRule` lançam erro se a regra recusar, em vez de devolver a recusa
-- [ ] Os helpers antigos não mudam e nenhum arquivo de teste muda
-- [ ] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] `openByRule` e `closeByRule` lançam erro se a regra recusar, em vez de devolver a recusa
+- [x] Os helpers antigos não mudam e nenhum arquivo de teste muda
+- [x] Gate: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build

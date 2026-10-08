@@ -1,6 +1,7 @@
 import { expect } from "bun:test";
 import { openDatabase } from "../../db.ts";
-import { createLog, type FeatureRow } from "../../log.ts";
+import { createFeature } from "../../feature.ts";
+import { createLog, type FeatureFields, type FeatureRow } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
 import { createPermission } from "../../permission.ts";
 import { createPlan } from "../../plan.ts";
@@ -34,6 +35,7 @@ export function setup() {
   const session = createSession(log);
   const permission = createPermission(log, HUMAN_TOKEN);
   const { state } = createState(log);
+  const feature = createFeature(log);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
@@ -78,6 +80,32 @@ export function setup() {
       "UPDATE features SET closed_seq = (SELECT COALESCE(MAX(seq), 0) FROM events), outcome = 'delivered' WHERE id = ?",
       [id]
     );
+  }
+
+  // Opens a feature by the rule, as the mother: the feature_opened takes a seq and leaves
+  // five pending deliveries, which nothing here confirms. Returns its id.
+  function openByRule(fields: Partial<FeatureFields> = {}): number {
+    const answer = feature.open(
+      { ...MOTHER, cwd: "/repo", git_root: "/repo/.git" },
+      {
+        title: "the feature",
+        workflow: "tlc",
+        branch: "feat/x",
+        base_branch: "main",
+        spec_ref: ".specs/features/x/spec.md",
+        spec_commit: "abc1234",
+        ...fields,
+      }
+    );
+    if (!answer.ok) throw new Error(`the feature was not opened: ${answer.error}`);
+    return answer.feature_id;
+  }
+
+  // Closes the open feature by the rule, as delivered. Returns the seq of the feature_closed.
+  function closeByRule(): number {
+    const answer = feature.close(MOTHER, { outcome: "delivered" });
+    if (!answer.ok) throw new Error(`the feature was not closed: ${answer.error}`);
+    return answer.seq;
   }
 
   function deliveries() {
@@ -151,6 +179,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, plan, session, permission, state, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
+    db, peers, log, send, plan, session, permission, state, feature, alive, clock, join, events, rows, openFeature, closeFeature, openByRule, closeByRule, deliveries, refusedWith, given,
   };
 }
