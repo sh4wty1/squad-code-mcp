@@ -404,7 +404,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-65 | P1: Permissão decidida fora do terminal | Execute | Implementing |
 | EVT-66 | P1: Permissão decidida fora do terminal | Execute | Implementing |
 | EVT-67 | P1: Leitura do log | Execute | Implementing |
-| EVT-68 | P1: Leitura do log | Tasks | In Tasks |
+| EVT-68 | P1: Leitura do log | Execute | Implementing |
 | EVT-69 | P1: Leitura do log | Execute | Implementing |
 | EVT-70 | P1: Leitura do log | Execute | Implementing |
 | EVT-71 | P1: Leitura do log | Execute | Implementing |
@@ -414,7 +414,7 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-75 | P1: Leitura do log | Execute | Implementing |
 | EVT-76 | P1: Leitura do log | Execute | Implementing |
 | EVT-77 | P1: Leitura do log | Execute | Implementing |
-| EVT-78 | P1: Leitura do log | Tasks | In Tasks |
+| EVT-78 | P1: Leitura do log | Execute | Implementing |
 | EVT-79 | P1: Leitura do log | Execute | Implementing |
 | EVT-80 | P1: Leitura do log | Execute | Implementing |
 | EVT-81 | P1: Polling, push e tools no servidor MCP | Execute | Implementing |

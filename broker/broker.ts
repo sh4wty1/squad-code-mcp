@@ -37,7 +37,8 @@ const CREDENTIAL_ROUTES = [
   "/turn-started",
   "/permission-request",
 ];
-const ROUTES = [...PEER_ROUTES, ...CREDENTIAL_ROUTES];
+// The human is not a peer: the decision of a permission is authorized by its own credential
+const ROUTES = [...PEER_ROUTES, ...CREDENTIAL_ROUTES, "/permission-decision"];
 
 const db = openDatabase(DB_PATH);
 const peers = createPeers(db);
@@ -45,6 +46,7 @@ const log = createLog(db);
 const { send } = createSend(log);
 const { plan } = createPlan(log);
 const session = createSession(log);
+// Read once, here, and created if it is not there. No answer and no event carries it.
 const permission = createPermission(log, loadHumanToken(tokenPath()));
 const { state } = createState(log);
 
@@ -60,6 +62,15 @@ function historyFilter(body: Record<string, unknown>): HistoryFilter | null {
   if (Number.isInteger(question_id)) return { question_id: question_id as number };
   if (Number.isInteger(gate_id)) return { gate_id: gate_id as number };
   return null;
+}
+
+// The whole log after a cursor, for the TUI: every feature and the events of none.
+// `after` is the query parameter as it came, null when absent.
+function eventsAfter(after: string | null): unknown {
+  if (after !== null && !/^\d+$/.test(after)) {
+    return refuse("invalid_field", "after must be an integer of zero or more: the last seq already read.");
+  }
+  return { events: log.after(Number(after ?? 0)), last_seq: log.lastSeq() };
 }
 
 // What a route with credential answers to `peer`, the holder of the id of the request.
@@ -118,6 +129,9 @@ Bun.serve({
       if (path === "/health") {
         return Response.json({ status: "ok", peers: peers.count() });
       }
+      if (path === "/events") {
+        return Response.json(eventsAfter(url.searchParams.get("after")));
+      }
       return new Response("squad broker", { status: 200 });
     }
 
@@ -131,6 +145,10 @@ Bun.serve({
       const body: unknown = await req.json().catch(() => null);
       if (typeof body !== "object" || body === null || Array.isArray(body)) {
         return Response.json({ ok: false, error: "missing_field", hint: "Send a JSON object as the body." });
+      }
+
+      if (path === "/permission-decision") {
+        return Response.json(permission.decision(body as Record<string, unknown>));
       }
 
       if (CREDENTIAL_ROUTES.includes(path)) {

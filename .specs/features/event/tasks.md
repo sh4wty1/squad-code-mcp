@@ -432,12 +432,12 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] `GET /events?after=1` com três eventos devolve os dois últimos e `last_seq` 3; sem `after` devolve tudo; com `after` maior que o último devolve lista vazia e `last_seq` do log
-- [ ] `after` negativo, fracionário e não numérico recebem status 200 com `invalid_field`
-- [ ] O broker cria o arquivo em `SQUAD_TOKEN_FILE` ao subir; a decisão com esse token é gravada e aparece no polling do peer; com token errado recebe `invalid_token`; o token não aparece em nenhuma resposta nem em `events`
-- [ ] Recusa de `/permission-decision` e de `GET /events` não grava `refused`
-- [ ] Parar o broker e subir outro sobre o mesmo banco: `/state`, `/poll-messages` e `GET /events` respondem o mesmo, e um `result` com `task_seq` velho continua recebendo `stale_reference`
-- [ ] Gate: `bun test`
+- [x] `GET /events?after=1` com três eventos devolve os dois últimos e `last_seq` 3; sem `after` devolve tudo; com `after` maior que o último devolve lista vazia e `last_seq` do log
+- [x] `after` negativo, fracionário e não numérico recebem status 200 com `invalid_field`
+- [x] O broker cria o arquivo em `SQUAD_TOKEN_FILE` ao subir; a decisão com esse token é gravada e aparece no polling do peer; com token errado recebe `invalid_token`; o token não aparece em nenhuma resposta nem em `events`
+- [x] Recusa de `/permission-decision` e de `GET /events` não grava `refused`
+- [x] Parar o broker e subir outro sobre o mesmo banco: `/state`, `/poll-messages` e `GET /events` respondem o mesmo, e um `result` com `task_seq` velho continua recebendo `stale_reference`
+- [x] Gate: `bun test`
 
 **Tests**: integration
 **Gate**: full
