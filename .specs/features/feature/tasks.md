@@ -338,9 +338,9 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Nenhuma chamada de `openFeature` nem de `closeFeature` no arquivo
-- [ ] Mesma contagem de testes do arquivo; nenhuma comparação enfraquecida (o design mediu 16 testes afetados)
-- [ ] Gate: `bun test test/unit`
+- [x] Nenhuma chamada de `openFeature` nem de `closeFeature` no arquivo
+- [x] Mesma contagem de testes do arquivo; nenhuma comparação enfraquecida (o design mediu 16 testes afetados)
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
