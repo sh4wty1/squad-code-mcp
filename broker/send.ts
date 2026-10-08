@@ -9,6 +9,7 @@
 import type { Log } from "./log.ts";
 import { ROSTER, type Refusal, type Role } from "./peers.ts";
 import { EDGES } from "./shared/contract.ts";
+import { REWORK_LIMIT, tickets } from "./shared/derive.ts";
 
 // Who holds the credential of the request: what `find` of the peer registry answers
 export interface Caller {
@@ -41,6 +42,12 @@ const ROUTE_OF: Record<string, string> = {
 // What the rule of an edge decides: the refusal, or what is stored besides the envelope
 type Ruling = { error: string; hint: string } | { ticket_ref: string | null; data: Record<string, unknown> };
 
+function isListOf(value: unknown, isItem: (item: unknown) => boolean): boolean {
+  return Array.isArray(value) && value.every(isItem);
+}
+
+const isString = (value: unknown) => typeof value === "string";
+
 export function createSend(log: Log) {
   // task mother → leader and result leader → mother: no ticket and no field of their own
   function untracked(body: Record<string, unknown>): Ruling {
@@ -53,9 +60,56 @@ export function createSend(log: Log) {
     return { ticket_ref: null, data: {} };
   }
 
-  function rule(kind: SentKind, peer: Caller, body: Record<string, unknown>): Ruling {
+  // task leader → worker: a ticket of the current plan, still open, for a free worker
+  function assignment(to: string, body: Record<string, unknown>): Ruling {
+    const { ticket_ref, loadout, criteria } = body;
+    if (
+      typeof ticket_ref !== "string" ||
+      ticket_ref === "" ||
+      !isListOf(loadout, isString) ||
+      (criteria !== undefined && !isListOf(criteria, Number.isInteger))
+    ) {
+      return {
+        error: "missing_field",
+        hint: "A task to a worker takes ticket_ref as a non-empty string, loadout as a list of strings, which may be empty, and criteria, if any, as a list of integers.",
+      };
+    }
+
+    const all = tickets(log.featureEvents());
+    const ticket = all.get(ticket_ref);
+    if (!ticket?.planned) {
+      return {
+        error: "unplanned_ticket",
+        hint: `${ticket_ref} is not in the current plan. Send a plan that has it before the task.`,
+      };
+    }
+    if (ticket.dropped) {
+      return { error: "ticket_dropped", hint: `${ticket_ref} was dropped and takes no task. Plan a new ticket.` };
+    }
+    if (ticket.approved) {
+      return { error: "ticket_closed", hint: `${ticket_ref} was approved and is closed. Plan a new ticket.` };
+    }
+    if (ticket.reworks >= REWORK_LIMIT) {
+      return {
+        error: "rework_limit",
+        hint: `${ticket_ref} had ${REWORK_LIMIT} verdicts of rework. Drop it in a new plan and plan another ticket, or escalate.`,
+      };
+    }
+    // Open for the worker: it owns the ticket, not approved and not dropped
+    const open = [...all.values()].find((t) => t.ticket_ref !== ticket_ref && t.owner === to && !t.approved && !t.dropped);
+    if (open) {
+      return {
+        error: "worker_busy",
+        hint: `${to} has ${open.ticket_ref} open. Send the task to a free worker, or wait for the verdict of ${open.ticket_ref}.`,
+      };
+    }
+    return { ticket_ref, data: { loadout, ...(criteria !== undefined && { criteria }) } };
+  }
+
+  function rule(kind: SentKind, peer: Caller, to: string, body: Record<string, unknown>): Ruling {
     if (kind === "task" && peer.role === "mother") return untracked(body);
     if (kind === "result" && peer.role === "leader") return untracked(body);
+    if (kind === "task") return assignment(to, body);
     throw new Error(`no rule for ${kind} from ${peer.role}`);
   }
 
@@ -103,7 +157,7 @@ export function createSend(log: Log) {
       return no("no_open_feature", "No feature is open. Wait for the mother to open one before sending.");
     }
 
-    const ruling = rule(kind as SentKind, peer, body);
+    const ruling = rule(kind as SentKind, peer, to, body);
     if ("error" in ruling) return no(ruling.error, ruling.hint);
 
     const seq = log.record({

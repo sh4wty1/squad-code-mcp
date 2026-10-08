@@ -4,6 +4,7 @@ import { createLog, type FeatureRow } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
 import { createPlan } from "../../plan.ts";
 import { createSend, type Caller } from "../../send.ts";
+import type { PlannedTicket } from "../../shared/contract.ts";
 
 export const NOW = 1791331200000;
 
@@ -78,6 +79,38 @@ export function setup() {
     }[];
   }
 
+  // Events of the cycle of a ticket put straight in the log, as the rules would leave
+  // them: the state a test starts from. Each one returns its seq.
+  const given = {
+    plan(tickets: PlannedTicket[]) {
+      return log.record({ kind: "plan", from: "leader", role_from: "leader", data: { tickets } });
+    },
+    task(ticket_ref: string, to: string) {
+      return log.record({
+        kind: "task", from: "leader", role_from: "leader", to, summary: "do it", ticket_ref, data: { loadout: [] },
+      });
+    },
+    result(ticket_ref: string, from: string, task_seq: number) {
+      return log.record({
+        kind: "result", from, role_from: "worker", to: "judge", summary: "done", ticket_ref,
+        data: { task_seq, branch: "squad/x", commit: "abc1234" },
+      });
+    },
+    verdict(ticket_ref: string, result_seq: number, outcome: "approve" | "rework") {
+      return log.record({
+        kind: "verdict", from: "judge", role_from: "judge", to: "leader", summary: outcome, ticket_ref,
+        data: { result_seq, outcome, criteria: [{ n: 1, text: "works", pass: outcome === "approve" }] },
+      });
+    },
+    // `rounds` times task, result and verdict of rework for the ticket
+    reworks(ticket_ref: string, worker: string, rounds: number) {
+      for (let i = 0; i < rounds; i++) {
+        const task = given.task(ticket_ref, worker);
+        given.verdict(ticket_ref, given.result(ticket_ref, worker, task), "rework");
+      }
+    },
+  };
+
   // Runs a call that has to be refused (EVT-47): the answer is the refusal with a hint, the
   // log gains its `refused` and nothing else, and no delivery changes. Returns the answer.
   function refusedWith(call: () => unknown, peer: string, attempted_kind: string, error: string) {
@@ -109,6 +142,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, plan, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith,
+    db, peers, log, send, plan, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
   };
 }

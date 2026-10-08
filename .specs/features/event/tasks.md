@@ -286,10 +286,10 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Um teste por AC de EVT-19 a EVT-25 e EVT-27, com o código de erro ou o `data` da spec
-- [ ] Edge cases: `task` do mesmo ticket para outro worker libera o dono anterior; ticket descartado libera o worker; ticket de feature fechada com o mesmo `ticket_ref` não conta
-- [ ] `task` para ticket em `working` e em `review` é aceito
-- [ ] Gate: `bun test test/unit`
+- [x] Um teste por AC de EVT-19 a EVT-25 e EVT-27, com o código de erro ou o `data` da spec
+- [x] Edge cases: `task` do mesmo ticket para outro worker libera o dono anterior; ticket descartado libera o worker; ticket de feature fechada com o mesmo `ticket_ref` não conta
+- [x] `task` para ticket em `working` e em `review` é aceito
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
