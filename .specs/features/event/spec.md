@@ -350,11 +350,11 @@ Valem para toda a spec e são calculadas só a partir de `events` (ADR-002, ADR-
 | EVT-11 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
 | EVT-12 | P1: Envio pelas arestas da estrela | Tasks | In Tasks |
 | EVT-13 | P1: Envio pelas arestas da estrela | Execute | Implementing |
-| EVT-14 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-15 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-16 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-17 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
-| EVT-18 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
+| EVT-14 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-15 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-16 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-17 | P1: Plano e ciclo do ticket | Execute | Implementing |
+| EVT-18 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-19 | P1: Plano e ciclo do ticket | Tasks | In Tasks |
 | EVT-20 | P1: Plano e ciclo do ticket | Execute | Implementing |
 | EVT-21 | P1: Plano e ciclo do ticket | Execute | Implementing |

@@ -265,11 +265,11 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Um teste por AC, com o evento `plan` conferido campo a campo e `data.tickets` só com as quatro chaves
-- [ ] `invalid_plan` para `ticket_ref` repetido, `depends_on` fora da lista, dependência de si mesmo e ticket que volta de `dropped`
-- [ ] Quem não é leader recebe `edge_not_allowed` mesmo sem feature aberta e com corpo inválido
-- [ ] Toda recusa grava `refused` com `attempted_kind` `plan`
-- [ ] Gate: `bun test test/unit`
+- [x] Um teste por AC, com o evento `plan` conferido campo a campo e `data.tickets` só com as quatro chaves
+- [x] `invalid_plan` para `ticket_ref` repetido, `depends_on` fora da lista, dependência de si mesmo e ticket que volta de `dropped`
+- [x] Quem não é leader recebe `edge_not_allowed` mesmo sem feature aberta e com corpo inválido
+- [x] Toda recusa grava `refused` com `attempted_kind` `plan`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

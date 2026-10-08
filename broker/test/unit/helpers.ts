@@ -2,6 +2,7 @@ import { expect } from "bun:test";
 import { openDatabase } from "../../db.ts";
 import { createLog, type FeatureRow } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
+import { createPlan } from "../../plan.ts";
 import { createSend, type Caller } from "../../send.ts";
 
 export const NOW = 1791331200000;
@@ -22,6 +23,7 @@ export function setup() {
   const peers = createPeers(db, (pid) => alive.has(pid), () => clock.now);
   const log = createLog(db, () => clock.now);
   const { send } = createSend(log);
+  const { plan } = createPlan(log);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
@@ -107,6 +109,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith,
+    db, peers, log, send, plan, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith,
   };
 }
