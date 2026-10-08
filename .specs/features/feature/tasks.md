@@ -672,9 +672,9 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Nenhuma chamada de `openFeature` no arquivo
-- [ ] Mesma contagem de testes do arquivo; nenhuma comparação enfraquecida: onde o teste comparava `pushed()` inteiro, continua comparando inteiro, com o `feature_opened` na frente
-- [ ] Gate: `bun test`
+- [x] Nenhuma chamada de `openFeature` no arquivo
+- [x] Mesma contagem de testes do arquivo; nenhuma comparação enfraquecida: onde o teste comparava `pushed()` inteiro, continua comparando inteiro, com o `feature_opened` na frente
+- [x] Gate: `bun test`
 
 **Tests**: integration
 **Gate**: full

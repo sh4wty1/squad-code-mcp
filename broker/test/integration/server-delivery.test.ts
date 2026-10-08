@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { closeSessions, openFeature, post, readDb, readDeliveries, startBroker, startSession, waitFor } from "./helpers.ts";
+import { closeSessions, openByRoute, post, readDb, readDeliveries, startBroker, startSession, waitFor } from "./helpers.ts";
 
 type Broker = Awaited<ReturnType<typeof startBroker>>;
 
@@ -26,10 +26,22 @@ function session(b: Broker, name: string, env: Record<string, string> = {}) {
   });
 }
 
-// The mother, registered over HTTP, to send the leader its tasks
-async function mother(b: Broker): Promise<(summary: string, body?: string) => Promise<number>> {
-  const { json } = await post(b.url, "/register", { pid: process.pid, cwd: "/repo", git_root: null, name: "mother", role: "mother" });
-  return async (summary, body) => (await post(b.url, "/send", { id: json.id, kind: "task", to: "leader", summary, body })).json.seq;
+// The mother, registered over HTTP: her id, to open the feature, and the task she sends the leader
+async function mother(b: Broker, pid = process.pid) {
+  const { json } = await post(b.url, "/register", { pid, cwd: "/repo", git_root: null, name: "mother", role: "mother" });
+  const send = async (summary: string, body?: string): Promise<number> =>
+    (await post(b.url, "/send", { id: json.id, kind: "task", to: "leader", summary, body })).json.seq;
+  return { id: json.id as string, send };
+}
+
+// The deliveries of a feature_opened: confirmed by the names with a session in the test,
+// pending for the others
+function opening(seq: number, confirmedBy: string[]) {
+  return ["judge", "leader", "worker-1", "worker-2", "worker-3"].map((recipient) => ({
+    event_seq: seq,
+    recipient,
+    acked_at: confirmedBy.includes(recipient) ? expect.any(Number) : null,
+  }));
 }
 
 const REFUSED = { ok: false, error: "unknown_peer", hint: "-" };
@@ -55,33 +67,38 @@ const pending = (b: Broker) => readDeliveries(b.dbFile).filter((d) => d.acked_at
 test("EVT-81/82/83: what was sent to the session is pushed through the channel with its seq, once, and then confirmed", async () => {
   broker = await startBroker();
   const b = broker;
-  openFeature(b.dbFile);
-  const send = await mother(b);
+  const { id, send } = await mother(b);
+  await openByRoute(b.url, id);
   const leader = await session(b, "leader");
   await leader.register();
 
   const seq = await send("kick off", "the spec is approved");
-  expect(seq).toBe(3);
+  expect(seq).toBe(4);
   // sooner than the second of the default interval: SQUAD_POLL_INTERVAL_MS is read
-  await waitFor(() => leader.pushed().length > 0, "the push of the task", 700);
-  const [push] = leader.pushed();
+  await waitFor(() => leader.pushed().length > 1, "the push of the task", 700);
+  const [opened, push] = leader.pushed();
+  expect(opened!.params.meta).toEqual({ kind: "feature_opened", seq: "2", from: "mother" });
   expect(push!.method).toBe("notifications/claude/channel");
-  expect(push!.params.meta).toEqual({ kind: "task", seq: "3", from: "mother" });
+  expect(push!.params.meta).toEqual({ kind: "task", seq: "4", from: "mother" });
   expect(push!.params.content).toContain("kick off");
   expect(push!.params.content).toContain("the spec is approved");
 
-  await waitFor(() => pending(b).length === 0, "the ack of the task");
-  expect(readDeliveries(b.dbFile)).toEqual([{ event_seq: 3, recipient: "leader", acked_at: expect.any(Number) }]);
+  // what is left pending is the feature_opened of the four names with no session
+  await waitFor(() => pending(b).length === 4, "the ack of the task");
+  expect(readDeliveries(b.dbFile)).toEqual([
+    ...opening(2, ["leader"]),
+    { event_seq: 4, recipient: "leader", acked_at: expect.any(Number) },
+  ]);
   // confirmed: the pollings that follow bring nothing, and it is not pushed again
   await Bun.sleep(POLL_MS * 6);
-  expect(leader.pushed()).toHaveLength(1);
+  expect(leader.pushed()).toHaveLength(2);
 });
 
 test("EVT-81: before ready the server does not ask the broker for anything, and what is pending arrives after it, in order", async () => {
   broker = await startBroker();
   const b = broker;
-  openFeature(b.dbFile);
-  const send = await mother(b);
+  const { id, send } = await mother(b);
+  await openByRoute(b.url, id);
   const first = await send("kick off");
   const second = await send("more scope", "one more page");
 
@@ -89,24 +106,26 @@ test("EVT-81: before ready the server does not ask the broker for anything, and 
   await leader.pingNumber();
   await Bun.sleep(POLL_MS * 8);
   expect(leader.pushed()).toEqual([]);
-  expect(pending(b)).toEqual([first, second]);
+  expect(pending(b)).toEqual([2, 2, 2, 2, 2, first, second]);
 
   await leader.register();
-  await waitFor(() => leader.pushed().length === 2, "the two pushes");
+  await waitFor(() => leader.pushed().length === 3, "the three pushes");
   expect(leader.pushed().map((p) => [p.params.meta.seq, p.params.meta.kind])).toEqual([
+    ["2", "feature_opened"],
     [String(first), "task"],
     [String(second), "task"],
   ]);
-  expect(leader.pushed()[1]!.params.content).toContain("more scope");
-  expect(leader.pushed()[1]!.params.content).toContain("one more page");
-  await waitFor(() => pending(b).length === 0, "the acks");
+  expect(leader.pushed()[2]!.params.content).toContain("more scope");
+  expect(leader.pushed()[2]!.params.content).toContain("one more page");
+  await waitFor(() => pending(b).length === 4, "the acks");
+  expect(readDeliveries(b.dbFile).filter((d) => d.acked_at === null)).toEqual(opening(2, []).filter((d) => d.recipient !== "leader"));
 });
 
 test("EVT-81: without SQUAD_POLL_INTERVAL_MS the server polls every second", async () => {
   broker = await startBroker();
   const b = broker;
-  openFeature(b.dbFile);
-  const send = await mother(b);
+  const { id, send } = await mother(b);
+  await openByRoute(b.url, id);
   const leader = await session(b, "leader", { SQUAD_POLL_INTERVAL_MS: "" });
   await leader.register();
   const registered = Date.now();
@@ -115,24 +134,26 @@ test("EVT-81: without SQUAD_POLL_INTERVAL_MS the server polls every second", asy
   // the first polling comes one interval after the registration
   await Bun.sleep(500);
   expect(leader.pushed()).toEqual([]);
-  await waitFor(() => leader.pushed().length === 1, "the push of the task", 2500);
+  await waitFor(() => leader.pushed().length === 2, "the push of the task", 2500);
+  expect(leader.pushed().map((p) => p.params.meta.kind)).toEqual(["feature_opened", "task"]);
   expect(Date.now() - registered).toBeGreaterThanOrEqual(900);
 });
 
 test("EVT-82: the push of an event of a ticket carries the fields of its kind and the ticket_ref", async () => {
   broker = await startBroker();
   const b = broker;
-  openFeature(b.dbFile);
+  await openByRoute(b.url, (await mother(b, process.ppid)).id);
   const leader = await post(b.url, "/register", { pid: process.pid, cwd: "/repo", git_root: null, name: "leader", role: "leader" });
   await post(b.url, "/plan", { id: leader.json.id, tickets: [{ ticket_ref: "T1", title: "first" }] });
   const task = { id: leader.json.id, kind: "task", to: "worker-1", ticket_ref: "T1", summary: "do the first", loadout: ["tdd"], criteria: [1, 2] };
-  expect((await post(b.url, "/send", task)).json).toEqual({ ok: true, seq: 3 });
+  expect((await post(b.url, "/send", task)).json).toEqual({ ok: true, seq: 5 });
 
   const worker = await session(b, "worker-1");
   await worker.register();
-  await waitFor(() => worker.pushed().length === 1, "the push of the task");
-  const { meta, content } = worker.pushed()[0]!.params;
-  expect(meta).toEqual({ kind: "task", seq: "3", from: "leader", ticket_ref: "T1" });
+  await waitFor(() => worker.pushed().length === 2, "the push of the task");
+  expect(worker.pushed()[0]!.params.meta).toEqual({ kind: "feature_opened", seq: "2", from: "mother" });
+  const { meta, content } = worker.pushed()[1]!.params;
+  expect(meta).toEqual({ kind: "task", seq: "5", from: "leader", ticket_ref: "T1" });
   expect(content).toContain("do the first");
   expect(content).toContain('loadout: ["tdd"]');
   expect(content).toContain("criteria: [1,2]");
@@ -286,24 +307,26 @@ test("EVT-86: a notification that is not a permission request is not relayed to 
 test("EVT-81: what was already pending at the registration waits for the first interval", async () => {
   broker = await startBroker();
   const b = broker;
-  openFeature(b.dbFile);
-  const send = await mother(b);
+  const { id, send } = await mother(b);
+  await openByRoute(b.url, id);
   await send("kick off");
   const leader = await session(b, "leader", { SQUAD_POLL_INTERVAL_MS: "" });
   await leader.register();
 
   await Bun.sleep(500);
   expect(leader.pushed()).toEqual([]);
-  await waitFor(() => leader.pushed().length === 1, "the push of the task", 2500);
+  await waitFor(() => leader.pushed().length === 2, "the push of the task", 2500);
+  expect(leader.pushed().map((p) => p.params.meta.kind)).toEqual(["feature_opened", "task"]);
 });
 
 test("EVT-81: when its stdin closes the server stops polling and exits", async () => {
   broker = await startBroker();
   const b = broker;
-  openFeature(b.dbFile);
-  const send = await mother(b);
+  const { id, send } = await mother(b);
+  await openByRoute(b.url, id);
   const leader = await session(b, "leader");
   await leader.register();
+  await waitFor(() => pending(b).length === 4, "the ack of the feature_opened");
   const pid = leader.transport.pid!;
 
   // close() sends SIGTERM 2 s after closing stdin; the exit has to come from the stdin close alone
@@ -321,10 +344,10 @@ test("EVT-81: when its stdin closes the server stops polling and exits", async (
     1500
   );
   await closing;
-  expect(readDb(b.dbFile).events.map((e) => e.kind)).toEqual(["peer_joined", "peer_joined", "peer_left"]);
+  expect(readDb(b.dbFile).events.map((e) => e.kind)).toEqual(["peer_joined", "feature_opened", "peer_joined", "peer_left"]);
 
   // Nobody asks for what is sent to the name from now on: it stays for its next session
   const seq = await send("kick off");
   await Bun.sleep(POLL_MS * 6);
-  expect(pending(b)).toEqual([seq]);
+  expect(pending(b)).toEqual([2, 2, 2, 2, seq]);
 });
