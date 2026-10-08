@@ -6,6 +6,9 @@
  */
 
 import { win32 } from "node:path";
+import type { Log } from "./log.ts";
+import type { Refusal } from "./peers.ts";
+import { isText, type Caller } from "./send.ts";
 
 // Where the session of a peer runs
 export type Where = { cwd: string; git_root: string | null };
@@ -16,4 +19,53 @@ export function projectOf(git_root: string | null, cwd: string): string {
   if (git_root === null) return win32.basename(cwd);
   const last = win32.basename(git_root);
   return last === ".git" ? win32.basename(win32.dirname(git_root)) : last;
+}
+
+const WORKFLOWS: readonly string[] = ["tlc", "matt-pocock"];
+
+export function createFeature(log: Log) {
+  // `peer` is who the id of the request belongs to and `body` the JSON object received
+  function open(
+    peer: Caller & Where,
+    body: Record<string, unknown>
+  ): { ok: true; feature_id: number; seq: number } | Refusal {
+    const no = (error: string, hint: string) => log.refused(peer.name, "feature_opened", error, hint);
+
+    if (peer.role !== "mother") {
+      return no("edge_not_allowed", "Only the mother opens a feature. Ask the mother for what you need.");
+    }
+    if (log.openFeature()) {
+      return no("feature_already_open", "A feature is already open. Close it before opening another.");
+    }
+    const { title, workflow, branch, base_branch, spec_ref, spec_commit } = body;
+    if (
+      !isText(title) ||
+      !isText(workflow) ||
+      !isText(branch) ||
+      !isText(base_branch) ||
+      !isText(spec_ref) ||
+      !isText(spec_commit)
+    ) {
+      return no(
+        "missing_field",
+        "Send title, workflow, branch, base_branch, spec_ref and spec_commit as non-empty strings."
+      );
+    }
+    if (!WORKFLOWS.includes(workflow)) {
+      return no("invalid_field", "workflow must be tlc or matt-pocock.");
+    }
+
+    // Only the six fields of the contract are stored, and nothing of the rest of the body
+    const opened = log.open(peer, projectOf(peer.git_root, peer.cwd), {
+      title,
+      workflow,
+      branch,
+      base_branch,
+      spec_ref,
+      spec_commit,
+    });
+    return { ok: true, ...opened };
+  }
+
+  return { open };
 }

@@ -244,17 +244,17 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] FEAT-01: a `mother` abre e a resposta é `{ ok: true, feature_id, seq }`; `project` da linha sai do `git_root` e do `cwd` do peer
-- [ ] FEAT-02: cada um dos outros três papéis recebe `edge_not_allowed`
-- [ ] FEAT-03: com feature aberta, `feature_already_open`; o `refused` leva o `feature_id` da aberta e a linha dela fica igual
-- [ ] FEAT-04: um teste por campo, para ausente, `null`, não texto e texto vazio → `missing_field`
-- [ ] FEAT-05: `workflow` fora de `tlc` e `matt-pocock` → `invalid_field`; os dois valores são aceitos
-- [ ] FEAT-06: `leader` com feature aberta → `edge_not_allowed`; `mother` com feature aberta e campo faltando → `feature_already_open`; campo faltando e `workflow` inválido → `missing_field`
-- [ ] FEAT-10: toda recusa passa por `refusedWith(..., "feature_opened", ...)` e não deixa linha em `features`
-- [ ] `feature_id`, `project`, `from` e `opened_seq` no corpo são ignorados: nem a linha nem `data` os levam
-- [ ] FEAT-13: depois de abrir, o `task` mother → leader e o `plan` são aceitos e gravados com o `feature_id` dela, e `/state` devolve `feature` com os sete campos
-- [ ] Testes em `broker/test/unit/feature-open.test.ts`, com `createFeature(s.log)` sobre o `setup()`
-- [ ] Gate: `bun test test/unit`
+- [x] FEAT-01: a `mother` abre e a resposta é `{ ok: true, feature_id, seq }`; `project` da linha sai do `git_root` e do `cwd` do peer
+- [x] FEAT-02: cada um dos outros três papéis recebe `edge_not_allowed`
+- [x] FEAT-03: com feature aberta, `feature_already_open`; o `refused` leva o `feature_id` da aberta e a linha dela fica igual
+- [x] FEAT-04: um teste por campo, para ausente, `null`, não texto e texto vazio → `missing_field`
+- [x] FEAT-05: `workflow` fora de `tlc` e `matt-pocock` → `invalid_field`; os dois valores são aceitos
+- [x] FEAT-06: `leader` com feature aberta → `edge_not_allowed`; `mother` com feature aberta e campo faltando → `feature_already_open`; campo faltando e `workflow` inválido → `missing_field`
+- [x] FEAT-10: toda recusa passa por `refusedWith(..., "feature_opened", ...)` e não deixa linha em `features`
+- [x] `feature_id`, `project`, `from` e `opened_seq` no corpo são ignorados: nem a linha nem `data` os levam
+- [x] FEAT-13: depois de abrir, o `task` mother → leader e o `plan` são aceitos e gravados com o `feature_id` dela, e `/state` devolve `feature` com os sete campos
+- [x] Testes em `broker/test/unit/feature-open.test.ts`, com `createFeature(s.log)` sobre o `setup()`
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
