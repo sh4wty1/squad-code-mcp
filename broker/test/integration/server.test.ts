@@ -1,80 +1,34 @@
 import { afterEach, expect, test } from "bun:test";
 import { cpSync, mkdirSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { getGitRoot } from "../../shared/git.ts";
 import {
   BROKER_DIR,
+  PING_MS,
   cleanEnv,
+  closeSessions,
   freePort,
   isUp,
   post,
   readDb,
   removeDir,
   startBroker,
+  startSession,
   tempDir,
   waitFor,
 } from "./helpers.ts";
 
 type Broker = Awaited<ReturnType<typeof startBroker>>;
-type Notification = { method: string; params?: any };
-
-const PING_MS = 100;
 
 let broker: Broker | undefined;
 const cleanups: (() => Promise<void> | void)[] = [];
 
 afterEach(async () => {
+  await closeSessions();
   for (const cleanup of cleanups.splice(0).reverse()) await cleanup();
   await broker?.stop();
   broker = undefined;
 });
-
-function scratch(): string {
-  const dir = tempDir();
-  cleanups.push(() => removeDir(dir));
-  return dir;
-}
-
-// A real server.ts process driven by an MCP client over stdio, the way Claude Code drives it
-async function startSession(port: number, env: Record<string, string>, serverDir = BROKER_DIR) {
-  const dir = scratch();
-  const transport = new StdioClientTransport({
-    command: process.execPath,
-    args: [join(serverDir, "server.ts")],
-    cwd: BROKER_DIR,
-    // SQUAD_DB and SQUAD_TOKEN_FILE always set: a server that starts a broker by mistake must not
-    // touch the real database nor the real human credential
-    env: cleanEnv({
-      SQUAD_PORT: String(port),
-      SQUAD_DB: join(dir, "squad.db"),
-      SQUAD_TOKEN_FILE: join(dir, "squad.token"),
-      SQUAD_PING_INTERVAL_MS: String(PING_MS),
-      ...env,
-    }),
-    stderr: "ignore",
-  });
-  const client = new Client({ name: "squad-test", version: "0.0.0" });
-  const notifications: Notification[] = [];
-  client.fallbackNotificationHandler = async (n) => {
-    notifications.push(n as Notification);
-  };
-  await client.connect(transport);
-  cleanups.push(() => client.close());
-
-  const pings = () => notifications.filter((n) => n.method === "notifications/claude/channel");
-  const toolNames = async () => (await client.listTools()).tools.map((t) => t.name);
-  const ready = (number: number) =>
-    client.callTool({ name: "ready", arguments: { number } }) as Promise<{ isError?: boolean; content: { text: string }[] }>;
-  // The number the model would read in the ping
-  async function pingNumber(): Promise<number> {
-    await waitFor(() => pings().length > 0, "the first ping");
-    return Number(pings()[0]!.params.meta.number);
-  }
-
-  return { client, transport, notifications, pings, toolNames, ready, pingNumber };
-}
 
 function registerOverHttp(b: Broker, name: string, role: string, pid: number) {
   return post(b.url, "/register", { pid, cwd: "/elsewhere", git_root: null, name, role });
@@ -164,7 +118,8 @@ test("PEER-30: ready with the ping number registers the session and swaps ready 
     () => session.notifications.some((n) => n.method === "notifications/tools/list_changed"),
     "tools/list_changed"
   );
-  expect(await session.toolNames()).toEqual(["list_peers"]);
+  // the tools of a worker since the Event slice (EVT-89)
+  expect(await session.toolNames()).toEqual(["list_peers", "state", "history", "blocked", "unblocked", "send_result"]);
 
   const sent = session.pings().length;
   await Bun.sleep(PING_MS * 4);

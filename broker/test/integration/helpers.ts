@@ -3,6 +3,8 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 export const BROKER_DIR = join(import.meta.dir, "..", "..");
 
@@ -146,4 +148,68 @@ export async function startBroker(extraEnv: Record<string, string> = {}, dir = t
   }
 
   return { url, port, dbFile, tokenFile, dir, proc, stop };
+}
+
+type Notification = { method: string; params?: any };
+type ToolResult = { isError?: boolean; content: { text: string }[] };
+
+export const PING_MS = 100;
+
+const sessionCleanups: (() => Promise<void> | void)[] = [];
+
+// Closes every session `startSession` started. For the afterEach of a test file, before the broker stops.
+export async function closeSessions() {
+  for (const cleanup of sessionCleanups.splice(0).reverse()) await cleanup();
+}
+
+// A real server.ts process driven by an MCP client over stdio, the way Claude Code drives it
+export async function startSession(port: number, env: Record<string, string>, serverDir = BROKER_DIR) {
+  const dir = tempDir();
+  sessionCleanups.push(() => removeDir(dir));
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [join(serverDir, "server.ts")],
+    cwd: BROKER_DIR,
+    // SQUAD_DB and SQUAD_TOKEN_FILE always set: a server that starts a broker by mistake must not
+    // touch the real database nor the real human credential
+    env: cleanEnv({
+      SQUAD_PORT: String(port),
+      SQUAD_DB: join(dir, "squad.db"),
+      SQUAD_TOKEN_FILE: join(dir, "squad.token"),
+      SQUAD_PING_INTERVAL_MS: String(PING_MS),
+      ...env,
+    }),
+    stderr: "ignore",
+  });
+  const client = new Client({ name: "squad-test", version: "0.0.0" });
+  const notifications: Notification[] = [];
+  client.fallbackNotificationHandler = async (n) => {
+    notifications.push(n as Notification);
+  };
+  await client.connect(transport);
+  sessionCleanups.push(() => client.close());
+
+  const channel = () => notifications.filter((n) => n.method === "notifications/claude/channel");
+  const pings = () => channel().filter((n) => n.params.meta.kind === "ping");
+  // What the channel pushed besides the ping: the events sent to the session
+  const pushed = () => channel().filter((n) => n.params.meta.kind !== "ping");
+  const toolNames = async () => (await client.listTools()).tools.map((t) => t.name);
+  const ready = (number: number) => client.callTool({ name: "ready", arguments: { number } }) as Promise<ToolResult>;
+  // The number the model would read in the ping
+  async function pingNumber(): Promise<number> {
+    await waitFor(() => pings().length > 0, "the first ping");
+    return Number(pings()[0]!.params.meta.number);
+  }
+  // Answers the ping, as the model would, and fails if the broker refuses the session
+  async function register() {
+    const result = await ready(await pingNumber());
+    if (result.isError) throw new Error(result.content[0]!.text);
+  }
+  // Calls a tool and returns its text and whether it is an error
+  async function call(name: string, args: Record<string, unknown> = {}) {
+    const result = (await client.callTool({ name, arguments: args })) as ToolResult;
+    return { isError: result.isError === true, text: result.content[0]!.text };
+  }
+
+  return { client, transport, notifications, pings, pushed, toolNames, ready, pingNumber, register, call };
 }

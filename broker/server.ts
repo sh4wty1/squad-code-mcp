@@ -31,7 +31,7 @@ import {
 import type { ListedPeer, Refusal, RegisterResponse } from "./peers.ts";
 import { brokerUrl, heartbeatIntervalMs, pingIntervalMs } from "./shared/config.ts";
 import { getGitRoot } from "./shared/git.ts";
-import { LIST_PEERS_TOOL } from "./tools.ts";
+import { ROUTE_OF, toolsFor } from "./tools.ts";
 
 // --- Configuration ---
 
@@ -135,7 +135,9 @@ const mcp = new Server(
 IMPORTANT: When a <channel source="squad" kind="ping" ...> message arrives, call the ready tool with the number it carries, right away. That registers this session in the squad. Until then the squad cannot reach you and ready is the only squad tool.
 
 Available tools after ready:
-- list_peers: See the other members of the squad and whether each one is online`
+${toolsFor(ROLE)
+  .map((t) => `- ${t.name}: ${t.description}`)
+  .join("\n")}`
       : undefined,
   }
 );
@@ -159,17 +161,10 @@ const READY_TOOL = {
 };
 
 // A session only sees the tools of its role (ADR-010)
-const ROLE_TOOLS: Record<string, (typeof LIST_PEERS_TOOL)[]> = {
-  mother: [LIST_PEERS_TOOL],
-  leader: [LIST_PEERS_TOOL],
-  worker: [LIST_PEERS_TOOL],
-  judge: [LIST_PEERS_TOOL],
-};
-
 function currentTools() {
   if (!ROLE) return [];
   if (!myId) return [READY_TOOL];
-  return ROLE_TOOLS[ROLE] ?? [];
+  return toolsFor(ROLE);
 }
 
 // --- Channel ping ---
@@ -260,8 +255,26 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
       }
     }
 
-    default:
-      throw new Error(`Unknown tool: ${name}`);
+    // Every other tool is one route of the broker, called in the name of this session
+    default: {
+      const route = ROUTE_OF[name];
+      if (!route) throw new Error(`Unknown tool: ${name}`);
+      try {
+        // The kind is the tool's and the id is this session's, whatever the arguments say
+        const result = await brokerFetch<unknown>(route.path, {
+          ...args,
+          ...(route.kind && { kind: route.kind }),
+          id: myId,
+        });
+        if (isRefusal(result)) {
+          return text(`${name} refused: ${result.error}. ${result.hint}`, true);
+        }
+        const { seq } = result as { seq?: unknown };
+        return text(typeof seq === "number" ? `Recorded with seq ${seq}.` : JSON.stringify(result, null, 2));
+      } catch (e) {
+        return text(`Error calling ${name}: ${e instanceof Error ? e.message : String(e)}`, true);
+      }
+    }
   }
 });
 

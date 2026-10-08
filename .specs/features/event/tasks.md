@@ -495,11 +495,11 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Com cliente MCP real, a lista de tools de cada um dos quatro papéis depois de `ready` é a de EVT-89
-- [ ] `send_task` da `mother` com feature aberta devolve o `seq` e o evento está no banco com `from_name` `mother`
-- [ ] `send_task` de um `worker` não existe; `send_task` da `mother` sem feature devolve erro com `no_open_feature` e o `hint`
-- [ ] `plan`, `blocked`, `unblocked`, `state` e `history` chamam a rota de mesmo nome e devolvem o `seq` ou o conteúdo
-- [ ] Gate: `bun test`
+- [x] Com cliente MCP real, a lista de tools de cada um dos quatro papéis depois de `ready` é a de EVT-89
+- [x] `send_task` da `mother` com feature aberta devolve o `seq` e o evento está no banco com `from_name` `mother`
+- [x] `send_task` de um `worker` não existe; `send_task` da `mother` sem feature devolve erro com `no_open_feature` e o `hint`
+- [x] `plan`, `blocked`, `unblocked`, `state` e `history` chamam a rota de mesmo nome e devolvem o `seq` ou o conteúdo
+- [x] Gate: `bun test`
 
 **Tests**: integration
 **Gate**: full
