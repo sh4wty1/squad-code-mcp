@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/event/design.md`
-**Status**: In Progress
+**Status**: Done (T1 a T24); falta a verificação independente
 
 Linha de base no Windows antes da T1, com Bun 1.4.2: 98 testes, 95 passam, 3 pulados, 0 falhas.
 
@@ -555,8 +555,8 @@ T16 → T17 → T18 → T19 → T20 → T21 → T22 → T23 → T24
 
 **Done when**:
 
-- [ ] Cada arquivo novo tem uma linha dizendo o que é
-- [ ] Gate: `bun x tsc --noEmit && bun test`
+- [x] Cada arquivo novo tem uma linha dizendo o que é
+- [x] Gate: `bun x tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build
