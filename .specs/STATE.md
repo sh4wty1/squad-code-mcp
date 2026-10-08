@@ -62,29 +62,33 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-08. A fatia Feature está implementada e verificada no branch `feat/feature`, com o PR 4 aberto (https://github.com/sh4wty1/squad-code-mcp/pull/4).
+Escrito em 2026-10-08, depois do merge. A fatia Feature está na `main` pelo PR 4 (https://github.com/sh4wty1/squad-code-mcp/pull/4), merge `4b59c12`.
 
 - **Feature**: fatia Feature, `.specs/features/feature/`
-- **Phase / Task**: Execute concluído. T1 a T31, um commit por tarefa, de `c76e70b` a `ae14f01`.
-- **Completed**: FEAT-01 a FEAT-33, todos verificados. `validate_state.py feature` sai com 0.
+- **Phase / Task**: concluída e mesclada. T1 a T31, de `c76e70b` a `ae14f01`, mais `47af274`, da revisão do `/the-judge`.
+- **Completed**: FEAT-01 a FEAT-33, todos verificados.
 - **In-progress** (file:line): nada
-- **Next step**: revisão do PR 4 por `/the-judge` e merge. Depois, a fatia TUI leitura, que pede antes a segunda rodada de frames (`ROADMAP.md`, Pendências).
+- **Next step**: abrir a fatia TUI leitura. Os frames que ela pede estão todos no handoff.
 - **Blockers**: nenhum
 - **Uncommitted files**: none
-- **Branch**: `feat/feature`, saído da `main` em `61e1411`. Está no `origin`.
+- **Branch**: `main` em `4b59c12`. `feat/feature` foi mesclado.
 
 ### Como a verificação ficou
 
-Relatório em `.specs/features/feature/validation.md`, verificado em `ae14f01`, PASS.
+Relatório em `.specs/features/feature/validation.md`, verificado em `ae14f01`, PASS. Ele é anterior à revisão do PR e não foi refeito.
 
 - 33 de 33 ACs e os 10 edge cases com evidência `file:line` e valor igual ao da spec.
-- 57 mutações, 55 mortas. As duas sobreviventes estão em `features()` de `broker/shared/derive.ts` e foram classificadas como equivalentes: só um log que viole FEAT-09 ou FEAT-12 as distingue. Um caso de unidade com log malformado mataria as duas, se o Lucas quiser.
+- 57 mutações, 55 mortas no relatório. As duas sobreviventes, em `features()` de `broker/shared/derive.ts` (a ordenação final por `id` e o `feature_closed` fechando a feature do seu `feature_id`), deixaram de sobreviver: `47af274` acrescentou a `broker/test/unit/derive.test.ts` um caso com log que o broker não escreve (`id` menor aberto depois), e as duas mutações, reaplicadas sobre a `main`, fazem esse caso falhar. O relatório ainda as lista como equivalentes.
+- `47af274` também renomeou em `broker/log.ts` o parâmetro de `transaction` que sombreava `write`. Sem mudança de comportamento.
 - Auditoria da migração dos testes: mesma contagem por arquivo, nenhum teste apagado, pulado ou afrouxado.
 - Lacunas não bloqueantes anotadas no relatório: o edge case de `/open-feature` com feature aberta só é exercitado com o `leader`, não com um worker; FEAT-09 "por qualquer conexão" é provado com SQL cru e arquivo reaberto, não com duas conexões simultâneas.
 - Nenhuma lição nova.
 
 ### O que a fatia TUI leitura precisa saber
 
+- A segunda rodada de frames já está no handoff: `docs/claude-design-handoff/Handoff-Design.zip` (`1d1ae45`) tem os frames 22 a 25, com o modal de permissão, o agente `stalled`, a mensagem sem reação, os tickets `planned` e `dropped` e a linha de `refused` com contador. O pedido que os gerou é `PROMPT-estados-faltantes-2.md`.
+- A terceira rodada também: os frames 09a, 09b, 11 e 26 a 30 cobrem o que a fatia Feature criou (a linha 0 dependente do estado, a linha de sistema de `feature_opened`, a feature `abandoned`, o broker sem nenhuma feature no log, o squad sem feature com um agente `blocked` ou `offline`, e os tokens da feature e da sessão). O pedido é `PROMPT-estados-faltantes-3.md`.
+- O Claude Design decidiu coisas que a spec não tem, listadas em `docs/claude-design-handoff/DECISOES-rodada-3.md`. As que tocam a derivação: o rótulo `[não lançado]` para o nome que nunca entrou, a tecla `t` que alterna os tokens entre feature e sessão, e a linha 0 sem o nome do projeto. A spec da TUI leitura precisa adotar ou cortar cada uma.
 - `features(events)` em `broker/shared/derive.ts` devolve as linhas de `features` sem `project`, a partir de `GET /events`. `project` não está em nenhum evento: a TUI que quiser o nome do projeto não o tem pelo log.
 - `feature_opened` e `feature_closed` têm `to` `*` e uma entrega para cada um dos cinco nomes que não são `mother`, com sessão ou não. Um nome nunca lançado acumula duas entregas por feature.
 - Encerrar não grava nada além do `feature_closed`: um `blocked` aberto continua aberto e as entregas pendentes continuam pendentes.
@@ -96,7 +100,7 @@ Relatório em `.specs/features/feature/validation.md`, verificado em `ae14f01`, 
 ### Ambiente
 
 - O `bun` do `PATH` é o 1.3.14 (WinGet). O 1.4.2 de `~/.bun/bin` não existe mais. A fatia Feature rodou inteira no 1.3.14.
-- De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. No Windows: 539 testes, 536 passam, 3 pulados, uns 45 s. Só `test/unit`: 400 testes.
+- De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. No Windows, na `main` em `4b59c12`: 540 testes, 537 passam, 3 pulados, uns 45 s. Só `test/unit`: 404 testes, 403 passam, 1 pulado.
 - `bun x tsc` baixa um `tsc` 7 em vez de usar o TypeScript 5.9.3 instalado, e ele acusa centenas de erros de tipo global. `broker/CLAUDE.md` ainda mostra `bun x tsc --noEmit`.
 - Teste instável: `EVT-43: /ack confirms...` em `broker/test/integration/routes.test.ts` compara `Date.now()` do teste com o relógio do processo do broker e falha de vez em quando por poucos ms. Rodar de novo.
 - `broker/test/integration/server.test.ts` (`PEER-34`) copia uma lista fixa de fontes: módulo novo importado pelo `broker.ts` ou pelo `server.ts` tem de entrar nela.

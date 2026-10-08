@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** fatia Feature implementada e verificada no branch `feat/feature` (31 tarefas, relatório em `.specs/features/feature/validation.md`, PASS); PR 4 aberto, esperando a revisão do `/the-judge`. A Peer foi mesclada pelo PR 2 e a Event pelo PR 3. A próxima é a TUI leitura, que pede antes a segunda rodada de frames.
+**Agora:** fatia Feature mesclada pelo PR 4, depois da Peer (PR 2) e da Event (PR 3). A próxima é a TUI leitura. Os frames que ela pede estão todos no handoff: a segunda rodada (22 a 25) e a terceira (26 a 30), com os estados sem feature aberta que a fatia Feature criou.
 
 ## Decidir (concluído)
 
@@ -43,10 +43,14 @@ gate aprovado usando só o terminal da mother e a TUI.
 
 ## Pendências fora da ordem
 
-- [ ] Segunda rodada de frames no Claude Design, antes da fatia TUI leitura. O `/the-fool`
-      criou estados depois do primeiro pedido: modal de pedido de permissão (só se o
-      spike A passar), agente `stalled`, ticket `planned`, ticket `dropped` e a linha de
-      `refused` com contador.
+- [x] Segunda rodada de frames no Claude Design: modal de pedido de permissão, agente
+      `stalled`, ticket `planned`, ticket `dropped` e a linha de `refused` com contador
+      (frames 22 a 25 no handoff).
+- [x] Terceira rodada de frames no Claude Design (frames 26 a 30 no handoff): a linha 0
+      sem feature aberta, a abertura da feature no feed, a feature abandonada, o broker
+      sem nenhuma feature e o squad sem feature com um agente `blocked` ou `offline`.
+      O que ele decidiu por conta própria está em
+      `docs/claude-design-handoff/DECISOES-rodada-3.md`.
 - [ ] Guardar em `docs/claude-design-handoff/` a lista do que o Claude Design decidiu por
       conta própria na primeira rodada.
 - [ ] Conferir o formato do `roles.json` contra o `manifest.json` do registry, antes da
