@@ -85,6 +85,20 @@ que sobrevive à queda da sessão, e da leitura do log por cursor, que é a font
 | Append-only na prática | Gatilhos do SQLite abortam `UPDATE` e `DELETE` em `events` | Torna o ADR-002 verificável por teste, e não só uma regra do código | y |
 | Tamanho máximo de `body` | Sem limite | O design só limita `summary` | y |
 | Testes | `bun test`, unidade com SQLite em memória e integração com processos reais, como na Peer | Convenção já em uso | y |
+| Ordem das recusas de `result` de worker, de `verdict` e de `/plan` | `result`: `not_owner` → `ticket_dropped` → `stale_reference`. `verdict`: `ticket_dropped` → `stale_reference`. `/plan`: `edge_not_allowed` → `no_open_feature` → `missing_field` → `invalid_plan` → `plan_drops_started_ticket` | A spec só fixava a ordem do `task` (EVT-25); achado da verificação, rodada 1 | n |
+| `null` num campo opcional | `ticket_ref: null` vale como ausente em toda rota, e um filtro `null` em `/history` vale como não enviado. Em `body`, `criteria`, `depends_on`, `dropped` e `note`, `null` recebe `missing_field` | `ticket_ref` é nulo no próprio envelope; os outros têm tipo definido | n |
+| Chaves gravadas em `data` | Item de `plan` e de `criteria` fica só com as chaves do contrato que vieram, sem default para as ausentes; `task` mother → leader e `result` leader → mother gravam `data` `{}` | EVT-15 e EVT-38 dizem quais chaves existem, não o que fazer com a ausente ou a extra | n |
+| `/unblocked` e `/turn-started` em EVT-47 e EVT-48 | Estão na lista de rotas que gravam `refused`, mas hoje não têm recusa além de `unknown_peer`; o `attempted_kind` delas só passa a existir se ganharem uma | Achado da verificação, rodada 1 | n |
+| Ticket descartado que nunca recebeu `task` | EVT-17 só olha o plano vigente: um `plan` pode omitir esse ticket e um `plan` seguinte trazê-lo de volta sem `dropped`. Fica como está | A regra de EVT-18 já protege o ticket que começou; fechar a brecha exige olhar todos os `plan` da feature e muda um AC aprovado | n |
+| `invalid_token` e corpo que não é objeto JSON | O corpo inválido recebe `missing_field` (EVT-12) antes de `invalid_token`; "antes de qualquer outra recusa" em EVT-65 vale para corpo que é objeto | Sem objeto não há `human_token` para conferir | n |
+| Arquivo de credencial vazio ou só com espaços | Vale como inexistente e é recriado; o conteúdo é lido sem os espaços das pontas | Sem isso `human_token` vazio seria aceito | n |
+| `after` em `GET /events` | Só dígitos; vazio, `1e2`, `0x1`, `1.5` e `-1` recebem `invalid_field` | "Inteiro maior ou igual a zero" sem ambiguidade de notação | n |
+| Primeiro polling e falha no meio do ciclo | O primeiro ciclo roda um intervalo depois do registro. Falha de push, de ack, de veredito ou do próprio polling encerra o ciclo; o seguinte retoma | EVT-83 só fala do push | n |
+| "Ignora" o pedido de permissão antes do registro | O servidor MCP não faz nenhuma chamada ao broker antes do registro, nem de polling nem de pedido de permissão | Achado da verificação, rodada 1: um pedido enviado com `id` nulo era recusado em silêncio e passava nos testes | n |
+| Pedido de permissão que o broker recusa | O servidor MCP registra no stderr e descarta; vale o diálogo do terminal | Não há a quem devolver a recusa; sem teste | n |
+| Texto devolvido pelas tools | `Recorded with seq N.` nas rotas que respondem `seq`; o JSON da resposta em `state` e `history`; `<tool> refused: <error>. <hint>` na recusa | EVT-90 a EVT-92 só pedem "em texto" | n |
+| Empate de `seq` em `owed` | A entrega vem antes da dívida de papel com o mesmo `seq` | EVT-80 só pede ordem crescente | n |
+| `question_id` e `gate_id` no formato de leitura | Não aparecem nesta fatia | Nenhum kind da Event os usa; as fatias Question e Gate decidem | n |
 
 **Open questions:** none - all resolved or logged above.
 

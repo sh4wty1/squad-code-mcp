@@ -198,6 +198,34 @@ test("EVT-86: a permission request that arrives before the registration is ignor
   expect(readDb(b.dbFile).events.map((e) => e.kind)).toEqual(["peer_joined"]);
 });
 
+test("EVT-81/86: before ready the server sends the broker no request, with or without a permission request", async () => {
+  // A stand-in broker that answers /health, so the server starts none, and records every POST
+  const posts: string[] = [];
+  const fake = Bun.serve({
+    port: 0,
+    hostname: "127.0.0.1",
+    fetch(req) {
+      const path = new URL(req.url).pathname;
+      if (req.method === "POST") posts.push(path);
+      return Response.json(path === "/health" ? { status: "ok", peers: 0 } : { ok: false, error: "unknown_peer", hint: "-" });
+    },
+  });
+  try {
+    const judge = await startSession(fake.port!, {
+      SQUAD_NAME: "judge",
+      SQUAD_ROLE: "judge",
+      SQUAD_POLL_INTERVAL_MS: String(POLL_MS),
+    });
+    await judge.pingNumber();
+    await judge.client.notification({ method: "notifications/claude/channel/permission_request", params: REQUEST });
+    await Bun.sleep(POLL_MS * 8);
+    expect(posts).toEqual([]);
+  } finally {
+    await closeSessions();
+    await fake.stop(true);
+  }
+});
+
 test("EVT-81: when its stdin closes the server stops polling and exits", async () => {
   broker = await startBroker();
   const b = broker;
