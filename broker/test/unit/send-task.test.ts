@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { LEADER, NOW, setup } from "./helpers.ts";
+import { LEADER, NOW, setup, toOthers } from "./helpers.ts";
 
 const A = { ticket_ref: "A", title: "the parser" };
 const B = { ticket_ref: "B", title: "the writer" };
@@ -12,7 +12,7 @@ function task(ticket_ref: unknown, to = "worker-1", fields: Record<string, unkno
 // A broker with a feature open and A and B in its plan
 function planned() {
   const b = setup();
-  const feature = b.openFeature();
+  const feature = b.openByRule();
   b.given.plan([A, B]);
   return { ...b, feature };
 }
@@ -21,9 +21,9 @@ test("EVT-27: a task of the leader to a worker is stored with loadout and criter
   const b = planned();
   b.clock.now = NOW + 40;
   const answer = b.send(LEADER, { ...task("A", "worker-2", { loadout: ["tdd", "review"], criteria: [1, 4] }), extra: true, title: "x" });
-  expect(answer).toEqual({ ok: true, seq: 2 });
-  expect(b.events()[1]).toEqual({
-    seq: 2,
+  expect(answer).toEqual({ ok: true, seq: 3 });
+  expect(b.events()[2]).toEqual({
+    seq: 3,
     ts: NOW + 40,
     kind: "task",
     feature_id: b.feature,
@@ -37,15 +37,15 @@ test("EVT-27: a task of the leader to a worker is stored with loadout and criter
     gate_id: null,
     data: { loadout: ["tdd", "review"], criteria: [1, 4] },
   });
-  expect(b.deliveries()).toEqual([{ event_seq: 2, recipient: "worker-2", acked_at: null }]);
+  expect(b.deliveries()).toEqual([...toOthers(1), { event_seq: 3, recipient: "worker-2", acked_at: null }]);
 });
 
 test("EVT-27: without criteria data has only loadout, which may be empty", () => {
   const b = planned();
-  expect(b.send(LEADER, task("A", "worker-1", { loadout: [] }))).toEqual({ ok: true, seq: 2 });
-  expect(b.send(LEADER, task("B", "worker-2", { criteria: [] }))).toEqual({ ok: true, seq: 3 });
-  expect(b.events()[1]!.data).toEqual({ loadout: [] });
-  expect(b.events()[2]!.data).toEqual({ loadout: ["tdd"], criteria: [] });
+  expect(b.send(LEADER, task("A", "worker-1", { loadout: [] }))).toEqual({ ok: true, seq: 3 });
+  expect(b.send(LEADER, task("B", "worker-2", { criteria: [] }))).toEqual({ ok: true, seq: 4 });
+  expect(b.events()[2]!.data).toEqual({ loadout: [] });
+  expect(b.events()[3]!.data).toEqual({ loadout: ["tdd"], criteria: [] });
 });
 
 test("EVT-19: a task to a worker without ticket_ref as a non-empty string is refused with missing_field", () => {
@@ -75,15 +75,15 @@ test("EVT-20: a task for a ticket outside the current plan is refused with unpla
   // in an earlier plan and not in the current one
   b.given.plan([B]);
   b.refusedWith(() => b.send(LEADER, task("A")), "leader", "task", "unplanned_ticket");
-  expect(b.send(LEADER, task("B"))).toEqual({ ok: true, seq: 5 });
+  expect(b.send(LEADER, task("B"))).toEqual({ ok: true, seq: 6 });
 });
 
 test("EVT-20: without a plan in the open feature a task is refused with unplanned_ticket", () => {
   const b = setup();
-  const old = b.openFeature();
+  b.openByRule();
   b.given.plan([A]);
-  b.closeFeature(old);
-  b.openFeature();
+  b.closeByRule();
+  b.openByRule();
   b.refusedWith(() => b.send(LEADER, task("A")), "leader", "task", "unplanned_ticket");
 });
 
@@ -91,7 +91,7 @@ test("EVT-21: a task for a dropped ticket is refused with ticket_dropped", () =>
   const b = planned();
   b.given.plan([{ ...A, dropped: true }, B]);
   b.refusedWith(() => b.send(LEADER, task("A")), "leader", "task", "ticket_dropped");
-  expect(b.send(LEADER, task("B"))).toEqual({ ok: true, seq: 4 });
+  expect(b.send(LEADER, task("B"))).toEqual({ ok: true, seq: 5 });
 });
 
 test("EVT-22: a task for an approved ticket is refused with ticket_closed", () => {
@@ -106,50 +106,50 @@ test("EVT-23: the task after the second rework is accepted and the one after the
   const b = planned();
   b.given.reworks("A", "worker-1", 2);
   const third = b.send(LEADER, task("A"));
-  expect(third).toEqual({ ok: true, seq: 8 });
-  b.given.verdict("A", b.given.result("A", "worker-1", 8), "rework");
+  expect(third).toEqual({ ok: true, seq: 9 });
+  b.given.verdict("A", b.given.result("A", "worker-1", 9), "rework");
   b.refusedWith(() => b.send(LEADER, task("A")), "leader", "task", "rework_limit");
   b.refusedWith(() => b.send(LEADER, task("A", "worker-2")), "leader", "task", "rework_limit");
   // the reworks are of the ticket: B is untouched
-  expect(b.send(LEADER, task("B", "worker-2"))).toEqual({ ok: true, seq: 13 });
+  expect(b.send(LEADER, task("B", "worker-2"))).toEqual({ ok: true, seq: 14 });
 });
 
 test("EVT-24: a task for a worker that has another ticket open is refused with worker_busy", () => {
   const b = planned();
-  expect(b.send(LEADER, task("A", "worker-1"))).toEqual({ ok: true, seq: 2 });
+  expect(b.send(LEADER, task("A", "worker-1"))).toEqual({ ok: true, seq: 3 });
   b.refusedWith(() => b.send(LEADER, task("B", "worker-1")), "leader", "task", "worker_busy");
   // in review and after a rework the ticket is still open for its worker
-  const result = b.given.result("A", "worker-1", 2);
+  const result = b.given.result("A", "worker-1", 3);
   b.refusedWith(() => b.send(LEADER, task("B", "worker-1")), "leader", "task", "worker_busy");
   b.given.verdict("A", result, "rework");
   b.refusedWith(() => b.send(LEADER, task("B", "worker-1")), "leader", "task", "worker_busy");
   // another worker is free
-  expect(b.send(LEADER, task("B", "worker-2"))).toEqual({ ok: true, seq: 8 });
+  expect(b.send(LEADER, task("B", "worker-2"))).toEqual({ ok: true, seq: 9 });
 });
 
 test("EVT-24: the approval of its ticket frees the worker", () => {
   const b = planned();
   const first = b.given.task("A", "worker-1");
   b.given.verdict("A", b.given.result("A", "worker-1", first), "approve");
-  expect(b.send(LEADER, task("B", "worker-1"))).toEqual({ ok: true, seq: 5 });
+  expect(b.send(LEADER, task("B", "worker-1"))).toEqual({ ok: true, seq: 6 });
 });
 
 test("EVT-24: a task for a ticket in working and in review is accepted", () => {
   const b = planned();
   b.given.task("A", "worker-1");
   // working: the latest event of the ticket is a task
-  expect(b.send(LEADER, task("A", "worker-1"))).toEqual({ ok: true, seq: 3 });
+  expect(b.send(LEADER, task("A", "worker-1"))).toEqual({ ok: true, seq: 4 });
   // review: the latest event of the ticket is a result
-  b.given.result("A", "worker-1", 3);
-  expect(b.send(LEADER, task("A", "worker-1"))).toEqual({ ok: true, seq: 5 });
-  expect(b.events().map((e) => e.kind)).toEqual(["plan", "task", "task", "result", "task"]);
+  b.given.result("A", "worker-1", 4);
+  expect(b.send(LEADER, task("A", "worker-1"))).toEqual({ ok: true, seq: 6 });
+  expect(b.events().map((e) => e.kind)).toEqual(["feature_opened", "plan", "task", "task", "result", "task"]);
 });
 
 test("EVT-24: a task of the same ticket to another worker frees the previous owner", () => {
   const b = planned();
   b.given.task("A", "worker-1");
-  expect(b.send(LEADER, task("A", "worker-2"))).toEqual({ ok: true, seq: 3 });
-  expect(b.send(LEADER, task("B", "worker-1"))).toEqual({ ok: true, seq: 4 });
+  expect(b.send(LEADER, task("A", "worker-2"))).toEqual({ ok: true, seq: 4 });
+  expect(b.send(LEADER, task("B", "worker-1"))).toEqual({ ok: true, seq: 5 });
   // and the new owner is the busy one
   b.refusedWith(() => b.send(LEADER, task("B", "worker-2")), "leader", "task", "worker_busy");
 });
@@ -159,21 +159,21 @@ test("EVT-24: the plan that drops the open ticket of a worker frees it", () => {
   b.given.task("A", "worker-1");
   b.refusedWith(() => b.send(LEADER, task("B", "worker-1")), "leader", "task", "worker_busy");
   b.given.plan([{ ...A, dropped: true }, B]);
-  expect(b.send(LEADER, task("B", "worker-1"))).toEqual({ ok: true, seq: 5 });
+  expect(b.send(LEADER, task("B", "worker-1"))).toEqual({ ok: true, seq: 6 });
 });
 
 test("EVT-20/22/23/24: the tickets of a feature that closed do not count, even with the same ticket_ref", () => {
   const b = setup();
-  const old = b.openFeature();
+  b.openByRule();
   b.given.plan([A, B, { ticket_ref: "C", title: "c" }, { ticket_ref: "D", title: "d", dropped: true }]);
   // there A was approved, B had three reworks, C is open for worker-3 and D was dropped
   const first = b.given.task("A", "worker-1");
   b.given.verdict("A", b.given.result("A", "worker-1", first), "approve");
   b.given.reworks("B", "worker-2", 3);
   b.given.task("C", "worker-3");
-  b.closeFeature(old);
+  b.closeByRule();
 
-  const id = b.openFeature();
+  const id = b.openByRule();
   b.given.plan([A, B, { ticket_ref: "D", title: "d" }]);
   const answers = [
     b.send(LEADER, task("A", "worker-1")),
