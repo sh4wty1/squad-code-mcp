@@ -62,13 +62,13 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-08. A fatia Event está fechada e mesclada; a Feature está especificada.
+Escrito em 2026-10-08. A fatia Event está fechada e mesclada; a Feature está especificada e desenhada.
 
 - **Feature**: fatia Feature, `.specs/features/feature/`
 - **Phase / Task**: Specify concluído e confirmado pelo Lucas em 2026-10-08. `validate_spec.py feature` sai com 0.
 - **Completed**: spec com FEAT-01 a FEAT-33
 - **In-progress** (file:line): nada
-- **Next step**: Design da fatia Feature.
+- **Next step**: Tasks da fatia Feature. O Design em `.specs/features/feature/design.md` foi aprovado pelo Lucas em 2026-10-08.
 - **Blockers**: nenhum
 - **Uncommitted files**: none
 - **Branch**: `feat/feature`, saído da `main` em `61e1411` (merge do PR 3). Ainda não está no `origin`.
