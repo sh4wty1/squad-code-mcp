@@ -114,12 +114,12 @@ T24 → T25 → T26 → T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] O segundo `INSERT` em `features` com `closed_seq` nulo lança erro e a tabela fica com uma linha
-- [ ] O `UPDATE` que põe `closed_seq` nulo numa fechada, havendo outra aberta, lança erro e a linha fica igual
-- [ ] Duas fechadas e uma aberta são aceitas
-- [ ] Um banco em arquivo temporário do qual o índice foi apagado ganha o índice no `openDatabase` seguinte e recusa a segunda aberta (edge case do banco da Event)
-- [ ] Os 305 testes de unidade continuam como estavam (medido: o índice sozinho não quebra nenhum)
-- [ ] Gate: `bun test test/unit`
+- [x] O segundo `INSERT` em `features` com `closed_seq` nulo lança erro e a tabela fica com uma linha
+- [x] O `UPDATE` que põe `closed_seq` nulo numa fechada, havendo outra aberta, lança erro e a linha fica igual
+- [x] Duas fechadas e uma aberta são aceitas
+- [x] Um banco em arquivo temporário do qual o índice foi apagado ganha o índice no `openDatabase` seguinte e recusa a segunda aberta (edge case do banco da Event)
+- [x] Os 305 testes de unidade continuam como estavam (medido: o índice sozinho não quebra nenhum)
+- [x] Gate: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

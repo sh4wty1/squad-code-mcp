@@ -194,3 +194,60 @@ test("PEER-15: a broker event is stored with broker as author, no recipient and 
     data: '{"peer":"judge","reason":"died"}',
   });
 });
+
+function feature(db: ReturnType<typeof openDatabase>, closed_seq: number | null) {
+  db.run(
+    `INSERT INTO features (project, title, workflow, branch, base_branch, spec_ref, spec_commit, opened_seq, closed_seq)
+     VALUES ('repo', 'the feature', 'tlc', 'feat/x', 'main', 'spec.md', 'abc1234', 1, ?)`,
+    [closed_seq]
+  );
+}
+
+function features(db: ReturnType<typeof openDatabase>) {
+  return db.query("SELECT id, closed_seq FROM features ORDER BY id").all() as { id: number; closed_seq: number | null }[];
+}
+
+test("FEAT-09: a second INSERT of an open feature is aborted and the table keeps one row", () => {
+  const db = openDatabase(":memory:");
+  feature(db, null);
+  expect(() => feature(db, null)).toThrow("UNIQUE constraint failed");
+  expect(features(db)).toEqual([{ id: 1, closed_seq: null }]);
+});
+
+test("FEAT-09: an UPDATE that reopens a closed feature beside an open one is aborted and the row stays as it was", () => {
+  const db = openDatabase(":memory:");
+  feature(db, 5);
+  feature(db, null);
+  expect(() => db.run("UPDATE features SET closed_seq = NULL WHERE id = 1")).toThrow("UNIQUE constraint failed");
+  expect(features(db)).toEqual([
+    { id: 1, closed_seq: 5 },
+    { id: 2, closed_seq: null },
+  ]);
+});
+
+test("FEAT-09: two closed features and an open one are accepted", () => {
+  const db = openDatabase(":memory:");
+  feature(db, 5);
+  feature(db, 9);
+  feature(db, null);
+  expect(features(db)).toEqual([
+    { id: 1, closed_seq: 5 },
+    { id: 2, closed_seq: 9 },
+    { id: 3, closed_seq: null },
+  ]);
+});
+
+test("FEAT-09: a database without the index gains it at the next openDatabase and refuses the second open feature", () => {
+  const dir = mkdtempSync(join(tmpdir(), "squad-db-"));
+  const file = join(dir, "squad.db");
+  const old = openDatabase(file);
+  old.run("DROP INDEX features_one_open");
+  feature(old, null);
+  old.close();
+
+  const db = openDatabase(file);
+  expect(() => feature(db, null)).toThrow("UNIQUE constraint failed");
+  expect(features(db)).toEqual([{ id: 1, closed_seq: null }]);
+  db.close();
+  rmSync(dir, { recursive: true, force: true });
+});
