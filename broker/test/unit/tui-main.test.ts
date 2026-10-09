@@ -113,3 +113,94 @@ test("TUI-38: the panel without tickets says why, with and without a feature", (
 for (const frame of ["01", "10", "13a", "14", "23a", "24a", "24c", "25a", "26a", "28a", "28b"]) {
   test(`TUI-43: the agents and the tickets of frame ${frame}, columns 0 to 27`, () => columns(frame, 0, 27));
 }
+
+// The cell where `text` starts in the first line of the screen that has it
+function cell(view: ReturnType<typeof frameView>, text: string) {
+  const g = main(view);
+  const y = g.text().findIndex((line) => line.includes(text));
+  return g.rows[y]![[...g.text()[y]!].join("").indexOf(text)]!;
+}
+const more = (...fields: Record<string, unknown>[]): Change => (events) => [
+  ...events,
+  ...fields.map((f, i) => ({ ...events.at(-1)!, seq: 900 + i, to: null, ticket_ref: null, summary: "", ...f }) as SquadEvent),
+];
+
+test("TUI-20: a message is the hour, who sent it, who it is for, the kind and the summary cut at column 84", () => {
+  const stranger = more({ kind: "task", from: "reviewer-9", role_from: "reviewer", to: "human", summary: "a summary long enough to be cut at the edge" });
+  const drawn = lines("24a", stranger);
+  expect(part(drawn[16]!, 29, 84)).toBe("  14:19:51 rev → hum [task]          a summary long eno…");
+  expect(part(lines("01")[21]!, 29, 84)).toBe("▶ 14:28:03 jdg → ldr [verdict]       rework: reconexão …");
+});
+
+test("TUI-28: the color of the kind of an answer, a gate, a verdict and a permission decision", () => {
+  expect(cell(frameView("01"), "[answer]").fg).toBe("blue");
+  expect(cell(frameView("19a"), "[gate]").fg).toBe("bmagenta");
+  expect(cell(frameView("18a"), "[gate_decision]").fg).toBe("bmagenta");
+  expect(cell(frameView("01"), "[verdict]       rework").fg).toBe("bred");
+  expect(cell(frameView("01"), "[verdict]       approve").fg).toBe("bgreen");
+  expect(cell(frameView("22h"), "[permission_decision]").fg).toBe("bgreen");
+  const denied: Change = (events) => events.map((e) => (e.kind === "permission_decision" ? { ...e, behavior: "deny" } : e));
+  expect(cell(frameView("22h", denied), "[permission_decision]").fg).toBe("bred");
+  // A system line has the color of what it tells
+  expect(cell(frameView("01"), "⟳ Q-05 timeout")).toEqual({ ch: "⟳", fg: "byellow", bg: null, bold: false });
+  expect(cell(frameView("10"), "⚠ w2 [blocked]")).toEqual({ ch: "⚠", fg: "bred", bg: "black", bold: true });
+});
+
+test("TUI-29: what came before the open feature is gray, above a ruler that says what it was", () => {
+  const second = frameView("26b");
+  expect(lines("26b").some((line) => part(line, 29, 84) === "─ ▲ anterior · player ao vivo com setlist · ✓ entregue ─")).toBe(true);
+  expect(cell(second, "✓ feature encerrada").fg).toBe("gray");
+  expect(cell(second, "[verdict]").fg).toBe("gray");
+  expect(cell(second, "▶ feature aberta · busca").fg).toBe("bmagenta");
+  const reopened: Change = (events) => [...events, { ...events.find((e) => e.kind === "feature_opened")!, seq: 900, feature_id: 2, title: "busca" }];
+  expect(lines("27a", reopened).some((line) => part(line, 29, 84) === " ▲ anterior · player ao vivo com setlist · ✗ abandonada")).toBe(true);
+  expect(part(lines("26a")[10]!, 29, 84)).toBe("─────── ▲ antes da feature · entradas no broker ────────");
+  expect(cell(frameView("26a"), "● mot entrou").fg).toBe("gray");
+});
+
+test("TUI-30: without an open feature, the band under the closing line says since when", () => {
+  expect(part(lines("09a")[36]!, 29, 84)).toBe("─── squad ocioso desde 14:53:31 · sem feature ativa ────");
+  expect(part(lines("29a")[36]!, 29, 84)).toBe("─ squad sem feature desde 14:53:31 · 2 fora de [idle] ──");
+  // Gray before the closing line; that line and the ones after keep their color
+  const after = frameView("29c");
+  after.ui.selected = null;
+  expect(cell(after, "[verdict]").fg).toBe("gray");
+  expect(cell(after, "✓ feature encerrada")).toEqual({ ch: "✓", fg: "bgreen", bg: null, bold: true });
+  // worker-1, blocked by its permission request, is the one out of idle
+  expect(part(main(after).text()[35]!, 29, 84)).toBe("─ squad sem feature desde 14:53:31 · 1 fora de [idle] ──");
+  expect(cell(after, "[permission_request]").fg).toBe("bcyan");
+  expect(cell(frameView("27a"), "✗ feature encerrada").fg).toBe("byellow");
+});
+
+test("TUI-31: without any feature the band has the hour of the first event, and an empty log says so", () => {
+  expect(part(lines("28b")[6]!, 29, 84)).toBe("─ broker no ar desde 15:02:24 · nenhuma feature ainda ──");
+  const empty = lines("28a");
+  expect(part(empty[6]!, 29, 84)).toBe("  ○ log vazio");
+  expect(part(empty[7]!, 29, 84)).toBe("  o feed começa quando o primeiro agente entrar");
+});
+
+test("TUI-32: the feed shows its last 33 lines, or goes up to keep the selected one in sight", () => {
+  const view = frameView("09a");
+  const last = main(view).text();
+  expect(part(last[4]!, 29, 84)).toBe("  14:20:13 ldr → w3  [task]          formato de data da…");
+  expect(part(last[36]!, 29, 84)).toBe("─── squad ocioso desde 14:53:31 · sem feature ativa ────");
+  view.ui.selected = 401;
+  const up = main(view).text();
+  expect(part(up[4]!, 29, 84)).toBe("▶ 14:17:48 ▶ feature aberta · player ao vivo com setlist");
+  // The 32 lines of the feature until the answer of worker-2, and the one after
+  expect(part(up[36]!, 29, 84)).toBe("  14:33:02 hum → w1  [answer]        Q-07: infinito com…");
+});
+
+test("TUI-29, TUI-30: the title of the feed says live, idle or paused", () => {
+  const title = (view: ReturnType<typeof frameView>) => part(main(view).text()[2]!, 28, 85);
+  expect(title(frameView("01"))).toBe("┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐");
+  expect(title(frameView("09a"))).toBe("┌─ feed · sem feature aberta ───────────────── ○ ocioso ─┐");
+  expect(title(frameView("28a"))).toBe("┌─ feed · sem feature aberta ──────────────── ● ao vivo ─┐");
+  const paused = frameView("01");
+  paused.ui.paused = true;
+  expect(title(paused)).toBe("┌─ feed · player ao vivo com setlist ──────── ○ pausado ─┐");
+});
+
+for (const frame of ["01", "09a", "26b", "27a", "28a", "29a", "29c"]) {
+  test(`TUI-43: the feed of frame ${frame}, columns 28 to 85`, () => columns(frame, 28, 85));
+}

@@ -438,12 +438,12 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] As cores de TUI-28 por kind e desfecho, cada uma com asserção na célula
-- [ ] Linhas anteriores em cinza e a régua, nos três textos de TUI-29
-- [ ] As três faixas de TUI-30 e TUI-31, e `○ log vazio`
-- [ ] 33 linhas visíveis; a selecionada acima delas rola a janela
-- [ ] Colunas 28 a 85 dos frames 01, 09a, 26b, 27a, 28a, 29a e 29c batem, fora os desvios declarados
-- [ ] Testes em `test/unit/tui-main.test.ts`; gate quick passa
+- [x] As cores de TUI-28 por kind e desfecho, cada uma com asserção na célula
+- [x] Linhas anteriores em cinza e a régua, nos três textos de TUI-29
+- [x] As três faixas de TUI-30 e TUI-31, e `○ log vazio`
+- [x] 33 linhas visíveis; a selecionada acima delas rola a janela
+- [x] Colunas 28 a 85 dos frames 01, 09a, 26b, 27a, 28a, 29a e 29c batem, fora os desvios declarados
+- [x] Testes em `test/unit/tui-main.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

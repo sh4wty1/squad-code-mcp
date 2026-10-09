@@ -41,8 +41,31 @@ const LEADER_WORKING = status(7, "●", "leader", "working", ".design/squad-mvp.
 const doing = (line: number, text: string, why: string) => d("D1", why, [line, 4, 23, text]);
 const ESCALATED = "table of activity of the design: a leader that passed on a question still open shows `escalou <ticket>` before its tickets (Q-07)";
 
+// The feed, columns 29 to 84. The scenarios of the prototype that start at the opening of
+// the feature get the six entries and the ruler above it: with them the feed is the last
+// 33 of its lines, each one where the frame has the one before.
+const ENTERED = "the prototype draws the six agents in the broker with no entry in the feed; by TUI-01 the log needs their peer_joined, TUI-24 gives each a line and TUI-29 the ruler above the feature, so the lines of the feature go down";
+function entered(id: string): Deviation[] {
+  const feed = frame(id).map((line) => [...line.padEnd(120)].slice(29, 85).join("").trimEnd());
+  const drawn = feed.slice(4, 37).filter((line) => line !== "");
+  const rule = " ▲ antes da feature · entradas no broker ";
+  const side = Math.floor((56 - len(rule)) / 2);
+  const entries = ["14:02:10 ● mot", "14:02:18 ● ldr", "14:03:01 ● w1", "14:03:02 ● w2", "14:03:04 ● w3", "14:03:30 ● jdg"].map((who) => `  ${who} entrou`);
+  const all = [...entries, "─".repeat(side) + rule + "─".repeat(56 - side - len(rule)), ...drawn].slice(-33);
+  return d("D1", ENTERED, ...all.flatMap((text, i): At[] => (text === feed[4 + i] ? [] : [[4 + i, 29, 56, text]])));
+}
+// The text of a system line, columns 40 to 84
+const PLAN = "TUI-24 fixes the line of a plan as `▶ plano v<N> de ldr · <n> tickets`; the prototype writes more by hand";
+const plan = (line: number, text = "▶ plano v1 de ldr · 3 tickets") => d("D1", PLAN, [line, 40, 45, text]);
+// The body of a permission line, columns 71 to 84
+const SUMMARY = "the body of a line is the summary of the event, and the broker writes the one of a permission as the tool and the description or the decision (Assumptions, `Corpo da linha de mensagem`)";
+const body = (line: number, text: string) => d("D1", SUMMARY, [line, 71, 14, text]);
+
 export const DEVIATIONS: Record<string, Deviation[]> = {
-  "01": [...skills(MOT, LDR, W2, JDG), ...doing(8, "tech lead · escalou TK…", ESCALATED)],
+  "01": [...skills(MOT, LDR, W2, JDG), ...doing(8, "tech lead · escalou TK…", ESCALATED), ...entered("01"), ...plan(9)],
+  "27a": plan(4),
+  "28a": d("D2", "an empty log has no first event to give the hour of the band (TUI-31)", [4, 29, 56, ""]),
+  "29c": body(36, "Bash: Apagar …"),
   "10": [...skills(MOT, LDR, W1, JDG), ...LEADER_WORKING],
   "13a": [...skills(MOT, LDR, JDG), ...doing(8, "tech lead · escalou TK…", ESCALATED)],
   "14": [

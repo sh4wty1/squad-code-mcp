@@ -3,10 +3,10 @@
 
 import type { Agent } from "../../shared/derive.ts";
 import { activity, refs } from "../activity.ts";
-import { debt, qid } from "../feed.ts";
-import { age, cut, grid, len, mmss, type Color, type Grid } from "../grid.ts";
+import { debt, label, qid, type FeedRow, type SysKind } from "../feed.ts";
+import { age, clock, cut, grid, len, mmss, type Color, type Grid } from "../grid.ts";
 import type { View } from "../view.ts";
-import { chrome, MAIN_KEYS, segLen, stats, STATUS, statusSegs, TICKET_TONE, tone } from "./chrome.ts";
+import { chrome, kindTone, MAIN_KEYS, segLen, stats, STATUS, statusSegs, TICKET_TONE, tone } from "./chrome.ts";
 
 const ROLES = { mother: "objetivo", leader: "tech lead", worker: "worker", judge: "judge" };
 
@@ -110,12 +110,114 @@ function tickets(g: Grid, view: View, frame: Color) {
   if (all.length > 7) g.put(2, 36, `+${all.length - 6} tickets`, "gray");
 }
 
+// The color of a system line, and whether it is bold
+const SYS: Record<SysKind, [Color, boolean]> = {
+  opened: ["bmagenta", true],
+  closed: ["bgreen", true],
+  plan: ["cyan", true],
+  joined: ["bgreen", false],
+  left: ["red", false],
+  blocked: ["bred", true],
+  stalled: ["byellow", true],
+  limit: ["bred", true],
+  refused: ["bred", false],
+  default: ["byellow", false],
+  merged: ["byellow", false],
+};
+
+function feedRow(g: Grid, y: number, row: FeedRow, selected: boolean, dim: boolean) {
+  const e = row.event;
+  const C = (color: Color): Color => (dim ? "gray" : color);
+  if (selected) {
+    g.bg(29, y, 56, "black");
+    g.put(29, y, "▶", C("bwhite"), { bold: true });
+  }
+  g.put(31, y, clock(row.ts), C(selected ? "bwhite" : "gray"));
+  if (row.sys) {
+    const abandoned = e.kind === "feature_closed" && e.outcome === "abandoned";
+    g.put(40, y, cut(row.text, 45), C(abandoned ? "byellow" : SYS[row.sys][0]), { bold: SYS[row.sys][1] });
+    return;
+  }
+  const to = e.to ?? "";
+  g.put(40, y, label(e.from), C(tone(e.from)), { bold: selected });
+  g.put(44, y, "→", C("gray"));
+  g.put(46, y, label(to), C(tone(to)), { bold: selected });
+  const kind = `[${e.kind}]`;
+  g.put(50, y, kind, C(kindTone(e)));
+  const x = Math.max(66, 51 + len(kind));
+  // What waits for the dev stands out: a gate, a permission request, a question that reached him
+  const asks = e.kind === "question" && to === "human";
+  const hot = asks || e.kind === "gate" || e.kind === "permission_request";
+  const body: Color = e.kind === "gate" ? "bmagenta" : e.kind === "permission_request" ? "bcyan" : asks ? (e.blocking ? "bred" : "byellow") : selected ? "bwhite" : "white";
+  g.put(x, y, cut(row.text, 85 - x), C(body), { bold: hot });
+}
+
+// The last 33 lines of the feed, with what came before the feature in gray above a ruler
+// and, without a feature, a band that says since when
+function feedPanel(g: Grid, view: View, frame: Color) {
+  const { squad, rows, ui } = view;
+  const feature = squad.feature;
+  const lastEnd = rows.findLastIndex((row) => row.sys === "closed");
+  g.box(28, 2, 58, 36, frame, feature ? "feed · " + cut(feature.title, 32) : "feed · sem feature aberta", "bwhite");
+  const live: [string, Color] = ui.paused ? ["○ pausado", "byellow"] : !feature && lastEnd >= 0 ? ["○ ocioso", "gray"] : ["● ao vivo", "green"];
+  g.put(84 - len(live[0]) - 2, 2, ` ${live[0]} `, live[1]);
+  g.put(31, 3, "hora", "gray");
+  g.put(40, 3, "de", "gray");
+  g.put(46, 3, "p/", "gray");
+  g.put(50, 3, "kind", "gray");
+  g.put(66, 3, "corpo", "gray");
+
+  const lastOpen = feature ? rows.findIndex((row) => row.seq === feature.opened_seq) : -1;
+  let rule: string | null = null;
+  if (lastOpen > 0) {
+    const before = rows.slice(0, lastOpen).findLast((row) => row.sys === "closed");
+    rule = before
+      ? ` ▲ anterior · ${before.squad?.feature?.title ?? ""} · ${before.event.kind === "feature_closed" && before.event.outcome === "delivered" ? "✓ entregue" : "✗ abandonada"} `
+      : " ▲ antes da feature · entradas no broker ";
+  }
+  let band: string | null = null;
+  if (!feature && lastEnd >= 0) {
+    const out = squad.agents.filter((a) => a.status === "blocked" || a.status === "offline").length;
+    const since = clock(rows[lastEnd]!.ts);
+    band = out ? ` squad sem feature desde ${since} · ${out} fora de [idle] ` : ` squad ocioso desde ${since} · sem feature ativa `;
+  } else if (!feature && rows.length > 0) {
+    band = ` broker no ar desde ${clock(rows[0]!.ts)} · nenhuma feature ainda `;
+  }
+
+  const list: ({ rule: string } | { row: FeedRow; dim: boolean })[] = [];
+  rows.forEach((row, i) => {
+    if (rule && i === lastOpen) list.push({ rule });
+    list.push({ row, dim: feature ? i < lastOpen : i < lastEnd });
+    if (band && i === (lastEnd >= 0 ? lastEnd : rows.length - 1)) list.push({ rule: band });
+  });
+
+  let start = Math.max(0, list.length - 33);
+  const selected = list.findIndex((item) => "row" in item && item.row.seq === ui.selected);
+  if (selected >= 0 && selected < start) start = selected;
+  list.slice(start, start + 33).forEach((item, i) => {
+    const y = 4 + i;
+    if ("rule" in item) {
+      const text = cut(item.rule, 56);
+      const side = Math.floor((56 - len(text)) / 2);
+      g.put(29, y, "─".repeat(side) + text + "─".repeat(56 - side - len(text)), "gray");
+    } else {
+      const chosen = item.row.seq === ui.selected;
+      feedRow(g, y, item.row, chosen, item.dim && !chosen);
+    }
+  });
+  if (rows.length === 0) {
+    g.put(31, 6, "○ log vazio", "gray", { bold: true });
+    g.put(31, 7, "o feed começa quando o primeiro agente entrar", "white");
+  }
+}
+
 export function main(view: View): Grid {
   const g = grid();
   const frame = (panel: number): Color => (view.ui.focus === panel ? "bwhite" : "gray");
   chrome(g, view, "main", MAIN_KEYS);
   agents(g, view, frame(0));
   tickets(g, view, frame(0));
+  feedPanel(g, view, frame(1));
   stats(g, view);
   return g;
 }

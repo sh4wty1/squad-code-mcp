@@ -1,6 +1,7 @@
 // What every screen has around it: line 0, the tabs and the seals of line 1, the tokens
 // of line 38 and the keys of line 39. Ported from `chrome`, `stats` and `drawKeys`.
 
+import type { SquadEvent } from "../../shared/contract.ts";
 import { SQUAD, type Agent, type AgentStatus, type TicketStatus, type Totals } from "../../shared/derive.ts";
 import { right, seals } from "../activity.ts";
 import { cost } from "../config.ts";
@@ -164,4 +165,23 @@ export function statusSegs(a: Agent): Seg[] {
   if (a.status === "blocked" && a.permission) return [["[blocked ", "bred", true], ["x", "bwhite", true], ["]", "bred", true]];
   if (a.status === "waiting" && a.blockingQuestion !== null) return [["[waiting ", "white"], ["?", "bred", true], ["]", "white"]];
   return [[`[${a.status === "never" ? "não lançado" : a.status}]`, STATUS[a.status][0], a.status === "blocked"]];
+}
+
+const KIND_TONE: Record<string, Color> = {
+  task: "bblue",
+  result: "white",
+  verdict: "byellow",
+  question: "bwhite",
+  answer: "blue",
+  gate: "bmagenta",
+  gate_decision: "bmagenta",
+  permission_request: "bcyan",
+  permission_decision: "cyan",
+};
+
+// The color of the kind of a message: red and green for what was refused and accepted
+export function kindTone(e: SquadEvent): Color {
+  if (e.kind === "verdict") return e.outcome === "rework" ? "bred" : "bgreen";
+  if (e.kind === "permission_decision") return e.behavior === "deny" ? "bred" : "bgreen";
+  return KIND_TONE[e.kind] ?? "white";
 }
