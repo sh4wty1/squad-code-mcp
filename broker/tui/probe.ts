@@ -42,6 +42,13 @@ export async function measure(glyphs: string[]): Promise<Record<string, number>>
   return widths;
 }
 
+export function report(widths: Record<string, number>): { lines: string[]; exitCode: number } {
+  const wide = Object.entries(widths).filter(([, w]) => w !== 1);
+  const lines = Object.entries(widths).map(([glyph, w]) => `${glyph}  U+${glyph.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}  ${w}`);
+  lines.push(wide.length === 0 ? "every glyph takes one cell" : `not one cell: ${wide.map(([g]) => g).join(" ")}`);
+  return { lines, exitCode: wide.length === 0 ? 0 : 2 };
+}
+
 if (import.meta.main) {
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     console.error("probe needs a terminal on stdin and stdout");
@@ -56,12 +63,11 @@ if (import.meta.main) {
     process.stdin.setRawMode(false);
     process.stdin.pause();
   }
-  const wide = Object.entries(widths).filter(([, w]) => w !== 1);
-  for (const [glyph, w] of Object.entries(widths)) console.log(`${glyph}  U+${glyph.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}  ${w}`);
-  console.log(wide.length === 0 ? "every glyph takes one cell" : `not one cell: ${wide.map(([g]) => g).join(" ")}`);
+  const result = report(widths);
+  for (const line of result.lines) console.log(line);
   const out = process.argv.indexOf("--out");
   if (out > 0) {
     writeFileSync(process.argv[out + 1]!, JSON.stringify({ term: process.env.WT_SESSION ? "windows-terminal" : (process.env.TERM ?? "unknown"), widths }, null, 2));
   }
-  process.exit(wide.length === 0 ? 0 : 2);
+  process.exit(result.exitCode);
 }
