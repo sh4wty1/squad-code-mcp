@@ -595,9 +595,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Frame 12 entra em `tui-frames.test.ts`: tela em cinza, `○ congelado`, `broker ○ desconectado · 12s`, tentativa no rodapé
-- [ ] O número de segundos e o da tentativa vêm de `view.down`
-- [ ] Gate build passa
+- [x] Frame 12 entra em `tui-frames.test.ts`: tela em cinza, `○ congelado`, `broker ○ desconectado · 12s`, tentativa no rodapé
+- [x] O número de segundos e o da tentativa vêm de `view.down`
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build

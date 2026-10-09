@@ -353,6 +353,15 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ),
     ...d("D3", "Out of Scope: the ids `P-nn` and the line of a request answered in the terminal only exist in the modal of permission (slice Gate); the feed of this slice never draws it", [30, 29, 29, ""]),
   ],
+  // The main screen of 01, frozen
+  "12": [
+    ...skills(MOT, LDR, W2, JDG),
+    ...doing(8, "tech lead · escalou TK…", ESCALATED),
+    ...entered("12"),
+    ...plan(9),
+    ...loadout(33, 2),
+    ...d("D1", "the screen is frozen since the broker stopped answering, the 12 s of line 0 before the clock (TUI-51, `view.down`); the prototype writes the clock itself", [3, 45, 8, "14:31:55"]),
+  ],
   "29c": [...skills(MOT, LDR, W2, JDG), ...doing(12, "worker · sem ticket", NO_TICKET), ...body(36, "Bash: Apagar …"), ...declared(23), ...loadout(27, 2)],
 };
 

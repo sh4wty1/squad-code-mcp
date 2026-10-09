@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import type { Grid } from "../../tui/grid.ts";
+import { down } from "../../tui/screens/down.ts";
 import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
 import { small } from "../../tui/screens/small.ts";
@@ -15,11 +16,15 @@ const MAIN = ["01", "09a", "09b", "10", "13a", "13c", "14", "15a", "18a", "19a",
 
 const TOPOLOGY = ["02", "13b", "23b", "28c", "29b"];
 
+// The broker of frame 12 does not answer for 12 s, in 12 reads
+const frozen = (view: View, seconds = 12): View => ({ ...view, down: { since: view.squad.now - seconds * 1000, attempt: seconds } });
+
 const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid][] = [
   ["main screen", MAIN, main],
   ["topology", TOPOLOGY, topology],
   ["thread", ["03", "15b", "24d", "25b"], thread],
   ["legend", ["11"], help],
+  ["frozen screen", ["12"], (view) => down(frozen(view))],
 ];
 
 for (const [name, ids, draw] of SCREENS) {
@@ -43,7 +48,7 @@ test("TUI-43: a deviation of the status of an agent cites the line of the design
   // The status is at the right of the first line of each agent: in the panel of agents of
   // the main screen, and in the box of each node of the topology
   const head = (id: string, dev: { line: number; col: number }) =>
-    TOPOLOGY.includes(id) ? [8, 14, 22, 31].includes(dev.line) : MAIN.includes(id) && [3, 7, 11, 15, 19, 23].includes(dev.line) && dev.col < 28;
+    TOPOLOGY.includes(id) ? [8, 14, 22, 31].includes(dev.line) : [...MAIN, "12"].includes(id) && [3, 7, 11, 15, 19, 23].includes(dev.line) && dev.col < 28;
   const statuses = Object.entries(DEVIATIONS).flatMap(([id, list]) => list.filter((dev) => head(id, dev)).map((dev) => ({ id, ...dev })));
   expect(statuses.map((dev) => dev.id + " " + dev.text.replace(/ +/g, " "))).toEqual([
     "10 ● leader [working]",
@@ -98,6 +103,20 @@ test("TUI-54: the message has the size of the terminal and is in the middle of i
   const drawn = g.text();
   // Eleven lines from line 9 down, each one centered in the 100 columns
   expect([drawn[8], drawn[9], drawn[13], drawn[14], drawn[19], drawn[20]]).toEqual(["", " ".repeat(45) + "squad-tui", " ".repeat(40) + "atual       100 × 30", " ".repeat(40) + "necessário  120 × 40", " ".repeat(47) + "q sair", ""]);
+});
+
+test("TUI-51: the frozen screen is the last state in gray, with the seconds and the attempt of `view.down`", () => {
+  const g = down(frozen(frameView("12"), 75));
+  const drawn = g.text();
+  expect(drawn[0]!.slice(-37)).toBe("broker ○ desconectado · 75s  14:32:07");
+  expect(drawn[38]).toBe(" ○ broker inacessível · reconexão automática a cada 1s · tentativa 75  · responder, gate e permissão desabilitados");
+  expect(drawn[39]).toBe(" j/k mover   enter abrir   1-4 telas   ? ajuda   q sair       sem tecla de reconectar: a TUI tenta sozinha");
+  expect([...drawn[2]!].slice(71, 86).join("")).toBe(" ○ congelado ─┐");
+  // Frozen 75 s before the clock
+  expect([...drawn[3]!].slice(30, 84).join("").trimEnd()).toBe("○ congelado em 14:30:52 · último estado conhecido");
+  // Nothing of the state keeps its color or its background: only the two notices of the freeze
+  const lit = g.rows.slice(2, 38).flatMap((row, i) => row.flatMap((cell, x) => (cell.bg !== null || (cell.ch !== " " && cell.fg !== "gray") ? [`${i + 2}:${x}:${cell.fg}`] : [])));
+  expect(new Set(lit.map((at) => at.split(":")[0] + ":" + at.split(":")[2]))).toEqual(new Set(["2:byellow", "3:byellow"]));
 });
 
 test("TUI-43: no deviation is dead: each one changes the line of its frame", () => {
