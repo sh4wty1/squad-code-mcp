@@ -336,9 +336,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Cada cenário é uma lista de `SquadEvent` com os horários, resumos e `seq` do protótipo, mais os eventos que o protótipo não tem e a derivação precisa (`peer_joined`, `turn_started`, `usage`, `blocked`, `plan`, `feature_opened`)
-- [ ] Cada cenário exporta também o `agora` do frame
-- [ ] `tsc` aceita todos os eventos como `SquadEvent`; gate build passa
+- [x] Cada cenário é uma lista de `SquadEvent` com os horários, resumos e `seq` do protótipo, mais os eventos que o protótipo não tem e a derivação precisa (`peer_joined`, `turn_started`, `usage`, `blocked`, `plan`, `feature_opened`)
+- [x] Cada cenário exporta também o `agora` do frame
+- [x] `tsc` aceita todos os eventos como `SquadEvent`; gate build passa
 
 **Tests**: none
 **Gate**: build
