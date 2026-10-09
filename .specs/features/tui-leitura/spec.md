@@ -288,8 +288,8 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-30 | P1: Feed e tela principal | Specify | Pending |
 | TUI-31 | P1: Feed e tela principal | Specify | Pending |
 | TUI-32 | P1: Feed e tela principal | Specify | Pending |
-| TUI-33 | P1: Feed e tela principal | Specify | Pending |
-| TUI-34 | P1: Feed e tela principal | Specify | Pending |
+| TUI-33 | P1: Feed e tela principal | Specify | Implementing |
+| TUI-34 | P1: Feed e tela principal | Specify | Implementing |
 | TUI-35 | P1: Feed e tela principal | Specify | Implementing |
 | TUI-36 | P1: Feed e tela principal | Specify | Pending |
 | TUI-37 | P1: Feed e tela principal | Specify | Pending |
@@ -297,7 +297,7 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-39 | P1: Feed e tela principal | Specify | Pending |
 | TUI-40 | P1: Feed e tela principal | Specify | Pending |
 | TUI-41 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-42 | P1: Feed e tela principal | Specify | Pending |
+| TUI-42 | P1: Feed e tela principal | Specify | Implementing |
 | TUI-43 | P1: Feed e tela principal | Specify | Implementing |
 | TUI-44 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |
 | TUI-45 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |

@@ -397,10 +397,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] As nove linhas do frame 26c saem iguais para os nove estados (com e sem projeto, título longo, desconectado, sem feature, nenhuma feature)
-- [ ] `? N` conta só perguntas com holder `human`, com fundo vermelho se alguma é bloqueante
-- [ ] As seis linhas do frame 30 saem iguais para os seis estados de tokens e escopo
-- [ ] Testes em `test/unit/tui-chrome.test.ts`; gate quick passa
+- [x] As nove linhas do frame 26c saem iguais para os nove estados (com e sem projeto, título longo, desconectado, sem feature, nenhuma feature)
+- [x] `? N` conta só perguntas com holder `human`, com fundo vermelho se alguma é bloqueante
+- [x] As seis linhas do frame 30 saem iguais para os seis estados de tokens e escopo
+- [x] Testes em `test/unit/tui-chrome.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
