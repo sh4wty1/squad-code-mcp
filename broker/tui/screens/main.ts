@@ -48,7 +48,10 @@ function agents(g: Grid, view: View, frame: Color) {
       g.segs(4, y + 2, [["x", "bwhite", true], [" " + cut(`${a.permission.tool_name} · ${a.permission.input_preview.split("\n")[0]}`, 21), "bred"]]);
     } else if (a.status === "stalled") g.put(4, y + 2, cut("‖ deve " + debt(a.owes!), 23), "byellow", { bold: true });
     else if (a.blockedReason !== null) g.put(4, y + 2, cut("⚠ " + a.blockedReason, 23), "bred", { bold: true });
-    else if (a.blockingQuestion !== null) g.put(4, y + 2, cut(`? ${qid(a.blockingQuestion)} bloqueante · dev`, 23), "bred");
+    else if (a.blockingQuestion !== null) {
+      const holder = squad.questions.find((q) => q.id === a.blockingQuestion)!.holder;
+      g.put(4, y + 2, cut(`? ${qid(a.blockingQuestion)} bloqueante · ${holder === "human" ? "dev" : label(holder)}`, 23), "bred");
+    }
     else if (a.noReactionSince !== null) g.put(4, y + 2, "sem reação há " + age(seconds(view, a.noReactionSince)), "byellow");
     else g.put(4, y + 2, loadout.length ? cut(loadout.join(" "), 23) : "sem loadout", "gray");
   });

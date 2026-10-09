@@ -124,7 +124,7 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
   ],
   "15a": [
     ...status(7, "?", "leader", "waiting ?", ".design/squad-mvp.md line 355: he is `asked_by` of the blocking question of the escalation, still open (slice Question, line 425)"),
-    ...d("D1", "the third line of who waits for a blocking question of its own is the question (TUI-35); see the status of the leader, .design/squad-mvp.md line 355", [9, 4, 23, "? Q-13 bloqueante · dev"]),
+    ...d("D1", "the third line of who waits for a blocking question of its own is the question and who holds it, here the mother (TUI-35); see the status of the leader, .design/squad-mvp.md line 355", [9, 4, 23, "? Q-13 bloqueante · mot"]),
     ...skills(MOT, W1, W2, JDG),
     ...doing(8, "tech lead · escalou TK…", "table of activity of the design: a leader that asked a question still open shows `escalou <ticket>`"),
     ...doing(12, "worker · TKT-12 a… ⟳2/2", "table of activity of the design: a worker whose ticket ended in a verdict of rework shows `<ticket> aguarda ldr`; the ticket is still his"),

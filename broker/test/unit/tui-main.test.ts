@@ -28,6 +28,8 @@ test("TUI-35: the third line of an agent is the first thing there is to say of i
   expect(third("23a", 3)).toBe("‖ deve result TKT-13");
   expect(third("10", 3)).toBe("⚠ RADIO_API_KEY ausente");
   expect(third("01", 2)).toBe("? Q-07 bloqueante · dev");
+  // The holder is the mother: the question of the leader did not reach the dev
+  expect(third("15a", 1)).toBe("? Q-13 bloqueante · mot");
   expect(third("23a", 1)).toBe("sem reação há 3m10s");
   const loadout: Change = (events) => events.map((e) => (e.seq === 406 ? { ...e, loadout: ["tlc-implement", "ponytail", "react-best-practices"] } : e));
   expect(third("24b", 2, loadout)).toBe("tlc-implement ponytail…");
