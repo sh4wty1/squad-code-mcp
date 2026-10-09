@@ -229,6 +229,7 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ...plan(7),
     ...d("D2", LIMIT, [29, 31, 8, "14:47:30"]),
     ...plan(34, "▶ plano v2 de ldr · 3 tickets"),
+    ...d("D1", "send.ts records worker_busy for the leader that attempted the task, not its worker; the prototype attributes this refusal to worker-1", [35, 40, 45, "✗ ldr recusado · task · worker_busy"]),
     ...d("D2", "a refused keeps who tried, the kind and the error, not who the message was for", [5, 88, 30, "tentou [task]"]),
     ...panel(
       "D2",
