@@ -100,7 +100,7 @@ Escrito em 2026-10-09, com a fatia TUI leitura implementada e reprovada pelo Ver
 - **Phase / Task**: Execute. T1 a T30 commitadas (`4657be1` a `1f377d5`). O Verifier deu FAIL na primeira rodada.
 - **Completed**: T1 a T30. Nenhum requisito está `Verified`.
 - **In-progress** (file:line): nada
-- **Next step**: fechar as lacunas de `.specs/features/tui-leitura/validation.md` (seção de gaps) e rodar o Verifier de novo. Só depois: marcar a fatia em `ROADMAP.md`, atualizar a rastreabilidade da spec e abrir o PR.
+- **Next step**: fechar as lacunas listadas em `.specs/features/tui-leitura/fix-round-1.md` (o handoff da rodada de correção; o relatório completo é o `validation.md`) e rodar o Verifier de novo. Só depois: marcar a fatia em `ROADMAP.md`, atualizar a rastreabilidade da spec e abrir o PR.
 - **Blockers**: veredito FAIL. `validate_state.py tui-leitura` sai com 1.
 - **Uncommitted files**: none
 - **Branch**: `feat/tui-leitura`
