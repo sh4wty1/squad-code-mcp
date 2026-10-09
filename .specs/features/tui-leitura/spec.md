@@ -90,6 +90,16 @@ das fatias Question e Gate.
 | Tela de thread sem ticket selecionado | `3` e `enter` abrem o thread do ticket da linha selecionada; se a linha não tem ticket, o do primeiro ticket do plano; sem plano, a tela diz `○ nenhum ticket ainda` | O protótipo abre sempre o TKT-12 | y |
 | Entrada `result` do leader no thread (frame 03, 14:44:02 "ticket fechado") | Sai (D2) | O contrato não dá `ticket_ref` ao `result` do leader, e o leader não reporta ticket fechado | y |
 | Feed pausado | `p` congela a lista de linhas e a seleção; a leitura do broker continua, e ao retomar o feed mostra o que chegou | "Pausar o feed" (N24) | y |
+| Pergunta mesclada | Deixa de contar como aberta: quem a fez não fica `waiting` por ela e o holder não deve nada; fecha com a de destino | Fatia Question: "a mesclada sai da lista e segue a sorte da outra". É o que mantém o leader `working` no frame 01 | y |
+| Leader entre o kickoff e o `plan` | Em turno, `idle`; fora de turno, `stalled` devendo o `plan` | Nenhuma regra acima de `idle` vale sem ticket no plano | y |
+| Ticket descartado | Não é ticket em andamento do worker nem `result` à espera do judge | Fatia Event: descartado conta como concluído e libera o dono | y |
+| `done` com todos os tickets do plano descartados | Vale `done` | A regra só exige os não descartados aprovados | y |
+| Alcance de "sem reação" | O log inteiro; mensagem é qualquer evento com `to` igual ao nome | Entregas pendentes sobrevivem ao encerramento da feature | y |
+| `timeout_s` de uma pergunta | Lido do `question` que chega a `human`; ausente, 240 | Pendência para a fatia Question: `/escalate` precisa copiar o campo | y |
+| Linhas de entrada antes da feature | Um log legítimo tem o `peer_joined` de cada agente; nos frames em que o protótipo não os desenha, a régua `▲ antes da feature` ocupa uma linha e o feed desce (D1) | Sem os `peer_joined` todo agente seria `never` | y |
+| Um só alerta de agente sem feature aberta, no rodapé | Sem a idade: `⚠ w1 bloqueado · ○ ocioso desde 14:53` | Frame 29c; com a idade o texto passa por cima do custo | y |
+| `gate_decision` no feed | Sempre magenta claro, não verde ou vermelho pelo desfecho como no protótipo | TUI-28 | y |
+| Ticket descartado no painel | Dono `—` | O descarte libera o dono | y |
 | Testes | `bun test`, só unidade: derivação e desenho são funções puras; o laço de leitura recebe `fetch`, relógio e saída injetados. Um teste de integração sobe o broker real e lê `GET /events` | Convenção em uso | y |
 
 **Open questions:** none - all resolved or logged above. As três primeiras linhas foram respondidas pelo dev em 2026-10-09.
@@ -177,7 +187,7 @@ Valem as das specs da Event e da Feature. Mais:
 14. **TUI-32** The feed SHALL mostrar as últimas 33 linhas, ou rolar para manter a linha selecionada visível quando ela está acima delas.
 15. **TUI-33** The linha 0 SHALL mostrar, com feature aberta, o projeto, `›`, o título cortado com `…` no espaço que sobra à esquerda do contador de perguntas, e `workflow <workflow>` inteiro; sem feature aberta, `○ sem feature aberta` em cinza; sem nenhuma feature no log, `○ nenhuma feature ainda`.
 16. **TUI-34** The linha 0 SHALL mostrar o contador `? N` das perguntas abertas cujo holder é `human`, com fundo vermelho se alguma é bloqueante, o indicador `broker ● conectado` e o relógio.
-17. **TUI-35** The painel de agentes SHALL mostrar, para cada um dos seis nomes, o glifo e o rótulo do status, o papel, o texto de atividade e uma terceira linha que é a primeira que existir entre: `sem sessão no broker`; `◌ sessão morta há <idade>`; `x <tool> · <primeira linha de input_preview>`; `‖ deve <dívida>`; `⚠ <reason>`; `? Q-<id> bloqueante · dev`; `sem reação há <idade>`; o `loadout` do `task` do ticket em andamento; `sem loadout`.
+17. **TUI-35** The painel de agentes SHALL mostrar, para cada um dos seis nomes, o glifo e o rótulo do status, o papel, o texto de atividade e uma terceira linha que é a primeira que existir entre: `sem sessão no broker`; `◌ sessão morta há <idade>`; `x <tool> · <primeira linha de input_preview>`; `‖ deve <dívida>`; `⚠ <reason>`; `? Q-<id> bloqueante · <holder>`, com `dev` para `human` e o rótulo curto para um agente; `sem reação há <idade>`; o `loadout` do `task` do ticket em andamento; `sem loadout`.
 18. **TUI-36** The título do painel de agentes SHALL ser `agentes · 6` quando nenhum agente é `never` e `agentes · <n>/6 no ar` caso contrário.
 19. **TUI-37** The painel de tickets SHALL mostrar cada ticket com a referência, o título, o dono, `⟳n/2` com n limitado a 2, o status entre colchetes e uma nota: `dep <tickets>` para `planned` com `depends_on`, `◌ parado` com o dono `offline`, `‖ parado` com o dono `stalled`, `→ mot` para `escalated`, `? dev` para `waiting`.
 20. **TUI-38** WHEN não há ticket THEN o painel de tickets SHALL mostrar `○ nenhum ticket ainda` com feature aberta, e `○ sem feature aberta` sem ela, com as duas linhas de explicação dos frames 26a, 09a e 28a.
