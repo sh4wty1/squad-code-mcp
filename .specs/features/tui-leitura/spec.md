@@ -319,7 +319,7 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-51 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |
 | TUI-52 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |
 | TUI-53 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |
-| TUI-54 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |
+| TUI-54 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
 | TUI-55 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |
 | TUI-56 | P1: Rodar no terminal | Specify | Implementing |
 | TUI-57 | P1: Rodar no terminal | Specify | Implementing |

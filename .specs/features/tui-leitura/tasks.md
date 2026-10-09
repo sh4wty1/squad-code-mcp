@@ -577,8 +577,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `small(80, 24)` bate com o frame 21; `small(100, 30)` mostra `100 × 30` centralizado na grade de 100×30
-- [ ] Testes em `test/unit/tui-frames.test.ts`; gate quick passa
+- [x] `small(80, 24)` bate com o frame 21; `small(100, 30)` mostra `100 × 30` centralizado na grade de 100×30
+- [x] Testes em `test/unit/tui-frames.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

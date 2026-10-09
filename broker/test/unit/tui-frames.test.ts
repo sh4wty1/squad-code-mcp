@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import type { Grid } from "../../tui/grid.ts";
 import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
+import { small } from "../../tui/screens/small.ts";
 import { thread } from "../../tui/screens/thread.ts";
 import { topology } from "../../tui/screens/topology.ts";
 import type { View } from "../../tui/view.ts";
@@ -85,6 +86,18 @@ test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen o
       "✓ P-01 fechado no terminal",
     ].map((text) => ["D3", "", text])
   );
+});
+
+test("TUI-54: a terminal of 80 by 24 shows frame 21", () => {
+  expect(small(80, 24).text()).toEqual(frame("21"));
+});
+
+test("TUI-54: the message has the size of the terminal and is in the middle of its grid", () => {
+  const g = small(100, 30);
+  expect([g.w, g.h, g.text().length]).toEqual([100, 30, 30]);
+  const drawn = g.text();
+  // Eleven lines from line 9 down, each one centered in the 100 columns
+  expect([drawn[8], drawn[9], drawn[13], drawn[14], drawn[19], drawn[20]]).toEqual(["", " ".repeat(45) + "squad-tui", " ".repeat(40) + "atual       100 × 30", " ".repeat(40) + "necessário  120 × 40", " ".repeat(47) + "q sair", ""]);
 });
 
 test("TUI-43: no deviation is dead: each one changes the line of its frame", () => {
