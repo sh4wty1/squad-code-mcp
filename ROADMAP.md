@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** fatia Feature mesclada pelo PR 4, depois da Peer (PR 2) e da Event (PR 3). A próxima é a TUI leitura. Os frames que ela pede estão todos no handoff: a segunda rodada (22 a 25) e a terceira (26 a 30), com os estados sem feature aberta que a fatia Feature criou.
+**Agora:** fatia Feature mesclada pelo PR 4, depois da Peer (PR 2) e da Event (PR 3). A próxima é a TUI leitura. Os frames que ela pede estão todos no handoff: a segunda rodada (22 a 25) e a terceira (26 a 30), com os estados sem feature aberta que a fatia Feature criou. O prompt dela está em "Como rodar uma fatia".
 
 ## Decidir (concluído)
 
@@ -100,6 +100,43 @@ STATE.md só o que for decisão nova, apontando para o ADR quando existir um.
 Precisa rodar no Windows: a seção Work do design lista o que o upstream não faz aqui.
 Mensagens de commit seguem a convenção do repositório. Trabalhe num branch e abra um PR
 no fim. Ao terminar, marque a fatia Peer em ROADMAP.md.
+```
+
+A fatia TUI leitura tem frames e decisões do Claude Design para conferir. Para ela, use
+este prompt no lugar do modelo:
+
+```text
+/tlc-spec-driven
+
+Implemente a fatia TUI leitura de .design/squad-mvp.md. O design e os ADRs em docs/adr/ já
+estão decididos: a spec deriva da fatia, não reabra as decisões. Registre no STATE.md
+só o que for decisão nova, apontando para o ADR quando existir um.
+
+Comece pelo Handoff de .specs/STATE.md: ele diz o que as fatias anteriores deixaram para
+esta e como rodar a suíte nesta máquina.
+
+Os frames estão em docs/claude-design-handoff/Handoff-Design.zip (Squad TUI.dc.html,
+frames 01 a 30). A fatia entrega as telas de leitura; os modais de resposta, de gate e de
+permissão ficam de fora, porque escrever é das fatias Question e Gate. O design manda
+portar as funções de desenho do protótipo e usar cada frame como caso de teste: mesmo
+estado, mesmas 40 linhas.
+
+Antes de qualquer tela, resolva a pergunta aberta da fatia: se ⚠ e ⟳ ocupam uma célula no
+Windows Terminal.
+
+O Claude Design decidiu coisas que o design não tem. Estão em
+docs/claude-design-handoff/DECISOES-rodada-3.md, e a lista da segunda rodada não foi
+guardada: o que os frames 22 a 25 mostram e a fatia não descreve é decisão dele. Na spec,
+adote ou corte cada uma, e me pergunte antes de fechar estas três, que tocam a derivação
+ou o contrato:
+- de onde a TUI tira o nome do projeto, que não está em nenhum evento;
+- o status do nome que nunca entrou no broker ([não lançado] nos frames), que a regra de
+  offline do design não cobre;
+- a tecla t, que alterna os tokens entre a feature e a sessão.
+
+Precisa rodar no Windows e no Linux: rode a suíte nos dois antes de fechar, ou registre
+qual dos dois ficou sem rodar. Mensagens de commit seguem a convenção do repositório.
+Trabalhe num branch e abra um PR no fim. Ao terminar, marque a fatia em ROADMAP.md.
 ```
 
 Para parar no meio: `pause work`. Para voltar em outra sessão: `/tlc-spec-driven resume work`.
