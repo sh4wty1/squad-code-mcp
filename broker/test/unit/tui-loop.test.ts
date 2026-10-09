@@ -187,6 +187,18 @@ test("TUI-63: the notice of a key stays 4 s in the footer", async () => {
   stop();
 });
 
+test("TUI-62: a chunk with 3]] advances to the third ticket", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the plan of three tickets");
+    key("3]]");
+    expect(t.lines()[2]).toContain("TKT-14");
+    expect(t.lines()[2]).not.toContain("TKT-13");
+  } finally {
+    stop();
+  }
+});
+
 test("the paused feed keeps its lines while the read goes on, and shows what arrived when it resumes", async () => {
   const before = EVENTS.filter((e) => e.seq <= 422);
   const { t, key, stop } = launch(before);

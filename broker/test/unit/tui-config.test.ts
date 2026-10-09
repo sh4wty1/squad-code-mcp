@@ -33,6 +33,14 @@ test("TUI-57: a SQUAD_PRICES file that does not exist is refused with its path",
   expect(() => prices({ SQUAD_PRICES: path })).toThrow(path);
 });
 
+test("TUI-57: a price table mixing valid and invalid models is refused", () => {
+  const path = file("mixed.json", JSON.stringify({
+    valid: { input: 1, output: 2, cache_write: 3, cache_read: 4 },
+    invalid: { input: 1, output: 2, cache_write: 3, cache_read: "4" },
+  }));
+  expect(() => prices({ SQUAD_PRICES: path })).toThrow(path);
+});
+
 for (const [what, content] of [
   ["not JSON", "{ input: 1"],
   ["a list", "[]"],

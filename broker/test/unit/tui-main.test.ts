@@ -126,6 +126,15 @@ test("TUI-38: the panel without tickets says why, with and without a feature", (
   expect(empty("28a")).toEqual(["○ sem feature aberta", "  aparecem com o plano", "  da primeira feature"]);
 });
 
+test("TUI-37: exactly eight tickets show six rows and two more", () => {
+  const drawn = lines("24a", (events) => events.map((e) => e.kind === "plan"
+    ? { ...e, tickets: Array.from({ length: 8 }, (_, i) => ({ ticket_ref: `TKT-${i + 1}`, title: "t" })) } : e));
+  expect(drawn.slice(30, 37).map((line) => part(line, 2, 26))).toEqual([
+    "TKT-1  ⟳0/2 [planned]   —", "TKT-2  ⟳0/2 [planned]   —", "TKT-3  ⟳0/2 [planned]   —",
+    "TKT-4  ⟳0/2 [planned]   —", "TKT-5  ⟳0/2 [planned]   —", "TKT-6  ⟳0/2 [planned]   —", "+2 tickets",
+  ]);
+});
+
 for (const frame of ["01", "10", "13a", "14", "23a", "24a", "24c", "25a", "26a", "28a", "28b"]) {
   test(`TUI-43: the agents and the tickets of frame ${frame}, columns 0 to 27`, () => columns(frame, 0, 27));
 }

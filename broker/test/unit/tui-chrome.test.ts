@@ -13,6 +13,13 @@ function drawn(view: View) {
 }
 
 const LONG = "player ao vivo com setlist, histórico das últimas 24 horas e integração com os apps de iOS e Android";
+
+test("TUI-41: 1600 tokens round to 2k in the footer", () => {
+  const view = frameView("26b", (events) => events.map((e) => e.kind === "usage" && e.from === "mother"
+    ? { ...e, input: e.seq > 473 ? 1600 : 0, output: 0, cache_write: 0, cache_read: 0 } : e));
+  expect(view.squad.agents.find((a) => a.name === "mother")!.featureTokens).toBe(1600);
+  expect(drawn(view).text()[38]).toContain("mot 2k");
+});
 const long = (events: SquadEvent[]) => events.map((e) => (e.kind === "feature_opened" ? { ...e, title: LONG } : e));
 
 test("TUI-33, TUI-34: line 0 in the nine states of frame 26c", () => {
