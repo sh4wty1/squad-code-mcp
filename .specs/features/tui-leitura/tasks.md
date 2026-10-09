@@ -355,12 +355,12 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Uma linha por kind de mensagem, com rótulos curtos e `summary` de uma linha só
-- [ ] As linhas de sistema de TUI-21, TUI-22 e TUI-24 com o texto exato da spec, incluindo `entrou` e `voltou`, `sessão morta` e `sessão encerrada`, e a versão do plano
-- [ ] Recusas iguais e vizinhas viram uma linha com `×N`; uma linha diferente entre elas separa
-- [ ] A linha de `stalled` sai no `usage` certo e não sai quando o agente não deve nada; a de limite sai depois do terceiro `rework` e não depois do segundo
-- [ ] Nenhuma linha para `turn_started`, `unblocked` e `usage` comum; kind desconhecido não gera linha; nome fora do squad vira os três primeiros caracteres
-- [ ] Testes em `test/unit/tui-feed.test.ts`; gate quick passa
+- [x] Uma linha por kind de mensagem, com rótulos curtos e `summary` de uma linha só
+- [x] As linhas de sistema de TUI-21, TUI-22 e TUI-24 com o texto exato da spec, incluindo `entrou` e `voltou`, `sessão morta` e `sessão encerrada`, e a versão do plano
+- [x] Recusas iguais e vizinhas viram uma linha com `×N`; uma linha diferente entre elas separa
+- [x] A linha de `stalled` sai no `usage` certo e não sai quando o agente não deve nada; a de limite sai depois do terceiro `rework` e não depois do segundo
+- [x] Nenhuma linha para `turn_started`, `unblocked` e `usage` comum; kind desconhecido não gera linha; nome fora do squad vira os três primeiros caracteres
+- [x] Testes em `test/unit/tui-feed.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
