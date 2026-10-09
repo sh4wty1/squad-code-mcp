@@ -295,6 +295,26 @@ test("TUI-40: the summary has the gate that was approved", () => {
   expect(detail("09b").slice(3, 7)).toEqual(["✓ entregue · 14:53:31", "  player ao vivo com setlist", "  G-01 aprovado 14:53:20", "---"]);
 });
 
+test("TUI-40: the summary selects the second of two closed features", () => {
+  const lines = detail("09a", null, (events) => {
+    const opened = events.find((e) => e.kind === "feature_opened")!;
+    const closed = events.find((e) => e.kind === "feature_closed")!;
+    return [...events,
+      { ...opened, seq: 9000, ts: closed.ts + 1000, feature_id: 2, title: "segunda feature" },
+      { ...closed, seq: 9001, ts: closed.ts + 61000, feature_id: 2, outcome: "abandoned", body: "prioridade mudou" },
+    ];
+  });
+  expect(lines.slice(3, 7)).toEqual(["✗ abandonada · 14:54:32", "  segunda feature", "  motivo", "  prioridade mudou"]);
+});
+
+for (const decision of ["comment", "reject"] as const) {
+  test(`TUI-40: a lone ${decision} gate decision is not an approval`, () => {
+    const lines = detail("09b", null, (events) => events.map((e) => e.kind === "gate_decision" ? { ...e, decision } : e));
+    expect(lines.slice(3, 6)).toEqual(["✓ entregue · 14:53:31", "  player ao vivo com setlist", "---"]);
+    expect(lines.some((line) => /G-\d+ aprovado/.test(line))).toBe(false);
+  });
+}
+
 test("TUI-40: an abandoned feature shows the reason, or that none was given, and where each ticket stopped", () => {
   expect(detail("27c").slice(3, 14)).toEqual([
     "✗ abandonada · 14:41:12",
