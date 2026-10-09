@@ -680,10 +680,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `CLAUDE.md` lista os módulos de `tui/` e troca `bun x tsc --noEmit` pelo comando que funciona
-- [ ] `README.md` diz como rodar a TUI e a sonda, e as três variáveis (`SQUAD_TUI_GLYPHS`, `SQUAD_PRICES`, `SQUAD_POLL_INTERVAL_MS`)
-- [ ] `package.json` tem o script `tui`
-- [ ] Gate build passa
+- [x] `CLAUDE.md` lista os módulos de `tui/` e troca `bun x tsc --noEmit` pelo comando que funciona
+- [x] `README.md` diz como rodar a TUI e a sonda, e as três variáveis (`SQUAD_TUI_GLYPHS`, `SQUAD_PRICES`, `SQUAD_POLL_INTERVAL_MS`)
+- [x] `package.json` tem o script `tui`
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build

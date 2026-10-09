@@ -4,7 +4,7 @@ The broker of [squad-code-mcp](../README.md): a daemon on `127.0.0.1` with SQLit
 
 It is a fork of [louislva/claude-peers-mcp](https://github.com/louislva/claude-peers-mcp) at commit `640183f`, by Louis Arge, under the MIT license in [`LICENSE`](LICENSE). The first commit of this directory is that code unchanged; `git diff 10e92d3 -- broker` shows everything the fork changed.
 
-> **Status:** the Peer, Event and Feature slices. Sessions register, the mother opens and closes the feature, and inside it the squad sends `task`, `result` and `verdict` along its edges, receives them through the channel and reads the log.
+> **Status:** the Peer, Event and Feature slices, and the reading TUI. Sessions register, the mother opens and closes the feature, and inside it the squad sends `task`, `result` and `verdict` along its edges, receives them through the channel and reads the log. The TUI shows the squad from that log; it does not answer questions, gates or permission requests yet.
 
 ## Requirements
 
@@ -53,6 +53,36 @@ A session with a role declares `claude/channel/permission`. When Claude Code ask
 
 The human credential is a token in a file, `~/.squad-code-mcp.token` by default. The broker creates it when it starts and it is in no answer and no event. Any process of the user can read the file: it keeps an agent from approving its own request by mistake, not on purpose.
 
+## TUI
+
+```bash
+cd broker
+bun tui.ts        # or: bun run tui
+```
+
+It needs a terminal of 120×40 or more, and shows only the size it has while the terminal is smaller. It reads `GET /events` every second and writes nothing to the broker: the feed, the agents and the tickets with the status derived from the log, the topology and the thread of a ticket. While the broker does not answer, the last state stays on the screen, frozen, and the TUI keeps trying. Launch it from the repository of the mother: the name of the project in the first line is the name of the repository of the directory it starts in.
+
+| Key | What |
+| --- | --- |
+| `1` `2` `3` `?` | Main screen, topology, thread, legend |
+| `esc` | Back to the main screen |
+| `j` `k` `↑` `↓` | Move the selection of the feed, or scroll the thread |
+| `enter` | Open the thread of the ticket of the selected line |
+| `[` `]` | Ticket before and after, in the thread |
+| `tab` `shift+tab` | Panel in focus |
+| `p` | Pause and resume the feed |
+| `b` | Go to the oldest blocking question that waits for you |
+| `t` | Tokens of the feature or of the session, in the footer |
+| `q` `ctrl+c` | Quit |
+
+The screens assume every glyph outside ASCII takes one cell. The probe asks the terminal:
+
+```bash
+bun tui/probe.ts
+```
+
+It prints the width of each glyph and exits 0 if all are one cell, 2 if some is not, and 1 outside a terminal. A glyph the terminal counts as two goes in `SQUAD_TUI_GLYPHS` with what to write in its place.
+
 ## Settings
 
 | Variable | Default | What |
@@ -65,7 +95,9 @@ The human credential is a token in a file, `~/.squad-code-mcp.token` by default.
 | `SQUAD_PING_INTERVAL_MS` | `10000` | Interval of the channel ping |
 | `SQUAD_HEARTBEAT_INTERVAL_MS` | `15000` | Interval of the heartbeat of a registered session |
 | `SQUAD_CLEANUP_INTERVAL_MS` | `30000` | Interval of the dead-session cleanup |
-| `SQUAD_POLL_INTERVAL_MS` | `1000` | Interval at which a registered session asks for what was sent to it |
+| `SQUAD_POLL_INTERVAL_MS` | `1000` | Interval at which a registered session asks for what was sent to it, and at which the TUI reads the log. The TUI uses 1000 when it is not a positive integer |
+| `SQUAD_TUI_GLYPHS` | none | Glyphs the TUI writes as another character: pairs `glyph=substitute` separated by commas, as in `⚠=!,⟳=~`. A pair without one character on each side stops the TUI with exit code 1 |
+| `SQUAD_PRICES` | `tui/prices.json` | JSON file of the price table of the TUI: `{ "<model>": { "input", "output", "cache_write", "cache_read" } }`, in dollars per million tokens. A model outside the table costs zero. A file that is missing or has another format stops the TUI with exit code 1 |
 
 Port and database differ from claude-peers (`7899`, `~/.claude-peers.db`), so both can run on the same machine.
 
@@ -171,6 +203,7 @@ bun cli.ts kill-broker   # stop the broker
 - `tools.ts`: the tools of each role
 - `delivery.ts`: the loop of poll, push and ack of a session
 - `cli.ts`: status and stop
+- `tui.ts`, `tui/`: the reading TUI, its screens and the glyph probe
 - `shared/contract.ts`, `shared/derive.ts`: the event contract, and the state of the tickets and the features derived from the events
 - `shared/config.ts`, `shared/git.ts`: settings and the git common directory
 - `test/unit`, `test/integration`: `bun test`
