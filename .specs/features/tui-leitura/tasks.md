@@ -614,12 +614,12 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Com `fetch` falso: eventos acrescentados em ordem de `seq`, um `seq` já visto não entra duas vezes, cursor igual a `last_seq`
-- [ ] Conexão recusada, tempo esgotado, status 500, corpo que não é JSON, `events` que não é lista e `last_seq` que não é inteiro: `ok: false` e o log igual
-- [ ] Depois de uma falha a leitura seguinte usa o mesmo cursor
-- [ ] `last_seq` menor que o cursor esvazia o log e volta ao cursor 0
-- [ ] O `fetch` falso só vê `GET` em `/events?after=`
-- [ ] Testes em `test/unit/tui-reader.test.ts`; gate quick passa
+- [x] Com `fetch` falso: eventos acrescentados em ordem de `seq`, um `seq` já visto não entra duas vezes, cursor igual a `last_seq`
+- [x] Conexão recusada, tempo esgotado, status 500, corpo que não é JSON, `events` que não é lista e `last_seq` que não é inteiro: `ok: false` e o log igual
+- [x] Depois de uma falha a leitura seguinte usa o mesmo cursor
+- [x] `last_seq` menor que o cursor esvazia o log e volta ao cursor 0
+- [x] O `fetch` falso só vê `GET` em `/events?after=`
+- [x] Testes em `test/unit/tui-reader.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
