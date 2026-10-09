@@ -375,6 +375,7 @@ export const LOGS: Record<string, FrameLog> = {
   "09a": log("15:07:44", null, idle),
   "09b": log("15:07:44", null, idle, G01, APPROVED),
   "10": log("14:31:05", 442, early, ERR_X, tokens({ mot: 47333, ldr: 92000, w1: 118000, w2: 54000, w3: 22000, jdg: 31333 })),
+  "11": log("14:32:07", 417, main),
   "12": log("14:32:07", 417, main),
   "13a": log("14:32:22", 446, offline),
   "13b": log("14:32:22", 446, offline),

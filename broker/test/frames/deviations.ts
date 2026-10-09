@@ -345,6 +345,14 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
       ...NOTES, "---", "perguntas no thread", "Q-13 ✓ respondida pelo dev em 1m52s", "", "", ""
     ),
   ],
+  "11": [
+    ...d(
+      "D3",
+      "TUI-49, Out of Scope: the focus on the history is a key of the tab of questions (slice Question), and the modals of answer, of gate and of permission are screens of the slices Question and Gate; their keys do nothing here",
+      ...[19, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33].map((line): At => [line, 62, 56, ""])
+    ),
+    ...d("D3", "Out of Scope: the ids `P-nn` and the line of a request answered in the terminal only exist in the modal of permission (slice Gate); the feed of this slice never draws it", [30, 29, 29, ""]),
+  ],
   "29c": [...skills(MOT, LDR, W2, JDG), ...doing(12, "worker · sem ticket", NO_TICKET), ...body(36, "Bash: Apagar …"), ...declared(23), ...loadout(27, 2)],
 };
 

@@ -559,8 +559,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Frame 11 entra em `tui-frames.test.ts`; os desvios são só as linhas que citam tecla ou tela fora da fatia, classe D3
-- [ ] Gate quick passa
+- [x] Frame 11 entra em `tui-frames.test.ts`; os desvios são só as linhas que citam tecla ou tela fora da fatia, classe D3
+- [x] Gate quick passa
 
 **Tests**: unit
 **Gate**: quick

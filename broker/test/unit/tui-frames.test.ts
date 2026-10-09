@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import type { Grid } from "../../tui/grid.ts";
+import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
 import { thread } from "../../tui/screens/thread.ts";
 import { topology } from "../../tui/screens/topology.ts";
@@ -17,6 +18,7 @@ const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid][] = [
   ["main screen", MAIN, main],
   ["topology", TOPOLOGY, topology],
   ["thread", ["03", "15b", "24d", "25b"], thread],
+  ["legend", ["11"], help],
 ];
 
 for (const [name, ids, draw] of SCREENS) {
@@ -61,6 +63,28 @@ test("TUI-43: a deviation of the status of an agent cites the line of the design
     "23b ○ worker-1 [idle]",
   ]);
   expect(statuses.filter((dev) => dev.class !== "D1" || !/\.design\/squad-mvp\.md line 3\d\d/.test(dev.why))).toEqual([]);
+});
+
+test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen of another slice", () => {
+  const lines = frame("11").map((line) => [...line.padEnd(120)]);
+  const cut = DEVIATIONS["11"]!.map((dev) => [dev.class, dev.text, lines[dev.line]!.slice(dev.col, dev.col + dev.width).join("").trim()]);
+  expect(cut).toEqual(
+    [
+      "h           foco no histórico",
+      "modal de resposta",
+      "1–4 enter   escolher · enviar · esc cancela",
+      "ctrl+e · u  expandir o texto · limpar",
+      "gate (modal)",
+      "a           aprovar → pede confirmação (y)",
+      "r · c       rejeitar · comentar, texto obrigatório",
+      "] [ · esc   fila de gates · fechar sem decidir",
+      "permissão (modal)",
+      "a · d       permitir (após ver o fim) · negar",
+      "j k · G     rolar a prévia · ir ao fim",
+      "] [ · esc   fila · fechar, o pedido segue",
+      "✓ P-01 fechado no terminal",
+    ].map((text) => ["D3", "", text])
+  );
 });
 
 test("TUI-43: no deviation is dead: each one changes the line of its frame", () => {
