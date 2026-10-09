@@ -315,11 +315,11 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Devolve feature aberta, última fechada, versão do plano, agentes na ordem de `SQUAD`, tickets na ordem do plano, perguntas, gates, permissões e tokens
-- [ ] Duas chamadas com os mesmos argumentos dão resultados iguais em profundidade, e os eventos de entrada não são alterados
-- [ ] Eventos fora de ordem de `seq` dão o mesmo resultado; kind desconhecido é ignorado
-- [ ] `broker/CLAUDE.md` descreve o que `derive.ts` passou a fazer
-- [ ] Testes em `test/unit/derive-squad.test.ts`; gate build passa
+- [x] Devolve feature aberta, última fechada, versão do plano, agentes na ordem de `SQUAD`, tickets na ordem do plano, perguntas, gates, permissões e tokens
+- [x] Duas chamadas com os mesmos argumentos dão resultados iguais em profundidade, e os eventos de entrada não são alterados
+- [x] Eventos fora de ordem de `seq` dão o mesmo resultado; kind desconhecido é ignorado
+- [x] `broker/CLAUDE.md` descreve o que `derive.ts` passou a fazer
+- [x] Testes em `test/unit/derive-squad.test.ts`; gate build passa
 
 **Tests**: unit
 **Gate**: build

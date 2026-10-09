@@ -2,13 +2,14 @@
  * squad derivation
  *
  * The state of the tickets and what each peer owes, computed from the events of
- * the open feature and from nothing else (ADR-002, ADR-006). Pure functions: no
- * database, no clock. The broker decides with them and the TUI shows the same thing.
+ * the open feature and from nothing else (ADR-002, ADR-006), and `squad`, the status
+ * of every agent and ticket from the whole log. Pure functions: no database, no
+ * clock. The broker decides with them and the TUI shows the same thing.
  */
 
 import type { FeatureFields } from "../log.ts";
 import type { Role } from "../peers.ts";
-import type { Kind, SquadEvent } from "./contract.ts";
+import { KINDS, type Kind, type SquadEvent } from "./contract.ts";
 
 export interface Ticket {
   ticket_ref: string;
@@ -436,23 +437,56 @@ export interface Agent {
   // the ts of the oldest message to it with no event of its own after, once the message
   // is 120 s old; null for who is not in the broker
   noReactionSince: number | null;
+  // input, output, cache_write and cache_read of every model, in the session and since
+  // the open feature opened; null without `usage`, and without open feature in the second
+  tokens: number | null;
+  featureTokens: number | null;
 }
 
 const NO_REACTION_MS = 120_000;
 
 export interface Squad {
+  now: number;
+  features: DerivedFeature[];
+  // the open one, and the one closed last
+  feature: DerivedFeature | null;
+  lastClosed: DerivedFeature | null;
+  // how many `plan` the open feature has
+  planVersion: number;
   // in the order of SQUAD
   agents: Agent[];
   // of the open feature: those of the current plan in its order, then the ones outside it
   tickets: SquadTicket[];
+  questions: Question[];
+  gates: Gate[];
+  // the open requests
+  permissions: EventOf<"permission_request">[];
+  // by name; `feature` is empty without an open feature
+  usage: { session: Map<string, Totals>; feature: Map<string, Totals> };
+}
+
+function sum(totals: Totals | undefined): number | null {
+  if (!totals) return null;
+  return Object.values(totals).reduce((all, model) => all + COUNTS.reduce((n, count) => n + model[count], 0), 0);
 }
 
 // The state of the squad at `now`, from the whole log. Tickets, debts, questions and
 // gates come from the events of the open feature; presence, blocks, permission requests,
 // turns and tokens from the whole log, which has them outside a feature too (AD-006).
-export function squad(events: SquadEvent[], now: number): Squad {
-  const feature = features(events).findLast((f) => f.closed_seq === null) ?? null;
+export function squad(log: SquadEvent[], now: number): Squad {
+  // A kind this code does not know says nothing, not even that its author reacted
+  const events = log.filter((e) => KINDS.includes(e.kind));
+  const every = features(events);
+  const feature = every.findLast((f) => f.closed_seq === null) ?? null;
+  const lastClosed = every.reduce<DerivedFeature | null>(
+    (last, f) => (f.closed_seq !== null && f.closed_seq > (last?.closed_seq ?? 0) ? f : last),
+    null
+  );
   const own = feature ? bySeq(events).filter((e) => e.feature_id === feature.id) : [];
+  const usage = {
+    session: usageTotals(events),
+    feature: feature ? usageTotals(events, feature.opened_seq) : new Map<string, Totals>(),
+  };
 
   const online = presence(events);
   const declared = blocks(events);
@@ -467,7 +501,8 @@ export function squad(events: SquadEvent[], now: number): Squad {
   const planned = plan?.kind === "plan" ? plan.tickets : [];
   const all = [...tickets(own).values()];
   const open = asked.filter((q) => q.open);
-  const pending = gates(own).filter((g) => g.pending);
+  const requested = gates(own);
+  const pending = requested.filter((g) => g.pending);
   const ordered = bySeq(events);
 
   const agents = SQUAD.map(({ name, role, short }): Agent => {
@@ -503,6 +538,8 @@ export function squad(events: SquadEvent[], now: number): Squad {
       ticket: owned.at(-1)?.ticket_ref ?? null,
       inTurn,
       noReactionSince: here?.online ? (unanswered?.ts ?? null) : null,
+      tokens: sum(usage.session.get(name)),
+      featureTokens: sum(usage.feature.get(name)),
     };
 
     if (!here) return { ...base, status: "never" };
@@ -549,11 +586,20 @@ export function squad(events: SquadEvent[], now: number): Squad {
   });
 
   return {
+    now,
+    features: every,
+    feature,
+    lastClosed,
+    planVersion: own.filter((e) => e.kind === "plan").length,
     agents,
     tickets: all.map((t) => ({
       ...t,
       status: ticketStatus(t, isBlocked(t.owner), asked),
       depends_on: planned.find((p) => p.ticket_ref === t.ticket_ref)?.depends_on ?? [],
     })),
+    questions: asked,
+    gates: requested,
+    permissions,
+    usage,
   };
 }

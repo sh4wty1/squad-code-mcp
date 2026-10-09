@@ -18,7 +18,7 @@ Broker and MCP channel server of squad-code-mcp. A fork of claude-peers-mcp at `
 - `delivery.ts` — The loop of a session: poll, push in order, ack after the push. No MCP and no HTTP: the calls are injected.
 - `tools.ts` — The MCP tools of each role and the route each one calls.
 - `shared/contract.ts` — The event envelope, the twenty kinds, the edges and the read format.
-- `shared/derive.ts` — The state of the tickets, what each peer owes and the features, from the events alone. Pure functions.
+- `shared/derive.ts` — The state of the tickets, what each peer owes and the features, from the events alone. Pure functions. `squad(events, now)` is the status rule of the contract (ADR-006): from the whole log it gives the open feature, the status of each agent and of each ticket by precedence, the questions, the gates, the open permission requests and the tokens. `presence`, `blocks`, `openPermissions`, `questions`, `gates` and `usageTotals` are its parts.
 - `shared/config.ts`, `shared/git.ts` — Settings (`SQUAD_*`) and the git common directory.
 - `cli.ts` — CLI utility for the broker.
 

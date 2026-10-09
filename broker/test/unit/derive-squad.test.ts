@@ -658,6 +658,8 @@ test("TUI-01: a name of the squad without an event of presence is never, whateve
     ticket: null,
     inTurn: true,
     noReactionSince: null,
+    tokens: null,
+    featureTokens: null,
   });
   expect(statuses(log)).toEqual({ mot: "idle", ldr: "idle", w1: "never", w2: "never", w3: "never", jdg: "never" });
   expect(statuses([])).toEqual({ mot: "never", ldr: "never", w1: "never", w2: "never", w3: "never", jdg: "never" });
@@ -1074,4 +1076,132 @@ test("TUI-16: an agent that is not in the broker has no message without reaction
   // and one that never entered has none
   const never = [joined(1, "leader"), opened(7), plan(8, [A]), task(10, "A", "worker-1")];
   expect(noReaction(never, "worker-1", 500000)).toBeNull();
+});
+
+// Feature 1 abandoned (seq 7 and 8), then feature 2 open (seq 10) with a second plan, a
+// ticket with its worker asking for a permission, a question with the dev and a gate
+const WHOLE = [
+  ...UP,
+  opened(7),
+  closed(8, 1, "abandoned"),
+  usage(9, "mother", "m1", "opus", [1000, 100, 10, 1]),
+  ...[
+    opened(10, 2),
+    kickoff(11),
+    plan(12, [A]),
+    plan(13, [A, { ...B, depends_on: ["A"] }]),
+    task(14, "A", "worker-1"),
+    turn(15, "worker-1"),
+    usage(16, "mother", "m1", "opus", [3000, 300, 30, 3]),
+    usage(17, "mother", "m1", "haiku", [40, 4, 0, 0]),
+    question(18, 9, "mother", "human"),
+    gate(19, 1),
+    request(20, "worker-1"),
+  ].map((e) => ({ ...e, feature_id: 2 }) as SquadEvent),
+];
+
+test("TUI-18: the squad has the open feature, the one closed last, the version of the plan and the state of everything in it", () => {
+  const s = squad(WHOLE, NOW);
+  expect(s.now).toBe(NOW);
+  expect(s.features.map((f) => [f.id, f.opened_seq, f.closed_seq, f.outcome])).toEqual([
+    [1, 7, 8, "abandoned"],
+    [2, 10, null, null],
+  ]);
+  expect(s.feature).toEqual(s.features[1]!);
+  expect(s.feature!.title).toBe("the importer");
+  expect(s.lastClosed).toEqual(s.features[0]!);
+  expect(s.planVersion).toBe(2);
+
+  expect(s.agents.map((a) => a.name)).toEqual(["mother", "leader", "worker-1", "worker-2", "worker-3", "judge"]);
+  expect(s.agents.map((a) => a.status)).toEqual(["waiting", "working", "blocked", "idle", "idle", "idle"]);
+  expect(s.tickets.map((t) => [t.ticket_ref, t.status, t.depends_on])).toEqual([
+    ["A", "blocked", []],
+    ["B", "planned", ["A"]],
+  ]);
+  expect(s.questions.map((q) => [q.id, q.holder, q.open])).toEqual([[9, "human", true]]);
+  expect(s.gates).toEqual([{ id: 1, pending: true, request_seq: 19, decision: null }]);
+  expect(s.permissions.map((p) => [p.seq, p.from])).toEqual([[20, "worker-1"]]);
+});
+
+test("TUI-17: the squad has the tokens of each agent, in the session and since the feature opened", () => {
+  const s = squad(WHOLE, NOW);
+  expect([...s.usage.session.keys()]).toEqual(["mother"]);
+  expect(s.usage.session.get("mother")).toEqual({
+    opus: { input: 3000, output: 300, cache_write: 30, cache_read: 3 },
+    haiku: { input: 40, output: 4, cache_write: 0, cache_read: 0 },
+  });
+  // the usage of seq 9 came before the feature_opened of seq 10
+  expect(s.usage.feature.get("mother")).toEqual({
+    opus: { input: 2000, output: 200, cache_write: 20, cache_read: 2 },
+    haiku: { input: 40, output: 4, cache_write: 0, cache_read: 0 },
+  });
+  const [mother, leader] = s.agents;
+  expect(mother!.tokens).toBe(3333 + 44);
+  expect(mother!.featureTokens).toBe(2222 + 44);
+  expect(leader!.tokens).toBeNull();
+  expect(leader!.featureTokens).toBeNull();
+});
+
+test("TUI-18: without an open feature the squad has no ticket, question, gate nor tokens of feature", () => {
+  const s = squad([...WHOLE, { ...closed(21, 2), feature_id: 2 } as SquadEvent], NOW);
+  expect(s.feature).toBeNull();
+  // the one closed last is the one of the greatest closed_seq
+  expect(s.lastClosed!.id).toBe(2);
+  expect(s.lastClosed!.outcome).toBe("delivered");
+  expect(s.planVersion).toBe(0);
+  expect(s.tickets).toEqual([]);
+  expect(s.questions).toEqual([]);
+  expect(s.gates).toEqual([]);
+  // the whole log still gives the permission request and the tokens of the session
+  expect(s.permissions.map((p) => p.seq)).toEqual([20]);
+  expect(s.usage.feature.size).toBe(0);
+  expect(s.agents[0]!.tokens).toBe(3333 + 44);
+  expect(s.agents[0]!.featureTokens).toBeNull();
+  expect(s.agents.map((a) => a.status)).toEqual(["idle", "idle", "blocked", "idle", "idle", "idle"]);
+});
+
+test("TUI-18: an empty log is a squad that never entered, with no feature", () => {
+  const s = squad([], NOW);
+  expect(s.features).toEqual([]);
+  expect(s.feature).toBeNull();
+  expect(s.lastClosed).toBeNull();
+  expect(s.planVersion).toBe(0);
+  expect(s.agents.map((a) => a.status)).toEqual(["never", "never", "never", "never", "never", "never"]);
+  expect(s.permissions).toEqual([]);
+  expect(s.usage.session.size).toBe(0);
+});
+
+test("TUI-18: the same events and the same now give the same squad, and the events are not changed", () => {
+  const log = structuredClone(WHOLE);
+  for (const e of log) {
+    Object.freeze(e);
+    if (e.kind === "plan") Object.freeze(e.tickets).forEach((t) => Object.freeze(t));
+  }
+  Object.freeze(log);
+
+  const first = squad(log, NOW);
+  expect(squad(log, NOW)).toEqual(first);
+  expect(log).toEqual(WHOLE);
+  // the status depends on the now it was given, not on a clock
+  expect(squad(log, NOW + 1).now).toBe(NOW + 1);
+});
+
+test("TUI-18: the events out of the order of seq give the same squad", () => {
+  const expected = squad(WHOLE, NOW);
+  expect(squad([...WHOLE].reverse(), NOW)).toEqual(expected);
+  const odd = WHOLE.filter((e) => e.seq % 2 === 1);
+  const even = WHOLE.filter((e) => e.seq % 2 === 0);
+  expect(squad([...even, ...odd], NOW)).toEqual(expected);
+});
+
+test("an event of a kind the derivation does not know is ignored", () => {
+  // of worker-1, after its permission request, to worker-2, with every field another rule reads
+  const unknown = {
+    ...event(21, { kind: "mystery", feature_id: 2, from: "worker-1", to: "worker-2", ticket_ref: "A" }),
+    peer: "worker-3",
+    question_id: 9,
+    gate_id: 1,
+    request_seq: 20,
+  } as unknown as SquadEvent;
+  expect(squad([...WHOLE, unknown], NOW + 500000)).toEqual(squad(WHOLE, NOW + 500000));
 });
