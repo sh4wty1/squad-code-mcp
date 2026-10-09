@@ -235,9 +235,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] O total soma o `usage` mais recente por `session_id` e `model`; um `usage` repetido não muda o total
-- [ ] O total da feature desconta o último `usage` anterior ao `feature_opened` de cada `session_id` e `model`, e conta inteiro o de uma sessão que começou depois
-- [ ] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
+- [x] O total soma o `usage` mais recente por `session_id` e `model`; um `usage` repetido não muda o total
+- [x] O total da feature desconta o último `usage` anterior ao `feature_opened` de cada `session_id` e `model`, e conta inteiro o de uma sessão que começou depois
+- [x] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

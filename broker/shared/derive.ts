@@ -358,3 +358,32 @@ export function gates(events: SquadEvent[]): Gate[] {
   }
   return [...all.values()];
 }
+
+const COUNTS = ["input", "output", "cache_write", "cache_read"] as const;
+
+// The tokens of each model
+export type Totals = Record<string, Record<(typeof COUNTS)[number], number>>;
+
+// The tokens each name used: the sum of its latest `usage` of each session_id and model,
+// which is accumulated. With `sinceSeq`, only what was used after that event: the latest
+// `usage` before it is taken out, and a session that started later counts whole. A name
+// without `usage` has no entry. `events` are the whole log.
+export function usageTotals(events: SquadEvent[], sinceSeq?: number): Map<string, Totals> {
+  const latest = new Map<string, EventOf<"usage">>();
+  const before = new Map<string, EventOf<"usage">>();
+  for (const e of bySeq(events)) {
+    if (e.kind !== "usage") continue;
+    const key = JSON.stringify([e.from, e.session_id, e.model]);
+    latest.set(key, e);
+    if (sinceSeq !== undefined && e.seq < sinceSeq) before.set(key, e);
+  }
+
+  const all = new Map<string, Totals>();
+  for (const [key, e] of latest) {
+    const models = all.get(e.from) ?? {};
+    all.set(e.from, models);
+    const total = (models[e.model] ??= { input: 0, output: 0, cache_write: 0, cache_read: 0 });
+    for (const count of COUNTS) total[count] += e[count] - (before.get(key)?.[count] ?? 0);
+  }
+  return all;
+}

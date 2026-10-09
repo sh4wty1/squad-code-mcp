@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
-import { blocks, gates, openPermissions, presence, questions, SQUAD } from "../../shared/derive.ts";
+import { blocks, gates, openPermissions, presence, questions, SQUAD, usageTotals } from "../../shared/derive.ts";
 
 const T0 = 1791331200000;
 
@@ -327,4 +327,76 @@ test("TUI-06: a decision of approve or of reject closes the gate, and only the o
     { id: 1, pending: true, request_seq: 4, decision: null },
     { id: 2, pending: false, request_seq: 5, decision: "reject" },
   ]);
+});
+
+// [input, output, cache_write, cache_read], accumulated by the session for the model
+function usage(seq: number, from: string, session_id: string, model: string, counts: number[]): SquadEvent {
+  const [input, output, cache_write, cache_read] = counts;
+  return event(seq, { kind: "usage", from, session_id, model, input, output, cache_write, cache_read });
+}
+
+test("TUI-17: the total of an agent is the sum of its latest usage of each session_id and model", () => {
+  const totals = usageTotals([
+    usage(1, "worker-1", "s1", "opus", [100, 10, 5, 1]),
+    usage(2, "worker-1", "s1", "opus", [300, 30, 15, 3]),
+    usage(3, "worker-1", "s1", "haiku", [7, 6, 5, 4]),
+    usage(4, "worker-1", "s2", "opus", [1000, 100, 50, 10]),
+    usage(5, "judge", "s3", "opus", [9, 8, 7, 6]),
+  ]);
+  expect([...totals.keys()]).toEqual(["worker-1", "judge"]);
+  expect(totals.get("worker-1")).toEqual({
+    opus: { input: 1300, output: 130, cache_write: 65, cache_read: 13 },
+    haiku: { input: 7, output: 6, cache_write: 5, cache_read: 4 },
+  });
+  expect(totals.get("judge")).toEqual({ opus: { input: 9, output: 8, cache_write: 7, cache_read: 6 } });
+});
+
+test("TUI-17: a repeated usage does not change the total, and the latest is the one of the greatest seq", () => {
+  const log = [usage(1, "worker-1", "s1", "opus", [100, 10, 5, 1]), usage(2, "worker-1", "s1", "opus", [300, 30, 15, 3])];
+  const expected = { opus: { input: 300, output: 30, cache_write: 15, cache_read: 3 } };
+  expect(usageTotals(log).get("worker-1")).toEqual(expected);
+  expect(usageTotals([...log, usage(3, "worker-1", "s1", "opus", [300, 30, 15, 3])]).get("worker-1")).toEqual(expected);
+  expect(usageTotals([...log].reverse()).get("worker-1")).toEqual(expected);
+});
+
+test("TUI-17: an agent without usage has no total", () => {
+  expect(usageTotals([]).size).toBe(0);
+  expect(usageTotals([turn(1, "leader"), joined(2, "leader")]).has("leader")).toBe(false);
+});
+
+test("TUI-17: the total of the feature takes out the latest usage of each session_id and model before the feature_opened", () => {
+  const log = [
+    usage(1, "worker-1", "s1", "opus", [100, 10, 5, 1]),
+    usage(4, "worker-1", "s1", "opus", [300, 30, 15, 3]),
+    // the feature opens at seq 5
+    usage(6, "worker-1", "s1", "opus", [450, 70, 15, 43]),
+    usage(7, "worker-1", "s1", "opus", [1000, 100, 20, 50]),
+  ];
+  // 1000 - 300, 100 - 30, 20 - 15, 50 - 3: the usage of seq 4 is the one taken out, not the one of seq 1
+  expect(usageTotals(log, 5).get("worker-1")).toEqual({ opus: { input: 700, output: 70, cache_write: 5, cache_read: 47 } });
+  // and without the seq the total is the one of the session
+  expect(usageTotals(log).get("worker-1")).toEqual({ opus: { input: 1000, output: 100, cache_write: 20, cache_read: 50 } });
+});
+
+test("TUI-17: a session or a model that started after the feature_opened counts whole in the total of the feature", () => {
+  const totals = usageTotals(
+    [
+      usage(1, "worker-1", "s1", "opus", [100, 10, 5, 1]),
+      // the feature opens at seq 5
+      usage(6, "worker-1", "s1", "opus", [150, 20, 5, 2]),
+      usage(7, "worker-1", "s1", "haiku", [7, 6, 5, 4]),
+      usage(8, "worker-1", "s2", "opus", [1000, 100, 50, 10]),
+    ],
+    5
+  );
+  // opus: (150 - 100) + 1000, (20 - 10) + 100, (5 - 5) + 50, (2 - 1) + 10
+  expect(totals.get("worker-1")).toEqual({
+    opus: { input: 1050, output: 110, cache_write: 50, cache_read: 11 },
+    haiku: { input: 7, output: 6, cache_write: 5, cache_read: 4 },
+  });
+});
+
+test("TUI-17: an agent that used nothing since the feature_opened has a total of zero in the feature", () => {
+  const totals = usageTotals([usage(4, "judge", "s3", "opus", [9, 8, 7, 6])], 5);
+  expect(totals.get("judge")).toEqual({ opus: { input: 0, output: 0, cache_write: 0, cache_read: 0 } });
 });
