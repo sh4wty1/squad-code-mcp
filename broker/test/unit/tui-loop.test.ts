@@ -40,7 +40,7 @@ function screen(out: string): string[] {
 
 // The loop over a broker that is a function, a clock that is a variable and a terminal
 // that is a string
-function launch(events: SquadEvent[] = EVENTS) {
+function launch(events: SquadEvent[] = EVENTS, settings: { intervalMs?: number; glyphs?: Map<string, string> } = {}) {
   const state = {
     events,
     now: NOW,
@@ -67,10 +67,50 @@ function launch(events: SquadEvent[] = EVENTS) {
   };
   const tui = start(
     { fetch, now: () => t.now, size: () => t.size, write: (text) => (t.out += text), raw: (on) => t.raw.push(on), project: "portal-89fm" },
-    { url: BROKER, intervalMs: 5, glyphs: new Map(), prices: PRICES }
+    { url: BROKER, intervalMs: 5, glyphs: new Map(), prices: PRICES, ...settings }
   );
   return { ...tui, t };
 }
+
+test("TUI-61: selecting a feed line repaints only changed rows", async () => {
+  const { t, key, stop } = launch(EVENTS, { intervalMs: 60000 });
+  try {
+    await t.shows(main(t.view()).text(), "the first drawing");
+    const before = t.out.length;
+    const first = main(t.view());
+    const selected = main(t.view({ selected: feed(EVENTS).at(-1)!.seq }));
+    const changed = selected.rows.flatMap((row, y) => Bun.deepEquals(row, first.rows[y]) ? [] : [y + 1]);
+    key("j");
+    const positions = [...t.out.slice(before).matchAll(/\x1b\[(\d+);1H/g)].map((m) => Number(m[1]));
+    expect(changed.length).toBeGreaterThan(0);
+    expect(changed.length).toBeLessThan(40);
+    expect(positions).toEqual(changed);
+  } finally {
+    stop();
+  }
+});
+
+test("TUI-56: the loop writes the configured glyph substitute", async () => {
+  const { t, stop } = launch(LOGS["10"]!.events, { glyphs: new Map([["⚠", "!"]]) });
+  try {
+    await until(() => t.lines().length === 40, "the substituted drawing");
+    expect(t.out).toContain("!");
+    expect(t.out).not.toContain("⚠");
+  } finally {
+    stop();
+  }
+});
+
+test("TUI-58: the loop waits for the configured interval before reading again", async () => {
+  const { t, stop } = launch(EVENTS, { intervalMs: 60000 });
+  try {
+    await t.shows(main(t.view()).text(), "the first drawing");
+    await Bun.sleep(60);
+    expect(t.calls).toHaveLength(1);
+  } finally {
+    stop();
+  }
+});
 
 test("TUI-60: the loop takes the terminal, draws what the broker answers and gives the terminal back on q", async () => {
   const { t, key, done } = launch();
