@@ -99,14 +99,14 @@ function tickets(g: Grid, view: View, frame: Color) {
     const note: [string, Color] | null =
       t.status === "planned" && t.depends_on.length > 0
         ? ["dep " + refs(t.depends_on), "gray"]
-        : going && owner?.status === "offline"
-          ? ["◌ parado", "red"]
-          : going && owner?.status === "stalled"
-            ? ["‖ parado", "byellow"]
-            : t.status === "escalated"
-              ? ["→ mot", "bred"]
-              : t.status === "waiting"
-                ? ["? dev", "bred"]
+        : t.status === "escalated"
+          ? ["→ mot", "bred"]
+          : t.status === "waiting"
+            ? ["? dev", "bred"]
+            : going && owner?.status === "offline"
+              ? ["◌ parado", "red"]
+              : going && owner?.status === "stalled"
+                ? ["‖ parado", "byellow"]
                 : null;
     if (note) g.put(x + 1, y + 1, cut(note[0], 27 - x - 1), note[1], { bold: note[1] !== "gray" });
     y += 2;

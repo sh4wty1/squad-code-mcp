@@ -2,6 +2,9 @@ import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
 import { main } from "../../tui/screens/main.ts";
 import { expected } from "../frames/deviations.ts";
+import { squad } from "../../shared/derive.ts";
+import { feed } from "../../tui/feed.ts";
+import { LOGS } from "../frames/logs.ts";
 import { frameView } from "../frames/view.ts";
 
 type Change = (events: SquadEvent[]) => SquadEvent[];
@@ -254,3 +257,40 @@ test("TUI-29, TUI-30: the title of the feed says live, idle or paused", () => {
 for (const frame of ["01", "09a", "26b", "27a", "28a", "29a", "29c"]) {
   test(`TUI-43: the feed of frame ${frame}, columns 28 to 85`, () => columns(frame, 28, 85));
 }
+
+// The view of a frame three minutes after its clock, with a question of the judge the agent has not reacted to
+function unreacted(frame: string, to: string, change: Change = (events) => events) {
+  const log = LOGS[frame]!;
+  const events = change(log.events);
+  const question = { ...events.at(-1)!, seq: 9000, ts: log.now, kind: "question", from: "judge", role_from: "judge", to, summary: "ok?", body: "",
+    ticket_ref: null, question_id: 99, asked_by: "judge", blocking: false, default: "yes", why: "confirm" } as SquadEvent;
+  const all = [...events, question];
+  const view = { ...frameView(frame), squad: squad(all, log.now + 180000), rows: feed(all) };
+  expect(view.squad.agents.find((a) => a.name === to)!.noReactionSince).toBe(log.now);
+  return main(view).text();
+}
+
+test("TUI-35: the message without reaction comes after the debt, the block, the request and the blocking question, and before the loadout", () => {
+  expect(part(unreacted("23a", "worker-2")[5 + 3 * 4]!, 4, 26)).toBe("‖ deve result TKT-13");
+  expect(part(unreacted("10", "worker-2")[5 + 3 * 4]!, 4, 26)).toBe("⚠ RADIO_API_KEY ausente");
+  expect(part(unreacted("14", "worker-1")[5 + 2 * 4]!, 4, 26)).toBe("x Bash · bun test src/…");
+  expect(part(unreacted("01", "worker-1")[5 + 2 * 4]!, 4, 26)).toBe("? Q-07 bloqueante · dev");
+  const loadout: Change = (events) => events.map((e) => (e.seq === 406 ? { ...e, loadout: ["tlc-implement", "ponytail"] } : e));
+  expect(part(unreacted("24b", "worker-1", loadout)[5 + 2 * 4]!, 4, 26)).toBe("sem reação há 3m00s");
+});
+
+// The owner of the ticket leaves the broker, dead
+const gone = (name: string): Change => (events) => [
+  ...events,
+  { ...events.at(-1)!, seq: 9000, ts: events.at(-1)!.ts + 1000, kind: "peer_left", from: "broker", role_from: "broker", to: null, summary: "", body: "", ticket_ref: null, peer: name, reason: "died" } as SquadEvent,
+];
+
+test("TUI-37: the note of an escalated or waiting ticket wins over the one of its stopped owner", () => {
+  const tickets = (frame: string) => {
+    const view = frameView(frame, gone("worker-1"));
+    expect(view.squad.agents.find((a) => a.name === "worker-1")!.status).toBe("offline");
+    return main(view).text().slice(30, 37).map((line) => part(line, 2, 26));
+  };
+  expect(tickets("15a")).toContain("⟳2/2 [escalated] → mot");
+  expect(tickets("01")).toContain("⟳1/2 [waiting] ? dev");
+});

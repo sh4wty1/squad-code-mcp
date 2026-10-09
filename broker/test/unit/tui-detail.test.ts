@@ -164,9 +164,9 @@ test("TUI-39: a plan lists its tickets, what each depends on, the ones it adds a
 
 test("TUI-39: a refusal has the agent, what it tried, the error, how many times and from when to when", () => {
   expect(detail("25a").slice(0, 6)).toEqual(["✗ recusa do broker", "agente ldr leader", "tentou [task]", "erro   ticket_dropped", "vezes  ×3 · 14:51:40–52:05", "---"]);
-  expect(detail("25a", 470).slice(1, 5)).toEqual(["agente ldr leader", "tentou [task]", "erro   worker_busy", "vezes  1 · 14:51:25"]);
+  expect(detail("25a", 470).slice(1, 5)).toEqual(["agente ldr leader", "tentou [task]", "erro   unplanned_ticket", "vezes  1 · 14:51:25"]);
   expect(feed(LOGS["25a"]!.events).filter((r) => r.sys === "refused").map((r) => [r.seq, r.text])).toEqual([
-    [470, "✗ ldr recusado · task · worker_busy"],
+    [470, "✗ ldr recusado · task · unplanned_ticket"],
     [471, "✗ ldr recusado · task · ticket_dropped ×3"],
   ]);
 });

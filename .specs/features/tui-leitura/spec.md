@@ -100,6 +100,9 @@ das fatias Question e Gate.
 | Um só alerta de agente sem feature aberta, no rodapé | Sem a idade: `⚠ w1 bloqueado · ○ ocioso desde 14:53` | Frame 29c; com a idade o texto passa por cima do custo | y |
 | `gate_decision` no feed | Sempre magenta claro, não verde ou vermelho pelo desfecho como no protótipo | TUI-28 | y |
 | Ticket descartado no painel | Dono `—` | O descarte libera o dono | y |
+| Nota do ticket quando duas valem (TUI-37) | Vence a do status do ticket: `→ mot` para `escalated` e `? dev` para `waiting`; `◌ parado` e `‖ parado` só quando o ticket não tem nota própria | A nota do status diz por que o ticket está parado; a do dono só diz que ele está. Lacuna apontada pelo Verifier na rodada 2 | y |
+| Nó do dev na topologia com mais de uma pendência (TUI-44) | A primeira que existir: pedido de permissão, gate, pergunta | Ordem do protótipo (`rTopo`); lacuna apontada pelo Verifier na rodada 2 | y |
+| Recusa das 14:51:25 no log do frame 25a | O log tem `unplanned_ticket` para o leader, não o `worker_busy` do protótipo: naquele ponto nenhum worker tem ticket aberto, e o broker só responde `worker_busy` quando o destinatário tem. Desvio D1 | Um log de frame só tem evento que o broker escreveria naquele estado | y |
 | Testes | `bun test`, só unidade: derivação e desenho são funções puras; o laço de leitura recebe `fetch`, relógio e saída injetados. Um teste de integração sobe o broker real e lê `GET /events` | Convenção em uso | y |
 | `usage` reenviado e linha de `stalled` | Uma linha por agente e dívida: outro `usage` não gera linha se já há `stalled` para o mesmo agente e o mesmo `seq` de origem da dívida | O contrato permite reenvio; uma nova dívida, com outro `seq`, pode gerar outra linha (TUI-25) | y |
 | Nota `◌ parado` ou `‖ parado` do ticket | Só aparece em ticket que não é `planned`, `done` nem `dropped` | A nota indica trabalho em andamento interrompido (TUI-37) | y |

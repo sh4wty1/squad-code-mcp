@@ -147,3 +147,9 @@ test("TUI-45: a question still held by the leader is absent from the dev node an
   expect(panel).toContain("perguntas abertas · 0");
   expect(panel.some((line) => line.startsWith("Q-07"))).toBe(false);
 });
+
+test("TUI-44: with a permission, a gate and a question waiting, the node of the dev shows the permission, then the gate", () => {
+  expect(part(draw("22g").text()[4]!, 33, 52)).toBe("dev    x 1 permissão");
+  const noRequest: Change = (events) => events.filter((e) => e.kind !== "permission_request");
+  expect(part(draw("22g", noRequest).text()[4]!, 33, 52)).toBe("dev         ⚠ gate 1");
+});

@@ -229,3 +229,27 @@ test("TUI-27: a turn_started, an unblocked, a usage of who owes nothing and an u
 test("TUI-20: the lines come in the order of seq whatever the order of the log", () => {
   expect(texts([kickoff(3), opened(1), refused(2, "leader", "e")])).toEqual(["▶ feature aberta · player ao vivo", "✗ ldr recusado · task · e", "spec"]);
 });
+
+test("TUI-24: a peer that comes back resumes nothing when its ticket was approved or dropped", () => {
+  const rows = feed([
+    opened(1),
+    plan(2, [{ ticket_ref: "TKT-13", title: "a" }, { ticket_ref: "TKT-14", title: "b" }]),
+    joined(3, "worker-2"),
+    joined(4, "worker-3"),
+    task(5, "worker-2", "TKT-13"),
+    task(6, "worker-3", "TKT-14"),
+    result(7, "worker-2", "TKT-13"),
+    event(8, { kind: "verdict", from: "judge", to: "leader", ticket_ref: "TKT-13", summary: "approve", outcome: "approve", result_seq: 7, criteria: [] }),
+    plan(9, [{ ticket_ref: "TKT-13", title: "a" }, { ticket_ref: "TKT-14", title: "b", dropped: true }]),
+    left(10, "worker-2", "died"),
+    left(11, "worker-3", "died"),
+    joined(12, "worker-2"),
+    joined(13, "worker-3"),
+  ]);
+  expect(rows.filter((row) => row.seq >= 10).map((row) => [row.text, row.ticket])).toEqual([
+    ["○ w2 saiu · sessão morta", undefined],
+    ["○ w3 saiu · sessão morta", undefined],
+    ["● w2 voltou", undefined],
+    ["● w3 voltou", undefined],
+  ]);
+});

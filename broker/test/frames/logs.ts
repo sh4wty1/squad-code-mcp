@@ -260,7 +260,8 @@ const DROP_X = [
   answer(467, "14:50:02", HUM, MOT, "TKT-12", "Q-13: descartar, tentar de novo", "Resposta do dev: descartar o TKT-12 e tentar de novo, com o iOS como critério central de um ticket novo.", 13, "descartar, tentar de novo", "human"),
   answer(468, "14:50:20", MOT, LDR, "TKT-12", "descartar · nova tentativa", "Resposta à escalação: descartar o TKT-12 e planejar uma nova tentativa do player, centrada no iOS.", 13, "descartar · nova tentativa", "agent"),
   plan(469, "14:51:10", [{ ...PLAN1[0]!, dropped: true }, { ticket_ref: "TKT-13", title: "API da setlist" }, PLAN1[2]!, { ticket_ref: "TKT-15", title: "player no iOS" }]),
-  refused(470, "14:51:25", LDR, "worker_busy"),
+  // The prototype has worker_busy here; with every worker free the broker cannot write it
+  refused(470, "14:51:25", LDR, "unplanned_ticket"),
   refused(471, "14:51:40", LDR, "ticket_dropped"),
   refused(472, "14:51:52", LDR, "ticket_dropped"),
   refused(473, "14:52:05", LDR, "ticket_dropped"),
