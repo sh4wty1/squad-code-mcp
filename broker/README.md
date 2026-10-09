@@ -75,6 +75,14 @@ It needs a terminal of 120×40 or more, and shows only the size it has while the
 | `t` | Tokens of the feature or of the session, in the footer |
 | `q` `ctrl+c` | Quit |
 
+To see it without a squad, the demo opens it over the log of one of the test frames, served by a broker of its own on a free port:
+
+```bash
+bun run demo          # or: bun run demo 22g
+```
+
+The frames are the keys of `LOGS` in `test/frames/logs.ts`; a name that is not one of them lists them all.
+
 The screens assume every glyph outside ASCII takes one cell. The probe asks the terminal:
 
 ```bash

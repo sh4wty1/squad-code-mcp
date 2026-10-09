@@ -10,6 +10,7 @@
     "broker": "bun broker.ts",
     "server": "bun server.ts",
     "tui": "bun tui.ts",
+    "demo": "bun tui/demo.ts",
     "test": "bun test"
   },
   "devDependencies": {
