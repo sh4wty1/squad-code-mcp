@@ -1,8 +1,13 @@
 import { expect, test } from "bun:test";
-import { paint, parseGlyphs } from "../../tui/ansi.ts";
+import { ENTER, LEAVE, paint, parseGlyphs } from "../../tui/ansi.ts";
 import { grid, type Color } from "../../tui/grid.ts";
 
 const ESC = "\x1b";
+
+test("TUI-60: entering hides the cursor and leaving shows it again", () => {
+  expect(ENTER).toBe("\x1b[?1049h\x1b[?25l");
+  expect(LEAVE).toBe("\x1b[?25h\x1b[?1049l");
+});
 
 function scene() {
   const g = grid(4, 3);
