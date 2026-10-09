@@ -29,7 +29,7 @@ import type { Ui, View } from "./tui/view.ts";
 
 const SCREENS = { main, topology, thread, help };
 
-// One key of a chunk of the input: an escape sequence, or a character
+// One complete key: a CSI escape sequence, or a character
 const KEY = /\x1b\[[0-9;]*[A-Za-z~]|[\s\S]/gu;
 
 export interface Settings {
@@ -76,6 +76,8 @@ export function start(io: Io, settings: Settings) {
   let prev: Grid | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let stopped = false;
+  let pending = "";
+  let escapeTimer: ReturnType<typeof setTimeout> | undefined;
   let resolve!: () => void;
   let reject!: (error: unknown) => void;
   const done = new Promise<void>((yes, no) => ((resolve = yes), (reject = no)));
@@ -98,6 +100,7 @@ export function start(io: Io, settings: Settings) {
     if (stopped) return;
     stopped = true;
     clearTimeout(timer);
+    clearTimeout(escapeTimer);
     io.write(LEAVE);
     io.raw(false);
     settle();
@@ -116,7 +119,7 @@ export function start(io: Io, settings: Settings) {
     timer = setTimeout(() => tick().catch(fail), settings.intervalMs);
   }
 
-  function key(chunk: string) {
+  function dispatch(chunk: string) {
     if (stopped) return;
     try {
       const seen = view();
@@ -129,6 +132,22 @@ export function start(io: Io, settings: Settings) {
     } catch (error) {
       fail(error);
     }
+  }
+
+  function key(chunk: string) {
+    if (stopped) return;
+    clearTimeout(escapeTimer);
+    const input = pending + chunk;
+    // stdin chunks can end inside a CSI sequence. Wait briefly for its remaining bytes;
+    // a lone Escape must still navigate back when no more input arrives.
+    pending = /\x1b(?:\[[0-9;]*)?$/u.exec(input)?.[0] ?? "";
+    const complete = input.slice(0, input.length - pending.length);
+    if (complete) dispatch(complete);
+    if (pending && !stopped) escapeTimer = setTimeout(() => {
+      const tail = pending;
+      pending = "";
+      dispatch(tail);
+    }, 40);
   }
 
   function resize() {

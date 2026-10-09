@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
 import { squad } from "../../shared/derive.ts";
 import { config, start } from "../../tui.ts";
-import { CLEAR, ENTER, LEAVE } from "../../tui/ansi.ts";
+import { CLEAR, ENTER, LEAVE, paint } from "../../tui/ansi.ts";
 import { feed } from "../../tui/feed.ts";
 import { START } from "../../tui/keys.ts";
 import type { Fetch } from "../../tui/reader.ts";
@@ -169,7 +169,7 @@ test("TUI-62: the keys of a chunk of the input are pressed in order, an escape s
   key("2");
   expect(t.lines()).toEqual(topology(t.view({ selected: feed(EVENTS).at(-2)!.seq, screen: "topology" })).text());
   key("\x1b");
-  expect(t.lines()).toEqual(main(t.view({ selected: feed(EVENTS).at(-2)!.seq })).text());
+  await t.shows(main(t.view({ selected: feed(EVENTS).at(-2)!.seq })).text(), "standalone Escape");
   stop();
 });
 
@@ -297,4 +297,47 @@ test("TUI-56, TUI-57, TUI-58: the settings come from the environment, and an inv
   expect(config({}).intervalMs).toBe(1000);
   expect(() => config({ SQUAD_TUI_GLYPHS: "⚠=!!" })).toThrow('"⚠=!!"');
   expect(() => config({ SQUAD_PRICES: "no-such-prices.json" })).toThrow("no-such-prices.json");
+});
+
+test("F3 / TUI-62: arrows and shift-tab survive every escape sequence chunk boundary", async () => {
+  for (const sequence of ["\x1b[A", "\x1b[B", "\x1b[Z"]) {
+    for (let split = 1; split < sequence.length; split++) {
+      const whole = launch(EVENTS, { intervalMs: 60000 });
+      const divided = launch(EVENTS, { intervalMs: 60000 });
+      try {
+        await whole.t.shows(main(whole.t.view()).text(), "whole input");
+        await divided.t.shows(main(divided.t.view()).text(), "divided input");
+        whole.key("2");
+        divided.key("2");
+        const before = divided.t.lines();
+        whole.key(sequence);
+        divided.key(sequence.slice(0, split));
+        expect(divided.t.lines()).toEqual(before);
+        divided.key(sequence.slice(split));
+        expect(divided.t.lines()).toEqual(whole.t.lines());
+        expect(divided.t.lines()[2]).toContain("topologia");
+        const written = divided.t.out.length;
+        divided.key("1");
+        const expected = sequence === "\x1b[Z" ? { focus: 0 as const } : { selected: feed(EVENTS).at(-1)!.seq };
+        const next = main(divided.t.view(expected));
+        expect(divided.t.lines()).toEqual(next.text());
+        expect(divided.t.out.slice(written)).toBe(paint(next, topology(divided.t.view({ screen: "topology" })), new Map()));
+      } finally {
+        whole.stop();
+        divided.stop();
+      }
+    }
+  }
+});
+
+test("F3 / TUI-60: stopping cancels a pending Escape", async () => {
+  const { t, key, stop, done } = launch();
+  await t.shows(main(t.view()).text(), "main before stop");
+  key("\x1b");
+  stop();
+  await done;
+  const out = t.out;
+  await Bun.sleep(80);
+  expect(t.out).toBe(out);
+  expect(t.raw).toEqual([true, false]);
 });
