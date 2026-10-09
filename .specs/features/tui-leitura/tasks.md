@@ -254,10 +254,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Um caso por status, e um caso para cada par vizinho da ordem em que as duas regras valem
-- [ ] `question`, `answer` e `blocked` com `ticket_ref` não mudam o último evento do ticket
-- [ ] Ticket com `rework` como último evento, abaixo do limite, é `working`
-- [ ] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
+- [x] Um caso por status, e um caso para cada par vizinho da ordem em que as duas regras valem
+- [x] `question`, `answer` e `blocked` com `ticket_ref` não mudam o último evento do ticket
+- [x] Ticket com `rework` como último evento, abaixo do limite, é `working`
+- [x] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

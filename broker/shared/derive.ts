@@ -387,3 +387,59 @@ export function usageTotals(events: SquadEvent[], sinceSeq?: number): Map<string
   }
   return all;
 }
+
+export type TicketStatus = "planned" | "working" | "review" | "waiting" | "blocked" | "escalated" | "done" | "dropped";
+
+export interface SquadTicket extends Ticket {
+  status: TicketStatus;
+  // from the current plan
+  depends_on: string[];
+}
+
+// The first rule that holds, in this order. `ownerBlocked` is whether the owner has the
+// status `blocked`, and `asked` the questions of the open feature.
+function ticketStatus(t: Ticket, ownerBlocked: boolean, asked: Question[]): TicketStatus {
+  if (t.dropped) return "dropped";
+  if (t.taskSeq === null) return "planned";
+  if (t.reworks >= REWORK_LIMIT) return "escalated";
+  if (t.approved) return "done";
+  // Only the ticket the owner is working on: one already delivered is not stopped by the block
+  if (ownerBlocked && t.last?.kind === "task") return "blocked";
+  if (asked.some((q) => q.open && q.blocking && q.asked_by === t.owner && q.ticket_ref === t.ticket_ref)) return "waiting";
+  if (t.last?.kind === "result") return "review";
+  // A task, or a verdict of rework below the limit: the leader owes the next task
+  return "working";
+}
+
+export interface Squad {
+  // of the open feature: those of the current plan in its order, then the ones outside it
+  tickets: SquadTicket[];
+}
+
+// The state of the squad at `now`, from the whole log. Tickets, debts, questions and
+// gates come from the events of the open feature; presence, blocks, permission requests,
+// turns and tokens from the whole log, which has them outside a feature too (AD-006).
+export function squad(events: SquadEvent[], now: number): Squad {
+  const feature = features(events).findLast((f) => f.closed_seq === null) ?? null;
+  const own = feature ? bySeq(events).filter((e) => e.feature_id === feature.id) : [];
+
+  const online = presence(events);
+  const declared = blocks(events);
+  const permissions = openPermissions(events);
+  const asked = questions(own);
+
+  // `blocked` comes right after `never` and `offline`: no other status rule can take it
+  const isBlocked = (name: string | null) =>
+    name !== null && online.get(name)?.online === true && (declared.has(name) || permissions.some((p) => p.from === name));
+
+  const plan = own.findLast((e) => e.kind === "plan");
+  const planned = plan?.kind === "plan" ? plan.tickets : [];
+
+  return {
+    tickets: [...tickets(own).values()].map((t) => ({
+      ...t,
+      status: ticketStatus(t, isBlocked(t.owner), asked),
+      depends_on: planned.find((p) => p.ticket_ref === t.ticket_ref)?.depends_on ?? [],
+    })),
+  };
+}

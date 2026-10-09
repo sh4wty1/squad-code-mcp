@@ -269,8 +269,8 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-11 | P1: Status derivado do log | Specify | Pending |
 | TUI-12 | P1: Status derivado do log | Specify | Pending |
 | TUI-13 | P1: Status derivado do log | Specify | Pending |
-| TUI-14 | P1: Status derivado do log | Specify | Pending |
-| TUI-15 | P1: Status derivado do log | Specify | Pending |
+| TUI-14 | P1: Status derivado do log | Specify | Implementing |
+| TUI-15 | P1: Status derivado do log | Specify | Implementing |
 | TUI-16 | P1: Status derivado do log | Specify | Pending |
 | TUI-17 | P1: Status derivado do log | Specify | Implementing |
 | TUI-18 | P1: Status derivado do log | Specify | Pending |

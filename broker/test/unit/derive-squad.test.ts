@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import type { SquadEvent } from "../../shared/contract.ts";
-import { blocks, gates, openPermissions, presence, questions, SQUAD, usageTotals } from "../../shared/derive.ts";
+import type { PlannedTicket, SquadEvent } from "../../shared/contract.ts";
+import { blocks, gates, openPermissions, presence, questions, squad, SQUAD, usageTotals } from "../../shared/derive.ts";
 
 const T0 = 1791331200000;
 
@@ -399,4 +399,223 @@ test("TUI-17: a session or a model that started after the feature_opened counts 
 test("TUI-17: an agent that used nothing since the feature_opened has a total of zero in the feature", () => {
   const totals = usageTotals([usage(4, "judge", "s3", "opus", [9, 8, 7, 6])], 5);
   expect(totals.get("judge")).toEqual({ opus: { input: 0, output: 0, cache_write: 0, cache_read: 0 } });
+});
+
+const NOW = T0 + 3600 * 1000;
+
+// The six in the broker (seq 1 to 6) and feature 1 open (seq 7)
+const UP = SQUAD.map((agent, i) => joined(i + 1, agent.name));
+
+function opened(seq: number, feature_id = 1): SquadEvent {
+  return event(seq, {
+    kind: "feature_opened", feature_id, from: "mother", to: "*", title: "the importer", workflow: "tlc",
+    branch: "feat/importer", base_branch: "develop", spec_ref: ".specs/features/importer/spec.md", spec_commit: "9f8e7d6",
+  });
+}
+
+function closed(seq: number, feature_id = 1, outcome = "delivered"): SquadEvent {
+  return event(seq, { kind: "feature_closed", feature_id, from: "mother", to: "*", outcome });
+}
+
+const OPEN = [...UP, opened(7)];
+
+function plan(seq: number, list: PlannedTicket[], feature_id = 1): SquadEvent {
+  return event(seq, { kind: "plan", feature_id, from: "leader", tickets: list });
+}
+
+function task(seq: number, ticket_ref: string, to: string, fields: Record<string, unknown> = {}): SquadEvent {
+  return event(seq, { kind: "task", feature_id: 1, from: "leader", to, summary: "do it", ticket_ref, loadout: [], ...fields });
+}
+
+function result(seq: number, ticket_ref: string, from: string, fields: Record<string, unknown> = {}): SquadEvent {
+  return event(seq, {
+    kind: "result", feature_id: 1, from, to: "judge", summary: "done", ticket_ref, task_seq: seq - 1, branch: "b", commit: "c", ...fields,
+  });
+}
+
+function verdict(seq: number, ticket_ref: string, outcome: "approve" | "rework", fields: Record<string, unknown> = {}): SquadEvent {
+  return event(seq, {
+    kind: "verdict", feature_id: 1, from: "judge", to: "leader", summary: outcome, ticket_ref, result_seq: seq - 1, outcome,
+    criteria: [{ n: 1, text: "works", pass: outcome === "approve" }], ...fields,
+  });
+}
+
+const A = { ticket_ref: "A", title: "the parser" };
+const B = { ticket_ref: "B", title: "the writer" };
+
+// The plan of A and B (seq 8) in the open feature
+const PLANNED = [...OPEN, plan(8, [A, B])];
+
+// task, result and verdict of rework for ticket A of worker-1, `rounds` times from seq 10
+function reworked(rounds: number): SquadEvent[] {
+  const events: SquadEvent[] = [];
+  for (let i = 0; i < rounds; i++) {
+    const seq = 10 + i * 3;
+    events.push(task(seq, "A", "worker-1"), result(seq + 1, "A", "worker-1"), verdict(seq + 2, "A", "rework"));
+  }
+  return events;
+}
+
+function ticketStatus(log: SquadEvent[], ticket_ref: string): string | undefined {
+  return squad(log, NOW).tickets.find((t) => t.ticket_ref === ticket_ref)?.status;
+}
+
+test("TUI-14: a ticket the current plan marks as dropped is dropped", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1"), plan(12, [{ ...A, dropped: true }, B])];
+  expect(ticketStatus(log, "A")).toBe("dropped");
+  // what an earlier plan marked does not count
+  expect(ticketStatus([...log, plan(13, [A, B])], "A")).toBe("working");
+});
+
+test("TUI-14: a ticket that never received a task is planned, with the dependencies of the plan", () => {
+  const log = [...OPEN, plan(8, [A, { ...B, depends_on: ["A"] }]), task(10, "A", "worker-1")];
+  const [a, b] = squad(log, NOW).tickets;
+  expect(b!.status).toBe("planned");
+  expect(b!.depends_on).toEqual(["A"]);
+  expect(b!.title).toBe("the writer");
+  expect(b!.owner).toBeNull();
+  expect(a!.status).toBe("working");
+  expect(a!.depends_on).toEqual([]);
+});
+
+test("TUI-14: a ticket whose latest event is a task is working", () => {
+  const [a] = squad([...PLANNED, task(10, "A", "worker-1")], NOW).tickets;
+  expect(a!.status).toBe("working");
+  expect(a!.owner).toBe("worker-1");
+  expect(a!.last).toEqual({ kind: "task", seq: 10 });
+});
+
+test("TUI-14: a ticket whose latest event is a result is in review", () => {
+  expect(ticketStatus([...PLANNED, task(10, "A", "worker-1"), result(11, "A", "worker-1")], "A")).toBe("review");
+});
+
+test("TUI-14: a ticket whose latest event is a verdict of approve is done", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1"), result(11, "A", "worker-1"), verdict(12, "A", "approve")];
+  expect(ticketStatus(log, "A")).toBe("done");
+  // and it is not anymore when a result comes after the approve
+  expect(ticketStatus([...log, result(13, "A", "worker-1")], "A")).toBe("review");
+});
+
+test("TUI-14: a ticket with a verdict of rework as its latest event, below the limit, is working", () => {
+  expect(ticketStatus([...PLANNED, ...reworked(1)], "A")).toBe("working");
+  expect(ticketStatus([...PLANNED, ...reworked(2)], "A")).toBe("working");
+});
+
+test("TUI-14: a ticket with three verdicts of rework is escalated", () => {
+  const log = [...PLANNED, ...reworked(3)];
+  expect(ticketStatus(log, "A")).toBe("escalated");
+  expect(squad(log, NOW).tickets[0]!.reworks).toBe(3);
+});
+
+test("TUI-14: the ticket a blocked owner is working on is blocked", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1"), task(11, "B", "worker-2")];
+  const declared = [...log, blocked(12, "worker-1", "missing credential", { ticket_ref: "A" })];
+  expect(ticketStatus(declared, "A")).toBe("blocked");
+  // the ticket of another worker is not
+  expect(ticketStatus(declared, "B")).toBe("working");
+  // nor is it after the unblocked
+  expect(ticketStatus([...declared, unblocked(13, "worker-1")], "A")).toBe("working");
+
+  // an open permission request blocks the owner too
+  const asking = [...log, request(12, "worker-1")];
+  expect(ticketStatus(asking, "A")).toBe("blocked");
+  expect(ticketStatus([...asking, decision(13, "worker-1", 12)], "A")).toBe("working");
+});
+
+test("TUI-14: a ticket is not blocked when its owner is offline, nor when the owner already delivered it", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1")];
+  // an offline agent is offline, not blocked
+  expect(ticketStatus([...log, blocked(12, "worker-1", "r"), left(13, "worker-1")], "A")).toBe("working");
+  // delivered: it is not the ticket the owner is working on
+  expect(ticketStatus([...log, result(11, "A", "worker-1"), blocked(12, "worker-1", "r")], "A")).toBe("review");
+});
+
+test("TUI-14: a ticket whose owner asked an open blocking question about it is waiting", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1"), task(11, "B", "worker-2")];
+  const asked = [...log, question(12, 4, "worker-1", "leader", { blocking: true, ticket_ref: "A" })];
+  expect(ticketStatus(asked, "A")).toBe("waiting");
+  expect(ticketStatus(asked, "B")).toBe("working");
+  // still waiting when the leader escalates it
+  const escalated = [...asked, question(13, 4, "leader", "mother", { asked_by: "worker-1", blocking: true, ticket_ref: "A" })];
+  expect(ticketStatus(escalated, "A")).toBe("waiting");
+  // and working again when it is answered
+  expect(ticketStatus([...asked, answer(13, 4, "leader", "worker-1", "agent")], "A")).toBe("working");
+});
+
+test("TUI-14: a non-blocking question, one about another ticket and one somebody else asked do not leave the ticket waiting", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1")];
+  expect(ticketStatus([...log, question(12, 4, "worker-1", "leader", { ticket_ref: "A" })], "A")).toBe("working");
+  expect(ticketStatus([...log, question(12, 4, "worker-1", "leader", { blocking: true, ticket_ref: "B" })], "A")).toBe("working");
+  expect(ticketStatus([...log, question(12, 4, "worker-1", "leader", { blocking: true })], "A")).toBe("working");
+  expect(ticketStatus([...log, question(12, 4, "judge", "worker-1", { blocking: true, ticket_ref: "A" })], "A")).toBe("working");
+});
+
+test("TUI-14: dropped comes before planned", () => {
+  expect(ticketStatus([...OPEN, plan(8, [{ ...A, dropped: true }, B])], "A")).toBe("dropped");
+});
+
+test("TUI-14: planned comes before escalated", () => {
+  // a log the broker does not write: three verdicts of rework for a ticket that never received a task
+  const log = [...PLANNED, verdict(10, "A", "rework"), verdict(11, "A", "rework"), verdict(12, "A", "rework")];
+  expect(ticketStatus(log, "A")).toBe("planned");
+});
+
+test("TUI-14: escalated comes before done", () => {
+  // a log the broker does not write: a fourth round after the third rework
+  const log = [...PLANNED, ...reworked(3), task(19, "A", "worker-1"), result(20, "A", "worker-1"), verdict(21, "A", "approve")];
+  expect(ticketStatus(log, "A")).toBe("escalated");
+});
+
+test("TUI-14: blocked comes before waiting", () => {
+  const log = [
+    ...PLANNED,
+    task(10, "A", "worker-1"),
+    question(11, 4, "worker-1", "leader", { blocking: true, ticket_ref: "A" }),
+    blocked(12, "worker-1", "missing credential", { ticket_ref: "A" }),
+  ];
+  expect(ticketStatus(log, "A")).toBe("blocked");
+});
+
+test("TUI-14: waiting comes before review", () => {
+  const log = [
+    ...PLANNED,
+    task(10, "A", "worker-1"),
+    result(11, "A", "worker-1"),
+    question(12, 4, "worker-1", "leader", { blocking: true, ticket_ref: "A" }),
+  ];
+  expect(ticketStatus(log, "A")).toBe("waiting");
+});
+
+test("TUI-15: a question, an answer and a blocked with the ticket_ref do not change the latest event of the ticket", () => {
+  const review = [...PLANNED, task(10, "A", "worker-1"), result(11, "A", "worker-1")];
+  const others = (seq: number, ticket_ref: string) => [
+    question(seq, 4, "judge", "worker-1", { ticket_ref }),
+    { ...answer(seq + 1, 4, "worker-1", "judge", "agent"), ticket_ref },
+    blocked(seq + 2, "judge", "cannot check out the branch", { ticket_ref }),
+  ];
+  expect(ticketStatus([...review, ...others(12, "A")], "A")).toBe("review");
+  expect(squad([...review, ...others(12, "A")], NOW).tickets[0]!.last).toEqual({ kind: "result", seq: 11 });
+
+  const done = [...review, verdict(12, "A", "approve")];
+  expect(ticketStatus([...done, ...others(13, "A")], "A")).toBe("done");
+  // and a ticket_ref seen only in them is not a ticket
+  expect(squad([...done, ...others(13, "Z")], NOW).tickets.map((t) => t.ticket_ref)).toEqual(["A", "B"]);
+});
+
+test("TUI-14: every ticket of the current plan and every one with an event of ticket has a status, the planned ones first", () => {
+  const log = [...OPEN, task(9, "X", "worker-3"), plan(10, [B, A]), task(11, "A", "worker-1")];
+  expect(squad(log, NOW).tickets.map((t) => [t.ticket_ref, t.status])).toEqual([
+    ["B", "planned"],
+    ["A", "working"],
+    ["X", "working"],
+  ]);
+});
+
+test("TUI-14: only the events of the open feature count", () => {
+  const before = [...PLANNED, task(10, "A", "worker-1"), result(11, "A", "worker-1"), verdict(12, "A", "approve"), closed(13)];
+  // without an open feature there is no ticket
+  expect(squad(before, NOW).tickets).toEqual([]);
+  // and the A of the next feature starts over
+  const next = [...before, opened(14, 2), plan(15, [A], 2)];
+  expect(squad(next, NOW).tickets.map((t) => [t.ticket_ref, t.status])).toEqual([["A", "planned"]]);
 });
