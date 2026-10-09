@@ -936,6 +936,12 @@ test("TUI-10: nobody is done while a ticket of the plan is not approved, nor in 
   expect(statuses(OPEN).w1).toBe("idle");
 });
 
+test("TUI-10: all tickets of the plan dropped still gives done", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1"), task(11, "B", "worker-2"),
+    plan(12, [{ ...A, dropped: true }, { ...B, dropped: true }])];
+  expect(statuses(log)).toEqual({ mot: "working", ldr: "done", w1: "done", w2: "done", w3: "done", jdg: "done" });
+});
+
 test("TUI-11: the worker whose ticket got a verdict of rework below the limit is idle and owes nothing", () => {
   const a = agent([...PLANNED, ...reworked(1)], "worker-1");
   expect(a.status).toBe("idle");
@@ -1030,6 +1036,14 @@ test("TUI-13: without an open feature the agents are only never, offline, blocke
 function noReaction(log: SquadEvent[], name: string, ms: number): number | null {
   return squad(log, T0 + 10000 + ms).agents.find((a) => a.name === name)!.noReactionSince;
 }
+
+test("TUI-16: a message without reaction survives feature closure", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1"),
+    event(11, { kind: "feature_closed", from: "mother", feature_id: 1, outcome: "abandoned" })];
+  expect(squad(log, T0 + 130000).feature).toBeNull();
+  expect(noReaction(log, "worker-1", 120000)).toBe(T0 + 10000);
+  expect(noReaction([...log, turn(12, "worker-1")], "worker-1", 120000)).toBeNull();
+});
 
 test("TUI-16: a message to an agent without an event of it after is without reaction from 120000 ms on", () => {
   const log = [...PLANNED, task(10, "A", "worker-1")];
