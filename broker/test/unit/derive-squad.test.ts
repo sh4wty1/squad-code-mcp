@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
-import { blocks, openPermissions, presence, SQUAD } from "../../shared/derive.ts";
+import { blocks, gates, openPermissions, presence, questions, SQUAD } from "../../shared/derive.ts";
 
 const T0 = 1791331200000;
 
@@ -150,4 +150,181 @@ test("TUI-03: an unblocked with the name in peer closes the block, whoever wrote
 test("TUI-03: a name blocked again after an unblocked is blocked, with the reason of the latest blocked", () => {
   const all = blocks([blocked(4, "worker-2", "first"), unblocked(6, "worker-2"), blocked(8, "worker-2", "second")]);
   expect(all.get("worker-2")!.reason).toBe("second");
+});
+
+// From here on the events are those of feature 1
+function question(seq: number, id: number, from: string, to: string, fields: Record<string, unknown> = {}): SquadEvent {
+  return event(seq, {
+    kind: "question", feature_id: 1, from, to, summary: "which one?", question_id: id, asked_by: from, blocking: false,
+    why: "the spec does not say", default: "the first", ...fields,
+  });
+}
+
+function answer(seq: number, id: number, from: string, to: string, resolved_by: string, text = "the second"): SquadEvent {
+  return event(seq, { kind: "answer", feature_id: 1, from, to, summary: text, question_id: id, answer: text, resolved_by });
+}
+
+function merged(seq: number, id: number, into: number): SquadEvent {
+  return event(seq, { kind: "question_merged", feature_id: 1, from: "mother", question_id: id, into });
+}
+
+function gate(seq: number, id: number): SquadEvent {
+  return event(seq, {
+    kind: "gate", feature_id: 1, from: "mother", to: "human", summary: "deliver", gate_id: id, scope: "delivery",
+    commit: "9f8e7d6", action: "merge", effect: "the feature goes to develop",
+  });
+}
+
+function gateDecision(seq: number, id: number, decision: string): SquadEvent {
+  return event(seq, { kind: "gate_decision", feature_id: 1, from: "human", to: "mother", summary: decision, gate_id: id, decision });
+}
+
+test("TUI-06: a question without answer is open, held by the recipient of its latest question", () => {
+  const all = questions([question(3, 9, "worker-2", "leader", { ticket_ref: "TKT-13" })]);
+  expect(all).toEqual([
+    {
+      id: 9,
+      asked_by: "worker-2",
+      holder: "leader",
+      blocking: false,
+      ticket_ref: "TKT-13",
+      open: true,
+      merged_into: null,
+      default: "the first",
+      deadline: null,
+      reached_human_ts: null,
+      route: ["worker-2", "leader"],
+      resolved_by: null,
+      answer: null,
+      first_seq: 3,
+      last_seq: 3,
+    },
+  ]);
+});
+
+test("TUI-06: an escalation moves the holder and extends the route, and who asked stays", () => {
+  const log = [
+    question(3, 9, "worker-2", "leader", { ticket_ref: "TKT-13" }),
+    question(5, 9, "leader", "mother", { asked_by: "worker-2", ticket_ref: "TKT-13" }),
+  ];
+  const [q] = questions(log);
+  expect(q!.asked_by).toBe("worker-2");
+  expect(q!.holder).toBe("mother");
+  expect(q!.route).toEqual(["worker-2", "leader", "mother"]);
+  expect(q!.first_seq).toBe(3);
+  expect(q!.last_seq).toBe(5);
+  expect(q!.reached_human_ts).toBeNull();
+  expect(q!.deadline).toBeNull();
+  // the latest question is the one of the greatest seq, whatever the order of the list
+  expect(questions([...log].reverse())).toEqual(questions(log));
+});
+
+test("the deadline of a non-blocking question is 240 s after the first question to the dev", () => {
+  const [q] = questions([
+    question(3, 9, "worker-2", "leader"),
+    question(5, 9, "leader", "mother", { asked_by: "worker-2" }),
+    question(8, 9, "mother", "human", { asked_by: "worker-2" }),
+  ]);
+  expect(q!.holder).toBe("human");
+  expect(q!.route).toEqual(["worker-2", "leader", "mother", "human"]);
+  expect(q!.reached_human_ts).toBe(T0 + 8000);
+  expect(q!.deadline).toBe(T0 + 8000 + 240000);
+});
+
+test("the deadline uses the timeout_s of the question, and counts from the first question to the dev only", () => {
+  const [q] = questions([
+    question(3, 9, "mother", "human", { timeout_s: 60 }),
+    question(7, 9, "mother", "human", { timeout_s: 60 }),
+  ]);
+  expect(q!.reached_human_ts).toBe(T0 + 3000);
+  expect(q!.deadline).toBe(T0 + 3000 + 60000);
+  expect(q!.last_seq).toBe(7);
+});
+
+test("a blocking question has no deadline and no default, even with the dev", () => {
+  const [q] = questions([question(3, 4, "mother", "human", { blocking: true, default: undefined })]);
+  expect(q!.blocking).toBe(true);
+  expect(q!.reached_human_ts).toBe(T0 + 3000);
+  expect(q!.deadline).toBeNull();
+  expect(q!.default).toBeNull();
+});
+
+test("TUI-06: an answer with the question_id closes the question, and one with another id does not", () => {
+  const log = [question(3, 9, "worker-2", "leader"), question(4, 10, "worker-1", "leader")];
+  const [nine, ten] = questions([...log, answer(6, 9, "leader", "worker-2", "agent")]);
+  expect(nine!.open).toBe(false);
+  expect(nine!.resolved_by).toBe("agent");
+  expect(nine!.answer).toBe("the second");
+  expect(ten!.open).toBe(true);
+  expect(ten!.resolved_by).toBeNull();
+  expect(ten!.answer).toBeNull();
+});
+
+test("the first answer of a question is the one that counts, and an answer to no question is no question", () => {
+  const all = questions([
+    question(3, 9, "mother", "human"),
+    answer(6, 9, "broker", "mother", "timeout_default", "the first"),
+    answer(7, 9, "human", "mother", "human", "late"),
+    answer(8, 77, "human", "mother", "human"),
+  ]);
+  expect(all.map((q) => q.id)).toEqual([9]);
+  expect(all[0]!.resolved_by).toBe("timeout_default");
+  expect(all[0]!.answer).toBe("the first");
+});
+
+test("TUI-06: a merged question leaves the open ones and closes with the one it was merged into", () => {
+  const log = [question(3, 9, "worker-2", "leader"), question(4, 10, "mother", "human"), merged(5, 9, 10)];
+  const [nine, ten] = questions(log);
+  expect(nine!.open).toBe(false);
+  expect(nine!.merged_into).toBe(10);
+  // not closed yet: the one it follows is open
+  expect(nine!.resolved_by).toBeNull();
+  expect(nine!.answer).toBeNull();
+  expect(ten!.open).toBe(true);
+  expect(ten!.merged_into).toBeNull();
+
+  const [closed, target] = questions([...log, answer(8, 10, "human", "mother", "human", "use both")]);
+  expect(closed!.open).toBe(false);
+  expect(closed!.resolved_by).toBe("human");
+  expect(closed!.answer).toBe("use both");
+  expect(target!.open).toBe(false);
+  expect(target!.answer).toBe("use both");
+});
+
+test("a merged question with an answer of its own closes alone", () => {
+  const [nine, ten] = questions([
+    question(3, 9, "worker-2", "leader"),
+    question(4, 10, "mother", "human"),
+    merged(5, 9, 10),
+    answer(6, 9, "broker", "worker-2", "result_default", "the first"),
+  ]);
+  expect(nine!.resolved_by).toBe("result_default");
+  expect(nine!.answer).toBe("the first");
+  expect(ten!.open).toBe(true);
+});
+
+test("the questions come in the order they were asked", () => {
+  const all = questions([question(7, 2, "worker-1", "leader"), question(3, 9, "worker-2", "leader"), question(8, 9, "leader", "mother")]);
+  expect(all.map((q) => q.id)).toEqual([9, 2]);
+});
+
+test("TUI-06: a gate without a decision is pending", () => {
+  expect(gates([gate(4, 1)])).toEqual([{ id: 1, pending: true, request_seq: 4, decision: null }]);
+  expect(gates([question(3, 9, "mother", "human")])).toEqual([]);
+});
+
+test("TUI-06: a gate with a decision of comment is still pending", () => {
+  expect(gates([gate(4, 1), gateDecision(6, 1, "comment")])).toEqual([{ id: 1, pending: true, request_seq: 4, decision: null }]);
+});
+
+test("TUI-06: a decision of approve or of reject closes the gate, and only the one of its gate_id", () => {
+  const log = [gate(4, 1), gate(5, 2), gateDecision(6, 1, "comment")];
+  expect(gates([...log, gateDecision(7, 1, "approve")])).toEqual([
+    { id: 1, pending: false, request_seq: 4, decision: "approve" },
+    { id: 2, pending: true, request_seq: 5, decision: null },
+  ]);
+  expect(gates([...log, gateDecision(7, 2, "reject")])).toEqual([
+    { id: 1, pending: true, request_seq: 4, decision: null },
+    { id: 2, pending: false, request_seq: 5, decision: "reject" },
+  ]);
 });

@@ -215,10 +215,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Pergunta aberta, holder, rota, `reached_human_ts` e prazo (240 por default) conforme Assumptions
-- [ ] Mesclada sai das abertas e fecha com a de destino
-- [ ] Gate com `comment` continua pendente; com `approve` ou `reject` fecha
-- [ ] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
+- [x] Pergunta aberta, holder, rota, `reached_human_ts` e prazo (240 por default) conforme Assumptions
+- [x] Mesclada sai das abertas e fecha com a de destino
+- [x] Gate com `comment` continua pendente; com `approve` ou `reject` fecha
+- [x] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

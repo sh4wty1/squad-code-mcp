@@ -229,3 +229,132 @@ export function blocks(events: SquadEvent[]): Map<string, EventOf<"blocked">> {
   }
   return all;
 }
+
+export interface Question {
+  id: number;
+  asked_by: string;
+  // the `to` of the latest question
+  holder: string;
+  blocking: boolean;
+  ticket_ref: string | null;
+  // no answer of its own and not merged into another. A merged one is not open and has
+  // `resolved_by` null until the one it was merged into closes.
+  open: boolean;
+  merged_into: number | null;
+  default: string | null;
+  // when the default applies: only for a non-blocking one that reached the dev
+  deadline: number | null;
+  // the ts of the first question to "human"
+  reached_human_ts: number | null;
+  // who asked, then each holder in order
+  route: string[];
+  resolved_by: EventOf<"answer">["resolved_by"] | null;
+  answer: string | null;
+  // of the first and of the latest question
+  first_seq: number;
+  last_seq: number;
+}
+
+// A non-blocking question without timeout_s waits this long for the dev
+const TIMEOUT_S = 240;
+
+// Every question with at least one `question`, in the order they were asked. `events`
+// are those of the open feature, here and in `gates`.
+export function questions(events: SquadEvent[]): Question[] {
+  const ordered = bySeq(events);
+  const all = new Map<number, Question>();
+
+  for (const e of ordered) {
+    if (e.kind !== "question") continue;
+    let q = all.get(e.question_id);
+    if (!q) {
+      // What the question is comes from who asked it; an escalation only moves the holder
+      q = {
+        id: e.question_id,
+        asked_by: e.asked_by,
+        holder: e.to as string,
+        blocking: e.blocking,
+        ticket_ref: e.ticket_ref,
+        open: true,
+        merged_into: null,
+        default: e.default ?? null,
+        deadline: null,
+        reached_human_ts: null,
+        route: [e.from],
+        resolved_by: null,
+        answer: null,
+        first_seq: e.seq,
+        last_seq: e.seq,
+      };
+      all.set(q.id, q);
+    }
+    q.holder = e.to as string;
+    q.route.push(q.holder);
+    q.last_seq = e.seq;
+    if (q.holder === "human" && q.reached_human_ts === null) {
+      q.reached_human_ts = e.ts;
+      if (!q.blocking) q.deadline = e.ts + (e.timeout_s ?? TIMEOUT_S) * 1000;
+    }
+  }
+
+  for (const e of ordered) {
+    if (e.kind === "answer") {
+      // The first answer to be written is the one that counts
+      const q = all.get(e.question_id);
+      if (q && q.resolved_by === null) {
+        q.open = false;
+        q.resolved_by = e.resolved_by;
+        q.answer = e.answer;
+      }
+    } else if (e.kind === "question_merged") {
+      const q = all.get(e.question_id);
+      if (q) {
+        q.open = false;
+        q.merged_into = e.into;
+      }
+    }
+  }
+
+  // A merged question without an answer of its own closes with the one it was merged
+  // into. The walk stops after as many steps as there are questions: a cycle closes nothing.
+  for (const q of all.values()) {
+    let into = q;
+    for (let steps = 0; steps < all.size && into.resolved_by === null && into.merged_into !== null; steps++) {
+      into = all.get(into.merged_into) ?? into;
+    }
+    if (into !== q) {
+      q.resolved_by = into.resolved_by;
+      q.answer = into.answer;
+    }
+  }
+  return [...all.values()];
+}
+
+export interface Gate {
+  id: number;
+  // no gate_decision of approve or reject: a comment does not decide
+  pending: boolean;
+  // the seq of the gate
+  request_seq: number;
+  decision: "approve" | "reject" | null;
+}
+
+// Every gate, in the order they were asked
+export function gates(events: SquadEvent[]): Gate[] {
+  const ordered = bySeq(events);
+  const all = new Map<number, Gate>();
+  for (const e of ordered) {
+    if (e.kind === "gate" && !all.has(e.gate_id)) {
+      all.set(e.gate_id, { id: e.gate_id, pending: true, request_seq: e.seq, decision: null });
+    }
+  }
+  for (const e of ordered) {
+    if (e.kind !== "gate_decision" || e.decision === "comment") continue;
+    const gate = all.get(e.gate_id);
+    if (gate?.pending) {
+      gate.pending = false;
+      gate.decision = e.decision;
+    }
+  }
+  return [...all.values()];
+}
