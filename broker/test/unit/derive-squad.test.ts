@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { HUMAN_TOKEN, setup, WORKER_1 } from "./helpers.ts";
 import type { PlannedTicket, SquadEvent } from "../../shared/contract.ts";
 import { blocks, gates, openPermissions, presence, questions, squad, SQUAD, usageTotals } from "../../shared/derive.ts";
 
@@ -117,7 +118,7 @@ test("TUI-04: any later event of the same peer closes the request, and one of an
 });
 
 test("TUI-04: a refused and an unblocked the broker wrote about the peer do not close its request", () => {
-  const log = [request(3, "worker-1"), refused(4, "worker-1"), unblocked(5, "worker-1", "broker"), left(6, "worker-1")];
+  const log = [request(3, "worker-1"), refused(4, "worker-1"), unblocked(5, "worker-1", "broker")];
   expect(openPermissions(log).map((e) => e.seq)).toEqual([3]);
   // the unblocked the peer itself sent is an event of the peer
   expect(openPermissions([request(3, "worker-1"), unblocked(5, "worker-1")])).toEqual([]);
@@ -1218,4 +1219,27 @@ test("an event of a kind the derivation does not know is ignored", () => {
     request_seq: 20,
   } as unknown as SquadEvent;
   expect(squad([...WHOLE, unknown], NOW + 500000)).toEqual(squad(WHOLE, NOW + 500000));
+});
+
+test("F1 / TUI-04: leaving closes the permission for the old session, including after rejoin", () => {
+  const b = setup();
+  try {
+    const { id } = b.join("worker-1", "worker", 100) as { id: string };
+    const asked = b.permission.request(WORKER_1, { request_id: "r1", tool_name: "Bash", description: "tests", input_preview: "bun test" });
+    if (!asked.ok) throw new Error("request failed");
+    expect(openPermissions(b.log.after(0)).map((e) => e.seq)).toEqual([asked.seq]);
+    b.peers.unregister(id);
+    expect(b.permission.decision({ human_token: HUMAN_TOKEN, request_seq: asked.seq, behavior: "allow" })).toMatchObject({ ok: false, error: "permission_closed" });
+    expect(openPermissions(b.log.after(0))).toEqual([]);
+    b.join("worker-1", "worker", 101);
+    expect(squad(b.log.after(0), b.clock.now).agents.find((a) => a.name === "worker-1")).toMatchObject({ status: "idle", permission: null });
+  } finally {
+    b.db.close();
+  }
+});
+
+test("F1 / TUI-04: only a later departure of the requester closes permission", () => {
+  const log = [left(1, "worker-1"), request(3, "worker-1"), left(4, "worker-2")];
+  expect(openPermissions(log).map((e) => e.seq)).toEqual([3]);
+  expect(openPermissions([...log, left(5, "worker-1")].reverse())).toEqual([]);
 });

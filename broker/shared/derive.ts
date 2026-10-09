@@ -209,13 +209,14 @@ export function presence(events: SquadEvent[]): Map<string, Presence> {
 
 // The permission requests still open, in ascending seq. A request closes with the
 // decision that cites it and with any later event of its peer: the dev may have answered
-// in the terminal. What the broker writes about the peer has `from` "broker" and closes nothing.
+// in the terminal. A later peer_left also closes it: that session can no longer answer.
 export function openPermissions(events: SquadEvent[]): EventOf<"permission_request">[] {
   const decided = new Set<number>();
   const latest = new Map<string, number>();
   for (const e of events) {
     if (e.kind === "permission_decision") decided.add(e.request_seq);
     latest.set(e.from, Math.max(latest.get(e.from) ?? 0, e.seq));
+    if (e.kind === "peer_left") latest.set(e.peer, Math.max(latest.get(e.peer) ?? 0, e.seq));
   }
   return bySeq(events).filter(
     (e): e is EventOf<"permission_request"> =>
