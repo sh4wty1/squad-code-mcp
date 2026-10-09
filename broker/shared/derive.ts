@@ -91,8 +91,10 @@ export function tickets(events: SquadEvent[]): Map<string, Ticket> {
 }
 
 export interface Owed {
-  owes: "result" | "verdict" | "task" | "plan" | "delivery";
+  // "answer" is the debt of the holder of an open question: `squad` adds it, `owed` does not
+  owes: "result" | "verdict" | "task" | "plan" | "delivery" | "answer";
   ticket_ref?: string;
+  question_id?: number;
   // the event that created the debt
   seq: number;
 }
@@ -411,7 +413,31 @@ function ticketStatus(t: Ticket, ownerBlocked: boolean, asked: Question[]): Tick
   return "working";
 }
 
+export type AgentStatus = "never" | "offline" | "blocked" | "waiting" | "stalled" | "working" | "done" | "idle";
+
+export interface Agent {
+  name: string;
+  role: Role;
+  short: string;
+  status: AgentStatus;
+  // the ts of the peer_left when offline; of the blocked or of the permission request,
+  // the earlier, when blocked; of the end of turn or of the debt, the later, when stalled
+  since: number | null;
+  // the question_id, when waiting for a blocking question it asked
+  blockingQuestion: number | null;
+  // the open request and the reason of the declared block, when blocked
+  permission: EventOf<"permission_request"> | null;
+  blockedReason: string | null;
+  // the oldest debt, when stalled
+  owes: Owed | null;
+  // the ticket of the open feature it owns, not approved and not dropped
+  ticket: string | null;
+  inTurn: boolean;
+}
+
 export interface Squad {
+  // in the order of SQUAD
+  agents: Agent[];
   // of the open feature: those of the current plan in its order, then the ones outside it
   tickets: SquadTicket[];
 }
@@ -434,9 +460,87 @@ export function squad(events: SquadEvent[], now: number): Squad {
 
   const plan = own.findLast((e) => e.kind === "plan");
   const planned = plan?.kind === "plan" ? plan.tickets : [];
+  const all = [...tickets(own).values()];
+  const open = asked.filter((q) => q.open);
+  const pending = gates(own).filter((g) => g.pending);
+  const ordered = bySeq(events);
+
+  const agents = SQUAD.map(({ name, role, short }): Agent => {
+    // In turn: among its turn_started and usage, the latest is a turn_started
+    const turn = ordered.findLast((e) => e.from === name && (e.kind === "turn_started" || e.kind === "usage"));
+    const inTurn = turn?.kind === "turn_started";
+
+    // A dropped ticket counts as concluded: it frees its owner and waits for no verdict
+    const live = all.filter((t) => !t.dropped);
+    const owned = live.filter((t) => t.owner === name && !t.approved).sort((a, b) => (a.taskSeq ?? 0) - (b.taskSeq ?? 0));
+    // What the rules of `waiting` and of `working` call a ticket in progress (AD-011)
+    const busy =
+      role === "worker"
+        ? owned.some((t) => t.last?.kind === "task")
+        : role === "judge"
+          ? live.some((t) => t.last?.kind === "result")
+          : role === "leader" && live.some((t) => t.planned && !t.approved);
+
+    const base = {
+      name,
+      role,
+      short,
+      since: null,
+      blockingQuestion: null,
+      permission: null,
+      blockedReason: null,
+      owes: null,
+      ticket: owned.at(-1)?.ticket_ref ?? null,
+      inTurn,
+    };
+
+    const here = online.get(name);
+    if (!here) return { ...base, status: "never" };
+    if (!here.online) return { ...base, status: "offline", since: here.since };
+
+    const block = declared.get(name);
+    const permission = permissions.find((p) => p.from === name);
+    if (block || permission) {
+      return {
+        ...base,
+        status: "blocked",
+        since: Math.min(block?.ts ?? Infinity, permission?.ts ?? Infinity),
+        permission: permission ?? null,
+        blockedReason: block?.reason ?? null,
+      };
+    }
+
+    const blocking = open.find((q) => q.blocking && q.asked_by === name);
+    if (blocking) return { ...base, status: "waiting", blockingQuestion: blocking.id };
+
+    // Who asked a question and who passed it on both sent a `question` of it
+    const sent = own.some(
+      (e) =>
+        e.from === name &&
+        ((e.kind === "question" && open.some((q) => q.id === e.question_id)) ||
+          (e.kind === "gate" && pending.some((g) => g.id === e.gate_id)))
+    );
+    if (sent && !busy) return { ...base, status: "waiting" };
+
+    const debts: Owed[] = [
+      ...owed(name, role, own, []),
+      ...open.filter((q) => q.holder === name).map((q) => ({ owes: "answer" as const, question_id: q.id, seq: q.last_seq })),
+    ].sort((a, b) => a.seq - b.seq);
+    const debt = debts[0];
+    if (debt && !inTurn) {
+      // Stalled since the turn ended, or since the debt came if it came after
+      const owedAt = own.find((e) => e.seq === debt.seq)?.ts ?? 0;
+      return { ...base, status: "stalled", owes: debt, since: Math.max(turn?.ts ?? 0, owedAt) };
+    }
+
+    if (busy || (role === "mother" && feature)) return { ...base, status: "working" };
+    if (plan && live.filter((t) => t.planned).every((t) => t.approved)) return { ...base, status: "done" };
+    return { ...base, status: "idle" };
+  });
 
   return {
-    tickets: [...tickets(own).values()].map((t) => ({
+    agents,
+    tickets: all.map((t) => ({
       ...t,
       status: ticketStatus(t, isBlocked(t.owner), asked),
       depends_on: planned.find((p) => p.ticket_ref === t.ticket_ref)?.depends_on ?? [],

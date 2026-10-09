@@ -274,11 +274,11 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Um caso por status e por papel que a regra cita
-- [ ] Um caso para cada par vizinho da precedência em que as duas regras valem, com o resultado da mais forte
-- [ ] Sem feature aberta só saem `never`, `offline`, `blocked` e `idle`
-- [ ] Em turno: o mais recente entre `turn_started` e `usage` do agente
-- [ ] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
+- [x] Um caso por status e por papel que a regra cita
+- [x] Um caso para cada par vizinho da precedência em que as duas regras valem, com o resultado da mais forte
+- [x] Sem feature aberta só saem `never`, `offline`, `blocked` e `idle`
+- [x] Em turno: o mais recente entre `turn_started` e `usage` do agente
+- [x] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
