@@ -174,11 +174,11 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `broker/tui/prices.json` tem dólares por milhão de tokens por modelo e tipo de token, tirados da referência da skill
-- [ ] `prices(env)` lê `SQUAD_PRICES` quando definida; arquivo ausente ou fora do formato lança com o caminho
-- [ ] `cost` soma por modelo e tipo; modelo fora da tabela custa zero
-- [ ] `readIntervalMs` devolve `SQUAD_POLL_INTERVAL_MS` quando é inteiro positivo e 1000 para ausente, vazio, `abc`, `0`, `-5` e `1.5`
-- [ ] Testes em `test/unit/tui-config.test.ts`; gate build passa
+- [x] `broker/tui/prices.json` tem dólares por milhão de tokens por modelo e tipo de token, tirados da referência da skill
+- [x] `prices(env)` lê `SQUAD_PRICES` quando definida; arquivo ausente ou fora do formato lança com o caminho
+- [x] `cost` soma por modelo e tipo; modelo fora da tabela custa zero
+- [x] `readIntervalMs` devolve `SQUAD_POLL_INTERVAL_MS` quando é inteiro positivo e 1000 para ausente, vazio, `abc`, `0`, `-5` e `1.5`
+- [x] Testes em `test/unit/tui-config.test.ts`; gate build passa
 
 **Tests**: unit
 **Gate**: build
