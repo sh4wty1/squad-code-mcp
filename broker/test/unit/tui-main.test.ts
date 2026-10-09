@@ -46,6 +46,20 @@ test("TUI-35: the status with its glyph, the role and the activity with the rewo
   expect(part(lines("28b")[11]!, 2, 26)).toBe("· worker-1  [não lançado]");
 });
 
+test("TUI-35: an open permission takes precedence over a declared block on the third line", () => {
+  const view = frameView("14", (events) => {
+    const request = events.find((e) => e.kind === "permission_request")!;
+    const block: SquadEvent = { ...request, kind: "blocked", seq: request.seq - 0.1, ts: request.ts - 1000,
+      to: null, reason: "missing credential", detail: "credential unavailable", last_action: "read configuration" };
+    return [...events.filter((e) => e.seq < request.seq), block, request];
+  });
+  const agent = view.squad.agents.find((a) => a.name === "worker-1")!;
+  expect(agent.status).toBe("blocked");
+  expect(agent.blockedReason).toBe("missing credential");
+  expect(agent.permission?.tool_name).toBe("Bash");
+  expect(part(main(view).text()[13]!, 4, 26)).toBe("x Bash · bun test src/…");
+});
+
 test("TUI-36: the title counts who is in the broker when someone never entered", () => {
   expect(part(lines("01")[2]!, 0, 27)).toBe("┌─ agentes · 6 ────────────┐");
   expect(part(lines("28b")[2]!, 0, 27)).toBe("┌─ agentes · 2/6 no ar ────┐");
