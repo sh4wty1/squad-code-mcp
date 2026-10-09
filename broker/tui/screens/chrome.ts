@@ -167,7 +167,7 @@ export function statusSegs(a: Agent): Seg[] {
   return [[`[${a.status === "never" ? "não lançado" : a.status}]`, STATUS[a.status][0], a.status === "blocked"]];
 }
 
-const KIND_TONE: Record<string, Color> = {
+export const KIND_TONE: Record<string, Color> = {
   task: "bblue",
   result: "white",
   verdict: "byellow",
@@ -184,4 +184,18 @@ export function kindTone(e: SquadEvent): Color {
   if (e.kind === "verdict") return e.outcome === "rework" ? "bred" : "bgreen";
   if (e.kind === "permission_decision") return e.behavior === "deny" ? "bred" : "bgreen";
   return KIND_TONE[e.kind] ?? "white";
+}
+
+// A line of a panel: its segments, or a separator across the panel
+export type Line = Seg[] | "SEP";
+
+// Draws the lines from (x, y) down to line maxY; a separator spans the box at sx, sw wide
+export function drawRows(g: Grid, x: number, y: number, maxY: number, lines: Line[], sx: number, sw: number, color: Color): number {
+  for (const line of lines) {
+    if (y > maxY) break;
+    if (line === "SEP") g.sep(sx, y, sw, color);
+    else g.segs(x, y, line);
+    y++;
+  }
+  return y;
 }

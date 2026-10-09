@@ -20,6 +20,12 @@ export interface FeedRow {
   lastTs?: number;
   // in the line of a feature_closed: the squad right before it closed
   squad?: Squad;
+  // in the line of a plan: its version in the feature
+  version?: number;
+  // in the line of who left or came back: the ticket it had open
+  ticket?: string;
+  // in the line of stalled: the debt
+  owes?: Owed;
 }
 
 // `w2` for worker-2, `hum` for the dev; the first three characters of any other name
@@ -86,22 +92,22 @@ export function feed(log: SquadEvent[]): FeedRow[] {
       own = [];
     } else if (e.kind === "plan") {
       const version = own.filter((x) => x.kind === "plan").length;
-      rows.push(row("plan", `▶ plano v${version} de ${label(e.from)} · ${e.tickets.filter((t) => !t.dropped).length} tickets`));
-    } else if (e.kind === "peer_joined") {
-      const ticket = [...tickets(own).values()].findLast((t) => t.owner === e.peer && !t.approved && !t.dropped);
-      rows.push(
-        row("joined", gone.has(e.peer) ? `● ${label(e.peer)} voltou${ticket ? " · retoma " + ticket.ticket_ref : ""}` : `● ${label(e.peer)} entrou`)
-      );
-    } else if (e.kind === "peer_left") {
-      gone.add(e.peer);
-      rows.push(row("left", `○ ${label(e.peer)} saiu · sessão ${e.reason === "died" ? "morta" : "encerrada"}`));
+      rows.push({ ...row("plan", `▶ plano v${version} de ${label(e.from)} · ${e.tickets.filter((t) => !t.dropped).length} tickets`), version });
+    } else if (e.kind === "peer_joined" || e.kind === "peer_left") {
+      const ticket = [...tickets(own).values()].findLast((t) => t.owner === e.peer && !t.approved && !t.dropped)?.ticket_ref;
+      if (e.kind === "peer_left") {
+        gone.add(e.peer);
+        rows.push({ ...row("left", `○ ${label(e.peer)} saiu · sessão ${e.reason === "died" ? "morta" : "encerrada"}`), ticket });
+      } else if (gone.has(e.peer)) {
+        rows.push({ ...row("joined", `● ${label(e.peer)} voltou${ticket ? " · retoma " + ticket : ""}`), ticket });
+      } else rows.push(row("joined", `● ${label(e.peer)} entrou`));
     } else if (e.kind === "question_merged") {
       rows.push(row("merged", `⟳ ${qid(e.question_id)} mesclada em ${qid(e.into)} pela mother`));
     } else if (e.kind === "usage") {
       // ponytail: O(usage × n), the derivation runs again for each end of turn; keep the
       // lines already computed by seq when the log passes a few thousand events
       const agent = squad(events.slice(0, i + 1), e.ts).agents.find((a) => a.name === e.from);
-      if (agent?.status === "stalled" && agent.owes) rows.push(row("stalled", `‖ ${agent.short} [stalled] deve ${debt(agent.owes)}`));
+      if (agent?.status === "stalled" && agent.owes) rows.push({ ...row("stalled", `‖ ${agent.short} [stalled] deve ${debt(agent.owes)}`), owes: agent.owes });
     }
   });
   return rows;

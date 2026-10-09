@@ -460,9 +460,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Mensagem: cabeçalho, corpo em 30 colunas cortado para caber, critérios do `verdict`, cinco últimas do ticket, loadout do `task`
-- [ ] Um bloco por tipo de linha de sistema: `blocked`, saída, volta, entrada, `stalled`, plano, recusa, abertura, encerramento, pedido de permissão
-- [ ] Testes em `test/unit/tui-detail.test.ts`; gate quick passa
+- [x] Mensagem: cabeçalho, corpo em 30 colunas cortado para caber, critérios do `verdict`, cinco últimas do ticket, loadout do `task`
+- [x] Um bloco por tipo de linha de sistema: `blocked`, saída, volta, entrada, `stalled`, plano, recusa, abertura, encerramento, pedido de permissão
+- [x] Testes em `test/unit/tui-detail.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

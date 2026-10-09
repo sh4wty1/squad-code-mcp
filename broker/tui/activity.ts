@@ -150,7 +150,8 @@ export function right(squad: Squad, rows: FeedRow[], ui: Pick<Ui, "toast" | "sel
   if (gate) return [[`⚠ ${gid(gate.id)} aguarda você`, "bmagenta"]];
   if (!squad.feature) return [[idle, "gray"]];
 
-  const ref = rows.find((row) => row.seq === ui.selected)?.event.ticket_ref;
+  const chosen = rows.find((row) => row.seq === ui.selected);
+  const ref = chosen?.ticket ?? chosen?.event.ticket_ref;
   const ticket = squad.tickets.find((t) => t.ticket_ref === ref);
   if (!ticket) return [["rework —", "gray"]];
   const n = ticket.reworks;

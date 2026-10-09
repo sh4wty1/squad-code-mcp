@@ -6,7 +6,8 @@ import { activity, refs } from "../activity.ts";
 import { debt, label, qid, type FeedRow, type SysKind } from "../feed.ts";
 import { age, clock, cut, grid, len, mmss, type Color, type Grid } from "../grid.ts";
 import type { View } from "../view.ts";
-import { chrome, kindTone, MAIN_KEYS, segLen, stats, STATUS, statusSegs, TICKET_TONE, tone } from "./chrome.ts";
+import { chrome, drawRows, kindTone, MAIN_KEYS, segLen, stats, STATUS, statusSegs, TICKET_TONE, tone } from "./chrome.ts";
+import { detailLines } from "./detail.ts";
 
 const ROLES = { mother: "objetivo", leader: "tech lead", worker: "worker", judge: "judge" };
 
@@ -218,6 +219,8 @@ export function main(view: View): Grid {
   agents(g, view, frame(0));
   tickets(g, view, frame(0));
   feedPanel(g, view, frame(1));
+  g.box(86, 2, 34, 36, frame(2), "detalhe", "bwhite");
+  drawRows(g, 88, 3, 36, detailLines(view, view.rows.find((row) => row.seq === view.ui.selected)), 86, 34, frame(2));
   stats(g, view);
   return g;
 }
