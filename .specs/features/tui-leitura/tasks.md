@@ -377,10 +377,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Uma asserção por linha da tabela de atividade
-- [ ] Selos: forma longa com um, curta com mais de um, na ordem do design
-- [ ] Lado direito: uma asserção por item da lista, na ordem de prioridade
-- [ ] Testes em `test/unit/tui-activity.test.ts`; gate quick passa
+- [x] Uma asserção por linha da tabela de atividade
+- [x] Selos: forma longa com um, curta com mais de um, na ordem do design
+- [x] Lado direito: uma asserção por item da lista, na ordem de prioridade
+- [x] Testes em `test/unit/tui-activity.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
