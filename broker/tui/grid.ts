@@ -88,7 +88,7 @@ export function grid(w = 120, h = 40) {
     for (const ch of s) {
       if (x >= 0 && x < w) {
         const cell = rows[y]![x]!;
-        cell.ch = ch;
+        cell.ch = /[\x00-\x1f\x7f-\x9f]/u.test(ch) ? " " : ch;
         cell.fg = fg;
         if ("bg" in o) cell.bg = o.bg ?? null;
         cell.bold = !!o.bold;

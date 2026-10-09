@@ -1,4 +1,11 @@
 import { expect, test } from "bun:test";
+import { paint } from "../../tui/ansi.ts";
+import { squad } from "../../shared/derive.ts";
+import { feed } from "../../tui/feed.ts";
+import { START } from "../../tui/keys.ts";
+import { main } from "../../tui/screens/main.ts";
+import { PRICES } from "../frames/logs.ts";
+import { setup } from "./helpers.ts";
 import { age, clock, cut, grid, len, mmss, pad, wrap } from "../../tui/grid.ts";
 
 test("TUI-19: the grid is 120 by 40 cells of character, color, background and bold", () => {
@@ -117,4 +124,22 @@ test("TUI-19: age and mmss format seconds as the prototype does", () => {
 test("TUI-19: clock is the local time as HH:MM:SS", () => {
   expect(clock(new Date(2026, 9, 7, 14, 5, 9).getTime())).toBe("14:05:09");
   expect(clock(new Date(2026, 9, 7, 0, 0, 0).getTime())).toBe("00:00:00");
+});
+
+test("F4 / TUI-19: controls never become cells, including a title accepted by the broker", () => {
+  const b = setup();
+  try {
+    b.openFeature({ title: "first\nsecond" });
+    const events = b.log.after(0);
+    const g = main({ squad: squad(events, b.clock.now), rows: feed(events), ui: START, project: null, down: null, prices: PRICES });
+    expect(g.text()[0]).toContain("first second");
+    expect(paint(g, null, new Map())).not.toContain("\n");
+    expect(g.rows.flat().every((cell) => !/[\x00-\x1f\x7f-\x9f]/u.test(cell.ch))).toBe(true);
+  } finally {
+    b.db.close();
+  }
+  const controls = Array.from({ length: 160 }, (_, n) => String.fromCodePoint(n)).filter((c) => /[\x00-\x1f\x7f-\x9f]/u.test(c)).join("");
+  const g = grid(controls.length + 2, 1);
+  expect(g.put(0, 0, "a" + controls + "b")).toBe(controls.length + 2);
+  expect(g.rows[0]!.map((c) => c.ch).join("")).toBe("a" + " ".repeat(controls.length) + "b");
 });
