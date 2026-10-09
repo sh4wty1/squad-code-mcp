@@ -636,11 +636,11 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Uma asserção por tecla de TUI-62, incluindo as setas como sequência de escape crua e `shift+tab`
-- [ ] `g`, `x`, `4` e `enter` sobre pergunta aberta com holder `human` dão o aviso da fatia certa por 4 s e não trocam de tela
-- [ ] `t` alterna com feature aberta e avisa sem ela; `b` vai à bloqueante ou avisa `nenhuma bloqueante`
-- [ ] Seleção mantida quando chegam linhas novas; `p` congela as linhas e a seleção
-- [ ] Testes em `test/unit/tui-keys.test.ts`; gate quick passa
+- [x] Uma asserção por tecla de TUI-62, incluindo as setas como sequência de escape crua e `shift+tab`
+- [x] `g`, `x`, `4` e `enter` sobre pergunta aberta com holder `human` dão o aviso da fatia certa por 4 s e não trocam de tela
+- [x] `t` alterna com feature aberta e avisa sem ela; `b` vai à bloqueante ou avisa `nenhuma bloqueante`
+- [x] Seleção mantida quando chegam linhas novas; `p` congela as linhas e a seleção
+- [x] Testes em `test/unit/tui-keys.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
