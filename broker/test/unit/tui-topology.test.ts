@@ -137,3 +137,13 @@ test("TUI-45: each part of the panel says so when it has nothing", () => {
   expect(edges("29b", 3, 5)).toEqual(["última aresta", "○ ldr → mot  [result]", "  feature · 14:45:41"]);
   expect(edges("26a", 3, 15).at(-1)).toBe("nenhum ticket ainda");
 });
+
+test("TUI-45: a question still held by the leader is absent from the dev node and open questions panel", () => {
+  const view = frameView("02", (events) => events.filter((e) => e.seq <= 420));
+  expect(view.squad.questions.filter((q) => q.open).map((q) => [q.id, q.holder])).toEqual([[7, "leader"]]);
+  const lines = topology(view).text();
+  expect(part(lines[4]!, 33, 52)).toBe("dev       via mother");
+  const panel = lines.map((line) => part(line, 88, 117));
+  expect(panel).toContain("perguntas abertas · 0");
+  expect(panel.some((line) => line.startsWith("Q-07"))).toBe(false);
+});
