@@ -8,17 +8,21 @@
 
 Corroborated across multiple features. Safe to apply as guidance.
 
-_none_
+### L-001 - When an AC fixes the order of two steps, test a scenario whose result differs if the steps are swapped
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker-rules` · harmful: 0
+- features: peer, tui-leitura
+- evidence: P7 broker/peers.ts:117 (PEER-09) (broker-rules) (+2 more)
+- last seen: 2026-10-09T17:54:51Z
+
+### L-020 - Assert a spec-defined limit with the literal value from the spec, not with the constant imported from the code under test
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker tests` · harmful: 0
+- features: peer, tui-leitura
+- evidence: mutant P11 broker/peers.ts:79 (PEER-14, PEER-42, PEER-43 60 s) (broker tests) (+1 more)
+- last seen: 2026-10-09T17:54:51Z
 
 ## Candidates (under observation - do NOT load as guidance yet)
 
 Seen once or not yet corroborated. Tracked, not trusted.
-
-### L-001 - When an AC fixes the order of two steps, test a scenario whose result differs if the steps are swapped
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker-rules` · harmful: 0
-- features: peer
-- evidence: P7 broker/peers.ts:117 (PEER-09) (broker-rules) (+1 more)
-- last seen: 2026-10-07T19:35:33Z
 
 ### L-002 - Assert the listen address of a server on the real socket, not on a URL helper
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `routes` · harmful: 0
@@ -128,12 +132,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: mutant P13 broker/peers.ts:190 (PEER-16 listing vs heartbeat rule) (broker-rules)
 - last seen: 2026-10-07T22:57:31Z
 
-### L-020 - Assert a spec-defined limit with the literal value from the spec, not with the constant imported from the code under test
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
-- features: peer
-- evidence: mutant P11 broker/peers.ts:79 (PEER-14, PEER-42, PEER-43 60 s) (broker tests)
-- last seen: 2026-10-07T22:57:31Z
-
 ### L-021 - Assert that a client makes no call with a fake server that counts requests, not with the state a real server leaves
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
 - features: event
@@ -229,6 +227,60 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: event
 - evidence: EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)
 - last seen: 2026-10-08T04:58:15Z
+
+### L-037 - When a setting or a kept state is unit-tested in a pure function, also assert through the loop that wires it that a non-default value reaches the function
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
+- features: tui-leitura
+- evidence: T13 and T17 broker/tui.ts:93, L29 broker/tui.ts:116 (TUI-61, TUI-56, TUI-58) (tui)
+- last seen: 2026-10-09T17:54:51Z
+
+### L-038 - Give every settled assumption of the spec that changes an outcome its own test case, not only the ACs
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `spec tests` · harmful: 0
+- features: tui-leitura
+- evidence: D17 broker/shared/derive.ts:584, D19 broker/shared/derive.ts:527 (spec tests)
+- last seen: 2026-10-09T17:54:51Z
+
+### L-039 - When code picks or filters by a condition an AC names, test with an item that fails the condition, not only with items that pass it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
+- features: tui-leitura
+- evidence: X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui)
+- last seen: 2026-10-09T17:54:51Z
+
+### L-040 - Test a count limit or a rounding rule at its boundary value, not only well past it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
+- features: tui-leitura
+- evidence: L08 broker/tui/screens/main.ts:77, S23 broker/tui/screens/chrome.ts:127 (tui)
+- last seen: 2026-10-09T17:54:51Z
+
+### L-041 - Test a validated collection with one valid and one invalid entry, not only with a single invalid entry
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `config` · harmful: 0
+- features: tui-leitura
+- evidence: C03 broker/tui/config.ts:31 (TUI-57) (config)
+- last seen: 2026-10-09T17:54:51Z
+
+### L-042 - Keep the decision of an exit code in an exported pure function so that it is tested without a terminal
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `cli` · harmful: 0
+- features: tui-leitura
+- evidence: TUI-59 broker/tui/probe.ts:66 (P01) (cli)
+- last seen: 2026-10-09T17:54:51Z
+
+### L-043 - When an event doubles as a marker and may be sent again, state in the AC what a resend produces
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: tui-leitura
+- evidence: TUI-25 broker/tui/feed.ts:106 (spec)
+- last seen: 2026-10-09T17:54:52Z
+
+### L-044 - State for each note of a list item which statuses of the item it applies to
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: tui-leitura
+- evidence: TUI-37 broker/tui/screens/main.ts:98 (L06) (spec)
+- last seen: 2026-10-09T17:54:52Z
+
+### L-045 - When a slice keeps a screen of the full design, state what each line that names a key of a later slice shows
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: tui-leitura
+- evidence: TUI-49 broker/tui/screens/help.ts:70 (spec)
+- last seen: 2026-10-09T17:54:52Z
 
 ## Quarantined (failed when applied - ignore)
 

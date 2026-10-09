@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 37,
+  "next_id": 46,
   "lessons": [
     {
       "id": "L-001",
@@ -11,18 +11,20 @@
       "text": "When an AC fixes the order of two steps, test a scenario whose result differs if the steps are swapped",
       "signal": "surviving_mutant",
       "scope": "broker-rules",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "peer"
+        "peer",
+        "tui-leitura"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
         "P7 broker/peers.ts:117 (PEER-09) (broker-rules)",
-        "mutant M11 broker/peers.ts:110 (cleanup order vs input refusals) (broker-rules)"
+        "mutant M11 broker/peers.ts:110 (cleanup order vs input refusals) (broker-rules)",
+        "S14 broker/tui/screens/main.ts:47 (TUI-35) (broker-rules)"
       ],
       "created": "2026-10-07T18:54:22Z",
-      "last_seen": "2026-10-07T19:35:33Z"
+      "last_seen": "2026-10-09T17:54:51Z"
     },
     {
       "id": "L-002",
@@ -359,17 +361,19 @@
       "text": "Assert a spec-defined limit with the literal value from the spec, not with the constant imported from the code under test",
       "signal": "surviving_mutant",
       "scope": "broker tests",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "peer"
+        "peer",
+        "tui-leitura"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "mutant P11 broker/peers.ts:79 (PEER-14, PEER-42, PEER-43 60 s) (broker tests)"
+        "mutant P11 broker/peers.ts:79 (PEER-14, PEER-42, PEER-43 60 s) (broker tests)",
+        "A06 broker/tui/ansi.ts:30, A07 broker/tui/ansi.ts:29 (TUI-60) (broker tests)"
       ],
       "created": "2026-10-07T22:57:31Z",
-      "last_seen": "2026-10-07T22:57:31Z"
+      "last_seen": "2026-10-09T17:54:51Z"
     },
     {
       "id": "L-021",
@@ -659,6 +663,168 @@
       ],
       "created": "2026-10-08T04:58:15Z",
       "last_seen": "2026-10-08T04:58:15Z"
+    },
+    {
+      "id": "L-037",
+      "key": "surviving_mutant::when a setting or a kept state is unit tested in a pure function also assert through the loop that wires it that a non default value reaches the function",
+      "text": "When a setting or a kept state is unit-tested in a pure function, also assert through the loop that wires it that a non-default value reaches the function",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "T13 and T17 broker/tui.ts:93, L29 broker/tui.ts:116 (TUI-61, TUI-56, TUI-58) (tui)"
+      ],
+      "created": "2026-10-09T17:54:51Z",
+      "last_seen": "2026-10-09T17:54:51Z"
+    },
+    {
+      "id": "L-038",
+      "key": "surviving_mutant::give every settled assumption of the spec that changes an outcome its own test case not only the acs",
+      "text": "Give every settled assumption of the spec that changes an outcome its own test case, not only the ACs",
+      "signal": "surviving_mutant",
+      "scope": "spec tests",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "D17 broker/shared/derive.ts:584, D19 broker/shared/derive.ts:527 (spec tests)"
+      ],
+      "created": "2026-10-09T17:54:51Z",
+      "last_seen": "2026-10-09T17:54:51Z"
+    },
+    {
+      "id": "L-039",
+      "key": "surviving_mutant::when code picks or filters by a condition an ac names test with an item that fails the condition not only with items that pass it",
+      "text": "When code picks or filters by a condition an AC names, test with an item that fails the condition, not only with items that pass it",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui)"
+      ],
+      "created": "2026-10-09T17:54:51Z",
+      "last_seen": "2026-10-09T17:54:51Z"
+    },
+    {
+      "id": "L-040",
+      "key": "surviving_mutant::test a count limit or a rounding rule at its boundary value not only well past it",
+      "text": "Test a count limit or a rounding rule at its boundary value, not only well past it",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "L08 broker/tui/screens/main.ts:77, S23 broker/tui/screens/chrome.ts:127 (tui)"
+      ],
+      "created": "2026-10-09T17:54:51Z",
+      "last_seen": "2026-10-09T17:54:51Z"
+    },
+    {
+      "id": "L-041",
+      "key": "surviving_mutant::test a validated collection with one valid and one invalid entry not only with a single invalid entry",
+      "text": "Test a validated collection with one valid and one invalid entry, not only with a single invalid entry",
+      "signal": "surviving_mutant",
+      "scope": "config",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C03 broker/tui/config.ts:31 (TUI-57) (config)"
+      ],
+      "created": "2026-10-09T17:54:51Z",
+      "last_seen": "2026-10-09T17:54:51Z"
+    },
+    {
+      "id": "L-042",
+      "key": "ac_gap::keep the decision of an exit code in an exported pure function so that it is tested without a terminal",
+      "text": "Keep the decision of an exit code in an exported pure function so that it is tested without a terminal",
+      "signal": "ac_gap",
+      "scope": "cli",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "TUI-59 broker/tui/probe.ts:66 (P01) (cli)"
+      ],
+      "created": "2026-10-09T17:54:51Z",
+      "last_seen": "2026-10-09T17:54:51Z"
+    },
+    {
+      "id": "L-043",
+      "key": "spec_precision_gap::when an event doubles as a marker and may be sent again state in the ac what a resend produces",
+      "text": "When an event doubles as a marker and may be sent again, state in the AC what a resend produces",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "TUI-25 broker/tui/feed.ts:106 (spec)"
+      ],
+      "created": "2026-10-09T17:54:52Z",
+      "last_seen": "2026-10-09T17:54:52Z"
+    },
+    {
+      "id": "L-044",
+      "key": "spec_precision_gap::state for each note of a list item which statuses of the item it applies to",
+      "text": "State for each note of a list item which statuses of the item it applies to",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "TUI-37 broker/tui/screens/main.ts:98 (L06) (spec)"
+      ],
+      "created": "2026-10-09T17:54:52Z",
+      "last_seen": "2026-10-09T17:54:52Z"
+    },
+    {
+      "id": "L-045",
+      "key": "spec_precision_gap::when a slice keeps a screen of the full design state what each line that names a key of a later slice shows",
+      "text": "When a slice keeps a screen of the full design, state what each line that names a key of a later slice shows",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "TUI-49 broker/tui/screens/help.ts:70 (spec)"
+      ],
+      "created": "2026-10-09T17:54:52Z",
+      "last_seen": "2026-10-09T17:54:52Z"
     }
   ]
 }

@@ -94,57 +94,51 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-08, depois do merge. A fatia Feature está na `main` pelo PR 4 (https://github.com/sh4wty1/squad-code-mcp/pull/4), merge `4b59c12`.
+Escrito em 2026-10-09, com a fatia TUI leitura implementada e reprovada pelo Verifier. O branch está no GitHub; não há PR.
 
-- **Feature**: fatia Feature, `.specs/features/feature/`
-- **Phase / Task**: concluída e mesclada. T1 a T31, de `c76e70b` a `ae14f01`, mais `47af274`, da revisão do `/the-judge`.
-- **Completed**: FEAT-01 a FEAT-33, todos verificados.
+- **Feature**: fatia TUI leitura, `.specs/features/tui-leitura/`
+- **Phase / Task**: Execute. T1 a T30 commitadas (`4657be1` a `1f377d5`). O Verifier deu FAIL na primeira rodada.
+- **Completed**: T1 a T30. Nenhum requisito está `Verified`.
 - **In-progress** (file:line): nada
-- **Next step**: abrir a fatia TUI leitura. Os frames que ela pede estão todos no handoff.
-- **Blockers**: nenhum
+- **Next step**: fechar as lacunas de `.specs/features/tui-leitura/validation.md` (seção de gaps) e rodar o Verifier de novo. Só depois: marcar a fatia em `ROADMAP.md`, atualizar a rastreabilidade da spec e abrir o PR.
+- **Blockers**: veredito FAIL. `validate_state.py tui-leitura` sai com 1.
 - **Uncommitted files**: none
-- **Branch**: `main` em `4b59c12`. `feat/feature` foi mesclado.
+- **Branch**: `feat/tui-leitura`
 
-### Como a verificação ficou
+### O que o Verifier achou
 
-Relatório em `.specs/features/feature/validation.md`, verificado em `ae14f01`, PASS. Ele é anterior à revisão do PR e não foi refeito.
+Relatório em `.specs/features/tui-leitura/validation.md`, sobre `main..1f377d5`. Nenhum comportamento contradiz a spec; o FAIL é dos testes.
 
-- 33 de 33 ACs e os 10 edge cases com evidência `file:line` e valor igual ao da spec.
-- 57 mutações, 55 mortas no relatório. As duas sobreviventes, em `features()` de `broker/shared/derive.ts` (a ordenação final por `id` e o `feature_closed` fechando a feature do seu `feature_id`), deixaram de sobreviver: `47af274` acrescentou a `broker/test/unit/derive.test.ts` um caso com log que o broker não escreve (`id` menor aberto depois), e as duas mutações, reaplicadas sobre a `main`, fazem esse caso falhar. O relatório ainda as lista como equivalentes.
-- `47af274` também renomeou em `broker/log.ts` o parâmetro de `transaction` que sombreava `write`. Sem mudança de comportamento.
-- Auditoria da migração dos testes: mesma contagem por arquivo, nenhum teste apagado, pulado ou afrouxado.
-- Lacunas não bloqueantes anotadas no relatório: o edge case de `/open-feature` com feature aberta só é exercitado com o `leader`, não com um worker; FEAT-09 "por qualquer conexão" é provado com SQL cru e arquivo reaberto, não com duas conexões simultâneas.
-- Nenhuma lição nova.
-
-### O que a fatia TUI leitura precisa saber
-
-- A segunda rodada de frames já está no handoff: `docs/claude-design-handoff/Handoff-Design.zip` (`1d1ae45`) tem os frames 22 a 25, com o modal de permissão, o agente `stalled`, a mensagem sem reação, os tickets `planned` e `dropped` e a linha de `refused` com contador. O pedido que os gerou é `PROMPT-estados-faltantes-2.md`.
-- A terceira rodada também: os frames 09a, 09b, 11 e 26 a 30 cobrem o que a fatia Feature criou (a linha 0 dependente do estado, a linha de sistema de `feature_opened`, a feature `abandoned`, o broker sem nenhuma feature no log, o squad sem feature com um agente `blocked` ou `offline`, e os tokens da feature e da sessão). O pedido é `PROMPT-estados-faltantes-3.md`.
-- O Claude Design decidiu coisas que a spec não tem, listadas em `docs/claude-design-handoff/DECISOES-rodada-3.md`. As que tocam a derivação: o rótulo `[não lançado]` para o nome que nunca entrou, a tecla `t` que alterna os tokens entre feature e sessão, e a linha 0 sem o nome do projeto. A spec da TUI leitura precisa adotar ou cortar cada uma.
-- `features(events)` em `broker/shared/derive.ts` devolve as linhas de `features` sem `project`, a partir de `GET /events`. `project` não está em nenhum evento: a TUI que quiser o nome do projeto não o tem pelo log.
-- `feature_opened` e `feature_closed` têm `to` `*` e uma entrega para cada um dos cinco nomes que não são `mother`, com sessão ou não. Um nome nunca lançado acumula duas entregas por feature.
-- Encerrar não grava nada além do `feature_closed`: um `blocked` aberto continua aberto e as entregas pendentes continuam pendentes.
-- `/close-feature` ainda não confere gate (`gate_required` entra com a fatia Gate).
-- O comentário sobre a tabela `features` em `broker/db.ts` ainda diz que a fatia Feature é quem a preenche; ficou desatualizado.
-- Brecha conhecida da Event, ainda aberta: ticket descartado que nunca recebeu `task` pode sumir de um `plan` e voltar no seguinte.
-- `SQUAD_POLL_INTERVAL_MS` não numérica vira `NaN` em `broker/shared/config.ts`; ninguém tratou.
+- 56 de 64 ACs com evidência que bate com a spec; 9 de 9 edge cases.
+- 210 mutações, 186 mortas, 24 sobreviventes, 18 delas não equivalentes: TUI-60, TUI-61, TUI-56, TUI-40, TUI-45, TUI-10, TUI-16, TUI-35, TUI-57, TUI-37, TUI-41, TUI-62, mais TUI-59 e TUI-58, que estão dentro de limites já declarados.
+- Um log de teste dobrado: `broker/test/frames/logs.ts:263` tem um `refused` de `worker_busy` com `peer: worker-1`, e o broker o grava para o leader (`send.ts:116`). Falta trocar pelo evento legítimo e declarar o desvio D1 no frame 25a.
+- Quatro lacunas de precisão da spec, ainda sem decisão do dev: um `usage` reenviado desenha a linha de `stalled` duas vezes (TUI-25); `◌ parado` em ticket `done`, `planned` ou `dropped` (TUI-37); a legenda mantém `g`, `x`, `enter responder` e "a TUI escreve três coisas" (TUI-49); o prazo `? m:ss` depois de vencido.
+- Os 41 frames são idênticos byte a byte a uma nova extração do zip. Os 16 desvios de status são exatamente a tabela do `design.md`, cada um com a linha do design.
 
 ### Ambiente
 
-- O `bun` do `PATH` é o 1.3.14 (WinGet). O 1.4.2 de `~/.bun/bin` não existe mais. A fatia Feature rodou inteira no 1.3.14.
-- De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. No Windows, na `main` em `4b59c12`: 540 testes, 537 passam, 3 pulados, uns 45 s. Só `test/unit`: 404 testes, 403 passam, 1 pulado.
-- `bun x tsc` baixa um `tsc` 7 em vez de usar o TypeScript 5.9.3 instalado, e ele acusa centenas de erros de tipo global. `broker/CLAUDE.md` ainda mostra `bun x tsc --noEmit`.
-- Teste instável: `EVT-43: /ack confirms...` em `broker/test/integration/routes.test.ts` compara `Date.now()` do teste com o relógio do processo do broker e falha de vez em quando por poucos ms. Rodar de novo.
-- `broker/test/integration/server.test.ts` (`PEER-34`) copia uma lista fixa de fontes: módulo novo importado pelo `broker.ts` ou pelo `server.ts` tem de entrar nela.
-- Os testes de integração sobem processos reais, sempre com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Nunca subir `broker.ts` ou `server.ts` à mão sem os dois: ele cria `~/.squad-code-mcp.db` e `~/.squad-code-mcp.token`.
-- No bun, `await expect(promessa).rejects...` trava o laço de eventos nos testes de integração.
-- No Git Bash desta máquina, um heredoc pode trocar `\\` por `\` ao gravar um arquivo.
+- De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. Windows, bun 1.3.14, em `1f377d5`: 893 testes, 890 passam, 3 pulados, uns 60 s. Nunca `bun x tsc`.
+- Linux, em `1f377d5`: 893 passam, 0 falham, 0 pulados, no contêiner `oven/bun:1.3.14` com `git`, `lsof` e `procps` instalados por `apt-get` e a suíte rodada num clone do branch. Sem `lsof` e `ps`, `PEER-34`, `PEER-35` e `PEER-45` falham, na `main` também: a imagem não os traz.
+- A TUI roda com `bun tui.ts`; a sonda de glifos com `bun tui/probe.ts`. No Windows Terminal 1.24.11911.0 os 43 glifos contam uma célula.
+- Teste instável: `EVT-43` em `broker/test/integration/routes.test.ts` falha de vez em quando por 1 ms. Sob carga a suíte de integração já estourou tempo uma vez e passou na repetição.
+- Os testes de integração sobem processos reais, sempre com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Nunca subir `broker.ts` ou `server.ts` à mão sem os dois.
+- No bun, `await expect(promessa).rejects...` trava o laço de eventos nos testes de integração, e um `fetch` falso que escuta `AbortSignal.timeout` trava o `bun test`.
+- No Git Bash desta máquina, crase dentro de heredoc quebra o comando, e um heredoc pode trocar `\` por `\`.
 - Python é `py -3`; `python3` não está instalado.
 - Mensagens de commit seguem a convenção do repositório (frase imperativa em minúsculas), não Conventional Commits.
 
+### Pendências que a fatia deixa
+
+- `cost()` casa o nome do modelo exato: um `usage.model` com sufixo de data ou `[1m]` custa zero sem aviso. É da fatia Papéis, que entrega o hook.
+- `/escalate`, na fatia Question, precisa copiar `timeout_s` para o `question` que chega ao dev; senão o prazo cai em 240 s.
+- Nenhuma tecla limpa a seleção do feed: depois de selecionar uma linha, o resumo da última feature (TUI-40) não volta.
+- A tela de broker desconectado diz "a cada 1s" qualquer que seja `SQUAD_POLL_INTERVAL_MS`.
+- Da Event, ainda aberta: ticket descartado que nunca recebeu `task` pode sumir de um `plan` e voltar no seguinte; `SQUAD_POLL_INTERVAL_MS` não numérica vira `NaN` em `broker/shared/config.ts` (a TUI trata o próprio uso).
+- O relatório da Peer (`.specs/features/peer/validation.md`) termina em FAIL na rodada 6, por mutantes sobreviventes; não foi conferido se foram fechados depois.
+
 ### Não verificado
 
-- Linux: nem a suíte da Event nem a da Feature rodaram lá. O WSL Debian desta máquina não tem bun.
-- Sessão real do Claude Code: abertura e encerramento de feature, push de evento e veredito de permissão só foram vistos por cliente MCP de teste.
-- O intervalo padrão de 1 s é testado por tempo de relógio.
-- Da Peer, continuam sem verificar: macOS e a sobrevivência do broker ao fechamento de uma janela de terminal real.
+- Terminal interativo real: a TUI só foi vista subindo e ficando de pé por 7 s no Windows Terminal, sem broker. Ninguém olhou a tela nem apertou tecla.
+- `SIGINT`, `SIGTERM` e erro não tratado reais; o intervalo padrão de 1 s por relógio.
+- Sessão real do Claude Code alimentando a tela, e eventos de `question`, `answer` e `gate` gravados pelo broker.
+- macOS.
