@@ -325,11 +325,11 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-57 | P1: Rodar no terminal | Specify | Implementing |
 | TUI-58 | P1: Rodar no terminal | Specify | Implementing |
 | TUI-59 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-60 | P1: Rodar no terminal | Specify | Pending |
+| TUI-60 | P1: Rodar no terminal | Specify | Implementing |
 | TUI-61 | P1: Rodar no terminal | Specify | Implementing |
 | TUI-62 | P1: Rodar no terminal | Specify | Implementing |
 | TUI-63 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-64 | P1: Rodar no terminal | Specify | Pending |
+| TUI-64 | P1: Rodar no terminal | Specify | Implementing |
 
 **Coverage:** 64 total, 0 mapped to tasks, 64 unmapped.
 

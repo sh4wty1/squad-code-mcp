@@ -25,6 +25,12 @@ const FG: Record<Color, number> = {
   bwhite: 97,
 };
 
+// Into the alternate screen with the cursor hidden, and back out of both
+export const ENTER = "\x1b[?1049h\x1b[?25l";
+export const LEAVE = "\x1b[?25h\x1b[?1049l";
+// Erases the screen, before a drawing that does not start from the one before
+export const CLEAR = "\x1b[2J";
+
 function line(row: Cell[], glyphs: Map<string, string>): string {
   let out = "";
   let last = "";

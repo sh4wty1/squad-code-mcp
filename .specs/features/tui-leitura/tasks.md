@@ -657,13 +657,13 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] O laço é uma função com `fetch`, relógio, tamanho do terminal, entrada e saída injetados; o processo só a liga ao terminal real
-- [ ] Configuração inválida sai com 1 antes de entrar na tela alternativa
-- [ ] Entra e sai da tela alternativa, do cursor escondido e do modo cru em `q`, `ctrl+c`, `SIGTERM` e erro não tratado
-- [ ] Terminal menor que 120×40 desenha a tela pequena e volta quando cresce; redimensionar redesenha inteiro
-- [ ] O projeto vem do diretório de lançamento; fora de repositório, `null`
-- [ ] Teste de integração em `test/integration/tui.test.ts`: broker real com banco temporário, uma feature aberta pela rota, e o laço com saída capturada mostra o título da feature
-- [ ] Gate full passa
+- [x] O laço é uma função com `fetch`, relógio, tamanho do terminal, entrada e saída injetados; o processo só a liga ao terminal real
+- [x] Configuração inválida sai com 1 antes de entrar na tela alternativa
+- [x] Entra e sai da tela alternativa, do cursor escondido e do modo cru em `q`, `ctrl+c`, `SIGTERM` e erro não tratado
+- [x] Terminal menor que 120×40 desenha a tela pequena e volta quando cresce; redimensionar redesenha inteiro
+- [x] O projeto vem do diretório de lançamento; fora de repositório, `null`
+- [x] Teste de integração em `test/integration/tui.test.ts`: broker real com banco temporário, uma feature aberta pela rota, e o laço com saída capturada mostra o título da feature
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full
