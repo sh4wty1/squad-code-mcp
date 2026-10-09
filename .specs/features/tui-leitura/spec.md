@@ -296,7 +296,7 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-40 | P1: Feed e tela principal | Specify | Pending |
 | TUI-41 | P1: Feed e tela principal | Specify | Pending |
 | TUI-42 | P1: Feed e tela principal | Specify | Pending |
-| TUI-43 | P1: Feed e tela principal | Specify | Pending |
+| TUI-43 | P1: Feed e tela principal | Specify | Implementing |
 | TUI-44 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |
 | TUI-45 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |
 | TUI-46 | P1: Topologia, thread, legenda e estados da tela | Specify | Pending |

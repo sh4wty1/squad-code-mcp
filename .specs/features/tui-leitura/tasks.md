@@ -111,9 +111,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `broker/test/frames/` tem um `.txt` para cada frame de leitura listado na spec
-- [ ] `bun test/frames/extract.ts <html> <dir>` reproduz os mesmos arquivos
-- [ ] Gate build passa
+- [x] `broker/test/frames/` tem um `.txt` para cada frame de leitura listado na spec
+- [x] `bun test/frames/extract.ts <html> <dir>` reproduz os mesmos arquivos
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build
