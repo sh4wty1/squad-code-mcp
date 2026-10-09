@@ -94,7 +94,7 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-09, com a fatia TUI leitura no PR e sem PASS do Verifier.
+Escrito em 2026-10-09, com a fatia TUI leitura no PR 8 (https://github.com/sh4wty1/squad-code-mcp/pull/8) e sem PASS do Verifier.
 
 - **Feature**: fatia TUI leitura, `.specs/features/tui-leitura/`
 - **Phase / Task**: Execute. T1 a T30 commitadas (`4657be1` a `1f377d5`), mais duas rodadas de correção (`d2c21a1` a `fb41991`, feita no Codex, e `d013585`).
