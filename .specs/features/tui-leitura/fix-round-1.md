@@ -182,3 +182,125 @@ O Verifier roda de novo sobre `main..HEAD`, do zero, com o mesmo checklist. Com 
 `validate_state.py tui-leitura` sai com 0, a rastreabilidade da spec vai a `Verified`, a
 fatia é marcada em `ROADMAP.md` e o PR é aberto. A skill limita o ciclo correção → nova
 verificação a três rodadas antes de escalar ao dev.
+
+## Prompt do Verifier
+
+O mesmo prompt da primeira rodada, com o que muda na segunda marcado no fim desta seção.
+Rode numa sessão nova, que não tenha escrito nem corrigido o código.
+
+```text
+You are the independent Verifier for the feature "TUI leitura" in this repository (branch
+feat/tui-leitura, checked out). You did not write this code. Your job is to decide PASS or
+FAIL with evidence, write the report, and return a compact verdict. You do NOT write, modify
+or fix any code or test in the real working tree, and you do not spawn sub-agents.
+
+Your operating checklist is .claude/skills/tlc-spec-driven/references/validate.md: read it
+completely first and follow it (spec-anchored outcome check, evidence-or-zero,
+payload/conjunction rule, discrimination sensor, report template, lessons distillation).
+Also read .claude/skills/tlc-spec-driven/references/lessons.md for the lessons step.
+
+This is round 2. Round 1 ended in FAIL: .specs/features/tui-leitura/validation.md is its
+report and .specs/features/tui-leitura/fix-round-1.md lists the gaps the implementer was
+asked to close. Re-derive everything from scratch; do not trust the round 1 report or the
+implementer's summary. Then, in addition, re-apply each round 1 survivor that was not
+equivalent (A06, A07, T13, T17, L29, X02, X11, L16, S14, D17, D19, S23, L08, C03, L28, P01,
+L06, L22) and confirm it is now killed, and check that no test was weakened, skipped or
+deleted since 1f377d5 (git diff 1f377d5..HEAD -- broker/test).
+
+Inputs:
+- Spec (source of truth, in Portuguese): .specs/features/tui-leitura/spec.md: 64 ACs TUI-01
+  to TUI-64, the Edge Cases, and the Assumptions table, which is part of the spec (it defines
+  many expected outcomes and what was cut).
+- Design: .specs/features/tui-leitura/design.md; tasks: .specs/features/tui-leitura/tasks.md.
+- Decisions: .specs/STATE.md AD-008 to AD-011.
+- Diff surface: git diff main...feat/tui-leitura. Code: broker/shared/derive.ts (new
+  functions; tickets, owed, features pre-existed), broker/tui/**, broker/tui.ts. Tests:
+  broker/test/unit/derive-squad.test.ts, broker/test/unit/tui-*.test.ts,
+  broker/test/integration/tui.test.ts, and the frame support in broker/test/frames/ (*.txt are
+  the untouched extraction of the design prototype's frames; logs.ts, view.ts, deviations.ts
+  are test support).
+
+Things specific to this feature that you must check, beyond the generic checklist:
+1. Frames as tests (TUI-43, STATE AD-010): every reading frame listed in the spec's
+   Assumptions row "Frames de leitura" (41 ids) is exercised by a test that compares the
+   drawing with broker/test/frames/<id>.txt; a line may differ only through a declared
+   deviation with class D1, D2 or D3 and a reason. Confirm the .txt files are byte-identical
+   to what broker/test/frames/extract.ts produces from the prototype
+   (docs/claude-design-handoff/Handoff-Design.zip, file "Squad TUI.dc.html"; extract the zip
+   into a new empty temp directory outside the repo).
+2. Agent-status deviations: the user approved exactly the cases in design.md's table "Desvios
+   de status conhecidos nos painéis de agentes", each needing the cited line of
+   .design/squad-mvp.md. Verify the test pins that list, that every status deviation in
+   deviations.ts is in the table and cites a line, and independently spot-check at least four
+   frames (include 01, 10 and 23a) by reading the frame's agents panel and the derivation's
+   result yourself. Also check the ticket-status deviation of frame 22h (TKT-12).
+3. Honesty of the logs: broker/test/frames/logs.ts must not bend a log to fake content the
+   log cannot legitimately hold (base skills stuffed into a task's loadout, events of a kind
+   or edge the contract in broker/shared/contract.ts and .design/squad-mvp.md lines 139-205
+   does not allow). Round 1 found seq 470 bent; confirm it now is what the broker would write.
+4. The derivation against the design table (.design/squad-mvp.md lines 349-364) and
+   AD-008/AD-011: precedence order, the four readings of AD-011, and the settled gaps logged
+   in the spec's Assumptions.
+5. TUI-55: the TUI makes no request other than GET /events; check the code path and that the
+   test asserts it with a recording fake.
+6. Known and already reported limits: list them under "Not verified", do not fail the feature
+   for them alone: nothing ran on a real interactive terminal beyond a start-up smoke check; a
+   real SIGTERM/SIGINT and the uncaught-exception handler are tested by calling stop() or
+   throwing in the injected loop; the 1000 ms default interval is not tested by wall clock.
+
+Discrimination sensor: run the expanded tier. Beyond the 18 round 1 survivors, inject at
+least 12 new behaviour-level mutations of your own choosing, different from the round 1
+table, spread over the derivation, the feed, the screens, the reader, the keys and tui.ts,
+and give extra weight to whatever code changed since 1f377d5. Run them ONLY in an isolated
+scratch: a temporary git worktree outside the repo directory, or file copies in a temp
+directory. Never git stash, never edit the real tree. node_modules is not in a fresh
+worktree: run "bun install --frozen-lockfile" inside its broker/. Record the real tree's
+"git status --porcelain" before and after and confirm they match; remove the scratch when
+done.
+
+Environment:
+- Run from broker/: "bun node_modules/typescript/bin/tsc --noEmit && bun test" (about 60 s;
+  at 1f377d5: 890 pass, 3 skip, 0 fail on Windows; 893 pass, 0 skip on Linux with git, lsof
+  and ps installed). Unit only: "bun test test/unit". Never "bun x tsc". bun is 1.3.14. On
+  this Windows machine Python is "py -3".
+- Integration tests are occasionally flaky under load, and EVT-43 in
+  test/integration/routes.test.ts is off by 1 ms now and then: rerun once before concluding;
+  if a failure repeats, record exactly which tests and treat it as a finding.
+- Never start broker.ts or server.ts without temporary SQUAD_DB and SQUAD_TOKEN_FILE.
+- Backticks inside a Bash heredoc break the Git Bash wrapper on this machine: write files
+  with a file-writing tool.
+
+Outputs:
+1. Rewrite .specs/features/tui-leitura/validation.md following the report template of
+   validate.md, as round 2: verdict near the top in the format
+   .claude/skills/tlc-spec-driven/scripts/validate_state.py reads (run
+   "py -3 .claude/skills/tlc-spec-driven/scripts/validate_state.py tui-leitura" from the repo
+   root and report its exit code), per-AC table with file:line + assertion expression + spec
+   outcome for all 64 ACs and the edge cases, sensor table (each mutation: file:line, what
+   changed, killed or survived, by which test), the round 1 survivors and their fate, gate
+   results, diff range, spec-precision gaps, "Not verified". In English.
+2. Distill lessons with .claude/skills/tlc-spec-driven/scripts/lessons.py as lessons.md
+   instructs, only for grounded failures; a clean PASS records nothing.
+3. Do not commit; leave validation.md and any lessons files uncommitted.
+4. Reply with only the compact verdict:
+
+## Validation: TUI leitura - PASS | FAIL
+**Spec-anchored check**: N/64 ACs matched spec outcome | M spec-precision gaps
+**Edge cases**: N/9
+**Gate**: X passed, Y failed, Z skipped
+**Sensor**: N injected, N killed, N survived (round 1 survivors: N of 18 now killed)
+**validate_state.py**: exit code
+**Report**: .specs/features/tui-leitura/validation.md
+**Ranked gaps**: (numbered; each with AC, file:line or "no evidence", and whether it is a
+code gap, a test gap or a spec-precision gap)
+**Not verified**: ...
+
+Be strict: FAIL if any AC has no evidence, if an assertion would pass under a plausible
+wrong implementation, if any non-equivalent mutant survives, or if the gate fails. Do not
+soften a finding because the feature is large.
+```
+
+O que muda em relação à primeira rodada: o parágrafo "This is round 2", a reaplicação dos
+18 sobreviventes, a conferência de que nenhum teste foi enfraquecido desde `1f377d5`, o
+item 3 pedindo a confirmação do `seq` 470, e o mínimo de 12 mutações novas com peso no
+código que mudou. O resto é o texto original.
