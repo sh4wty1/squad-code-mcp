@@ -272,7 +272,7 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-16 | P1: Status derivado do log | Specify | Pending |
 | TUI-17 | P1: Status derivado do log | Specify | Pending |
 | TUI-18 | P1: Status derivado do log | Specify | Pending |
-| TUI-19 | P1: Feed e tela principal | Specify | Pending |
+| TUI-19 | P1: Feed e tela principal | Specify | Implementing |
 | TUI-20 | P1: Feed e tela principal | Specify | Pending |
 | TUI-21 | P1: Feed e tela principal | Specify | Pending |
 | TUI-22 | P1: Feed e tela principal | Specify | Pending |

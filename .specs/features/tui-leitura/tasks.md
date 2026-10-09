@@ -130,10 +130,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `put` escreve caractere, cor, fundo e negrito, corta fora da grade e devolve a coluna seguinte
-- [ ] `box`, `sep`, `dim`, `clear` e `bg` dão o mesmo resultado do protótipo para os mesmos argumentos
-- [ ] `cut` corta com `…`, `wrap` quebra por palavra e parte a palavra maior que a largura, `age` e `mmss` formatam como o protótipo, `clock` dá `HH:MM:SS` local
-- [ ] Testes em `test/unit/tui-grid.test.ts`; gate quick passa
+- [x] `put` escreve caractere, cor, fundo e negrito, corta fora da grade e devolve a coluna seguinte
+- [x] `box`, `sep`, `dim`, `clear` e `bg` dão o mesmo resultado do protótipo para os mesmos argumentos
+- [x] `cut` corta com `…`, `wrap` quebra por palavra e parte a palavra maior que a largura, `age` e `mmss` formatam como o protótipo, `clock` dá `HH:MM:SS` local
+- [x] Testes em `test/unit/tui-grid.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
