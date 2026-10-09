@@ -141,7 +141,12 @@ export function right(squad: Squad, rows: FeedRow[], ui: Pick<Ui, "toast" | "sel
     const tail: Colored[] = squad.feature ? [] : [[" · ", "gray"], [idle, "gray"]];
     const first = alerts[0]!;
     const [glyph, word, color] = ALERT[first.status]!;
-    if (alerts.length === 1) return [[`${glyph} ${first.short} ${word} há ${age(Math.floor((squad.now - first.since!) / 1000))}`, color], ...tail];
+    // SPEC_DEVIATION: without an open feature a single alert has no age
+    // Reason: with the age and the idle hour the text runs over the cost at 120 columns; frame 29c draws it without
+    if (alerts.length === 1) {
+      const since = squad.feature ? ` há ${age(Math.floor((squad.now - first.since!) / 1000))}` : "";
+      return [[`${glyph} ${first.short} ${word}${since}`, color], ...tail];
+    }
     if (alerts.every((a) => a.permission && a.blockedReason === null)) return [[`⚠ ${alerts.length} bloqueados por permissão`, "bred"], ...tail];
     return [...alerts.map((a, i): Colored => [`${i ? " " : ""}${ALERT[a.status]![0]} ${a.short}`, ALERT[a.status]![2]]), ...tail];
   }

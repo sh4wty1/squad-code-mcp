@@ -142,7 +142,8 @@ test("TUI-41: the right side of the footer is the first of the list that exists"
   expect(side("14")).toEqual([["⚠ w1 bloqueado há 1m30s", "bred"]]);
   expect(side("22c")).toEqual([["⚠ 2 bloqueados por permissão", "bred"]]);
   expect(side("29a")).toEqual([["⚠ w2", "bred"], [" ◌ w3", "red"], [" · ", "gray"], ["○ ocioso desde 14:53", "gray"]]);
-  expect(side("29c")).toEqual([["⚠ w1 bloqueado há 2m38s", "bred"], [" · ", "gray"], ["○ ocioso desde 14:53", "gray"]]);
+  // Without an open feature the age gives its place to the idle hour, as in frame 29c
+  expect(side("29c")).toEqual([["⚠ w1 bloqueado", "bred"], [" · ", "gray"], ["○ ocioso desde 14:53", "gray"]]);
   // An alert comes before a gate
   expect(side("22g")).toEqual([["⚠ jdg bloqueado há 17s", "bred"]]);
   // 3. the pending gate, the oldest

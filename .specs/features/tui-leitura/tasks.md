@@ -498,10 +498,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Um caso para cada um de 01, 09a, 09b, 10, 13a, 13c, 14, 15a, 18a, 19a, 22c, 22g, 22h, 23a, 24a, 24b, 24c, 25a, 26a, 26b, 27a, 27b, 27c, 28a, 28b, 29a, 29c
-- [ ] Toda linha fora de `DEVIATIONS` bate com o frame; toda entrada de `DEVIATIONS` tem classe e motivo, e a linha desenhada bate com o `expected` dela
-- [ ] Um teste falha se `DEVIATIONS` tem entrada cuja linha já bate com o frame (desvio morto)
-- [ ] Gate build passa
+- [x] Um caso para cada um de 01, 09a, 09b, 10, 13a, 13c, 14, 15a, 18a, 19a, 22c, 22g, 22h, 23a, 24a, 24b, 24c, 25a, 26a, 26b, 27a, 27b, 27c, 28a, 28b, 29a, 29c
+- [x] Toda linha fora de `DEVIATIONS` bate com o frame; toda entrada de `DEVIATIONS` tem classe e motivo, e a linha desenhada bate com o `expected` dela
+- [x] Um teste falha se `DEVIATIONS` tem entrada cuja linha já bate com o frame (desvio morto)
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build
