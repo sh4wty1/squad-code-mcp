@@ -518,10 +518,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] A aresta ativa de cada par permitido sai no caminho do protótipo, em cor clara e negrito; sem feature, cor normal e `○ última`
-- [ ] O painel de arestas com as cinco partes de TUI-45
-- [ ] Frames 02, 13b, 23b, 28c e 29b entram em `tui-frames.test.ts` com os seus desvios
-- [ ] Testes em `test/unit/tui-topology.test.ts`; gate quick passa
+- [x] A aresta ativa de cada par permitido sai no caminho do protótipo, em cor clara e negrito; sem feature, cor normal e `○ última`
+- [x] O painel de arestas com as cinco partes de TUI-45
+- [x] Frames 02, 13b, 23b, 28c e 29b entram em `tui-frames.test.ts` com os seus desvios
+- [x] Testes em `test/unit/tui-topology.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

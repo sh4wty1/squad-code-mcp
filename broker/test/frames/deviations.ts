@@ -84,6 +84,17 @@ const seal = (text: string, why: string) => d("D1", why, [1, 66, 53, text.padSta
 const footer = (cls: Deviation["class"], why: string, text: string) => d(cls, why, [38, 85, 34, text.padStart(34)]);
 const LIMIT = "the line of the limit is no event: it takes the hour of the third verdict of rework (TUI-26), not one second after";
 
+// The topology. The box of a worker takes lines 21 to 25 at columns 4, 31 and 58, with 20
+// columns of text; the ones of mother, leader and judge start at lines 7, 13 and 30, with
+// 22 columns of text from column 32. The panel of edges has its text in columns 88 to 117.
+const WORKER = { w1: 6, w2: 33, w3: 60 };
+const nodeStatus = (line: number, col: number, width: number, glyph: string, name: string, label: string, why: string) =>
+  d("D1", why, [line, col, width, `${glyph} ${name}`.padEnd(width - label.length - 2) + `[${label}]`]);
+const nodeSkills = (...workers: (keyof typeof WORKER)[]) => d("D2", SKILLS, ...workers.map((w): At => [24, WORKER[w], 20, "sem loadout"]));
+const REWORKS_ALL = "the prototype lists the reworks of TKT-12 and TKT-13 by name; TUI-45 asks the reworks of each ticket, and the plan has TKT-14 too";
+const reworksAll = (line: number) => d("D1", REWORKS_ALL, [line, 88, 30, "TKT-14 ⟳ 0/2  worker-3"]);
+const nodeEscalated = d("D1", ESCALATED, [15, 32, 22, "escalou TKT-12"]);
+
 export const DEVIATIONS: Record<string, Deviation[]> = {
   "01": [...skills(MOT, LDR, W2, JDG), ...doing(8, "tech lead · escalou TK…", ESCALATED), ...entered("01"), ...plan(9), ...loadout(33, 2)],
   "09a": [...skills(MOT, LDR, W1, W2, JDG), ...counts(15)],
@@ -214,6 +225,19 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ...doing(20, "worker · sem ticket", NO_TICKET),
     ...seal("⚠ w2 bloqueado   ◌ w3 offline", "table of seals of the design: more than one seal take the short form"),
     ...counts(15),
+  ],
+  "02": [...nodeEscalated, ...nodeSkills("w2"), ...reworksAll(29)],
+  "13b": [...nodeEscalated, ...reworksAll(28)],
+  "23b": [
+    ...nodeStatus(8, 32, 22, "●", "mother", "working", MOTHER[0]!.why),
+    ...nodeStatus(22, 6, 20, "○", "worker-1", "idle", W1_IDLE[0]!.why),
+    ...nodeSkills("w1"),
+    ...reworksAll(28),
+  ],
+  "29b": [
+    ...seal("⚠ w2 bloqueado   ◌ w3 offline", "table of seals of the design: more than one seal take the short form"),
+    ...d("D1", NO_TICKET, [23, WORKER.w2, 20, "sem ticket"], [23, WORKER.w3, 20, "sem ticket"]),
+    ...nodeSkills("w1"),
   ],
   "29c": [...skills(MOT, LDR, W2, JDG), ...doing(12, "worker · sem ticket", NO_TICKET), ...body(36, "Bash: Apagar …"), ...declared(23), ...loadout(27, 2)],
 };

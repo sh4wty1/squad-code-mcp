@@ -1,5 +1,8 @@
 import { expect, test } from "bun:test";
+import type { Grid } from "../../tui/grid.ts";
 import { main } from "../../tui/screens/main.ts";
+import { topology } from "../../tui/screens/topology.ts";
+import type { View } from "../../tui/view.ts";
 import { DEVIATIONS, expected } from "../frames/deviations.ts";
 import { frame, frameView } from "../frames/view.ts";
 
@@ -7,12 +10,21 @@ import { frame, frameView } from "../frames/view.ts";
 // prototype, line by line, but for the deviations declared for it
 const MAIN = ["01", "09a", "09b", "10", "13a", "13c", "14", "15a", "18a", "19a", "22c", "22g", "22h", "23a", "24a", "24b", "24c", "25a", "26a", "26b", "27a", "27b", "27c", "28a", "28b", "29a", "29c"];
 
-for (const id of MAIN) {
-  test(`TUI-43: frame ${id} of the main screen`, () => {
-    const drawn = main(frameView(id)).text();
-    expect(drawn.length).toBe(40);
-    expect(drawn.map((line, y) => `${y} ${line}`)).toEqual(expected(id).lines.map((line, y) => `${y} ${line}`));
-  });
+const TOPOLOGY = ["02", "13b", "23b", "28c", "29b"];
+
+const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid][] = [
+  ["main screen", MAIN, main],
+  ["topology", TOPOLOGY, topology],
+];
+
+for (const [name, ids, draw] of SCREENS) {
+  for (const id of ids) {
+    test(`TUI-43: frame ${id} of the ${name}`, () => {
+      const drawn = draw(frameView(id)).text();
+      expect(drawn.length).toBe(40);
+      expect(drawn.map((line, y) => `${y} ${line}`)).toEqual(expected(id).lines.map((line, y) => `${y} ${line}`));
+    });
+  }
 }
 
 test("TUI-43: every deviation is of a declared frame, has a class and says why", () => {
@@ -23,9 +35,11 @@ test("TUI-43: every deviation is of a declared frame, has a class and says why",
 });
 
 test("TUI-43: a deviation of the status of an agent cites the line of the design that contradicts the prototype", () => {
-  // The status is at the right of the first line of each agent, in the panel of agents
-  const heads = [3, 7, 11, 15, 19, 23];
-  const statuses = Object.entries(DEVIATIONS).flatMap(([id, list]) => list.filter((dev) => heads.includes(dev.line) && dev.col < 28).map((dev) => ({ id, ...dev })));
+  // The status is at the right of the first line of each agent: in the panel of agents of
+  // the main screen, and in the box of each node of the topology
+  const head = (id: string, dev: { line: number; col: number }) =>
+    TOPOLOGY.includes(id) ? [8, 14, 22, 31].includes(dev.line) : MAIN.includes(id) && [3, 7, 11, 15, 19, 23].includes(dev.line) && dev.col < 28;
+  const statuses = Object.entries(DEVIATIONS).flatMap(([id, list]) => list.filter((dev) => head(id, dev)).map((dev) => ({ id, ...dev })));
   expect(statuses.map((dev) => dev.id + " " + dev.text.replace(/ +/g, " "))).toEqual([
     "10 ● leader [working]",
     "14 ● mother [working]",
@@ -41,6 +55,8 @@ test("TUI-43: a deviation of the status of an agent cites the line of the design
     "24b ● mother [working]",
     "24c ● mother [working]",
     "25a ● mother [working]",
+    "23b ● mother [working]",
+    "23b ○ worker-1 [idle]",
   ]);
   expect(statuses.filter((dev) => dev.class !== "D1" || !/\.design\/squad-mvp\.md line 3\d\d/.test(dev.why))).toEqual([]);
 });
