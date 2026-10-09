@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** fatia TUI leitura implementada no branch `feat/tui-leitura` (30 tarefas) e reprovada pelo Verifier na primeira rodada: os testes deixam passar 18 mutações. Falta fechar as lacunas de `.specs/features/tui-leitura/validation.md`, rodar o Verifier de novo e abrir o PR. O estado está no Handoff de `.specs/STATE.md`.
+**Agora:** fatia TUI leitura implementada e em PR, sem PASS do Verifier: duas rodadas deram FAIL por lacuna de teste, as lacunas foram fechadas e não houve terceira rodada. A fatia fica sem marcar até um PASS. O estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 

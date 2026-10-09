@@ -338,7 +338,7 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-63 | P1: Rodar no terminal | Specify | Implementing |
 | TUI-64 | P1: Rodar no terminal | Specify | Implementing |
 
-**Coverage:** 64 total, 0 mapped to tasks, 64 unmapped.
+**Coverage:** 64 total, 64 mapped to tasks, 0 unmapped. Nenhum está `Verified`: o Verifier deu FAIL em duas rodadas, por lacuna de teste, e não rodou depois da última correção (`d013585`).
 
 ---
 

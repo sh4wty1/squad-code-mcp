@@ -94,31 +94,31 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-09, com a fatia TUI leitura implementada e reprovada pelo Verifier. O branch está no GitHub; não há PR.
+Escrito em 2026-10-09, com a fatia TUI leitura no PR e sem PASS do Verifier.
 
 - **Feature**: fatia TUI leitura, `.specs/features/tui-leitura/`
-- **Phase / Task**: Execute. T1 a T30 commitadas (`4657be1` a `1f377d5`). O Verifier deu FAIL na primeira rodada.
+- **Phase / Task**: Execute. T1 a T30 commitadas (`4657be1` a `1f377d5`), mais duas rodadas de correção (`d2c21a1` a `fb41991`, feita no Codex, e `d013585`).
 - **Completed**: T1 a T30. Nenhum requisito está `Verified`.
 - **In-progress** (file:line): nada
-- **Next step**: fechar as lacunas listadas em `.specs/features/tui-leitura/fix-round-1.md` (o handoff da rodada de correção; o relatório completo é o `validation.md`) e rodar o Verifier de novo. Só depois: marcar a fatia em `ROADMAP.md`, atualizar a rastreabilidade da spec e abrir o PR.
-- **Blockers**: veredito FAIL. `validate_state.py tui-leitura` sai com 1.
+- **Next step**: revisar o PR com `/the-judge`. A fatia só é marcada em `ROADMAP.md` e a rastreabilidade da spec só vai a `Verified` com um PASS do Verifier; o prompt dele está no fim de `.specs/features/tui-leitura/fix-round-1.md` (trocar "round 2" por "round 3" e a lista de sobreviventes pela da rodada 2).
+- **Blockers**: o veredito registrado é FAIL. `validate_state.py tui-leitura` sai com 1. O dev decidiu abrir o PR assim, sem a terceira rodada.
 - **Uncommitted files**: none
 - **Branch**: `feat/tui-leitura`
 
-### O que o Verifier achou
+### Como a verificação ficou
 
-Relatório em `.specs/features/tui-leitura/validation.md`, sobre `main..1f377d5`. Nenhum comportamento contradiz a spec; o FAIL é dos testes.
+Duas rodadas do Verifier, as duas FAIL, as duas só por lacuna de teste: nenhuma achou comportamento que contradiga a spec. O relatório em `.specs/features/tui-leitura/validation.md` é o da rodada 2, sobre `main..fb41991`; o da rodada 1 está no git (`a167cd7`).
 
-- 56 de 64 ACs com evidência que bate com a spec; 9 de 9 edge cases.
-- 210 mutações, 186 mortas, 24 sobreviventes, 18 delas não equivalentes: TUI-60, TUI-61, TUI-56, TUI-40, TUI-45, TUI-10, TUI-16, TUI-35, TUI-57, TUI-37, TUI-41, TUI-62, mais TUI-59 e TUI-58, que estão dentro de limites já declarados.
-- Um log de teste dobrado: `broker/test/frames/logs.ts:263` tem um `refused` de `worker_busy` com `peer: worker-1`, e o broker o grava para o leader (`send.ts:116`). Falta trocar pelo evento legítimo e declarar o desvio D1 no frame 25a.
-- Quatro lacunas de precisão da spec, ainda sem decisão do dev: um `usage` reenviado desenha a linha de `stalled` duas vezes (TUI-25); `◌ parado` em ticket `done`, `planned` ou `dropped` (TUI-37); a legenda mantém `g`, `x`, `enter responder` e "a TUI escreve três coisas" (TUI-49); o prazo `? m:ss` depois de vencido.
-- Os 41 frames são idênticos byte a byte a uma nova extração do zip. Os 16 desvios de status são exatamente a tabela do `design.md`, cada um com a linha do design.
+- Rodada 1 (`1f377d5`): 56 de 64 ACs, 210 mutações, 18 sobreviventes não equivalentes, um log de frame dobrado, quatro lacunas de precisão da spec. Correção em `d2c21a1..fb41991`, a partir de `fix-round-1.md`.
+- Rodada 2 (`fb41991`): 62 de 64 ACs, os 18 da rodada 1 mortos, 46 mutações novas com 8 sobreviventes não equivalentes (TUI-35, TUI-24, TUI-59), o log do frame 25a ainda com uma recusa que o broker não escreveria, duas lacunas de precisão (TUI-37, TUI-44). Correção em `d013585`.
+- Depois de `d013585` não houve Verifier. O que foi conferido: as oito mutações da rodada 2 e as duas das regras novas, aplicadas uma a uma, falham os testes novos; a suíte passa nos dois sistemas.
+- Os 41 frames são idênticos byte a byte a uma nova extração do zip (conferido nas duas rodadas). Os 16 desvios de status são exatamente a tabela do `design.md`, cada um com a linha do design.
+- Lições: L-001 e L-020 foram confirmadas; L-037 a L-048 são candidatas.
 
 ### Ambiente
 
-- De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. Windows, bun 1.3.14, em `1f377d5`: 893 testes, 890 passam, 3 pulados, uns 60 s. Nunca `bun x tsc`.
-- Linux, em `1f377d5`: 893 passam, 0 falham, 0 pulados, no contêiner `oven/bun:1.3.14` com `git`, `lsof` e `procps` instalados por `apt-get` e a suíte rodada num clone do branch. Sem `lsof` e `ps`, `PEER-34`, `PEER-35` e `PEER-45` falham, na `main` também: a imagem não os traz.
+- De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. Windows, bun 1.3.14, em `d013585`: 923 testes, 920 passam, 3 pulados, uns 60 s. Nunca `bun x tsc`.
+- Linux, em `d013585`: 923 passam, 0 falham, 0 pulados, no contêiner `oven/bun:1.3.14` com `git`, `lsof` e `procps` instalados por `apt-get` e a suíte rodada num clone do branch. Sem `lsof` e `ps`, `PEER-34`, `PEER-35` e `PEER-45` falham, na `main` também: a imagem não os traz.
 - A TUI roda com `bun tui.ts`; a sonda de glifos com `bun tui/probe.ts`. No Windows Terminal 1.24.11911.0 os 43 glifos contam uma célula.
 - Teste instável: `EVT-43` em `broker/test/integration/routes.test.ts` falha de vez em quando por 1 ms. Sob carga a suíte de integração já estourou tempo uma vez e passou na repetição.
 - Os testes de integração sobem processos reais, sempre com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Nunca subir `broker.ts` ou `server.ts` à mão sem os dois.
