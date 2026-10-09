@@ -312,7 +312,7 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-56 | P1: Rodar no terminal | Specify | Pending |
 | TUI-57 | P1: Rodar no terminal | Specify | Pending |
 | TUI-58 | P1: Rodar no terminal | Specify | Pending |
-| TUI-59 | P1: Rodar no terminal | Specify | Pending |
+| TUI-59 | P1: Rodar no terminal | Specify | Implementing |
 | TUI-60 | P1: Rodar no terminal | Specify | Pending |
 | TUI-61 | P1: Rodar no terminal | Specify | Pending |
 | TUI-62 | P1: Rodar no terminal | Specify | Pending |

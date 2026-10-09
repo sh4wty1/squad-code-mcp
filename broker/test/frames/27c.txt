@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › ○ sem feature aberta                                       ? 0   broker ● conectado  14:58:20
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ agentes · 6 ────────────┐┌─ feed · sem feature aberta ───────────────── ○ ocioso ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother           [idle]││  hora     de    p/  kind            corpo              ││ nenhuma mensagem selecionada   │
+│   objetivo · sem feature ││  14:19:50 ▶ plano v1 de ldr · 3 tickets · 1 dependência││                                │
+│   tlc-discover to-spec t…││  14:20:11 ldr → w1  [task]          player de áudio HLS││ última feature                 │
+│                          ││  14:20:12 ldr → w2  [task]          API da setlist + c…││ ✗ abandonada · 14:41:12        │
+│ ○ leader           [idle]││  14:20:13 ldr → w3  [task]          formato de data da…││   player ao vivo com setlist   │
+│   tech lead · sem tickets││  14:21:00 w3  → ldr [question]      Q-05 formato de da…││   motivo                       │
+│   tlc-plan help-me       ││  14:21:30 mot → hum [question]      ? Q-05 timeout 4min││   o dev trocou a prioridade; a │
+│                          ││  14:23:40 w2  → ldr [question]      Q-06 público ou au…││   busca de programas entra     │
+│ ○ worker-1         [idle]││  14:23:52 mot → hum [question]      ? Q-06 [BLOQUEANTE]││   antes                        │
+│   worker · sem ticket    ││  14:24:10 hum → w2  [answer]        Q-06: público, só …│├────────────────────────────────┤
+│   tlc-implement coding-g…││  14:25:30 ⟳ Q-05 timeout · default aplicado: HH:mm     ││ tickets · 2 de 3 aprovados     │
+│                          ││  14:26:47 w1  → jdg [result]        player + controles…││ ✓ TKT-13 ⟳0/2 w2               │
+│ ○ worker-2         [idle]││  14:27:30 w3  → jdg [result]        horários em HH:mm …││ ✓ TKT-14 ⟳0/2 w3               │
+│   worker · sem ticket    ││  14:28:03 jdg → ldr [verdict]       rework: reconexão …││ ○ TKT-12 ⟳1/2 w1               │
+│   tlc-implement coding-g…││  14:28:30 ldr → w1  [task]          rework 1/2: retry …││   parou em [working]           │
+│                          ││  14:28:52 jdg → ldr [verdict]       approve 1/1        │├────────────────────────────────┤
+│ ○ worker-3         [idle]││  14:29:10 w1  → ldr [question]      Q-07 retry infinit…││ perguntas                      │
+│   worker · sem ticket    ││  14:29:25 ldr → mot [question]      Q-07 encaminhada   ││ ✓ 2 pelo dev · 1 entre agentes │
+│   sem loadout            ││  14:29:40 mot → hum [question]      ? Q-07 [BLOQUEANTE]││ ⟳ 3 com default aplicado       │
+│                          ││  14:30:20 w2  → ldr [question]      Q-10 caixa alta no…││ ▶ 1 mesclada                   │
+│ ○ judge            [idle]││  14:30:35 mot → hum [question]      ? Q-10 timeout 4min│├────────────────────────────────┤
+│   judge · sem review     ││  14:30:55 w2  → jdg [result]        /api/setlist + cac…││ feature                        │
+│   spec-driven-eval ponyt…││  14:30:56 ⟳ Q-10 fechada · w2 entregou antes da respos…││ duração   23 min               │
+│                          ││  14:31:02 w2  → ldr [question]      Q-08 faixa sem cap…││ mensagens 29                   │
+│                          ││  14:31:15 mot → hum [question]      ? Q-08 timeout 4min││ custo     ≈$8.14 est.          │
+│                          ││  14:31:20 jdg → w2  [question]      Q-11 cache invalid…│├────────────────────────────────┤
+├─ tickets ────────────────┤│  14:31:34 ldr → mot [question]      Q-12 limite de rec…││ j/k navega o histórico         │
+│                          ││  14:31:36 ⟳ Q-12 mesclada em Q-07 pela mother          ││                                │
+│ ○ sem feature aberta     ││  14:31:48 w2  → jdg [answer]        Q-11: sim, via ETag││                                │
+│   os da última feature   ││  14:33:02 hum → w1  [answer]        Q-07: infinito com…││                                │
+│   ficam no resumo →      ││  14:35:15 ⟳ Q-08 timeout · default aplicado: logo da 89││                                │
+│                          ││  14:37:40 jdg → ldr [verdict]       approve 1/1        ││                                │
+│                          ││  14:41:12 ✗ feature encerrada · abandonada             ││                                │
+│                          ││─── squad ocioso desde 14:41:12 · sem feature ativa ────││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 60k  ldr 101k  w1 148k  w2 104k  w3 22k  jdg 118k  │ sessão ≈$8.30 est.                       ○ ocioso desde 14:41
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:44:10
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ thread TKT-12 · player de áudio ────────────────────────────────────────┐┌─ judge · nota por critério ──────────────┐
+│ worker-1 · aberto 14:20:11 · fechado 14:44:02 · ⟳ 1/2                    ││ critério da spec                 v1   v2 │
+│                                                                          ││ 1 play/pause e volume            ✓    ✓  │
+│ 14:20:11 ● [task]     ldr → w1                                           ││ 2 metadados da faixa atual       ✓    ✓  │
+│          │ Player HLS: play/pause, volume e metadados. Critérios 1–4, 6  ││ 3 reconexão após queda           ✗    ✓  │
+│          │ loadout: tlc-implement · coding-guidelines · ponytail · react-…│ 4 acessível por teclado          ✓    ✓  │
+│          │                                                               ││ 6 funciona no iOS (Safari)       ✓    ✓  │
+│ 14:26:47 ● [result]   w1 → jdg     6m36s · 18.4k tok                     │├──────────────────────────────────────────┤
+│          │ PlayerBar, useHlsStream, NowPlaying + testes. +312 −18        ││ v1 14:28:03  ✗ rework   4/5              │
+│          │                                                               ││ v2 14:43:50  ✓ approve  5/5              │
+│ 14:28:03 ✗ [verdict]  jdg → ldr    REWORK ⟳ 1/2 · 4/5                    │├──────────────────────────────────────────┤
+│          │ "reconexão após queda do stream" não atendido.                ││ notas do judge                           │
+│          │                                                               ││ 3 v1   player fica em erro ao derrubar o │
+│ 14:28:30 ● [task]     ldr → w1     rework 1/2                            ││        HLS; nenhuma tentativa de         │
+│          │ Retry com backoff e retomada sem ação do usuário.             ││        reconexão.                        │
+│          │                                                               ││ 3 v2   retoma em ~2s; backoff 1s·2s·4s   │
+│ 14:29:10 ? [question] w1 → ldr     Q-07 [BLOQUEANTE] · w1 → ldr → mot →… ││        nos logs, sem limite (Q-07).      │
+│          │ Reconexão: retry infinito ou desistir após 5 tentativas?      ││ 6 v2   autoplay exige gesto no iOS, como │
+│          │                                                               ││        a spec prevê.                     │
+│ 14:33:02 ● [answer]   hum → w1     Q-07 · 3m22s no dev                   │├──────────────────────────────────────────┤
+│          │ infinito com backoff                                          ││ avaliado com                             │
+│          │                                                               ││ spec-driven-eval ponytail-review break-ui│
+│ 14:39:52 ● [result]   w1 → jdg     11m22s · 22.9k tok                    │├──────────────────────────────────────────┤
+│          │ useHlsStream com backoff e evento "reconnected". +86 −12      ││ perguntas no thread                      │
+│          │                                                               ││ Q-07 ✓ respondida pelo dev em 3m22s      │
+│ 14:43:50 ✓ [verdict]  jdg → ldr    APPROVE · 5/5                         ││ Q-12 ▶ mesclada em Q-07                  │
+│          │ Todos os critérios. Stream derrubado 3x, retomou em ~2s.      │├──────────────────────────────────────────┤
+│          │                                                               ││ custo do thread (estimado)               │
+│ 14:44:02 ● [result]   ldr → mot    ticket fechado                        ││ w1 41.3k tok ≈$0.62  jdg 18.0k ≈$0.27    │
+│          │ TKT-12 concluído e reportado à mother.                        ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│ fluxo  task ▶ result ▶ ✗ v1 ▶ task ▶ ? Q-07 ▶ answer ▶ result ▶ ✓ v2     ││                                          │
+│                                                                          ││                                          │
+└──────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────────┘
+
+ j/k rolar   [ ] ticket ant/próx   esc voltar   b próx. bloqueante   1-4 telas   ? ajuda   q sair

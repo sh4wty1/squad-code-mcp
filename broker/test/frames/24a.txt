@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:20:05
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother        [waiting]││  hora     de    p/  kind            corpo              ││ ▶ plano v1 · leader            │
+│   objetivo · aguarda squ…││  14:17:48 ▶ feature aberta · player ao vivo com setlist││ publicado 14:19:50             │
+│   tlc-discover to-spec t…││  14:18:02 mot → ldr [task]          spec: player ao vi…││ evento do log, não mensagem    │
+│                          ││  14:18:40 ldr → mot [question]      setlist vem da API…││ entre peers: não tem de/para.  │
+│ ● leader        [working]││  14:19:05 mot → ldr [answer]        API /v1/setlist, p…│├────────────────────────────────┤
+│   tech lead · plano v1 ·…││▶ 14:19:50 ▶ plano v1 de ldr · 3 tickets · 1 dependência││ tickets · 3 no plano           │
+│   tlc-plan help-me       ││                                                        ││   TKT-12 player de áudio       │
+│                          ││                                                        ││   TKT-13 API da setlist        │
+│ ○ worker-1         [idle]││                                                        ││     depende de TKT-12          │
+│   worker · sem ticket    ││                                                        ││   TKT-14 data na setlist       │
+│   tlc-implement coding-g…││                                                        │├────────────────────────────────┤
+│                          ││                                                        ││ sem dono até a task            │
+│ ○ worker-2         [idle]││                                                        ││ Nenhuma task saiu ainda. Cada  │
+│   worker · sem ticket    ││                                                        ││ ticket ganha dono quando o     │
+│   tlc-implement coding-g…││                                                        ││ leader mandar a primeira task  │
+│                          ││                                                        ││ dele.                          │
+│ ○ worker-3         [idle]││                                                        │├────────────────────────────────┤
+│   worker · sem ticket    ││                                                        ││ loadout leader                 │
+│   sem loadout            ││                                                        ││ tlc-plan · help-me             │
+│                          ││                                                        ││                                │
+│ ○ judge            [idle]││                                                        ││                                │
+│   judge · sem review     ││                                                        ││                                │
+│   spec-driven-eval ponyt…││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+├─ tickets · plano v1 ─────┤│                                                        ││                                │
+│ TKT-12 player de áudio  —││                                                        ││                                │
+│ ⟳0/2 [planned]           ││                                                        ││                                │
+│ TKT-13 API da setlist   —││                                                        ││                                │
+│ ⟳0/2 [planned] dep TKT-12││                                                        ││                                │
+│ TKT-14 data na setlist  —││                                                        ││                                │
+│ ⟳0/2 [planned]           ││                                                        ││                                │
+│                          ││                                                        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 6k  ldr 11k  w1 —  w2 —  w3 —  jdg —  │ feature ≈$0.26 est.                                               rework —
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

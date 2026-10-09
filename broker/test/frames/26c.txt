@@ -1,0 +1,20 @@
+ feature aberta · com projeto
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 2   broker ● conectado  14:32:07
+ feature aberta · sem projeto
+ squad-tui  feature player ao vivo com setlist   workflow tlc                        ? 2   broker ● conectado  14:32:07
+ título longo · com projeto · ? 2 com bloqueante
+ squad-tui  portal-89fm › player ao vivo com setlist, histórico da…   workflow tlc   ? 2   broker ● conectado  14:32:07
+ título longo · sem projeto
+ squad-tui  feature player ao vivo com setlist, histórico das últi…   workflow tlc   ? 2   broker ● conectado  14:32:07
+ título longo · broker desconectado: o lado direito cresce, o título encolhe
+ squad-tui  portal-89fm › player ao vivo com setlist, his…   workflow tlc   ? 2   broker ○ desconectado · 12s  14:32:07
+ sem feature aberta · com projeto
+ squad-tui  portal-89fm › ○ sem feature aberta                                       ? 0   broker ● conectado  15:07:44
+ sem feature aberta · sem projeto
+ squad-tui  ○ sem feature aberta                                                     ? 0   broker ● conectado  15:07:44
+ nenhuma feature ainda · com projeto
+ squad-tui  portal-89fm › ○ nenhuma feature ainda                                    ? 0   broker ● conectado  15:02:14
+ nenhuma feature ainda · sem projeto
+ squad-tui  ○ nenhuma feature ainda                                                  ? 0   broker ● conectado  15:02:14
+
+ corte: o título encolhe com …; workflow, ? N, broker e relógio não se movem

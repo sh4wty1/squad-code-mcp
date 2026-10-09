@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:20:08
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother        [waiting]││  hora     de    p/  kind            corpo              ││ ▶ plano v2 · leader            │
+│   objetivo · aguarda squ…││  14:17:48 ▶ feature aberta · player ao vivo com setlist││ publicado 14:20:02             │
+│   tlc-discover to-spec t…││  14:18:02 mot → ldr [task]          spec: player ao vi…││ evento do log, não mensagem    │
+│                          ││  14:18:40 ldr → mot [question]      setlist vem da API…││ entre peers: não tem de/para.  │
+│ ● leader        [working]││  14:19:05 mot → ldr [answer]        API /v1/setlist, p…│├────────────────────────────────┤
+│   tech lead · plano v2 ·…││  14:19:50 ▶ plano v1 de ldr · 3 tickets · 1 dependência││ tickets · 4 no plano           │
+│   tlc-plan help-me       ││▶ 14:20:02 ▶ plano v2 de ldr · 4 tickets · + TKT-15     ││   TKT-12 player de áudio       │
+│                          ││                                                        ││   TKT-13 API da setlist        │
+│ ○ worker-1         [idle]││                                                        ││     depende de TKT-12          │
+│   worker · sem ticket    ││                                                        ││   TKT-14 data na setlist       │
+│   tlc-implement coding-g…││                                                        ││ + TKT-15 player no iOS         │
+│                          ││                                                        ││     depende de TKT-12          │
+│ ○ worker-2         [idle]││                                                        │├────────────────────────────────┤
+│   worker · sem ticket    ││                                                        ││ sem dono até a task            │
+│   tlc-implement coding-g…││                                                        ││ Republicar o plano não muda o  │
+│                          ││                                                        ││ que já está em andamento; os   │
+│ ○ worker-3         [idle]││                                                        ││ novos entram em [planned].     │
+│   worker · sem ticket    ││                                                        │├────────────────────────────────┤
+│   sem loadout            ││                                                        ││ loadout leader                 │
+│                          ││                                                        ││ tlc-plan · help-me             │
+│ ○ judge            [idle]││                                                        ││                                │
+│   judge · sem review     ││                                                        ││                                │
+│   spec-driven-eval ponyt…││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+├─ tickets · plano v2 ─────┤│                                                        ││                                │
+│ TKT-12 ⟳0/2 [planned]   —││                                                        ││                                │
+│ TKT-13 ⟳0/2 [planned]   —││                                                        ││                                │
+│ TKT-14 ⟳0/2 [planned]   —││                                                        ││                                │
+│ TKT-15 ⟳0/2 [planned]   —││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 6k  ldr 11k  w1 —  w2 —  w3 —  jdg —  │ feature ≈$0.26 est.                                               rework —
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

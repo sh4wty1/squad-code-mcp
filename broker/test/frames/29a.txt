@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › ○ sem feature aberta                                       ? 0   broker ● conectado  15:07:44
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda               ⚠ w2 bloqueado · credencial   ◌ w3 offline
+┌─ agentes · 6 ────────────┐┌─ feed · sem feature aberta ───────────────── ○ ocioso ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother           [idle]││  hora     de    p/  kind            corpo              ││ nenhuma mensagem selecionada   │
+│   objetivo · sem feature ││  14:21:30 mot → hum [question]      ? Q-05 timeout 4min││                                │
+│   tlc-discover to-spec t…││  14:23:40 w2  → ldr [question]      Q-06 público ou au…││ última feature                 │
+│                          ││  14:23:52 mot → hum [question]      ? Q-06 [BLOQUEANTE]││ ✓ entregue · 14:53:31          │
+│ ○ leader           [idle]││  14:24:10 hum → w2  [answer]        Q-06: público, só …││   player ao vivo com setlist   │
+│   tech lead · sem tickets││  14:25:30 ⟳ Q-05 timeout · default aplicado: HH:mm     │├────────────────────────────────┤
+│   tlc-plan help-me       ││  14:26:47 w1  → jdg [result]        player + controles…││ tickets · 3 de 3 aprovados     │
+│                          ││  14:27:30 w3  → jdg [result]        horários em HH:mm …││ ✓ TKT-12 ⟳1/2 w1               │
+│ ○ worker-1         [idle]││  14:28:03 jdg → ldr [verdict]       rework: reconexão …││ ✓ TKT-13 ⟳0/2 w2               │
+│   worker · sem ticket    ││  14:28:30 ldr → w1  [task]          rework 1/2: retry …││ ✓ TKT-14 ⟳0/2 w3               │
+│   tlc-implement coding-g…││  14:28:52 jdg → ldr [verdict]       approve 1/1        │├────────────────────────────────┤
+│                          ││  14:29:10 w1  → ldr [question]      Q-07 retry infinit…││ perguntas                      │
+│ ⚠ worker-2      [blocked]││  14:29:25 ldr → mot [question]      Q-07 encaminhada   ││ ✓ 2 pelo dev · 1 entre agentes │
+│   worker · era TKT-13    ││  14:29:40 mot → hum [question]      ? Q-07 [BLOQUEANTE]││ ⟳ 3 com default aplicado       │
+│   ⚠ RADIO_API_KEY ausente││  14:30:20 w2  → ldr [question]      Q-10 caixa alta no…││ ▶ 1 mesclada                   │
+│                          ││  14:30:35 mot → hum [question]      ? Q-10 timeout 4min│├────────────────────────────────┤
+│ ◌ worker-3      [offline]││  14:30:55 w2  → jdg [result]        /api/setlist + cac…││ feature                        │
+│   worker · era TKT-14    ││  14:30:56 ⟳ Q-10 fechada · w2 entregou antes da respos…││ duração   36 min               │
+│   ◌ sessão morta há 23m2…││  14:31:02 w2  → ldr [question]      Q-08 faixa sem cap…││ mensagens 32                   │
+│                          ││  14:31:15 mot → hum [question]      ? Q-08 timeout 4min││ custo     ≈$10.17 est.         │
+│ ○ judge            [idle]││  14:31:20 jdg → w2  [question]      Q-11 cache invalid…│├────────────────────────────────┤
+│   judge · sem review     ││  14:31:34 ldr → mot [question]      Q-12 limite de rec…││ j/k navega o histórico         │
+│   spec-driven-eval ponyt…││  14:31:36 ⟳ Q-12 mesclada em Q-07 pela mother          ││                                │
+│                          ││  14:31:48 w2  → jdg [answer]        Q-11: sim, via ETag││                                │
+│                          ││  14:33:02 hum → w1  [answer]        Q-07: infinito com…││                                │
+│                          ││  14:35:15 ⟳ Q-08 timeout · default aplicado: logo da 89││                                │
+├─ tickets ────────────────┤│  14:39:52 w1  → jdg [result]        backoff + retomada…││                                │
+│                          ││  14:43:50 jdg → ldr [verdict]       approve 5/5        ││                                │
+│ ○ sem feature aberta     ││  14:44:20 ○ w3 saiu · sessão morta                     ││                                │
+│   os da última feature   ││  14:45:30 jdg → ldr [verdict]       approve 1/1        ││                                │
+│   ficam no resumo →      ││  14:45:41 ldr → mot [result]        3/3 tickets aprova…││                                │
+│                          ││  14:50:10 ⚠ w2 [blocked] RADIO_API_KEY ausente         ││                                │
+│                          ││  14:53:31 ✓ feature encerrada · entregue               ││                                │
+│                          ││─ squad sem feature desde 14:53:31 · 2 fora de [idle] ──││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 70k  ldr 121k  w1 171k  w2 112k  w3 22k  jdg 193k  │ sessão ≈$10.35 est.          ⚠ w2 ◌ w3 · ○ ocioso desde 14:53
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

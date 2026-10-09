@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:48:20
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda                               ⚠ TKT-12 escalado à mother
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ● mother        [working]││  hora     de    p/  kind            corpo              ││ msg #0455           [question] │
+│   objetivo · decide TKT-…││  14:17:48 ▶ feature aberta · player ao vivo com setlist││ de    ldr leader               │
+│   tlc-discover to-spec t…││  14:18:02 mot → ldr [task]          spec: player ao vi…││ para  mot mother               │
+│                          ││  14:18:40 ldr → mot [question]      setlist vem da API…││ hora  14:47:55                 │
+│ ○ leader        [waiting]││  14:19:05 mot → ldr [answer]        API /v1/setlist, p…││ ticket TKT-12 player de áudio  │
+│   tech lead · TKT-12 → m…││  14:19:50 ▶ plano v1 de ldr · 3 tickets · 1 dependência││ rework ⟳ 2/2  limite · sem 3º  │
+│   tlc-plan help-me       ││  14:20:11 ldr → w1  [task]          player de áudio HLS│├────────────────────────────────┤
+│                          ││  14:20:12 ldr → w2  [task]          API da setlist + c…││ TKT-12 reprovado 3 vezes (v1,  │
+│ ○ worker-1         [idle]││  14:20:13 ldr → w3  [task]          formato de data da…││ v2, v3). Atingi o limite de 2  │
+│   worker · sem ticket    ││  14:21:00 w3  → ldr [question]      Q-05 formato de da…││ reworks e não posso mandar     │
+│   tlc-implement coding-g…││  14:21:30 mot → hum [question]      ? Q-05 timeout 4min││ outro. Bloqueante: replanejar  │
+│                          ││  14:23:40 w2  → ldr [question]      Q-06 público ou au…││ o ticket, aceitar com ressalva │
+│ ○ worker-2         [idle]││  14:23:52 mot → hum [question]      ? Q-06 [BLOQUEANTE]││ ou cancelar?                   │
+│   worker · TKT-13 ✓      ││  14:24:10 hum → w2  [answer]        Q-06: público, só …│├────────────────────────────────┤
+│   tlc-implement coding-g…││  14:25:30 ⟳ Q-05 timeout · default aplicado: HH:mm     ││ thread TKT-12 · 10 msgs        │
+│                          ││  14:26:47 w1  → jdg [result]        player + controles…││  14:38 jdg→ldr [verdict]       │
+│ ○ worker-3         [idle]││  14:27:30 w3  → jdg [result]        horários em HH:mm …││  14:39 ldr→w1  [task]          │
+│   worker · TKT-14 ✓      ││  14:28:03 jdg → ldr [verdict]       rework: reconexão …││  14:46 w1→jdg [result]         │
+│   sem loadout            ││  14:28:30 ldr → w1  [task]          rework 1/2: retry …││  14:47 jdg→ldr [verdict]       │
+│                          ││  14:28:52 jdg → ldr [verdict]       approve 1/1        ││ ▶14:47 ldr→mot [question]      │
+│ ○ judge            [idle]││  14:30:55 w2  → jdg [result]        /api/setlist + cac…│├────────────────────────────────┤
+│   judge · sem review     ││  14:36:10 w1  → jdg [result]        v2: backoff + reto…││ loadout worker-1               │
+│   spec-driven-eval ponyt…││  14:38:40 jdg → ldr [verdict]       rework 2/2: retoma…││ tlc-implement ·                │
+│                          ││  14:39:05 ldr → w1  [task]          rework 2/2 (último…││ coding-guidelines · ponytail · │
+│                          ││  14:41:00 jdg → ldr [verdict]       approve 1/1        ││ react-best-practices           │
+│                          ││  14:46:20 w1  → jdg [result]        v3: liveSyncPositi…││                                │
+├─ tickets ────────────────┤│  14:47:30 jdg → ldr [verdict]       reprovado 3ª vez: …││                                │
+│ TKT-12 player de áudio w1││  14:47:31 ⚠ TKT-12 no limite ⟳ 2/2 · sem 3º rework     ││                                │
+│ ⟳2/2 [escalated] → mot   ││▶ 14:47:55 ldr → mot [question]      escalado: reprovad…││                                │
+│ TKT-13 API da setlist  w2││                                                        ││                                │
+│ ⟳0/2 [done]              ││                                                        ││                                │
+│ TKT-14 data na setlist w3││                                                        ││                                │
+│ ⟳0/2 [done]              ││                                                        ││                                │
+│                          ││                                                        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 52k  ldr 117k  w1 188k  w2 104k  w3 22k  jdg 141k  │ feature ≈$9.37 est.                rework TKT-12 ⟳ 2/2 limite
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

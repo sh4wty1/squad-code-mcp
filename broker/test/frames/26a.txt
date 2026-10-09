@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:17:52
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ● mother        [working]││  hora     de    p/  kind            corpo              ││ ▶ feature aberta · mother      │
+│   objetivo · feature abe…││  14:02:10 ● mot entrou                                 ││ às       14:17:48              │
+│   tlc-discover to-spec t…││  14:02:18 ● ldr entrou                                 ││ aviso da mother a todos: sem   │
+│                          ││  14:03:01 ● w1 entrou                                  ││ destinatário, não acende       │
+│ ○ leader           [idle]││  14:03:02 ● w2 entrou                                  ││ aresta.                        │
+│   tech lead · sem tarefa…││  14:03:04 ● w3 entrou                                  │├────────────────────────────────┤
+│   tlc-plan help-me       ││  14:03:30 ● jdg entrou                                 ││ título                         │
+│                          ││─────── ▲ antes da feature · entradas no broker ────────││ player ao vivo com setlist     │
+│ ○ worker-1         [idle]││▶ 14:17:48 ▶ feature aberta · player ao vivo com setlist││ workflow tlc                   │
+│   worker · sem ticket    ││                                                        ││ branch   feat/player-ao-vivo   │
+│   tlc-implement coding-g…││                                                        ││ base     main                  │
+│                          ││                                                        ││ spec                           │
+│ ○ worker-2         [idle]││                                                        ││   .specs/features/             │
+│   worker · sem ticket    ││                                                        ││   player-ao-vivo/spec.md       │
+│   tlc-implement coding-g…││                                                        ││ commit   a3f9c21               │
+│                          ││                                                        │├────────────────────────────────┤
+│ ○ worker-3         [idle]││                                                        ││ loadout mother                 │
+│   worker · sem ticket    ││                                                        ││ tlc-discover · to-spec ·       │
+│   sem loadout            ││                                                        ││ the-fool                       │
+│                          ││                                                        ││                                │
+│ ○ judge            [idle]││                                                        ││                                │
+│   judge · sem review     ││                                                        ││                                │
+│   spec-driven-eval ponyt…││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+├─ tickets ────────────────┤│                                                        ││                                │
+│                          ││                                                        ││                                │
+│ ○ nenhum ticket ainda    ││                                                        ││                                │
+│   o leader publica o     ││                                                        ││                                │
+│   plano ao receber a spec││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 1k  ldr —  w1 —  w2 —  w3 —  jdg —  │ feature ≈$0.02 est.                                                 rework —
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

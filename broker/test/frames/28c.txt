@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › ○ nenhuma feature ainda                                    ? 0   broker ● conectado  15:04:40
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ topologia · estrela ──────────────────────────────────────────────────────────────┐┌─ arestas ──────────────────────┐
+│                              ┌──────────────────────┐                              ││ última aresta                  │
+│                              │ dev       via mother │                              ││ ○ nenhuma                      │
+│                              └──────────────────────┘                              ││                                │
+│                                          │ gate · perguntas                        ││ últimas mensagens              │
+│                             ┌────────────────────────┐                             ││ nenhuma                        │
+│                             │ ○ mother        [idle] │   workers nunca se falam    │├────────────────────────────────┤
+│                             │ sem feature            │   máx 2 reworks/ticket      ││ perguntas abertas · 0          │
+│                             └────────────────────────┘   perguntas sobem até a     ││ nenhuma                        │
+│                                          │ task ▼  ▲ resumother, que deduplica     │├────────────────────────────────┤
+│                                          │ ▲ escala após rework 2/2                ││ volume por aresta              │
+│                             ┌────────────────────────┐      verdict                │├────────────────────────────────┤
+│                             │ ○ leader        [idle] │◀──────────────────────────┐ ││ reworks                        │
+│                             │ sem feature            │                           │ ││ sem feature aberta             │
+│                             └────────────────────────┘                           │ ││                                │
+│                                          │                                       │ ││                                │
+│                                          │ task + loadout                        │ ││                                │
+│               ┌──────────────────────────┼──────────────────────────┐            │ ││                                │
+│               ▼                          ▼                          ▼            │ ││                                │
+│   ┌──────────────────────┐   ┌──────────────────────┐   ┌──────────────────────┐ │ ││                                │
+│   │ · worker-1           │   │ · worker-2           │   │ · worker-3           │ │ ││                                │
+│   │ [não lançado]        │   │ [não lançado]        │   │ [não lançado]        │ │ ││                                │
+│   │ nunca entrou no broker   │ nunca entrou no broker   │ nunca entrou no broker │ ││                                │
+│   └──────────────────────┘   └──────────────────────┘   └──────────────────────┘ │ ││                                │
+│               │                          │                          │            │ ││                                │
+│               └──────────────────────────┼──────────────────────────┘            │ ││                                │
+│                                          │ result · answer                       │ ││                                │
+│                                          ▼                                       │ ││                                │
+│                             ┌────────────────────────┐                           │ ││                                │
+│                             │ · judge                │───────────────────────────┘ ││                                │
+│                             │ [não lançado]          │      rework ⟳ · approve ✓   ││                                │
+│                             └────────────────────────┘                             ││                                │
+│                                                                                    ││                                │
+│                                                                                    ││                                │
+│ ━━ ativa = par da última mensagem   ── ociosa   ▼ ◀ direção                        ││                                │
+└────────────────────────────────────────────────────────────────────────────────────┘└────────────────────────────────┘
+
+ 1-4 telas   tab próx. nó   enter thread do nó   b próx. bloqueante   ? ajuda   q sair

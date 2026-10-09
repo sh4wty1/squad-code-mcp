@@ -92,9 +92,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `bun tui/probe.ts` fora de um terminal sai com 1 (teste de integração em `test/integration/tui.test.ts`)
-- [ ] Todo caractere acima de U+024F que aparece em `test/frames/*.txt` está em `GLYPHS` (teste de unidade em `test/unit/tui-glyphs.test.ts`)
-- [ ] Gate full passa
+- [x] `bun tui/probe.ts` fora de um terminal sai com 1 (teste de integração em `test/integration/tui.test.ts`)
+- [x] Todo caractere acima de U+024F que aparece em `test/frames/*.txt` está em `GLYPHS` (teste de unidade em `test/unit/tui-glyphs.test.ts`)
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

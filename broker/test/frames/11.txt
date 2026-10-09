@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 2   broker ● conectado  14:32:07
+  1 principal   2 topologia   3 thread   4 perguntas 2   ? ajuda
+┌─ cores, status e glifos ─────────────────────────────────┐┌─ atalhos de teclado ─────────────────────────────────────┐
+│ papéis                                                   ││ global                                                   │
+│ ● mother magenta   ● leader ciano   ● worker-n verde     ││ 1 2 3 4     principal · topologia · thread · perguntas   │
+│ ● judge  amarelo   ● dev    branco  ⚠ erro     vermelho  ││ g           abrir o gate pendente mais antigo            │
+│ status do agente · do mais forte ao mais fraco           ││ x           abrir o pedido de permissão mais antigo      │
+│ ◌ [offline]    sessão morta · relançar com o mesmo nome  ││ p           pausar / retomar o feed                      │
+│ ⚠ [blocked]    impedimento externo · resolve fora        ││ t           rodapé: tokens da feature ↔ da sessão        │
+│ ⚠ [blocked x]  permissão pendente · sai com tecla        ││ ? · q       ajuda · sair (o broker segue rodando)        │
+│ ? [waiting ?]  pergunta bloqueante sua                   ││                                                          │
+│ ○ [waiting]    aguarda outro agente                      ││ navegação                                                │
+│ ‖ [stalled]    turno acabou devendo · ir ao terminal     ││ tab ⇧tab    painel seguinte / anterior                   │
+│ ● [working]    em turno                                  ││ j k ↑ ↓     mover seleção                                │
+│ ✓ [done]       tickets do plano mais recente aprovados   ││ enter · esc abrir · voltar / fechar modal                │
+│ ○ [idle]       sem ticket · sem feature, todos menos ⚠ ◌ ││                                                          │
+│ · [não lançado] nunca entrou · ≠ offline                 ││ perguntas                                                │
+│ status do ticket · dropped vence qualquer regra          ││ b           ir direto à próxima bloqueante               │
+│ [planned]   sem task ainda  [working]   executando       ││ enter       responder a selecionada                      │
+│ [review]    com o judge     [waiting]   aguarda resposta ││ h           foco no histórico                            │
+│ [blocked]   dono impedido   [escalated] estourou ⟳ 2/2   ││                                                          │
+│ [done]      aprovado        [dropped]   saiu do plano    ││ modal de resposta                                        │
+│ kinds                                                    ││ 1–4 enter   escolher · enviar · esc cancela              │
+│ [task] [result] [verdict] [question] [answer]            ││ ctrl+e · u  expandir o texto · limpar                    │
+│ [gate] [gate_decision] [permission_request]              ││                                                          │
+│ [permission_decision]  decisões: ✓ ✗ comentário          ││ gate (modal)                                             │
+│ linhas de sistema                                        ││ a           aprovar → pede confirmação (y)               │
+│ ▶ plano v1 de ldr          ✗ w1 recusado · erro ×3       ││ r · c       rejeitar · comentar, texto obrigatório       │
+│ ‖ w2 [stalled] deve result ⟳ Q-05 default aplicado       ││ ] [ · esc   fila de gates · fechar sem decidir           │
+│ ⚠ w2 [blocked] credencial  ⚠ TKT-12 no limite ⟳ 2/2      ││                                                          │
+│ ○ w2 saiu · ● w2 voltou    ✓ P-01 fechado no terminal    ││ permissão (modal)                                        │
+│ ● ldr entrou               ▶ feature aberta · título     ││ a · d       permitir (após ver o fim) · negar            │
+│ feature encerrada · ✓ entregue  ✗ abandonada             ││ j k · G     rolar a prévia · ir ao fim                   │
+│ ● ○ ▶ ✓ ✗ ⟳ ⚠   extras ? pergunta  ◌ offline  ‖ parado   ││ ] [ · esc   fila · fechar, o pedido segue                │
+│ ≈ custo estimado   ━━ aresta ativa   broker ○ congela    ││ a TUI escreve três coisas: respostas a                   │
+│                                                          ││ perguntas, decisões de gate e decisões de                │
+│                                                          ││ pedido de permissão. O resto é leitura do broker.        │
+└──────────────────────────────────────────────────────────┘└──────────────────────────────────────────────────────────┘
+
+ esc voltar   q sair

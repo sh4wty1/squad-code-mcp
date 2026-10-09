@@ -1,0 +1,14 @@
+ feature aberta · padrão: tokens e custo da feature aberta
+ mot 41k  ldr 88k  w1 126k  w2 97k  w3 22k  jdg 64k  │ feature ≈$6.58 est.                          rework TKT-12 ⟳ 1/2
+ feature aberta · t alterna: a sessão inteira, com a conversa da mother antes da abertura
+ mot 50k  ldr 88k  w1 126k  w2 97k  w3 22k  jdg 64k  │ sessão ≈$6.72 est.                           rework TKT-12 ⟳ 1/2
+ segunda feature recém-aberta · feature
+ mot 1k  ldr —  w1 —  w2 —  w3 —  jdg —  │ feature ≈$0.02 est.                                                 rework —
+ segunda feature · t: a sessão inclui a primeira feature e o intervalo entre as duas
+ mot 71k  ldr 121k  w1 171k  w2 112k  w3 22k  jdg 193k  │ sessão ≈$10.37 est.                                  rework —
+ sem feature · só existe a sessão; t avisa e não alterna
+ mot 70k  ldr 121k  w1 171k  w2 112k  w3 22k  jdg 193k  │ sessão ≈$10.35 est.                      ○ ocioso desde 14:53
+ nenhuma feature ainda · a mother já gastou conversando com o dev; os outros têm traço
+ mot 9k  ldr —  w1 —  w2 —  w3 —  jdg —  │ sessão ≈$0.14 est.                                   ○ nenhuma feature ainda
+
+ custo da feature encerrada: no resumo da tela tudo idle, ao lado de duração e mensagens (09a, 27c)

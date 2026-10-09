@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:52:10
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother        [waiting]││  hora     de    p/  kind            corpo              ││ ✗ recusa do broker             │
+│   objetivo · aguarda squ…││  14:18:02 mot → ldr [task]          spec: player ao vi…││ agente ldr leader              │
+│   tlc-discover to-spec t…││  14:18:40 ldr → mot [question]      setlist vem da API…││ tentou [task] → w1             │
+│                          ││  14:19:05 mot → ldr [answer]        API /v1/setlist, p…││ erro   ticket_dropped          │
+│ ● leader        [working]││  14:19:50 ▶ plano v1 de ldr · 3 tickets · 1 dependência││ vezes  ×3 · 14:51:40–52:05     │
+│   tech lead · TKT-15 · 2…││  14:20:11 ldr → w1  [task]          player de áudio HLS│├────────────────────────────────┤
+│   tlc-plan help-me       ││  14:20:12 ldr → w2  [task]          API da setlist + c…││ o que houve                    │
+│                          ││  14:20:13 ldr → w3  [task]          formato de data da…││ O leader tentou mandar a task  │
+│ ○ worker-1         [idle]││  14:21:00 w3  → ldr [question]      Q-05 formato de da…││ do TKT-12 ao worker-1 depois   │
+│   worker · sem ticket · …││  14:21:30 mot → hum [question]      ? Q-05 timeout 4min││ que o ticket saiu do plano.    │
+│   tlc-implement coding-g…││  14:23:40 w2  → ldr [question]      Q-06 público ou au…││ Ticket descartado não recebe   │
+│                          ││  14:23:52 mot → hum [question]      ? Q-06 [BLOQUEANTE]││ task.                          │
+│ ○ worker-2         [idle]││  14:24:10 hum → w2  [answer]        Q-06: público, só …│├────────────────────────────────┤
+│   worker · TKT-13 ✓      ││  14:25:30 ⟳ Q-05 timeout · default aplicado: HH:mm     ││ agrupamento                    │
+│   tlc-implement coding-g…││  14:26:47 w1  → jdg [result]        player + controles…││ Recusas seguidas do mesmo      │
+│                          ││  14:27:30 w3  → jdg [result]        horários em HH:mm …││ agente com o mesmo erro viram  │
+│ ○ worker-3         [idle]││  14:28:03 jdg → ldr [verdict]       rework: reconexão …││ uma linha só; o contador sobe  │
+│   worker · TKT-14 ✓      ││  14:28:30 ldr → w1  [task]          rework 1/2: retry …││ a cada nova.                   │
+│   sem loadout            ││  14:28:52 jdg → ldr [verdict]       approve 1/1        │├────────────────────────────────┤
+│                          ││  14:30:55 w2  → jdg [result]        /api/setlist + cac…││ Só leitura: a TUI não reenvia  │
+│ ○ judge            [idle]││  14:36:10 w1  → jdg [result]        v2: backoff + reto…││ nem corrige.                   │
+│   judge · sem review     ││  14:38:40 jdg → ldr [verdict]       rework 2/2: retoma…│├────────────────────────────────┤
+│   spec-driven-eval ponyt…││  14:39:05 ldr → w1  [task]          rework 2/2 (último…││ loadout leader                 │
+│                          ││  14:41:00 jdg → ldr [verdict]       approve 1/1        ││ tlc-plan · help-me             │
+│                          ││  14:46:20 w1  → jdg [result]        v3: liveSyncPositi…││                                │
+│                          ││  14:47:30 jdg → ldr [verdict]       reprovado 3ª vez: …││                                │
+├─ tickets · plano v2 ─────┤│  14:47:31 ⚠ TKT-12 no limite ⟳ 2/2 · sem 3º rework     ││                                │
+│ TKT-12 ⟳2/2 [dropped]   —││  14:47:55 ldr → mot [question]      escalado: reprovad…││                                │
+│ TKT-13 ⟳0/2 [done]     w2││  14:48:10 mot → hum [question]      ? Q-13 [BLOQUEANTE]││                                │
+│ TKT-14 ⟳0/2 [done]     w3││  14:50:02 hum → mot [answer]        Q-13: descartar, t…││                                │
+│ TKT-15 ⟳0/2 [planned]   —││  14:50:20 mot → ldr [answer]        descartar · nova t…││                                │
+│                          ││  14:51:10 ▶ plano v2 de ldr · ✗ TKT-12 · + TKT-15      ││                                │
+│                          ││  14:51:25 ✗ w1 recusado · task · worker_busy           ││                                │
+│                          ││▶ 14:51:40 ✗ ldr recusado · task · ticket_dropped ×3    ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 57k  ldr 126k  w1 188k  w2 104k  w3 22k  jdg 141k  │ feature ≈$9.58 est.        ✗ TKT-12 descartado · nova: TKT-15
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

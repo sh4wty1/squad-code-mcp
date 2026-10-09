@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › ○ sem feature aberta                                       ? 0   broker ● conectado  15:07:44
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda               ⚠ w2 bloqueado · credencial   ◌ w3 offline
+┌─ topologia · estrela ──────────────────────────────────────────────────────────────┐┌─ arestas ──────────────────────┐
+│                              ┌──────────────────────┐                              ││ última aresta                  │
+│                              │ dev       via mother │                              ││ ○ ldr → mot  [result]          │
+│                              └──────────────────────┘                              ││   feature · 14:45:41           │
+│                                          │ gate · perguntas                        ││                                │
+│                             ┌────────────────────────┐                             ││ últimas mensagens              │
+│                             │ ○ mother        [idle] │   workers nunca se falam    ││ 14:45 ldr → mot [result]       │
+│                             │ sem feature            │   máx 2 reworks/ticket      ││ 14:45 jdg → ldr [verdict]      │
+│                             └────────────────────────┘   perguntas sobem até a     ││ 14:43 jdg → ldr [verdict]      │
+│                                          ▲ task ▼  ▲ resumother, que deduplica     ││ 14:39 w1  → jdg [result]       │
+│                                          ┃ ▲ escala após rework 2/2                ││ 14:33 hum → w1  [answer]       │
+│                             ┌────────────────────────┐      verdict                ││ 14:31 w2  → jdg [answer]       │
+│                             │ ○ leader        [idle] │◀──────────────────────────┐ │├────────────────────────────────┤
+│                             │ sem tickets            │                           │ ││ perguntas abertas · 0          │
+│                             └────────────────────────┘                           │ ││ nenhuma                        │
+│                                          │                                       │ │├────────────────────────────────┤
+│                                          │ task + loadout                        │ ││ volume por aresta              │
+│               ┌──────────────────────────┼──────────────────────────┐            │ ││ mot → hum  5 ━━━━━━━━━━        │
+│               ▼                          ▼                          ▼            │ ││ ldr → mot  4 ━━━━━━━━          │
+│   ┌──────────────────────┐   ┌──────────────────────┐   ┌──────────────────────┐ │ ││ jdg → ldr  4 ━━━━━━━━          │
+│   │ ○ worker-1    [idle] │   │ ⚠ worker-2 [blocked] │   │ ◌ worker-3 [offline] │ │ ││ w2  → ldr  3 ━━━━━━            │
+│   │ sem ticket           │   │ era TKT-13           │   │ era TKT-14           │ │ ││ mot → ldr  2 ━━━━              │
+│   │ tlc-implement codin… │   │ ⚠ RADIO_API_KEY aus… │   │ ◌ morta há 23m24s    │ │ │├────────────────────────────────┤
+│   └──────────────────────┘   └──────────────────────┘   └──────────────────────┘ │ ││ reworks                        │
+│               │                          │                          │            │ ││ sem feature aberta             │
+│               └──────────────────────────┼──────────────────────────┘            │ ││                                │
+│                                          │ result · answer                       │ ││                                │
+│                                          ▼                                       │ ││                                │
+│                             ┌────────────────────────┐                           │ ││                                │
+│                             │ ○ judge         [idle] │───────────────────────────┘ ││                                │
+│                             │ sem review             │      rework ⟳ · approve ✓   ││                                │
+│                             └────────────────────────┘                             ││                                │
+│                                                                                    ││                                │
+│ ○ última  ldr → mot  [result]  3/3 tickets aprovados · 14:45:41                    ││                                │
+│ ━━ ativa = par da última mensagem   ── ociosa   ▼ ◀ direção                        ││                                │
+└────────────────────────────────────────────────────────────────────────────────────┘└────────────────────────────────┘
+
+ 1-4 telas   tab próx. nó   enter thread do nó   b próx. bloqueante   ? ajuda   q sair

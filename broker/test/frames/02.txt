@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 2   broker ● conectado  14:32:07
+  1 principal   2 topologia   3 thread   4 perguntas 2   ? ajuda
+┌─ topologia · estrela ──────────────────────────────────────────────────────────────┐┌─ arestas ──────────────────────┐
+│                              ┌──────────────────────┐                              ││ ativa agora                    │
+│                              │ dev ? 2 p/ responder │                              ││ ▶ w2 → jdg  [answer]           │
+│                              └──────────────────────┘                              ││   TKT-13 · 14:31:48            │
+│                                          │ gate · perguntas ? 2                    ││                                │
+│                             ┌────────────────────────┐                             ││ últimas mensagens              │
+│                             │ ○ mother     [waiting] │   workers nunca se falam    ││ 14:31 w2  → jdg [answer]       │
+│                             │ 2 perguntas → dev      │   máx 2 reworks/ticket      ││ 14:31 ldr → mot [question]     │
+│                             └────────────────────────┘   perguntas sobem até a     ││ 14:31 jdg → w2  [question]     │
+│                                          │ task ▼  ▲ resumother, que deduplica     ││ 14:31 mot → hum [question]     │
+│                                          │ ▲ escala após rework 2/2                ││ 14:31 w2  → ldr [question]     │
+│                             ┌────────────────────────┐      verdict                ││ 14:30 w2  → jdg [result]       │
+│                             │ ● leader     [working] │◀──────────────────────────┐ │├────────────────────────────────┤
+│                             │ TKT-12/13              │                           │ ││ perguntas abertas · 2          │
+│                             └────────────────────────┘                           │ ││ Q-07 w1  TKT-12 [BLOQ]         │
+│                                          │                                       │ ││ Q-08 w2  TKT-13 3:08           │
+│                                          │ task + loadout                        │ │├────────────────────────────────┤
+│               ┌──────────────────────────┼──────────────────────────┐            │ ││ volume por aresta              │
+│               ▼                          ▼                          ▼            │ ││ mot → hum  5 ━━━━━━━━━━        │
+│   ┌──────────────────────┐   ┌──────────────────────┐   ┌──────────────────────┐ │ ││ ldr → mot  3 ━━━━━━            │
+│   │? worker-1 [waiting ?]│   │ ○ worker-2 [waiting] │   │ ○ worker-3    [idle] │ │ ││ w2  → ldr  3 ━━━━━━            │
+│   │ TKT-12 ⟳1/2          │   │ TKT-13 review        │   │ TKT-14 ✓             │ │ ││ mot → ldr  2 ━━━━              │
+│   │ ? Q-07 aguarda o dev │   │ tlc-implement codin… │   │ sem loadout          │ │ ││ ldr → w1   2 ━━━━              │
+│   └──────────────────────┘   └──────────────────────┘   └──────────────────────┘ │ │├────────────────────────────────┤
+│               │                          ┃                          │            │ ││ reworks                        │
+│               └──────────────────────────┃──────────────────────────┘            │ ││ TKT-12 ⟳ 1/2  worker-1         │
+│                                          ┃ result · answer                       │ ││ TKT-13 ⟳ 0/2  worker-2         │
+│                                          ▼                                       │ ││                                │
+│                             ┌────────────────────────┐                           │ ││                                │
+│                             │ ● judge      [working] │───────────────────────────┘ ││                                │
+│                             │ rev TKT-13             │      rework ⟳ · approve ✓   ││                                │
+│                             └────────────────────────┘                             ││                                │
+│                                                                                    ││                                │
+│ ▶ ativa  w2 → jdg  [answer]  TKT-13 · Q-11: sim, via ETag · 14:31:48               ││                                │
+│ ━━ ativa = par da última mensagem   ── ociosa   ▼ ◀ direção                        ││                                │
+└────────────────────────────────────────────────────────────────────────────────────┘└────────────────────────────────┘
+
+ 1-4 telas   tab próx. nó   enter thread do nó   b próx. bloqueante   ? ajuda   q sair

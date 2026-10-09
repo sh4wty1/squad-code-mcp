@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 1   broker ● conectado  14:32:22
+  1 principal   2 topologia   3 thread   4 perguntas 1   ? ajuda                            ◌ w2 offline · sessão morta
+┌─ topologia · estrela ──────────────────────────────────────────────────────────────┐┌─ arestas ──────────────────────┐
+│                              ┌──────────────────────┐                              ││ ativa agora                    │
+│                              │ dev ? 1 p/ responder │                              ││ ▶ mot → hum  [question]        │
+│                              └──────────────────────┘                              ││   TKT-12 · 14:29:40            │
+│                                          ▲ gate · perguntas ? 1                    ││                                │
+│                             ┌────────────────────────┐                             ││ últimas mensagens              │
+│                             │ ○ mother     [waiting] │   workers nunca se falam    ││ 14:29 mot → hum [question]     │
+│                             │ Q-07 → dev             │   máx 2 reworks/ticket      ││ 14:29 ldr → mot [question]     │
+│                             └────────────────────────┘   perguntas sobem até a     ││ 14:29 w1  → ldr [question]     │
+│                                          │ task ▼  ▲ resumother, que deduplica     ││ 14:28 jdg → ldr [verdict]      │
+│                                          │ ▲ escala após rework 2/2                ││ 14:28 ldr → w1  [task]         │
+│                             ┌────────────────────────┐      verdict                ││ 14:28 jdg → ldr [verdict]      │
+│                             │ ● leader     [working] │◀──────────────────────────┐ │├────────────────────────────────┤
+│                             │ TKT-12/13              │                           │ ││ perguntas abertas · 1          │
+│                             └────────────────────────┘                           │ ││ Q-07 w1  TKT-12 [BLOQ]         │
+│                                          │                                       │ │├────────────────────────────────┤
+│                                          │ task + loadout                        │ ││ volume por aresta              │
+│               ┌──────────────────────────┼──────────────────────────┐            │ ││ mot → hum  3 ━━━━━━            │
+│               ▼                          ▼                          ▼            │ ││ mot → ldr  2 ━━━━              │
+│   ┌──────────────────────┐   ┌──────────────────────┐   ┌──────────────────────┐ │ ││ ldr → mot  2 ━━━━              │
+│   │? worker-1 [waiting ?]│   │ ◌ worker-2 [offline] │   │ ○ worker-3    [idle] │ │ ││ ldr → w1   2 ━━━━              │
+│   │ TKT-12 ⟳1/2          │   │ TKT-13 parado        │   │ TKT-14 ✓             │ │ ││ jdg → ldr  2 ━━━━              │
+│   │ ? Q-07 aguarda o dev │   │ ◌ morta há 2m10s     │   │ sem loadout          │ │ │├────────────────────────────────┤
+│   └──────────────────────┘   └──────────────────────┘   └──────────────────────┘ │ ││ reworks                        │
+│               │                          │                          │            │ ││ TKT-12 ⟳ 1/2  worker-1         │
+│               └──────────────────────────┼──────────────────────────┘            │ ││ TKT-13 ⟳ 0/2  worker-2         │
+│                                          │ result · answer                       │ ││                                │
+│                                          ▼                                       │ ││                                │
+│                             ┌────────────────────────┐                           │ ││                                │
+│                             │ ○ judge         [idle] │───────────────────────────┘ ││                                │
+│                             │ sem review             │      rework ⟳ · approve ✓   ││                                │
+│                             └────────────────────────┘                             ││                                │
+│                                                                                    ││                                │
+│ ▶ ativa  mot → hum  [question]  TKT-12 · ? Q-07 [BLOQUEANTE] · 14:29:40            ││                                │
+│ ━━ ativa = par da última mensagem   ── ociosa   ▼ ◀ direção                        ││                                │
+└────────────────────────────────────────────────────────────────────────────────────┘└────────────────────────────────┘
+
+ 1-4 telas   tab próx. nó   enter thread do nó   b próx. bloqueante   ? ajuda   q sair

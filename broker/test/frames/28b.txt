@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › ○ nenhuma feature ainda                                    ? 0   broker ● conectado  15:04:40
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ agentes · 2/6 no ar ────┐┌─ feed · sem feature aberta ──────────────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother           [idle]││  hora     de    p/  kind            corpo              ││ ● leader entrou                │
+│   objetivo · sem feature ││  15:02:24 ● mot entrou                                 ││ às      15:02:31               │
+│   tlc-discover to-spec t…││▶ 15:02:31 ● ldr entrou                                 ││ primeira entrada deste nome    │
+│                          ││─ broker no ar desde 15:02:10 · nenhuma feature ainda ──││ nesta sessão do broker.        │
+│ ○ leader           [idle]││                                                        │├────────────────────────────────┤
+│   tech lead · sem feature││                                                        ││ squad · 2 de 6 entraram        │
+│   tlc-plan help-me       ││                                                        ││ ○ mother   [idle]              │
+│                          ││                                                        ││ ○ leader   [idle]              │
+│ · worker-1  [não lançado]││                                                        ││ · worker-1 [não lançado]       │
+│   worker · nunca entrou  ││                                                        ││ · worker-2 [não lançado]       │
+│   sem sessão no broker   ││                                                        ││ · worker-3 [não lançado]       │
+│                          ││                                                        ││ · judge    [não lançado]       │
+│ · worker-2  [não lançado]││                                                        │├────────────────────────────────┤
+│   worker · nunca entrou  ││                                                        ││ [não lançado] não é [offline]: │
+│   sem sessão no broker   ││                                                        ││ offline é sessão que entrou e  │
+│                          ││                                                        ││ morreu.                        │
+│ · worker-3  [não lançado]││                                                        │├────────────────────────────────┤
+│   worker · nunca entrou  ││                                                        ││ loadout leader                 │
+│   sem sessão no broker   ││                                                        ││ tlc-plan · help-me             │
+│                          ││                                                        ││                                │
+│ · judge     [não lançado]││                                                        ││                                │
+│   judge · nunca entrou   ││                                                        ││                                │
+│   sem sessão no broker   ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+├─ tickets ────────────────┤│                                                        ││                                │
+│                          ││                                                        ││                                │
+│ ○ sem feature aberta     ││                                                        ││                                │
+│   aparecem com o plano   ││                                                        ││                                │
+│   da primeira feature    ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 9k  ldr —  w1 —  w2 —  w3 —  jdg —  │ sessão ≈$0.14 est.                                   ○ nenhuma feature ainda
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

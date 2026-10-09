@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:53:10
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda                       ⚠ G-01 pendente · mother revisando
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ● mother        [working]││  hora     de    p/  kind            corpo              ││ msg #0456      [gate_decision] │
+│   objetivo · revisando G…││  14:20:13 ldr → w3  [task]          formato de data da…││ de    hum dev                  │
+│   tlc-discover to-spec t…││  14:21:00 w3  → ldr [question]      Q-05 formato de da…││ para  mot mother               │
+│                          ││  14:21:30 mot → hum [question]      ? Q-05 timeout 4min││ hora  14:53:02                 │
+│ ✓ leader           [done]││  14:23:40 w2  → ldr [question]      Q-06 público ou au…││ escopo feature (sem ticket)    │
+│   tech lead · 3/3 tickets││  14:23:52 mot → hum [question]      ? Q-06 [BLOQUEANTE]│├────────────────────────────────┤
+│   tlc-plan help-me       ││  14:24:10 hum → w2  [answer]        Q-06: público, só …││ Comentário do dev no G-01:     │
+│                          ││  14:25:30 ⟳ Q-05 timeout · default aplicado: HH:mm     ││ "Antes do merge, confirme que  │
+│ ✓ worker-1         [done]││  14:26:47 w1  → jdg [result]        player + controles…││ o player não faz autoplay no   │
+│   worker · TKT-12 ✓ ⟳0/2 ││  14:27:30 w3  → jdg [result]        horários em HH:mm …││ iOS." O gate continua          │
+│   tlc-implement coding-g…││  14:28:03 jdg → ldr [verdict]       rework: reconexão …││ pendente; a mother vai         │
+│                          ││  14:28:30 ldr → w1  [task]          rework 1/2: retry …││ reemitir o G-01.               │
+│ ✓ worker-2         [done]││  14:28:52 jdg → ldr [verdict]       approve 1/1        │├────────────────────────────────┤
+│   worker · TKT-13 ✓      ││  14:29:10 w1  → ldr [question]      Q-07 retry infinit…││ thread da feature · 6 msgs     │
+│   tlc-implement coding-g…││  14:29:25 ldr → mot [question]      Q-07 encaminhada   ││  14:18 ldr→mot [question]      │
+│                          ││  14:29:40 mot → hum [question]      ? Q-07 [BLOQUEANTE]││  14:19 mot→ldr [answer]        │
+│ ✓ worker-3         [done]││  14:30:20 w2  → ldr [question]      Q-10 caixa alta no…││  14:45 ldr→mot [result]        │
+│   worker · TKT-14 ✓      ││  14:30:35 mot → hum [question]      ? Q-10 timeout 4min││  14:51 mot→hum [gate]          │
+│   sem loadout            ││  14:30:55 w2  → jdg [result]        /api/setlist + cac…││ ▶14:53 hum→mot [gate_decision] │
+│                          ││  14:30:56 ⟳ Q-10 fechada · w2 entregou antes da respos…│├────────────────────────────────┤
+│ ✓ judge            [done]││  14:31:02 w2  → ldr [question]      Q-08 faixa sem cap…││ loadout mother                 │
+│   judge · 7/7 critérios  ││  14:31:15 mot → hum [question]      ? Q-08 timeout 4min││ tlc-discover · to-spec ·       │
+│   spec-driven-eval ponyt…││  14:31:20 jdg → w2  [question]      Q-11 cache invalid…││ the-fool                       │
+│                          ││  14:31:34 ldr → mot [question]      Q-12 limite de rec…││                                │
+│                          ││  14:31:36 ⟳ Q-12 mesclada em Q-07 pela mother          ││                                │
+│                          ││  14:31:48 w2  → jdg [answer]        Q-11: sim, via ETag││                                │
+├─ tickets ────────────────┤│  14:33:02 hum → w1  [answer]        Q-07: infinito com…││                                │
+│ TKT-12 player de áudio w1││  14:35:15 ⟳ Q-08 timeout · default aplicado: logo da 89││                                │
+│ ⟳1/2 [done]              ││  14:39:52 w1  → jdg [result]        backoff + retomada…││                                │
+│ TKT-13 API da setlist  w2││  14:43:50 jdg → ldr [verdict]       approve 5/5        ││                                │
+│ ⟳0/2 [done]              ││  14:45:30 jdg → ldr [verdict]       approve 1/1        ││                                │
+│ TKT-14 data na setlist w3││  14:45:41 ldr → mot [result]        3/3 tickets aprova…││                                │
+│ ⟳0/2 [done]              ││  14:51:58 mot → hum [gate]          G-01 entrega final ││                                │
+│                          ││▶ 14:53:02 hum → mot [gate_decision] comentário: autopl…││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 58k  ldr 121k  w1 171k  w2 112k  w3 22k  jdg 193k  │ feature ≈$10.17 est.           ○ aguardando a mother reemitir
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

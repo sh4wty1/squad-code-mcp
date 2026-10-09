@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:48:20
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ thread TKT-12 · player de áudio ────────────────────────────────────────┐┌─ judge · nota por critério ──────────────┐
+│ worker-1 · aberto 14:20:11 · escalado 14:47:55 · ⟳ 2/2                   ││ critério da spec            v1   v2   v3 │
+│                                                                          ││ 1 play/pause e volume       ✓    ✓    ✓  │
+│ 14:20:11 ● [task]     ldr → w1                                           ││ 2 metadados da faixa        ✓    ✓    ✓  │
+│          │ Player HLS: play/pause, volume e metadados. Critérios 1–4, 6  ││ 3 reconexão após queda      ✗    ✗    ✓  │
+│          │                                                               ││ 4 acessível por teclado     ✓    ✓    ✓  │
+│ 14:26:47 ● [result]   w1 → jdg     6m36s · 18.4k tok                     ││ 6 funciona no iOS           ✓    ✓    ✗  │
+│          │ PlayerBar, useHlsStream, NowPlaying + testes. +312 −18        │├──────────────────────────────────────────┤
+│          │                                                               ││ v1 14:28:03  ✗ rework     4/5            │
+│ 14:28:03 ✗ [verdict]  jdg → ldr    REWORK ⟳ 1/2 · 4/5                    ││ v2 14:38:40  ✗ rework     4/5            │
+│          │ "reconexão após queda do stream" não atendido.                ││ v3 14:47:30  ✗ reprovado  4/5            │
+│          │                                                               │├──────────────────────────────────────────┤
+│ 14:28:30 ● [task]     ldr → w1     rework 1/2                            ││ limite de rework                         │
+│          │ Retry com backoff e retomada sem ação do usuário.             ││ ⟳ 2/2 atingido · sem 3º rework           │
+│          │                                                               ││ escalado à mother 14:47:55               │
+│ 14:36:10 ● [result]   w1 → jdg     7m40s · 15.1k tok                     ││ pergunta bloqueante do leader            │
+│          │ Backoff exponencial; retoma do ponto em que parou. +86 −12    │├──────────────────────────────────────────┤
+│          │                                                               ││ notas do judge                           │
+│ 14:38:40 ✗ [verdict]  jdg → ldr    REWORK ⟳ 2/2 · 4/5                    ││ 3 v1   fica em erro ao derrubar o HLS.   │
+│          │ Volta ~40s atrás do ao vivo; precisa voltar na borda.         ││ 3 v2   volta ~40s atrás do ao vivo.      │
+│          │                                                               ││ 6 v3   no iOS o áudio não volta a tocar  │
+│ 14:39:05 ● [task]     ldr → w1     rework 2/2 · o último                 ││        depois de reconectar.             │
+│          │ Ao reconectar, pular para a borda ao vivo do HLS.             │├──────────────────────────────────────────┤
+│          │                                                               ││ custo do thread (estimado)               │
+│ 14:46:20 ● [result]   w1 → jdg     7m15s · 12.6k tok                     ││ w1 58.7k tok ≈$0.88  jdg 26.4k ≈$0.40    │
+│          │ liveSyncPosition do hls.js ao reconectar. +41 −9              ││                                          │
+│          │                                                               ││                                          │
+│ 14:47:30 ✗ [verdict]  jdg → ldr    REPROVADO · 4/5 · limite atingido     ││                                          │
+│          │ Reconexão ok, mas no iOS o áudio não volta a tocar.           ││                                          │
+│          │                                                               ││                                          │
+│ 14:47:55 ? [question] ldr → mot    ESCALADO · bloqueante · sem 3º rework ││                                          │
+│          │ Reprovado 3x. Replanejar, aceitar com ressalva ou cancelar?   ││                                          │
+│                                                                          ││                                          │
+│ fluxo  ✗ v1 ▶ rework ▶ ✗ v2 ▶ rework ▶ ✗ v3 ▶ ⚠ limite 2/2 ▶ ldr → mot   ││                                          │
+│                                                                          ││                                          │
+└──────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────────┘
+
+ j/k rolar   [ ] ticket ant/próx   esc voltar   b próx. bloqueante   1-4 telas   ? ajuda   q sair
