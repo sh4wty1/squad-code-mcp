@@ -151,7 +151,7 @@ export function thread(view: View): Grid {
   let start = end;
   let used = 0;
   while (start > 0) {
-    const need = entries[start - 1]!.length + (used ? 1 : 0);
+    const need = Math.min(entries[start - 1]!.length, budget - (start > 1 ? 2 : 0)) + (used ? 1 : 0);
     if (used && used + need + (start > 1 ? 2 : 0) > budget) break;
     used += need;
     start--;
@@ -163,7 +163,10 @@ export function thread(view: View): Grid {
   }
   entries.slice(start, end).forEach((lines, i) => {
     if (i) g.put(11, y++, "│", "gray");
-    for (const line of lines) line(y++);
+    const room = 35 - (after ? 2 : 0) - y;
+    const clipped = lines.length > room;
+    for (const line of lines.slice(0, clipped ? room - 1 : room)) line(y++);
+    if (clipped) g.put(13, y++, "… conteúdo cortado", "gray");
   });
   if (after) {
     g.put(11, y++, "│", "gray");

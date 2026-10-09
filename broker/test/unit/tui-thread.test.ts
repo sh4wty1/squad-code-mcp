@@ -194,3 +194,18 @@ test("Assumptions: the thread is of the chosen ticket, or of the one of the sele
   const none = lines("26a");
   expect([part(none[2]!, 0, 11), left(none[5]!)]).toEqual(["┌─ thread ──", "○ nenhum ticket ainda"]);
 });
+
+test("F2 / TUI-46: a valid multiline summary stays inside the timeline with a cut marker", () => {
+  const change: Change = (events) => events.map((e) => e.seq === 406 ? { ...e, summary: Array(40).fill("a").join("\n") } : e);
+  for (const offset of [0, 1, 2, 3]) {
+    const ui = { threadTicket: "TKT-12", threadOffset: offset };
+    const plain = lines("24b", ui);
+    const drawn = lines("24b", ui, change);
+    expect(drawn.slice(35)).toEqual(plain.slice(35));
+    if (heads(drawn).some((h) => h.includes("[task]"))) {
+      expect(drawn.slice(5, 35).some((row) => row.includes("… conteúdo cortado"))).toBe(true);
+      expect(drawn.slice(5, 35).some((row) => left(row) === "         │ a")).toBe(true);
+    }
+  }
+  expect(heads(lines("24b", { threadTicket: "TKT-12", threadOffset: 3 }, change)).some((h) => h.includes("[task]"))).toBe(true);
+});
