@@ -150,10 +150,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `paint(next, null)` escreve todas as linhas; `paint(next, prev)` só as que diferem, cada uma com o posicionamento do cursor da sua linha
-- [ ] Cada cor do protótipo vira o SGR do design, com negrito e fundo
-- [ ] Um glifo com substituto sai trocado; `parseGlyphs("⚠=!,⟳=~")` devolve os dois pares; um par sem exatamente um caractere de cada lado lança com o par na mensagem
-- [ ] Testes em `test/unit/tui-ansi.test.ts`; gate quick passa
+- [x] `paint(next, null)` escreve todas as linhas; `paint(next, prev)` só as que diferem, cada uma com o posicionamento do cursor da sua linha
+- [x] Cada cor do protótipo vira o SGR do design, com negrito e fundo
+- [x] Um glifo com substituto sai trocado; `parseGlyphs("⚠=!,⟳=~")` devolve os dois pares; um par sem exatamente um caractere de cada lado lança com o par na mensagem
+- [x] Testes em `test/unit/tui-ansi.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
