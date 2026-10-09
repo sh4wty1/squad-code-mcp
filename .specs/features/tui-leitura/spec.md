@@ -17,10 +17,10 @@ das fatias Question e Gate.
 
 ## Goals
 
-- [ ] `bun tui.ts`, num terminal de 120×40 ou maior, mostra o estado do squad a partir de `GET /events` e o atualiza a cada segundo, sem ler o banco.
-- [ ] O status de cada agente e de cada ticket sai de uma função pura sobre os eventos, em `broker/shared/derive.ts`, com a precedência da fatia.
-- [ ] Cada frame de leitura do handoff é um caso de teste: um log que reproduz o estado do frame desenha as mesmas 40 linhas, e toda diferença está declarada com o motivo.
-- [ ] A TUI não escreve nada no broker.
+- [x] `bun tui.ts`, num terminal de 120×40 ou maior, mostra o estado do squad a partir de `GET /events` e o atualiza a cada segundo, sem ler o banco.
+- [x] O status de cada agente e de cada ticket sai de uma função pura sobre os eventos, em `broker/shared/derive.ts`, com a precedência da fatia.
+- [x] Cada frame de leitura do handoff é um caso de teste: um log que reproduz o estado do frame desenha as mesmas 40 linhas, e toda diferença está declarada com o motivo.
+- [x] A TUI não escreve nada no broker.
 - [ ] A suíte passa no Windows e no Linux.
 
 ## Out of Scope
@@ -131,7 +131,7 @@ Valem as das specs da Event e da Feature. Mais:
 - **Agora**: o relógio da máquina da TUI, em epoch ms, passado à derivação; ela não lê relógio.
 - **Feature aberta**: a última de `features(log)` com `closed_seq` nulo.
 - **Em turno**: entre os `turn_started` e `usage` do agente, o mais recente é `turn_started`.
-- **Pedido de permissão aberto**: `permission_request` sem `permission_decision` que o cite em `request_seq` e sem evento do mesmo peer com `seq` maior.
+- **Pedido de permissão aberto**: `permission_request` sem `permission_decision` que o cite em `request_seq`, sem evento do mesmo peer com `seq` maior e sem `peer_left` posterior cujo `peer` seja o requerente. A saída encerra o pedido daquela sessão, como em `broker/permission.ts`; `refused` e `unblocked` escritos pelo broker não encerram o pedido.
 - **Ticket em andamento**: para o worker, ticket da feature aberta de que ele é dono e cujo último evento de ticket é `task`; para o leader, algum ticket do plano nem aprovado nem descartado; para o judge, um `result` sem `verdict`; a mother nunca tem. Depois de um `verdict` de `rework` abaixo do limite o ticket continua `working`, mas a bola está com o leader: o worker dono não tem ticket em andamento nem dívida, e fica `idle`.
 - **Frame**: as linhas de texto de um frame do protótipo, extraídas uma vez para `broker/test/frames/<id>.txt`.
 
@@ -273,70 +273,70 @@ Valem as das specs da Event e da Feature. Mais:
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| TUI-01 | P1: Status derivado do log | Specify | Implementing |
-| TUI-02 | P1: Status derivado do log | Specify | Implementing |
-| TUI-03 | P1: Status derivado do log | Specify | Implementing |
-| TUI-04 | P1: Status derivado do log | Specify | Implementing |
-| TUI-05 | P1: Status derivado do log | Specify | Implementing |
-| TUI-06 | P1: Status derivado do log | Specify | Implementing |
-| TUI-07 | P1: Status derivado do log | Specify | Implementing |
-| TUI-08 | P1: Status derivado do log | Specify | Implementing |
-| TUI-09 | P1: Status derivado do log | Specify | Implementing |
-| TUI-10 | P1: Status derivado do log | Specify | Implementing |
-| TUI-11 | P1: Status derivado do log | Specify | Implementing |
-| TUI-12 | P1: Status derivado do log | Specify | Implementing |
-| TUI-13 | P1: Status derivado do log | Specify | Implementing |
-| TUI-14 | P1: Status derivado do log | Specify | Implementing |
-| TUI-15 | P1: Status derivado do log | Specify | Implementing |
-| TUI-16 | P1: Status derivado do log | Specify | Implementing |
-| TUI-17 | P1: Status derivado do log | Specify | Implementing |
-| TUI-18 | P1: Status derivado do log | Specify | Implementing |
-| TUI-19 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-20 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-21 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-22 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-23 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-24 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-25 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-26 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-27 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-28 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-29 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-30 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-31 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-32 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-33 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-34 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-35 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-36 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-37 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-38 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-39 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-40 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-41 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-42 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-43 | P1: Feed e tela principal | Specify | Implementing |
-| TUI-44 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-45 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-46 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-47 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-48 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-49 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-50 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-51 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-52 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-53 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-54 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-55 | P1: Topologia, thread, legenda e estados da tela | Specify | Implementing |
-| TUI-56 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-57 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-58 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-59 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-60 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-61 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-62 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-63 | P1: Rodar no terminal | Specify | Implementing |
-| TUI-64 | P1: Rodar no terminal | Specify | Implementing |
+| TUI-01 | P1: Status derivado do log | Execute | Verified |
+| TUI-02 | P1: Status derivado do log | Execute | Verified |
+| TUI-03 | P1: Status derivado do log | Execute | Verified |
+| TUI-04 | P1: Status derivado do log | Execute | Verified |
+| TUI-05 | P1: Status derivado do log | Execute | Verified |
+| TUI-06 | P1: Status derivado do log | Execute | Verified |
+| TUI-07 | P1: Status derivado do log | Execute | Verified |
+| TUI-08 | P1: Status derivado do log | Execute | Verified |
+| TUI-09 | P1: Status derivado do log | Execute | Verified |
+| TUI-10 | P1: Status derivado do log | Execute | Verified |
+| TUI-11 | P1: Status derivado do log | Execute | Verified |
+| TUI-12 | P1: Status derivado do log | Execute | Verified |
+| TUI-13 | P1: Status derivado do log | Execute | Verified |
+| TUI-14 | P1: Status derivado do log | Execute | Verified |
+| TUI-15 | P1: Status derivado do log | Execute | Verified |
+| TUI-16 | P1: Status derivado do log | Execute | Verified |
+| TUI-17 | P1: Status derivado do log | Execute | Verified |
+| TUI-18 | P1: Status derivado do log | Execute | Verified |
+| TUI-19 | P1: Feed e tela principal | Execute | Verified |
+| TUI-20 | P1: Feed e tela principal | Execute | Verified |
+| TUI-21 | P1: Feed e tela principal | Execute | Verified |
+| TUI-22 | P1: Feed e tela principal | Execute | Verified |
+| TUI-23 | P1: Feed e tela principal | Execute | Verified |
+| TUI-24 | P1: Feed e tela principal | Execute | Verified |
+| TUI-25 | P1: Feed e tela principal | Execute | Verified |
+| TUI-26 | P1: Feed e tela principal | Execute | Verified |
+| TUI-27 | P1: Feed e tela principal | Execute | Verified |
+| TUI-28 | P1: Feed e tela principal | Execute | Verified |
+| TUI-29 | P1: Feed e tela principal | Execute | Verified |
+| TUI-30 | P1: Feed e tela principal | Execute | Verified |
+| TUI-31 | P1: Feed e tela principal | Execute | Verified |
+| TUI-32 | P1: Feed e tela principal | Execute | Verified |
+| TUI-33 | P1: Feed e tela principal | Execute | Verified |
+| TUI-34 | P1: Feed e tela principal | Execute | Verified |
+| TUI-35 | P1: Feed e tela principal | Execute | Verified |
+| TUI-36 | P1: Feed e tela principal | Execute | Verified |
+| TUI-37 | P1: Feed e tela principal | Execute | Verified |
+| TUI-38 | P1: Feed e tela principal | Execute | Verified |
+| TUI-39 | P1: Feed e tela principal | Execute | Verified |
+| TUI-40 | P1: Feed e tela principal | Execute | Verified |
+| TUI-41 | P1: Feed e tela principal | Execute | Verified |
+| TUI-42 | P1: Feed e tela principal | Execute | Verified |
+| TUI-43 | P1: Feed e tela principal | Execute | Verified |
+| TUI-44 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-45 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-46 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-47 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-48 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-49 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-50 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-51 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-52 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-53 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-54 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-55 | P1: Topologia, thread, legenda e estados da tela | Execute | Verified |
+| TUI-56 | P1: Rodar no terminal | Execute | Verified |
+| TUI-57 | P1: Rodar no terminal | Execute | Verified |
+| TUI-58 | P1: Rodar no terminal | Execute | Verified |
+| TUI-59 | P1: Rodar no terminal | Execute | Verified |
+| TUI-60 | P1: Rodar no terminal | Execute | Verified |
+| TUI-61 | P1: Rodar no terminal | Execute | Verified |
+| TUI-62 | P1: Rodar no terminal | Execute | Verified |
+| TUI-63 | P1: Rodar no terminal | Execute | Verified |
+| TUI-64 | P1: Rodar no terminal | Execute | Verified |
 
 **Coverage:** 64 total, 64 mapped to tasks, 0 unmapped. Nenhum está `Verified`: o Verifier deu FAIL em duas rodadas, por lacuna de teste, e não rodou depois da última correção (`d013585`).
 

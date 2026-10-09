@@ -94,51 +94,22 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Escrito em 2026-10-09, com a fatia TUI leitura no PR 8 (https://github.com/sh4wty1/squad-code-mcp/pull/8) e sem PASS do Verifier.
+Atualizado em 2026-10-09. PR 8: https://github.com/sh4wty1/squad-code-mcp/pull/8.
 
-- **Feature**: fatia TUI leitura, `.specs/features/tui-leitura/`
-- **Phase / Task**: Execute. T1 a T30 commitadas (`4657be1` a `1f377d5`), mais duas rodadas de correção (`d2c21a1` a `fb41991`, feita no Codex, e `d013585`).
-- **Completed**: T1 a T30. Nenhum requisito está `Verified`.
-- **In-progress** (file:line): nada
-- **Next step**: revisar o PR com `/the-judge`. A fatia só é marcada em `ROADMAP.md` e a rastreabilidade da spec só vai a `Verified` com um PASS do Verifier; o prompt dele está no fim de `.specs/features/tui-leitura/fix-round-1.md` (trocar "round 2" por "round 3" e a lista de sobreviventes pela da rodada 2).
-- **Blockers**: o veredito registrado é FAIL. `validate_state.py tui-leitura` sai com 1. O dev decidiu abrir o PR assim, sem a terceira rodada.
-- **Uncommitted files**: none
-- **Branch**: `feat/tui-leitura`
+- **Feature**: TUI leitura, `.specs/features/tui-leitura/`.
+- **Phase / Task**: verificação concluída; correções commitadas e publicadas após aprovação do dev.
+- **Completed**: T1–T30 e F1–F4 corrigidos. Verifier independente, rodada 3: PASS, 64/64 ACs, 9/9 bordas, 24/24 mutações mortas ao final. Requisitos Verified e TUI leitura marcada no ROADMAP.
+- **In-progress** (file:line): nenhuma implementação em curso. Correções em `1eaf4b1`, `a943d95`, `83f1eef` e `98b8323`, publicadas sobre `004fe43`; tabela Resolution em `.specs/features/tui-leitura/fix-round-2.md:9`.
+- **Next step**: conferir a resolução F1–F4 no PR 8 se solicitado; Question é a próxima fatia e não foi iniciada. Não fazer merge sem instrução do dev.
+- **Blockers**: nenhum bloqueio técnico; commits e push aprovados pelo dev em 2026-10-09. Windows, macOS e terminal interativo real não executados nesta rodada.
+- **Uncommitted files**: após o commit documental aprovado, somente os três registros anteriores preservados: `docs/tasks/2026-10-09-handoff-pr-8.md`, `docs/tasks/2026-10-09-judge-pr-8.md` e `docs/tasks/2026-10-09-sincronizar-e-localizar-retomada.md`. Não incluídos no escopo aprovado.
+- **Branch**: `feat/tui-leitura`, base revisada `004fe43`; correções publicadas até `98b8323`, seguidas pelo commit documental aprovado. Sem merge.
 
-### Como a verificação ficou
+### Evidência e limites
 
-Duas rodadas do Verifier, as duas FAIL, as duas só por lacuna de teste: nenhuma achou comportamento que contradiga a spec. O relatório em `.specs/features/tui-leitura/validation.md` é o da rodada 2, sobre `main..fb41991`; o da rodada 1 está no git (`a167cd7`).
-
-- Rodada 1 (`1f377d5`): 56 de 64 ACs, 210 mutações, 18 sobreviventes não equivalentes, um log de frame dobrado, quatro lacunas de precisão da spec. Correção em `d2c21a1..fb41991`, a partir de `fix-round-1.md`.
-- Rodada 2 (`fb41991`): 62 de 64 ACs, os 18 da rodada 1 mortos, 46 mutações novas com 8 sobreviventes não equivalentes (TUI-35, TUI-24, TUI-59), o log do frame 25a ainda com uma recusa que o broker não escreveria, duas lacunas de precisão (TUI-37, TUI-44). Correção em `d013585`.
-- Depois de `d013585` não houve Verifier. O que foi conferido: as oito mutações da rodada 2 e as duas das regras novas, aplicadas uma a uma, falham os testes novos; a suíte passa nos dois sistemas.
-- Os 41 frames são idênticos byte a byte a uma nova extração do zip (conferido nas duas rodadas). Os 16 desvios de status são exatamente a tabela do `design.md`, cada um com a linha do design.
-- Lições: L-001 e L-020 foram confirmadas; L-037 a L-048 são candidatas.
-
-### Ambiente
-
-- De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. Windows, bun 1.3.14, em `d013585`: 923 testes, 920 passam, 3 pulados, uns 60 s. Nunca `bun x tsc`.
-- Linux, em `d013585`: 923 passam, 0 falham, 0 pulados, no contêiner `oven/bun:1.3.14` com `git`, `lsof` e `procps` instalados por `apt-get` e a suíte rodada num clone do branch. Sem `lsof` e `ps`, `PEER-34`, `PEER-35` e `PEER-45` falham, na `main` também: a imagem não os traz.
-- A TUI roda com `bun tui.ts`; a sonda de glifos com `bun tui/probe.ts`. No Windows Terminal 1.24.11911.0 os 43 glifos contam uma célula.
-- Teste instável: `EVT-43` em `broker/test/integration/routes.test.ts` falha de vez em quando por 1 ms. Sob carga a suíte de integração já estourou tempo uma vez e passou na repetição.
-- Os testes de integração sobem processos reais, sempre com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Nunca subir `broker.ts` ou `server.ts` à mão sem os dois.
-- No bun, `await expect(promessa).rejects...` trava o laço de eventos nos testes de integração, e um `fetch` falso que escuta `AbortSignal.timeout` trava o `bun test`.
-- No Git Bash desta máquina, crase dentro de heredoc quebra o comando, e um heredoc pode trocar `\` por `\`.
-- Python é `py -3`; `python3` não está instalado.
-- Mensagens de commit seguem a convenção do repositório (frase imperativa em minúsculas), não Conventional Commits.
-
-### Pendências que a fatia deixa
-
-- `cost()` casa o nome do modelo exato: um `usage.model` com sufixo de data ou `[1m]` custa zero sem aviso. É da fatia Papéis, que entrega o hook.
-- `/escalate`, na fatia Question, precisa copiar `timeout_s` para o `question` que chega ao dev; senão o prazo cai em 240 s.
-- Nenhuma tecla limpa a seleção do feed: depois de selecionar uma linha, o resumo da última feature (TUI-40) não volta.
-- A tela de broker desconectado diz "a cada 1s" qualquer que seja `SQUAD_POLL_INTERVAL_MS`.
-- Da Event, ainda aberta: ticket descartado que nunca recebeu `task` pode sumir de um `plan` e voltar no seguinte; `SQUAD_POLL_INTERVAL_MS` não numérica vira `NaN` em `broker/shared/config.ts` (a TUI trata o próprio uso).
-- O relatório da Peer (`.specs/features/peer/validation.md`) termina em FAIL na rodada 6, por mutantes sobreviventes; não foi conferido se foram fechados depois.
-
-### Não verificado
-
-- Terminal interativo real: a TUI só foi vista subindo e ficando de pé por 7 s no Windows Terminal, sem broker. Ninguém olhou a tela nem apertou tecla.
-- `SIGINT`, `SIGTERM` e erro não tratado reais; o intervalo padrão de 1 s por relógio.
-- Sessão real do Claude Code alimentando a tela, e eventos de `question`, `answer` e `gate` gravados pelo broker.
-- macOS.
+- TypeScript passa; Linux com Bun 1.3.14: 929 testes passam, zero falham/pulados, 5664 assertions, 48 arquivos. `validate_state.py tui-leitura`: exit 0.
+- Sensor em cópia isolada: os oito sobreviventes da rodada 2, as duas prioridades clarificadas e 14 mutações novas morreram. Shift-tab sobreviveu inicialmente ao teste de texto; após asserção da saída ANSI morreu na repetição. L-049 registrada como candidata.
+- Os 41 frames permanecem idênticos à extração original. Relatório: `.specs/features/tui-leitura/validation.md`; registro: `docs/tasks/2026-10-09-corrigir-review-pr-8.md`.
+- A review The Judge original foi COMMENT com quatro should-fix. F1–F4 foram conferidos localmente; nenhuma nova review ou resolução de comentários foi publicada no GitHub.
+- Nunca subir `broker.ts` ou `server.ts` manualmente sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários; não usar `bun x tsc`.
+- Compatibilidade Windows e terminal real são limites explícitos do relatório. Pendências anteriores continuam em ROADMAP, design e histórico deste STATE; nenhuma foi implementada fora do escopo.

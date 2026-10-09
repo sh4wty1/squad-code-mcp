@@ -300,6 +300,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: TUI-37 (spec) (+1 more)
 - last seen: 2026-10-09T18:48:24Z
 
+### L-049 - Assert cell attributes or emitted ANSI when a TUI behavior changes only styling, because text snapshots cannot detect it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
+- features: tui-leitura
+- evidence: R07-F3; test/unit/tui-loop.test.ts:324 (tui)
+- last seen: 2026-10-09T22:42:40Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

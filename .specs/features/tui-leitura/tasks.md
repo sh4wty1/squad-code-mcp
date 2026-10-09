@@ -729,3 +729,18 @@ nenhuma. Nenhuma dependência aponta para fase posterior.
 | T27, T28 | Processo | unit | unit | ✅ |
 | T29 | Entrada | integration | integration | ✅ |
 | T30 | Documentação | none | none | ✅ |
+
+---
+
+## Correções da review do PR 8 (2026-10-09)
+
+Escopo e evidências em `fix-round-2.md`; commits e push aprovados pelo dev em 2026-10-09.
+Correções publicadas em `1eaf4b1`, `a943d95`, `83f1eef` e `98b8323`.
+
+- [x] F1: encerrar pedido de permissão no `peer_left` posterior do requerente; regressão com broker em memória, saída e rejoin, preservando recusa/unblocked como eventos distintos.
+- [x] F2: limitar a entrada individual do thread ao painel, com aviso de corte e borda/fluxo/atalhos preservados em todos os offsets do cenário reproduzido.
+- [x] F3: guardar sequências CSI fragmentadas e entregar Escape isolado com timeout curto; testar setas, shift-tab com cores e cancelamento do timer na saída.
+- [x] F4: substituir controles na fronteira de escrita das células; testar título multilinha aceito pelo broker e C0/DEL/C1.
+- [x] Gate Linux: TypeScript e 929 testes passam, zero falhas e zero pulados.
+- [x] Verifier independente, rodada 3: 64/64 ACs, 9/9 bordas e 24/24 mutações mortas após correção da asserção ANSI.
+**Limitação:** Windows indisponível neste ambiente. Executar novamente nessa plataforma antes de afirmar compatibilidade atual; resultados anteriores não substituem esta execução.

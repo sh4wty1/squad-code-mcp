@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 49,
+  "next_id": 50,
   "lessons": [
     {
       "id": "L-001",
@@ -881,6 +881,24 @@
       ],
       "created": "2026-10-09T18:48:24Z",
       "last_seen": "2026-10-09T18:48:24Z"
+    },
+    {
+      "id": "L-049",
+      "key": "surviving_mutant::assert cell attributes or emitted ansi when a tui behavior changes only styling because text snapshots cannot detect it",
+      "text": "Assert cell attributes or emitted ANSI when a TUI behavior changes only styling, because text snapshots cannot detect it",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R07-F3; test/unit/tui-loop.test.ts:324 (tui)"
+      ],
+      "created": "2026-10-09T22:42:40Z",
+      "last_seen": "2026-10-09T22:42:40Z"
     }
   ]
 }
