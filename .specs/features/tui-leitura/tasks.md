@@ -417,11 +417,11 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] A terceira linha do agente segue a ordem de TUI-35, uma asserção por alternativa
-- [ ] Título `agentes · 6` e `agentes · 2/6 no ar`
-- [ ] Tickets em duas linhas até três, uma linha de quatro a sete, `+N tickets` acima de sete; as notas de TUI-37; os três textos de painel vazio
-- [ ] Colunas 0 a 27 dos frames 01, 10, 13a, 14, 23a, 24a, 24c, 25a, 26a, 28a e 28b batem, fora os desvios declarados
-- [ ] Testes em `test/unit/tui-main.test.ts`; gate quick passa
+- [x] A terceira linha do agente segue a ordem de TUI-35, uma asserção por alternativa
+- [x] Título `agentes · 6` e `agentes · 2/6 no ar`
+- [x] Tickets em duas linhas até três, uma linha de quatro a sete, `+N tickets` acima de sete; as notas de TUI-37; os três textos de painel vazio
+- [x] Colunas 0 a 27 dos frames 01, 10, 13a, 14, 23a, 24a, 24c, 25a, 26a, 28a e 28b batem, fora os desvios declarados
+- [x] Testes em `test/unit/tui-main.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

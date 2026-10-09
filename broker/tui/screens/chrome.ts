@@ -1,7 +1,7 @@
 // What every screen has around it: line 0, the tabs and the seals of line 1, the tokens
 // of line 38 and the keys of line 39. Ported from `chrome`, `stats` and `drawKeys`.
 
-import { SQUAD, type Totals } from "../../shared/derive.ts";
+import { SQUAD, type Agent, type AgentStatus, type TicketStatus, type Totals } from "../../shared/derive.ts";
 import { right, seals } from "../activity.ts";
 import { cost } from "../config.ts";
 import { clock, cut, len, type Color, type Grid, type Seg } from "../grid.ts";
@@ -134,4 +134,34 @@ export function stats(g: Grid, view: View) {
 
   const side: Seg[] = right(squad, view.rows, ui).map(([text, color]) => [text, color, true]);
   g.segs(119 - segLen(side), y, side);
+}
+
+// The color and the glyph of each status of an agent, and the color of each status of a ticket
+export const STATUS: Record<AgentStatus, [color: Color, glyph: string]> = {
+  idle: ["gray", "○"],
+  working: ["bblue", "●"],
+  waiting: ["white", "○"],
+  blocked: ["bred", "⚠"],
+  offline: ["red", "◌"],
+  done: ["bgreen", "✓"],
+  stalled: ["byellow", "‖"],
+  never: ["gray", "·"],
+};
+
+export const TICKET_TONE: Record<TicketStatus, Color> = {
+  working: "bblue",
+  review: "blue",
+  waiting: "white",
+  blocked: "bred",
+  escalated: "bred",
+  done: "bgreen",
+  planned: "cyan",
+  dropped: "gray",
+};
+
+// `[blocked x]` with a permission request, `[waiting ?]` with a blocking question of its own
+export function statusSegs(a: Agent): Seg[] {
+  if (a.status === "blocked" && a.permission) return [["[blocked ", "bred", true], ["x", "bwhite", true], ["]", "bred", true]];
+  if (a.status === "waiting" && a.blockingQuestion !== null) return [["[waiting ", "white"], ["?", "bred", true], ["]", "white"]];
+  return [[`[${a.status === "never" ? "não lançado" : a.status}]`, STATUS[a.status][0], a.status === "blocked"]];
 }

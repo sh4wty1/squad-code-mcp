@@ -353,6 +353,8 @@ const stalled = [
   until(MAIN, 419).filter((e) => e.seq !== 418),
   turn(405.2, "14:19:52", LDR),
   turn(406.1, "14:20:12", W1),
+  // The leader read the question of worker-2 and nothing after it
+  turn(411.2, "14:23:42", LDR),
   // 464 in the prototype: the turn of worker-2 ends without the result
   usage(414.5, "14:26:00", W2, 58000),
   tokens({ mot: 36000, ldr: 79333, w1: 104000, w3: 22000, jdg: 46000 }),
