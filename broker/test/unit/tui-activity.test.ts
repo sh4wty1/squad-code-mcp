@@ -3,6 +3,8 @@ import type { SquadEvent } from "../../shared/contract.ts";
 import { squad } from "../../shared/derive.ts";
 import { activity, refs, right, seals } from "../../tui/activity.ts";
 import { feed } from "../../tui/feed.ts";
+import { main } from "../../tui/screens/main.ts";
+import { frameView } from "../frames/view.ts";
 import { LOGS } from "../frames/logs.ts";
 
 // The state of a frame of the prototype, with more events or only the first ones
@@ -85,6 +87,14 @@ test("TUI-35: the time left of a non-blocking question of the agent that reached
   // Q-08 reached the dev at 14:31:15 with 240 s; the frame is at 14:32:07
   expect(state("01").of("w2")).toEqual({ text: "TKT-13 review", rework: null, left: 188 });
   expect(state("01").of("w1").left).toBeNull();
+});
+
+test("TUI-35: an overdue question countdown stops at zero before the default", () => {
+  const view = frameView("01");
+  view.squad.now = new Date(2026, 9, 7, 14, 35, 16).getTime();
+  expect(view.squad.questions.find((q) => q.id === 8)!.open).toBe(true);
+  expect(activity(view.squad.agents.find((a) => a.name === "worker-2")!, view.squad, view.rows).left).toBe(0);
+  expect(main(view).text()[16]).toContain("? 0:00");
 });
 
 test("TUI-35: references with the same prefix are joined, the others are separated by a space", () => {

@@ -135,6 +135,31 @@ test("TUI-37: exactly eight tickets show six rows and two more", () => {
   ]);
 });
 
+for (const status of ["offline", "stalled"] as const) {
+  for (const [frame, ticket, name, expectedStatus] of [
+    ["24a", "TKT-14", "worker-3", "planned"],
+    ["19a", "TKT-14", "worker-3", "done"],
+    ["25a", "TKT-12", "worker-1", "dropped"],
+  ] as const) {
+    test(`TUI-37: a ${expectedStatus} ticket has no stopped note when its agent is ${status}`, () => {
+      const view = frameView(frame, (events) => {
+        const base = { ...events.at(-1)!, seq: 9000, ts: events.at(-1)!.ts + 1000, summary: "", body: "", ticket_ref: null };
+        const extra: SquadEvent = status === "offline"
+          ? { ...base, kind: "peer_left", from: "broker", role_from: "broker", to: null, peer: name, reason: "died" }
+          : { ...base, kind: "question", from: "judge", role_from: "judge", to: name, question_id: 99, asked_by: "judge", blocking: false, default: "yes", why: "confirm" };
+        const ended: SquadEvent = { ...base, seq: 8999, kind: "usage", from: name, role_from: "worker", to: null,
+          session_id: "stopped-note", model: "frame", input: 0, output: 0, cache_write: 0, cache_read: 0 };
+        return [...events.map((e) => e.kind === "plan" ? { ...e, tickets: e.tickets.filter((t) => t.ticket_ref !== "TKT-15") } : e), ended, extra];
+      });
+      expect(view.squad.agents.find((a) => a.name === name)!.status).toBe(status);
+      expect(view.squad.tickets.find((t) => t.ticket_ref === ticket)!.status).toBe(expectedStatus);
+      const panel = main(view).text().slice(30, 37).map((line) => part(line, 2, 26)).join("\n");
+      expect(panel).toContain(`[${expectedStatus}]`);
+      expect(panel).not.toContain("parado");
+    });
+  }
+}
+
 for (const frame of ["01", "10", "13a", "14", "23a", "24a", "24c", "25a", "26a", "28a", "28b"]) {
   test(`TUI-43: the agents and the tickets of frame ${frame}, columns 0 to 27`, () => columns(frame, 0, 27));
 }

@@ -192,6 +192,17 @@ test("TUI-25: the debt is what is owed and of which ticket or question", () => {
   expect(debt({ owes: "answer", question_id: 7, seq: 1 })).toBe("answer Q-07");
 });
 
+test("TUI-25: resent usage emits one stalled line per agent and debt origin", () => {
+  const events = [joined(1, "worker-2"), opened(2), plan(3, [{ ticket_ref: "TKT-13", title: "api" }]),
+    task(4, "worker-2", "TKT-13"), usage(5, "worker-2"), usage(6, "worker-2"),
+    result(7, "worker-2", "TKT-13"), rework(8, "TKT-13"), task(9, "worker-2", "TKT-13"),
+    usage(10, "worker-2"), usage(11, "worker-2")];
+  expect(feed(events).filter((r) => r.sys === "stalled").map((r) => [r.seq, r.ts, r.owes?.seq, r.text])).toEqual([
+    [5, T0 + 5000, 4, "‖ w2 [stalled] deve result TKT-13"],
+    [10, T0 + 10000, 9, "‖ w2 [stalled] deve result TKT-13"],
+  ]);
+});
+
 test("TUI-26: the line of the limit comes right after the third verdict of rework, and not after the second", () => {
   const round = (seq: number) => [task(seq, "worker-1", "TKT-12"), result(seq + 1, "worker-1", "TKT-12"), rework(seq + 2, "TKT-12")];
   const two = [opened(1), plan(2, [{ ticket_ref: "TKT-12", title: "player" }]), ...round(3), ...round(6)];

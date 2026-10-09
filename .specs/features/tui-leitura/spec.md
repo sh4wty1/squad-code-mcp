@@ -101,6 +101,10 @@ das fatias Question e Gate.
 | `gate_decision` no feed | Sempre magenta claro, não verde ou vermelho pelo desfecho como no protótipo | TUI-28 | y |
 | Ticket descartado no painel | Dono `—` | O descarte libera o dono | y |
 | Testes | `bun test`, só unidade: derivação e desenho são funções puras; o laço de leitura recebe `fetch`, relógio e saída injetados. Um teste de integração sobe o broker real e lê `GET /events` | Convenção em uso | y |
+| `usage` reenviado e linha de `stalled` | Uma linha por agente e dívida: outro `usage` não gera linha se já há `stalled` para o mesmo agente e o mesmo `seq` de origem da dívida | O contrato permite reenvio; uma nova dívida, com outro `seq`, pode gerar outra linha (TUI-25) | y |
+| Nota `◌ parado` ou `‖ parado` do ticket | Só aparece em ticket que não é `planned`, `done` nem `dropped` | A nota indica trabalho em andamento interrompido (TUI-37) | y |
+| Textos de escrita mantidos na legenda e no detalhe de permissão | Manter `g abrir o gate`, `x abrir o pedido`, `enter responder a selecionada`, "a TUI escreve três coisas", `x abre` e `a permite   d nega` como nos frames | As fatias Question e Gate os tornam operantes; nesta fatia valem os avisos de TUI-63 e a leitura de TUI-55 | y |
+| Prazo de pergunta vencido antes do default | O prazo `? m:ss` para em `0:00` até o broker registrar a resolução | Não mostrar tempo negativo enquanto a pergunta continua aberta | y |
 
 **Open questions:** none - all resolved or logged above. As três primeiras linhas foram respondidas pelo dev em 2026-10-09.
 

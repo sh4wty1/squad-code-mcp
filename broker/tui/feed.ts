@@ -49,6 +49,7 @@ export function feed(log: SquadEvent[]): FeedRow[] {
   const rows: FeedRow[] = [];
   const gone = new Set<string>();
   const asked = new Map<number, string>();
+  const stalled = new Set<string>();
   // The events of the feature that is open at the event being read
   let own: SquadEvent[] = [];
 
@@ -107,7 +108,13 @@ export function feed(log: SquadEvent[]): FeedRow[] {
       // ponytail: O(usage × n), the derivation runs again for each end of turn; keep the
       // lines already computed by seq when the log passes a few thousand events
       const agent = squad(events.slice(0, i + 1), e.ts).agents.find((a) => a.name === e.from);
-      if (agent?.status === "stalled" && agent.owes) rows.push({ ...row("stalled", `‖ ${agent.short} [stalled] deve ${debt(agent.owes)}`), owes: agent.owes });
+      if (agent?.status === "stalled" && agent.owes) {
+        const key = `${agent.name}:${agent.owes.seq}`;
+        if (!stalled.has(key)) {
+          rows.push({ ...row("stalled", `‖ ${agent.short} [stalled] deve ${debt(agent.owes)}`), owes: agent.owes });
+          stalled.add(key);
+        }
+      }
     }
   });
   return rows;
