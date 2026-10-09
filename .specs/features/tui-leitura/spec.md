@@ -271,7 +271,7 @@ Valem as das specs da Event e da Feature. Mais:
 | TUI-13 | P1: Status derivado do log | Specify | Implementing |
 | TUI-14 | P1: Status derivado do log | Specify | Implementing |
 | TUI-15 | P1: Status derivado do log | Specify | Implementing |
-| TUI-16 | P1: Status derivado do log | Specify | Pending |
+| TUI-16 | P1: Status derivado do log | Specify | Implementing |
 | TUI-17 | P1: Status derivado do log | Specify | Implementing |
 | TUI-18 | P1: Status derivado do log | Specify | Pending |
 | TUI-19 | P1: Feed e tela principal | Specify | Implementing |

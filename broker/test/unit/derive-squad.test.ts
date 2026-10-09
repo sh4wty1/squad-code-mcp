@@ -657,6 +657,7 @@ test("TUI-01: a name of the squad without an event of presence is never, whateve
     owes: null,
     ticket: null,
     inTurn: true,
+    noReactionSince: null,
   });
   expect(statuses(log)).toEqual({ mot: "idle", ldr: "idle", w1: "never", w2: "never", w3: "never", jdg: "never" });
   expect(statuses([])).toEqual({ mot: "never", ldr: "never", w1: "never", w2: "never", w3: "never", jdg: "never" });
@@ -1021,4 +1022,56 @@ test("TUI-13: without an open feature the agents are only never, offline, blocke
   expect(statuses(left_behind)).toEqual({ mot: "idle", ldr: "idle", w1: "idle", w2: "idle", w3: "idle", jdg: "idle" });
   expect(agent(left_behind, "worker-1").ticket).toBeNull();
   expect(agent(left_behind, "worker-1").blockingQuestion).toBeNull();
+});
+
+// The ts of the message without reaction of the agent, `ms` after the event of seq 10
+function noReaction(log: SquadEvent[], name: string, ms: number): number | null {
+  return squad(log, T0 + 10000 + ms).agents.find((a) => a.name === name)!.noReactionSince;
+}
+
+test("TUI-16: a message to an agent without an event of it after is without reaction from 120000 ms on", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1")];
+  expect(noReaction(log, "worker-1", 119999)).toBeNull();
+  expect(noReaction(log, "worker-1", 120000)).toBe(T0 + 10000);
+  expect(noReaction(log, "worker-1", 500000)).toBe(T0 + 10000);
+  // the message is to worker-1 and to nobody else
+  expect(noReaction(log, "worker-2", 500000)).toBeNull();
+  expect(noReaction(log, "leader", 500000)).toBeNull();
+});
+
+test("TUI-16: an event of the agent with a greater seq is a reaction, and one before the message is not", () => {
+  const log = [...PLANNED, turn(9, "worker-1"), task(10, "A", "worker-1")];
+  expect(noReaction(log, "worker-1", 120000)).toBe(T0 + 10000);
+  expect(noReaction([...log, turn(11, "worker-1")], "worker-1", 500000)).toBeNull();
+  expect(noReaction([turn(11, "worker-1"), ...log], "worker-1", 500000)).toBeNull();
+  // the event of another agent is no reaction
+  expect(noReaction([...log, turn(11, "worker-2")], "worker-1", 120000)).toBe(T0 + 10000);
+});
+
+test("TUI-16: a refused with the name of the agent in peer is no reaction", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1"), refused(11, "worker-1"), unblocked(12, "worker-1", "broker")];
+  expect(noReaction(log, "worker-1", 120000)).toBe(T0 + 10000);
+});
+
+test("TUI-16: of the messages without reaction the oldest with 120000 ms counts", () => {
+  // seq 10 and seq 70, one minute apart, both without reaction
+  const two = [...PLANNED, task(10, "A", "worker-1"), task(70, "B", "worker-1")];
+  expect(noReaction(two, "worker-1", 119999)).toBeNull();
+  expect(noReaction(two, "worker-1", 120000)).toBe(T0 + 10000);
+  expect(noReaction(two, "worker-1", 500000)).toBe(T0 + 10000);
+
+  // the agent reacted to the first: only the second counts, when it is old enough
+  const reacted = [...PLANNED, task(10, "A", "worker-1"), turn(11, "worker-1"), task(70, "B", "worker-1")];
+  expect(noReaction(reacted, "worker-1", 60000 + 119999)).toBeNull();
+  expect(noReaction(reacted, "worker-1", 60000 + 120000)).toBe(T0 + 70000);
+});
+
+test("TUI-16: an agent that is not in the broker has no message without reaction", () => {
+  const log = [...PLANNED, task(10, "A", "worker-1")];
+  expect(noReaction([...log, left(11, "worker-1")], "worker-1", 500000)).toBeNull();
+  // back in the broker, the message is still without reaction
+  expect(noReaction([...log, left(11, "worker-1"), joined(12, "worker-1")], "worker-1", 500000)).toBe(T0 + 10000);
+  // and one that never entered has none
+  const never = [joined(1, "leader"), opened(7), plan(8, [A]), task(10, "A", "worker-1")];
+  expect(noReaction(never, "worker-1", 500000)).toBeNull();
 });

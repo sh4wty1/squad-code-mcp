@@ -433,7 +433,12 @@ export interface Agent {
   // the ticket of the open feature it owns, not approved and not dropped
   ticket: string | null;
   inTurn: boolean;
+  // the ts of the oldest message to it with no event of its own after, once the message
+  // is 120 s old; null for who is not in the broker
+  noReactionSince: number | null;
 }
+
+const NO_REACTION_MS = 120_000;
 
 export interface Squad {
   // in the order of SQUAD
@@ -481,6 +486,11 @@ export function squad(events: SquadEvent[], now: number): Squad {
           ? live.some((t) => t.last?.kind === "result")
           : role === "leader" && live.some((t) => t.planned && !t.approved);
 
+    const here = online.get(name);
+    // An event of the agent has it in `from`: what the broker writes about it does not count
+    const latest = ordered.findLast((e) => e.from === name)?.seq ?? 0;
+    const unanswered = ordered.find((e) => e.to === name && e.seq > latest && now - e.ts >= NO_REACTION_MS);
+
     const base = {
       name,
       role,
@@ -492,9 +502,9 @@ export function squad(events: SquadEvent[], now: number): Squad {
       owes: null,
       ticket: owned.at(-1)?.ticket_ref ?? null,
       inTurn,
+      noReactionSince: here?.online ? (unanswered?.ts ?? null) : null,
     };
 
-    const here = online.get(name);
     if (!here) return { ...base, status: "never" };
     if (!here.online) return { ...base, status: "offline", since: here.since };
 

@@ -295,10 +295,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] 119999 ms não aparece; 120000 ms aparece
-- [ ] Um evento do agente com `seq` maior zera; um `refused` com o nome dele em `peer` não zera
-- [ ] Agente fora do ar não tem "sem reação"
-- [ ] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
+- [x] 119999 ms não aparece; 120000 ms aparece
+- [x] Um evento do agente com `seq` maior zera; um `refused` com o nome dele em `peer` não zera
+- [x] Agente fora do ar não tem "sem reação"
+- [x] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
