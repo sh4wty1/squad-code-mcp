@@ -1,11 +1,13 @@
 // The lines of the panel of detail, for the selected line of the feed: a message, or the
 // block of its kind of system line. Ported from `detailLines` of the prototype and its
-// helpers, with what the prototype writes by hand taken from the events.
+// helpers, with what the prototype writes by hand taken from the events. Without a
+// selected line and without an open feature, the summary of the last feature.
 
 import type { SquadEvent } from "../../shared/contract.ts";
 import type { SquadTicket } from "../../shared/derive.ts";
 import { refs } from "../activity.ts";
-import { debt, label, type FeedRow } from "../feed.ts";
+import { cost } from "../config.ts";
+import { debt, gid, label, type FeedRow } from "../feed.ts";
 import { age, clock, cut, len, pad, wrap, type Color, type Seg } from "../grid.ts";
 import type { View } from "../view.ts";
 import { KIND_TONE, kindTone, STATUS, statusSegs, TICKET_TONE, tone, type Line } from "./chrome.ts";
@@ -356,10 +358,67 @@ function message(view: View, row: FeedRow): Line[] {
   return [...head, "SEP", ...body.map((line): Seg[] => [[line, "white"]]), ...criteria, "SEP", ...thread, "SEP", ...load];
 }
 
+// The last feature that closed: how it ended, its tickets, its questions and what it cost
+function summary(view: View, row: FeedRow, e: Extract<SquadEvent, { kind: "feature_closed" }>): Line[] {
+  const then = row.squad!;
+  const abandoned = e.outcome === "abandoned";
+  const own = view.rows.filter((r) => r.event.feature_id === e.feature_id);
+  const approval = own.findLast((r) => r.event.kind === "gate_decision" && r.event.decision === "approve");
+  const by = (how: string) => then.questions.filter((q) => q.merged_into === null && q.resolved_by?.includes(how)).length;
+  const merged = then.questions.filter((q) => q.merged_into !== null).length;
+  const dollars = [...then.usage.feature.values()].reduce((sum, totals) => sum + cost(totals, view.prices), 0);
+  return [
+    [["nenhuma mensagem selecionada", "gray"]],
+    [],
+    [["última feature", "gray"]],
+    [[abandoned ? "✗ abandonada" : "✓ entregue", abandoned ? "byellow" : "bgreen", true], [" · " + clock(row.ts), "white"]],
+    ...wrap(then.feature?.title ?? "", W - 2).map((line): Seg[] => [["  " + line, "bwhite", true]]),
+    ...(approval?.event.kind === "gate_decision" ? ([[[`  ${gid(approval.event.gate_id)} aprovado ${clock(approval.ts)}`, "white"]]] satisfies Line[]) : []),
+    ...(!abandoned ? [] : e.body ? ([[["  motivo", "gray"]], ...wrap(e.body, W - 2).map((line): Seg[] => [["  " + line, "white"]])] satisfies Line[]) : ([[["  sem motivo registrado", "gray"]]] satisfies Line[])),
+    "SEP",
+    [[`tickets · ${then.tickets.filter((t) => t.approved).length} de ${then.tickets.length} aprovados`, "gray"]],
+    ...closing(then.tickets).flatMap((t) => ticketSummary(view, t)),
+    "SEP",
+    [["perguntas", "gray"]],
+    [[`✓ ${by("human")} pelo dev · ${by("agent")} entre agentes`, "white"]],
+    [[`⟳ ${by("default")} com default aplicado`, "byellow"]],
+    [[`▶ ${merged} ${merged === 1 ? "mesclada" : "mescladas"}`, "white"]],
+    "SEP",
+    [["feature", "gray"]],
+    [["duração   ", "gray"], [`${Math.round((row.ts - (own[0]?.ts ?? row.ts)) / 60000)} min`, "white"]],
+    [["mensagens ", "gray"], [String(own.filter((r) => !r.sys).length), "white"]],
+    [["custo     ", "gray"], ["≈$" + dollars.toFixed(2), "bwhite", true], [" est.", "gray"]],
+    "SEP",
+    [["j/k navega o histórico", "gray"]],
+  ];
+}
+
+// A log without any feature: what there is to say of the broker
+function nothing(view: View): Line[] {
+  const here = view.squad.agents.filter((a) => a.status !== "never").length;
+  const first = view.rows[0];
+  return [
+    [["nenhuma feature ainda", "gray"]],
+    [],
+    ...text("O log deste broker não tem feature aberta nem encerrada: não há resumo, última entrega nem ocioso desde."),
+    "SEP",
+    [["sessão", "gray"]],
+    [["broker no ar ", "gray"], first ? [since(view, first.ts), "white"] : ["—", "gray"]],
+    [["agentes      ", "gray"], [`${here} de 6 entraram`, here ? "white" : "gray"]],
+    [["mensagens    ", "gray"], [String(view.rows.filter((r) => !r.sys).length), "white"]],
+    "SEP",
+    ...text("A mother abre a feature quando a spec estiver pronta; a linha 0 passa a mostrá-la.", "gray"),
+  ];
+}
+
 const GLYPH_TONE: Record<string, Color> = { default: "byellow", merged: "byellow", limit: "bred" };
 
 export function detailLines(view: View, row: FeedRow | undefined): Line[] {
-  if (!row) return [[["nenhuma mensagem selecionada", "gray"]]];
+  if (!row) {
+    if (view.squad.feature) return [[["nenhuma mensagem selecionada", "gray"]]];
+    const last = view.rows.findLast((r) => r.sys === "closed");
+    return last?.event.kind === "feature_closed" ? summary(view, last, last.event) : nothing(view);
+  }
   const e = row.event;
   if (!row.sys) return e.kind === "permission_request" ? permission(view, row, e) : message(view, row);
   if (e.kind === "feature_opened") return opened(view, row, e);

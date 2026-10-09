@@ -479,9 +479,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Resumo de entregue e de abandonada com e sem motivo; linha do gate aprovado; tickets com o status em que pararam; perguntas por tipo de resolução; duração, mensagens e custo
-- [ ] Sem nenhuma feature: o bloco do frame 28a
-- [ ] Testes em `test/unit/tui-detail.test.ts`; gate quick passa
+- [x] Resumo de entregue e de abandonada com e sem motivo; linha do gate aprovado; tickets com o status em que pararam; perguntas por tipo de resolução; duração, mensagens e custo
+- [x] Sem nenhuma feature: o bloco do frame 28a
+- [x] Testes em `test/unit/tui-detail.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

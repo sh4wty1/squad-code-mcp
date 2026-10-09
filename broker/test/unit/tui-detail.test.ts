@@ -258,3 +258,80 @@ test("TUI-24, TUI-25: the line of a plan carries its version, the one of who lef
   expect(row("13c", 4).ticket).toBeUndefined();
   expect(row("23a", 414.5).owes).toEqual({ owes: "result", ticket_ref: "TKT-13", seq: 407 });
 });
+
+test("TUI-40: without a selected line and without an open feature, the summary of the last feature", () => {
+  expect(detail("09a")).toEqual([
+    "nenhuma mensagem selecionada",
+    "",
+    "última feature",
+    "✓ entregue · 14:53:31",
+    "  player ao vivo com setlist",
+    "---",
+    "tickets · 3 de 3 aprovados",
+    "✓ TKT-12 ⟳1/2 w1",
+    "✓ TKT-13 ⟳0/2 w2",
+    "✓ TKT-14 ⟳0/2 w3",
+    "---",
+    "perguntas",
+    // Q-06 and Q-07 by the dev; the question of the leader to the mother and Q-11 between agents
+    "✓ 2 pelo dev · 2 entre agentes",
+    // Q-05 and Q-08 by timeout, Q-10 by the result
+    "⟳ 3 com default aplicado",
+    "▶ 1 mesclada",
+    "---",
+    "feature",
+    // From 14:17:48 to 14:53:31
+    "duração   36 min",
+    // 27 until 14:31:48, then the answer of the dev, a result, two verdicts and the report
+    "mensagens 32",
+    // What was spent between the opening and the closing: 678000 tokens at $15 a million
+    "custo     ≈$10.17 est.",
+    "---",
+    "j/k navega o histórico",
+  ]);
+});
+
+test("TUI-40: the summary has the gate that was approved", () => {
+  expect(detail("09b").slice(3, 7)).toEqual(["✓ entregue · 14:53:31", "  player ao vivo com setlist", "  G-01 aprovado 14:53:20", "---"]);
+});
+
+test("TUI-40: an abandoned feature shows the reason, or that none was given, and where each ticket stopped", () => {
+  expect(detail("27c").slice(3, 14)).toEqual([
+    "✗ abandonada · 14:41:12",
+    "  player ao vivo com setlist",
+    "  motivo",
+    "  o dev trocou a prioridade; a",
+    "  busca de programas entra",
+    "  antes",
+    "---",
+    "tickets · 2 de 3 aprovados",
+    "✓ TKT-13 ⟳0/2 w2",
+    "✓ TKT-14 ⟳0/2 w3",
+    "○ TKT-12 ⟳1/2 w1",
+  ]);
+  expect(detail("27c")[14]).toBe("  parou em [working]");
+  expect(detail("27c").slice(-6, -2)).toEqual(["feature", "duração   23 min", "mensagens 29", "custo     ≈$8.14 est."]);
+  expect(detail("27b", null).slice(3, 7)).toEqual(["✗ abandonada · 14:41:12", "  player ao vivo com setlist", "  sem motivo registrado", "---"]);
+});
+
+test("TUI-40: a log without any feature says what there is of the broker", () => {
+  expect(detail("28a")).toEqual([
+    "nenhuma feature ainda",
+    "",
+    "O log deste broker não tem",
+    "feature aberta nem encerrada:",
+    "não há resumo, última entrega",
+    "nem ocioso desde.",
+    "---",
+    "sessão",
+    "broker no ar —",
+    "agentes      0 de 6 entraram",
+    "mensagens    0",
+    "---",
+    "A mother abre a feature quando",
+    "a spec estiver pronta; a linha",
+    "0 passa a mostrá-la.",
+  ]);
+  // With events, the hour of the first one
+  expect(detail("28b", null).slice(8, 11)).toEqual(["broker no ar 15:02:24 · há 2m16s", "agentes      2 de 6 entraram", "mensagens    0"]);
+});
