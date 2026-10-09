@@ -15,6 +15,8 @@ export interface FrameLog {
   now: number;
   // the seq of the selected line of the feed
   selected: number | null;
+  // the ticket of the thread screen, when it is not the one of the selected line
+  ticket?: string;
 }
 
 // The dollars of the prototype are its thousands of tokens times 0.015
@@ -44,8 +46,11 @@ const result = (seq: number, t: string, from: string, to: string, tk: string | n
   task_seq,
 });
 
-function verdict(seq: number, t: string, tk: string, outcome: "approve" | "rework", s: string, b: string, result_seq: number, marks: [number, string][]): SquadEvent {
-  const criteria: Criterion[] = marks.map(([pass, text], i) => ({ n: i + 1, text, pass: pass === 1 }));
+// A mark is whether the criterion passed, its text, its number in the spec (its position
+// when absent) and the note of the judge
+type Mark = [pass: number, text: string, n?: number, note?: string];
+function verdict(seq: number, t: string, tk: string, outcome: "approve" | "rework", s: string, b: string, result_seq: number, marks: Mark[]): SquadEvent {
+  const criteria: Criterion[] = marks.map(([pass, text, n, note], i) => ({ n: n ?? i + 1, text, pass: pass === 1, ...(note ? { note } : {}) }));
   return { ...env(seq, t, JDG, LDR, tk, s, b), kind: "verdict", result_seq, outcome, criteria };
 }
 
@@ -150,14 +155,16 @@ const usage = (seq: number, t: string, from: string, tokens: number, session = "
 });
 
 const FEAT1 = "player ao vivo com setlist";
-const CR5 = (a: number, b: number, c: number, d: number, e: number): [number, string][] => [
-  [a, "play/pause e volume"],
-  [b, "metadados da faixa"],
-  [c, "reconexão após queda"],
-  [d, "acessível por teclado"],
-  [e, "funciona no iOS"],
+// The task of TKT-12 has the criteria 1 to 4 and 6 of the spec, and the one of TKT-13 the
+// criterion 5. The notes are the ones the judge wrote of the third and of the sixth.
+const CR5 = (a: number, b: number, c: number, d: number, e: number, note3?: string, note6?: string): Mark[] => [
+  [a, "play/pause e volume", 1],
+  [b, "metadados da faixa", 2],
+  [c, "reconexão após queda", 3, note3],
+  [d, "acessível por teclado", 4],
+  [e, "funciona no iOS", 6, note6],
 ];
-const SETLIST: [number, string][] = [[1, "setlist atualiza em ≤30s"]];
+const SETLIST: Mark[] = [[1, "setlist atualiza em ≤30s", 5]];
 
 // The first entries of the six, and what the mother spent talking to the dev before the feature
 const JOINS1 = [
@@ -196,7 +203,7 @@ const MAIN = [
   answer(414, "14:25:30", "broker", W3, "TKT-14", "", "Q-05 expirou 4min depois de chegar ao dev. worker-3 seguiu com o default HH:mm.", 5, "HH:mm", "timeout_default"),
   result(415, "14:26:47", W1, JDG, "TKT-12", "player + controles, 4 arquivos", "PlayerBar.tsx, useHlsStream.ts, NowPlaying.tsx e testes. +312 −18. Testado no Chrome e no Firefox.", 406),
   result(416, "14:27:30", W3, JDG, "TKT-14", "horários em HH:mm (BRT)", "formatTime() com Intl, fuso America/Sao_Paulo. +38 −2.", 408),
-  verdict(417, "14:28:03", "TKT-12", "rework", "rework: reconexão após queda", 'TKT-12 não atende o critério "reconexão após queda do stream". Ao derrubar o HLS o player fica em erro e não tenta reconectar.\nEsperado: retry com backoff e retomada sem ação do usuário.', 415, CR5(1, 1, 0, 1, 1)),
+  verdict(417, "14:28:03", "TKT-12", "rework", "rework: reconexão após queda", 'TKT-12 não atende o critério "reconexão após queda do stream". Ao derrubar o HLS o player fica em erro e não tenta reconectar.\nEsperado: retry com backoff e retomada sem ação do usuário.', 415, CR5(1, 1, 0, 1, 1, "player fica em erro ao derrubar o HLS; nenhuma tentativa de reconexão.")),
   task(418, "14:28:30", LDR, W1, "TKT-12", "rework 1/2: retry c/ backoff", "Rework 1/2. Adicionar retry com backoff exponencial no useHlsStream e retomar a reprodução sem ação do usuário. Não mexer no layout."),
   verdict(419, "14:28:52", "TKT-14", "approve", "approve 1/1", "Horários corretos no fuso de Brasília.", 416, [[1, "horário legível na setlist"]]),
   ask(420, "14:29:10", W1, LDR, "TKT-12", "Q-07 retry infinito ou 5?", "Reconexão do stream: retry infinito ou desistir após 5 tentativas? A spec não define. Pausando TKT-12 até a resposta.", 7, W1, true),
@@ -221,7 +228,7 @@ const FINAL = [
   answer(434, "14:35:15", "broker", W2, "TKT-13", "", "Q-08 expirou 4min depois de chegar ao dev. worker-2 seguiu com o default.", 8, "logo da 89", "timeout_default"),
   turn(434.1, "14:35:16", W2),
   result(435, "14:39:52", W1, JDG, "TKT-12", "backoff + retomada automática", 'useHlsStream com backoff exponencial e evento "reconnected"; a reprodução retoma sozinha. +86 −12.', 418),
-  verdict(436, "14:43:50", "TKT-12", "approve", "approve 5/5", "Todos os critérios atendidos. Stream derrubado 3x: retomou em ~2s em todas.", 435, CR5(1, 1, 1, 1, 1)),
+  verdict(436, "14:43:50", "TKT-12", "approve", "approve 5/5", "Todos os critérios atendidos. Stream derrubado 3x: retomou em ~2s em todas.", 435, CR5(1, 1, 1, 1, 1, "retoma em ~2s; backoff 1s·2s·4s nos logs, sem limite (Q-07).", "autoplay exige gesto no iOS, como a spec prevê.")),
   verdict(437, "14:45:30", "TKT-13", "approve", "approve 1/1", "Cache e invalidação por ETag ok, inclusive sob rate limit.", 425, SETLIST),
   result(438, "14:45:41", LDR, MOT, null, "3/3 tickets aprovados", "Relatório: TKT-12, TKT-13 e TKT-14 aprovados pelo judge. 1 rework no TKT-12."),
 ];
@@ -239,11 +246,11 @@ const ON = [joined(447, "14:34:05", W2), turn(447.1, "14:34:06", W2)];
 
 const ESC_X = [
   result(448, "14:36:10", W1, JDG, "TKT-12", "v2: backoff + retomada", "Backoff exponencial sem limite; retoma do ponto em que parou. +86 −12.", 418),
-  verdict(449, "14:38:40", "TKT-12", "rework", "rework 2/2: retoma atrasado", "Reconecta, mas volta ~40s atrás do ao vivo. Num stream ao vivo precisa voltar na borda.", 448, CR5(1, 1, 0, 1, 1)),
+  verdict(449, "14:38:40", "TKT-12", "rework", "rework 2/2: retoma atrasado", "Reconecta, mas volta ~40s atrás do ao vivo. Num stream ao vivo precisa voltar na borda.", 448, CR5(1, 1, 0, 1, 1, "volta ~40s atrás do ao vivo.")),
   task(450, "14:39:05", LDR, W1, "TKT-12", "rework 2/2 (último): borda", "Rework 2/2, o último permitido. Ao reconectar, pular para a borda ao vivo do HLS."),
   verdict(451, "14:41:00", "TKT-13", "approve", "approve 1/1", "Cache e ETag ok.", 425, SETLIST),
   result(452, "14:46:20", W1, JDG, "TKT-12", "v3: liveSyncPosition", "Ao reconectar usa liveSyncPosition do hls.js. +41 −9.", 450),
-  verdict(453, "14:47:30", "TKT-12", "rework", "reprovado 3ª vez: iOS", "Reconexão agora correta, mas no iOS o áudio não volta a tocar depois de reconectar.", 452, CR5(1, 1, 1, 1, 0)),
+  verdict(453, "14:47:30", "TKT-12", "rework", "reprovado 3ª vez: iOS", "Reconexão agora correta, mas no iOS o áudio não volta a tocar depois de reconectar.", 452, CR5(1, 1, 1, 1, 0, undefined, "no iOS o áudio não volta a tocar depois de reconectar.")),
   // 454 is the line of the limit, which is no event
   ask(455, "14:47:55", LDR, MOT, "TKT-12", "escalado: reprovado 3x", "TKT-12 reprovado 3 vezes (v1, v2, v3). Atingi o limite de 2 reworks e não posso mandar outro. Bloqueante: replanejar o ticket, aceitar com ressalva ou cancelar?", 13, LDR, true),
   turn(455.1, "14:47:56", MOT),
@@ -385,7 +392,7 @@ export const LOGS: Record<string, FrameLog> = {
   "24a": log("14:20:05", 405, planned),
   "24b": log("14:20:20", 406, planned, MAIN[5]!, TURNS[0]!, TURNS[1]!),
   "24c": log("14:20:08", 465, planned, PLAN2),
-  "24d": log("14:20:20", 406, planned, MAIN[5]!, TURNS[0]!, TURNS[1]!),
+  "24d": { ...log("14:20:20", 406, planned, MAIN[5]!, TURNS[0]!, TURNS[1]!), ticket: "TKT-13" },
   "25a": log("14:52:10", 471, escalated.slice(0, 3), DROP_X, tokens({ mot: 57333, ldr: 126000, w1: 188000, w2: 104000, w3: 22000, jdg: 141333 })),
   "25b": log("14:52:10", 471, escalated.slice(0, 3), DROP_X, tokens({ mot: 57333, ldr: 126000, w1: 188000, w2: 104000, w3: 22000, jdg: 141333 })),
   "26a": log("14:17:52", 401, JOINS1, OPEN1, usage(401.1, "14:17:50", MOT, 10633)),

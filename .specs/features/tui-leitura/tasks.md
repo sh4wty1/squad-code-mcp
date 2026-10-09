@@ -538,11 +538,11 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Uma asserção por anotação de TUI-47
-- [ ] Matriz de critérios, vereditos com `passou/total`, notas do judge e perguntas do ticket
-- [ ] Ticket `planned` e ticket `dropped` conforme TUI-48; dobra `… N eventos antes · k rola` quando não cabe
-- [ ] Frames 03, 15b, 24d e 25b entram em `tui-frames.test.ts` com os seus desvios
-- [ ] Testes em `test/unit/tui-thread.test.ts`; gate quick passa
+- [x] Uma asserção por anotação de TUI-47
+- [x] Matriz de critérios, vereditos com `passou/total`, notas do judge e perguntas do ticket
+- [x] Ticket `planned` e ticket `dropped` conforme TUI-48; dobra `… N eventos antes · k rola` quando não cabe
+- [x] Frames 03, 15b, 24d e 25b entram em `tui-frames.test.ts` com os seus desvios
+- [x] Testes em `test/unit/tui-thread.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

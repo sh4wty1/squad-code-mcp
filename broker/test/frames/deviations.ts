@@ -95,6 +95,41 @@ const REWORKS_ALL = "the prototype lists the reworks of TKT-12 and TKT-13 by nam
 const reworksAll = (line: number) => d("D1", REWORKS_ALL, [line, 88, 30, "TKT-14 ⟳ 0/2  worker-3"]);
 const nodeEscalated = d("D1", ESCALATED, [15, 32, 22, "escalou TKT-12"]);
 
+// The thread. The line of time is in columns 2 to 73 of lines 5 to 34 and the right side
+// in columns 78 to 117. Both are given whole, from a line down, and only the lines that
+// differ from the frame become deviations.
+function block(cls: Deviation["class"], why: string, id: string, line: number, col: number, texts: string[]): Deviation[] {
+  const drawn = frame(id).map((text) => [...text.padEnd(120)]);
+  return d(cls, why, ...texts.flatMap((text, i): At[] => (drawn[line + i]!.slice(col, col + len(text)).join("") === text ? [] : [[line + i, col, len(text), text]])));
+}
+// An entry is its line and the line of its summary; a line of the thread alone between two entries
+const steps = (...entries: [head: string, body?: string][]) =>
+  entries.flatMap(([head, body], i) => [...(i ? ["         │"] : []), head, ...(body === undefined ? [] : ["         │ " + body])]);
+// The line of time takes the edge of its box too: the frame 03 writes over it
+const timeline = (cls: Deviation["class"], why: string, id: string, ...texts: string[]) =>
+  block(cls, why, id, 5, 2, texts.map((text) => pad(text, 73) + "│"));
+const side = (cls: Deviation["class"], why: string, id: string, line: number, ...texts: string[]) =>
+  block(cls, why, id, line, 76, texts.map((text) => (text === "---" ? "├" + "─".repeat(42) + "┤" : `│ ${pad(text, 40)} │`)));
+const SUMMARIES = "TUI-46: the body of an entry is the summary of its event, and TUI-47 the note of a result the time since its task; the prose the prototype writes for each step and the tokens per step are in no event (Out of Scope)";
+const FLOW = "design, `Anotações e fluxo do thread`: the flow is every event of the ticket in its short form, cut at the 72 columns of the panel; the prototype writes a summary of it by hand";
+const flow = (text: string) => d("D1", FLOW, [35, 2, 72, text]);
+const FLOW_ESCALATED = "fluxo  task ▶ result ▶ ✗ v1 ▶ task ▶ result ▶ ✗ v2 ▶ task ▶ result ▶ ✗ …";
+const NOTES = ["notas do judge", "3 v1   player fica em erro ao derrubar o", "       HLS; nenhuma tentativa de", "       reconexão.", "3 v2   volta ~40s atrás do ao vivo.", "6 v3   no iOS o áudio não volta a tocar", "       depois de reconectar."];
+// The first three events of TKT-12, and the six that follow where it is reproved three times
+const STARTED: [string, string][] = [
+  ["14:20:11 ● [task]     ldr → w1", "player de áudio HLS"],
+  ["14:26:47 ● [result]   w1 → jdg     6m36s", "player + controles, 4 arquivos"],
+  ["14:28:03 ✗ [verdict]  jdg → ldr    REWORK ⟳ 1/2 · 4/5", "rework: reconexão após queda"],
+];
+const REPROVED: [string, string][] = [
+  ["14:28:30 ● [task]     ldr → w1     rework 1/2", "rework 1/2: retry c/ backoff"],
+  ["14:36:10 ● [result]   w1 → jdg     7m40s", "v2: backoff + retomada"],
+  ["14:38:40 ✗ [verdict]  jdg → ldr    REWORK ⟳ 2/2 · 4/5", "rework 2/2: retoma atrasado"],
+  ["14:39:05 ● [task]     ldr → w1     rework 2/2", "rework 2/2 (último): borda"],
+  ["14:46:20 ● [result]   w1 → jdg     7m15s", "v3: liveSyncPosition"],
+  ["14:47:30 ✗ [verdict]  jdg → ldr    REPROVADO · 4/5 · limite atingido", "reprovado 3ª vez: iOS"],
+];
+
 export const DEVIATIONS: Record<string, Deviation[]> = {
   "01": [...skills(MOT, LDR, W2, JDG), ...doing(8, "tech lead · escalou TK…", ESCALATED), ...entered("01"), ...plan(9), ...loadout(33, 2)],
   "09a": [...skills(MOT, LDR, W1, W2, JDG), ...counts(15)],
@@ -238,6 +273,77 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ...seal("⚠ w2 bloqueado   ◌ w3 offline", "table of seals of the design: more than one seal take the short form"),
     ...d("D1", NO_TICKET, [23, WORKER.w2, 20, "sem ticket"], [23, WORKER.w3, 20, "sem ticket"]),
     ...nodeSkills("w1"),
+  ],
+  "03": [
+    ...d("D2", "Assumptions, `Entrada result do leader no thread`: the result of the leader at 14:44:02 has no ticket and leaves, so the ticket closes with its verdict of approve", [3, 39, 8, "14:43:50"]),
+    ...d("D1", "the prototype writes two criteria of TKT-12 with more words here than in 01 and 15b; the verdicts of the log have one text for each", [5, 80, 29, "metadados da faixa"], [8, 80, 29, "funciona no iOS"]),
+    ...timeline(
+      "D2",
+      SUMMARIES + "; the line of the loadout shows the one of the task, and no task of these logs has one (roles.json, slice Papéis); the entry of the leader at 14:44:02 leaves (Assumptions); and Q-12, a question of the ticket (TUI-46) the prototype only lists at the right, has its entry, so the lines move",
+      "03",
+      ...steps(
+        ...STARTED,
+        ["14:28:30 ● [task]     ldr → w1     rework 1/2", "rework 1/2: retry c/ backoff"],
+        ["14:29:10 ? [question] w1 → ldr     Q-07 [BLOQUEANTE] · w1 → ldr → mot →…", "Q-07 retry infinito ou 5?"],
+        ["14:31:34 ● [question] ldr → mot    Q-12 · ldr → mot", "Q-12 limite de reconexão?"],
+        ["14:33:02 ● [answer]   hum → w1     Q-07 · 3m22s no dev", "Q-07: infinito com backoff"],
+        ["14:39:52 ● [result]   w1 → jdg     11m22s", "backoff + retomada automática"],
+        ["14:43:50 ✓ [verdict]  jdg → ldr    APPROVE · 5/5", "approve 5/5"]
+      ),
+      ""
+    ),
+    ...side("D3", "Out of Scope: `avaliado com` are the skills of the judge (roles.json, slice Papéis) and the cost of the thread is outside the TUI; the questions of the ticket come up", "03", 22, "perguntas no thread", "Q-07 ✓ respondida pelo dev em 3m22s", "Q-12 ▶ mesclada em Q-07", "", "", "", "", "", ""),
+  ],
+  "15b": [
+    ...seal("⚠ TKT-12 escalado à mother", "table of seals of the design: an escalated ticket has its seal on every screen; the prototype takes it out of this frame by hand and draws it in 15a, the same state"),
+    ...d("D1", "TUI-14: the ticket is `escalated` by its third verdict of rework, at 14:47:30; the prototype writes the hour of the question of the leader", [3, 40, 8, "14:47:30"]),
+    ...timeline(
+      "D2",
+      SUMMARIES + "; and by TUI-47 the note of a task after a rework is `rework n/2` and the one of a question its id, `[BLOQUEANTE]` and its route, where the prototype writes `o último` and `ESCALADO` by hand",
+      "15b",
+      ...steps(...STARTED, ...REPROVED, ["14:47:55 ? [question] ldr → mot    Q-13 [BLOQUEANTE] · ldr → mot", "escalado: reprovado 3x"])
+    ),
+    ...flow(FLOW_ESCALATED),
+    ...side(
+      "D2",
+      "TUI-46 gives the right side the criteria, the verdicts, the notes of the judge and the questions of the ticket: the block of the limit is prose of the scenario, the note of v1 is the one of the verdict of the log (the prototype writes it shorter here than in 03) and the cost of the thread is Out of Scope",
+      "15b",
+      14,
+      ...NOTES, "---", "perguntas no thread", "Q-13 ? aberta · com mot", "", "", ""
+    ),
+  ],
+  "24d": [
+    ...side(
+      "D2",
+      "the criteria of a ticket come in its verdicts: the plan has none for a ticket without a result, so the rest comes one line up; and the cost of the thread is Out of Scope",
+      "24d",
+      4,
+      "---", "judge", "○ sem avaliação · nada entregue", "---", "perguntas no thread", "nenhuma", "", "", "", ""
+    ),
+  ],
+  "25b": [
+    ...timeline(
+      "D1",
+      "design, `Anotações e fluxo do thread`: the oldest entries fold when the thread does not fit in its 30 lines, and here three do; the prototype folds seven by hand, with prose. A question has one entry, where it was asked, with its route (TUI-47), and not one for each hop; " + SUMMARIES,
+      "25b",
+      "           … 3 eventos antes · k rola",
+      "         │",
+      ...steps(
+        ...REPROVED,
+        ["14:47:55 ? [question] ldr → mot    Q-13 [BLOQUEANTE] · ldr → mot → dev", "escalado: reprovado 3x"],
+        ["14:50:02 ● [answer]   hum → mot    Q-13 · 1m52s no dev", "Q-13: descartar, tentar de novo"],
+        ["14:50:20 ● [answer]   mot → ldr    Q-13", "descartar · nova tentativa"],
+        ["14:51:10 ✗ [dropped]  ldr          plano v2 · TKT-12 saiu · w1 liberado"]
+      )
+    ),
+    ...flow(FLOW_ESCALATED),
+    ...side(
+      "D2",
+      "TUI-46 gives the right side the criteria, the verdicts, the notes of the judge and the questions of the ticket: `desfecho` and `caminho da decisão` are prose of the scenario, with a ticket that replaces another (Out of Scope), and the cost of the thread is Out of Scope",
+      "25b",
+      14,
+      ...NOTES, "---", "perguntas no thread", "Q-13 ✓ respondida pelo dev em 1m52s", "", "", ""
+    ),
   ],
   "29c": [...skills(MOT, LDR, W2, JDG), ...doing(12, "worker · sem ticket", NO_TICKET), ...body(36, "Bash: Apagar …"), ...declared(23), ...loadout(27, 2)],
 };

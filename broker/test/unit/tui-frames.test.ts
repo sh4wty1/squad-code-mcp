@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import type { Grid } from "../../tui/grid.ts";
 import { main } from "../../tui/screens/main.ts";
+import { thread } from "../../tui/screens/thread.ts";
 import { topology } from "../../tui/screens/topology.ts";
 import type { View } from "../../tui/view.ts";
 import { DEVIATIONS, expected } from "../frames/deviations.ts";
@@ -15,6 +16,7 @@ const TOPOLOGY = ["02", "13b", "23b", "28c", "29b"];
 const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid][] = [
   ["main screen", MAIN, main],
   ["topology", TOPOLOGY, topology],
+  ["thread", ["03", "15b", "24d", "25b"], thread],
 ];
 
 for (const [name, ids, draw] of SCREENS) {

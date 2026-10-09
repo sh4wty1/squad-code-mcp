@@ -14,15 +14,15 @@ export function frame(id: string): string[] {
   return readFileSync(join(import.meta.dir, `${id}.txt`), "utf8").replace(/\r?\n$/, "").split(/\r?\n/);
 }
 
-// The View of the frame: its log at its clock, with the selection of the prototype and
-// the project of the prototype. `change` gives another log from the one of the frame.
+// The View of the frame: its log at its clock, with the selection of the prototype, the
+// ticket of its thread and the project of the prototype. `change` gives another log from the one of the frame.
 export function frameView(id: string, change: (events: SquadEvent[]) => SquadEvent[] = (events) => events): View {
-  const { now, selected } = LOGS[id]!;
+  const { now, selected, ticket } = LOGS[id]!;
   const events = change(LOGS[id]!.events);
   return {
     squad: squad(events, now),
     rows: feed(events),
-    ui: { screen: "main", selected, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0 },
+    ui: { screen: "main", selected, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: ticket ?? null, threadOffset: 0 },
     project: "portal-89fm",
     down: null,
     prices: PRICES,
