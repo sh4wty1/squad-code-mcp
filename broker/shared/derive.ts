@@ -8,7 +8,7 @@
 
 import type { FeatureFields } from "../log.ts";
 import type { Role } from "../peers.ts";
-import type { SquadEvent } from "./contract.ts";
+import type { Kind, SquadEvent } from "./contract.ts";
 
 export interface Ticket {
   ticket_ref: string;
@@ -167,4 +167,65 @@ export function features(events: SquadEvent[]): DerivedFeature[] {
     }
   }
   return [...all.values()].sort((a, b) => a.id - b.id);
+}
+
+type EventOf<K extends Kind> = Extract<SquadEvent, { kind: K }>;
+
+function bySeq(events: SquadEvent[]): SquadEvent[] {
+  return [...events].sort((a, b) => a.seq - b.seq);
+}
+
+// The six positions of the star, in the order the screens list them
+export const SQUAD: { name: string; role: Role; short: string }[] = [
+  { name: "mother", role: "mother", short: "mot" },
+  { name: "leader", role: "leader", short: "ldr" },
+  { name: "worker-1", role: "worker", short: "w1" },
+  { name: "worker-2", role: "worker", short: "w2" },
+  { name: "worker-3", role: "worker", short: "w3" },
+  { name: "judge", role: "judge", short: "jdg" },
+];
+
+export interface Presence {
+  online: boolean;
+  // the ts of the latest event of presence
+  since: number;
+  joins: number;
+}
+
+// Whether each name is in the broker. A name that never had an event of presence has
+// no entry. `events` are the whole log, here and in the two functions below.
+export function presence(events: SquadEvent[]): Map<string, Presence> {
+  const all = new Map<string, Presence>();
+  for (const e of bySeq(events)) {
+    if (e.kind !== "peer_joined" && e.kind !== "peer_left") continue;
+    const joined = e.kind === "peer_joined";
+    all.set(e.peer, { online: joined, since: e.ts, joins: (all.get(e.peer)?.joins ?? 0) + (joined ? 1 : 0) });
+  }
+  return all;
+}
+
+// The permission requests still open, in ascending seq. A request closes with the
+// decision that cites it and with any later event of its peer: the dev may have answered
+// in the terminal. What the broker writes about the peer has `from` "broker" and closes nothing.
+export function openPermissions(events: SquadEvent[]): EventOf<"permission_request">[] {
+  const decided = new Set<number>();
+  const latest = new Map<string, number>();
+  for (const e of events) {
+    if (e.kind === "permission_decision") decided.add(e.request_seq);
+    latest.set(e.from, Math.max(latest.get(e.from) ?? 0, e.seq));
+  }
+  return bySeq(events).filter(
+    (e): e is EventOf<"permission_request"> =>
+      e.kind === "permission_request" && !decided.has(e.seq) && latest.get(e.from) === e.seq
+  );
+}
+
+// The block each name declared: its latest `blocked` with no `unblocked` of the name after it
+export function blocks(events: SquadEvent[]): Map<string, EventOf<"blocked">> {
+  const all = new Map<string, EventOf<"blocked">>();
+  for (const e of bySeq(events)) {
+    if (e.kind === "blocked") all.set(e.from, e);
+    else if (e.kind === "unblocked") all.delete(e.peer);
+  }
+  return all;
 }

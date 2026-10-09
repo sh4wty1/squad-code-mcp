@@ -195,10 +195,10 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Nome sem evento de presença não tem entrada; último `peer_left` dá offline com o `ts`; dois `peer_joined` seguidos dão no ar
-- [ ] Um pedido fecha com a `permission_decision` que o cita e com qualquer evento posterior do mesmo peer; `refused` e `unblocked` do broker não fecham; decisão com `request_seq` inexistente é ignorada
-- [ ] `blocked` sem `unblocked` posterior com o nome em `peer` dá o `reason`
-- [ ] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
+- [x] Nome sem evento de presença não tem entrada; último `peer_left` dá offline com o `ts`; dois `peer_joined` seguidos dão no ar
+- [x] Um pedido fecha com a `permission_decision` que o cita e com qualquer evento posterior do mesmo peer; `refused` e `unblocked` do broker não fecham; decisão com `request_seq` inexistente é ignorada
+- [x] `blocked` sem `unblocked` posterior com o nome em `peer` dá o `reason`
+- [x] Testes em `test/unit/derive-squad.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

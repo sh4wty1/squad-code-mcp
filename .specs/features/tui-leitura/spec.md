@@ -256,10 +256,10 @@ Valem as das specs da Event e da Feature. Mais:
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| TUI-01 | P1: Status derivado do log | Specify | Pending |
-| TUI-02 | P1: Status derivado do log | Specify | Pending |
-| TUI-03 | P1: Status derivado do log | Specify | Pending |
-| TUI-04 | P1: Status derivado do log | Specify | Pending |
+| TUI-01 | P1: Status derivado do log | Specify | Implementing |
+| TUI-02 | P1: Status derivado do log | Specify | Implementing |
+| TUI-03 | P1: Status derivado do log | Specify | Implementing |
+| TUI-04 | P1: Status derivado do log | Specify | Implementing |
 | TUI-05 | P1: Status derivado do log | Specify | Pending |
 | TUI-06 | P1: Status derivado do log | Specify | Pending |
 | TUI-07 | P1: Status derivado do log | Specify | Pending |
