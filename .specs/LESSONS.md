@@ -243,8 +243,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-039 - When code picks or filters by a condition an AC names, test with an item that fails the condition, not only with items that pass it
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
 - features: tui-leitura
-- evidence: X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui)
-- last seen: 2026-10-09T17:54:51Z
+- evidence: X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui) (+1 more)
+- last seen: 2026-10-09T18:48:24Z
 
 ### L-040 - Test a count limit or a rounding rule at its boundary value, not only well past it
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
@@ -281,6 +281,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: tui-leitura
 - evidence: TUI-49 broker/tui/screens/help.ts:70 (spec)
 - last seen: 2026-10-09T17:54:52Z
+
+### L-046 - When an AC lists alternatives in order of precedence, test every pair of alternatives that can hold together, not only one pair
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
+- features: tui-leitura
+- evidence: N25..N29 tui/screens/main.ts:47-55 (TUI-35) (tui)
+- last seen: 2026-10-09T18:48:24Z
+
+### L-047 - Test an is-not-equal rule with a value on each side of the expected one, not only above it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `cli` · harmful: 0
+- features: tui-leitura
+- evidence: N05 tui/probe.ts:46 (TUI-59) (cli)
+- last seen: 2026-10-09T18:48:24Z
+
+### L-048 - When an AC lists alternatives that can hold together, state which one wins
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: tui-leitura
+- evidence: TUI-37 (spec) (+1 more)
+- last seen: 2026-10-09T18:48:24Z
 
 ## Quarantined (failed when applied - ignore)
 

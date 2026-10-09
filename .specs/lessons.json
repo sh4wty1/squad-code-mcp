@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 46,
+  "next_id": 49,
   "lessons": [
     {
       "id": "L-001",
@@ -713,10 +713,11 @@
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui)"
+        "X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui)",
+        "N21 tui/feed.ts:98 (tui)"
       ],
       "created": "2026-10-09T17:54:51Z",
-      "last_seen": "2026-10-09T17:54:51Z"
+      "last_seen": "2026-10-09T18:48:24Z"
     },
     {
       "id": "L-040",
@@ -825,6 +826,61 @@
       ],
       "created": "2026-10-09T17:54:52Z",
       "last_seen": "2026-10-09T17:54:52Z"
+    },
+    {
+      "id": "L-046",
+      "key": "surviving_mutant::when an ac lists alternatives in order of precedence test every pair of alternatives that can hold together not only one pair",
+      "text": "When an AC lists alternatives in order of precedence, test every pair of alternatives that can hold together, not only one pair",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N25..N29 tui/screens/main.ts:47-55 (TUI-35) (tui)"
+      ],
+      "created": "2026-10-09T18:48:24Z",
+      "last_seen": "2026-10-09T18:48:24Z"
+    },
+    {
+      "id": "L-047",
+      "key": "surviving_mutant::test an is not equal rule with a value on each side of the expected one not only above it",
+      "text": "Test an is-not-equal rule with a value on each side of the expected one, not only above it",
+      "signal": "surviving_mutant",
+      "scope": "cli",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N05 tui/probe.ts:46 (TUI-59) (cli)"
+      ],
+      "created": "2026-10-09T18:48:24Z",
+      "last_seen": "2026-10-09T18:48:24Z"
+    },
+    {
+      "id": "L-048",
+      "key": "spec_precision_gap::when an ac lists alternatives that can hold together state which one wins",
+      "text": "When an AC lists alternatives that can hold together, state which one wins",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "tui-leitura"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "TUI-37 (spec)",
+        "TUI-44 (spec)"
+      ],
+      "created": "2026-10-09T18:48:24Z",
+      "last_seen": "2026-10-09T18:48:24Z"
     }
   ]
 }
