@@ -546,10 +546,10 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Cada pergunta de `QS` e de `H05` a `H12` tem no primeiro `question` do log o texto do protótipo como `body`; Q-07, Q-08 e Q-09 têm `why`, e Q-07 e Q-09 as `options`
-- [ ] `LOGS` tem `04`, `05`, `06`, `07` e `20b` sobre o cenário principal (20b com o relógio em 14:35:17 e os dois primeiros eventos de `FINAL`) e `20a` sobre o cenário de erro, cada um com a seleção e o `modal` do frame em `ui`
-- [ ] `bun test test/unit/tui-frames.test.ts` passa: os 41 frames de leitura são os mesmos, sem desvio novo
-- [ ] Gate build passa
+- [x] Cada pergunta de `QS` e de `H05` a `H12` tem no primeiro `question` do log o texto do protótipo como `body`; Q-07, Q-08 e Q-09 têm `why`, e Q-07 e Q-09 as `options`
+- [x] `LOGS` tem `04`, `05`, `06`, `07` e `20b` sobre o cenário principal (20b com o relógio em 14:35:17 e os dois primeiros eventos de `FINAL`) e `20a` sobre o cenário de erro, cada um com a seleção e o `modal` do frame em `ui`
+- [x] `bun test test/unit/tui-frames.test.ts` passa: os 41 frames de leitura são os mesmos, sem desvio novo
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build

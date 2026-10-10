@@ -432,7 +432,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-66 | P1: Aba Perguntas | T31 | In Tasks |
 | QST-67 | P1: Aba Perguntas | T31 | In Tasks |
 | QST-68 | P1: Aba Perguntas | T33 | In Tasks |
-| QST-69 | P1: Aba Perguntas | T21, T26, T37 | In Tasks |
+| QST-69 | P1: Aba Perguntas | T21, T26, T37 | Implementing |
 | QST-70 | P1: Modal de resposta | T27 | In Tasks |
 | QST-71 | P1: Modal de resposta | T27 | In Tasks |
 | QST-72 | P1: Modal de resposta | T32 | In Tasks |
@@ -450,7 +450,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-84 | P1: Modal de resposta | T33, T35 | In Tasks |
 | QST-85 | P1: Modal de resposta | T32 | In Tasks |
 | QST-86 | P1: Modal de resposta | T34, T35, T38 | In Tasks |
-| QST-87 | P1: Modal de resposta | T21, T30, T37 | In Tasks |
+| QST-87 | P1: Modal de resposta | T21, T30, T37 | Implementing |
 | QST-88 | P2: Legenda e tabela de desvios | T36 | In Tasks |
 | QST-89 | P2: Legenda e tabela de desvios | T26, T30, T36 | In Tasks |
 | QST-90 | P2: Legenda e tabela de desvios | T19 | Implementing |
