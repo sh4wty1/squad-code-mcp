@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
 import { squad } from "../../shared/derive.ts";
+import { resolved, waiting } from "../../tui/asked.ts";
 import { feed } from "../../tui/feed.ts";
 import { press, START, visible } from "../../tui/keys.ts";
 import type { Ui, View } from "../../tui/view.ts";
@@ -111,22 +112,108 @@ test("TUI-62: a key with no meaning leaves the state as it is", () => {
   for (const k of ["z", "G", " ", "\x1b[C", "\x1b[D"]) expect(key(k, v)).toBe(v.ui);
 });
 
-test("TUI-63: g, x and 4 say for 4 s which slice brings them and do not change the screen", () => {
-  for (const screen of ["main", "topology", "thread", "help"] as const) {
+test("TUI-63, QST-91: g and x say for 4 s that the Gate slice brings them and do not change the screen", () => {
+  for (const screen of ["main", "topology", "thread", "questions", "help"] as const) {
     const v = view("01", { screen });
     const until = v.squad.now + 4000;
     expect(key("g", v)).toEqual({ ...v.ui, toast: { text: "chega com a fatia Gate", color: "gray", until } });
     expect(key("x", v)).toEqual({ ...v.ui, toast: { text: "chega com a fatia Gate", color: "gray", until } });
-    expect(key("4", v)).toEqual({ ...v.ui, toast: { text: "chega com a fatia Question", color: "gray", until } });
   }
 });
 
-test("TUI-63: enter on the question of an open question that is with the dev says the Question slice brings it", () => {
-  // Blocking or not: 422 is of Q-07 and 428 of Q-08. 420 is Q-07 where it was asked, to the leader.
-  for (const selected of [422, 428, 420]) {
-    const v = view("01", { selected });
-    expect(key("\r", v)).toEqual({ ...v.ui, toast: { text: "chega com a fatia Question", color: "gray", until: v.squad.now + 4000 } });
+test("QST-91: 4 and enter never say that the Question slice brings them", () => {
+  for (const screen of ["main", "topology", "thread", "questions", "help"] as const) {
+    expect(key("4", view("01", { screen })).toast).toBeNull();
+    for (const { seq } of view("01").rows) expect(key("\r", view("01", { screen, selected: seq })).toast).toBeNull();
   }
+});
+
+test("QST-64: 4 shows the tab of questions from any screen, and esc goes back from it to the main one", () => {
+  for (const screen of ["main", "topology", "thread", "questions", "help"] as const) {
+    const v = view("01", { screen, selected: 417 });
+    expect(key("4", v)).toEqual({ ...v.ui, screen: "questions" });
+  }
+  const tab = view("04");
+  expect(key("\x1b", tab)).toEqual({ ...tab.ui, screen: "main" });
+});
+
+test("QST-63: h moves the focus of the tab between the list and the history, and does nothing outside it", () => {
+  const list = view("04");
+  expect(key("h", list)).toEqual({ ...list.ui, qfocus: "history" });
+  const history = view("04", { qfocus: "history" });
+  expect(key("h", history)).toEqual({ ...history.ui, qfocus: "list" });
+  const main = view("01", { selected: 417 });
+  expect(key("h", main)).toBe(main.ui);
+});
+
+test("QST-63: with the focus on the list j, k and the arrows move the selection by one question, and stop at its ends", () => {
+  // The list of frame 04 is Q-07, then Q-08
+  const first = view("04", { question: 7, selected: 417 });
+  expect(key("j", first)).toEqual({ ...first.ui, question: 8 });
+  expect(key(DOWN, first)).toEqual({ ...first.ui, question: 8 });
+  expect(key("k", first).question).toBe(7);
+  expect(key(UP, first).question).toBe(7);
+  const last = view("04", { question: 8 });
+  expect(key("k", last)).toEqual({ ...last.ui, question: 7 });
+  expect(key(UP, last)).toEqual({ ...last.ui, question: 7 });
+  expect(key("j", last).question).toBe(8);
+  expect(key(DOWN, last).question).toBe(8);
+  // With no id selected the first of the list is the selected one
+  expect(key("j", view("04", { question: null })).question).toBe(8);
+  // An empty list has no question to select: in frame 15a none is with the dev
+  const empty = view("15a", { screen: "questions" });
+  expect(key("j", empty)).toBe(empty.ui);
+});
+
+test("QST-63: with the focus on the history j, k and the arrows move it by one question, not before its start and never leaving fewer than 4 on the screen", () => {
+  // Frame 04 has 6 resolved questions: the last 4 are the ones from the third
+  const top = view("04", { qfocus: "history", question: 7, selected: 417 });
+  expect(key("j", top)).toEqual({ ...top.ui, historyOffset: 1 });
+  expect(key(DOWN, top)).toEqual({ ...top.ui, historyOffset: 1 });
+  expect(key("k", top).historyOffset).toBe(0);
+  expect(key(UP, top).historyOffset).toBe(0);
+  const middle = view("04", { qfocus: "history", historyOffset: 1 });
+  expect(key("j", middle).historyOffset).toBe(2);
+  expect(key("k", middle)).toEqual({ ...middle.ui, historyOffset: 0 });
+  expect(key(UP, middle)).toEqual({ ...middle.ui, historyOffset: 0 });
+  const bottom = view("04", { qfocus: "history", historyOffset: 2 });
+  expect(key("j", bottom).historyOffset).toBe(2);
+  expect(key(DOWN, bottom).historyOffset).toBe(2);
+  // Five fit on the screen: without Q-04 there is nothing to move
+  const five = view("04", { qfocus: "history" }, (events) => events.filter((e) => (e as { question_id?: number }).question_id !== 4));
+  expect(resolved(five.squad)).toHaveLength(5);
+  expect(key("j", five).historyOffset).toBe(0);
+  // With the focus on the list the history stays where it is
+  expect(key("j", view("04", { historyOffset: 1 })).historyOffset).toBe(1);
+});
+
+// The modal of answer as it opens: on the first option, or on an empty text
+const opened = (question: number, choice: number | null) => ({ question, choice, text: "", expanded: false, sending: false, refused: false });
+
+test("QST-66: enter on the feed over a question of an open question that is with the dev shows the tab with it selected and the modal of its answer", () => {
+  // 422 is Q-07 where it reached the dev and 420 where it was asked, to the leader: it has options
+  for (const selected of [422, 420]) {
+    const v = view("01", { selected, qfocus: "history" });
+    expect(key("\r", v)).toEqual({ ...v.ui, screen: "questions", question: 7, qfocus: "list", modal: opened(7, 0) });
+  }
+  // Q-08 has none: 428 and 427 are its questions
+  for (const selected of [428, 427]) {
+    const v = view("01", { selected });
+    expect(key("\r", v)).toEqual({ ...v.ui, screen: "questions", question: 8, qfocus: "list", modal: opened(8, null) });
+  }
+});
+
+test("QST-67: enter on the tab opens the modal of the selected question, and does nothing without a question in the list", () => {
+  const first = view("04", { question: 7, selected: 417 });
+  expect(key("\r", first)).toEqual({ ...first.ui, modal: opened(7, 0) });
+  const second = view("04", { question: 8 });
+  expect(key("\r", second)).toEqual({ ...second.ui, modal: opened(8, null) });
+  // With no id selected, the first of the list
+  expect(key("\r", view("04", { question: null })).modal).toEqual(opened(7, 0));
+  // The line selected in the feed does not count on the tab: 428 is of Q-08
+  expect(key("\r", view("04", { question: 7, selected: 428 })).modal).toEqual(opened(7, 0));
+  const empty = view("15a", { screen: "questions", selected: 455 });
+  expect(key("\r", empty)).toBe(empty.ui);
 });
 
 test("TUI-42: t switches the footer between the tokens of the feature and of the session", () => {
@@ -142,21 +229,42 @@ test("TUI-42: without an open feature t says only the session exists, for 4 s", 
   expect(key("t", v)).toEqual({ ...v.ui, toast: { text: "sem feature aberta · só a sessão", color: "gray", until: v.squad.now + 4000 } });
 });
 
-test("b selects, on the main screen, the latest question of the oldest blocking question that is with the dev", () => {
-  const v = view("01", { screen: "topology", selected: 417 });
-  expect(key("b", v)).toEqual({ ...v.ui, screen: "main", selected: 422 });
+// Two more blocking questions reach the dev after Q-07: the list is Q-07, Q-20, Q-21, then Q-08
+const q07 = LOGS["01"]!.events.find((e) => e.seq === 422)!;
+const blockers: Change = (events) => [
+  ...events,
+  { ...q07, seq: 500, ts: q07.ts + 60_000, question_id: 20, asked_by: "worker-2", summary: "? Q-20 [BLOQUEANTE]" } as SquadEvent,
+  { ...q07, seq: 501, ts: q07.ts + 120_000, question_id: 21, asked_by: "worker-3", summary: "? Q-21 [BLOQUEANTE]" } as SquadEvent,
+];
 
-  // A second blocking one reaches the dev later: Q-07 is still the oldest
-  const q07 = LOGS["01"]!.events.find((e) => e.seq === 422)!;
-  const later: Change = (events) => [...events, { ...q07, seq: 500, ts: q07.ts + 600_000, question_id: 20, asked_by: "worker-2", summary: "? Q-20 [BLOQUEANTE]" } as SquadEvent];
-  expect(key("b", view("01", { selected: null }, later)).selected).toBe(422);
+test("QST-65: b outside the tab shows it with the first blocking question of the list selected and the focus on the list", () => {
+  for (const screen of ["main", "topology", "thread", "help"] as const) {
+    const v = view("01", { screen, selected: 417, question: 8, qfocus: "history" }, blockers);
+    expect(key("b", v)).toEqual({ ...v.ui, screen: "questions", question: 7, qfocus: "list" });
+  }
 });
 
-test("b without a blocking question with the dev says so, for 4 s", () => {
+test("QST-65: b on the tab selects the blocking question after the selected one in the order of the list, and the first after the last", () => {
+  const at = (question: number | null) => view("04", { question, selected: 417 }, blockers);
+  expect(waiting(at(7).squad).map((q) => q.id)).toEqual([7, 20, 21, 8]);
+  expect(key("b", at(7))).toEqual({ ...at(7).ui, question: 20 });
+  expect(key("b", at(20)).question).toBe(21);
+  expect(key("b", at(21)).question).toBe(7);
+  // Q-08 does not block and comes after all that do
+  expect(key("b", at(8)).question).toBe(7);
+  // With no id selected the first of the list is the selected one
+  expect(key("b", at(null)).question).toBe(20);
+  // The only blocking one stays selected
+  expect(key("b", view("04", { question: 7 })).question).toBe(7);
+});
+
+test("QST-65: b without a blocking question with the dev says so, for 4 s, and does not change the screen", () => {
   // Frame 15a: the blocking question of the leader is with the mother; frame 09a has no feature
   for (const frame of ["15a", "09a"]) {
-    const v = view(frame);
-    expect(key("b", v)).toEqual({ ...v.ui, toast: { text: "nenhuma bloqueante", color: "gray", until: v.squad.now + 4000 } });
+    for (const screen of ["main", "topology", "questions"] as const) {
+      const v = view(frame, { screen });
+      expect(key("b", v)).toEqual({ ...v.ui, toast: { text: "nenhuma bloqueante", color: "gray", until: v.squad.now + 4000 } });
+    }
   }
   // An open one with the dev that does not block is not one either
   const answered: Change = (events) => events.filter((e) => !(e.kind === "question" && e.question_id === 7));

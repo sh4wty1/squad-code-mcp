@@ -428,9 +428,9 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-62 | P1: Aba Perguntas | T25 | Implementing |
 | QST-63 | P1: Aba Perguntas | T25, T31 | Implementing |
 | QST-64 | P1: Aba Perguntas | T20, T23, T31 | Implementing |
-| QST-65 | P1: Aba Perguntas | T31 | In Tasks |
-| QST-66 | P1: Aba Perguntas | T31 | In Tasks |
-| QST-67 | P1: Aba Perguntas | T31 | In Tasks |
+| QST-65 | P1: Aba Perguntas | T31 | Implementing |
+| QST-66 | P1: Aba Perguntas | T31 | Implementing |
+| QST-67 | P1: Aba Perguntas | T31 | Implementing |
 | QST-68 | P1: Aba Perguntas | T33 | In Tasks |
 | QST-69 | P1: Aba Perguntas | T21, T26, T37 | Implementing |
 | QST-70 | P1: Modal de resposta | T27 | Implementing |
@@ -454,7 +454,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-88 | P2: Legenda e tabela de desvios | T36 | In Tasks |
 | QST-89 | P2: Legenda e tabela de desvios | T26, T30, T36 | Implementing |
 | QST-90 | P2: Legenda e tabela de desvios | T19 | Implementing |
-| QST-91 | P2: Legenda e tabela de desvios | T31, T36 | In Tasks |
+| QST-91 | P2: Legenda e tabela de desvios | T31, T36 | Implementing |
 | QST-92 | Edge cases | T10 | Implementing |
 | QST-93 | Edge cases | T10 | Implementing |
 | QST-94 | Edge cases | T6 | Implementing |

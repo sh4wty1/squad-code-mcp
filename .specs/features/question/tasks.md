@@ -761,13 +761,13 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `4` abre a aba de qualquer tela e `esc` volta à principal
-- [ ] `j`/`k` e as setas movem a seleção na lista sem passar das pontas; com o foco no histórico deslocam uma pergunta, sem passar do começo nem deixar menos de 4 visíveis
-- [ ] `b`: de fora abre a aba na primeira bloqueante; na aba vai à seguinte e volta à primeira; sem bloqueante avisa `nenhuma bloqueante` por 4 s e não troca de tela
-- [ ] `enter` no feed sobre o `question` de uma pergunta aberta com o dev abre a aba com ela selecionada e o modal; sobre outra linha abre o thread; na aba abre o modal da selecionada, e não faz nada sem pergunta
-- [ ] `g` e `x` continuam avisando `chega com a fatia Gate`; o texto `chega com a fatia Question` não existe mais no código
-- [ ] Testes em `test/unit/tui-keys.test.ts`, com os de TUI-63 e de `b` atualizados para as regras novas
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `4` abre a aba de qualquer tela e `esc` volta à principal
+- [x] `j`/`k` e as setas movem a seleção na lista sem passar das pontas; com o foco no histórico deslocam uma pergunta, sem passar do começo nem deixar menos de 4 visíveis
+- [x] `b`: de fora abre a aba na primeira bloqueante; na aba vai à seguinte e volta à primeira; sem bloqueante avisa `nenhuma bloqueante` por 4 s e não troca de tela
+- [x] `enter` no feed sobre o `question` de uma pergunta aberta com o dev abre a aba com ela selecionada e o modal; sobre outra linha abre o thread; na aba abre o modal da selecionada, e não faz nada sem pergunta
+- [x] `g` e `x` continuam avisando `chega com a fatia Gate`; o texto `chega com a fatia Question` não existe mais no código
+- [x] Testes em `test/unit/tui-keys.test.ts`, com os de TUI-63 e de `b` atualizados para as regras novas
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

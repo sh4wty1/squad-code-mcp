@@ -2,8 +2,11 @@
 // key is the string the terminal sends in raw mode. Ported from the branch of `onKey` of
 // the prototype with no modal open.
 
+import type { Question } from "../shared/derive.ts";
+import { resolved, waiting } from "./asked.ts";
 import type { FeedRow } from "./feed.ts";
 import type { Color } from "./grid.ts";
+import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
 import type { Ui, View } from "./view.ts";
 
@@ -25,8 +28,17 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
   const { squad, rows } = view;
   const toast = (text: string, color: Color = "gray"): Ui => ({ ...ui, toast: { text, color, until: squad.now + TOAST_MS } });
   const thread = (): Ui => ({ ...ui, screen: "thread", threadTicket: null, threadOffset: 0 });
-  // The open questions that wait for the dev
-  const waiting = squad.questions.filter((q) => q.open && q.holder === "human");
+  // The questions that wait for the dev, in the order of the tab, and the selected one
+  const asked = waiting(squad);
+  const chosen = selected(view);
+  // The tab with the question selected and the modal of its answer: on its first option, or on the text
+  const answer = (q: Question): Ui => ({
+    ...ui,
+    screen: "questions",
+    question: q.id,
+    qfocus: "list",
+    modal: { question: q.id, choice: q.options.length ? 0 : null, text: "", expanded: false, sending: false, refused: false },
+  });
 
   switch (key) {
     case "q":
@@ -43,13 +55,18 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
     case "\x1b":
       return { ...ui, screen: "main" };
     case "4":
-      return toast("chega com a fatia Question");
+      return { ...ui, screen: "questions" };
     case "g":
     case "x":
       return toast("chega com a fatia Gate");
+    case "h":
+      return ui.screen === "questions" ? { ...ui, qfocus: ui.qfocus === "list" ? "history" : "list" } : ui;
     case "\r": {
+      if (ui.screen === "questions") return chosen ? answer(chosen) : ui;
+      // Any question of a question that waits for the dev, where it was asked or where it reached him
       const e = rows.find((row) => row.seq === ui.selected)?.event;
-      return e?.kind === "question" && waiting.some((q) => q.id === e.question_id) ? toast("chega com a fatia Question") : thread();
+      const q = e?.kind === "question" ? asked.find((q) => q.id === e.question_id) : undefined;
+      return q ? answer(q) : thread();
     }
     case "j":
     case "k":
@@ -58,6 +75,15 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
       const step = key === "j" || key === DOWN ? 1 : -1;
       // The offset of the thread counts up from the latest entry; the screen clamps the top
       if (ui.screen === "thread") return { ...ui, threadOffset: Math.max(0, ui.threadOffset - step) };
+      if (ui.screen === "questions" && ui.qfocus === "history") {
+        // Five fit; with more the screen shows four from the offset, and never fewer
+        const past = resolved(squad).length;
+        return { ...ui, historyOffset: Math.max(0, Math.min(past > 5 ? past - 4 : 0, ui.historyOffset + step)) };
+      }
+      if (ui.screen === "questions") {
+        if (!chosen) return ui;
+        return { ...ui, question: asked[Math.max(0, Math.min(asked.length - 1, asked.indexOf(chosen) + step))]!.id };
+      }
       if (!rows.length) return ui;
       const at = rows.findIndex((row) => row.seq === ui.selected);
       const next = at < 0 ? rows.length - 1 : Math.max(0, Math.min(rows.length - 1, at + step));
@@ -79,10 +105,10 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
     case "t":
       return squad.feature ? { ...ui, scope: ui.scope === "feature" ? "session" : "feature", toast: null } : toast("sem feature aberta · só a sessão");
     case "b": {
-      // The oldest blocking one, at its latest question: the line the dev has to read
-      const q = waiting.filter((q) => q.blocking).sort((a, b) => a.first_seq - b.first_seq)[0];
-      const row = q && rows.findLast((row) => row.event.kind === "question" && row.event.question_id === q.id);
-      return row ? { ...ui, screen: "main", selected: row.seq } : toast("nenhuma bloqueante");
+      // From the tab, the blocking one after the selected in the order of the list, and around; from outside, the first
+      const at = ui.screen === "questions" && chosen ? asked.indexOf(chosen) : -1;
+      const q = asked.slice(at + 1).find((q) => q.blocking) ?? asked.find((q) => q.blocking);
+      return q ? { ...ui, screen: "questions", question: q.id, qfocus: "list" } : toast("nenhuma bloqueante");
     }
   }
   return ui;
