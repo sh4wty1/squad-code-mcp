@@ -214,9 +214,9 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `/state` de um holder tem o item, com o `seq` do `question` mais recente, na ordem de `seq` com os outros itens; a pergunta fechada, a mesclada e a de outro holder não aparecem (testes em `test/unit/state.test.ts` e `test/unit/derive.test.ts`)
-- [ ] `test/unit/derive-squad.test.ts` passa sem mudança de expectativa: `stalled` por pergunta continua igual
-- [ ] Gate build passa
+- [x] `/state` de um holder tem o item, com o `seq` do `question` mais recente, na ordem de `seq` com os outros itens; a pergunta fechada, a mesclada e a de outro holder não aparecem (testes em `test/unit/state.test.ts` e `test/unit/derive.test.ts`)
+- [x] `test/unit/derive-squad.test.ts` passa sem mudança de expectativa: `stalled` por pergunta continua igual
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build

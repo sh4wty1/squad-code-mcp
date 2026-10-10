@@ -92,7 +92,7 @@ export function tickets(events: SquadEvent[]): Map<string, Ticket> {
 }
 
 export interface Owed {
-  // "answer" is the debt of the holder of an open question: `squad` adds it, `owed` does not
+  // "answer" is the debt of the holder of an open question
   owes: "result" | "verdict" | "task" | "plan" | "delivery" | "answer";
   ticket_ref?: string;
   question_id?: number;
@@ -129,6 +129,11 @@ export function owed(name: string, role: Role, events: SquadEvent[], pendingSeqs
   if (role === "leader" && !events.some((e) => e.kind === "plan")) {
     const kickoffs = events.filter((e) => e.kind === "task" && e.role_from === "mother").map((e) => e.seq);
     if (kickoffs.length > 0) debts.push({ owes: "plan", seq: Math.min(...kickoffs) });
+  }
+
+  // The answer of each open question the name holds, since the question that made it the holder
+  for (const q of questions(events)) {
+    if (q.open && q.holder === name) debts.push({ owes: "answer", question_id: q.id, seq: q.last_seq });
   }
 
   return debts.sort((a, b) => a.seq - b.seq);
@@ -613,11 +618,7 @@ export function squad(log: SquadEvent[], now: number): Squad {
     );
     if (sent && !busy) return { ...base, status: "waiting" };
 
-    const debts: Owed[] = [
-      ...owed(name, role, own, []),
-      ...open.filter((q) => q.holder === name).map((q) => ({ owes: "answer" as const, question_id: q.id, seq: q.last_seq })),
-    ].sort((a, b) => a.seq - b.seq);
-    const debt = debts[0];
+    const debt = owed(name, role, own, [])[0];
     if (debt && !inTurn) {
       // Stalled since the turn ended, or since the debt came if it came after
       const owedAt = own.find((e) => e.seq === debt.seq)?.ts ?? 0;

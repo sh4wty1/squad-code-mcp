@@ -713,3 +713,39 @@ test("QST-49: absorbed has the ids of the questions merged straight into it, in 
     [10, []],
   ]);
 });
+
+test("QST-51: the holder of an open question owes its answer, with the seq of the latest question of it, in order of seq with its other debts", () => {
+  const events = [
+    kickoff(1),
+    asked(2, 7, "worker-1", "leader"),
+    asked(3, 8, "worker-2", "leader"),
+    asked(5, 8, "leader", "mother", { asked_by: "worker-2" }),
+  ];
+  expect(owed("leader", "leader", events, [3, 1])).toEqual([
+    { owes: "delivery", seq: 1 },
+    { owes: "plan", seq: 1 },
+    { owes: "answer", question_id: 7, seq: 2 },
+    { owes: "delivery", seq: 3 },
+  ]);
+  // passed on, the debt is of the new holder, since the question that reached it
+  expect(owed("mother", "mother", events, [])).toEqual([{ owes: "answer", question_id: 8, seq: 5 }]);
+  // and who asked owes nothing
+  expect(owed("worker-1", "worker", events, [])).toEqual([]);
+  expect(owed("worker-2", "worker", events, [])).toEqual([]);
+});
+
+test("QST-51: nobody owes the answer of an answered question, of a merged one or of one another holds", () => {
+  const events = [
+    asked(2, 7, "worker-1", "leader"),
+    asked(3, 8, "worker-2", "leader"),
+    asked(4, 9, "worker-3", "leader"),
+    asked(5, 10, "mother", "human"),
+    answered(6, 7, "leader", "agent"),
+    mergedInto(7, 8, 9),
+  ];
+  // 7 is answered and 8 merged into 9, which is the one still open with the leader
+  expect(owed("leader", "leader", events, [])).toEqual([{ owes: "answer", question_id: 9, seq: 4 }]);
+  // 10 is with the dev
+  expect(owed("mother", "mother", events, [])).toEqual([]);
+  expect(owed("judge", "judge", events, [])).toEqual([]);
+});
