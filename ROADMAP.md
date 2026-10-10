@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** TUI leitura concluída localmente com PASS do Verifier na rodada 3. F1–F4 do PR 8 corrigidos e publicados após aprovação do dev, com as quatro threads da review respondidas e resolvidas, sem merge. O gate também passa no Windows. A próxima fatia é Question. Terminal interativo real e macOS não foram exercitados. O estado está no Handoff de `.specs/STATE.md`.
+**Agora:** TUI leitura concluída e na `main` (PR 8, merge `9a4d921`). A fatia Question está em andamento no branch `feat/question`. Terminal interativo real e macOS não foram exercitados. O estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 

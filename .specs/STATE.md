@@ -94,24 +94,29 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-10. PR 8: https://github.com/sh4wty1/squad-code-mcp/pull/8.
+Atualizado em 2026-10-10.
 
-- **Feature**: TUI leitura, `.specs/features/tui-leitura/`.
-- **Phase / Task**: concluída e verificada; o PR 8 espera só o merge.
-- **Completed**: T1–T30 e F1–F4. Verifier independente, rodada 3: PASS, 64/64 ACs, 9/9 bordas, 24/24 mutações mortas ao final. Requisitos Verified e TUI leitura marcada no ROADMAP. As quatro threads da review foram respondidas e resolvidas no GitHub em 2026-10-10. O gate passou no Windows no mesmo dia.
+- **Feature**: Question, `.specs/features/question/` (ainda sem arquivos).
+- **Phase / Task**: Specify, não iniciada.
+- **Completed**: nada desta fatia. A TUI leitura entrou na `main` pelo PR 8 (merge `9a4d921`, 2026-10-10).
 - **In-progress** (file:line): nada.
-- **Next step**: o dev olha a TUI num terminal real (`bun tui/demo.ts 01`, de dentro de `broker/`) e decide o merge do PR 8. Depois do merge, a fatia Question sai da `main` atualizada; ela não foi iniciada. Não fazer merge sem instrução do dev.
-- **Blockers**: nenhum bloqueio técnico. O merge é decisão do dev.
+- **Next step**: escrever a spec da fatia Question a partir de `.design/squad-mvp.md` e dos frames 04 a 07, 20a e 20b do handoff.
+- **Blockers**: nenhum.
 - **Uncommitted files**: none.
-- **Branch**: `feat/tui-leitura`. O head publicado é `7bdf4c9`; o commit que registra o gate do Windows e este handoff vem depois dele e é local até o dev pedir o push.
+- **Branch**: `feat/question`, saído da `main` em `9a4d921`.
+
+### O que a TUI leitura deixou para esta fatia
+
+- Os frames de Question entram no teste de frames do AD-010 e saem da classe D3 da tabela de desvios; os frames continuam sem edição.
+- `/escalate` copia `timeout_s` para o `question` que chega a `human`: é de onde a TUI lê o prazo.
+- As teclas `4` e `enter` sobre uma pergunta aberta só mostram o aviso "chega com a fatia Question" (TUI-63); passam a abrir a aba e o modal. Conferir o `b`, que no protótipo pula para a aba.
+- A derivação já lê `question`, `answer` e `question_merged`. A tabela `questions` e o que a TUI deriva do log têm de dizer a mesma coisa.
 
 ### Evidência e limites
 
-- Linux, Bun 1.3.14: TypeScript passa; 929 testes passam, zero falham ou pulados, 5664 assertions, 48 arquivos.
-- Windows 11, Bun 1.4.2, em `7bdf4c9`: TypeScript passa; 926 passam, zero falham, 3 pulados por condição de plataforma anterior à fatia, 5650 assertions. O sensor de mutação não foi repetido no Windows.
-- `validate_state.py tui-leitura`: exit 0. Relatório em `.specs/features/tui-leitura/validation.md`; resolução de F1–F4 em `fix-round-2.md`; registros em `docs/tasks/`.
-- PR 8 em 2026-10-10: `MERGEABLE`, estado `CLEAN`, sem review nova depois da rodada 1 do The Judge (COMMENT, quatro should-fix, todos resolvidos).
-- Os 41 frames permanecem idênticos à extração original. L-049 continua candidata.
+- Estado da `main` em `9a4d921`, medido na TUI leitura. Linux, Bun 1.3.14: TypeScript passa; 929 testes passam, zero falham ou pulados, 5664 assertions, 48 arquivos. Windows 11, Bun 1.4.2, em `7bdf4c9`: TypeScript passa; 926 passam, zero falham, 3 pulados por condição de plataforma anterior à fatia, 5650 assertions.
+- Rodar de dentro de `broker/`: `bun test` e `bun node_modules/typescript/bin/tsc --noEmit`. Não usar `bun x tsc`.
+- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários.
+- Os 41 frames de leitura permanecem idênticos à extração original. L-049 continua candidata.
 - `bun tui/demo.ts [frame]` abre a TUI sobre o log de um frame, sem broker, sem banco e sem token. No Linux deu 39 linhas em tela cheia com a fonte padrão, uma abaixo do mínimo de 40 do design; o dev quer rever isso depois.
-- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários; não usar `bun x tsc`.
 - Não exercitados: terminal interativo real (teclas, resize, cores como a fonte desenha), macOS, sinais reais e uma sessão do Claude Code alimentando a TUI. Pendências anteriores continuam em ROADMAP, design e histórico deste STATE.
