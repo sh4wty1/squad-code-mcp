@@ -16,10 +16,10 @@ tarefa marcada aqui.
 **Where**: `broker/tui.ts`
 **Requirement**: QST-78
 
-- [ ] O laço diz ao redutor que o bloco tinha mais de uma tecla quando segurou um escape pendente: `key("\r\x1b")` e `key("\r\x1b[")` não fazem `POST`, com o modal no modo texto e no modo escolha (testes em `test/unit/tui-loop.test.ts`)
-- [ ] `key("\r")` sozinho continua enviando, e um `esc` sozinho continua fechando o modal depois da espera de 40 ms
-- [ ] Os testes de QST-78 que já existem passam sem mudar valor esperado
-- [ ] Gate full passa
+- [x] O laço diz ao redutor que o bloco tinha mais de uma tecla quando segurou um escape pendente: `key("\r\x1b")` e `key("\r\x1b[")` não fazem `POST`, com o modal no modo texto e no modo escolha (testes em `test/unit/tui-loop.test.ts`)
+- [x] `key("\r")` sozinho continua enviando, e um `esc` sozinho continua fechando o modal depois da espera de 40 ms
+- [x] Os testes de QST-78 que já existem passam sem mudar valor esperado
+- [x] Gate full passa
 
 ### F13: Não-bloqueante com opções, na lista e no detalhe
 

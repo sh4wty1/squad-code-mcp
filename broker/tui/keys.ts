@@ -178,12 +178,13 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
 // of more than one key is a paste, and a paste never sends an answer, which nothing erases
 // from the log: a line break whose turn comes with the modal open becomes a space, also when
 // a key before it in the chunk opened the modal. In the text mode the space goes to the text;
-// in the choice mode it does nothing, where enter would confirm an option.
-export function input(ui: Ui, chunk: string, view: View): Ui | null {
+// in the choice mode it does nothing, where enter would confirm an option. `more` says the
+// chunk had keys after these, which the loop holds back.
+export function input(ui: Ui, chunk: string, view: View, more = false): Ui | null {
   const keys = keysOf(chunk);
   let next: Ui | null = ui;
   for (const k of keys) {
-    const pasted = keys.length > 1 && next.modal !== null && (k === "\r" || k === "\n");
+    const pasted = (more || keys.length > 1) && next.modal !== null && (k === "\r" || k === "\n");
     next = press(next, pasted ? " " : k, { ...view, ui: next });
     if (!next) return null;
   }

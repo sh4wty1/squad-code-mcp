@@ -156,11 +156,12 @@ export function start(io: Io, settings: Settings) {
       .catch(fail);
   }
 
-  function dispatch(chunk: string) {
+  // `more` says the chunk of the input had keys after these
+  function dispatch(chunk: string, more = false) {
     if (stopped) return;
     try {
       const sending = ui.send;
-      const next = input(ui, chunk, view());
+      const next = input(ui, chunk, view(), more);
       if (!next) return stop();
       ui = next;
       // One POST for each answer: the one on its way stays in `send` until it is settled
@@ -179,7 +180,8 @@ export function start(io: Io, settings: Settings) {
     // a lone Escape must still navigate back when no more input arrives.
     pending = /\x1b(?:\[[0-9;]*)?$/u.exec(input)?.[0] ?? "";
     const complete = input.slice(0, input.length - pending.length);
-    if (complete) dispatch(complete);
+    // The escape held back is a key of this chunk: a line break before it was not typed alone
+    if (complete) dispatch(complete, pending !== "");
     if (pending && !stopped) escapeTimer = setTimeout(() => {
       const tail = pending;
       pending = "";

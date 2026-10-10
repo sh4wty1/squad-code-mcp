@@ -427,6 +427,48 @@ test("QST-78: a chunk that opens the modal of a question with options and ends i
   }
 });
 
+test("QST-78: a line break and an unfinished escape in one chunk send nothing in the text mode: the break is a space, the escape closes the modal after its wait, and enter alone still sends", async () => {
+  for (const chunk of ["\r\x1b", "\r\x1b["]) {
+    const { t, key, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      for (const k of ["4", "j", "\r", "logo"]) key(k);
+      // The loop holds the escape back: the line break reaches the keys without it
+      key(chunk);
+      expect(t.posts).toEqual([]);
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo " }) })));
+      await t.shows(questions(t.view({ screen: "questions", question: 8 })).text(), "the tab without the modal");
+      expect(t.posts).toEqual([]);
+
+      for (const k of ["\r", "logo", "\r"]) key(k);
+      expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo" } }]);
+    } finally {
+      stop();
+    }
+  }
+});
+
+test("QST-78: a line break and an unfinished escape in one chunk confirm no option in the choice mode, the escape closes the modal after its wait, and enter alone still confirms", async () => {
+  for (const chunk of ["\r\x1b", "\r\x1b["]) {
+    const { t, key, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      // Q-07, on the first of its options
+      for (const k of ["4", "\r"]) key(k);
+      key(chunk);
+      expect(t.posts).toEqual([]);
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 7, modal: modal(7, { choice: 0 }) })));
+      await t.shows(questions(t.view({ screen: "questions", question: 7 })).text(), "the tab without the modal");
+      expect(t.posts).toEqual([]);
+
+      for (const k of ["\r", "\r"]) key(k);
+      expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 7, answer: "infinito com backoff" } }]);
+    } finally {
+      stop();
+    }
+  }
+});
+
 test("QST-80, QST-81: a broker that fails leaves the modal to send again with the error in the footer, and the refusal of a closed question leaves it refused until esc", async () => {
   const { t, key, stop } = launch();
   try {
