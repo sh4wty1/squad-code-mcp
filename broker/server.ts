@@ -324,9 +324,11 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         if (isRefusal(result)) {
           return text(`${name} refused: ${result.error}. ${result.hint}`, true);
         }
-        const { seq, feature_id } = result as { seq?: unknown; feature_id?: unknown };
+        const { seq, feature_id, question_id } = result as { seq?: unknown; feature_id?: unknown; question_id?: unknown };
         // Only /open-feature answers a feature_id, and the mother needs it
         if (typeof feature_id === "number") return text(`Feature ${feature_id} opened with seq ${seq}.`);
+        // Only /ask answers a question_id: what the history of the question is read by
+        if (typeof question_id === "number") return text(`Question ${question_id} asked with seq ${seq}.`);
         return text(typeof seq === "number" ? `Recorded with seq ${seq}.` : JSON.stringify(result, null, 2));
       } catch (e) {
         return text(`Error calling ${name}: ${e instanceof Error ? e.message : String(e)}`, true);

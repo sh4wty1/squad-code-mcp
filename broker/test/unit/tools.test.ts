@@ -11,8 +11,10 @@ function tool(role: string, name: string) {
   return found;
 }
 
-test("EVT-89/FEAT-29: the mother has the common tools, send_task, open_feature and close_feature, and no other", () => {
-  expect(names("mother")).toEqual([...COMMON, "send_task", "open_feature", "close_feature"]);
+test("EVT-89/FEAT-29/QST-52: the mother has the common tools, send_task, open_feature, close_feature and the four of the questions, and no other", () => {
+  expect(names("mother")).toEqual([
+    ...COMMON, "send_task", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question",
+  ]);
 });
 
 test("FEAT-29: no other role has open_feature or close_feature", () => {
@@ -41,16 +43,60 @@ test("FEAT-29: close_feature requires only outcome, which is delivered or abando
   expect(schema.required).toEqual(["outcome"]);
 });
 
-test("EVT-89: the leader has the common tools, plan, send_task and send_result, and no other", () => {
-  expect(names("leader")).toEqual([...COMMON, "plan", "send_task", "send_result"]);
+test("EVT-89/QST-52: the leader has the common tools, plan, send_task, send_result, ask, answer and escalate, and no other", () => {
+  expect(names("leader")).toEqual([...COMMON, "plan", "send_task", "send_result", "ask", "answer", "escalate"]);
 });
 
-test("EVT-89: a worker has the common tools and send_result, and no other", () => {
-  expect(names("worker")).toEqual([...COMMON, "send_result"]);
+test("EVT-89/QST-52: a worker has the common tools, send_result, ask, answer and escalate, and no other", () => {
+  expect(names("worker")).toEqual([...COMMON, "send_result", "ask", "answer", "escalate"]);
 });
 
-test("EVT-89: the judge has the common tools and send_verdict, and no other", () => {
-  expect(names("judge")).toEqual([...COMMON, "send_verdict"]);
+test("EVT-89/QST-52: the judge has the common tools, send_verdict and ask, and no other", () => {
+  expect(names("judge")).toEqual([...COMMON, "send_verdict", "ask"]);
+});
+
+test("QST-52: the judge asks and neither answers, escalates nor merges, and only the mother merges", () => {
+  expect(names("judge")).toContain("ask");
+  for (const tool of ["answer", "escalate", "merge_question"]) expect(names("judge")).not.toContain(tool);
+  for (const role of ["mother", "leader", "worker"]) {
+    for (const tool of ["ask", "answer", "escalate"]) expect(names(role)).toContain(tool);
+  }
+  expect(["mother", "leader", "worker", "judge"].filter((role) => names(role).includes("merge_question"))).toEqual(["mother"]);
+});
+
+test("QST-53: ask, answer, escalate and merge_question declare the fields of their routes", () => {
+  for (const role of ["mother", "leader", "worker", "judge"]) {
+    const ask = tool(role, "ask").inputSchema as any;
+    expect(Object.keys(ask.properties)).toEqual([
+      "to", "summary", "body", "why", "blocking", "options", "default", "timeout_s", "ticket_ref",
+    ]);
+    for (const field of ["to", "summary", "body", "why", "default", "ticket_ref"]) expect(ask.properties[field].type).toBe("string");
+    expect(ask.properties.blocking.type).toBe("boolean");
+    expect(ask.properties.options).toMatchObject({ type: "array", items: { type: "string" } });
+    expect(ask.properties.timeout_s.type).toBe("integer");
+    // a blocking question has no default, and none has to carry a body, options or a ticket
+    expect(ask.required).toEqual(["to", "summary", "why", "blocking"]);
+  }
+  for (const role of ["mother", "leader", "worker"]) {
+    const answer = tool(role, "answer").inputSchema as any;
+    expect(Object.keys(answer.properties)).toEqual(["question_id", "answer"]);
+    expect(answer.properties.question_id.type).toBe("integer");
+    expect(answer.properties.answer.type).toBe("string");
+    expect(answer.required).toEqual(["question_id", "answer"]);
+
+    // the route takes no `to`: the level above is the one of who escalates
+    const escalate = tool(role, "escalate").inputSchema as any;
+    expect(Object.keys(escalate.properties)).toEqual(["question_id", "summary", "body"]);
+    expect(escalate.properties.question_id.type).toBe("integer");
+    expect(escalate.properties.summary.type).toBe("string");
+    expect(escalate.properties.body.type).toBe("string");
+    expect(escalate.required).toEqual(["question_id"]);
+  }
+  const merge = tool("mother", "merge_question").inputSchema as any;
+  expect(Object.keys(merge.properties)).toEqual(["question_id", "into"]);
+  expect(merge.properties.question_id.type).toBe("integer");
+  expect(merge.properties.into.type).toBe("integer");
+  expect(merge.required).toEqual(["question_id", "into"]);
 });
 
 test("EVT-89: a role that does not exist has no tools", () => {
@@ -141,6 +187,10 @@ test("EVT-90/92: each tool but list_peers has its route, and each tool that send
     history: { path: "/history" },
     open_feature: { path: "/open-feature" },
     close_feature: { path: "/close-feature" },
+    ask: { path: "/ask" },
+    answer: { path: "/answer" },
+    escalate: { path: "/escalate" },
+    merge_question: { path: "/merge-question" },
   });
   const listed = new Set(["mother", "leader", "worker", "judge"].flatMap(names));
   expect([...listed].sort()).toEqual(["list_peers", ...Object.keys(ROUTE_OF)].sort());

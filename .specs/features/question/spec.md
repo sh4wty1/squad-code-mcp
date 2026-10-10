@@ -415,9 +415,9 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-49 | P1: Encerramento da feature e paridade com o log | T4 | Implementing |
 | QST-50 | P1: Encerramento da feature e paridade com o log | T3 | Implementing |
 | QST-51 | P1: O que o agente vê | T5 | Implementing |
-| QST-52 | P1: O que o agente vê | T17 | In Tasks |
-| QST-53 | P1: O que o agente vê | T17 | In Tasks |
-| QST-54 | P1: O que o agente vê | T17 | In Tasks |
+| QST-52 | P1: O que o agente vê | T17 | Implementing |
+| QST-53 | P1: O que o agente vê | T17 | Implementing |
+| QST-54 | P1: O que o agente vê | T17 | Implementing |
 | QST-55 | P1: Aba Perguntas | T22, T23 | In Tasks |
 | QST-56 | P1: Aba Perguntas | T23 | In Tasks |
 | QST-57 | P1: Aba Perguntas | T23 | In Tasks |

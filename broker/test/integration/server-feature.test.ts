@@ -56,6 +56,7 @@ test("FEAT-29: the session of the mother lists open_feature and close_feature, a
   const leader = await joined(broker, "leader");
   expect(await mother.toolNames()).toEqual([
     "list_peers", "state", "history", "blocked", "unblocked", "send_task", "open_feature", "close_feature",
+    "ask", "answer", "escalate", "merge_question",
   ]);
   const ofLeader = await leader.toolNames();
   expect(ofLeader).not.toContain("open_feature");

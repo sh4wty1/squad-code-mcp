@@ -469,9 +469,9 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `toolsFor` de cada papel tem exatamente as tools de QST-52: o judge tem `ask` e não tem `answer`, `escalate` nem `merge_question`; só a mother tem `merge_question` (`test/unit/tools.test.ts`)
-- [ ] Dois clientes MCP reais, worker-1 e leader: `ask` devolve `question_id` e `seq`; o leader recebe o push com `summary`, `body`, `why` e `kind`, `seq`, `from` em `meta`; `answer` do leader chega ao worker-1 como push; uma recusa devolve `error` e `hint` (`test/integration/server-question.test.ts`)
-- [ ] Gate full passa
+- [x] `toolsFor` de cada papel tem exatamente as tools de QST-52: o judge tem `ask` e não tem `answer`, `escalate` nem `merge_question`; só a mother tem `merge_question` (`test/unit/tools.test.ts`)
+- [x] Dois clientes MCP reais, worker-1 e leader: `ask` devolve `question_id` e `seq`; o leader recebe o push com `summary`, `body`, `why` e `kind`, `seq`, `from` em `meta`; `answer` do leader chega ao worker-1 como push; uma recusa devolve `error` e `hint` (`test/integration/server-question.test.ts`)
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

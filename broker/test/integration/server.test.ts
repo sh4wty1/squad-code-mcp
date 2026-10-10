@@ -118,8 +118,10 @@ test("PEER-30: ready with the ping number registers the session and swaps ready 
     () => session.notifications.some((n) => n.method === "notifications/tools/list_changed"),
     "tools/list_changed"
   );
-  // the tools of a worker since the Event slice (EVT-89)
-  expect(await session.toolNames()).toEqual(["list_peers", "state", "history", "blocked", "unblocked", "send_result"]);
+  // the tools of a worker since the Event slice (EVT-89), and the ones of the questions (QST-52)
+  expect(await session.toolNames()).toEqual([
+    "list_peers", "state", "history", "blocked", "unblocked", "send_result", "ask", "answer", "escalate",
+  ]);
 
   const sent = session.pings().length;
   await Bun.sleep(PING_MS * 4);
