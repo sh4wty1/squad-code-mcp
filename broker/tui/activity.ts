@@ -1,8 +1,9 @@
 // The three texts the design leaves to the TUI, from the derived squad and the lines of
 // the feed: what each agent is doing, the seals of line 1 and the right side of the footer.
 
+import { qid } from "../shared/contract.ts";
 import type { Agent, Squad, SquadTicket } from "../shared/derive.ts";
-import { debt, gid, qid, type FeedRow } from "./feed.ts";
+import { debt, gid, type FeedRow } from "./feed.ts";
 import { age, clock, type Color } from "./grid.ts";
 import type { Ui } from "./view.ts";
 

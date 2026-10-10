@@ -1,0 +1,394 @@
+/**
+ * squad broker /ask, /escalate, /answer and /merge-question
+ *
+ * An agent asks the level above what the spec does not settle, and the question
+ * keeps its id until it closes (ADR-005): who holds it answers who asked, or
+ * passes it one level up, and the mother merges the ones that ask the same. The
+ * table `questions` is the state the rules decide over: its row, the event and
+ * the deliveries are written together or not at all.
+ */
+
+import type { Database } from "bun:sqlite";
+import type { QuestionRow } from "./db.ts";
+import type { Log } from "./log.ts";
+import { refuse, ROSTER, type Refusal, type Role } from "./peers.ts";
+import { isText, SUMMARY_MAX, type Answer, type Caller } from "./send.ts";
+import { qid, type SquadEvent } from "./shared/contract.ts";
+
+const OPTIONS_MAX = 3;
+
+// A non-blocking question without timeout_s waits this long for the dev
+const TIMEOUT_S = 240;
+
+// Who asks whom, by role: each one the level above, and the judge a worker or the leader
+const ASK_EDGES: { from: Role; to: Role | "human" }[] = [
+  { from: "worker", to: "leader" },
+  { from: "judge", to: "worker" },
+  { from: "judge", to: "leader" },
+  { from: "leader", to: "mother" },
+  { from: "mother", to: "human" },
+];
+
+// The level above, where a holder escalates to. The judge holds no question: none goes to it.
+const NEXT: Record<Role, string> = { worker: "leader", leader: "mother", mother: "human", judge: "leader" };
+
+function isTexts(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+// Who closes a question, and with what
+interface Resolution {
+  from: string;
+  role_from: string;
+  answer: string;
+  resolved_by: "human" | "agent" | "timeout_default" | "result_default";
+}
+
+export function createQuestion(db: Database, log: Log, token: string, now: () => number = Date.now) {
+  function find(id: number): QuestionRow | null {
+    return db.query("SELECT * FROM questions WHERE id = ?").get(id) as QuestionRow | null;
+  }
+
+  // When the default applies: only to a non-blocking question that reached the dev, counted
+  // from the ts of the `question` that took it there
+  function deadline(seq: number, to: string, blocking: boolean, timeout_s: number | null): number | null {
+    if (to !== "human" || blocking) return null;
+    return log.after(seq - 1)[0]!.ts + (timeout_s ?? TIMEOUT_S) * 1000;
+  }
+
+  // The only place a question closes by an `answer`. The status is read and the answer
+  // written in one transaction, so a question has one answer, the first to come (QST-38).
+  // Returns the seq of the answer, or null when the question is not open. With `merged` a
+  // merged one closes too, by an answer of its own.
+  function resolve(id: number, by: Resolution, merged = false): number | null {
+    return log.transaction(() => {
+      const row = find(id)!;
+      if (row.status !== "open" && !(merged && row.status === "merged")) return null;
+      // The questions merged into it, straight or through another merged one, close with it
+      const followers = db
+        .query(
+          `WITH RECURSIVE merged (id, asked_by) AS (
+             SELECT id, asked_by FROM questions WHERE merged_into = ? AND status = 'merged'
+             UNION ALL
+             SELECT q.id, q.asked_by FROM questions q JOIN merged m ON q.merged_into = m.id WHERE q.status = 'merged'
+           )
+           SELECT id, asked_by FROM merged`
+        )
+        .all(id) as { id: number; asked_by: string }[];
+      // Who asked waits for it, and the mother for what the dev answers: each name once,
+      // and never who writes it
+      const waiting = new Set([
+        row.asked_by,
+        ...followers.map((f) => f.asked_by),
+        ...(by.resolved_by === "human" ? ["mother"] : []),
+      ]);
+      waiting.delete(by.from);
+      const seq = log.record({
+        kind: "answer",
+        from: by.from,
+        role_from: by.role_from,
+        to: row.asked_by,
+        summary: `${qid(id)}: ${by.answer}`.slice(0, SUMMARY_MAX),
+        body: by.answer,
+        ticket_ref: row.ticket_ref,
+        question_id: id,
+        recipients: [...waiting],
+        data: { question_id: id, answer: by.answer, resolved_by: by.resolved_by },
+      });
+      const status = by.resolved_by === "human" || by.resolved_by === "agent" ? "answered" : "defaulted";
+      for (const closed of [id, ...followers.map((f) => f.id)]) {
+        db.run("UPDATE questions SET status = ?, answer_seq = ? WHERE id = ?", [status, seq, closed]);
+      }
+      return seq;
+    });
+  }
+
+  // `peer` is who the id of the request belongs to and `body` the JSON object received
+  function ask(
+    peer: Caller,
+    body: Record<string, unknown>
+  ): { ok: true; question_id: number; seq: number } | Refusal {
+    const no = (error: string, hint: string) => log.refused(peer.name, "question", error, hint);
+
+    const { to, summary, why, blocking, options, default: fallback, ticket_ref } = body;
+    if (
+      typeof to !== "string" ||
+      !isText(summary) ||
+      !isText(why) ||
+      typeof blocking !== "boolean" ||
+      (body.body !== undefined && typeof body.body !== "string") ||
+      (options !== undefined && !isTexts(options)) ||
+      (fallback !== undefined && !isText(fallback)) ||
+      (body.timeout_s !== undefined && !Number.isInteger(body.timeout_s)) ||
+      (ticket_ref !== undefined && !isText(ticket_ref)) ||
+      (!blocking && fallback === undefined)
+    ) {
+      return no(
+        "missing_field",
+        "Send to as a string, summary and why as non-empty strings and blocking as a boolean; body, if any, as a string, options as a list of strings, timeout_s as an integer and default and ticket_ref as non-empty strings. A non-blocking question takes a default."
+      );
+    }
+    const timeout_s = body.timeout_s as number | undefined;
+    if (
+      summary.length > SUMMARY_MAX ||
+      (options !== undefined && (options.length === 0 || options.includes(""))) ||
+      (timeout_s !== undefined && (timeout_s < 1 || blocking))
+    ) {
+      return no(
+        "invalid_field",
+        `summary takes up to ${SUMMARY_MAX} characters, options at least one item and no empty one, and timeout_s 1 or more, on a non-blocking question only.`
+      );
+    }
+    if (options !== undefined && options.length > OPTIONS_MAX) {
+      return no(
+        "too_many_options",
+        `A question takes up to ${OPTIONS_MAX} options. Keep the ${OPTIONS_MAX} that matter: the answer may always be another text.`
+      );
+    }
+
+    const recipient = to === "human" ? "human" : ROSTER.find((r) => r.name === to)?.role;
+    if (recipient === undefined) {
+      return no("unknown_recipient", `to must be ${ROSTER.map((r) => r.name).join(", ")} or human.`);
+    }
+    if (!ASK_EDGES.some((e) => e.from === peer.role && e.to === recipient)) {
+      const mine = ASK_EDGES.filter((e) => e.from === peer.role).map((e) => (e.to === "human" ? "human" : `the ${e.to}`));
+      return no("edge_not_allowed", `A ${peer.role} asks only ${mine.join(" or ")}.`);
+    }
+    const feature = log.openFeature();
+    if (!feature) {
+      return no("no_open_feature", "No feature is open. Wait for the mother to open one before asking.");
+    }
+
+    return log.transaction(() => {
+      const { id } = db.query("SELECT COALESCE(MAX(id), 0) + 1 AS id FROM questions").get() as { id: number };
+      // A question to the dev waits for no one: the TUI reads it from the log
+      const seq = log.record({
+        kind: "question",
+        from: peer.name,
+        role_from: peer.role,
+        to,
+        summary,
+        body: body.body as string | undefined,
+        ticket_ref,
+        question_id: id,
+        recipients: to === "human" ? [] : [to],
+        // Only the fields of the contract, and the optional ones only when sent
+        data: {
+          question_id: id,
+          asked_by: peer.name,
+          blocking,
+          why,
+          ...(options !== undefined && { options }),
+          ...(fallback !== undefined && { default: fallback }),
+          ...(timeout_s !== undefined && { timeout_s }),
+        },
+      });
+      db.run(
+        `INSERT INTO questions (id, feature_id, ticket_ref, asked_by, holder, blocking, default_answer, timeout_s, deadline_ts, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'open')`,
+        [
+          id,
+          feature.id,
+          ticket_ref ?? null,
+          peer.name,
+          to,
+          blocking ? 1 : 0,
+          fallback ?? null,
+          timeout_s ?? null,
+          deadline(seq, to, blocking, timeout_s ?? null),
+        ]
+      );
+      return { ok: true, question_id: id, seq };
+    });
+  }
+
+  // The holder passes the question to the level above. The route takes no `to`.
+  function escalate(peer: Caller, body: Record<string, unknown>): Answer {
+    const no = (error: string, hint: string) => log.refused(peer.name, "question", error, hint);
+
+    const { question_id, summary } = body;
+    if (
+      !Number.isInteger(question_id) ||
+      (summary !== undefined && !isText(summary)) ||
+      (body.body !== undefined && typeof body.body !== "string")
+    ) {
+      return no(
+        "missing_field",
+        "Send question_id as the integer id of the question, summary, if any, as a non-empty string and body, if any, as a string."
+      );
+    }
+    const row = find(question_id as number);
+    if ((summary !== undefined && summary.length > SUMMARY_MAX) || !row) {
+      return no(
+        "invalid_field",
+        `summary takes up to ${SUMMARY_MAX} characters, and question_id is the id of a question: the one of the question you received.`
+      );
+    }
+    if (row.status !== "open") {
+      return no("question_closed", `${qid(row.id)} is closed. Go on without escalating it.`);
+    }
+    if (row.holder !== peer.name) {
+      return no("not_holder", `${qid(row.id)} is with ${row.holder}. Only who holds a question escalates it.`);
+    }
+
+    // What the question is comes from who asked it; the text, when not sent, from who held it last
+    const asked = log
+      .history({ question_id: row.id })
+      .filter((e): e is Extract<SquadEvent, { kind: "question" }> => e.kind === "question");
+    const first = asked[0]!;
+    const latest = asked.at(-1)!;
+    const to = NEXT[peer.role];
+
+    return log.transaction(() => {
+      const seq = log.record({
+        kind: "question",
+        from: peer.name,
+        role_from: peer.role,
+        to,
+        summary: summary ?? latest.summary,
+        body: (body.body as string | undefined) ?? latest.body,
+        ticket_ref: row.ticket_ref,
+        question_id: row.id,
+        recipients: to === "human" ? [] : [to],
+        data: {
+          question_id: row.id,
+          asked_by: first.asked_by,
+          blocking: first.blocking,
+          why: first.why,
+          ...(first.options !== undefined && { options: first.options }),
+          ...(first.default !== undefined && { default: first.default }),
+          ...(first.timeout_s !== undefined && { timeout_s: first.timeout_s }),
+        },
+      });
+      db.run("UPDATE questions SET holder = ?, deadline_ts = ? WHERE id = ?", [
+        to,
+        deadline(seq, to, row.blocking === 1, row.timeout_s),
+        row.id,
+      ]);
+      return { ok: true, seq };
+    });
+  }
+
+  // What /answer does once it knows who answers, a peer or the dev: the holder answers who
+  // asked, and the answer is stored as it came. `no` gives the refusal.
+  function answered(
+    who: { name: string; role: string },
+    body: Record<string, unknown>,
+    no: (error: string, hint: string) => Refusal
+  ): Answer {
+    const { question_id, answer: text } = body;
+    if (!Number.isInteger(question_id) || typeof text !== "string" || text.trim() === "") {
+      return no(
+        "missing_field",
+        "Send question_id as the integer id of the question and answer as a string with the answer in it."
+      );
+    }
+    const row = find(question_id as number);
+    if (!row) {
+      return no("invalid_field", "question_id is the id of a question: the one of the question you received.");
+    }
+    if (row.status === "open" && row.holder !== who.name) {
+      return no("not_holder", `${qid(row.id)} is with ${row.holder}. Only who holds a question answers it.`);
+    }
+    // Whether it is closed is for `resolve` to say, in the transaction of the answer
+    const seq = resolve(row.id, {
+      from: who.name,
+      role_from: who.role,
+      answer: text,
+      resolved_by: who.name === "human" ? "human" : "agent",
+    });
+    if (seq === null) {
+      return no("question_closed", `${qid(row.id)} is closed and takes no answer. Go on without it.`);
+    }
+    return { ok: true, seq };
+  }
+
+  // `peer` is who the id of the request belongs to and `body` the JSON object received
+  function answer(peer: Caller, body: Record<string, unknown>): Answer {
+    return answered(peer, body, (error, hint) => log.refused(peer.name, "answer", error, hint));
+  }
+
+  // The human is not a peer: the credential comes first, and no refusal here leaves a trace
+  // in the log
+  function answerAsHuman(body: Record<string, unknown>): Answer {
+    if (body.human_token !== token) {
+      return refuse("invalid_token", "human_token is not the human credential. Only the dev answers as human.");
+    }
+    return answered({ name: "human", role: "human" }, body, refuse);
+  }
+
+  // The mother merges a question into another that asks the same: it leaves the list and
+  // closes with the other, whoever holds each one
+  function merge(peer: Caller, body: Record<string, unknown>): Answer {
+    const no = (error: string, hint: string) => log.refused(peer.name, "question_merged", error, hint);
+
+    if (peer.role !== "mother") {
+      return no("edge_not_allowed", "Only the mother merges questions. Answer the one you hold, or escalate it.");
+    }
+    const { question_id, into } = body;
+    if (!Number.isInteger(question_id) || !Number.isInteger(into)) {
+      return no(
+        "missing_field",
+        "Send question_id as the integer id of the question to merge and into as the one of the question it follows."
+      );
+    }
+    const merged = find(question_id as number);
+    const target = find(into as number);
+    if (question_id === into || !merged || !target) {
+      return no("invalid_field", "question_id and into are the ids of two different questions.");
+    }
+    if (merged.status !== "open" || target.status !== "open") {
+      const closed = merged.status !== "open" ? merged : target;
+      return no("question_closed", `${qid(closed.id)} is closed. Only two open questions are merged.`);
+    }
+    if (merged.blocking !== target.blocking) {
+      return no(
+        "merge_not_allowed",
+        "A blocking question and a non-blocking one are not merged: one waits for the answer and the other goes on with its default."
+      );
+    }
+
+    return log.transaction(() => {
+      const seq = log.record({
+        kind: "question_merged",
+        from: peer.name,
+        role_from: peer.role,
+        ticket_ref: merged.ticket_ref,
+        question_id: merged.id,
+        data: { question_id: merged.id, into: target.id },
+      });
+      db.run("UPDATE questions SET status = 'merged', merged_into = ? WHERE id = ?", [target.id, merged.id]);
+      return { ok: true, seq };
+    });
+  }
+
+  // The check of the deadlines: every open question whose deadline came closes by its
+  // default. Returns the seq of each answer written.
+  function expire(): number[] {
+    const due = db
+      .query("SELECT id, default_answer FROM questions WHERE status = 'open' AND deadline_ts <= ? ORDER BY id")
+      .all(now()) as { id: number; default_answer: string }[];
+    return due
+      .map((row) =>
+        resolve(row.id, { from: "broker", role_from: "broker", answer: row.default_answer, resolved_by: "timeout_default" })
+      )
+      .filter((seq) => seq !== null);
+  }
+
+  // The default by the result: a worker that delivers a ticket went on with the default of
+  // what it asked about it without blocking. Those questions close, open or merged, in
+  // ascending id. Called by /send, inside the transaction of the result.
+  function delivered(worker: string, ticket_ref: string): void {
+    const asked = db
+      .query(
+        `SELECT id, default_answer FROM questions
+         WHERE asked_by = ? AND ticket_ref = ? AND blocking = 0 AND status IN ('open', 'merged') ORDER BY id`
+      )
+      .all(worker, ticket_ref) as { id: number; default_answer: string }[];
+    for (const row of asked) {
+      resolve(row.id, { from: "broker", role_from: "broker", answer: row.default_answer, resolved_by: "result_default" }, true);
+    }
+  }
+
+  return { ask, escalate, answer, answerAsHuman, merge, expire, delivered };
+}

@@ -37,6 +37,9 @@ const ROUTE_OF: Record<string, string> = {
   turn_started: "/turn-started",
   permission_request: "/permission-request",
   permission_decision: "/permission-decision",
+  question: "/ask",
+  answer: "/answer",
+  question_merged: "/merge-question",
 };
 
 // What the rule of an edge decides: the refusal, or what is stored besides the envelope
@@ -63,7 +66,9 @@ function isCriterion(value: unknown): value is Criterion {
   );
 }
 
-export function createSend(log: Log) {
+// `afterResult` runs inside the transaction of the result of a worker, with its name and the
+// ticket delivered: what it records is stored with the result or not at all
+export function createSend(log: Log, afterResult?: (worker: string, ticket_ref: string) => void) {
   // task mother → leader and result leader → mother: no ticket and no field of their own
   function untracked(body: Record<string, unknown>): Ruling {
     if (body.ticket_ref != null) {
@@ -273,6 +278,8 @@ export function createSend(log: Log) {
       if (kind === "result" && peer.role === "worker" && log.blocked(peer.name)) {
         log.record({ kind: "unblocked", from: "broker", role_from: "broker", data: { peer: peer.name } });
       }
+      // After the unblocked: what else the delivery of a ticket settles
+      if (kind === "result" && peer.role === "worker") afterResult?.(peer.name, ruling.ticket_ref!);
       return { ok: true, seq };
     });
   }

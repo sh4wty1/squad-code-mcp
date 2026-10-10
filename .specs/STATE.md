@@ -92,26 +92,56 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 - **Date**: 2026-10-09
 - **Status**: active
 
+### AD-012
+- **Decision**: O `feature_closed` encerra as perguntas da feature, em `delivered` e em `abandoned`, sem evento novo. Na tabela `questions` a pergunta vira `defaulted` se tem default e `discarded` se não tem, um quinto status que o design não lista; a derivação trata pergunta de feature fechada do mesmo jeito.
+- **Reason**: O design só diz "resolvidas pelo default ou descartadas" e não dá evento nem status para isso. O `feature_closed` já é entregue a todos, e o envelope do ADR-004 fica como está. Decidido pelo dev em 2026-10-10.
+- **Trade-off**: O log não diz, pergunta a pergunta, o que aconteceu no encerramento, e o resumo da feature fechada não conta essas perguntas como respondidas nem como default. Um agente pausado numa bloqueante só sabe que ela acabou pelo `feature_closed`.
+- **Scope**: `broker/log.ts`, `broker/shared/derive.ts`, tabela `questions`, e a fatia Gate, que tem o mesmo caso com gates pendentes. Detalha o ADR-005.
+- **Date**: 2026-10-10
+- **Status**: active
+
+### AD-013
+- **Decision**: O que uma pergunta é sai do primeiro `question` dela: texto (`body`, ou `summary` se o `body` é vazio), `why`, `options`, `default`, `asked_by` e `blocking`. `/escalate` copia esses campos e o `timeout_s` para cada `question` novo; o `summary` e o `body` de quem escala são a nota do salto e aparecem só no feed e no thread.
+- **Reason**: Os frames têm um texto por pergunta e `/escalate` aceita `summary` e `body` novos a cada salto. É a regra que a derivação já usava para `asked_by`, `blocking` e `default`. Decidido pelo dev em 2026-10-10.
+- **Trade-off**: A mother não consegue reescrever a pergunta para o dev: se o texto do worker é ruim, o dev lê o texto ruim. A skill de papel tem de fazer o agente perguntar direito na origem.
+- **Scope**: `broker/question.ts`, `broker/shared/derive.ts`, TUI e as skills da fatia Papéis. Detalha o ADR-005.
+- **Date**: 2026-10-10
+- **Status**: active
+
+### AD-014
+- **Decision**: A TUI escreve por um comando que o redutor de teclas deixa no estado (`Ui.send`); o laço de `tui.ts` faz o `POST` e devolve o resultado a outro redutor puro (`settle`). A credencial humana é lida do arquivo a cada envio.
+- **Reason**: `press` é pura e testada sem rede; um `fetch` dentro dela acabaria com isso. O broker pode criar o arquivo do token depois de a TUI subir.
+- **Trade-off**: Um envio são dois passos no estado, e enquanto ele espera resposta o modal não aceita tecla.
+- **Scope**: `broker/tui/keys.ts`, `broker/tui.ts`, e os modais de gate e de permissão da fatia Gate. Detalha o AD-007 e o AD-010.
+- **Date**: 2026-10-10
+- **Status**: active
+
 ## Handoff
 
-Atualizado em 2026-10-10. PR 8: https://github.com/sh4wty1/squad-code-mcp/pull/8.
+Atualizado em 2026-10-10.
 
-- **Feature**: TUI leitura, `.specs/features/tui-leitura/`.
-- **Phase / Task**: concluída e verificada; o PR 8 espera só o merge.
-- **Completed**: T1–T30 e F1–F4. Verifier independente, rodada 3: PASS, 64/64 ACs, 9/9 bordas, 24/24 mutações mortas ao final. Requisitos Verified e TUI leitura marcada no ROADMAP. As quatro threads da review foram respondidas e resolvidas no GitHub em 2026-10-10. O gate passou no Windows no mesmo dia.
+- **Feature**: Question, `.specs/features/question/`.
+- **Phase / Task**: concluída e verificada; falta a review e o merge do PR.
+- **Completed**: T1–T38, F1–F11 (`fix-round-1.md`) e F12–F13 (`fix-round-2.md`). Verifier independente, rodada 3: PASS, 98/98 requisitos, 36 de 38 mutações mortas (as duas que sobraram estão fora da fatia ou fora da spec). Requisitos Verified e Question marcada no ROADMAP.
 - **In-progress** (file:line): nada.
-- **Next step**: o dev olha a TUI num terminal real (`bun tui/demo.ts 01`, de dentro de `broker/`) e decide o merge do PR 8. Depois do merge, a fatia Question sai da `main` atualizada; ela não foi iniciada. Não fazer merge sem instrução do dev.
+- **Next step**: o dev olha a aba e o modal num terminal real (`bun tui/demo.ts 04`, de dentro de `broker/`: `4`, `enter`, responder) e decide a review e o merge do PR. Depois do merge, a fatia Papéis sai da `main` atualizada. Não fazer merge sem instrução do dev.
 - **Blockers**: nenhum bloqueio técnico. O merge é decisão do dev.
 - **Uncommitted files**: none.
-- **Branch**: `feat/tui-leitura`. O head publicado é `7bdf4c9`; o commit que registra o gate do Windows e este handoff vem depois dele e é local até o dev pedir o push.
+- **Branch**: `feat/question`, saído da `main` em `9a4d921`.
+
+### O que esta fatia deixa para as próximas
+
+- Papéis: as skills de papel têm de fazer o agente perguntar direito na origem, porque o texto que o dev lê é o do primeiro `question` (AD-013), e de pedir uma credencial com "coloque no lugar e confirme". Um agente pausado numa bloqueante só sabe que ela acabou no encerramento pelo `feature_closed` (AD-012).
+- Gate: os modais de gate e de permissão escrevem como o de resposta, por um comando em `Ui` (AD-014), e a regra de colagem do modal de resposta (QST-78) vale para o campo de texto deles. `g` e `x` continuam com o aviso `chega com a fatia Gate`.
+- Gate: gates pendentes no encerramento da feature são o mesmo caso das perguntas (AD-012).
 
 ### Evidência e limites
 
-- Linux, Bun 1.3.14: TypeScript passa; 929 testes passam, zero falham ou pulados, 5664 assertions, 48 arquivos.
-- Windows 11, Bun 1.4.2, em `7bdf4c9`: TypeScript passa; 926 passam, zero falham, 3 pulados por condição de plataforma anterior à fatia, 5650 assertions. O sensor de mutação não foi repetido no Windows.
-- `validate_state.py tui-leitura`: exit 0. Relatório em `.specs/features/tui-leitura/validation.md`; resolução de F1–F4 em `fix-round-2.md`; registros em `docs/tasks/`.
-- PR 8 em 2026-10-10: `MERGEABLE`, estado `CLEAN`, sem review nova depois da rodada 1 do The Judge (COMMENT, quatro should-fix, todos resolvidos).
-- Os 41 frames permanecem idênticos à extração original. L-049 continua candidata.
-- `bun tui/demo.ts [frame]` abre a TUI sobre o log de um frame, sem broker, sem banco e sem token. No Linux deu 39 linhas em tela cheia com a fonte padrão, uma abaixo do mínimo de 40 do design; o dev quer rever isso depois.
-- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários; não usar `bun x tsc`.
-- Não exercitados: terminal interativo real (teclas, resize, cores como a fonte desenha), macOS, sinais reais e uma sessão do Claude Code alimentando a TUI. Pendências anteriores continuam em ROADMAP, design e histórico deste STATE.
+- Windows 11, Bun 1.4.2, em `2ac91fe`: `tsc` passa; 1270 passam, 3 pulados por condição de plataforma anterior à fatia, zero falham, 63 arquivos. Antes da fatia: 926 passam, 3 pulados.
+- Linux, contêiner `oven/bun:1.4.2` (kernel 6.18 do WSL2) sobre um clone limpo: `tsc` passa e a suíte inteira passou em 10 de 13 execuções sobre o código final, com 1273 passando e zero pulados. As 3 que falharam caíram cada uma num teste de integração anterior à fatia (`EVT-85` duas vezes, `EVT-89` uma), por tempo esgotado à espera de um broker ou servidor MCP real. A `main` falha do mesmo jeito no mesmo contêiner (`EVT-81`, 1 de 14 repetições de `server-delivery.test.ts` e `server-tools.test.ts`; o HEAD passou 14 de 14): a instabilidade é anterior à fatia e não teve a causa investigada.
+- `validate_state.py question`: exit 0. Relatório em `.specs/features/question/validation.md`.
+- Os 41 frames de leitura permanecem idênticos à extração original; os 6 de Question (04, 05, 06, 07, 20a, 20b) são a saída da ferramenta, sem edição, e nenhum tem desvio D3.
+- Riscos conhecidos, não corrigidos: `expire` roda num `setInterval` sem `try` em `broker.ts`, como o `cleanStale`, e uma exceção num temporizador do Bun encerra o broker; uma colagem que o terminal entrega em várias leituras, com o `\r` sozinho numa delas, envia a resposta; `tui/demo.ts` não tem teste automático.
+- Rodar de dentro de `broker/`: `bun test` e `bun node_modules/typescript/bin/tsc --noEmit`. Não usar `bun x tsc`. No Linux desta máquina a suíte roda num contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` instalados dentro dele, sobre um clone do repositório; o WSL Debian não tem `bun`.
+- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários.
+- Não exercitados: terminal interativo real (teclas, colagem, cores como a fonte desenha), macOS, sinais reais e uma sessão do Claude Code perguntando e recebendo a resposta. Pendências anteriores continuam em ROADMAP, design e histórico deste STATE.

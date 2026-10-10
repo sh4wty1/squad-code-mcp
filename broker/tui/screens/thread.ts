@@ -2,10 +2,10 @@
 // entry, the line of the flow and, at the right, what the judge said of each criterion.
 // The layout is the one of `rThread` of the prototype; the content comes from the events.
 
-import type { SquadEvent } from "../../shared/contract.ts";
+import { qid, type SquadEvent } from "../../shared/contract.ts";
 import { REWORK_LIMIT, type SquadTicket } from "../../shared/derive.ts";
 import { refs } from "../activity.ts";
-import { label, qid } from "../feed.ts";
+import { label } from "../feed.ts";
 import { age, clock, cut, grid, len, pad, wrap, type Color, type Grid, type Seg } from "../grid.ts";
 import type { View } from "../view.ts";
 import { chrome, drawRows, KIND_TONE, TICKET_TONE, tone, type Keys, type Line } from "./chrome.ts";

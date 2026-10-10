@@ -15,14 +15,15 @@ export function frame(id: string): string[] {
 }
 
 // The View of the frame: its log at its clock, with the selection of the prototype, the
-// ticket of its thread and the project of the prototype. `change` gives another log from the one of the frame.
+// ticket of its thread, the state of its screen and the project of the prototype. `change`
+// gives another log from the one of the frame.
 export function frameView(id: string, change: (events: SquadEvent[]) => SquadEvent[] = (events) => events): View {
-  const { now, selected, ticket } = LOGS[id]!;
+  const { now, selected, ticket, ui } = LOGS[id]!;
   const events = change(LOGS[id]!.events);
   return {
     squad: squad(events, now),
     rows: feed(events),
-    ui: { screen: "main", selected, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: ticket ?? null, threadOffset: 0 },
+    ui: { screen: "main", selected, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: ticket ?? null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null, ...ui },
     project: "portal-89fm",
     down: null,
     prices: PRICES,

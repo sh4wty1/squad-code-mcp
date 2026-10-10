@@ -73,6 +73,25 @@ export function openDatabase(path: string): Database {
     )
   `);
 
+  // The state of each question, written by question.ts and closed with its feature by
+  // log.ts. No row is deleted, so the next id, MAX(id) + 1, is never one already given.
+  db.run(`
+    CREATE TABLE IF NOT EXISTS questions (
+      id INTEGER PRIMARY KEY,
+      feature_id INTEGER NOT NULL REFERENCES features(id),
+      ticket_ref TEXT,
+      asked_by TEXT NOT NULL,
+      holder TEXT NOT NULL,
+      blocking INTEGER NOT NULL,
+      default_answer TEXT,
+      timeout_s INTEGER,
+      deadline_ts INTEGER,
+      status TEXT NOT NULL,
+      merged_into INTEGER REFERENCES questions(id),
+      answer_seq INTEGER REFERENCES events(seq)
+    )
+  `);
+
   db.run("CREATE INDEX IF NOT EXISTS events_feature_ticket ON events (feature_id, ticket_ref)");
   db.run("CREATE INDEX IF NOT EXISTS events_question ON events (question_id)");
   db.run("CREATE INDEX IF NOT EXISTS events_gate ON events (gate_id)");
@@ -91,6 +110,24 @@ export function openDatabase(path: string): Database {
   `);
 
   return db;
+}
+
+// A row of `questions`, as stored
+export interface QuestionRow {
+  id: number;
+  feature_id: number;
+  ticket_ref: string | null;
+  asked_by: string;
+  // peer name, or "human"
+  holder: string;
+  blocking: 0 | 1;
+  default_answer: string | null;
+  timeout_s: number | null;
+  // only of a non-blocking question that reached the dev
+  deadline_ts: number | null;
+  status: "open" | "answered" | "defaulted" | "merged" | "discarded";
+  merged_into: number | null;
+  answer_seq: number | null;
 }
 
 export interface NewEvent {

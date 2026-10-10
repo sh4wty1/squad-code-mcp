@@ -82,6 +82,8 @@ const counts = (line: number) => d("D2", COUNTS, [line, 88, 30, "✓ 2 pelo dev 
 // Line 1, the seals at the right, and line 38, the right side of the footer
 const seal = (text: string, why: string) => d("D1", why, [1, 66, 53, text.padStart(53)]);
 const footer = (cls: Deviation["class"], why: string, text: string) => d(cls, why, [38, 85, 34, text.padStart(34)]);
+// The seal of the scenario of the missing key, where the prototype writes `Q-09 é sua`
+const KEY_SEAL = seal("⚠ w2 bloqueado · RADIO_API_KEY ausente", "table of seals of the design: the long form of a block has its reason, not the question the prototype writes by hand");
 const LIMIT = "the line of the limit is no event: it takes the hour of the third verdict of rework (TUI-26), not one second after";
 
 // The topology. The box of a worker takes lines 21 to 25 at columns 4, 31 and 58, with 20
@@ -130,6 +132,23 @@ const REPROVED: [string, string][] = [
   ["14:47:30 ✗ [verdict]  jdg → ldr    REPROVADO · 4/5 · limite atingido", "reprovado 3ª vez: iOS"],
 ];
 
+// The tab of questions. A route takes 20 columns: from column 9 in the list, from column 70
+// in the detail and from column 18 in the history.
+const HOPS = ".design/squad-mvp.md line 490: the route shown is the sequence of the `question` of the log, and a question of the mock without a hop is an omission of the mock; the scenario has no `question` of the leader to the mother for this one, and the prototype writes that hop by hand";
+const hops = (line: number, col: number, route: string, width = 20) => d("D1", HOPS, [line, col, width, route]);
+const ASKED_MOTHER = "Assumptions, `Logs dos frames novos`: the question the leader asked the mother at 14:18:40, answered by her at 14:19:05, is a resolved question of the feature (QST-60), and the history the prototype writes by hand leaves it out";
+// The history of the main scenario at 14:32:07, the one of frames 04 to 07: its count, the
+// line of the ones below where the frame has the fifth, and the routes of Q-10 and of Q-05
+const SIX = d("D1", ASKED_MOTHER + "; with six the history shows four and how many are below (QST-62)", [26, 15, 1, "6"], [35, 2, 116, "+2 mais antigas · h e j/k para rolar"], [36, 2, 116, ""]);
+const Q10_HOPS = hops(31, 18, "w2 → ldr → dev");
+const Q05_HOPS = hops(33, 18, "w3 → ldr → dev");
+
+// The modal of answer, over the tab. The route of Q-08 in it ends in `você`: 21 columns
+// from column 30. Its box and the margin around it take columns 18 to 101 of each line.
+const Q08_HOPS = (line: number) => hops(line, 30, "w2 → ldr → você", 21);
+const modalOf = (id: string, from: number, to: number) => frame(id).slice(from, to + 1).map((line) => [...line.padEnd(120)].slice(18, 102).join(""));
+const EFFECT = 'Assumptions, `Linha "efeito"`: the TUI writes the effect from who asked and the ticket (QST-59), and the one the prototype writes by hand for Q-09 is in no event';
+
 export const DEVIATIONS: Record<string, Deviation[]> = {
   "01": [...skills(MOT, LDR, W2, JDG), ...doing(8, "tech lead · escalou TK…", ESCALATED), ...entered("01"), ...plan(9), ...loadout(33, 2)],
   "09a": [...skills(MOT, LDR, W1, W2, JDG), ...counts(15)],
@@ -139,10 +158,10 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ...LEADER_WORKING,
     ...entered("10"),
     ...plan(15),
-    ...seal("⚠ w2 bloqueado · RADIO_API_KEY ausente", "table of seals of the design: the long form of a block has its reason, not the question the prototype writes by hand"),
+    ...KEY_SEAL,
     ...panel(
       "D2",
-      "Assumptions, `Detalhe de um blocked`: the reason, the detail and the last action of the event, then the questions of the ticket after it; `tipo`, `resolver em` and the key that answers are prose of the scenario or of the slice Question",
+      "Assumptions, `Detalhe de um blocked`: the reason, the detail and the last action of the event, then the questions of the ticket after it; `tipo`, `resolver em` and the key that answers are prose of the scenario",
       6,
       "---", "motivo", "RADIO_API_KEY ausente", "GET /v1/setlist → 401. A", "RADIO_API_KEY não está no .env", "do worktree do worker-2.", "última ação", "bun test src/api, 3 tentativas",
       "---", "escalação", " 14:29 w2→ldr [question]", " 14:30 ldr→mot [question]", " 14:30 mot→hum [question]", "---", "enter thread TKT-13", "", "", "", "", ""
@@ -349,8 +368,8 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
   "11": [
     ...d(
       "D3",
-      "TUI-49, Out of Scope: the focus on the history is a key of the tab of questions (slice Question), and the modals of answer, of gate and of permission are screens of the slices Question and Gate; their keys do nothing here",
-      ...[19, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33].map((line): At => [line, 62, 56, ""])
+      "TUI-49, QST-88, Out of Scope: the modals of gate and of permission are screens of the slice Gate; their keys do nothing here",
+      ...[25, 26, 27, 28, 30, 31, 32, 33].map((line): At => [line, 62, 56, ""])
     ),
     ...d("D3", "Out of Scope: the ids `P-nn` and the line of a request answered in the terminal only exist in the modal of permission (slice Gate); the feed of this slice never draws it", [30, 29, 29, ""]),
   ],
@@ -364,6 +383,35 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ...d("D1", "the screen is frozen since the broker stopped answering, the 12 s of line 0 before the clock (TUI-51, `view.down`); the prototype writes the clock itself", [3, 45, 8, "14:31:55"]),
   ],
   "29c": [...skills(MOT, LDR, W2, JDG), ...doing(12, "worker · sem ticket", NO_TICKET), ...body(36, "Bash: Apagar …"), ...declared(23), ...loadout(27, 2)],
+  "04": [...hops(12, 9, "w2 → ldr → dev"), ...SIX, ...Q10_HOPS, ...Q05_HOPS],
+  // The modal covers the route of Q-08 in the list, and in 07 the one of the detail and the one of Q-10 in the history
+  "05": [...SIX, ...Q10_HOPS, ...Q05_HOPS],
+  "06": [...hops(7, 70, "w2 → ldr → dev"), ...Q08_HOPS(14), ...SIX, ...Q10_HOPS, ...Q05_HOPS],
+  "07": [...Q08_HOPS(12), ...SIX, ...Q05_HOPS],
+  "20a": [
+    ...KEY_SEAL,
+    ...block(
+      "D2",
+      EFFECT + "; it takes one line where the frame has two, so the box has a line less and, centered, starts a line below, where the frame has its margin over the text of the detail",
+      "20a",
+      9,
+      18,
+      [
+        " ".repeat(41) + "││ A RADIO_API_KEY não está no worktree do ",
+        ...modalOf("20a", 9, 25),
+        " │  " + pad("efeito  worker-2 retoma o TKT-13 assim que você confirmar.", 78) + "│ ",
+      ]
+    ),
+    ...d("D2", EFFECT + "; the detail behind the modal has it too, in its 47 columns", [18, 102, 15, "ue você"], [19, 102, 15, ""]),
+    ...d(
+      "D1",
+      ASKED_MOTHER + "; with three the history shows the three (QST-62)",
+      [26, 15, 1, "3"],
+      [31, 2, 116, "14:19:05  Q-04  " + pad("ldr → mot", 34) + "A setlist vem da API da rádio ou é cadastrada no CMS? Isso muda o…"],
+      [32, 12, 106, "✓ respondida por mother: API /v1/setlist, polling 30s  · rota curta, não chegou ao dev"]
+    ),
+  ],
+  "20b": [...Q08_HOPS(14), ...d("D1", ASKED_MOTHER + "; it is one more in the count and one more below the four (QST-62)", [26, 15, 1, "8"], [35, 3, 1, "4"])],
 };
 
 // The lines the screen has to draw for the frame, and the deviations that change nothing

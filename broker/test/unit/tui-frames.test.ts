@@ -1,8 +1,10 @@
 import { expect, test } from "bun:test";
 import type { Grid } from "../../tui/grid.ts";
+import { answer } from "../../tui/screens/answer.ts";
 import { down } from "../../tui/screens/down.ts";
 import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
+import { questions } from "../../tui/screens/questions.ts";
 import { small } from "../../tui/screens/small.ts";
 import { thread } from "../../tui/screens/thread.ts";
 import { topology } from "../../tui/screens/topology.ts";
@@ -19,17 +21,20 @@ const TOPOLOGY = ["02", "13b", "23b", "28c", "29b"];
 // The broker of frame 12 does not answer for 12 s, in 12 reads
 const frozen = (view: View, seconds = 12): View => ({ ...view, down: { since: view.squad.now - seconds * 1000, attempt: seconds } });
 
-const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid][] = [
+// The requirement of a screen of the slice that reads is TUI-43
+const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid, requirement?: string][] = [
   ["main screen", MAIN, main],
   ["topology", TOPOLOGY, topology],
   ["thread", ["03", "15b", "24d", "25b"], thread],
   ["legend", ["11"], help],
   ["frozen screen", ["12"], (view) => down(frozen(view))],
+  ["tab of questions", ["04"], questions, "QST-69"],
+  ["modal of answer", ["05", "06", "07", "20a", "20b"], (view) => answer(questions(view), view), "QST-87"],
 ];
 
-for (const [name, ids, draw] of SCREENS) {
+for (const [name, ids, draw, requirement = "TUI-43"] of SCREENS) {
   for (const id of ids) {
-    test(`TUI-43: frame ${id} of the ${name}`, () => {
+    test(`${requirement}: frame ${id} of the ${name}`, () => {
       const drawn = draw(frameView(id)).text();
       expect(drawn.length).toBe(40);
       expect(drawn.map((line, y) => `${y} ${line}`)).toEqual(expected(id).lines.map((line, y) => `${y} ${line}`));
@@ -71,15 +76,61 @@ test("TUI-43: a deviation of the status of an agent cites the line of the design
   expect(statuses.filter((dev) => dev.class !== "D1" || !/\.design\/squad-mvp\.md line 3\d\d/.test(dev.why))).toEqual([]);
 });
 
+test("QST-89: every deviation of frame 04 is D1 or D2 and cites the spec or the design", () => {
+  const all = DEVIATIONS["04"]!;
+  expect(all.length).toBeGreaterThan(0);
+  expect(all.filter((dev) => !["D1", "D2"].includes(dev.class) || !/QST-\d\d|Assumptions, `|\.design\/squad-mvp\.md line \d+/.test(dev.why))).toEqual([]);
+});
+
+test("QST-69: the history of frame 04 has the question the mother answered at 14:19:05, and its deviation says the prototype leaves it out", () => {
+  const view = frameView("04");
+  // The oldest of the six, at the end of the history
+  const drawn = questions({ ...view, ui: { ...view.ui, historyOffset: 2 } }).text();
+  expect([...drawn[33]!].slice(2, 27).join("")).toBe("14:19:05  Q-04  ldr → mot");
+  expect([...drawn[34]!].slice(12, 65).join("")).toBe("✓ respondida por mother: API /v1/setlist, polling 30s");
+  const counted = DEVIATIONS["04"]!.filter((dev) => dev.line === 26);
+  expect(counted.map((dev) => [dev.class, dev.text])).toEqual([["D1", "6"]]);
+  expect(counted[0]!.why).toContain("answered by her at 14:19:05");
+  expect(counted[0]!.why).toContain("the history the prototype writes by hand leaves it out");
+});
+
+test("QST-89: no deviation of the frames of the modal is D3", () => {
+  for (const id of ["05", "06", "07", "20a", "20b"]) {
+    expect(DEVIATIONS[id]!.length).toBeGreaterThan(0);
+    expect(DEVIATIONS[id]!.filter((dev) => !["D1", "D2"].includes(dev.class)).map((dev) => `${id} line ${dev.line}`)).toEqual([]);
+  }
+});
+
+test("QST-87: in frame 20a the effect of Q-09 written by hand is a D2 deviation, and the seal of line 1 the D1 one of frame 10", () => {
+  const all = DEVIATIONS["20a"]!;
+  const seal = all.filter((dev) => dev.line === 1);
+  expect(seal.map((dev) => [dev.class, dev.text.trim()])).toEqual([["D1", "⚠ w2 bloqueado · RADIO_API_KEY ausente"]]);
+  expect(seal).toEqual(DEVIATIONS["10"]!.filter((dev) => dev.line === 1));
+  // The frame has the effect in lines 26 and 27 of the modal; the one the TUI writes takes one
+  expect(frame("20a").slice(26, 28).map((line) => [...line].slice(22, 99).join("").trim())).toEqual([
+    "efeito  pronto: worker-2 relê o .env e retoma o TKT-13. Não vou fornecer: o",
+    "leader replaneja o ticket sem a API.",
+  ]);
+  const effect = all.filter((dev) => dev.text.includes("efeito  "));
+  expect(effect.map((dev) => [dev.class, dev.line, [...dev.text].slice(4, 81).join("").trim()])).toEqual([["D2", 27, "efeito  worker-2 retoma o TKT-13 assim que você confirmar."]]);
+  expect(effect[0]!.why).toContain('Assumptions, `Linha "efeito"`');
+  // Behind the modal, the end of the two lines of the effect in the detail
+  expect(all.filter((dev) => dev.col === 102).map((dev) => [dev.class, dev.line, dev.text])).toEqual([["D2", 18, "ue você"], ["D2", 19, ""]]);
+});
+
+test("QST-58: the default of the detail behind the modal of frames 06 and 07 is the one of the frame, with no deviation", () => {
+  // The end of `default  logo da 89  · aplicado em 3:08 sem resposta`, at the right of the modal
+  for (const [id, line] of [["06", 12], ["07", 12]] as const) {
+    expect([...frame(id)[line]!].slice(102, 114).join("")).toBe("sem resposta");
+    expect(DEVIATIONS[id]!.filter((dev) => dev.line === line && dev.col + dev.width > 102)).toEqual([]);
+  }
+});
+
 test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen of another slice", () => {
   const lines = frame("11").map((line) => [...line.padEnd(120)]);
   const cut = DEVIATIONS["11"]!.map((dev) => [dev.class, dev.text, lines[dev.line]!.slice(dev.col, dev.col + dev.width).join("").trim()]);
   expect(cut).toEqual(
     [
-      "h           foco no histórico",
-      "modal de resposta",
-      "1–4 enter   escolher · enviar · esc cancela",
-      "ctrl+e · u  expandir o texto · limpar",
       "gate (modal)",
       "a           aprovar → pede confirmação (y)",
       "r · c       rejeitar · comentar, texto obrigatório",
@@ -91,6 +142,23 @@ test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen o
       "✓ P-01 fechado no terminal",
     ].map((text) => ["D3", "", text])
   );
+});
+
+test("QST-88: the legend has the four lines of Question where frame 11 has them, and the lines of gate and of permission empty", () => {
+  const drawn = help(frameView("11")).text();
+  // The text of the panel of the keys, inside its box
+  const keys = drawn.map((line) => [...line.padEnd(120)].slice(62, 118).join("").trimEnd());
+  expect(keys.slice(19, 25)).toEqual(["h           foco no histórico", "", "modal de resposta", "1–4 enter   escolher · enviar · esc cancela", "ctrl+e · u  expandir o texto · limpar", ""]);
+  for (const y of [19, 21, 22, 23]) expect(drawn[y]).toBe(frame("11")[y]!);
+  expect([25, 26, 27, 28, 30, 31, 32, 33].map((y) => keys[y])).toEqual(["", "", "", "", "", "", "", ""]);
+});
+
+test("QST-89: no frame of Question has a D3 deviation, and no deviation is there for a screen or a key of the slice Question", () => {
+  for (const id of ["04", "05", "06", "07", "20a", "20b"]) expect(DEVIATIONS[id]!.filter((dev) => dev.class === "D3").map((dev) => `${id} line ${dev.line}`)).toEqual([]);
+  const all = Object.entries(DEVIATIONS).flatMap(([id, list]) => list.map((dev) => ({ id, ...dev })));
+  // What the spec cut is of the slices to come, and Question is not one of them
+  expect(all.filter((dev) => dev.class === "D3" && /Question/.test(dev.why)).map((dev) => `${dev.id} line ${dev.line}`)).toEqual([]);
+  expect(all.filter((dev) => /of the slices? Question/.test(dev.why)).map((dev) => `${dev.id} line ${dev.line}`)).toEqual([]);
 });
 
 test("TUI-54: a terminal of 80 by 24 shows frame 21", () => {

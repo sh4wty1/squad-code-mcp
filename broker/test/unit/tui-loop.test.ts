@@ -4,18 +4,23 @@ import { squad } from "../../shared/derive.ts";
 import { config, start } from "../../tui.ts";
 import { CLEAR, ENTER, LEAVE, paint } from "../../tui/ansi.ts";
 import { feed } from "../../tui/feed.ts";
+import type { Color } from "../../tui/grid.ts";
 import { START } from "../../tui/keys.ts";
 import type { Fetch } from "../../tui/reader.ts";
+import { answer } from "../../tui/screens/answer.ts";
 import { down } from "../../tui/screens/down.ts";
 import { main } from "../../tui/screens/main.ts";
+import { questions } from "../../tui/screens/questions.ts";
 import { small } from "../../tui/screens/small.ts";
 import { topology } from "../../tui/screens/topology.ts";
-import type { Ui, View } from "../../tui/view.ts";
+import type { Modal, Ui, View } from "../../tui/view.ts";
 import { LOGS, PRICES } from "../frames/logs.ts";
 
 const BROKER = "http://127.0.0.1:7900";
 const NOW = LOGS["01"]!.now;
 const EVENTS = LOGS["01"]!.events;
+// The human credential of the tests: no screen has this text
+const TOKEN = "c0ffee".repeat(10) + "beef";
 
 async function until(check: () => boolean, what: string) {
   const deadline = Date.now() + 3000;
@@ -47,6 +52,12 @@ function launch(events: SquadEvent[] = EVENTS, settings: { intervalMs?: number; 
     size: { cols: 120, rows: 40 },
     // what the broker answers instead of the log, when set
     answer: null as (() => Promise<Response>) | null,
+    // the human credential of the file; null without the file
+    token: TOKEN as string | null,
+    // what the broker answers to an answer of the dev
+    reply: (async () => Response.json({ ok: true, seq: 999 })) as () => Promise<Response>,
+    // the body of each POST
+    posts: [] as { url: string; body: unknown }[],
     out: "",
     raw: [] as boolean[],
     calls: [] as { method: string; url: string }[],
@@ -62,11 +73,15 @@ function launch(events: SquadEvent[] = EVENTS, settings: { intervalMs?: number; 
   const fetch: Fetch = async (url, init) => {
     t.calls.push({ method: init?.method ?? "GET", url });
     if (t.answer) return t.answer();
+    if (init?.method === "POST") {
+      t.posts.push({ url, body: JSON.parse(String(init.body)) });
+      return t.reply();
+    }
     const after = Number(new URL(url).searchParams.get("after"));
     return Response.json({ events: t.events.filter((e) => e.seq > after), last_seq: Math.max(0, ...t.events.map((e) => e.seq)) });
   };
   const tui = start(
-    { fetch, now: () => t.now, size: () => t.size, write: (text) => (t.out += text), raw: (on) => t.raw.push(on), project: "portal-89fm" },
+    { fetch, now: () => t.now, size: () => t.size, write: (text) => (t.out += text), raw: (on) => t.raw.push(on), project: "portal-89fm", token: () => t.token },
     { url: BROKER, intervalMs: 5, glyphs: new Map(), prices: PRICES, ...settings }
   );
   return { ...tui, t };
@@ -286,6 +301,244 @@ test("TUI-55: the loop asks the broker for nothing but GET /events?after=", asyn
   for (const call of t.calls) {
     expect(call.method).toBe("GET");
     expect(call.url).toMatch(/^http:\/\/127\.0\.0\.1:7900\/events\?after=\d+$/);
+  }
+});
+
+// The tab of questions with the modal of the state over it, as the loop draws it
+const tab = (view: View): string[] => answer(questions(view), view).text();
+const modal = (question: number, more: Partial<Modal> = {}): Modal => ({ question, choice: null, text: "", expanded: false, sending: false, refused: false, ...more });
+const notice = (text: string, color: Color) => ({ text, color, until: NOW + 4000 });
+// What was written to the terminal, without the escapes that split it
+const written = (out: string) => out.replace(/\x1b\[[0-9;?]*[A-Za-z]/g, "");
+
+test("QST-76, QST-79: enter in the modal makes one POST /answer with the credential of io.token(), and a second enter before the broker answers makes no other", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    // The broker answers only when the test lets it
+    let reply!: (res: Response) => void;
+    t.reply = () => new Promise((resolve) => (reply = resolve));
+
+    key("4");
+    expect(t.lines()).toEqual(questions(t.view({ screen: "questions" })).text());
+    // Q-08, its modal, a text with spaces at its ends and enter
+    for (const k of ["j", "\r", " logo da 89 ", "\r"]) key(k);
+    expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo da 89" } }]);
+    const waiting = tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: " logo da 89 ", sending: true }) }));
+    expect(t.lines()).toEqual(waiting);
+
+    for (const k of ["\r", "x", "\x7f", "\r", "\x1b"]) key(k);
+    // A lone escape is a key 40 ms after it came
+    await Bun.sleep(60);
+    expect(t.posts).toHaveLength(1);
+    expect(t.lines()).toEqual(waiting);
+
+    reply(Response.json({ ok: true, seq: 500 }));
+    await t.shows(questions(t.view({ screen: "questions", question: 8, toast: notice("✓ Q-08 respondida", "bgreen") })).text(), "the tab without the modal");
+    expect(t.lines()[38]).toContain("✓ Q-08 respondida");
+    expect(written(t.out)).not.toContain(TOKEN.slice(0, 12));
+  } finally {
+    stop();
+  }
+});
+
+test("QST-83: without a credential nothing is sent, the modal stays and the footer says so; the credential is read again at the next send and never written to the terminal", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    t.token = null;
+    for (const k of ["4", "j", "\r", "logo", "\r"]) key(k);
+    expect(t.calls.every((call) => call.method === "GET")).toBe(true);
+    expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo" }), toast: notice("✗ credencial humana não encontrada", "bred") })));
+    expect(t.lines()[38]).toContain("✗ credencial humana não encontrada");
+
+    // The broker wrote the file meanwhile
+    t.token = TOKEN;
+    key("\r");
+    expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo" } }]);
+    await until(() => t.lines()[38]!.includes("✓ Q-08 respondida"), "the notice of the answer");
+    await t.reads(t.calls.length + 2);
+    expect(written(t.out)).not.toContain(TOKEN.slice(0, 12));
+    expect(t.lines().join("\n")).not.toContain(TOKEN.slice(0, 12));
+  } finally {
+    stop();
+  }
+});
+
+test("QST-86: in a session that opens the tab, answers and quits, every call of the loop is GET /events or the POST /answer of the enter of the modal", async () => {
+  const { t, key, done } = launch();
+  await t.reads(2);
+  // Q-07 by the second of its options
+  for (const k of ["4", "\r", "2"]) key(k);
+  expect(t.calls.every((call) => call.method === "GET")).toBe(true);
+  key("\r");
+  await until(() => t.lines()[38]?.includes("✓ Q-07 respondida") ?? false, "the notice of the answer");
+  await t.reads(t.calls.length + 2);
+  for (const k of ["j", "h", "j", "b", "1", "4"]) key(k);
+  key("q");
+  await done;
+
+  expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 7, answer: "5 tentativas" } }]);
+  expect(t.calls.filter((call) => call.method !== "GET")).toEqual([{ method: "POST", url: "http://127.0.0.1:7900/answer" }]);
+  const reads = t.calls.filter((call) => call.method === "GET");
+  expect(reads.length).toBeGreaterThanOrEqual(4);
+  for (const call of reads) expect(call.url).toMatch(/^http:\/\/127\.0\.0\.1:7900\/events\?after=\d+$/);
+});
+
+test("QST-78: a pasted chunk with line breaks goes into the text of the modal and sends nothing; enter alone sends it", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    for (const k of ["4", "j", "\r"]) key(k);
+    key("logo da 89\rquadrado\r\n");
+    expect(t.posts).toEqual([]);
+    expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo da 89 quadrado  " }) })));
+    key("\r");
+    expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo da 89 quadrado" } }]);
+  } finally {
+    stop();
+  }
+});
+
+test("QST-78: a chunk that opens the modal in the text mode and goes on with a text and a line break sends nothing", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    for (const k of ["4", "j"]) key(k);
+    // enter over Q-08, which has no options, a text and enter, pasted as one
+    key("\rlogo da 89\r");
+    expect(t.posts).toEqual([]);
+    expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo da 89 " }) })));
+  } finally {
+    stop();
+  }
+});
+
+test("QST-78: a chunk that opens the modal of a question with options and ends in a line break posts nothing", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    // the tab, enter over Q-07, a text and enter, pasted as one
+    key("4\rtexto\r");
+    expect(t.posts).toEqual([]);
+    expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 7, modal: modal(7, { choice: 0 }) })));
+  } finally {
+    stop();
+  }
+});
+
+test("QST-78: a line break and an unfinished escape in one chunk send nothing in the text mode: the break is a space, the escape closes the modal after its wait, and enter alone still sends", async () => {
+  for (const chunk of ["\r\x1b", "\r\x1b["]) {
+    const { t, key, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      for (const k of ["4", "j", "\r", "logo"]) key(k);
+      // The loop holds the escape back: the line break reaches the keys without it
+      key(chunk);
+      expect(t.posts).toEqual([]);
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo " }) })));
+      await t.shows(questions(t.view({ screen: "questions", question: 8 })).text(), "the tab without the modal");
+      expect(t.posts).toEqual([]);
+
+      for (const k of ["\r", "logo", "\r"]) key(k);
+      expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo" } }]);
+    } finally {
+      stop();
+    }
+  }
+});
+
+test("QST-78: a line break and an unfinished escape in one chunk confirm no option in the choice mode, the escape closes the modal after its wait, and enter alone still confirms", async () => {
+  for (const chunk of ["\r\x1b", "\r\x1b["]) {
+    const { t, key, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      // Q-07, on the first of its options
+      for (const k of ["4", "\r"]) key(k);
+      key(chunk);
+      expect(t.posts).toEqual([]);
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 7, modal: modal(7, { choice: 0 }) })));
+      await t.shows(questions(t.view({ screen: "questions", question: 7 })).text(), "the tab without the modal");
+      expect(t.posts).toEqual([]);
+
+      for (const k of ["\r", "\r"]) key(k);
+      expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 7, answer: "infinito com backoff" } }]);
+    } finally {
+      stop();
+    }
+  }
+});
+
+test("QST-80, QST-81: a broker that fails leaves the modal to send again with the error in the footer, and the refusal of a closed question leaves it refused until esc", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    t.reply = async () => Response.json({ error: "database is locked" }, { status: 500 });
+    for (const k of ["4", "j", "\r", "logo", "\r"]) key(k);
+    const failed = notice("✗ resposta não enviada · broker não respondeu", "bred");
+    await t.shows(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo" }), toast: failed })), "the modal with the error");
+    expect(t.lines()[38]).toContain("✗ resposta não enviada · broker não respondeu");
+
+    t.reply = async () => Response.json({ ok: false, error: "question_closed", hint: "The question is closed." });
+    key("\r");
+    const refused = tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo", refused: true }), toast: failed }));
+    await t.shows(refused, "the refused modal");
+    expect(t.lines()[39]).toBe(" esc fechar");
+    for (const k of ["\r", "x", "\x7f"]) key(k);
+    expect(t.lines()).toEqual(refused);
+    expect(t.posts).toHaveLength(2);
+    key("\x1b");
+    await t.shows(questions(t.view({ screen: "questions", question: 8, toast: failed })).text(), "the tab without the modal");
+  } finally {
+    stop();
+  }
+});
+
+test("QST-68, QST-82: the read that shows the question of the modal closed by its default closes the modal, says so and selects the first of the list", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    for (const k of ["4", "j", "\r", "logo"]) key(k);
+    expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo" }) })));
+    // The broker applies the default of Q-08, as in frame 20b
+    t.events = [...EVENTS, LOGS["20b"]!.events.find((e) => e.seq === 434)!];
+    await t.shows(questions(t.view({ screen: "questions", question: 7, toast: notice("⟳ default aplicado", "byellow") })).text(), "the tab without the modal");
+    expect(t.lines()[38]).toContain("⟳ default aplicado");
+    expect(t.posts).toEqual([]);
+  } finally {
+    stop();
+  }
+});
+
+test("QST-84: while the broker does not answer the reads, enter over a question opens no modal, and an open modal is covered, changed by no key and drawn again with its text", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    for (const k of ["4", "j", "\r", "logo"]) key(k);
+    const open = tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo" }) }));
+    expect(t.lines()).toEqual(open);
+
+    t.answer = () => Promise.reject(new Error("ConnectionRefused"));
+    await until(() => t.lines()[3]!.includes("○ congelado"), "the frozen screen");
+    for (const k of [" da 89", "\x7f", "\x15", "\x05", "\r", "\x1b"]) key(k);
+    // A lone escape is a key 40 ms after it came
+    await Bun.sleep(60);
+    expect(t.lines()[3]).toContain("○ congelado");
+    expect(t.calls.every((call) => call.method === "GET")).toBe(true);
+    t.answer = null;
+    await t.shows(open, "the modal again");
+
+    // Without a modal: enter on the tab says that answering is disabled
+    key("\x1b");
+    await t.shows(questions(t.view({ screen: "questions", question: 8 })).text(), "the tab without the modal");
+    t.answer = () => Promise.reject(new Error("ConnectionRefused"));
+    await until(() => t.lines()[3]!.includes("○ congelado"), "the frozen screen again");
+    key("\r");
+    t.answer = null;
+    await t.shows(questions(t.view({ screen: "questions", question: 8, toast: notice("broker desconectado · responder desabilitado", "gray") })).text(), "the tab with no modal");
+    expect(t.calls.every((call) => call.method === "GET")).toBe(true);
+  } finally {
+    stop();
   }
 });
 
