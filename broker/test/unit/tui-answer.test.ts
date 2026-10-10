@@ -410,6 +410,35 @@ test("QST-80: a refused option is drawn in the text mode with its text in the fi
   expect(drawn[39]).toBe(" esc fechar");
 });
 
+test("QST-73, QST-80: a blocking question asked with a default has no line of default in the text mode, and refused the refusal names only the question", () => {
+  const b = open();
+  const id = b.ask(WORKER_1, { ...BLOCKING, default: "8080" });
+  const head = [
+    top("? responder Q-01 · BLOQUEANTE"),
+    boxed("contexto"),
+    boxed("ticket  —"),
+    boxed("thread  chegou ao dev " + clock(NOW) + " · há 0s"),
+    boxed("rota    w1 → ldr → mot → você"),
+    boxed("por quê the spec gives two"),
+    SEP,
+    boxed("worker-1 pergunta   [BLOQUEANTE] só worker-1 está pausado"),
+    boxed("which port?"),
+    boxed(""),
+    boxed("resposta  (uma linha · ctrl+e expande)"),
+  ];
+  const foot = [SEP, boxed("efeito  worker-1 retoma o trabalho assim que você confirmar."), BOTTOM];
+  // 18 lines, from line 11: the ones of a blocking question asked without a default
+  expect(box(b.lines(modal(id, { choice: null })), 11, 28)).toEqual([...head, ...field(["█"], 0), WARNING, ...foot]);
+  // Refused, 19 lines from line 10: the refusal is the one line more
+  expect(box(b.lines(modal(id, { choice: null, text: "9090", refused: true })), 10, 28)).toEqual([
+    ...head,
+    ...field(["9090█"], 4),
+    WARNING,
+    boxed("✗ recusada pelo broker: Q-01 já fechada"),
+    ...foot,
+  ]);
+});
+
 test("QST-80: the refusal comes below the fixed warning in the expanded field too", () => {
   // The modal of frame 07 refused: 25 lines, from line 7, with the field in lines 19 to 26
   const g = over(withModal("20b", { ...frameView("07").ui.modal!, refused: true }));

@@ -46,8 +46,8 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/tui-answer.test.ts`
 **Requirement**: QST-73, QST-80
 
-- [ ] Uma bloqueante com default, no modo texto, não tem a linha `default …`; recusada, a linha da recusa é `✗ recusada pelo broker: Q-NN já fechada`, sem a parte do default
-- [ ] Gate quick passa
+- [x] Uma bloqueante com default, no modo texto, não tem a linha `default …`; recusada, a linha da recusa é `✗ recusada pelo broker: Q-NN já fechada`, sem a parte do default
+- [x] Gate quick passa
 
 ### F5: O intervalo da conferência de prazos é configuração
 
