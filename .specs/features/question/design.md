@@ -123,7 +123,7 @@ iguais.
 
 - **Purpose**: O que a aba, o modal e as teclas precisam saber das perguntas, num lugar só.
 - **Location**: `broker/tui/asked.ts`
-- **Interfaces**: `waiting(squad): Question[]` (a lista, na ordem de QST-55); `resolved(squad): Question[]` (o histórico, na ordem de QST-60); `effect(q, squad): string` (QST-59); `outcome(q, squad): Seg[]` (QST-61); `left(q, now): number` (segundos até o prazo, nunca negativo).
+- **Interfaces**: `waiting(squad): Question[]` (a lista, na ordem de QST-55); `resolved(squad): Question[]` (o histórico, na ordem de QST-60); `effect(q, squad): string` (QST-59); `outcome(q): Seg[]` (QST-61); `left(q, now): number` (segundos até o prazo, nunca negativo).
 
 ### Tela de perguntas
 
