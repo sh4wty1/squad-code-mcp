@@ -248,3 +248,19 @@ The user approved commits and push on 2026-10-09. The exact source/test changes 
 above were committed as `1eaf4b1`, `a943d95`, `83f1eef` and `98b8323`, with no subsequent
 source/test changes. They were pushed to the PR branch. The earlier uncommitted status
 describes the verification snapshot; this documentation commit records publication.
+
+## Windows gate (added after verification)
+
+Run by the author on 2026-10-10 at `7bdf4c9`, outside the Verifier round: the PASS above
+stands on the Linux evidence, and this section only closes the "Windows was unavailable"
+limit. Windows 11, Bun 1.4.2, same command from `tasks.md:43`, in real `broker/`.
+
+- TypeScript: exit 0.
+- `bun test`: 926 passed, 0 failed, 3 skipped, 5650 assertions, 48 files, 50.27 s.
+- The three skips are platform conditions that predate this slice:
+  `test/integration/cli.test.ts:65` (no decoy host to listen on), `:100` and
+  `test/unit/presence.test.ts:6` (both `win32`).
+- The tree was clean before and after, and the run created neither `~/.squad-code-mcp.db`
+  nor `~/.squad-code-mcp.token`.
+- The discrimination sensor was not repeated on Windows. macOS and an interactive
+  terminal remain not exercised.

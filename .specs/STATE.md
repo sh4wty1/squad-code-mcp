@@ -94,22 +94,24 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-09. PR 8: https://github.com/sh4wty1/squad-code-mcp/pull/8.
+Atualizado em 2026-10-10. PR 8: https://github.com/sh4wty1/squad-code-mcp/pull/8.
 
 - **Feature**: TUI leitura, `.specs/features/tui-leitura/`.
-- **Phase / Task**: verificação concluída; correções commitadas e publicadas após aprovação do dev.
-- **Completed**: T1–T30 e F1–F4 corrigidos. Verifier independente, rodada 3: PASS, 64/64 ACs, 9/9 bordas, 24/24 mutações mortas ao final. Requisitos Verified e TUI leitura marcada no ROADMAP.
-- **In-progress** (file:line): nenhuma implementação em curso. Correções em `1eaf4b1`, `a943d95`, `83f1eef` e `98b8323`, publicadas sobre `004fe43`; tabela Resolution em `.specs/features/tui-leitura/fix-round-2.md:9`.
-- **Next step**: conferir a resolução F1–F4 no PR 8 se solicitado; Question é a próxima fatia e não foi iniciada. Não fazer merge sem instrução do dev.
-- **Blockers**: nenhum bloqueio técnico; commits e push aprovados pelo dev em 2026-10-09. Windows, macOS e terminal interativo real não executados nesta rodada.
-- **Uncommitted files**: após o commit documental aprovado, somente os três registros anteriores preservados: `docs/tasks/2026-10-09-handoff-pr-8.md`, `docs/tasks/2026-10-09-judge-pr-8.md` e `docs/tasks/2026-10-09-sincronizar-e-localizar-retomada.md`. Não incluídos no escopo aprovado.
-- **Branch**: `feat/tui-leitura`, base revisada `004fe43`; correções publicadas até `98b8323`, seguidas pelo commit documental aprovado. Sem merge.
+- **Phase / Task**: concluída e verificada; o PR 8 espera só o merge.
+- **Completed**: T1–T30 e F1–F4. Verifier independente, rodada 3: PASS, 64/64 ACs, 9/9 bordas, 24/24 mutações mortas ao final. Requisitos Verified e TUI leitura marcada no ROADMAP. As quatro threads da review foram respondidas e resolvidas no GitHub em 2026-10-10. O gate passou no Windows no mesmo dia.
+- **In-progress** (file:line): nada.
+- **Next step**: o dev olha a TUI num terminal real (`bun tui/demo.ts 01`, de dentro de `broker/`) e decide o merge do PR 8. Depois do merge, a fatia Question sai da `main` atualizada; ela não foi iniciada. Não fazer merge sem instrução do dev.
+- **Blockers**: nenhum bloqueio técnico. O merge é decisão do dev.
+- **Uncommitted files**: none.
+- **Branch**: `feat/tui-leitura`. O head publicado é `7bdf4c9`; o commit que registra o gate do Windows e este handoff vem depois dele e é local até o dev pedir o push.
 
 ### Evidência e limites
 
-- TypeScript passa; Linux com Bun 1.3.14: 929 testes passam, zero falham/pulados, 5664 assertions, 48 arquivos. `validate_state.py tui-leitura`: exit 0.
-- Sensor em cópia isolada: os oito sobreviventes da rodada 2, as duas prioridades clarificadas e 14 mutações novas morreram. Shift-tab sobreviveu inicialmente ao teste de texto; após asserção da saída ANSI morreu na repetição. L-049 registrada como candidata.
-- Os 41 frames permanecem idênticos à extração original. Relatório: `.specs/features/tui-leitura/validation.md`; registro: `docs/tasks/2026-10-09-corrigir-review-pr-8.md`.
-- A review The Judge original foi COMMENT com quatro should-fix. F1–F4 foram conferidos localmente; nenhuma nova review ou resolução de comentários foi publicada no GitHub.
-- Nunca subir `broker.ts` ou `server.ts` manualmente sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários; não usar `bun x tsc`.
-- Compatibilidade Windows e terminal real são limites explícitos do relatório. Pendências anteriores continuam em ROADMAP, design e histórico deste STATE; nenhuma foi implementada fora do escopo.
+- Linux, Bun 1.3.14: TypeScript passa; 929 testes passam, zero falham ou pulados, 5664 assertions, 48 arquivos.
+- Windows 11, Bun 1.4.2, em `7bdf4c9`: TypeScript passa; 926 passam, zero falham, 3 pulados por condição de plataforma anterior à fatia, 5650 assertions. O sensor de mutação não foi repetido no Windows.
+- `validate_state.py tui-leitura`: exit 0. Relatório em `.specs/features/tui-leitura/validation.md`; resolução de F1–F4 em `fix-round-2.md`; registros em `docs/tasks/`.
+- PR 8 em 2026-10-10: `MERGEABLE`, estado `CLEAN`, sem review nova depois da rodada 1 do The Judge (COMMENT, quatro should-fix, todos resolvidos).
+- Os 41 frames permanecem idênticos à extração original. L-049 continua candidata.
+- `bun tui/demo.ts [frame]` abre a TUI sobre o log de um frame, sem broker, sem banco e sem token. No Linux deu 39 linhas em tela cheia com a fonte padrão, uma abaixo do mínimo de 40 do design; o dev quer rever isso depois.
+- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários; não usar `bun x tsc`.
+- Não exercitados: terminal interativo real (teclas, resize, cores como a fonte desenha), macOS, sinais reais e uma sessão do Claude Code alimentando a TUI. Pendências anteriores continuam em ROADMAP, design e histórico deste STATE.
