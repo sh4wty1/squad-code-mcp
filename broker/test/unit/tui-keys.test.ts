@@ -216,6 +216,16 @@ test("QST-67: enter on the tab opens the modal of the selected question, and doe
   expect(key("\r", empty)).toBe(empty.ui);
 });
 
+test("QST-67: enter with the focus on the history opens the modal of the selected question and takes the focus to the list", () => {
+  const second = view("04", { question: 8, qfocus: "history", historyOffset: 1 });
+  expect(key("\r", second)).toEqual({ ...second.ui, qfocus: "list", modal: opened(8, null) });
+  // With no id selected, the first of the list
+  const first = view("04", { question: null, qfocus: "history" });
+  expect(key("\r", first)).toEqual({ ...first.ui, question: 7, qfocus: "list", modal: opened(7, 0) });
+  const empty = view("15a", { screen: "questions", qfocus: "history" });
+  expect(key("\r", empty)).toBe(empty.ui);
+});
+
 test("TUI-42: t switches the footer between the tokens of the feature and of the session", () => {
   const stale = { text: "nenhuma bloqueante", color: "gray" as const, until: LOGS["01"]!.now + 1000 };
   const v = view("01", { toast: stale });
@@ -256,6 +266,14 @@ test("QST-65: b on the tab selects the blocking question after the selected one 
   expect(key("b", at(null)).question).toBe(20);
   // The only blocking one stays selected
   expect(key("b", view("04", { question: 7 })).question).toBe(7);
+});
+
+test("QST-65: b on the tab with the focus on the history selects the next blocking question and takes the focus to the list", () => {
+  const v = view("04", { question: 7, qfocus: "history", historyOffset: 1 }, blockers);
+  expect(key("b", v)).toEqual({ ...v.ui, question: 20, qfocus: "list" });
+  // The only blocking one stays selected, and the focus goes to the list all the same
+  const one = view("04", { question: 7, qfocus: "history" });
+  expect(key("b", one)).toEqual({ ...one.ui, qfocus: "list" });
 });
 
 test("QST-65: b without a blocking question with the dev says so, for 4 s, and does not change the screen", () => {
@@ -562,6 +580,19 @@ test("QST-82: a modal whose question is not among the ones of the open feature i
     expect(v.squad.questions).toEqual([]);
     expect(sync(v.ui, v)).toEqual({ ...v.ui, modal: null, toast: { text: "Q-08 fechada", color: "gray", until: v.squad.now + 4000 } });
   }
+});
+
+test("QST-82: with an answer on its way, a modal whose question is not among the ones of the open feature waits for what the broker says of it", () => {
+  // Frame 09a: the feature was delivered while the answer of the dev was on its way
+  const v = view("09a", { screen: "questions", modal: { ...typing(8), sending: true }, send: { question_id: 8, answer: "pela metade" } });
+  expect(v.squad.questions).toEqual([]);
+  expect(sync(v.ui, v)).toBe(v.ui);
+  // The broker takes it, and the modal closes with the notice of the answer
+  expect(settle(v.ui, { ok: true }, v)).toEqual({ ...v.ui, send: null, modal: null, toast: { text: "✓ Q-08 respondida", color: "bgreen", until: v.squad.now + 4000 } });
+  // Or says the question closed: the modal turns refused, and the read after that closes it
+  const refused = settle(v.ui, { ok: false, error: "question_closed" }, v);
+  expect(refused).toEqual({ ...v.ui, send: null, modal: { ...typing(8), refused: true } });
+  expect(sync(refused, { ...v, ui: refused })).toEqual({ ...refused, modal: null, toast: { text: "Q-08 fechada", color: "gray", until: v.squad.now + 4000 } });
 });
 
 test("QST-68: the selection follows its question when the order of the list changes", () => {

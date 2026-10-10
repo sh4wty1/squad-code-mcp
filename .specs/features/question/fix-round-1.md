@@ -104,7 +104,7 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/tui-keys.test.ts`
 **Requirement**: QST-56, QST-65, QST-67, QST-82
 
-- [ ] QST-56: com o foco no histórico, a pergunta selecionada da lista não tem `▶` (teste em `tui-questions.test.ts`)
-- [ ] QST-67: `enter` com o foco no histórico abre o modal da selecionada e leva o foco à lista; QST-65: `b` dentro da aba leva o foco à lista
-- [ ] QST-82: com um envio em curso e a pergunta fora das perguntas da feature aberta, `sync` não fecha o modal; ele fecha quando o resultado do envio chega
-- [ ] Gate build passa
+- [x] QST-56: com o foco no histórico, a pergunta selecionada da lista não tem `▶` (teste em `tui-questions.test.ts`)
+- [x] QST-67: `enter` com o foco no histórico abre o modal da selecionada e leva o foco à lista; QST-65: `b` dentro da aba leva o foco à lista
+- [x] QST-82: com um envio em curso e a pergunta fora das perguntas da feature aberta, `sync` não fecha o modal; ele fecha quando o resultado do envio chega
+- [x] Gate build passa

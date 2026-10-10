@@ -68,6 +68,19 @@ test("QST-56: the selected question is the one of `ui.question`, and only it has
   }
 });
 
+test("QST-56: with the focus on the history the selected question of the list has no mark, and nothing else of the list changes", () => {
+  const list = draw("04", { question: 8 });
+  const history = draw("04", { question: 8, qfocus: "history" });
+  const heads = (lines: string[]) => [row(lines, 3).slice(0, 6), row(lines, 9).slice(0, 6)];
+  expect(heads(list.text())).toEqual(["  Q-07", "▶ Q-08"]);
+  expect(heads(history.text())).toEqual(["  Q-07", "  Q-08"]);
+  // The mark is in column 2, on the black background of its line: Q-08 starts in line 9
+  const lit = (g: typeof list) => g.rows.flatMap((cells, y) => (y > 2 && y < 25 && cells.slice(0, 60).some((cell) => cell.bg !== null) ? [y] : []));
+  expect(lit(list)).toEqual([9]);
+  expect(lit(history)).toEqual([]);
+  expect(cols(history.text(), 3, 58, 3, 24)).toEqual(cols(list.text(), 3, 58, 3, 24));
+});
+
 test("QST-56: a question of two options shows them whole, with the number of the free text", () => {
   expect(cols(draw("20a").text(), 0, 59, 2, 8)).toEqual(cols(frame("20a"), 0, 59, 2, 8));
 });
