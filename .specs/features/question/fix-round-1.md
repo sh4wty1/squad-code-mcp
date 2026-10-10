@@ -85,7 +85,7 @@ tarefa marcada aqui.
 **Requirement**: QST-78
 
 - [x] Num bloco de mais de uma tecla, um `\r` ou `\n` vira espaço quando, na vez dele, o modal está no modo texto, inclusive quando o modal entrou no modo texto por uma tecla anterior do mesmo bloco (por `outra resposta…` ou por um `enter` no feed que abre o modal no modo texto)
-- [x] Um bloco de uma tecla só continua enviando com `\r`; os testes de QST-78 que já existem passam sem mudar valor esperado
+- [x] Um bloco de uma tecla só continua enviando com `\r`; os testes de QST-78 que já existiam mantêm os valores esperados, e duas expectativas mudaram de forma porque `keysOf` não recebe mais o `Ui` e `input` reduz o bloco: `[UP, " "]` virou a divisão `[UP, "\r"]` mais o campo com `[" "]`, e `["\r"]` ganhou o estado com a resposta a enviar
 - [x] O laço de `tui.ts` usa a regra nova
 - [x] Gate quick passa
 
