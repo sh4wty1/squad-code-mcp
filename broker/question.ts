@@ -1,16 +1,18 @@
 /**
- * squad broker /ask
+ * squad broker /ask and /escalate
  *
  * An agent asks the level above what the spec does not settle, and the question
- * keeps its id until it closes (ADR-005). The table `questions` is the state the
- * rules decide over: its row, the event and the delivery are written together or
- * not at all.
+ * keeps its id until it closes (ADR-005): who holds it and cannot answer passes
+ * it one level up. The table `questions` is the state the rules decide over: its
+ * row, the event and the delivery are written together or not at all.
  */
 
 import type { Database } from "bun:sqlite";
+import type { QuestionRow } from "./db.ts";
 import type { Log } from "./log.ts";
 import { ROSTER, type Refusal, type Role } from "./peers.ts";
-import { isText, SUMMARY_MAX, type Caller } from "./send.ts";
+import { isText, SUMMARY_MAX, type Answer, type Caller } from "./send.ts";
+import { qid, type SquadEvent } from "./shared/contract.ts";
 
 const OPTIONS_MAX = 3;
 
@@ -26,11 +28,18 @@ const ASK_EDGES: { from: Role; to: Role | "human" }[] = [
   { from: "mother", to: "human" },
 ];
 
+// The level above, where a holder escalates to. The judge holds no question: none goes to it.
+const NEXT: Record<Role, string> = { worker: "leader", leader: "mother", mother: "human", judge: "leader" };
+
 function isTexts(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
 export function createQuestion(db: Database, log: Log, token: string, now: () => number = Date.now) {
+  function find(id: number): QuestionRow | null {
+    return db.query("SELECT * FROM questions WHERE id = ?").get(id) as QuestionRow | null;
+  }
+
   // When the default applies: only to a non-blocking question that reached the dev, counted
   // from the ts of the `question` that took it there
   function deadline(seq: number, to: string, blocking: boolean, timeout_s: number | null): number | null {
@@ -137,5 +146,72 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
     });
   }
 
-  return { ask };
+  // The holder passes the question to the level above. The route takes no `to`.
+  function escalate(peer: Caller, body: Record<string, unknown>): Answer {
+    const no = (error: string, hint: string) => log.refused(peer.name, "question", error, hint);
+
+    const { question_id, summary } = body;
+    if (
+      !Number.isInteger(question_id) ||
+      (summary !== undefined && !isText(summary)) ||
+      (body.body !== undefined && typeof body.body !== "string")
+    ) {
+      return no(
+        "missing_field",
+        "Send question_id as the integer id of the question, summary, if any, as a non-empty string and body, if any, as a string."
+      );
+    }
+    const row = find(question_id as number);
+    if ((summary !== undefined && summary.length > SUMMARY_MAX) || !row) {
+      return no(
+        "invalid_field",
+        `summary takes up to ${SUMMARY_MAX} characters, and question_id is the id of a question: the one of the question you received.`
+      );
+    }
+    if (row.status !== "open") {
+      return no("question_closed", `${qid(row.id)} is closed. Go on without escalating it.`);
+    }
+    if (row.holder !== peer.name) {
+      return no("not_holder", `${qid(row.id)} is with ${row.holder}. Only who holds a question escalates it.`);
+    }
+
+    // What the question is comes from who asked it; the text, when not sent, from who held it last
+    const asked = log
+      .history({ question_id: row.id })
+      .filter((e): e is Extract<SquadEvent, { kind: "question" }> => e.kind === "question");
+    const first = asked[0]!;
+    const latest = asked.at(-1)!;
+    const to = NEXT[peer.role];
+
+    return log.transaction(() => {
+      const seq = log.record({
+        kind: "question",
+        from: peer.name,
+        role_from: peer.role,
+        to,
+        summary: summary ?? latest.summary,
+        body: (body.body as string | undefined) ?? latest.body,
+        ticket_ref: row.ticket_ref,
+        question_id: row.id,
+        recipients: to === "human" ? [] : [to],
+        data: {
+          question_id: row.id,
+          asked_by: first.asked_by,
+          blocking: first.blocking,
+          why: first.why,
+          ...(first.options !== undefined && { options: first.options }),
+          ...(first.default !== undefined && { default: first.default }),
+          ...(first.timeout_s !== undefined && { timeout_s: first.timeout_s }),
+        },
+      });
+      db.run("UPDATE questions SET holder = ?, deadline_ts = ? WHERE id = ?", [
+        to,
+        deadline(seq, to, row.blocking === 1, row.timeout_s),
+        row.id,
+      ]);
+      return { ok: true, seq };
+    });
+  }
+
+  return { ask, escalate };
 }

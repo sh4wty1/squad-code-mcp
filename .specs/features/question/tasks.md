@@ -256,13 +256,13 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] worker → leader → mother → human: três `question` com o mesmo id; `asked_by`, `blocking`, `why`, `options`, `default`, `timeout_s` e `ticket_ref` iguais aos do primeiro em cada um
-- [ ] `summary` e `body` ausentes vêm do `question` anterior; enviados, substituem só naquele evento
-- [ ] `deadline_ts` nulo enquanto o holder é agente, e igual ao `ts` do evento para `human` mais `timeout_s` vezes 1000 (ou 240000) na não-bloqueante; nulo na bloqueante
-- [ ] A ordem de recusas de QST-16, par a par; `refused` com `attempted_kind` `question`
-- [ ] QST-95: o holder sai do broker e a pergunta continua `open` com o mesmo holder
-- [ ] Testes em `test/unit/question-escalate.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] worker → leader → mother → human: três `question` com o mesmo id; `asked_by`, `blocking`, `why`, `options`, `default`, `timeout_s` e `ticket_ref` iguais aos do primeiro em cada um
+- [x] `summary` e `body` ausentes vêm do `question` anterior; enviados, substituem só naquele evento
+- [x] `deadline_ts` nulo enquanto o holder é agente, e igual ao `ts` do evento para `human` mais `timeout_s` vezes 1000 (ou 240000) na não-bloqueante; nulo na bloqueante
+- [x] A ordem de recusas de QST-16, par a par; `refused` com `attempted_kind` `question`
+- [x] QST-95: o holder sai do broker e a pergunta continua `open` com o mesmo holder
+- [x] Testes em `test/unit/question-escalate.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

@@ -376,13 +376,13 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-10 | P1: Perguntar ao nível de cima | T6 | Implementing |
 | QST-11 | P1: Perguntar ao nível de cima | T15 | In Tasks |
 | QST-12 | P1: Perguntar ao nível de cima | T6, T16 | Implementing |
-| QST-13 | P1: Escalar | T7 | In Tasks |
-| QST-14 | P1: Escalar | T7 | In Tasks |
-| QST-15 | P1: Escalar | T7 | In Tasks |
-| QST-16 | P1: Escalar | T7 | In Tasks |
-| QST-17 | P1: Escalar | T7 | In Tasks |
-| QST-18 | P1: Escalar | T7 | In Tasks |
-| QST-19 | P1: Escalar | T7, T11 | In Tasks |
+| QST-13 | P1: Escalar | T7 | Implementing |
+| QST-14 | P1: Escalar | T7 | Implementing |
+| QST-15 | P1: Escalar | T7 | Implementing |
+| QST-16 | P1: Escalar | T7 | Implementing |
+| QST-17 | P1: Escalar | T7 | Implementing |
+| QST-18 | P1: Escalar | T7 | Implementing |
+| QST-19 | P1: Escalar | T7, T11 | Implementing |
 | QST-20 | P1: Responder como holder | T1, T8 | Implementing |
 | QST-21 | P1: Responder como holder | T8 | In Tasks |
 | QST-22 | P1: Responder como holder | T8 | In Tasks |
@@ -458,7 +458,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-92 | Edge cases | T10 | In Tasks |
 | QST-93 | Edge cases | T10 | In Tasks |
 | QST-94 | Edge cases | T6 | Implementing |
-| QST-95 | Edge cases | T7 | In Tasks |
+| QST-95 | Edge cases | T7 | Implementing |
 | QST-96 | Edge cases | T23, T28 | In Tasks |
 | QST-97 | Edge cases | T23 | In Tasks |
 | QST-98 | Edge cases | T22, T28 | In Tasks |
