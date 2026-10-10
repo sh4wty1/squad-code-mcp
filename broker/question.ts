@@ -10,7 +10,7 @@
 import type { Database } from "bun:sqlite";
 import type { QuestionRow } from "./db.ts";
 import type { Log } from "./log.ts";
-import { ROSTER, type Refusal, type Role } from "./peers.ts";
+import { refuse, ROSTER, type Refusal, type Role } from "./peers.ts";
 import { isText, SUMMARY_MAX, type Answer, type Caller } from "./send.ts";
 import { qid, type SquadEvent } from "./shared/contract.ts";
 
@@ -62,6 +62,10 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
     return log.transaction(() => {
       const row = find(id)!;
       if (row.status !== "open") return null;
+      // Who asked waits for it, and the mother for what the dev answers: each name once,
+      // and never who writes it
+      const waiting = new Set([row.asked_by, ...(by.resolved_by === "human" ? ["mother"] : [])]);
+      waiting.delete(by.from);
       const seq = log.record({
         kind: "answer",
         from: by.from,
@@ -71,8 +75,7 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
         body: by.answer,
         ticket_ref: row.ticket_ref,
         question_id: id,
-        // Who asked waits for it, unless it is who answers
-        recipients: [row.asked_by].filter((name) => name !== by.from),
+        recipients: [...waiting],
         data: { question_id: id, answer: by.answer, resolved_by: by.resolved_by },
       });
       const status = by.resolved_by === "human" || by.resolved_by === "agent" ? "answered" : "defaulted";
@@ -247,10 +250,13 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
     });
   }
 
-  // The holder answers who asked. The answer is stored as it came.
-  function answer(peer: Caller, body: Record<string, unknown>): Answer {
-    const no = (error: string, hint: string) => log.refused(peer.name, "answer", error, hint);
-
+  // What /answer does once it knows who answers, a peer or the dev: the holder answers who
+  // asked, and the answer is stored as it came. `no` gives the refusal.
+  function answered(
+    who: { name: string; role: string },
+    body: Record<string, unknown>,
+    no: (error: string, hint: string) => Refusal
+  ): Answer {
     const { question_id, answer: text } = body;
     if (!Number.isInteger(question_id) || typeof text !== "string" || text.trim() === "") {
       return no(
@@ -262,16 +268,35 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
     if (!row) {
       return no("invalid_field", "question_id is the id of a question: the one of the question you received.");
     }
-    if (row.status === "open" && row.holder !== peer.name) {
+    if (row.status === "open" && row.holder !== who.name) {
       return no("not_holder", `${qid(row.id)} is with ${row.holder}. Only who holds a question answers it.`);
     }
     // Whether it is closed is for `resolve` to say, in the transaction of the answer
-    const seq = resolve(row.id, { from: peer.name, role_from: peer.role, answer: text, resolved_by: "agent" });
+    const seq = resolve(row.id, {
+      from: who.name,
+      role_from: who.role,
+      answer: text,
+      resolved_by: who.name === "human" ? "human" : "agent",
+    });
     if (seq === null) {
       return no("question_closed", `${qid(row.id)} is closed and takes no answer. Go on without it.`);
     }
     return { ok: true, seq };
   }
 
-  return { ask, escalate, answer };
+  // `peer` is who the id of the request belongs to and `body` the JSON object received
+  function answer(peer: Caller, body: Record<string, unknown>): Answer {
+    return answered(peer, body, (error, hint) => log.refused(peer.name, "answer", error, hint));
+  }
+
+  // The human is not a peer: the credential comes first, and no refusal here leaves a trace
+  // in the log
+  function answerAsHuman(body: Record<string, unknown>): Answer {
+    if (body.human_token !== token) {
+      return refuse("invalid_token", "human_token is not the human credential. Only the dev answers as human.");
+    }
+    return answered({ name: "human", role: "human" }, body, refuse);
+  }
+
+  return { ask, escalate, answer, answerAsHuman };
 }

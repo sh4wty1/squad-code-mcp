@@ -301,11 +301,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `human → asked_by [answer]` com `resolved_by` `human`; entregas para o `asked_by` e para `mother`, uma só quando o `asked_by` é a mother
-- [ ] Token errado: `invalid_token` antes de qualquer outra regra, mesmo com `question_id` inválido, e o log não ganha evento
-- [ ] Holder agente: `not_holder`; pergunta fechada: `question_closed`; nenhuma recusa grava `refused`
-- [ ] Testes em `test/unit/question-human.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `human → asked_by [answer]` com `resolved_by` `human`; entregas para o `asked_by` e para `mother`, uma só quando o `asked_by` é a mother
+- [x] Token errado: `invalid_token` antes de qualquer outra regra, mesmo com `question_id` inválido, e o log não ganha evento
+- [x] Holder agente: `not_holder`; pergunta fechada: `question_closed`; nenhuma recusa grava `refused`
+- [x] Testes em `test/unit/question-human.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

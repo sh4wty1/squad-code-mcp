@@ -387,11 +387,11 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-21 | P1: Responder como holder | T8 | Implementing |
 | QST-22 | P1: Responder como holder | T8 | Implementing |
 | QST-23 | P1: Responder como holder | T8 | Implementing |
-| QST-24 | P1: Responder como dev | T9 | In Tasks |
-| QST-25 | P1: Responder como dev | T9 | In Tasks |
-| QST-26 | P1: Responder como dev | T9, T16 | In Tasks |
-| QST-27 | P1: Responder como dev | T9 | In Tasks |
-| QST-28 | P1: Responder como dev | T9, T16 | In Tasks |
+| QST-24 | P1: Responder como dev | T9 | Implementing |
+| QST-25 | P1: Responder como dev | T9 | Implementing |
+| QST-26 | P1: Responder como dev | T9, T16 | Implementing |
+| QST-27 | P1: Responder como dev | T9 | Implementing |
+| QST-28 | P1: Responder como dev | T9, T16 | Implementing |
 | QST-29 | P1: Mesclar | T10 | In Tasks |
 | QST-30 | P1: Mesclar | T10 | In Tasks |
 | QST-31 | P1: Mesclar | T10 | In Tasks |
