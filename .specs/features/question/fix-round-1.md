@@ -95,8 +95,8 @@ tarefa marcada aqui.
 **Where**: `broker/question.ts`
 **Requirement**: QST-05
 
-- [ ] `/ask` com `default: ""` responde `missing_field`, com `blocking` verdadeiro ou falso
-- [ ] Gate quick passa
+- [x] `/ask` com `default: ""` responde `missing_field`, com `blocking` verdadeiro ou falso
+- [x] Gate quick passa
 
 ### F10: O que a spec passou a dizer e ainda não tem teste
 

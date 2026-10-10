@@ -118,14 +118,14 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
       typeof blocking !== "boolean" ||
       (body.body !== undefined && typeof body.body !== "string") ||
       (options !== undefined && !isTexts(options)) ||
-      (fallback !== undefined && typeof fallback !== "string") ||
+      (fallback !== undefined && !isText(fallback)) ||
       (body.timeout_s !== undefined && !Number.isInteger(body.timeout_s)) ||
       (ticket_ref !== undefined && !isText(ticket_ref)) ||
-      (!blocking && !isText(fallback))
+      (!blocking && fallback === undefined)
     ) {
       return no(
         "missing_field",
-        "Send to as a string, summary and why as non-empty strings and blocking as a boolean; body and default, if any, as strings, options as a list of strings, timeout_s as an integer and ticket_ref as a non-empty string. A non-blocking question takes a non-empty default."
+        "Send to as a string, summary and why as non-empty strings and blocking as a boolean; body, if any, as a string, options as a list of strings, timeout_s as an integer and default and ticket_ref as non-empty strings. A non-blocking question takes a default."
       );
     }
     const timeout_s = body.timeout_s as number | undefined;

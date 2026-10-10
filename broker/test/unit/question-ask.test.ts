@@ -243,6 +243,15 @@ test("QST-05: a non-blocking question without a default, or with an empty one, i
   expect(b.question.ask(WORKER_1, { ...ASKED, blocking: false, default: "8080" })).toEqual({ ok: true, question_id: 1, seq: 4 });
 });
 
+test("QST-05: an empty default is refused with missing_field on a blocking question too, which takes one that is not empty", () => {
+  const b = setup();
+  const id = b.openFeature();
+  refusedAsk(b, WORKER_1, { ...ASKED, default: "" }, "missing_field");
+  refusedAsk(b, WORKER_1, { ...ASKED, blocking: true, default: "", options: ["8080", "9090"] }, "missing_field");
+  expect(b.question.ask(WORKER_1, { ...ASKED, default: "8080" })).toEqual({ ok: true, question_id: 1, seq: 4 });
+  expect(b.questionRows()).toEqual([questionRow(1, id, { default_answer: "8080" })]);
+});
+
 test("QST-06: a summary of more than 80 characters is refused with invalid_field, and one of 80 is stored", () => {
   const b = setup();
   const id = b.openFeature();

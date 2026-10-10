@@ -125,7 +125,7 @@ function run(seed: number, seen: ReturnType<typeof tally>) {
       blocking,
     };
     if (chance(0.3)) body.body = "8080 or 9090?";
-    // a default on a blocking question is kept, even an empty one; a non-blocking one needs it
+    // a default on a blocking question is kept, and an empty one refused; a non-blocking one needs it
     if (blocking ? chance(0.3) : chance(0.96)) body.default = pick(blocking ? ["8080", ""] : ["8080", "9090"]);
     if (!blocking && chance(0.4)) body.timeout_s = pick([1, 2, 30]);
     else if (chance(0.04)) body.timeout_s = pick([0, 5]);
