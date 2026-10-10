@@ -488,10 +488,10 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Gerador com semente fixa: ao menos 200 sequências de 40 passos entre `ask`, `escalate`, `answer`, `answerAsHuman`, `merge`, `expire` com o relógio avançando, `send` de `task` e de `result`, `close` e `open` de feature, com entradas válidas e inválidas
-- [ ] Depois de cada passo, para cada feature: os dez campos de QST-48 de cada linha são os de `questions()` sobre os eventos daquela feature, e não há pergunta em um lado só
-- [ ] Depois de cada passo o número de linhas de `questions` não diminui (QST-45), e nenhum `question_id` tem dois `answer`
-- [ ] Uma falha imprime a semente e os passos; gate build passa
+- [x] Gerador com semente fixa: ao menos 200 sequências de 40 passos entre `ask`, `escalate`, `answer`, `answerAsHuman`, `merge`, `expire` com o relógio avançando, `send` de `task` e de `result`, `close` e `open` de feature, com entradas válidas e inválidas
+- [x] Depois de cada passo, para cada feature: os dez campos de QST-48 de cada linha são os de `questions()` sobre os eventos daquela feature, e não há pergunta em um lado só
+- [x] Depois de cada passo o número de linhas de `questions` não diminui (QST-45), e nenhum `question_id` tem dois `answer`
+- [x] Uma falha imprime a semente e os passos; gate build passa
 
 **Tests**: unit
 **Gate**: build
