@@ -409,10 +409,10 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-43 | P1: Encerramento da feature e paridade com o log | T14 | In Tasks |
 | QST-44 | P1: Encerramento da feature e paridade com o log | T14 | In Tasks |
 | QST-45 | P1: Encerramento da feature e paridade com o log | T18 | In Tasks |
-| QST-46 | P1: Encerramento da feature e paridade com o log | T4 | In Tasks |
-| QST-47 | P1: Encerramento da feature e paridade com o log | T4 | In Tasks |
+| QST-46 | P1: Encerramento da feature e paridade com o log | T4 | Implementing |
+| QST-47 | P1: Encerramento da feature e paridade com o log | T4 | Implementing |
 | QST-48 | P1: Encerramento da feature e paridade com o log | T18 | In Tasks |
-| QST-49 | P1: Encerramento da feature e paridade com o log | T4 | In Tasks |
+| QST-49 | P1: Encerramento da feature e paridade com o log | T4 | Implementing |
 | QST-50 | P1: Encerramento da feature e paridade com o log | T3 | Implementing |
 | QST-51 | P1: O que o agente vê | T5 | In Tasks |
 | QST-52 | P1: O que o agente vê | T17 | In Tasks |

@@ -191,13 +191,13 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Um teste por regra de `status` de QST-46, na ordem dela, e um para a precedência entre duas que valem ao mesmo tempo (mesclada com `answer` próprio; mesclada cujo destino fecha depois do `feature_closed`)
-- [ ] Cadeia de três mescladas: as duas de cima herdam `status` e `answer_seq` da última
-- [ ] `open` é falso em todo `status` que não é `open`
-- [ ] `text` é o `body` do primeiro `question`, e o `summary` quando o `body` é vazio, mesmo que uma escalação traga outro `body`; `timeout_s` e a chegada vêm do primeiro `question` para `human`
-- [ ] `closed_ts` é o `ts` do `answer` próprio, ou o do `question_merged` sem ele; `answered_by` é o `from` do `answer`; `absorbed` tem os ids mesclados direto nela, em ordem
-- [ ] Os testes de `questions` que já existiam passam sem mudança de expectativa; testes novos em `test/unit/derive.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Um teste por regra de `status` de QST-46, na ordem dela, e um para a precedência entre duas que valem ao mesmo tempo (mesclada com `answer` próprio; mesclada cujo destino fecha depois do `feature_closed`)
+- [x] Cadeia de três mescladas: as duas de cima herdam `status` e `answer_seq` da última
+- [x] `open` é falso em todo `status` que não é `open`
+- [x] `text` é o `body` do primeiro `question`, e o `summary` quando o `body` é vazio, mesmo que uma escalação traga outro `body`; `timeout_s` e a chegada vêm do primeiro `question` para `human`
+- [x] `closed_ts` é o `ts` do `answer` próprio, ou o do `question_merged` sem ele; `answered_by` é o `from` do `answer`; `absorbed` tem os ids mesclados direto nela, em ordem
+- [x] Os testes de `questions` que já existiam passam sem mudar nenhum valor esperado; o `toEqual` de objeto inteiro de `TUI-06` ganha as chaves dos campos novos; testes novos em `test/unit/derive.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { PlannedTicket, SquadEvent } from "../../shared/contract.ts";
-import { features, owed, tickets } from "../../shared/derive.ts";
+import { features, owed, questions, tickets } from "../../shared/derive.ts";
 
 // Events of the open feature in the read format, with the seq given
 function event(seq: number, fields: Record<string, unknown>): SquadEvent {
@@ -424,4 +424,292 @@ test("FEAT-26: a refused and the other kinds are no feature", () => {
     event(6, { kind: "turn_started", from: "leader", role_from: "leader" }),
   ];
   expect(features(log)).toEqual([{ id: 1, ...SPEC, opened_seq: 2, closed_seq: null, outcome: null }]);
+});
+
+const T0 = 1791331200000;
+
+// The first `question` of a question: non-blocking, with a default, unless the test says otherwise
+function asked(seq: number, id: number, from: string, to: string, fields: Record<string, unknown> = {}): SquadEvent {
+  return event(seq, {
+    kind: "question", from, to, summary: "which port?", question_id: id, asked_by: from, blocking: false,
+    why: "the spec gives two", default: "8080", ...fields,
+  });
+}
+
+function answered(seq: number, id: number, from: string, resolved_by: string, text = "9090"): SquadEvent {
+  return event(seq, { kind: "answer", from, to: "worker-1", summary: text, question_id: id, answer: text, resolved_by });
+}
+
+function mergedInto(seq: number, id: number, into: number): SquadEvent {
+  return event(seq, { kind: "question_merged", from: "mother", question_id: id, into });
+}
+
+// id, status and answer_seq of each question
+function statuses(events: SquadEvent[]): unknown[][] {
+  return questions(events).map((q) => [q.id, q.status, q.answer_seq]);
+}
+
+test("QST-46: a question with an answer of its own of human or of agent is answered, with the seq of the answer", () => {
+  expect(
+    statuses([
+      asked(2, 7, "mother", "human"),
+      asked(3, 8, "worker-1", "leader"),
+      answered(5, 8, "leader", "agent"),
+      answered(6, 7, "human", "human"),
+    ])
+  ).toEqual([
+    [7, "answered", 6],
+    [8, "answered", 5],
+  ]);
+});
+
+test("QST-46: a question with an answer of its own of timeout_default or of result_default is defaulted, with the seq of the answer", () => {
+  expect(
+    statuses([
+      asked(2, 7, "mother", "human"),
+      asked(3, 8, "worker-1", "leader"),
+      answered(5, 8, "broker", "result_default", "8080"),
+      answered(6, 7, "broker", "timeout_default", "8080"),
+    ])
+  ).toEqual([
+    [7, "defaulted", 6],
+    [8, "defaulted", 5],
+  ]);
+});
+
+test("QST-46: a merged question without an answer of its own takes the status and the answer_seq of the one it was merged into, once that one has an answer", () => {
+  const log = [asked(2, 7, "mother", "human"), asked(3, 8, "leader", "mother"), mergedInto(4, 8, 7)];
+  expect(statuses([...log, answered(6, 7, "human", "human")])).toEqual([
+    [7, "answered", 6],
+    [8, "answered", 6],
+  ]);
+  expect(statuses([...log, answered(6, 7, "broker", "timeout_default", "8080")])).toEqual([
+    [7, "defaulted", 6],
+    [8, "defaulted", 6],
+  ]);
+});
+
+test("QST-46: with the feature_closed of the feature, a question without an answer is defaulted when it has a default and discarded when it has none", () => {
+  const log = [
+    asked(2, 7, "mother", "human"),
+    asked(3, 8, "worker-1", "leader", { blocking: true, default: undefined }),
+    asked(4, 9, "worker-2", "leader", { default: undefined }),
+    asked(5, 10, "worker-3", "leader"),
+    // each merged one closes by its own default, not by the one of the question it follows
+    mergedInto(6, 9, 7),
+    mergedInto(7, 10, 8),
+  ];
+  for (const outcome of ["delivered", "abandoned"]) {
+    expect(statuses([...log, closed(9, 1, outcome)])).toEqual([
+      [7, "defaulted", null],
+      [8, "discarded", null],
+      [9, "discarded", null],
+      [10, "defaulted", null],
+    ]);
+  }
+});
+
+test("QST-46: a merged question whose destination has no answer is merged, while the feature is open", () => {
+  expect(statuses([asked(2, 7, "mother", "human"), asked(3, 8, "leader", "mother"), mergedInto(4, 8, 7)])).toEqual([
+    [7, "open", null],
+    [8, "merged", null],
+  ]);
+});
+
+test("QST-46: a question with no answer, no merge and no feature_closed is open, escalated or not", () => {
+  expect(
+    statuses([
+      asked(2, 7, "worker-1", "leader"),
+      asked(3, 8, "worker-2", "leader", { blocking: true, default: undefined }),
+      asked(4, 7, "leader", "mother", { asked_by: "worker-1" }),
+    ])
+  ).toEqual([
+    [7, "open", null],
+    [8, "open", null],
+  ]);
+});
+
+test("QST-46: a merged question with an answer of its own keeps its status and its answer_seq when the one it was merged into is answered", () => {
+  expect(
+    statuses([
+      asked(2, 7, "mother", "human"),
+      asked(3, 8, "worker-1", "leader"),
+      mergedInto(4, 8, 7),
+      answered(5, 8, "broker", "result_default", "8080"),
+      answered(6, 7, "human", "human"),
+    ])
+  ).toEqual([
+    [7, "answered", 6],
+    [8, "defaulted", 5],
+  ]);
+});
+
+test("QST-46: an answer comes before the feature_closed: an answered question stays answered, and the one merged into it follows it and not its own default", () => {
+  const log = [
+    asked(2, 7, "mother", "human", { blocking: true, default: undefined }),
+    asked(3, 8, "leader", "mother", { blocking: true, default: undefined }),
+    mergedInto(4, 8, 7),
+  ];
+  const expected = [
+    [7, "answered", 6],
+    [8, "answered", 6],
+  ];
+  expect(statuses([...log, answered(6, 7, "human", "human"), closed(9, 1, "delivered")])).toEqual(expected);
+  // and with the destination closing after the feature_closed
+  expect(statuses([...log, closed(5, 1, "delivered"), answered(6, 7, "human", "human")])).toEqual(expected);
+});
+
+test("QST-46: in a chain of three merged questions the two above take the status and the answer_seq of the last", () => {
+  const log = [
+    asked(2, 7, "worker-1", "leader"),
+    asked(3, 8, "leader", "mother"),
+    asked(4, 9, "mother", "human"),
+    mergedInto(5, 7, 8),
+    mergedInto(6, 8, 9),
+  ];
+  expect(statuses(log)).toEqual([
+    [7, "merged", null],
+    [8, "merged", null],
+    [9, "open", null],
+  ]);
+  const all = [...log, answered(8, 9, "human", "human")];
+  const expected = [
+    [7, "answered", 8],
+    [8, "answered", 8],
+    [9, "answered", 8],
+  ];
+  expect(statuses(all)).toEqual(expected);
+  expect(statuses([...all].reverse())).toEqual(expected);
+});
+
+test("QST-47: open is false in every status that is not open", () => {
+  const log = [
+    asked(2, 7, "mother", "human"),
+    asked(3, 8, "worker-1", "leader"),
+    asked(4, 9, "worker-2", "leader"),
+    asked(5, 10, "worker-3", "leader"),
+    asked(6, 11, "leader", "mother", { default: undefined }),
+    answered(7, 7, "human", "human"),
+    answered(8, 8, "broker", "result_default", "8080"),
+    mergedInto(9, 9, 10),
+  ];
+  expect(questions(log).map((q) => [q.status, q.open])).toEqual([
+    ["answered", false],
+    ["defaulted", false],
+    ["merged", false],
+    ["open", true],
+    ["open", true],
+  ]);
+  expect(questions([...log, closed(12, 1, "abandoned")]).map((q) => [q.status, q.open])).toEqual([
+    ["answered", false],
+    ["defaulted", false],
+    ["defaulted", false],
+    ["defaulted", false],
+    ["discarded", false],
+  ]);
+});
+
+test("QST-49: the text is the body of the first question, or its summary when the body is empty, whatever an escalation carries", () => {
+  const all = questions([
+    asked(2, 7, "worker-1", "leader", { body: "8080 or 9090? The spec gives both." }),
+    asked(3, 8, "worker-2", "leader"),
+    asked(4, 7, "leader", "mother", { asked_by: "worker-1", summary: "the worker asks the port", body: "I do not know either" }),
+    asked(5, 8, "leader", "mother", { asked_by: "worker-2", summary: "another port", body: "I do not know either" }),
+  ]);
+  expect(all.map((q) => [q.id, q.text])).toEqual([
+    [7, "8080 or 9090? The spec gives both."],
+    [8, "which port?"],
+  ]);
+});
+
+test("QST-49: why, options and default are the ones of the first question", () => {
+  const first = { why: "the spec gives two", options: ["8080", "9090"], default: "8080" };
+  const [q, bare] = questions([
+    asked(2, 7, "worker-1", "leader", first),
+    asked(3, 8, "worker-2", "leader", { blocking: true, default: undefined }),
+    asked(4, 7, "leader", "mother", { asked_by: "worker-1", why: "another reason", options: ["1", "2", "3"], default: "1" }),
+  ]);
+  expect({ why: q!.why, options: q!.options, default: q!.default }).toEqual(first);
+  expect({ why: bare!.why, options: bare!.options, default: bare!.default }).toEqual({
+    why: "the spec gives two",
+    options: [],
+    default: null,
+  });
+});
+
+test("QST-49: timeout_s and the arrival come from the first question to human", () => {
+  const log = [
+    asked(2, 7, "worker-1", "leader", { timeout_s: 60 }),
+    asked(3, 7, "leader", "mother", { asked_by: "worker-1", timeout_s: 60 }),
+  ];
+  const [held] = questions(log);
+  expect([held!.timeout_s, held!.reached_human_ts, held!.deadline]).toEqual([null, null, null]);
+
+  const [q] = questions([
+    ...log,
+    asked(5, 7, "mother", "human", { asked_by: "worker-1", timeout_s: 90 }),
+    asked(8, 7, "mother", "human", { asked_by: "worker-1", timeout_s: 30 }),
+  ]);
+  expect([q!.timeout_s, q!.reached_human_ts, q!.deadline]).toEqual([90, T0 + 5, T0 + 5 + 90000]);
+
+  // without timeout_s the question has none, and the deadline is the one of 240 s
+  const [plain] = questions([asked(5, 7, "mother", "human")]);
+  expect([plain!.timeout_s, plain!.reached_human_ts, plain!.deadline]).toEqual([null, T0 + 5, T0 + 5 + 240000]);
+});
+
+test("QST-49: closed_ts is the ts of its own answer, or of the question_merged without one, and answered_by the author of the answer", () => {
+  const all = questions([
+    asked(2, 7, "mother", "human"),
+    asked(3, 8, "worker-1", "leader"),
+    asked(4, 9, "worker-2", "leader"),
+    asked(5, 10, "worker-3", "leader"),
+    asked(6, 11, "leader", "mother"),
+    mergedInto(7, 8, 7),
+    mergedInto(8, 9, 7),
+    answered(9, 9, "broker", "result_default", "8080"),
+    answered(10, 10, "leader", "agent"),
+    answered(11, 7, "human", "human"),
+  ]);
+  expect(all.map((q) => [q.id, q.closed_ts])).toEqual([
+    [7, T0 + 11],
+    // merged at seq 7, and still at that hour after the one it follows was answered
+    [8, T0 + 7],
+    // merged at seq 8, then closed by its own answer
+    [9, T0 + 9],
+    [10, T0 + 10],
+    [11, null],
+  ]);
+  const by = (id: number) => all.find((q) => q.id === id)!.answered_by;
+  expect([by(7), by(9), by(10), by(11)]).toEqual(["human", "broker", "leader", null]);
+});
+
+test("QST-49: a merged question whose destination is answered takes its status, answer_seq, resolved_by and answer, and has no answered_by: the answer is not its own", () => {
+  const all = questions([
+    asked(2, 7, "mother", "human"),
+    asked(3, 8, "leader", "mother"),
+    mergedInto(4, 8, 7),
+    answered(6, 7, "human", "human", "9090"),
+  ]);
+  expect(all.map((q) => [q.id, q.status, q.answer_seq, q.resolved_by, q.answer, q.answered_by])).toEqual([
+    [7, "answered", 6, "human", "9090", "human"],
+    [8, "answered", 6, "human", "9090", null],
+  ]);
+});
+
+test("QST-49: absorbed has the ids of the questions merged straight into it, in the order they were merged", () => {
+  const all = questions([
+    asked(2, 7, "mother", "human"),
+    asked(3, 8, "worker-1", "leader"),
+    asked(4, 9, "worker-2", "leader"),
+    asked(5, 10, "worker-3", "leader"),
+    mergedInto(6, 8, 9),
+    mergedInto(7, 10, 7),
+    mergedInto(8, 9, 7),
+  ]);
+  expect(all.map((q) => [q.id, q.absorbed])).toEqual([
+    [7, [10, 9]],
+    [8, []],
+    [9, [8]],
+    [10, []],
+  ]);
 });

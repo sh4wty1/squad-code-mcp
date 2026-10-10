@@ -241,11 +241,22 @@ export interface Question {
   holder: string;
   blocking: boolean;
   ticket_ref: string | null;
-  // no answer of its own and not merged into another. A merged one is not open and has
-  // `resolved_by` null until the one it was merged into closes.
+  // of the first question: its body, or its summary when the body is empty
+  text: string;
+  why: string;
+  options: string[];
+  // the first that holds: an answer of its own, the answer of the one it was merged into,
+  // the feature_closed among the events, the merge
+  status: "open" | "answered" | "defaulted" | "merged" | "discarded";
+  // `status` is "open". A merged one is not open and has `resolved_by` null until the one
+  // it was merged into closes.
   open: boolean;
   merged_into: number | null;
+  // the questions merged straight into this one, in the order they were
+  absorbed: number[];
   default: string | null;
+  // of the first question to "human", as it came
+  timeout_s: number | null;
   // when the default applies: only for a non-blocking one that reached the dev
   deadline: number | null;
   // the ts of the first question to "human"
@@ -254,6 +265,12 @@ export interface Question {
   route: string[];
   resolved_by: EventOf<"answer">["resolved_by"] | null;
   answer: string | null;
+  // of the answer that closed it: its own, or the one of the question it follows
+  answer_seq: number | null;
+  // the author of its own answer
+  answered_by: string | null;
+  // the ts of its own answer, or of the question_merged without one
+  closed_ts: number | null;
   // of the first and of the latest question
   first_seq: number;
   last_seq: number;
@@ -263,7 +280,7 @@ export interface Question {
 const TIMEOUT_S = 240;
 
 // Every question with at least one `question`, in the order they were asked. `events`
-// are those of the open feature, here and in `gates`.
+// are those of one feature, the open one in `squad`, here and in `gates`.
 export function questions(events: SquadEvent[]): Question[] {
   const ordered = bySeq(events);
   const all = new Map<number, Question>();
@@ -279,14 +296,23 @@ export function questions(events: SquadEvent[]): Question[] {
         holder: e.to as string,
         blocking: e.blocking,
         ticket_ref: e.ticket_ref,
+        text: e.body || e.summary,
+        why: e.why,
+        options: e.options ?? [],
+        status: "open",
         open: true,
         merged_into: null,
+        absorbed: [],
         default: e.default ?? null,
+        timeout_s: null,
         deadline: null,
         reached_human_ts: null,
         route: [e.from],
         resolved_by: null,
         answer: null,
+        answer_seq: null,
+        answered_by: null,
+        closed_ts: null,
         first_seq: e.seq,
         last_seq: e.seq,
       };
@@ -297,6 +323,7 @@ export function questions(events: SquadEvent[]): Question[] {
     q.last_seq = e.seq;
     if (q.holder === "human" && q.reached_human_ts === null) {
       q.reached_human_ts = e.ts;
+      q.timeout_s = e.timeout_s ?? null;
       if (!q.blocking) q.deadline = e.ts + (e.timeout_s ?? TIMEOUT_S) * 1000;
     }
   }
@@ -306,15 +333,19 @@ export function questions(events: SquadEvent[]): Question[] {
       // The first answer to be written is the one that counts
       const q = all.get(e.question_id);
       if (q && q.resolved_by === null) {
-        q.open = false;
+        q.status = e.resolved_by === "human" || e.resolved_by === "agent" ? "answered" : "defaulted";
         q.resolved_by = e.resolved_by;
         q.answer = e.answer;
+        q.answer_seq = e.seq;
+        q.answered_by = e.from;
+        q.closed_ts = e.ts;
       }
     } else if (e.kind === "question_merged") {
       const q = all.get(e.question_id);
       if (q) {
-        q.open = false;
         q.merged_into = e.into;
+        q.closed_ts ??= e.ts;
+        all.get(e.into)?.absorbed.push(q.id);
       }
     }
   }
@@ -327,9 +358,21 @@ export function questions(events: SquadEvent[]): Question[] {
       into = all.get(into.merged_into) ?? into;
     }
     if (into !== q) {
+      q.status = into.status;
       q.resolved_by = into.resolved_by;
       q.answer = into.answer;
+      q.answer_seq = into.answer_seq;
     }
+  }
+
+  // Without an answer, of its own or of the one it follows, the feature_closed closes it
+  // by its own default; before that a merged one is only merged
+  const closed = ordered.some((e) => e.kind === "feature_closed");
+  for (const q of all.values()) {
+    if (q.resolved_by === null) {
+      q.status = closed ? (q.default !== null ? "defaulted" : "discarded") : q.merged_into !== null ? "merged" : "open";
+    }
+    q.open = q.status === "open";
   }
   return [...all.values()];
 }
