@@ -362,5 +362,18 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
     });
   }
 
-  return { ask, escalate, answer, answerAsHuman, merge };
+  // The check of the deadlines: every open question whose deadline came closes by its
+  // default. Returns the seq of each answer written.
+  function expire(): number[] {
+    const due = db
+      .query("SELECT id, default_answer FROM questions WHERE status = 'open' AND deadline_ts <= ? ORDER BY id")
+      .all(now()) as { id: number; default_answer: string }[];
+    return due
+      .map((row) =>
+        resolve(row.id, { from: "broker", role_from: "broker", answer: row.default_answer, resolved_by: "timeout_default" })
+      )
+      .filter((seq) => seq !== null);
+  }
+
+  return { ask, escalate, answer, answerAsHuman, merge, expire };
 }

@@ -344,13 +344,13 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] No instante `deadline_ts - 1` nada é gravado; em `deadline_ts` o `answer` de `broker` é gravado, comparado por inteiro, e a linha fica `defaulted`
-- [ ] Pergunta bloqueante, pergunta com holder agente e pergunta `merged` não fecham, com o relógio um dia adiante
-- [ ] QST-41: `expire()` e `answerAsHuman` no mesmo instante, nas duas ordens: um só `answer`, e quem chega depois recebe `question_closed` ou não grava
-- [ ] QST-35: um módulo novo criado sobre o mesmo banco fecha a vencida na primeira `expire()` e mantém o `deadline_ts` gravado da que ainda não venceu
-- [ ] As mescladas de uma pergunta que vence fecham com ela
-- [ ] Testes em `test/unit/question-expire.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] No instante `deadline_ts - 1` nada é gravado; em `deadline_ts` o `answer` de `broker` é gravado, comparado por inteiro, e a linha fica `defaulted`
+- [x] Pergunta bloqueante, pergunta com holder agente e pergunta `merged` não fecham, com o relógio um dia adiante
+- [x] QST-41: `expire()` e `answerAsHuman` no mesmo instante, nas duas ordens: um só `answer`, e quem chega depois recebe `question_closed` ou não grava
+- [x] QST-35: um módulo novo criado sobre o mesmo banco fecha a vencida na primeira `expire()` e mantém o `deadline_ts` gravado da que ainda não venceu
+- [x] As mescladas de uma pergunta que vence fecham com ela
+- [x] Testes em `test/unit/question-expire.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
