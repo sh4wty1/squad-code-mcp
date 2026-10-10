@@ -194,6 +194,47 @@ test("QST-09/30: the mother merges a question through /merge-question, and the r
   ]);
 });
 
+test("QST-36: the result a worker sends through /send closes by its default the non-blocking question it asked about the ticket, which takes no answer afterwards", async () => {
+  broker = await startBroker();
+  const b = broker;
+  const { leader, worker, feature } = await squad(b);
+  await post(b.url, "/plan", { id: leader, tickets: [{ ticket_ref: "T1", title: "first" }] });
+  const task = { kind: "task", to: "worker-1", summary: "do the first", ticket_ref: "T1", loadout: [] };
+  expect((await post(b.url, "/send", { id: leader, ...task })).json).toEqual({ ok: true, seq: 6 });
+  const asked = { ...ASKED, blocking: false, default: "8080", ticket_ref: "T1" };
+  expect((await post(b.url, "/ask", { id: worker, ...asked })).json).toEqual({ ok: true, question_id: 1, seq: 7 });
+
+  const result = { kind: "result", to: "judge", summary: "first done", ticket_ref: "T1", task_seq: 6, branch: "squad/t1", commit: "abc1234" };
+  expect((await post(b.url, "/send", { id: worker, ...result })).json).toEqual({ ok: true, seq: 8 });
+  const answer = {
+    seq: 9,
+    ts: expect.any(Number),
+    kind: "answer",
+    feature_id: feature,
+    from: "broker",
+    role_from: "broker",
+    to: "worker-1",
+    summary: "Q-01: 8080",
+    body: "8080",
+    ticket_ref: "T1",
+    question_id: 1,
+    answer: "8080",
+    resolved_by: "result_default",
+  };
+  expect(((await get(b.url, "/events")).json.events as any[]).slice(7)).toEqual([
+    { ...result, seq: 8, ts: expect.any(Number), feature_id: feature, from: "worker-1", role_from: "worker", body: "" },
+    answer,
+  ]);
+  expect(questionRows(b).map((q) => [q.id, q.status, q.answer_seq])).toEqual([[1, "defaulted", 9]]);
+  expect((await polled(b, worker)).at(-1)).toEqual(answer);
+
+  // the leader that held it answers too late
+  expectRefusal(await post(b.url, "/answer", { id: leader, question_id: 1, answer: "9090" }), "question_closed");
+  expect(readDb(b.dbFile).events.slice(9).map((e) => [e.seq, e.kind, e.data])).toEqual([
+    [10, "refused", { peer: "leader", attempted_kind: "answer", error: "question_closed" }],
+  ]);
+});
+
 test("QST-12: when the row of the question cannot be written the broker answers 500 and stores no event and no delivery", async () => {
   broker = await startBroker();
   const b = broker;

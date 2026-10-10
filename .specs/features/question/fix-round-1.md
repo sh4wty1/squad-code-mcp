@@ -17,9 +17,9 @@ tarefa marcada aqui.
 **Where**: `broker/test/integration/question.test.ts`
 **Requirement**: QST-36
 
-- [ ] Broker real: um worker com uma não-bloqueante aberta do ticket envia o `result` por `/send`; `GET /events` tem, depois do `result`, o `answer` de `broker` com `resolved_by` `result_default` e o default, e a pergunta não aceita mais `/answer` (`question_closed`)
-- [ ] O teste falha se `broker.ts` cria `createSend` sem `question.delivered`
-- [ ] Gate full passa
+- [x] Broker real: um worker com uma não-bloqueante aberta do ticket envia o `result` por `/send`; `GET /events` tem, depois do `result`, o `answer` de `broker` com `resolved_by` `result_default` e o default, e a pergunta não aceita mais `/answer` (`question_closed`)
+- [x] O teste falha se `broker.ts` cria `createSend` sem `question.delivered`
+- [x] Gate full passa
 
 ### F2: A mesclada fechada pelo próprio `result`, a duas mesclas de distância
 
