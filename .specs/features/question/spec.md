@@ -405,7 +405,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-39 | P1: Prazo, default e resolução única | T12, T13 | In Tasks |
 | QST-40 | P1: Prazo, default e resolução única | T11 | In Tasks |
 | QST-41 | P1: Prazo, default e resolução única | T11 | In Tasks |
-| QST-42 | P1: Encerramento da feature e paridade com o log | T2 | In Tasks |
+| QST-42 | P1: Encerramento da feature e paridade com o log | T2 | Implementing |
 | QST-43 | P1: Encerramento da feature e paridade com o log | T14 | In Tasks |
 | QST-44 | P1: Encerramento da feature e paridade com o log | T14 | In Tasks |
 | QST-45 | P1: Encerramento da feature e paridade com o log | T18 | In Tasks |

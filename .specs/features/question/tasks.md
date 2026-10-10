@@ -150,10 +150,10 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `PRAGMA table_info(questions)` dá exatamente `id`, `feature_id`, `ticket_ref`, `asked_by`, `holder`, `blocking`, `default_answer`, `timeout_s`, `deadline_ts`, `status`, `merged_into`, `answer_seq`, com `id` como chave primária
-- [ ] Um banco em arquivo criado sem a tabela, com uma linha em `features` e eventos, é reaberto por `openDatabase`: a tabela existe e as linhas e os eventos são os mesmos
-- [ ] Testes em `test/unit/db.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `PRAGMA table_info(questions)` dá exatamente `id`, `feature_id`, `ticket_ref`, `asked_by`, `holder`, `blocking`, `default_answer`, `timeout_s`, `deadline_ts`, `status`, `merged_into`, `answer_seq`, com `id` como chave primária
+- [x] Um banco em arquivo criado sem a tabela, com uma linha em `features` e eventos, é reaberto por `openDatabase`: a tabela existe e as linhas e os eventos são os mesmos
+- [x] Testes em `test/unit/db.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
