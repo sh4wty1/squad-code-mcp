@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 50,
+  "next_id": 56,
   "lessons": [
     {
       "id": "L-001",
@@ -14,17 +14,19 @@
       "status": "confirmed",
       "features": [
         "peer",
-        "tui-leitura"
+        "tui-leitura",
+        "question"
       ],
-      "recurrence": 2,
+      "recurrence": 3,
       "harmful": 0,
       "evidence": [
         "P7 broker/peers.ts:117 (PEER-09) (broker-rules)",
         "mutant M11 broker/peers.ts:110 (cleanup order vs input refusals) (broker-rules)",
-        "S14 broker/tui/screens/main.ts:47 (TUI-35) (broker-rules)"
+        "S14 broker/tui/screens/main.ts:47 (TUI-35) (broker-rules)",
+        "B06 broker/broker.ts:190 (QST-10, QST-16, QST-22, QST-29: unknown_peer never sent with a second failing rule) (broker-rules)"
       ],
       "created": "2026-10-07T18:54:22Z",
-      "last_seen": "2026-10-09T17:54:51Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-002",
@@ -68,17 +70,19 @@
       "text": "Put every spec-defined default in the config module and unit-test the default value",
       "signal": "surviving_mutant",
       "scope": "config",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "peer"
+        "peer",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "B3 broker/broker.ts:18, S7 broker/server.ts:39 (PEER-38, PEER-28) (config)"
+        "B3 broker/broker.ts:18, S7 broker/server.ts:39 (PEER-38, PEER-28) (config)",
+        "B04 broker/broker.ts:71 (QST-34: 1000 ms as a bare literal, bounded at 3 s) (config)"
       ],
       "created": "2026-10-07T18:54:23Z",
-      "last_seen": "2026-10-07T18:54:23Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-005",
@@ -178,19 +182,21 @@
       "text": "When an AC lists several triggers, give each trigger its own assertion or a recorded platform skip",
       "signal": "surviving_mutant",
       "scope": "mcp-server",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "peer"
+        "peer",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
         "mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server)",
         "mutant C3 broker/cli.ts:78 (PEER-44 lookup finds nothing) (cli)",
-        "mutant C5 broker/cli.ts:80 (PEER-44 signal fails) (cli)"
+        "mutant C5 broker/cli.ts:80 (PEER-44 signal fails) (cli)",
+        "X01 broker/question.ts:351 (QST-12: /merge-question has no test of a failed write) (broker tests)"
       ],
       "created": "2026-10-07T19:35:33Z",
-      "last_seen": "2026-10-07T22:57:31Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-011",
@@ -436,17 +442,19 @@
       "text": "State for every optional field whether null counts as absent or as a present value of the wrong type",
       "signal": "spec_precision_gap",
       "scope": "spec routes",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "event"
+        "event",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "EVT-51 vs EVT-04; broker/session.ts:24 (spec routes)"
+        "EVT-51 vs EVT-04; broker/session.ts:24 (spec routes)",
+        "QST-05 (null in an optional field of /ask); broker/question.ts:119 (spec routes)"
       ],
       "created": "2026-10-08T04:22:31Z",
-      "last_seen": "2026-10-08T04:22:31Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-025",
@@ -652,17 +660,19 @@
       "text": "State for every optional text field what the empty string means: refused, absent or stored as sent",
       "signal": "spec_precision_gap",
       "scope": "spec routes",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "event"
+        "event",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)"
+        "EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)",
+        "QST-05, QST-43 (empty default on a blocking question); broker/question.ts:121 (spec routes)"
       ],
       "created": "2026-10-08T04:58:15Z",
-      "last_seen": "2026-10-08T04:58:15Z"
+      "last_seen": "2026-10-10T11:07:43Z"
     },
     {
       "id": "L-037",
@@ -869,18 +879,21 @@
       "text": "When an AC lists alternatives that can hold together, state which one wins",
       "signal": "spec_precision_gap",
       "scope": "spec",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "tui-leitura"
+        "tui-leitura",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
         "TUI-37 (spec)",
-        "TUI-44 (spec)"
+        "TUI-44 (spec)",
+        "QST-56, QST-58 (options line or default line); broker/tui/screens/questions.ts:118 (spec)",
+        "QST-82 (a send in course and a question that is gone); K08 broker/tui/keys.ts:207 (spec)"
       ],
       "created": "2026-10-09T18:48:24Z",
-      "last_seen": "2026-10-09T18:48:24Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-049",
@@ -899,6 +912,116 @@
       ],
       "created": "2026-10-09T22:42:40Z",
       "last_seen": "2026-10-09T22:42:40Z"
+    },
+    {
+      "id": "L-050",
+      "key": "surviving_mutant::test through the real process each callback the composition root injects into a module not only through the wiring of the test helper",
+      "text": "Test through the real process each callback the composition root injects into a module, not only through the wiring of the test helper",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "B08 broker/broker.ts:57 (QST-36: /send not wired to delivered, whole suite green) (broker tests)",
+        "T07 broker/tui.ts:233 (QST-83: token of the terminal entry) (tui)"
+      ],
+      "created": "2026-10-10T11:07:41Z",
+      "last_seen": "2026-10-10T11:07:41Z"
+    },
+    {
+      "id": "L-051",
+      "key": "surviving_mutant::test the filter of a recursive walk on a member reached through another member not only on one reached directly",
+      "text": "Test the filter of a recursive walk on a member reached through another member, not only on one reached directly",
+      "signal": "surviving_mutant",
+      "scope": "broker-rules",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M10b broker/question.ts:73 (QST-37: follower two merges away already closed) (broker-rules)"
+      ],
+      "created": "2026-10-10T11:07:42Z",
+      "last_seen": "2026-10-10T11:07:42Z"
+    },
+    {
+      "id": "L-052",
+      "key": "surviving_mutant::test a condition with a fixture where it differs from the conditions that coincide with it in every other fixture",
+      "text": "Test a condition with a fixture where it differs from the conditions that coincide with it in every other fixture",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N01 broker/tui/screens/answer.ts:73 (QST-73, QST-80: no blocking question with a default) (tui)"
+      ],
+      "created": "2026-10-10T11:07:42Z",
+      "last_seen": "2026-10-10T11:07:42Z"
+    },
+    {
+      "id": "L-053",
+      "key": "spec_precision_gap::state what a line that carries a count shows when the count is zero",
+      "text": "State what a line that carries a count shows when the count is zero",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-62 (+n mais antigas with n = 0); broker/tui/screens/questions.ts:189 (spec)"
+      ],
+      "created": "2026-10-10T11:07:43Z",
+      "last_seen": "2026-10-10T11:07:43Z"
+    },
+    {
+      "id": "L-054",
+      "key": "spec_precision_gap::state for each key and each mark of a screen with more than one focus what it does in every focus",
+      "text": "State for each key and each mark of a screen with more than one focus what it does in every focus",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-56 (mark of the selected question); Q01 broker/tui/screens/questions.ts:105 (spec)",
+        "QST-67, QST-65 (enter and b with the focus on the history); K21 broker/tui/keys.ts:132 (spec)"
+      ],
+      "created": "2026-10-10T11:07:43Z",
+      "last_seen": "2026-10-10T11:07:43Z"
+    },
+    {
+      "id": "L-055",
+      "key": "spec_precision_gap::state at which moment of a multi key input a rule that depends on the mode reads the mode",
+      "text": "State at which moment of a multi-key input a rule that depends on the mode reads the mode",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-78 (mode read at the start of the chunk); broker/tui/keys.ts:44 (spec)"
+      ],
+      "created": "2026-10-10T11:07:43Z",
+      "last_seen": "2026-10-10T11:07:43Z"
     }
   ]
 }

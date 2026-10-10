@@ -9,16 +9,46 @@
 Corroborated across multiple features. Safe to apply as guidance.
 
 ### L-001 - When an AC fixes the order of two steps, test a scenario whose result differs if the steps are swapped
-- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker-rules` · harmful: 0
-- features: peer, tui-leitura
-- evidence: P7 broker/peers.ts:117 (PEER-09) (broker-rules) (+2 more)
-- last seen: 2026-10-09T17:54:51Z
+- signal: `surviving_mutant` · recurrence: 3 feature(s) · scope: `broker-rules` · harmful: 0
+- features: peer, tui-leitura, question
+- evidence: P7 broker/peers.ts:117 (PEER-09) (broker-rules) (+3 more)
+- last seen: 2026-10-10T11:07:42Z
+
+### L-004 - Put every spec-defined default in the config module and unit-test the default value
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `config` · harmful: 0
+- features: peer, question
+- evidence: B3 broker/broker.ts:18, S7 broker/server.ts:39 (PEER-38, PEER-28) (config) (+1 more)
+- last seen: 2026-10-10T11:07:42Z
+
+### L-010 - When an AC lists several triggers, give each trigger its own assertion or a recorded platform skip
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `mcp-server` · harmful: 0
+- features: peer, question
+- evidence: mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server) (+3 more)
+- last seen: 2026-10-10T11:07:42Z
 
 ### L-020 - Assert a spec-defined limit with the literal value from the spec, not with the constant imported from the code under test
 - signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker tests` · harmful: 0
 - features: peer, tui-leitura
 - evidence: mutant P11 broker/peers.ts:79 (PEER-14, PEER-42, PEER-43 60 s) (broker tests) (+1 more)
 - last seen: 2026-10-09T17:54:51Z
+
+### L-024 - State for every optional field whether null counts as absent or as a present value of the wrong type
+- signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec routes` · harmful: 0
+- features: event, question
+- evidence: EVT-51 vs EVT-04; broker/session.ts:24 (spec routes) (+1 more)
+- last seen: 2026-10-10T11:07:42Z
+
+### L-036 - State for every optional text field what the empty string means: refused, absent or stored as sent
+- signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec routes` · harmful: 0
+- features: event, question
+- evidence: EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes) (+1 more)
+- last seen: 2026-10-10T11:07:43Z
+
+### L-048 - When an AC lists alternatives that can hold together, state which one wins
+- signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec` · harmful: 0
+- features: tui-leitura, question
+- evidence: TUI-37 (spec) (+3 more)
+- last seen: 2026-10-10T11:07:42Z
 
 ## Candidates (under observation - do NOT load as guidance yet)
 
@@ -34,12 +64,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
 - features: peer
 - evidence: S15 broker/server.ts:117 (PEER-27) (mcp-server)
-- last seen: 2026-10-07T18:54:23Z
-
-### L-004 - Put every spec-defined default in the config module and unit-test the default value
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `config` · harmful: 0
-- features: peer
-- evidence: B3 broker/broker.ts:18, S7 broker/server.ts:39 (PEER-38, PEER-28) (config)
 - last seen: 2026-10-07T18:54:23Z
 
 ### L-005 - Test every HTTP route with an empty body and a malformed body, not only with valid JSON
@@ -71,12 +95,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: peer
 - evidence: PEER-10 / validation.md spec-precision gap 1 (git_root object answers 500) (spec routes) (+2 more)
 - last seen: 2026-10-07T20:24:49Z
-
-### L-010 - When an AC lists several triggers, give each trigger its own assertion or a recorded platform skip
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `mcp-server` · harmful: 0
-- features: peer
-- evidence: mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server) (+2 more)
-- last seen: 2026-10-07T22:57:31Z
 
 ### L-011 - For each validated input field, test a present value of the wrong type, not only the absent field
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
@@ -150,12 +168,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: EVT-10, EVT-16 (result, verdict, /plan); broker/test/unit/send-result.test.ts:158, broker/test/unit/plan.test.ts:138 (spec)
 - last seen: 2026-10-08T04:22:31Z
 
-### L-024 - State for every optional field whether null counts as absent or as a present value of the wrong type
-- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec routes` · harmful: 0
-- features: event
-- evidence: EVT-51 vs EVT-04; broker/session.ts:24 (spec routes)
-- last seen: 2026-10-08T04:22:31Z
-
 ### L-025 - When an assumption says a state never comes back, write the AC over the whole history, not only over the current state
 - signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
 - features: event
@@ -220,12 +232,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
 - features: event
 - evidence: R16 broker/session.ts:39 (EVT-50) (broker tests)
-- last seen: 2026-10-08T04:58:15Z
-
-### L-036 - State for every optional text field what the empty string means: refused, absent or stored as sent
-- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec routes` · harmful: 0
-- features: event
-- evidence: EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)
 - last seen: 2026-10-08T04:58:15Z
 
 ### L-037 - When a setting or a kept state is unit-tested in a pure function, also assert through the loop that wires it that a non-default value reaches the function
@@ -294,17 +300,47 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: N05 tui/probe.ts:46 (TUI-59) (cli)
 - last seen: 2026-10-09T18:48:24Z
 
-### L-048 - When an AC lists alternatives that can hold together, state which one wins
-- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
-- features: tui-leitura
-- evidence: TUI-37 (spec) (+1 more)
-- last seen: 2026-10-09T18:48:24Z
-
 ### L-049 - Assert cell attributes or emitted ANSI when a TUI behavior changes only styling, because text snapshots cannot detect it
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
 - features: tui-leitura
 - evidence: R07-F3; test/unit/tui-loop.test.ts:324 (tui)
 - last seen: 2026-10-09T22:42:40Z
+
+### L-050 - Test through the real process each callback the composition root injects into a module, not only through the wiring of the test helper
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: question
+- evidence: B08 broker/broker.ts:57 (QST-36: /send not wired to delivered, whole suite green) (broker tests) (+1 more)
+- last seen: 2026-10-10T11:07:41Z
+
+### L-051 - Test the filter of a recursive walk on a member reached through another member, not only on one reached directly
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker-rules` · harmful: 0
+- features: question
+- evidence: M10b broker/question.ts:73 (QST-37: follower two merges away already closed) (broker-rules)
+- last seen: 2026-10-10T11:07:42Z
+
+### L-052 - Test a condition with a fixture where it differs from the conditions that coincide with it in every other fixture
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
+- features: question
+- evidence: N01 broker/tui/screens/answer.ts:73 (QST-73, QST-80: no blocking question with a default) (tui)
+- last seen: 2026-10-10T11:07:42Z
+
+### L-053 - State what a line that carries a count shows when the count is zero
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: question
+- evidence: QST-62 (+n mais antigas with n = 0); broker/tui/screens/questions.ts:189 (spec)
+- last seen: 2026-10-10T11:07:43Z
+
+### L-054 - State for each key and each mark of a screen with more than one focus what it does in every focus
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: question
+- evidence: QST-56 (mark of the selected question); Q01 broker/tui/screens/questions.ts:105 (spec) (+1 more)
+- last seen: 2026-10-10T11:07:43Z
+
+### L-055 - State at which moment of a multi-key input a rule that depends on the mode reads the mode
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: question
+- evidence: QST-78 (mode read at the start of the chunk); broker/tui/keys.ts:44 (spec)
+- last seen: 2026-10-10T11:07:43Z
 
 ## Quarantined (failed when applied - ignore)
 
