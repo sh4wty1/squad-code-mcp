@@ -68,7 +68,7 @@ export function fit(segs: Seg[], room: number): Seg[] {
 }
 
 // At most `room` lines of `w` columns, the last one saying there is more
-function clip(lines: string[], room: number, w: number): string[] {
+export function clip(lines: string[], room: number, w: number): string[] {
   return lines.length > room ? [...lines.slice(0, room - 1), cut(`${lines[room - 1]} …`, w)] : lines;
 }
 

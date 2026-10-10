@@ -694,13 +694,13 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Campo de 3 linhas e de 8 linhas, com `█` depois do texto e ` <n> chars ` na borda de baixo, para 0, 40 e 184 caracteres
-- [ ] O aviso `⚠ a resposta fica gravada no log e não pode ser apagada` está logo abaixo do campo nos dois tamanhos
-- [ ] Texto maior que a linha: `…` e o fim do texto; expandido com mais de 6 linhas: as 6 últimas
-- [ ] Não-bloqueante: `default <default>  · aplicado em m:ss se você não responder`; bloqueante: sem a linha; prazo passado: `timeout 0:00` no título
-- [ ] Rodapé de QST-73, com `recolher` quando expandido
-- [ ] Testes em `test/unit/tui-answer.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Campo de 3 linhas e de 8 linhas, com `█` depois do texto e ` <n> chars ` na borda de baixo, para 0, 40 e 184 caracteres
+- [x] O aviso `⚠ a resposta fica gravada no log e não pode ser apagada` está logo abaixo do campo nos dois tamanhos
+- [x] Texto maior que a linha: `…` e o fim do texto; expandido com mais de 6 linhas: as 6 últimas
+- [x] Não-bloqueante: `default <default>  · aplicado em m:ss se você não responder`; bloqueante: sem a linha; prazo passado: `timeout 0:00` no título
+- [x] Rodapé de QST-73, com `recolher` quando expandido
+- [x] Testes em `test/unit/tui-answer.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

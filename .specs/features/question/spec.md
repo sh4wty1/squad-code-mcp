@@ -436,9 +436,9 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-70 | P1: Modal de resposta | T27 | Implementing |
 | QST-71 | P1: Modal de resposta | T27 | Implementing |
 | QST-72 | P1: Modal de resposta | T32 | In Tasks |
-| QST-73 | P1: Modal de resposta | T28 | In Tasks |
+| QST-73 | P1: Modal de resposta | T28 | Implementing |
 | QST-74 | P1: Modal de resposta | T32 | In Tasks |
-| QST-75 | P1: Modal de resposta | T28 | In Tasks |
+| QST-75 | P1: Modal de resposta | T28 | Implementing |
 | QST-76 | P1: Modal de resposta | T32, T35 | In Tasks |
 | QST-77 | P1: Modal de resposta | T33 | In Tasks |
 | QST-78 | P1: Modal de resposta | T32 | In Tasks |

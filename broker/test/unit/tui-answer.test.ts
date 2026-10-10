@@ -7,7 +7,7 @@ import { START } from "../../tui/keys.ts";
 import { answer } from "../../tui/screens/answer.ts";
 import { questions } from "../../tui/screens/questions.ts";
 import type { Modal, Ui, View } from "../../tui/view.ts";
-import { PRICES } from "../frames/logs.ts";
+import { LOGS, PRICES } from "../frames/logs.ts";
 import { frame, frameView } from "../frames/view.ts";
 import { LEADER, MOTHER, NOW, setup, WORKER_1, WORKER_2 } from "./helpers.ts";
 
@@ -176,4 +176,184 @@ test("QST-70: the box has 82 columns from column 19 and is centered in the 40 li
     expect(sides).toEqual([]);
     expect(cols(drawn, 18, 101, first - 1, first - 1).concat(cols(drawn, 18, 101, last + 1, last + 1))).toEqual([" ".repeat(84), " ".repeat(84)]);
   }
+});
+
+// The field of the text in the box of the modal: 76 columns, a line for each of the text and the count at the bottom
+const field = (lines: string[], chars: number) => [
+  boxed("┌" + "─".repeat(74) + "┐"),
+  ...lines.map((line) => boxed("│ " + line.padEnd(73) + "│")),
+  boxed("└" + ` ${chars} chars ─┘`.padStart(75, "─")),
+];
+const WARNING = boxed("⚠ a resposta fica gravada no log e não pode ser apagada");
+const TEXT_KEYS = " enter enviar   ctrl+e expandir   ctrl+u limpar   esc cancelar";
+// The modal of Q-08 over the log of frame 06, in the text mode
+const typed = (more: Partial<Modal>) => over(withModal("06", modal(8, { choice: null, ...more }))).text();
+
+test("QST-73: the modal of a non-blocking question in the text mode is the one of frame 06, with its default and the field of one line", () => {
+  const drawn = over(frameView("06")).text();
+  // The box takes lines 10 to 28. The route is the sequence of the `question` of the log
+  // (.design/squad-mvp.md line 490): the prototype writes by hand a hop of the leader to the mother.
+  const expected = box(frame("06"), 10, 28);
+  expect(expected[4]).toBe(boxed("rota    w2 → ldr → mot → você"));
+  expected[4] = boxed("rota    w2 → ldr → você");
+  expect(box(drawn, 10, 28)).toEqual(expected);
+  expect(box(drawn, 19, 28)).toEqual([
+    boxed(""),
+    boxed("default logo da 89  · aplicado em 3:08 se você não responder"),
+    boxed("resposta  (uma linha · ctrl+e expande)"),
+    ...field(["logo da 89, com o nome do programa no ar█"], 40),
+    WARNING,
+    SEP,
+    boxed("efeito  worker-2 troca o default pela sua resposta; nada é refeito."),
+    BOTTOM,
+  ]);
+  expect(drawn[39]).toBe(TEXT_KEYS);
+  expect(drawn[39]).toBe(frame("06")[39]!);
+});
+
+test("QST-73: the expanded field of frame 07 has 8 lines, and the warning stays right below it", () => {
+  const drawn = over(frameView("07")).text();
+  // The box takes lines 8 to 31; its route has the hop the prototype writes by hand
+  const expected = box(frame("07"), 8, 31);
+  expect(expected[4]).toBe(boxed("rota    w2 → ldr → mot → você"));
+  expected[4] = boxed("rota    w2 → ldr → você");
+  expect(box(drawn, 8, 31)).toEqual(expected);
+  expect(box(drawn, 18, 31)).toEqual([
+    boxed("default logo da 89  · aplicado em 3:08 se você não responder"),
+    boxed("resposta  (expandido · ctrl+e recolhe)"),
+    ...field(
+      [
+        "Logo da 89 por enquanto, na versão quadrada para caber no card do",
+        "mobile. Abra um ticket separado para buscar capas no Discogs/MusicBrainz",
+        "depois da entrega; não bloqueia esta feature.█",
+        "",
+        "",
+        "",
+      ],
+      184
+    ),
+    WARNING,
+    SEP,
+    boxed("efeito  worker-2 troca o default pela sua resposta; nada é refeito."),
+    BOTTOM,
+  ]);
+  expect(drawn[39]).toBe(" enter enviar   ctrl+e recolher   ctrl+u limpar   esc cancelar");
+  expect(drawn[39]).toBe(frame("07")[39]!);
+});
+
+test("QST-73: an empty field has the cursor at its start and counts 0 characters, in both sizes", () => {
+  // The field of one line is in lines 22 to 24; expanded, the box starts at line 8 and the field at line 20
+  expect(box(typed({}), 22, 25)).toEqual([...field(["█"], 0), WARNING]);
+  expect(box(typed({ expanded: true }), 20, 28)).toEqual([...field(["█", "", "", "", "", ""], 0), WARNING]);
+});
+
+test("QST-75: a text that does not fit the line of the field shows `…` and its end", () => {
+  // The line has 72 columns: 71 characters and the cursor fill it
+  const fits = "x".repeat(61) + "0123456789";
+  expect(box(typed({ text: fits }), 22, 24)).toEqual(field([fits + "█"], 71));
+  // With one more, `…` and the last 70
+  const end = "…" + "x".repeat(60) + "0123456789█";
+  expect(box(typed({ text: "y" + fits }), 22, 24)).toEqual(field([end], 72));
+  expect(box(typed({ text: "y".repeat(200) + fits }), 22, 24)).toEqual(field([end], 271));
+});
+
+test("QST-75: the expanded field breaks the text at its width and shows its last six lines", () => {
+  const words = ["1", "2", "3", "4", "5", "6", "7", "8"].map((n) => n.repeat(70));
+  const lines = (text: string) => box(typed({ text, expanded: true }), 20, 27);
+  expect(lines("a".repeat(40) + " " + "b".repeat(40))).toEqual(field(["a".repeat(40), "b".repeat(40) + "█", "", "", "", ""], 81));
+  // Six lines fit; of eight, the first two leave
+  expect(lines(words.slice(0, 6).join(" "))).toEqual(field([...words.slice(0, 5), words[5] + "█"], 425));
+  expect(lines(words.join(" "))).toEqual(field([...words.slice(2, 7), words[7] + "█"], 567));
+});
+
+test("QST-71, QST-73: a blocking question has no line of default, and one without options is in the text mode", () => {
+  // Q-07 of frame 05 after `outra resposta…`: 19 lines, from line 10
+  const drawn = over(withModal("05", modal(7, { choice: null }))).text();
+  expect(box(drawn, 19, 26)).toEqual([
+    boxed("Reconexão do stream: retry infinito ou desistir após 5 tentativas?"),
+    boxed(""),
+    boxed("resposta  (uma linha · ctrl+e expande)"),
+    ...field(["█"], 0),
+    WARNING,
+    SEP,
+  ]);
+  expect(drawn[39]).toBe(TEXT_KEYS);
+
+  // A question without options has no line to choose from, whatever the choice of the modal: 18 lines, from line 11
+  const b = open();
+  const id = b.ask(WORKER_1);
+  for (const choice of [null, 0]) {
+    const lines = b.lines(modal(id, { choice }));
+    expect(box(lines, 19, 26)).toEqual([boxed("which port?"), boxed(""), boxed("resposta  (uma linha · ctrl+e expande)"), ...field(["█"], 0), WARNING, SEP]);
+    expect(lines[39]).toBe(TEXT_KEYS);
+  }
+});
+
+test("QST-98: the title of the modal shows `timeout 0:00` once the deadline of the question passed", () => {
+  // Q-08 reached the dev at 14:31:15 with 240 s: at 14:36:07 the answer of the broker was not read yet
+  const drawn = over({ ...frameView("06"), squad: squad(LOGS["06"]!.events, LOGS["06"]!.now + 240_000) }).text();
+  expect(box(drawn, 10, 10)).toEqual([top("? responder Q-08 · timeout 0:00")]);
+  expect(box(drawn, 13, 13)).toEqual([boxed("thread  TKT-13 · chegou ao dev 14:31:15 · há 4m52s")]);
+  expect(box(drawn, 20, 20)).toEqual([boxed("default logo da 89  · aplicado em 0:00 se você não responder")]);
+});
+
+test("QST-96: a text, a reason, an option and a ticket that do not fit are broken or cut with `…` inside the box of the modal", () => {
+  const b = open();
+  const id = b.ask(WORKER_1, { ...BLOCKING, body: "x".repeat(300), why: "y".repeat(300), options: ["a".repeat(100), "b"], ticket_ref: "T".repeat(100) });
+  // 24 lines, from line 8: the text is broken at 76 columns and the reason at 68
+  expect(box(b.lines(modal(id)), 8, 31)).toEqual([
+    top("? responder Q-01 · BLOQUEANTE"),
+    boxed("contexto"),
+    boxed("ticket  " + "T".repeat(68) + "…"),
+    boxed("thread  " + "T".repeat(68) + "…"),
+    boxed("rota    w1 → ldr → mot → você"),
+    boxed("por quê " + "y".repeat(68)),
+    ...Array.from({ length: 3 }, () => boxed("        " + "y".repeat(68))),
+    boxed("        " + "y".repeat(28)),
+    SEP,
+    boxed("worker-1 pergunta   [BLOQUEANTE] só worker-1 está pausado"),
+    ...Array.from({ length: 3 }, () => boxed("x".repeat(76))),
+    boxed("x".repeat(72)),
+    boxed(""),
+    boxed("▶ 1  " + "a".repeat(71) + "…"),
+    boxed("  2  b"),
+    boxed("  3  outra resposta…"),
+    SEP,
+    boxed("efeito  worker-1 retoma o"),
+    boxed("        " + "T".repeat(67) + "…"),
+    BOTTOM,
+  ]);
+});
+
+test("QST-96: a text and a reason too long for the screen are cut with `…`, and the modal stays between the tabs and the tokens", () => {
+  const b = open();
+  const id = b.ask(WORKER_2, { ...DEFAULT, body: "x".repeat(3000), why: "y".repeat(3000) });
+  const drawn = b.lines(modal(id, { choice: null, text: "8080" }));
+  // 34 lines, from line 3 to line 36: the text takes the lines the rest leaves, but for one of the reason
+  expect(box(drawn, 3, 10)).toEqual([
+    top("? responder Q-01 · timeout 4:00"),
+    boxed("contexto"),
+    boxed("ticket  —"),
+    boxed("thread  chegou ao dev " + clock(NOW) + " · há 0s"),
+    boxed("rota    w2 → ldr → mot → você"),
+    boxed("por quê " + "y".repeat(67) + "…"),
+    SEP,
+    boxed("worker-2 pergunta   não-bloqueante · worker-2 segue com o default"),
+  ]);
+  expect(box(drawn, 11, 26)).toEqual([...Array.from({ length: 15 }, () => boxed("x".repeat(76))), boxed("x".repeat(75) + "…")]);
+  expect(box(drawn, 27, 36)).toEqual([
+    boxed(""),
+    boxed("default 9090  · aplicado em 4:00 se você não responder"),
+    boxed("resposta  (uma linha · ctrl+e expande)"),
+    ...field(["8080█"], 4),
+    WARNING,
+    SEP,
+    boxed("efeito  worker-2 troca o default pela sua resposta; nada é refeito."),
+    BOTTOM,
+  ]);
+  // Its margin takes lines 2 and 37; the tabs and the tokens are the ones of the tab under it
+  expect(cols(drawn, 18, 101, 2, 2).concat(cols(drawn, 18, 101, 37, 37))).toEqual([" ".repeat(84), " ".repeat(84)]);
+  const under = questions(b.view()).text();
+  expect(under[1]).toBe("  1 principal   2 topologia   3 thread   4 perguntas 1   ? ajuda");
+  expect([drawn[1], drawn[38]]).toEqual([under[1]!, under[38]!]);
 });
