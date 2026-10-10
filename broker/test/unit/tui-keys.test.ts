@@ -3,8 +3,8 @@ import type { SquadEvent } from "../../shared/contract.ts";
 import { squad } from "../../shared/derive.ts";
 import { resolved, waiting } from "../../tui/asked.ts";
 import { feed } from "../../tui/feed.ts";
-import { press, START, visible } from "../../tui/keys.ts";
-import type { Ui, View } from "../../tui/view.ts";
+import { keysOf, press, START, visible } from "../../tui/keys.ts";
+import type { Modal, Ui, View } from "../../tui/view.ts";
 import { LOGS } from "../frames/logs.ts";
 import { frameView } from "../frames/view.ts";
 
@@ -296,4 +296,140 @@ test("p freezes the lines of the feed and the selection, and resuming shows what
   // The keys move over the frozen lines: 422 is the latest of them
   const v: View = { ...frameView("01"), rows: visible(paused, fresh, shown), ui: { ...paused, selected: 422 } };
   expect(press(v.ui, "j", v)!.selected).toBe(422);
+});
+
+// The view of a frame of the modal with its modal changed: 05 is Q-07 on the first of its three
+// options, 20a is Q-09 on the first of its two, 06 is Q-08 with a text, 20b is Q-08 refused
+function open(frame: string, modal: Partial<Modal> = {}): View {
+  return view(frame, { modal: { ...frameView(frame).ui.modal!, ...modal } });
+}
+const m = (v: View) => v.ui.modal!;
+
+test("QST-72: in the choice mode a digit selects the line of its number, the last one being the other answer", () => {
+  const three = open("05", { choice: 1 });
+  expect(["1", "2", "3", "4"].map((k) => key(k, three))).toEqual([0, 1, 2, 3].map((choice) => ({ ...three.ui, modal: { ...m(three), choice } })));
+  for (const k of ["5", "9", "0"]) expect(key(k, three)).toBe(three.ui);
+  // Q-09 has two options: the third line is the other answer
+  const two = open("20a");
+  expect(["1", "2", "3"].map((k) => m({ ...two, ui: key(k, two) }).choice)).toEqual([0, 1, 2]);
+  expect(key("4", two)).toBe(two.ui);
+});
+
+test("QST-72: in the choice mode j, k and the arrows move the selection by one line, and stop at the first and at the last", () => {
+  const at = (choice: number) => open("05", { choice });
+  expect(key("j", at(0))).toEqual({ ...at(0).ui, modal: { ...m(at(0)), choice: 1 } });
+  expect(m({ ...at(2), ui: key(DOWN, at(2)) }).choice).toBe(3);
+  expect(m({ ...at(3), ui: key("j", at(3)) }).choice).toBe(3);
+  expect(m({ ...at(3), ui: key(DOWN, at(3)) }).choice).toBe(3);
+  expect(key("k", at(3))).toEqual({ ...at(3).ui, modal: { ...m(at(3)), choice: 2 } });
+  expect(m({ ...at(1), ui: key(UP, at(1)) }).choice).toBe(0);
+  expect(m({ ...at(0), ui: key("k", at(0)) }).choice).toBe(0);
+  expect(m({ ...at(0), ui: key(UP, at(0)) }).choice).toBe(0);
+});
+
+test("QST-72: enter over an option leaves its text to send, and over the other answer goes to the text mode with the field empty", () => {
+  const second = open("05", { choice: 1 });
+  expect(key("\r", second)).toEqual({ ...second.ui, modal: { ...m(second), sending: true }, send: { question_id: 7, answer: "5 tentativas" } });
+  const first = open("20a");
+  expect(key("\r", first).send).toEqual({ question_id: 9, answer: "pronto" });
+  // A text left from before does not come back
+  const other = open("05", { choice: 3, text: "antes" });
+  expect(key("\r", other)).toEqual({ ...other.ui, modal: { question: 7, choice: null, text: "", expanded: false, sending: false, refused: false } });
+  expect(key("\r", other).send).toBeNull();
+});
+
+test("QST-72: in the choice mode a letter does nothing: q does not quit and b does not leave the modal", () => {
+  const v = open("05");
+  for (const k of ["q", "b", "h", "g", "x", "p", "t", "?", "a", " ", "\t", "\x7f", "\x15", "\x05"]) expect(key(k, v)).toBe(v.ui);
+});
+
+test("QST-74: in the text mode a printable character goes to the end of the text, also the ones that are keys outside the modal", () => {
+  const v = open("06");
+  for (const k of ["q", "1", "2", "3", "4", "0", "b", "h", "g", "x", "p", "t", "?", "j", "k", "[", "]", " ", "é", "ã", "Ç", "ñ", "…", "𝄞"]) {
+    expect(press(v.ui, k, v)).toEqual({ ...v.ui, modal: { ...m(v), text: "logo da 89, com o nome do programa no ar" + k } });
+  }
+  // Key after key, in the order they came
+  const typed = [..."não, 5!"].reduce((ui, k) => press(ui, k, { ...v, ui })!, open("06", { text: "" }).ui);
+  expect(typed.modal!.text).toBe("não, 5!");
+});
+
+test("QST-74: backspace erases the last character, ctrl+u empties the field and ctrl+e changes its size", () => {
+  const v = open("06", { text: "capa é" });
+  for (const backspace of ["\x7f", "\x08"]) expect(key(backspace, v)).toEqual({ ...v.ui, modal: { ...m(v), text: "capa " } });
+  // One character, not one unit of UTF-16
+  expect(m({ ...v, ui: key("\x7f", open("06", { text: "a𝄞" })) }).text).toBe("a");
+  expect(m({ ...v, ui: key("\x7f", open("06", { text: "" })) }).text).toBe("");
+  expect(key("\x15", v)).toEqual({ ...v.ui, modal: { ...m(v), text: "" } });
+  expect(key("\x05", v)).toEqual({ ...v.ui, modal: { ...m(v), expanded: true } });
+  const expanded = open("07");
+  expect(key("\x05", expanded)).toEqual({ ...expanded.ui, modal: { ...m(expanded), expanded: false } });
+});
+
+test("QST-74: an arrow and any other key that is not a character leave the text as it is", () => {
+  const v = open("06");
+  for (const k of [UP, DOWN, "\x1b[C", "\x1b[D", "\x1b[Z", "\x1b[3~", "\t", "\n", "\x00", "\x01"]) expect(key(k, v)).toBe(v.ui);
+});
+
+test("QST-76: enter with a text leaves it to send without the spaces of its ends, and the modal waits", () => {
+  const v = open("06", { text: "  logo da 89, quadrado   " });
+  expect(key("\r", v)).toEqual({ ...v.ui, modal: { ...m(v), sending: true }, send: { question_id: 8, answer: "logo da 89, quadrado" } });
+  // The text mode of a question with options: after the other answer
+  const other = open("05", { choice: null, text: "depende do plano" });
+  expect(key("\r", other)).toEqual({ ...other.ui, modal: { ...m(other), sending: true }, send: { question_id: 7, answer: "depende do plano" } });
+});
+
+test("QST-76: enter with the field empty or with only spaces changes nothing", () => {
+  for (const text of ["", " ", "    "]) {
+    const v = open("06", { text });
+    expect(key("\r", v)).toBe(v.ui);
+  }
+});
+
+test("QST-79: while the answer waits for the broker no key changes the state, and ctrl+c quits", () => {
+  for (const v of [open("05", { sending: true }), open("06", { sending: true })]) {
+    const waits: View = { ...v, ui: { ...v.ui, send: { question_id: m(v).question, answer: "x" } } };
+    for (const k of ["\r", "\x1b", "a", "q", "1", "2", "j", "k", UP, DOWN, "\x7f", "\x08", "\x15", "\x05", "4", "b", "h"]) expect(key(k, waits)).toBe(waits.ui);
+    expect(press(waits.ui, "\x03", waits)).toBeNull();
+  }
+});
+
+test("QST-85: esc closes the modal without an answer to send, and the tab keeps its selection", () => {
+  for (const v of [open("05", { choice: 2 }), open("06"), open("07")]) {
+    expect(key("\x1b", v)).toEqual({ ...v.ui, modal: null });
+    expect(key("\x1b", v).send).toBeNull();
+    expect(key("\x1b", v).screen).toBe("questions");
+    expect(key("\x1b", v).question).toBe(m(v).question);
+  }
+});
+
+test("QST-85: ctrl+c quits in any mode of the modal", () => {
+  for (const v of [open("05"), open("06"), open("07"), open("20b")]) expect(press(v.ui, "\x03", v)).toBeNull();
+});
+
+test("QST-80: only esc closes the modal of a refused answer", () => {
+  const v = open("20b");
+  expect(m(v).refused).toBe(true);
+  for (const k of ["\r", "a", "q", "1", "\x7f", "\x08", "\x15", "\x05", UP, DOWN]) expect(key(k, v)).toBe(v.ui);
+  expect(key("\x1b", v)).toEqual({ ...v.ui, modal: null });
+});
+
+test("QST-78: in a chunk of more than one key into the text mode a line break becomes a space, and one key alone stays as it came", () => {
+  const text = open("06").ui;
+  expect(keysOf("um\rdois\ntrês\r\n", text)).toEqual(["u", "m", " ", "d", "o", "i", "s", " ", "t", "r", "ê", "s", " ", " "]);
+  expect(keysOf("a\r", text)).toEqual(["a", " "]);
+  expect(keysOf("\r", text)).toEqual(["\r"]);
+  // An escape sequence is one key
+  expect(keysOf(UP + "\r", text)).toEqual([UP, " "]);
+  expect(keysOf(UP, text)).toEqual([UP]);
+  // Outside the text mode enter is enter: in the choice mode and with no modal
+  expect(keysOf("2\r", open("05").ui)).toEqual(["2", "\r"]);
+  expect(keysOf("j\r" + DOWN, START)).toEqual(["j", "\r", DOWN]);
+  expect(keysOf("", text)).toEqual([]);
+});
+
+test("QST-78: a pasted block with line breaks goes into the text and sends nothing", () => {
+  const v = open("06", { text: "" });
+  const pasted = keysOf("logo da 89\r\nna versão quadrada\r", v.ui).reduce((ui, k) => press(ui, k, { ...v, ui })!, v.ui);
+  expect(pasted).toEqual({ ...v.ui, modal: { ...m(v), text: "logo da 89  na versão quadrada " } });
+  expect(pasted.send).toBeNull();
 });

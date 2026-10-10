@@ -1,6 +1,6 @@
 // What a key does to the state of the screen. Pure: the clock is the one of the view, and a
-// key is the string the terminal sends in raw mode. Ported from the branch of `onKey` of
-// the prototype with no modal open.
+// key is the string the terminal sends in raw mode. Ported from `onKey` and `textKeys` of
+// the prototype, without the modals of gate and of permission.
 
 import type { Question } from "../shared/derive.ts";
 import { resolved, waiting } from "./asked.ts";
@@ -8,7 +8,7 @@ import type { FeedRow } from "./feed.ts";
 import type { Color } from "./grid.ts";
 import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
-import type { Ui, View } from "./view.ts";
+import type { Modal, Ui, View } from "./view.ts";
 
 export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null };
 
@@ -23,8 +23,60 @@ export function visible(ui: Ui, fresh: FeedRow[], shown: FeedRow[]): FeedRow[] {
   return ui.paused ? shown : fresh;
 }
 
+// One complete key: a CSI escape sequence, or a character
+const KEY = /\x1b\[[0-9;]*[A-Za-z~]|[\s\S]/gu;
+
+// The keys of one chunk of the input. A chunk of more than one key into the text of the
+// modal is a paste: its line breaks become spaces, or one of them would send half an answer,
+// and nothing erases an answer from the log.
+export function keysOf(chunk: string, ui: Ui): string[] {
+  const keys = chunk.match(KEY) ?? [];
+  return keys.length > 1 && ui.modal?.choice === null ? keys.map((k) => (k === "\r" || k === "\n" ? " " : k)) : keys;
+}
+
+// What a key does with the modal of answer open. The answer is not sent here: it is left in
+// `send`, for the loop.
+function answering(ui: Ui, m: Modal, key: string, view: View): Ui | null {
+  if (key === "\x03") return null;
+  // No key changes the modal while the broker did not say what it did with the answer
+  if (m.sending) return ui;
+  if (key === "\x1b") return { ...ui, modal: null };
+  // Only esc closes a refused answer
+  if (m.refused) return ui;
+  const set = (modal: Partial<Modal>): Ui => ({ ...ui, modal: { ...m, ...modal } });
+  const send = (answer: string): Ui => ({ ...ui, modal: { ...m, sending: true }, send: { question_id: m.question, answer } });
+  const options = view.squad.questions.find((q) => q.id === m.question)?.options ?? [];
+
+  if (m.choice !== null && options.length) {
+    // The line after the options is `outra resposta…`: it leads to the text
+    const other = options.length;
+    if (/^[1-9]$/.test(key) && Number(key) <= other + 1) return set({ choice: Number(key) - 1 });
+    if (key === "j" || key === DOWN) return set({ choice: Math.min(other, m.choice + 1) });
+    if (key === "k" || key === UP) return set({ choice: Math.max(0, m.choice - 1) });
+    if (key === "\r") return m.choice === other ? set({ choice: null, text: "" }) : send(options[m.choice]!);
+    return ui;
+  }
+  switch (key) {
+    case "\r": {
+      const text = m.text.trim();
+      return text ? send(text) : ui;
+    }
+    case "\x7f":
+    case "\x08":
+      return set({ text: [...m.text].slice(0, -1).join("") });
+    case "\x15":
+      return set({ text: "" });
+    case "\x05":
+      return set({ expanded: !m.expanded });
+  }
+  // A character that is not a control one goes to the end of the text; an arrow is not one character
+  return [...key].length === 1 && !/[\x00-\x1f\x7f-\x9f]/u.test(key) ? set({ text: m.text + key }) : ui;
+}
+
 // The state after the key, or null when the key quits
 export function press(ui: Ui, key: string, view: View): Ui | null {
+  // With the modal open every key is its own: q, the digits and the letters are text
+  if (ui.modal) return answering(ui, ui.modal, key, view);
   const { squad, rows } = view;
   const toast = (text: string, color: Color = "gray"): Ui => ({ ...ui, toast: { text, color, until: squad.now + TOAST_MS } });
   const thread = (): Ui => ({ ...ui, screen: "thread", threadTicket: null, threadOffset: 0 });

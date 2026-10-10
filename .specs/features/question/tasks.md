@@ -784,14 +784,14 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Modo escolha: dígito, `j`/`k`, setas e `enter` como em QST-72; `enter` em `outra resposta…` passa ao modo texto com o campo vazio
-- [ ] Modo texto: imprimível entra no fim (inclusive `q`, dígitos, `b`, `h`, `g`, `x`, `p`, `t`, `?` e letras acentuadas), `\x7f` e `\x08` apagam o último, `\x15` limpa, `\x05` alterna o tamanho; uma seta não muda o texto
-- [ ] `enter` com texto: `send` com `answer` sem os espaços das pontas e `modal.sending` verdadeiro; com o campo vazio ou só espaços, nada muda
-- [ ] QST-79: com `modal.sending` nenhuma tecla muda o `Ui`, a não ser `ctrl+c`, que sai
-- [ ] QST-85: `esc` fecha o modal sem `send` e mantém a seleção
-- [ ] `keysOf`: num bloco de mais de uma tecla no modo texto, `\r` e `\n` viram espaço; num bloco de uma tecla só, `\r` continua `\r`
-- [ ] Testes em `test/unit/tui-keys.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Modo escolha: dígito, `j`/`k`, setas e `enter` como em QST-72; `enter` em `outra resposta…` passa ao modo texto com o campo vazio
+- [x] Modo texto: imprimível entra no fim (inclusive `q`, dígitos, `b`, `h`, `g`, `x`, `p`, `t`, `?` e letras acentuadas), `\x7f` e `\x08` apagam o último, `\x15` limpa, `\x05` alterna o tamanho; uma seta não muda o texto
+- [x] `enter` com texto: `send` com `answer` sem os espaços das pontas e `modal.sending` verdadeiro; com o campo vazio ou só espaços, nada muda
+- [x] QST-79: com `modal.sending` nenhuma tecla muda o `Ui`, a não ser `ctrl+c`, que sai
+- [x] QST-85: `esc` fecha o modal sem `send` e mantém a seleção
+- [x] `keysOf`: num bloco de mais de uma tecla no modo texto, `\r` e `\n` viram espaço; num bloco de uma tecla só, `\r` continua `\r`
+- [x] Testes em `test/unit/tui-keys.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
