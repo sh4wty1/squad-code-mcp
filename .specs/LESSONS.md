@@ -348,6 +348,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: QST-78 broker/tui.ts:182 (validation.md round 2, gap 1) (tui input)
 - last seen: 2026-10-10T11:55:55Z
 
+### L-057 - When an AC states a rule for each mode of a component, state what the same input does when the component is in none of them
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: question
+- evidence: QST-78 vs Assumptions row 'Colagem com quebra de linha'; mutant K4 broker/tui/keys.ts:187 (validation.md round 3, P3) (spec)
+- last seen: 2026-10-10T12:21:06Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 57,
+  "next_id": 58,
   "lessons": [
     {
       "id": "L-001",
@@ -1040,6 +1040,24 @@
       ],
       "created": "2026-10-10T11:55:55Z",
       "last_seen": "2026-10-10T11:55:55Z"
+    },
+    {
+      "id": "L-057",
+      "key": "spec_precision_gap::when an ac states a rule for each mode of a component state what the same input does when the component is in none of them",
+      "text": "When an AC states a rule for each mode of a component, state what the same input does when the component is in none of them",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-78 vs Assumptions row 'Colagem com quebra de linha'; mutant K4 broker/tui/keys.ts:187 (validation.md round 3, P3) (spec)"
+      ],
+      "created": "2026-10-10T12:21:06Z",
+      "last_seen": "2026-10-10T12:21:06Z"
     }
   ]
 }
