@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 56,
+  "next_id": 57,
   "lessons": [
     {
       "id": "L-001",
@@ -1022,6 +1022,24 @@
       ],
       "created": "2026-10-10T11:07:43Z",
       "last_seen": "2026-10-10T11:07:43Z"
+    },
+    {
+      "id": "L-056",
+      "key": "ac_gap::when a layer reshapes its input before a rule about that input applies test the rule at the entry of the layer with an input the reshaping changes",
+      "text": "When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes",
+      "signal": "ac_gap",
+      "scope": "tui input",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-78 broker/tui.ts:182 (validation.md round 2, gap 1) (tui input)"
+      ],
+      "created": "2026-10-10T11:55:55Z",
+      "last_seen": "2026-10-10T11:55:55Z"
     }
   ]
 }

@@ -342,6 +342,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: QST-78 (mode read at the start of the chunk); broker/tui/keys.ts:44 (spec)
 - last seen: 2026-10-10T11:07:43Z
 
+### L-056 - When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `tui input` · harmful: 0
+- features: question
+- evidence: QST-78 broker/tui.ts:182 (validation.md round 2, gap 1) (tui input)
+- last seen: 2026-10-10T11:55:55Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
