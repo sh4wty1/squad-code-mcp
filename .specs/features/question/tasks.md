@@ -830,11 +830,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] O pedido é `POST <url>/answer` com `{ human_token, question_id, answer }` em JSON, e nenhum outro caminho existe no módulo
-- [ ] `{ ok: true, seq }` → `{ ok: true }`; `{ ok: false, error }` → o `error`; status 500, corpo que não é JSON, corpo sem `ok` e `fetch` que rejeita → `broker não respondeu`
-- [ ] Sem resposta em 2000 ms (literal, com relógio falso) → `broker não respondeu`
-- [ ] Testes em `test/unit/tui-writer.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] O pedido é `POST <url>/answer` com `{ human_token, question_id, answer }` em JSON, e nenhum outro caminho existe no módulo
+- [x] `{ ok: true, seq }` → `{ ok: true }`; `{ ok: false, error }` → o `error`; status 500, corpo que não é JSON, corpo sem `ok` e `fetch` que rejeita → `broker não respondeu`
+- [x] Sem resposta em 2000 ms (literal, com relógio falso) → `broker não respondeu`
+- [x] Testes em `test/unit/tui-writer.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

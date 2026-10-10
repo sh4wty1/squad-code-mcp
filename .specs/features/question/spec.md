@@ -449,7 +449,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-83 | P1: Modal de resposta | T35 | In Tasks |
 | QST-84 | P1: Modal de resposta | T33, T35 | Implementing |
 | QST-85 | P1: Modal de resposta | T32 | Implementing |
-| QST-86 | P1: Modal de resposta | T34, T35, T38 | In Tasks |
+| QST-86 | P1: Modal de resposta | T34, T35, T38 | Implementing |
 | QST-87 | P1: Modal de resposta | T21, T30, T37 | Implementing |
 | QST-88 | P2: Legenda e tabela de desvios | T36 | In Tasks |
 | QST-89 | P2: Legenda e tabela de desvios | T26, T30, T36 | Implementing |

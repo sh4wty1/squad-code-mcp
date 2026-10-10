@@ -10,6 +10,7 @@ import type { Color } from "./grid.ts";
 import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
 import type { Modal, Ui, View } from "./view.ts";
+import type { Sent } from "./writer.ts";
 
 export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null };
 
@@ -175,9 +176,6 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
   }
   return ui;
 }
-
-// What the broker said of the answer of `send`
-export type Sent = { ok: true } | { ok: false; error: string };
 
 // The state after the answer of `send` was sent, which is no longer to send
 export function settle(ui: Ui, result: Sent, view: View): Ui {
