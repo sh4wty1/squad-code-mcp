@@ -448,11 +448,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Broker real com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários: worker pergunta, leader e mother escalam, `POST /answer` com o token do arquivo devolve a resposta ao worker no polling
-- [ ] `/answer` sem `human_token` e com `id` desconhecido responde `unknown_peer`; com `human_token` errado e `id` registrado responde `invalid_token` e o log não muda
-- [ ] Não-bloqueante com `timeout_s` 1 que chega ao dev: em até 3 s o log tem o `answer` de `broker`
-- [ ] Broker derrubado com uma pergunta de prazo vencido no banco e relançado: o `answer` de default está em `GET /events` na primeira leitura
-- [ ] Testes em `test/integration/question.test.ts`; gate full passa
+- [x] Broker real com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários: worker pergunta, leader e mother escalam, `POST /answer` com o token do arquivo devolve a resposta ao worker no polling
+- [x] `/answer` sem `human_token` e com `id` desconhecido responde `unknown_peer`; com `human_token` errado e `id` registrado responde `invalid_token` e o log não muda
+- [x] Não-bloqueante com `timeout_s` 1 que chega ao dev: em até 3 s o log tem o `answer` de `broker`
+- [x] Broker derrubado com uma pergunta de prazo vencido no banco e relançado: o `answer` de default está em `GET /events` na primeira leitura
+- [x] Testes em `test/integration/question.test.ts`; gate full passa
 
 **Tests**: integration
 **Gate**: full

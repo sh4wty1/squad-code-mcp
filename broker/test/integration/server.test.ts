@@ -204,6 +204,7 @@ test("PEER-34: the server starts the broker from a path with a space, and the br
     "feature.ts",
     "session.ts",
     "permission.ts",
+    "question.ts",
     "state.ts",
     "tools.ts",
     "delivery.ts",

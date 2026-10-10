@@ -397,7 +397,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-31 | P1: Mesclar | T10 | Implementing |
 | QST-32 | P1: Mesclar | T10 | Implementing |
 | QST-33 | P1: Prazo, default e resolução única | T11 | Implementing |
-| QST-34 | P1: Prazo, default e resolução única | T16 | In Tasks |
+| QST-34 | P1: Prazo, default e resolução única | T16 | Implementing |
 | QST-35 | P1: Prazo, default e resolução única | T11, T16 | Implementing |
 | QST-36 | P1: Prazo, default e resolução única | T12, T13 | Implementing |
 | QST-37 | P1: Prazo, default e resolução única | T12 | Implementing |
