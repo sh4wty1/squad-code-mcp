@@ -3,13 +3,15 @@
  * squad tui
  *
  * Reads the log of the broker every second and draws the squad in the terminal: the feed,
- * the agents, the tickets, the topology and the thread of a ticket. It only reads.
+ * the agents, the tickets, the topology, the thread of a ticket and the questions that wait
+ * for the dev. It writes one thing: the answer of the dev to a question.
  *
  *   bun tui.ts
  */
 
+import { readFileSync } from "node:fs";
 import { projectOf } from "./feature.ts";
-import { brokerUrl } from "./shared/config.ts";
+import { brokerUrl, tokenPath } from "./shared/config.ts";
 import type { SquadEvent } from "./shared/contract.ts";
 import { squad } from "./shared/derive.ts";
 import { getGitRoot } from "./shared/git.ts";
@@ -17,21 +19,20 @@ import { CLEAR, ENTER, LEAVE, paint, parseGlyphs } from "./tui/ansi.ts";
 import { prices, readIntervalMs, type PriceTable } from "./tui/config.ts";
 import { feed, type FeedRow } from "./tui/feed.ts";
 import type { Grid } from "./tui/grid.ts";
-import { press, START, visible } from "./tui/keys.ts";
+import { keysOf, press, settle, START, sync, visible } from "./tui/keys.ts";
 import { createReader, type Fetch } from "./tui/reader.ts";
+import { answer } from "./tui/screens/answer.ts";
 import { down as frozen } from "./tui/screens/down.ts";
 import { help } from "./tui/screens/help.ts";
 import { main } from "./tui/screens/main.ts";
+import { questions } from "./tui/screens/questions.ts";
 import { small } from "./tui/screens/small.ts";
 import { thread } from "./tui/screens/thread.ts";
 import { topology } from "./tui/screens/topology.ts";
 import type { Ui, View } from "./tui/view.ts";
+import { createWriter } from "./tui/writer.ts";
 
-// The tab of questions shows the main screen until T35 wires its own
-const SCREENS = { main, topology, thread, help, questions: main };
-
-// One complete key: a CSI escape sequence, or a character
-const KEY = /\x1b\[[0-9;]*[A-Za-z~]|[\s\S]/gu;
+const SCREENS = { main, topology, thread, help, questions };
 
 export interface Settings {
   url: string;
@@ -51,6 +52,15 @@ export async function project(cwd: string): Promise<string | null> {
   return root === null ? null : projectOf(root, cwd);
 }
 
+// The human credential as its file has it now; null when the file is not there or is empty
+export function credential(env: Record<string, string | undefined> = process.env): string | null {
+  try {
+    return readFileSync(tokenPath(env), "utf8").trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 // The world the loop touches
 export interface Io {
   fetch: Fetch;
@@ -60,6 +70,8 @@ export interface Io {
   // puts the input in raw mode, and takes it out
   raw: (on: boolean) => void;
   project: string | null;
+  // the human credential, read when an answer is sent; null without one
+  token: () => string | null;
 }
 
 // Takes the terminal, reads the broker at each interval and draws. `key` takes what the
@@ -67,6 +79,7 @@ export interface Io {
 // settles after the terminal is back: it rejects with the error that stopped the loop.
 export function start(io: Io, settings: Settings) {
   const reader = createReader({ fetch: io.fetch, url: settings.url });
+  const writer = createWriter({ fetch: io.fetch, url: settings.url });
   let ui: Ui = START;
   let log: SquadEvent[] = [];
   // The lines of `fed`, and the ones on the screen: they differ while the feed is paused
@@ -90,9 +103,15 @@ export function start(io: Io, settings: Settings) {
     return { squad: squad(log, io.now()), rows, ui, project: io.project, down, prices: settings.prices };
   }
 
+  // The screen of the state, under the modal of answer when one is open
+  function screen(): Grid {
+    const seen = view();
+    return answer(SCREENS[ui.screen](seen), seen);
+  }
+
   function draw(whole = false) {
     const { cols, rows: lines } = io.size();
-    const next = cols < 120 || lines < 40 ? small(cols, lines) : down ? frozen(view()) : SCREENS[ui.screen](view());
+    const next = cols < 120 || lines < 40 ? small(cols, lines) : down ? frozen(view()) : screen();
     io.write((whole ? CLEAR : "") + paint(next, whole ? null : prev, settings.glyphs));
     prev = next;
   }
@@ -115,20 +134,40 @@ export function start(io: Io, settings: Settings) {
     if (read.ok) {
       log = read.events;
       down = null;
+      ui = sync(ui, view());
     } else down = { since: down?.since ?? io.now(), attempt: (down?.attempt ?? 0) + 1 };
     draw();
     timer = setTimeout(() => tick().catch(fail), settings.intervalMs);
+  }
+
+  // Sends the answer the keys left in `send`, with the credential as its file has it now:
+  // the broker may have written it after the TUI started. The token goes nowhere else.
+  function post() {
+    const sent = ui.send!;
+    const token = io.token();
+    if (token === null) return void (ui = settle(ui, null, view()));
+    writer
+      .answer(token, sent.question_id, sent.answer)
+      .then((result) => {
+        if (stopped) return;
+        ui = settle(ui, result, view());
+        draw();
+      })
+      .catch(fail);
   }
 
   function dispatch(chunk: string) {
     if (stopped) return;
     try {
       const seen = view();
-      for (const k of chunk.match(KEY) ?? []) {
+      const sending = ui.send;
+      for (const k of keysOf(chunk, ui)) {
         const next = press(ui, k, { ...seen, ui });
         if (!next) return stop();
         ui = next;
       }
+      // One POST for each answer: the one on its way stays in `send` until it is settled
+      if (ui.send && ui.send !== sending) post();
       draw();
     } catch (error) {
       fail(error);
@@ -191,6 +230,7 @@ if (import.meta.main) {
         else stdin.pause();
       },
       project: await project(process.cwd()),
+      token: credential,
     },
     settings
   );

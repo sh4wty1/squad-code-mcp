@@ -473,6 +473,12 @@ test("QST-81: any other answer of the broker leaves the modal as it was before t
   }
 });
 
+test("QST-83: without a credential to send the answer with, the modal stays as it was before the send and the footer says so for 4 s", () => {
+  for (const { before, after } of [sent("06", { text: "  logo da 89  " }), sent("05", { choice: 2 })]) {
+    expect(settle(after.ui, null, after)).toEqual({ ...before.ui, send: null, toast: { text: "✗ credencial humana não encontrada", color: "bred", until: before.squad.now + 4000 } });
+  }
+});
+
 // The log of frame 04 with the answers that close Q-07 and Q-08, as frame 20b has them
 const CLOSED = LOGS["20b"]!.events.filter((e) => e.kind === "answer" && (e.seq === 433 || e.seq === 434));
 const closing: Change = (events) => [...events, ...CLOSED];

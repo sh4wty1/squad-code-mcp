@@ -1,4 +1,4 @@
-// Reads the log of the broker by cursor. The only call the TUI makes: GET /events?after=<cursor>.
+// Reads the log of the broker by cursor. The only read the TUI makes: GET /events?after=<cursor>.
 
 import type { SquadEvent } from "../shared/contract.ts";
 

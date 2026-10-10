@@ -177,16 +177,19 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
   return ui;
 }
 
-// The state after the answer of `send` was sent, which is no longer to send
-export function settle(ui: Ui, result: Sent, view: View): Ui {
+// The state after the answer of `send` was sent, which is no longer to send. `result` is what
+// the broker said of it, or null when there was no human credential to send it with.
+export function settle(ui: Ui, result: Sent | null, view: View): Ui {
   const { modal: m, send } = ui;
   const idle: Ui = { ...ui, send: null };
   if (!m || !send) return idle;
+  // The modal as it was before the send, to send again
+  const back = (text: string): Ui => ({ ...idle, modal: { ...m, sending: false }, toast: notice(view, text, "bred") });
+  if (!result) return back("✗ credencial humana não encontrada");
   if (result.ok) return { ...idle, modal: null, toast: notice(view, `✓ ${qid(send.question_id)} respondida`, "bgreen") };
   // The question closed before the answer: the modal stays with what was sent, as a text, until esc
   if (result.error === "question_closed") return { ...idle, modal: { ...m, choice: null, text: send.answer, sending: false, refused: true } };
-  // The modal as it was before the send, to send again
-  return { ...idle, modal: { ...m, sending: false }, toast: notice(view, `✗ resposta não enviada · ${result.error}`, "bred") };
+  return back(`✗ resposta não enviada · ${result.error}`);
 }
 
 // The state after a read. The selection of the tab follows its question when the order of

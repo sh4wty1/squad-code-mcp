@@ -446,7 +446,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-80 | P1: Modal de resposta | T29, T33 | Implementing |
 | QST-81 | P1: Modal de resposta | T33, T34 | Implementing |
 | QST-82 | P1: Modal de resposta | T33 | Implementing |
-| QST-83 | P1: Modal de resposta | T35 | In Tasks |
+| QST-83 | P1: Modal de resposta | T35 | Implementing |
 | QST-84 | P1: Modal de resposta | T33, T35 | Implementing |
 | QST-85 | P1: Modal de resposta | T32 | Implementing |
 | QST-86 | P1: Modal de resposta | T34, T35, T38 | Implementing |

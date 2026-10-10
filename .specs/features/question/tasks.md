@@ -851,11 +851,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Laço com `fetch` falso: `enter` no modal faz um `POST /answer` com o token de `io.token()`; um segundo `enter` antes da resposta não faz outro
-- [ ] Token nulo: nenhum `POST`, modal mantido e aviso `✗ credencial humana não encontrada`; o token não aparece em nenhuma escrita de `io.write`
-- [ ] Toda chamada de `fetch` da TUI é `GET /events` ou `POST /answer` (QST-86), numa sessão que abre a aba, responde e sai
-- [ ] Broker real: a TUI, alimentada por teclas, responde uma pergunta por opção e outra por texto, e recebe a recusa de uma já fechada; `GET /events` tem os dois `answer` de `human` (`test/integration/tui.test.ts`)
-- [ ] Testes de unidade em `test/unit/tui-loop.test.ts`; gate full passa
+- [x] Laço com `fetch` falso: `enter` no modal faz um `POST /answer` com o token de `io.token()`; um segundo `enter` antes da resposta não faz outro
+- [x] Token nulo: nenhum `POST`, modal mantido e aviso `✗ credencial humana não encontrada`; o token não aparece em nenhuma escrita de `io.write`
+- [x] Toda chamada de `fetch` da TUI é `GET /events` ou `POST /answer` (QST-86), numa sessão que abre a aba, responde e sai
+- [x] Broker real: a TUI, alimentada por teclas, responde uma pergunta por opção e outra por texto, e recebe a recusa de uma já fechada; `GET /events` tem os dois `answer` de `human` (`test/integration/tui.test.ts`)
+- [x] Testes de unidade em `test/unit/tui-loop.test.ts`; gate full passa
 
 **Tests**: integration
 **Gate**: full
