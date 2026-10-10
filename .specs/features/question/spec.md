@@ -406,8 +406,8 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-40 | P1: Prazo, default e resolução única | T11 | Implementing |
 | QST-41 | P1: Prazo, default e resolução única | T11 | Implementing |
 | QST-42 | P1: Encerramento da feature e paridade com o log | T2 | Implementing |
-| QST-43 | P1: Encerramento da feature e paridade com o log | T14 | In Tasks |
-| QST-44 | P1: Encerramento da feature e paridade com o log | T14 | In Tasks |
+| QST-43 | P1: Encerramento da feature e paridade com o log | T14 | Implementing |
+| QST-44 | P1: Encerramento da feature e paridade com o log | T14 | Implementing |
 | QST-45 | P1: Encerramento da feature e paridade com o log | T18 | In Tasks |
 | QST-46 | P1: Encerramento da feature e paridade com o log | T4 | Implementing |
 | QST-47 | P1: Encerramento da feature e paridade com o log | T4 | Implementing |

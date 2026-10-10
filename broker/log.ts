@@ -136,6 +136,11 @@ export function createLog(db: Database, now: () => number = Date.now) {
   // open one, its deliveries and the row, together or not at all. Returns the seq.
   const close = db.transaction((by: Caller, outcome: string, body: string): number => {
     const seq = write({ kind: "feature_closed", from: by.name, role_from: by.role, to: "*", body, data: { outcome } });
+    // Its questions still waiting close with it, with no answer: by their default, or discarded
+    db.run(
+      `UPDATE questions SET status = CASE WHEN default_answer IS NOT NULL THEN 'defaulted' ELSE 'discarded' END
+       WHERE status IN ('open', 'merged') AND feature_id = (SELECT id FROM features WHERE closed_seq IS NULL)`
+    );
     db.run("UPDATE features SET closed_seq = ?, outcome = ? WHERE closed_seq IS NULL", [seq, outcome]);
     return seq;
   });

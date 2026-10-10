@@ -409,11 +409,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Com `delivered` e com `abandoned`: a pergunta com default fica `defaulted`, a sem default `discarded`, as duas com `answer_seq` nulo; a `answered` não muda; nenhum `answer` é gravado
-- [ ] Depois do encerramento, `/answer`, `/escalate` e `/merge-question` respondem `question_closed`, e `expire()` com o relógio adiante não grava nada
-- [ ] A pergunta de uma feature anterior, já fechada, não é tocada pelo encerramento da seguinte
-- [ ] Testes em `test/unit/question-close.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Com `delivered` e com `abandoned`: a pergunta com default fica `defaulted`, a sem default `discarded`, as duas com `answer_seq` nulo; a `answered` não muda; nenhum `answer` é gravado
+- [x] Depois do encerramento, `/answer`, `/escalate` e `/merge-question` respondem `question_closed`, e `expire()` com o relógio adiante não grava nada
+- [x] A pergunta de uma feature anterior, já fechada, não é tocada pelo encerramento da seguinte
+- [x] Testes em `test/unit/question-close.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
