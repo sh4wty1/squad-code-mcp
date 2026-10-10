@@ -392,10 +392,10 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-26 | P1: Responder como dev | T9, T16 | Implementing |
 | QST-27 | P1: Responder como dev | T9 | Implementing |
 | QST-28 | P1: Responder como dev | T9, T16 | Implementing |
-| QST-29 | P1: Mesclar | T10 | In Tasks |
-| QST-30 | P1: Mesclar | T10 | In Tasks |
-| QST-31 | P1: Mesclar | T10 | In Tasks |
-| QST-32 | P1: Mesclar | T10 | In Tasks |
+| QST-29 | P1: Mesclar | T10 | Implementing |
+| QST-30 | P1: Mesclar | T10 | Implementing |
+| QST-31 | P1: Mesclar | T10 | Implementing |
+| QST-32 | P1: Mesclar | T10 | Implementing |
 | QST-33 | P1: Prazo, default e resolução única | T11 | In Tasks |
 | QST-34 | P1: Prazo, default e resolução única | T16 | In Tasks |
 | QST-35 | P1: Prazo, default e resolução única | T11, T16 | In Tasks |
@@ -455,8 +455,8 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-89 | P2: Legenda e tabela de desvios | T26, T30, T36 | In Tasks |
 | QST-90 | P2: Legenda e tabela de desvios | T19 | In Tasks |
 | QST-91 | P2: Legenda e tabela de desvios | T31, T36 | In Tasks |
-| QST-92 | Edge cases | T10 | In Tasks |
-| QST-93 | Edge cases | T10 | In Tasks |
+| QST-92 | Edge cases | T10 | Implementing |
+| QST-93 | Edge cases | T10 | Implementing |
 | QST-94 | Edge cases | T6 | Implementing |
 | QST-95 | Edge cases | T7 | Implementing |
 | QST-96 | Edge cases | T23, T28 | In Tasks |

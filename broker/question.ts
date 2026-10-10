@@ -1,10 +1,11 @@
 /**
- * squad broker /ask, /escalate and /answer
+ * squad broker /ask, /escalate, /answer and /merge-question
  *
  * An agent asks the level above what the spec does not settle, and the question
  * keeps its id until it closes (ADR-005): who holds it answers who asked, or
- * passes it one level up. The table `questions` is the state the rules decide
- * over: its row, the event and the delivery are written together or not at all.
+ * passes it one level up, and the mother merges the ones that ask the same. The
+ * table `questions` is the state the rules decide over: its row, the event and
+ * the deliveries are written together or not at all.
  */
 
 import type { Database } from "bun:sqlite";
@@ -57,14 +58,30 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
 
   // The only place a question closes by an `answer`. The status is read and the answer
   // written in one transaction, so a question has one answer, the first to come (QST-38).
-  // Returns the seq of the answer, or null when the question is not open.
-  function resolve(id: number, by: Resolution): number | null {
+  // Returns the seq of the answer, or null when the question is not open. With `merged` a
+  // merged one closes too, by an answer of its own.
+  function resolve(id: number, by: Resolution, merged = false): number | null {
     return log.transaction(() => {
       const row = find(id)!;
-      if (row.status !== "open") return null;
+      if (row.status !== "open" && !(merged && row.status === "merged")) return null;
+      // The questions merged into it, straight or through another merged one, close with it
+      const followers = db
+        .query(
+          `WITH RECURSIVE merged (id, asked_by) AS (
+             SELECT id, asked_by FROM questions WHERE merged_into = ? AND status = 'merged'
+             UNION ALL
+             SELECT q.id, q.asked_by FROM questions q JOIN merged m ON q.merged_into = m.id WHERE q.status = 'merged'
+           )
+           SELECT id, asked_by FROM merged`
+        )
+        .all(id) as { id: number; asked_by: string }[];
       // Who asked waits for it, and the mother for what the dev answers: each name once,
       // and never who writes it
-      const waiting = new Set([row.asked_by, ...(by.resolved_by === "human" ? ["mother"] : [])]);
+      const waiting = new Set([
+        row.asked_by,
+        ...followers.map((f) => f.asked_by),
+        ...(by.resolved_by === "human" ? ["mother"] : []),
+      ]);
       waiting.delete(by.from);
       const seq = log.record({
         kind: "answer",
@@ -79,7 +96,9 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
         data: { question_id: id, answer: by.answer, resolved_by: by.resolved_by },
       });
       const status = by.resolved_by === "human" || by.resolved_by === "agent" ? "answered" : "defaulted";
-      db.run("UPDATE questions SET status = ?, answer_seq = ? WHERE id = ?", [status, seq, id]);
+      for (const closed of [id, ...followers.map((f) => f.id)]) {
+        db.run("UPDATE questions SET status = ?, answer_seq = ? WHERE id = ?", [status, seq, closed]);
+      }
       return seq;
     });
   }
@@ -298,5 +317,50 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
     return answered({ name: "human", role: "human" }, body, refuse);
   }
 
-  return { ask, escalate, answer, answerAsHuman };
+  // The mother merges a question into another that asks the same: it leaves the list and
+  // closes with the other, whoever holds each one
+  function merge(peer: Caller, body: Record<string, unknown>): Answer {
+    const no = (error: string, hint: string) => log.refused(peer.name, "question_merged", error, hint);
+
+    if (peer.role !== "mother") {
+      return no("edge_not_allowed", "Only the mother merges questions. Answer the one you hold, or escalate it.");
+    }
+    const { question_id, into } = body;
+    if (!Number.isInteger(question_id) || !Number.isInteger(into)) {
+      return no(
+        "missing_field",
+        "Send question_id as the integer id of the question to merge and into as the one of the question it follows."
+      );
+    }
+    const merged = find(question_id as number);
+    const target = find(into as number);
+    if (question_id === into || !merged || !target) {
+      return no("invalid_field", "question_id and into are the ids of two different questions.");
+    }
+    if (merged.status !== "open" || target.status !== "open") {
+      const closed = merged.status !== "open" ? merged : target;
+      return no("question_closed", `${qid(closed.id)} is closed. Only two open questions are merged.`);
+    }
+    if (merged.blocking !== target.blocking) {
+      return no(
+        "merge_not_allowed",
+        "A blocking question and a non-blocking one are not merged: one waits for the answer and the other goes on with its default."
+      );
+    }
+
+    return log.transaction(() => {
+      const seq = log.record({
+        kind: "question_merged",
+        from: peer.name,
+        role_from: peer.role,
+        ticket_ref: merged.ticket_ref,
+        question_id: merged.id,
+        data: { question_id: merged.id, into: target.id },
+      });
+      db.run("UPDATE questions SET status = 'merged', merged_into = ? WHERE id = ?", [target.id, merged.id]);
+      return { ok: true, seq };
+    });
+  }
+
+  return { ask, escalate, answer, answerAsHuman, merge };
 }

@@ -322,12 +322,12 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] A ordem de recusas de QST-29, par a par, com `attempted_kind` `question_merged`
-- [ ] O `question_merged` gravado é comparado por inteiro; a linha fica `merged` com `merged_into`; nenhuma entrega
-- [ ] Resposta à de destino: a mesclada fica com o mesmo status e `answer_seq`, e o `asked_by` dela recebe a entrega
-- [ ] QST-92: cadeia de três; QST-93: `asked_by` repetido e `asked_by` igual ao autor recebem uma entrega ou nenhuma
-- [ ] Responder, escalar ou mesclar uma pergunta `merged` responde `question_closed`
-- [ ] Testes em `test/unit/question-merge.test.ts`; gate build passa
+- [x] A ordem de recusas de QST-29, par a par, com `attempted_kind` `question_merged`
+- [x] O `question_merged` gravado é comparado por inteiro; a linha fica `merged` com `merged_into`; nenhuma entrega
+- [x] Resposta à de destino: a mesclada fica com o mesmo status e `answer_seq`, e o `asked_by` dela recebe a entrega
+- [x] QST-92: cadeia de três; QST-93: `asked_by` repetido e `asked_by` igual ao autor recebem uma entrega ou nenhuma
+- [x] Responder, escalar ou mesclar uma pergunta `merged` responde `question_closed`
+- [x] Testes em `test/unit/question-merge.test.ts`; gate build passa
 
 **Tests**: unit
 **Gate**: build
