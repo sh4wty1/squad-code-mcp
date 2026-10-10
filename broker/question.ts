@@ -375,5 +375,20 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
       .filter((seq) => seq !== null);
   }
 
-  return { ask, escalate, answer, answerAsHuman, merge, expire };
+  // The default by the result: a worker that delivers a ticket went on with the default of
+  // what it asked about it without blocking. Those questions close, open or merged, in
+  // ascending id. Called by /send, inside the transaction of the result.
+  function delivered(worker: string, ticket_ref: string): void {
+    const asked = db
+      .query(
+        `SELECT id, default_answer FROM questions
+         WHERE asked_by = ? AND ticket_ref = ? AND blocking = 0 AND status IN ('open', 'merged') ORDER BY id`
+      )
+      .all(worker, ticket_ref) as { id: number; default_answer: string }[];
+    for (const row of asked) {
+      resolve(row.id, { from: "broker", role_from: "broker", answer: row.default_answer, resolved_by: "result_default" }, true);
+    }
+  }
+
+  return { ask, escalate, answer, answerAsHuman, merge, expire, delivered };
 }

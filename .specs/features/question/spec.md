@@ -399,10 +399,10 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-33 | P1: Prazo, default e resolução única | T11 | Implementing |
 | QST-34 | P1: Prazo, default e resolução única | T16 | In Tasks |
 | QST-35 | P1: Prazo, default e resolução única | T11, T16 | Implementing |
-| QST-36 | P1: Prazo, default e resolução única | T12, T13 | In Tasks |
-| QST-37 | P1: Prazo, default e resolução única | T12 | In Tasks |
+| QST-36 | P1: Prazo, default e resolução única | T12, T13 | Implementing |
+| QST-37 | P1: Prazo, default e resolução única | T12 | Implementing |
 | QST-38 | P1: Prazo, default e resolução única | T8 | Implementing |
-| QST-39 | P1: Prazo, default e resolução única | T12, T13 | In Tasks |
+| QST-39 | P1: Prazo, default e resolução única | T12, T13 | Implementing |
 | QST-40 | P1: Prazo, default e resolução única | T11 | Implementing |
 | QST-41 | P1: Prazo, default e resolução única | T11 | Implementing |
 | QST-42 | P1: Encerramento da feature e paridade com o log | T2 | Implementing |

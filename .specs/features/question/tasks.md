@@ -367,11 +367,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Duas perguntas do mesmo worker e ticket fecham em ordem crescente de id, cada uma com o seu `default_answer`
-- [ ] QST-37: a mesclada fecha sozinha, a de destino continua `open`, e a resposta posterior à de destino não entrega nada ao `asked_by` dela nem muda a linha dela; as mescladas da própria mesclada a acompanham
-- [ ] QST-39: bloqueante do mesmo ticket, não-bloqueante de outro ticket, sem `ticket_ref` e de outro worker continuam `open`
-- [ ] Testes em `test/unit/question-result.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Duas perguntas do mesmo worker e ticket fecham em ordem crescente de id, cada uma com o seu `default_answer`
+- [x] QST-37: a mesclada fecha sozinha, a de destino continua `open`, e a resposta posterior à de destino não entrega nada ao `asked_by` dela nem muda a linha dela; as mescladas da própria mesclada a acompanham
+- [x] QST-39: bloqueante do mesmo ticket, não-bloqueante de outro ticket, sem `ticket_ref` e de outro worker continuam `open`
+- [x] Testes em `test/unit/question-result.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
