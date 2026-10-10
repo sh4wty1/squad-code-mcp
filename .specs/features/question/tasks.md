@@ -508,9 +508,10 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `broker/test/frames/` ganha `04.txt`, `05.txt`, `06.txt`, `07.txt`, `20a.txt` e `20b.txt`, como a ferramenta os escreve, com 40 linhas cada
-- [ ] `git status --porcelain broker/test/frames` só mostra os seis arquivos novos: os 41 que existiam não mudam
-- [ ] Gate build passa
+- [x] `broker/test/frames/` ganha `04.txt`, `05.txt`, `06.txt`, `07.txt`, `20a.txt` e `20b.txt`, como a ferramenta os escreve, com 40 linhas cada
+- [x] `git status --porcelain broker/test/frames` só mostra os seis arquivos novos: os 41 que existiam não mudam
+- [x] `test/unit/tui-glyphs.test.ts` passa a contar 47 frames, e TUI-59 vale para os seis novos
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build
