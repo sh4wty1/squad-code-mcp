@@ -27,9 +27,9 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/question-result.test.ts`
 **Requirement**: QST-37, QST-48
 
-- [ ] Q3 mesclada em Q2, Q2 em Q1; o `result` do `asked_by` de Q3 fecha Q3; depois Q1 é respondida: Q3 continua com o `answer_seq` e o status do próprio default, o `asked_by` dela não recebe a entrega da resposta de Q1, e Q2 acompanha Q1
-- [ ] O teste de paridade (`question-replay.test.ts`) passa a exigir que as sequências geradas alcancem "mesclada fechada pelo próprio `result` cuja de destino fecha depois"
-- [ ] Gate quick passa
+- [x] Q3 mesclada em Q2, Q2 em Q1; o `result` do `asked_by` de Q3 fecha Q3; depois Q1 é respondida: Q3 continua com o `answer_seq` e o status do próprio default, o `asked_by` dela não recebe a entrega da resposta de Q1, e Q2 acompanha Q1
+- [x] O teste de paridade (`question-replay.test.ts`) passa a exigir que as sequências geradas alcancem "mesclada fechada pelo próprio `result` cuja de destino fecha depois"
+- [x] Gate quick passa
 
 ### F3: Gravação que falha em `/merge-question`
 

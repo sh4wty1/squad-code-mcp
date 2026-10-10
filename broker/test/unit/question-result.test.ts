@@ -121,6 +121,40 @@ test("QST-37: the result closes a merged question and the ones merged into it, a
   expect(b.questionRows()).toEqual([{ ...rows[0], status: "answered", answer_seq: 8 }, rows[1]!, rows[2]!]);
 });
 
+test("QST-37: a question closed by its own result two merges away from the end of the chain keeps its default when the end is answered, and the one between them follows the answer", () => {
+  const b = setup();
+  const id = b.openFeature();
+  b.question.ask(WORKER_2, { ...ON_TICKET, ticket_ref: "T-2" });
+  b.question.ask(WORKER_3, { ...ON_TICKET, default: "7070", ticket_ref: "T-3" });
+  b.question.ask(WORKER_1, { ...ON_TICKET, default: "9090" });
+  b.question.merge(MOTHER, { question_id: 3, into: 2 });
+  b.question.merge(MOTHER, { question_id: 2, into: 1 });
+
+  b.question.delivered("worker-1", "T-1");
+  const own = questionRow(3, id, { ...ROW, default_answer: "9090", status: "defaulted", merged_into: 2, answer_seq: 7 });
+  expect(b.questionRows()[2]).toEqual(own);
+
+  expect(b.question.answer(LEADER, { question_id: 1, answer: "3000" })).toEqual({ ok: true, seq: 8 });
+  expect(b.questionRows()).toEqual([
+    questionRow(1, id, { ...ROW, asked_by: "worker-2", ticket_ref: "T-2", status: "answered", answer_seq: 8 }),
+    questionRow(2, id, {
+      ...ROW,
+      asked_by: "worker-3",
+      ticket_ref: "T-3",
+      default_answer: "7070",
+      status: "answered",
+      merged_into: 1,
+      answer_seq: 8,
+    }),
+    own,
+  ]);
+  // the answer is for who asked the two that closed by it, not for who went on with its default
+  expect(b.deliveries().filter((d) => d.event_seq === 8)).toEqual([
+    { event_seq: 8, recipient: "worker-2", acked_at: null },
+    { event_seq: 8, recipient: "worker-3", acked_at: null },
+  ]);
+});
+
 test("QST-39: a blocking question of the ticket, a non-blocking one of another ticket, one without ticket and one of another worker stay open", () => {
   const b = setup();
   const id = b.openFeature();

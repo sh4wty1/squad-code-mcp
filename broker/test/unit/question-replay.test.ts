@@ -44,6 +44,8 @@ function tally() {
     afterClose: {} as Record<string, number>,
     statuses: new Set<unknown>(),
     resolutions: new Set<unknown>(),
+    // the seeds with a merged question closed by its own result whose destination closed after it (QST-37)
+    closedAlone: new Set<number>(),
   };
 }
 
@@ -70,6 +72,15 @@ function run(seed: number, seen: ReturnType<typeof tally>) {
   const rows = () => b.questionRows() as unknown as QuestionRow[];
   const byName = (name: string) => PEERS.find((p) => p.name === name);
   const owned = (worker: string) => [...tickets(b.log.featureEvents()).values()].find((t) => t.owner === worker);
+  // Whether the question is of the worker and about the ticket it has: what its result closes
+  const closedByResultOf = (worker: string, q: QuestionRow) =>
+    q.asked_by === worker && q.ticket_ref !== null && q.ticket_ref === owned(worker)?.ticket_ref;
+  // The workers with a merged question their result would close
+  const followed = () =>
+    WORKERS.filter((w) => rows().some((q) => q.status === "merged" && q.blocking === 0 && closedByResultOf(w.name, q)));
+  // The open questions a question that closed by its own result was merged into
+  const outlived = () =>
+    rows().filter((q, _, all) => q.status === "open" && all.some((m) => m.merged_into === q.id && m.status !== "merged"));
 
   // The id of a question for a call: an open one most of the time, any one of any feature
   // otherwise, and now and then a value that is the id of none
@@ -138,7 +149,9 @@ function run(seed: number, seen: ReturnType<typeof tally>) {
   }
 
   function answer() {
-    const question_id = anId();
+    // the one a question closed by its own result was merged into, when there is such, most of the time
+    const left = outlived();
+    const question_id = left.length > 0 && chance(0.8) ? pick(left).id : anId();
     const peer = holderOr(question_id);
     const body = { question_id, answer: chance(0.92) ? pick(["8080", "9090", "neither"]) : " " };
     closedWithItsFeature("answer", question_id, call("answer", peer.name, body, () => b.question.answer(peer, body)));
@@ -160,7 +173,10 @@ function run(seed: number, seen: ReturnType<typeof tally>) {
   function merge() {
     const peer = chance(0.92) ? MOTHER : pick(PEERS);
     const open = rows().filter((q) => q.status === "open");
-    const first = open.length > 0 ? pick(open) : undefined;
+    // one the result of its worker would close, when there is such, most of the time: merged,
+    // it may close before the one it follows (QST-37)
+    const byResult = open.filter((q) => q.blocking === 0 && closedByResultOf(q.asked_by, q));
+    const first = byResult.length > 0 && chance(0.8) ? pick(byResult) : open.length > 0 ? pick(open) : undefined;
     const alike = open.filter((q) => q.id !== first?.id && q.blocking === first?.blocking);
     // two open ones that can be merged, when there are such, most of the time
     const body = first && alike.length > 0 && chance(0.6) ? { question_id: first.id, into: pick(alike).id } : { question_id: anId(), into: anId() };
@@ -193,7 +209,9 @@ function run(seed: number, seen: ReturnType<typeof tally>) {
     }
     // of a worker that has a ticket, most of the time, about its latest task
     const busy = WORKERS.filter((w) => owned(w.name));
-    const peer = busy.length > 0 && chance(0.8) ? pick(busy) : pick(WORKERS);
+    // and of one with a merged question about its ticket before the others
+    const waited = followed();
+    const peer = waited.length > 0 && chance(0.8) ? pick(waited) : busy.length > 0 && chance(0.8) ? pick(busy) : pick(WORKERS);
     const own = owned(peer.name);
     const body = {
       kind: "result",
@@ -226,6 +244,10 @@ function run(seed: number, seen: ReturnType<typeof tally>) {
     b.clock.now += Math.floor(random() * 300);
     // with no feature open almost every call is refused: one opens soon
     if (!b.log.openFeature() && chance(0.5)) return open();
+    // a merged question closes alone only by a result that comes before the answer to the one
+    // it follows (QST-37): the result comes soon, and that answer soon after it
+    if (followed().length > 0 && chance(0.4)) return result();
+    if (outlived().length > 0 && chance(0.4)) return answer();
     let roll = random() * total;
     for (const [fn, weight] of STEP) {
       if ((roll -= weight) < 0) return fn();
@@ -281,6 +303,11 @@ function run(seed: number, seen: ReturnType<typeof tally>) {
 
     for (const row of table) seen.statuses.add(row.status);
     for (const e of answers) seen.resolutions.add(e.resolved_by);
+    for (const row of table) {
+      const own = answers.some((e) => e.seq === row.answer_seq && e.question_id === row.id);
+      const into = table.find((q) => q.id === row.merged_into);
+      if (own && into?.answer_seq != null && into.answer_seq > row.answer_seq!) seen.closedAlone.add(seed);
+    }
   }
 
   try {
@@ -307,4 +334,6 @@ test("QST-48/45/38: after each step of 200 generated sequences of 40 calls, the 
   expect(["answer", "answerAsHuman", "escalate", "merge"].filter((s) => !seen.afterClose[s])).toEqual([]);
   expect([...seen.statuses].sort()).toEqual(["answered", "defaulted", "discarded", "merged", "open"]);
   expect([...seen.resolutions].sort()).toEqual(["agent", "human", "result_default", "timeout_default"]);
+  // and through the one state where the table and the log may part (QST-37)
+  expect(seen.closedAlone.size).toBeGreaterThan(0);
 });
