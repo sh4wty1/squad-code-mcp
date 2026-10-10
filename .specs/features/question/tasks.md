@@ -170,11 +170,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Um `record` com `question_id` preenche a coluna, e `history({ question_id })` o devolve
-- [ ] Com `recipients: ["leader", "mother"]` há uma entrega pendente por nome; com `recipients: []` nenhuma, mesmo num kind de `DELIVERED`; sem `recipients` vale a regra de antes (teste de regressão com `task` e com `feature_opened`)
-- [ ] Evento e entregas na mesma transação: uma entrega que falha (nome repetido em `recipients`) não deixa o evento
-- [ ] Testes em `test/unit/log.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Um `record` com `question_id` preenche a coluna, e `history({ question_id })` o devolve
+- [x] Com `recipients: ["leader", "mother"]` há uma entrega pendente por nome; com `recipients: []` nenhuma, mesmo num kind de `DELIVERED`; sem `recipients` vale a regra de antes (teste de regressão com `task` e com `feature_opened`)
+- [x] Evento e entregas na mesma transação: uma entrega que falha (nome repetido em `recipients`) não deixa o evento
+- [x] Testes em `test/unit/log.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

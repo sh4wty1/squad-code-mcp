@@ -45,6 +45,10 @@ export interface NewRecord {
   summary?: string;
   body?: string;
   ticket_ref?: string | null;
+  // the column of `events`. Who records puts the same id in data, which is what is read.
+  question_id?: number;
+  // who waits for the event, in place of the rule of its kind
+  recipients?: string[];
   // the fields of the kind
   data?: Record<string, unknown>;
 }
@@ -69,8 +73,9 @@ export function createLog(db: Database, now: () => number = Date.now) {
     return rows.map(toRead);
   }
 
-  // An event to "*" waits for every position of the squad but its author. Without a
-  // feature_id from the caller, the event takes the one of the open feature.
+  // An event to "*" waits for every position of the squad but its author, and one with
+  // `recipients` for those names only. Without a feature_id from the caller, the event
+  // takes the one of the open feature.
   function write(event: NewRecord, feature_id?: number): number {
     const seq = appendEvent(db, {
       ts: now(),
@@ -82,14 +87,16 @@ export function createLog(db: Database, now: () => number = Date.now) {
       summary: event.summary,
       body: event.body,
       ticket_ref: event.ticket_ref,
+      question_id: event.question_id,
       data: event.data,
     });
     const recipients =
-      event.to === "*"
+      event.recipients ??
+      (event.to === "*"
         ? ROSTER.map((r) => r.name).filter((name) => name !== event.from)
         : DELIVERED.includes(event.kind)
           ? [event.to ?? null]
-          : [];
+          : []);
     for (const recipient of recipients) {
       db.run("INSERT INTO deliveries (event_seq, recipient) VALUES (?, ?)", [seq, recipient]);
     }

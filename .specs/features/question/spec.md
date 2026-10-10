@@ -366,7 +366,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | -------------- | ----- | ----- | ------ |
 | QST-01 | P1: Perguntar ao nível de cima | T6 | In Tasks |
 | QST-02 | P1: Perguntar ao nível de cima | T6 | In Tasks |
-| QST-03 | P1: Perguntar ao nível de cima | T3, T6 | In Tasks |
+| QST-03 | P1: Perguntar ao nível de cima | T3, T6 | Implementing |
 | QST-04 | P1: Perguntar ao nível de cima | T6 | In Tasks |
 | QST-05 | P1: Perguntar ao nível de cima | T6 | In Tasks |
 | QST-06 | P1: Perguntar ao nível de cima | T6 | In Tasks |
@@ -413,7 +413,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-47 | P1: Encerramento da feature e paridade com o log | T4 | In Tasks |
 | QST-48 | P1: Encerramento da feature e paridade com o log | T18 | In Tasks |
 | QST-49 | P1: Encerramento da feature e paridade com o log | T4 | In Tasks |
-| QST-50 | P1: Encerramento da feature e paridade com o log | T3 | In Tasks |
+| QST-50 | P1: Encerramento da feature e paridade com o log | T3 | Implementing |
 | QST-51 | P1: O que o agente vê | T5 | In Tasks |
 | QST-52 | P1: O que o agente vê | T17 | In Tasks |
 | QST-53 | P1: O que o agente vê | T17 | In Tasks |
