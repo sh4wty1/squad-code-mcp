@@ -84,10 +84,10 @@ tarefa marcada aqui.
 **Where**: `broker/tui/keys.ts`
 **Requirement**: QST-78
 
-- [ ] Num bloco de mais de uma tecla, um `\r` ou `\n` vira espaço quando, na vez dele, o modal está no modo texto, inclusive quando o modal entrou no modo texto por uma tecla anterior do mesmo bloco (por `outra resposta…` ou por um `enter` no feed que abre o modal no modo texto)
-- [ ] Um bloco de uma tecla só continua enviando com `\r`; os testes de QST-78 que já existem passam sem mudar valor esperado
-- [ ] O laço de `tui.ts` usa a regra nova
-- [ ] Gate quick passa
+- [x] Num bloco de mais de uma tecla, um `\r` ou `\n` vira espaço quando, na vez dele, o modal está no modo texto, inclusive quando o modal entrou no modo texto por uma tecla anterior do mesmo bloco (por `outra resposta…` ou por um `enter` no feed que abre o modal no modo texto)
+- [x] Um bloco de uma tecla só continua enviando com `\r`; os testes de QST-78 que já existem passam sem mudar valor esperado
+- [x] O laço de `tui.ts` usa a regra nova
+- [x] Gate quick passa
 
 ### F9: Default vazio é campo ausente
 

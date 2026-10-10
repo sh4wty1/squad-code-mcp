@@ -400,6 +400,20 @@ test("QST-78: a pasted chunk with line breaks goes into the text of the modal an
   }
 });
 
+test("QST-78: a chunk that opens the modal in the text mode and goes on with a text and a line break sends nothing", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    for (const k of ["4", "j"]) key(k);
+    // enter over Q-08, which has no options, a text and enter, pasted as one
+    key("\rlogo da 89\r");
+    expect(t.posts).toEqual([]);
+    expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo da 89 " }) })));
+  } finally {
+    stop();
+  }
+});
+
 test("QST-80, QST-81: a broker that fails leaves the modal to send again with the error in the footer, and the refusal of a closed question leaves it refused until esc", async () => {
   const { t, key, stop } = launch();
   try {

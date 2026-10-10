@@ -36,12 +36,9 @@ export function visible(ui: Ui, fresh: FeedRow[], shown: FeedRow[]): FeedRow[] {
 // One complete key: a CSI escape sequence, or a character
 const KEY = /\x1b\[[0-9;]*[A-Za-z~]|[\s\S]/gu;
 
-// The keys of one chunk of the input. A chunk of more than one key into the text of the
-// modal is a paste: its line breaks become spaces, or one of them would send half an answer,
-// and nothing erases an answer from the log.
-export function keysOf(chunk: string, ui: Ui): string[] {
-  const keys = chunk.match(KEY) ?? [];
-  return keys.length > 1 && ui.modal?.choice === null ? keys.map((k) => (k === "\r" || k === "\n" ? " " : k)) : keys;
+// The keys of one chunk of the input
+export function keysOf(chunk: string): string[] {
+  return chunk.match(KEY) ?? [];
 }
 
 // What a key does with the modal of answer open. The answer is not sent here: it is left in
@@ -175,6 +172,21 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
     }
   }
   return ui;
+}
+
+// The state after the keys of one chunk of the input, or null when one of them quits. A chunk
+// of more than one key is a paste: a line break whose turn comes with the modal in the text
+// mode becomes a space, also when a key before it in the chunk took the modal there, or it
+// would send half an answer, and nothing erases an answer from the log.
+export function input(ui: Ui, chunk: string, view: View): Ui | null {
+  const keys = keysOf(chunk);
+  let next: Ui | null = ui;
+  for (const k of keys) {
+    const pasted = keys.length > 1 && next.modal?.choice === null && (k === "\r" || k === "\n");
+    next = press(next, pasted ? " " : k, { ...view, ui: next });
+    if (!next) return null;
+  }
+  return next;
 }
 
 // The state after the answer of `send` was sent, which is no longer to send. `result` is what

@@ -19,7 +19,7 @@ import { CLEAR, ENTER, LEAVE, paint, parseGlyphs } from "./tui/ansi.ts";
 import { prices, readIntervalMs, type PriceTable } from "./tui/config.ts";
 import { feed, type FeedRow } from "./tui/feed.ts";
 import type { Grid } from "./tui/grid.ts";
-import { keysOf, press, settle, START, sync, visible } from "./tui/keys.ts";
+import { input, settle, START, sync, visible } from "./tui/keys.ts";
 import { createReader, type Fetch } from "./tui/reader.ts";
 import { answer } from "./tui/screens/answer.ts";
 import { down as frozen } from "./tui/screens/down.ts";
@@ -159,13 +159,10 @@ export function start(io: Io, settings: Settings) {
   function dispatch(chunk: string) {
     if (stopped) return;
     try {
-      const seen = view();
       const sending = ui.send;
-      for (const k of keysOf(chunk, ui)) {
-        const next = press(ui, k, { ...seen, ui });
-        if (!next) return stop();
-        ui = next;
-      }
+      const next = input(ui, chunk, view());
+      if (!next) return stop();
+      ui = next;
       // One POST for each answer: the one on its way stays in `send` until it is settled
       if (ui.send && ui.send !== sending) post();
       draw();

@@ -3,7 +3,7 @@ import type { SquadEvent } from "../../shared/contract.ts";
 import { squad } from "../../shared/derive.ts";
 import { resolved, waiting } from "../../tui/asked.ts";
 import { feed } from "../../tui/feed.ts";
-import { keysOf, press, settle, START, sync, visible } from "../../tui/keys.ts";
+import { input, keysOf, press, settle, START, sync, visible } from "../../tui/keys.ts";
 import type { Modal, Ui, View } from "../../tui/view.ts";
 import { LOGS } from "../frames/logs.ts";
 import { frameView } from "../frames/view.ts";
@@ -413,25 +413,59 @@ test("QST-80: only esc closes the modal of a refused answer", () => {
   expect(key("\x1b", v)).toEqual({ ...v.ui, modal: null });
 });
 
+// The state after one chunk of the input
+const chunk = (keys: string, v: View) => input(v.ui, keys, v)!;
+
 test("QST-78: in a chunk of more than one key into the text mode a line break becomes a space, and one key alone stays as it came", () => {
-  const text = open("06").ui;
-  expect(keysOf("um\rdois\ntrês\r\n", text)).toEqual(["u", "m", " ", "d", "o", "i", "s", " ", "t", "r", "ê", "s", " ", " "]);
-  expect(keysOf("a\r", text)).toEqual(["a", " "]);
-  expect(keysOf("\r", text)).toEqual(["\r"]);
+  const text = open("06", { text: "" });
+  // What a chunk leaves in the empty field, character by character
+  const typed = (keys: string) => [...m({ ...text, ui: chunk(keys, text) }).text];
+  expect(typed("um\rdois\ntrês\r\n")).toEqual(["u", "m", " ", "d", "o", "i", "s", " ", "t", "r", "ê", "s", " ", " "]);
+  expect(typed("a\r")).toEqual(["a", " "]);
+  expect(keysOf("\r")).toEqual(["\r"]);
+  const one = open("06");
+  expect(chunk("\r", one)).toEqual({ ...one.ui, modal: { ...m(one), sending: true }, send: { question_id: 8, answer: "logo da 89, com o nome do programa no ar" } });
   // An escape sequence is one key
-  expect(keysOf(UP + "\r", text)).toEqual([UP, " "]);
-  expect(keysOf(UP, text)).toEqual([UP]);
+  expect(keysOf(UP + "\r")).toEqual([UP, "\r"]);
+  expect(typed(UP + "\r")).toEqual([" "]);
+  expect(keysOf(UP)).toEqual([UP]);
   // Outside the text mode enter is enter: in the choice mode and with no modal
-  expect(keysOf("2\r", open("05").ui)).toEqual(["2", "\r"]);
-  expect(keysOf("j\r" + DOWN, START)).toEqual(["j", "\r", DOWN]);
-  expect(keysOf("", text)).toEqual([]);
+  expect(keysOf("2\r")).toEqual(["2", "\r"]);
+  expect(chunk("2\r", open("05")).send).toEqual({ question_id: 7, answer: "5 tentativas" });
+  expect(keysOf("j\r" + DOWN)).toEqual(["j", "\r", DOWN]);
+  const tab = view("04", { question: 7 });
+  expect(chunk("j\r" + DOWN, tab)).toEqual({ ...tab.ui, question: 8, modal: opened(8, null) });
+  expect(keysOf("")).toEqual([]);
+  expect(chunk("", text)).toBe(text.ui);
 });
 
 test("QST-78: a pasted block with line breaks goes into the text and sends nothing", () => {
   const v = open("06", { text: "" });
-  const pasted = keysOf("logo da 89\r\nna versão quadrada\r", v.ui).reduce((ui, k) => press(ui, k, { ...v, ui })!, v.ui);
+  const pasted = chunk("logo da 89\r\nna versão quadrada\r", v);
   expect(pasted).toEqual({ ...v.ui, modal: { ...m(v), text: "logo da 89  na versão quadrada " } });
   expect(pasted.send).toBeNull();
+});
+
+test("QST-78: a line break of a chunk becomes a space also when a key before it in the same chunk took the modal to the text mode", () => {
+  // In the choice mode of Q-07 the fourth line is the other answer, and enter over it goes to the text mode
+  const choosing = open("05");
+  expect(chunk("4\rtexto\r", choosing)).toEqual({ ...choosing.ui, modal: { ...m(choosing), choice: null, text: "texto " } });
+  // Q-08 has no options: enter on the tab, or on the feed over its question, opens its modal in the text mode
+  const tab = view("04", { question: 8 });
+  expect(chunk("\rtexto\r\n", tab)).toEqual({ ...tab.ui, modal: { ...opened(8, null), text: "texto  " } });
+  const main = view("01", { selected: 428 });
+  expect(chunk("\rtexto\n", main)).toEqual({ ...main.ui, screen: "questions", question: 8, qfocus: "list", modal: { ...opened(8, null), text: "texto " } });
+  // The same keys one chunk each are typed, and the last enter sends
+  const typed = ["4", "\r", ..."texto", "\r"].reduce((ui, k) => input(ui, k, { ...choosing, ui })!, choosing.ui);
+  expect(typed.send).toEqual({ question_id: 7, answer: "texto" });
+});
+
+test("TUI-62: a chunk with q or ctrl+c among its keys quits", () => {
+  const v = view("01", { selected: 417 });
+  expect(input(v.ui, "jq", v)).toBeNull();
+  expect(input(v.ui, "j\x03k", v)).toBeNull();
+  // In the text of the modal q is a character, and ctrl+c still quits
+  expect(input(open("06").ui, "q\x03", open("06"))).toBeNull();
 });
 
 // The modal of a frame after enter: with its answer on the way to the broker
