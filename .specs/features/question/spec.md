@@ -17,11 +17,11 @@ com a credencial humana do AD-007.
 
 ## Goals
 
-- [ ] Um agente pergunta ao nível de cima, o holder responde ou escala, e a pergunta tem exatamente uma resolução: resposta, prazo, `result` do `asked_by` ou encerramento da feature.
-- [ ] A tabela `questions` e `questions()` de `broker/shared/derive.ts`, aplicada aos eventos da feature, dizem a mesma coisa depois de qualquer sequência de chamadas.
-- [ ] A aba Perguntas mostra o que espera o dev e o histórico, e o dev responde pelo modal; a TUI não faz nenhum outro `POST`.
-- [ ] Os frames 04, 05, 06, 07, 20a e 20b são casos do teste de frames, sem edição dos arquivos extraídos e sem desvio de classe D3 por "fatia Question".
-- [ ] A suíte passa no Windows e no Linux.
+- [x] Um agente pergunta ao nível de cima, o holder responde ou escala, e a pergunta tem exatamente uma resolução: resposta, prazo, `result` do `asked_by` ou encerramento da feature.
+- [x] A tabela `questions` e `questions()` de `broker/shared/derive.ts`, aplicada aos eventos da feature, dizem a mesma coisa depois de qualquer sequência de chamadas.
+- [x] A aba Perguntas mostra o que espera o dev e o histórico, e o dev responde pelo modal; a TUI não faz nenhum outro `POST`.
+- [x] Os frames 04, 05, 06, 07, 20a e 20b são casos do teste de frames, sem edição dos arquivos extraídos e sem desvio de classe D3 por "fatia Question".
+- [x] A suíte passa no Windows e no Linux; no Linux, com a instabilidade de tempo em testes de integração anteriores à fatia que os critérios de sucesso descrevem.
 
 ## Out of Scope
 
@@ -316,7 +316,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 6. **QST-75** WHEN o texto não cabe na linha única THEN o campo SHALL mostrar `…` e o fim do texto; WHEN está expandido THEN SHALL quebrar o texto na largura do campo e mostrar as últimas 6 linhas.
 7. **QST-76** WHEN `enter` é pressionada no modo texto com ao menos um caractere que não seja espaço THEN a TUI SHALL enviar `POST /answer` com `{ human_token, question_id, answer }`, com `answer` sem os espaços das pontas; IF o campo só tem espaços ou está vazio THEN a TUI SHALL não enviar nada e manter o modal.
 8. **QST-77** WHEN o broker responde `{ ok: true }` ao envio THEN a TUI SHALL fechar o modal e avisar `✓ Q-NN respondida` em verde por 4 s.
-9. **QST-78** IF um bloco de entrada com mais de uma tecla contém `\r` ou `\n` e, na vez dessa tecla, o modal está no modo texto THEN a TUI SHALL pôr um espaço no lugar dela e não enviar, mesmo que o modal tenha entrado no modo texto por uma tecla anterior do mesmo bloco; IF, na vez dessa tecla, o modal está no modo escolha THEN a TUI SHALL ignorá-la, sem confirmar opção nem enviar: um bloco colado nunca envia uma resposta.
+9. **QST-78** IF um bloco de entrada com mais de uma tecla contém `\r` ou `\n` e, na vez dessa tecla, o modal está no modo texto THEN a TUI SHALL pôr um espaço no lugar dela e não enviar, mesmo que o modal tenha entrado no modo texto por uma tecla anterior do mesmo bloco; IF, na vez dessa tecla, o modal está no modo escolha THEN a TUI SHALL ignorá-la, sem confirmar opção nem enviar: um bloco colado nunca envia uma resposta. Sem modal aberto na vez dela, a tecla faz o que `enter` faz naquela tela, e pode abrir o modal.
 10. **QST-79** WHILE um envio espera a resposta do broker the TUI SHALL não fazer outro `POST` e não mudar o modal por tecla alguma.
 11. **QST-80** WHEN o broker responde `question_closed` ao envio THEN o modal SHALL ficar no estado recusado: o campo com o texto enviado e a borda vermelha, `default <default>  · aplicado (o prazo venceu)` quando a pergunta é não-bloqueante, a linha `✗ recusada pelo broker: Q-NN já fechada · default aplicado: <default>` (sem a parte do default numa bloqueante) abaixo do aviso fixo, o rodapé `esc fechar`, e só `esc` SHALL fechá-lo.
 12. **QST-81** IF o broker responde outra recusa, um status que não é 200, um corpo que não é `{ ok }`, ou não responde em 2000 ms THEN a TUI SHALL manter o modal com o texto e avisar em vermelho por 4 s `✗ resposta não enviada · <erro>`, com o `error` da recusa ou `broker não respondeu`.
@@ -364,114 +364,114 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| QST-01 | P1: Perguntar ao nível de cima | T6 | Implementing |
-| QST-02 | P1: Perguntar ao nível de cima | T6 | Implementing |
-| QST-03 | P1: Perguntar ao nível de cima | T3, T6 | Implementing |
-| QST-04 | P1: Perguntar ao nível de cima | T6 | Implementing |
-| QST-05 | P1: Perguntar ao nível de cima | T6 | Implementing |
-| QST-06 | P1: Perguntar ao nível de cima | T6 | Implementing |
-| QST-07 | P1: Perguntar ao nível de cima | T6 | Implementing |
-| QST-08 | P1: Perguntar ao nível de cima | T6 | Implementing |
-| QST-09 | P1: Perguntar ao nível de cima | T6, T8 | Implementing |
-| QST-10 | P1: Perguntar ao nível de cima | T6 | Implementing |
-| QST-11 | P1: Perguntar ao nível de cima | T15 | Implementing |
-| QST-12 | P1: Perguntar ao nível de cima | T6, T16 | Implementing |
-| QST-13 | P1: Escalar | T7 | Implementing |
-| QST-14 | P1: Escalar | T7 | Implementing |
-| QST-15 | P1: Escalar | T7 | Implementing |
-| QST-16 | P1: Escalar | T7 | Implementing |
-| QST-17 | P1: Escalar | T7 | Implementing |
-| QST-18 | P1: Escalar | T7 | Implementing |
-| QST-19 | P1: Escalar | T7, T11 | Implementing |
-| QST-20 | P1: Responder como holder | T1, T8 | Implementing |
-| QST-21 | P1: Responder como holder | T8 | Implementing |
-| QST-22 | P1: Responder como holder | T8 | Implementing |
-| QST-23 | P1: Responder como holder | T8 | Implementing |
-| QST-24 | P1: Responder como dev | T9 | Implementing |
-| QST-25 | P1: Responder como dev | T9 | Implementing |
-| QST-26 | P1: Responder como dev | T9, T16 | Implementing |
-| QST-27 | P1: Responder como dev | T9 | Implementing |
-| QST-28 | P1: Responder como dev | T9, T16 | Implementing |
-| QST-29 | P1: Mesclar | T10 | Implementing |
-| QST-30 | P1: Mesclar | T10 | Implementing |
-| QST-31 | P1: Mesclar | T10 | Implementing |
-| QST-32 | P1: Mesclar | T10 | Implementing |
-| QST-33 | P1: Prazo, default e resolução única | T11 | Implementing |
-| QST-34 | P1: Prazo, default e resolução única | T16 | Implementing |
-| QST-35 | P1: Prazo, default e resolução única | T11, T16 | Implementing |
-| QST-36 | P1: Prazo, default e resolução única | T12, T13 | Implementing |
-| QST-37 | P1: Prazo, default e resolução única | T12 | Implementing |
-| QST-38 | P1: Prazo, default e resolução única | T8 | Implementing |
-| QST-39 | P1: Prazo, default e resolução única | T12, T13 | Implementing |
-| QST-40 | P1: Prazo, default e resolução única | T11 | Implementing |
-| QST-41 | P1: Prazo, default e resolução única | T11 | Implementing |
-| QST-42 | P1: Encerramento da feature e paridade com o log | T2 | Implementing |
-| QST-43 | P1: Encerramento da feature e paridade com o log | T14 | Implementing |
-| QST-44 | P1: Encerramento da feature e paridade com o log | T14 | Implementing |
-| QST-45 | P1: Encerramento da feature e paridade com o log | T18 | Implementing |
-| QST-46 | P1: Encerramento da feature e paridade com o log | T4 | Implementing |
-| QST-47 | P1: Encerramento da feature e paridade com o log | T4 | Implementing |
-| QST-48 | P1: Encerramento da feature e paridade com o log | T18 | Implementing |
-| QST-49 | P1: Encerramento da feature e paridade com o log | T4 | Implementing |
-| QST-50 | P1: Encerramento da feature e paridade com o log | T3 | Implementing |
-| QST-51 | P1: O que o agente vê | T5 | Implementing |
-| QST-52 | P1: O que o agente vê | T17 | Implementing |
-| QST-53 | P1: O que o agente vê | T17 | Implementing |
-| QST-54 | P1: O que o agente vê | T17 | Implementing |
-| QST-55 | P1: Aba Perguntas | T22, T23 | Implementing |
-| QST-56 | P1: Aba Perguntas | T23 | Implementing |
-| QST-57 | P1: Aba Perguntas | T23 | Implementing |
-| QST-58 | P1: Aba Perguntas | T24 | Implementing |
-| QST-59 | P1: Aba Perguntas | T22, T24 | Implementing |
-| QST-60 | P1: Aba Perguntas | T22, T25 | Implementing |
-| QST-61 | P1: Aba Perguntas | T22, T25 | Implementing |
-| QST-62 | P1: Aba Perguntas | T25 | Implementing |
-| QST-63 | P1: Aba Perguntas | T25, T31 | Implementing |
-| QST-64 | P1: Aba Perguntas | T20, T23, T31 | Implementing |
-| QST-65 | P1: Aba Perguntas | T31 | Implementing |
-| QST-66 | P1: Aba Perguntas | T31 | Implementing |
-| QST-67 | P1: Aba Perguntas | T31 | Implementing |
-| QST-68 | P1: Aba Perguntas | T33 | Implementing |
-| QST-69 | P1: Aba Perguntas | T21, T26, T37 | Implementing |
-| QST-70 | P1: Modal de resposta | T27 | Implementing |
-| QST-71 | P1: Modal de resposta | T27 | Implementing |
-| QST-72 | P1: Modal de resposta | T32 | Implementing |
-| QST-73 | P1: Modal de resposta | T28 | Implementing |
-| QST-74 | P1: Modal de resposta | T32 | Implementing |
-| QST-75 | P1: Modal de resposta | T28 | Implementing |
-| QST-76 | P1: Modal de resposta | T32, T35 | Implementing |
-| QST-77 | P1: Modal de resposta | T33 | Implementing |
-| QST-78 | P1: Modal de resposta | T32 | Implementing |
-| QST-79 | P1: Modal de resposta | T32, T35 | Implementing |
-| QST-80 | P1: Modal de resposta | T29, T33 | Implementing |
-| QST-81 | P1: Modal de resposta | T33, T34 | Implementing |
-| QST-82 | P1: Modal de resposta | T33 | Implementing |
-| QST-83 | P1: Modal de resposta | T35 | Implementing |
-| QST-84 | P1: Modal de resposta | T33, T35 | Implementing |
-| QST-85 | P1: Modal de resposta | T32 | Implementing |
-| QST-86 | P1: Modal de resposta | T34, T35, T38 | Implementing |
-| QST-87 | P1: Modal de resposta | T21, T30, T37 | Implementing |
-| QST-88 | P2: Legenda e tabela de desvios | T36 | Implementing |
-| QST-89 | P2: Legenda e tabela de desvios | T26, T30, T36 | Implementing |
-| QST-90 | P2: Legenda e tabela de desvios | T19 | Implementing |
-| QST-91 | P2: Legenda e tabela de desvios | T31, T36 | Implementing |
-| QST-92 | Edge cases | T10 | Implementing |
-| QST-93 | Edge cases | T10 | Implementing |
-| QST-94 | Edge cases | T6 | Implementing |
-| QST-95 | Edge cases | T7 | Implementing |
-| QST-96 | Edge cases | T23, T28 | Implementing |
-| QST-97 | Edge cases | T23 | Implementing |
-| QST-98 | Edge cases | T22, T28 | Implementing |
+| QST-01 | P1: Perguntar ao nível de cima | T6 | Verified |
+| QST-02 | P1: Perguntar ao nível de cima | T6 | Verified |
+| QST-03 | P1: Perguntar ao nível de cima | T3, T6 | Verified |
+| QST-04 | P1: Perguntar ao nível de cima | T6 | Verified |
+| QST-05 | P1: Perguntar ao nível de cima | T6 | Verified |
+| QST-06 | P1: Perguntar ao nível de cima | T6 | Verified |
+| QST-07 | P1: Perguntar ao nível de cima | T6 | Verified |
+| QST-08 | P1: Perguntar ao nível de cima | T6 | Verified |
+| QST-09 | P1: Perguntar ao nível de cima | T6, T8 | Verified |
+| QST-10 | P1: Perguntar ao nível de cima | T6 | Verified |
+| QST-11 | P1: Perguntar ao nível de cima | T15 | Verified |
+| QST-12 | P1: Perguntar ao nível de cima | T6, T16 | Verified |
+| QST-13 | P1: Escalar | T7 | Verified |
+| QST-14 | P1: Escalar | T7 | Verified |
+| QST-15 | P1: Escalar | T7 | Verified |
+| QST-16 | P1: Escalar | T7 | Verified |
+| QST-17 | P1: Escalar | T7 | Verified |
+| QST-18 | P1: Escalar | T7 | Verified |
+| QST-19 | P1: Escalar | T7, T11 | Verified |
+| QST-20 | P1: Responder como holder | T1, T8 | Verified |
+| QST-21 | P1: Responder como holder | T8 | Verified |
+| QST-22 | P1: Responder como holder | T8 | Verified |
+| QST-23 | P1: Responder como holder | T8 | Verified |
+| QST-24 | P1: Responder como dev | T9 | Verified |
+| QST-25 | P1: Responder como dev | T9 | Verified |
+| QST-26 | P1: Responder como dev | T9, T16 | Verified |
+| QST-27 | P1: Responder como dev | T9 | Verified |
+| QST-28 | P1: Responder como dev | T9, T16 | Verified |
+| QST-29 | P1: Mesclar | T10 | Verified |
+| QST-30 | P1: Mesclar | T10 | Verified |
+| QST-31 | P1: Mesclar | T10 | Verified |
+| QST-32 | P1: Mesclar | T10 | Verified |
+| QST-33 | P1: Prazo, default e resolução única | T11 | Verified |
+| QST-34 | P1: Prazo, default e resolução única | T16 | Verified |
+| QST-35 | P1: Prazo, default e resolução única | T11, T16 | Verified |
+| QST-36 | P1: Prazo, default e resolução única | T12, T13 | Verified |
+| QST-37 | P1: Prazo, default e resolução única | T12 | Verified |
+| QST-38 | P1: Prazo, default e resolução única | T8 | Verified |
+| QST-39 | P1: Prazo, default e resolução única | T12, T13 | Verified |
+| QST-40 | P1: Prazo, default e resolução única | T11 | Verified |
+| QST-41 | P1: Prazo, default e resolução única | T11 | Verified |
+| QST-42 | P1: Encerramento da feature e paridade com o log | T2 | Verified |
+| QST-43 | P1: Encerramento da feature e paridade com o log | T14 | Verified |
+| QST-44 | P1: Encerramento da feature e paridade com o log | T14 | Verified |
+| QST-45 | P1: Encerramento da feature e paridade com o log | T18 | Verified |
+| QST-46 | P1: Encerramento da feature e paridade com o log | T4 | Verified |
+| QST-47 | P1: Encerramento da feature e paridade com o log | T4 | Verified |
+| QST-48 | P1: Encerramento da feature e paridade com o log | T18 | Verified |
+| QST-49 | P1: Encerramento da feature e paridade com o log | T4 | Verified |
+| QST-50 | P1: Encerramento da feature e paridade com o log | T3 | Verified |
+| QST-51 | P1: O que o agente vê | T5 | Verified |
+| QST-52 | P1: O que o agente vê | T17 | Verified |
+| QST-53 | P1: O que o agente vê | T17 | Verified |
+| QST-54 | P1: O que o agente vê | T17 | Verified |
+| QST-55 | P1: Aba Perguntas | T22, T23 | Verified |
+| QST-56 | P1: Aba Perguntas | T23 | Verified |
+| QST-57 | P1: Aba Perguntas | T23 | Verified |
+| QST-58 | P1: Aba Perguntas | T24 | Verified |
+| QST-59 | P1: Aba Perguntas | T22, T24 | Verified |
+| QST-60 | P1: Aba Perguntas | T22, T25 | Verified |
+| QST-61 | P1: Aba Perguntas | T22, T25 | Verified |
+| QST-62 | P1: Aba Perguntas | T25 | Verified |
+| QST-63 | P1: Aba Perguntas | T25, T31 | Verified |
+| QST-64 | P1: Aba Perguntas | T20, T23, T31 | Verified |
+| QST-65 | P1: Aba Perguntas | T31 | Verified |
+| QST-66 | P1: Aba Perguntas | T31 | Verified |
+| QST-67 | P1: Aba Perguntas | T31 | Verified |
+| QST-68 | P1: Aba Perguntas | T33 | Verified |
+| QST-69 | P1: Aba Perguntas | T21, T26, T37 | Verified |
+| QST-70 | P1: Modal de resposta | T27 | Verified |
+| QST-71 | P1: Modal de resposta | T27 | Verified |
+| QST-72 | P1: Modal de resposta | T32 | Verified |
+| QST-73 | P1: Modal de resposta | T28 | Verified |
+| QST-74 | P1: Modal de resposta | T32 | Verified |
+| QST-75 | P1: Modal de resposta | T28 | Verified |
+| QST-76 | P1: Modal de resposta | T32, T35 | Verified |
+| QST-77 | P1: Modal de resposta | T33 | Verified |
+| QST-78 | P1: Modal de resposta | T32 | Verified |
+| QST-79 | P1: Modal de resposta | T32, T35 | Verified |
+| QST-80 | P1: Modal de resposta | T29, T33 | Verified |
+| QST-81 | P1: Modal de resposta | T33, T34 | Verified |
+| QST-82 | P1: Modal de resposta | T33 | Verified |
+| QST-83 | P1: Modal de resposta | T35 | Verified |
+| QST-84 | P1: Modal de resposta | T33, T35 | Verified |
+| QST-85 | P1: Modal de resposta | T32 | Verified |
+| QST-86 | P1: Modal de resposta | T34, T35, T38 | Verified |
+| QST-87 | P1: Modal de resposta | T21, T30, T37 | Verified |
+| QST-88 | P2: Legenda e tabela de desvios | T36 | Verified |
+| QST-89 | P2: Legenda e tabela de desvios | T26, T30, T36 | Verified |
+| QST-90 | P2: Legenda e tabela de desvios | T19 | Verified |
+| QST-91 | P2: Legenda e tabela de desvios | T31, T36 | Verified |
+| QST-92 | Edge cases | T10 | Verified |
+| QST-93 | Edge cases | T10 | Verified |
+| QST-94 | Edge cases | T6 | Verified |
+| QST-95 | Edge cases | T7 | Verified |
+| QST-96 | Edge cases | T23, T28 | Verified |
+| QST-97 | Edge cases | T23 | Verified |
+| QST-98 | Edge cases | T22, T28 | Verified |
 
-**Coverage:** 98 total, 98 mapped to tasks, 0 unmapped.
+**Coverage:** 98 total, 98 mapped to tasks, 0 unmapped. Verificados em `2ac91fe`, na terceira rodada do Verifier; relatório em `validation.md`, rodadas de correção em `fix-round-1.md` e `fix-round-2.md`.
 
 ---
 
 ## Success Criteria
 
-- [ ] Três clientes MCP de teste, `worker-1`, `leader` e `mother`, levam uma pergunta do `ask` até `human` por duas escalações, e um `POST /answer` com a credencial humana a devolve ao `worker-1`, sem nenhuma linha escrita em `questions` por fora das rotas.
-- [ ] Depois de qualquer sequência de chamadas, `questions()` aplicada a `GET /events` devolve as linhas de `questions` (QST-48).
-- [ ] Nenhum caminho deixa dois `answer` resolverem a mesma pergunta.
-- [ ] A TUI, sobre um broker de teste, abre a aba, responde uma pergunta por opção e outra por texto, e recebe a recusa de uma já fechada.
-- [ ] Os 47 frames passam no teste de frames; os 41 anteriores não mudam.
-- [ ] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar.
+- [x] Três clientes MCP de teste, `worker-1`, `leader` e `mother`, levam uma pergunta do `ask` até `human` por duas escalações, e um `POST /answer` com a credencial humana a devolve ao `worker-1`, sem nenhuma linha escrita em `questions` por fora das rotas.
+- [x] Depois de qualquer sequência de chamadas, `questions()` aplicada a `GET /events` devolve as linhas de `questions` (QST-48).
+- [x] Nenhum caminho deixa dois `answer` resolverem a mesma pergunta.
+- [x] A TUI, sobre um broker de teste, abre a aba, responde uma pergunta por opção e outra por texto, e recebe a recusa de uma já fechada.
+- [x] Os 47 frames passam no teste de frames; os 41 anteriores não mudam.
+- [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Windows 11, Bun 1.4.2, em `2ac91fe`: `tsc` passa; 1270 passam, 3 pulados por condição de plataforma anterior à fatia, zero falham. Linux, contêiner `oven/bun:1.4.2` (kernel 6.18 do WSL2) sobre um clone limpo: `tsc` passa e a suíte inteira passou em 10 de 13 execuções sobre o código final, com 1273 passando e zero pulados. As 3 que falharam caíram cada uma num teste de integração anterior à fatia (`EVT-85` duas vezes, `EVT-89` uma), por tempo esgotado à espera de um broker ou servidor MCP real. A `main` falha do mesmo jeito no mesmo contêiner (`EVT-81`, 1 de 14 repetições de `server-delivery.test.ts` e `server-tools.test.ts`; o HEAD passou 14 de 14): a instabilidade é anterior à fatia e não teve a causa investigada.

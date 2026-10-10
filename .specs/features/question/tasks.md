@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/question/design.md`
-**Status**: Approved
+**Status**: Done
 
 Regras do repositório que valem para toda tarefa:
 
