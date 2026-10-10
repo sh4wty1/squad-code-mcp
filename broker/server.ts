@@ -146,6 +146,8 @@ IMPORTANT: When a <channel source="squad" kind="ping" ...> message arrives, call
 
 After ready, what the squad sends you arrives as <channel source="squad" kind="task|result|verdict" seq="..." from="..." ticket_ref="..."> messages. The seq is what you cite when you answer: task_seq in a result, result_seq in a verdict.
 
+A question and its answer arrive the same way: kind="question" is a question for you to answer or to escalate, and kind="answer" is the answer to a question. Both carry the question_id in their text. The question_id, not the seq, is what you cite about a question.
+
 The mother opens and closes the feature the squad works on. Everyone else is told through the channel: kind="feature_opened" carries its title, workflow, branch, base_branch, spec_ref and spec_commit, and kind="feature_closed" its outcome.
 
 Available tools after ready:

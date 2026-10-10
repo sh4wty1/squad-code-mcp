@@ -913,10 +913,10 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Cada arquivo novo tem a sua linha na seção Architecture, e as linhas de `log.ts`, `shared/derive.ts`, `tui.ts`, `tui/keys.ts` e `test/frames/` dizem o que mudou
-- [ ] `tui.ts` deixa de ser descrita como um processo que só lê
-- [ ] As instruções que o servidor MCP dá à sessão (`server.ts`) citam `question` e `answer` entre os kinds que chegam pelo canal, com o `question_id`
-- [ ] Gate build passa
+- [x] Cada arquivo novo tem a sua linha na seção Architecture, e as linhas de `log.ts`, `shared/derive.ts`, `tui.ts`, `tui/keys.ts` e `test/frames/` dizem o que mudou
+- [x] `tui.ts` deixa de ser descrita como um processo que só lê
+- [x] As instruções que o servidor MCP dá à sessão (`server.ts`) citam `question` e `answer` entre os kinds que chegam pelo canal, com o `question_id`
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build

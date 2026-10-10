@@ -52,6 +52,10 @@ test("QST-53/54: ask of a worker answers the question_id and the seq, the leader
   const feature = await openFeature(b.url, await registered(b, "mother"));
   const worker = await joined(b, "worker-1");
   const leader = await joined(b, "leader");
+  // The session is told of the two kinds and of what it cites about a question
+  for (const session of [worker, leader]) {
+    for (const said of ['kind="question"', 'kind="answer"', "Both carry the question_id in their text"]) expect(session.client.getInstructions()).toContain(said);
+  }
 
   // The id is the session's, whatever the arguments carry
   const asked = await worker.call("ask", {
