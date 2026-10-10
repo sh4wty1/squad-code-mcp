@@ -2,6 +2,7 @@
 // key is the string the terminal sends in raw mode. Ported from `onKey` and `textKeys` of
 // the prototype, without the modals of gate and of permission.
 
+import { qid } from "../shared/contract.ts";
 import type { Question } from "../shared/derive.ts";
 import { resolved, waiting } from "./asked.ts";
 import type { FeedRow } from "./feed.ts";
@@ -12,11 +13,19 @@ import type { Modal, Ui, View } from "./view.ts";
 
 export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null };
 
-// How long the notice of a key stays in the footer
+// How long a notice stays in the footer
 const TOAST_MS = 4000;
 
 const UP = "\x1b[A";
 const DOWN = "\x1b[B";
+
+const notice = (view: View, text: string, color: Color = "gray"): Ui["toast"] => ({ text, color, until: view.squad.now + TOAST_MS });
+
+// The last offset of the history: five fit, and with more the screen shows four from the offset, never fewer
+function historyEnd(view: View): number {
+  const past = resolved(view.squad).length;
+  return past > 5 ? past - 4 : 0;
+}
 
 // The lines of the feed to show: while it is paused, the ones it had
 export function visible(ui: Ui, fresh: FeedRow[], shown: FeedRow[]): FeedRow[] {
@@ -38,8 +47,9 @@ export function keysOf(chunk: string, ui: Ui): string[] {
 // `send`, for the loop.
 function answering(ui: Ui, m: Modal, key: string, view: View): Ui | null {
   if (key === "\x03") return null;
-  // No key changes the modal while the broker did not say what it did with the answer
-  if (m.sending) return ui;
+  // No key changes the modal while the broker did not say what it did with the answer, nor
+  // while it does not answer the reads: the frozen screen covers the modal
+  if (m.sending || view.down) return ui;
   if (key === "\x1b") return { ...ui, modal: null };
   // Only esc closes a refused answer
   if (m.refused) return ui;
@@ -78,19 +88,23 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
   // With the modal open every key is its own: q, the digits and the letters are text
   if (ui.modal) return answering(ui, ui.modal, key, view);
   const { squad, rows } = view;
-  const toast = (text: string, color: Color = "gray"): Ui => ({ ...ui, toast: { text, color, until: squad.now + TOAST_MS } });
+  const toast = (text: string, color?: Color): Ui => ({ ...ui, toast: notice(view, text, color) });
   const thread = (): Ui => ({ ...ui, screen: "thread", threadTicket: null, threadOffset: 0 });
   // The questions that wait for the dev, in the order of the tab, and the selected one
   const asked = waiting(squad);
   const chosen = selected(view);
-  // The tab with the question selected and the modal of its answer: on its first option, or on the text
-  const answer = (q: Question): Ui => ({
-    ...ui,
-    screen: "questions",
-    question: q.id,
-    qfocus: "list",
-    modal: { question: q.id, choice: q.options.length ? 0 : null, text: "", expanded: false, sending: false, refused: false },
-  });
+  // The tab with the question selected and the modal of its answer: on its first option, or
+  // on the text. A broker that does not answer the reads would not take the answer.
+  const answer = (q: Question): Ui =>
+    view.down
+      ? toast("broker desconectado · responder desabilitado")
+      : {
+          ...ui,
+          screen: "questions",
+          question: q.id,
+          qfocus: "list",
+          modal: { question: q.id, choice: q.options.length ? 0 : null, text: "", expanded: false, sending: false, refused: false },
+        };
 
   switch (key) {
     case "q":
@@ -127,11 +141,7 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
       const step = key === "j" || key === DOWN ? 1 : -1;
       // The offset of the thread counts up from the latest entry; the screen clamps the top
       if (ui.screen === "thread") return { ...ui, threadOffset: Math.max(0, ui.threadOffset - step) };
-      if (ui.screen === "questions" && ui.qfocus === "history") {
-        // Five fit; with more the screen shows four from the offset, and never fewer
-        const past = resolved(squad).length;
-        return { ...ui, historyOffset: Math.max(0, Math.min(past > 5 ? past - 4 : 0, ui.historyOffset + step)) };
-      }
+      if (ui.screen === "questions" && ui.qfocus === "history") return { ...ui, historyOffset: Math.max(0, Math.min(historyEnd(view), ui.historyOffset + step)) };
       if (ui.screen === "questions") {
         if (!chosen) return ui;
         return { ...ui, question: asked[Math.max(0, Math.min(asked.length - 1, asked.indexOf(chosen) + step))]!.id };
@@ -164,4 +174,38 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
     }
   }
   return ui;
+}
+
+// What the broker said of the answer of `send`
+export type Sent = { ok: true } | { ok: false; error: string };
+
+// The state after the answer of `send` was sent, which is no longer to send
+export function settle(ui: Ui, result: Sent, view: View): Ui {
+  const { modal: m, send } = ui;
+  const idle: Ui = { ...ui, send: null };
+  if (!m || !send) return idle;
+  if (result.ok) return { ...idle, modal: null, toast: notice(view, `✓ ${qid(send.question_id)} respondida`, "bgreen") };
+  // The question closed before the answer: the modal stays with what was sent, as a text, until esc
+  if (result.error === "question_closed") return { ...idle, modal: { ...m, choice: null, text: send.answer, sending: false, refused: true } };
+  // The modal as it was before the send, to send again
+  return { ...idle, modal: { ...m, sending: false }, toast: notice(view, `✗ resposta não enviada · ${result.error}`, "bred") };
+}
+
+// The state after a read. The selection of the tab follows its question when the order of
+// the list changes, and goes to the first when the question left it. The modal of a question
+// that closed is closed and its text is lost; the one of a refused answer stays, and the one
+// of an answer on its way waits for what the broker says of it.
+export function sync(ui: Ui, view: View): Ui {
+  const { squad } = view;
+  const asked = waiting(squad);
+  const question = asked.some((q) => q.id === ui.question) ? ui.question : (asked[0]?.id ?? null);
+  const historyOffset = Math.min(ui.historyOffset, historyEnd(view));
+  const m = ui.modal;
+  const q = squad.questions.find((other) => other.id === m?.question);
+  // Without its question among the ones of the open feature, no modal is drawn
+  const closed = m !== null && !m.sending && (q === undefined || (!q.open && !m.refused));
+  if (question === ui.question && historyOffset === ui.historyOffset && !closed) return ui;
+  const next: Ui = { ...ui, question, historyOffset };
+  if (!closed) return next;
+  return { ...next, modal: null, toast: q?.status === "defaulted" ? notice(view, "⟳ default aplicado", "byellow") : notice(view, `${qid(m.question)} fechada`) };
 }

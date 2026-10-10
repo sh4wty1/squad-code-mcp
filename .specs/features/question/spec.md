@@ -431,7 +431,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-65 | P1: Aba Perguntas | T31 | Implementing |
 | QST-66 | P1: Aba Perguntas | T31 | Implementing |
 | QST-67 | P1: Aba Perguntas | T31 | Implementing |
-| QST-68 | P1: Aba Perguntas | T33 | In Tasks |
+| QST-68 | P1: Aba Perguntas | T33 | Implementing |
 | QST-69 | P1: Aba Perguntas | T21, T26, T37 | Implementing |
 | QST-70 | P1: Modal de resposta | T27 | Implementing |
 | QST-71 | P1: Modal de resposta | T27 | Implementing |
@@ -440,14 +440,14 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-74 | P1: Modal de resposta | T32 | Implementing |
 | QST-75 | P1: Modal de resposta | T28 | Implementing |
 | QST-76 | P1: Modal de resposta | T32, T35 | Implementing |
-| QST-77 | P1: Modal de resposta | T33 | In Tasks |
+| QST-77 | P1: Modal de resposta | T33 | Implementing |
 | QST-78 | P1: Modal de resposta | T32 | Implementing |
 | QST-79 | P1: Modal de resposta | T32, T35 | Implementing |
 | QST-80 | P1: Modal de resposta | T29, T33 | Implementing |
-| QST-81 | P1: Modal de resposta | T33, T34 | In Tasks |
-| QST-82 | P1: Modal de resposta | T33 | In Tasks |
+| QST-81 | P1: Modal de resposta | T33, T34 | Implementing |
+| QST-82 | P1: Modal de resposta | T33 | Implementing |
 | QST-83 | P1: Modal de resposta | T35 | In Tasks |
-| QST-84 | P1: Modal de resposta | T33, T35 | In Tasks |
+| QST-84 | P1: Modal de resposta | T33, T35 | Implementing |
 | QST-85 | P1: Modal de resposta | T32 | Implementing |
 | QST-86 | P1: Modal de resposta | T34, T35, T38 | In Tasks |
 | QST-87 | P1: Modal de resposta | T21, T30, T37 | Implementing |

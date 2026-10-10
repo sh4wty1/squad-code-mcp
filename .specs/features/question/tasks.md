@@ -808,12 +808,12 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `settle` com `{ ok: true }`: modal fechado e aviso `✓ Q-NN respondida` em verde por 4 s; com `question_closed`: `refused` verdadeiro; com outro erro: modal no modo de antes, com o texto, e aviso vermelho `✗ resposta não enviada · <erro>`; `send` nulo nos três
-- [ ] `sync`: a pergunta do modal fechou sem recusa → modal fechado e aviso `⟳ default aplicado` (default) ou `Q-NN fechada`; com `refused` o modal fica
-- [ ] `sync`: a seleção segue o id quando a ordem muda, e vai para a primeira da lista quando a selecionada sai
-- [ ] QST-84: com `view.down`, `enter` sobre pergunta avisa `broker desconectado · responder desabilitado` e não abre modal; com modal aberto, nenhuma tecla o muda
-- [ ] Testes em `test/unit/tui-keys.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `settle` com `{ ok: true }`: modal fechado e aviso `✓ Q-NN respondida` em verde por 4 s; com `question_closed`: `refused` verdadeiro; com outro erro: modal no modo de antes, com o texto, e aviso vermelho `✗ resposta não enviada · <erro>`; `send` nulo nos três
+- [x] `sync`: a pergunta do modal fechou sem recusa → modal fechado e aviso `⟳ default aplicado` (default) ou `Q-NN fechada`; com `refused` o modal fica
+- [x] `sync`: a seleção segue o id quando a ordem muda, e vai para a primeira da lista quando a selecionada sai
+- [x] QST-84: com `view.down`, `enter` sobre pergunta avisa `broker desconectado · responder desabilitado` e não abre modal; com modal aberto, nenhuma tecla o muda
+- [x] Testes em `test/unit/tui-keys.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

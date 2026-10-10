@@ -3,7 +3,7 @@ import type { SquadEvent } from "../../shared/contract.ts";
 import { squad } from "../../shared/derive.ts";
 import { resolved, waiting } from "../../tui/asked.ts";
 import { feed } from "../../tui/feed.ts";
-import { keysOf, press, START, visible } from "../../tui/keys.ts";
+import { keysOf, press, settle, START, sync, visible } from "../../tui/keys.ts";
 import type { Modal, Ui, View } from "../../tui/view.ts";
 import { LOGS } from "../frames/logs.ts";
 import { frameView } from "../frames/view.ts";
@@ -432,4 +432,145 @@ test("QST-78: a pasted block with line breaks goes into the text and sends nothi
   const pasted = keysOf("logo da 89\r\nna versão quadrada\r", v.ui).reduce((ui, k) => press(ui, k, { ...v, ui })!, v.ui);
   expect(pasted).toEqual({ ...v.ui, modal: { ...m(v), text: "logo da 89  na versão quadrada " } });
   expect(pasted.send).toBeNull();
+});
+
+// The modal of a frame after enter: with its answer on the way to the broker
+function sent(frame: string, modal: Partial<Modal> = {}): { before: View; after: View } {
+  const before = open(frame, modal);
+  return { before, after: { ...before, ui: key("\r", before) } };
+}
+
+test("QST-77: when the broker takes the answer the modal closes and the footer says so in green for 4 s", () => {
+  // Q-08 by its text, Q-07 by its second option
+  for (const [frame, modal, label] of [["06", {}, "Q-08"], ["05", { choice: 1 }, "Q-07"]] as const) {
+    const { before, after } = sent(frame, modal);
+    expect(after.ui.send).not.toBeNull();
+    expect(settle(after.ui, { ok: true }, after)).toEqual({ ...before.ui, modal: null, send: null, toast: { text: `✓ ${label} respondida`, color: "bgreen", until: before.squad.now + 4000 } });
+  }
+});
+
+test("QST-80: when the broker says the question closed the modal turns refused, in the text mode with what was sent", () => {
+  const typed = sent("06", { text: "  logo da 89, quadrado  ", expanded: true });
+  expect(settle(typed.after.ui, { ok: false, error: "question_closed" }, typed.after)).toEqual({
+    ...typed.before.ui,
+    send: null,
+    modal: { question: 8, choice: null, text: "logo da 89, quadrado", expanded: true, sending: false, refused: true },
+  });
+  // An option that was refused: its text goes to the field
+  const chose = sent("05", { choice: 1 });
+  expect(settle(chose.after.ui, { ok: false, error: "question_closed" }, chose.after)).toEqual({
+    ...chose.before.ui,
+    send: null,
+    modal: { question: 7, choice: null, text: "5 tentativas", expanded: false, sending: false, refused: true },
+  });
+});
+
+test("QST-81: any other answer of the broker leaves the modal as it was before the send and says the error in red for 4 s", () => {
+  for (const error of ["invalid_token", "not_holder", "missing_field", "invalid_field", "broker não respondeu"]) {
+    for (const { before, after } of [sent("06", { text: "  logo da 89  " }), sent("07"), sent("05", { choice: 2 })]) {
+      expect(settle(after.ui, { ok: false, error }, after)).toEqual({ ...before.ui, send: null, toast: { text: `✗ resposta não enviada · ${error}`, color: "bred", until: before.squad.now + 4000 } });
+    }
+  }
+});
+
+// The log of frame 04 with the answers that close Q-07 and Q-08, as frame 20b has them
+const CLOSED = LOGS["20b"]!.events.filter((e) => e.kind === "answer" && (e.seq === 433 || e.seq === 434));
+const closing: Change = (events) => [...events, ...CLOSED];
+const typing = (question: number): Modal => ({ question, choice: null, text: "pela metade", expanded: false, sending: false, refused: false });
+
+test("QST-82: a read that shows the question of the modal closed closes the modal, with the notice of the default in yellow or the one that it closed", () => {
+  // Q-08 closed by its timeout
+  const timeout = view("04", { question: null, modal: typing(8) }, closing);
+  expect(sync(timeout.ui, timeout)).toEqual({ ...timeout.ui, modal: null, toast: { text: "⟳ default aplicado", color: "byellow", until: timeout.squad.now + 4000 } });
+  // By the result of who asked it
+  const result = view("04", { question: null, modal: typing(8) }, (events) => closing(events).map((e) => (e.seq === 434 ? ({ ...e, resolved_by: "result_default" } as SquadEvent) : e)));
+  expect(sync(result.ui, result).toast).toEqual({ text: "⟳ default aplicado", color: "byellow", until: result.squad.now + 4000 });
+  expect(sync(result.ui, result).modal).toBeNull();
+  // Q-07 answered by another hand, in the choice mode
+  const answered = view("04", { question: null, modal: { ...typing(7), choice: 1 } }, closing);
+  expect(sync(answered.ui, answered)).toEqual({ ...answered.ui, modal: null, toast: { text: "Q-07 fechada", color: "gray", until: answered.squad.now + 4000 } });
+  // And merged into another one by the mother
+  const merged = view("04", { question: 7, modal: typing(8) }, (events) => [...events, { ...events.find((e) => e.kind === "question_merged")!, seq: 500, question_id: 8, into: 7 } as SquadEvent]);
+  expect(sync(merged.ui, merged)).toEqual({ ...merged.ui, modal: null, toast: { text: "Q-08 fechada", color: "gray", until: merged.squad.now + 4000 } });
+});
+
+test("QST-82: the modal of an open question stays as it is after a read", () => {
+  for (const frame of ["05", "06", "07", "20a"]) {
+    const v = open(frame);
+    expect(sync(v.ui, v)).toBe(v.ui);
+  }
+});
+
+test("QST-80, QST-82: the modal of a refused answer stays after the read that shows its question closed", () => {
+  // Frame 20b: Q-08 closed by its default, and the answer of the dev was refused
+  const v = open("20b");
+  expect(v.squad.questions.find((q) => q.id === 8)!.status).toBe("defaulted");
+  expect(sync(v.ui, v)).toBe(v.ui);
+});
+
+test("QST-79, QST-80: the modal of an answer on its way waits for what the broker says, also when a read shows its question closed", () => {
+  const v = view("04", { question: null, modal: { ...typing(8), sending: true }, send: { question_id: 8, answer: "pela metade" } }, closing);
+  expect(sync(v.ui, v)).toBe(v.ui);
+  // What the broker says then is the refusal
+  expect(settle(v.ui, { ok: false, error: "question_closed" }, v).modal).toEqual({ ...typing(8), refused: true });
+});
+
+test("QST-82: a modal whose question is not among the ones of the open feature is closed, refused or not", () => {
+  // Frame 09a: the feature was delivered, and the questions of the tab are the ones of the open one
+  for (const refused of [false, true]) {
+    const v = view("09a", { screen: "questions", modal: { ...typing(8), refused } });
+    expect(v.squad.questions).toEqual([]);
+    expect(sync(v.ui, v)).toEqual({ ...v.ui, modal: null, toast: { text: "Q-08 fechada", color: "gray", until: v.squad.now + 4000 } });
+  }
+});
+
+test("QST-68: the selection follows its question when the order of the list changes", () => {
+  // Q-08 is the second of the list, and the fourth with two more blocking questions
+  const before = view("04", { question: 8 });
+  const after = view("04", { question: 8 }, blockers);
+  expect(waiting(before.squad).map((q) => q.id)).toEqual([7, 8]);
+  expect(waiting(after.squad).map((q) => q.id)).toEqual([7, 20, 21, 8]);
+  expect(sync(after.ui, after)).toBe(after.ui);
+  // The first of the list, selected with no id, is held by its id: a question that comes before it does not take the selection
+  const first = view("04", { question: null });
+  expect(sync(first.ui, first)).toEqual({ ...first.ui, question: 7 });
+});
+
+test("QST-68: when the selected question leaves the list the selection goes to the first of the list", () => {
+  // Q-20 is answered by the dev somewhere else: the list is Q-07, Q-21, Q-08
+  const q20 = CLOSED[0]!;
+  const left = view("04", { question: 20, selected: 417 }, (events) => [...blockers(events), { ...q20, seq: 502, question_id: 20 } as SquadEvent]);
+  expect(waiting(left.squad).map((q) => q.id)).toEqual([7, 21, 8]);
+  expect(sync(left.ui, left)).toEqual({ ...left.ui, question: 7 });
+  // The two of frame 04 closed: there is no question to select
+  const none = view("04", { question: 8 }, closing);
+  expect(sync(none.ui, none)).toEqual({ ...none.ui, question: null });
+});
+
+test("QST-63: a read keeps the offset of the history from leaving fewer than 4 on the screen", () => {
+  // Six resolved: the last offset is 2
+  const past = view("04", { question: 7, historyOffset: 5 });
+  expect(sync(past.ui, past)).toEqual({ ...past.ui, historyOffset: 2 });
+  const within = view("04", { question: 7, historyOffset: 2 });
+  expect(sync(within.ui, within)).toBe(within.ui);
+});
+
+const off = (v: View): View => ({ ...v, down: { since: v.squad.now - 3000, attempt: 3 } });
+
+test("QST-84: while the broker does not answer, enter over a question says that answering is disabled and opens no modal", () => {
+  // On the main screen over Q-07 and Q-08, and on the tab
+  for (const v of [off(view("01", { selected: 422 })), off(view("01", { selected: 428 })), off(view("04")), off(view("04", { question: 8 }))]) {
+    expect(key("\r", v)).toEqual({ ...v.ui, toast: { text: "broker desconectado · responder desabilitado", color: "gray", until: v.squad.now + 4000 } });
+  }
+  // Any other line opens its thread, as before, and the tab without a question does nothing
+  expect(key("\r", off(view("01", { selected: 417 }))).screen).toBe("thread");
+  const empty = off(view("15a", { screen: "questions" }));
+  expect(key("\r", empty)).toBe(empty.ui);
+});
+
+test("QST-84: while the broker does not answer no key changes an open modal, and ctrl+c quits", () => {
+  for (const v of [off(open("05")), off(open("06")), off(open("07")), off(open("20b"))]) {
+    for (const k of ["\x1b", "\r", "a", "q", "1", "2", "j", "k", UP, DOWN, "\x7f", "\x08", "\x15", "\x05"]) expect(key(k, v)).toBe(v.ui);
+    expect(press(v.ui, "\x03", v)).toBeNull();
+  }
 });
