@@ -3,6 +3,7 @@ import type { Grid } from "../../tui/grid.ts";
 import { down } from "../../tui/screens/down.ts";
 import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
+import { questions } from "../../tui/screens/questions.ts";
 import { small } from "../../tui/screens/small.ts";
 import { thread } from "../../tui/screens/thread.ts";
 import { topology } from "../../tui/screens/topology.ts";
@@ -19,17 +20,19 @@ const TOPOLOGY = ["02", "13b", "23b", "28c", "29b"];
 // The broker of frame 12 does not answer for 12 s, in 12 reads
 const frozen = (view: View, seconds = 12): View => ({ ...view, down: { since: view.squad.now - seconds * 1000, attempt: seconds } });
 
-const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid][] = [
+// The requirement of a screen of the slice that reads is TUI-43
+const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid, requirement?: string][] = [
   ["main screen", MAIN, main],
   ["topology", TOPOLOGY, topology],
   ["thread", ["03", "15b", "24d", "25b"], thread],
   ["legend", ["11"], help],
   ["frozen screen", ["12"], (view) => down(frozen(view))],
+  ["tab of questions", ["04"], questions, "QST-69"],
 ];
 
-for (const [name, ids, draw] of SCREENS) {
+for (const [name, ids, draw, requirement = "TUI-43"] of SCREENS) {
   for (const id of ids) {
-    test(`TUI-43: frame ${id} of the ${name}`, () => {
+    test(`${requirement}: frame ${id} of the ${name}`, () => {
       const drawn = draw(frameView(id)).text();
       expect(drawn.length).toBe(40);
       expect(drawn.map((line, y) => `${y} ${line}`)).toEqual(expected(id).lines.map((line, y) => `${y} ${line}`));
@@ -69,6 +72,24 @@ test("TUI-43: a deviation of the status of an agent cites the line of the design
     "23b ○ worker-1 [idle]",
   ]);
   expect(statuses.filter((dev) => dev.class !== "D1" || !/\.design\/squad-mvp\.md line 3\d\d/.test(dev.why))).toEqual([]);
+});
+
+test("QST-89: every deviation of frame 04 is D1 or D2 and cites the spec or the design", () => {
+  const all = DEVIATIONS["04"]!;
+  expect(all.length).toBeGreaterThan(0);
+  expect(all.filter((dev) => !["D1", "D2"].includes(dev.class) || !/QST-\d\d|Assumptions, `|\.design\/squad-mvp\.md line \d+/.test(dev.why))).toEqual([]);
+});
+
+test("QST-69: the history of frame 04 has the question the mother answered at 14:19:05, and its deviation says the prototype leaves it out", () => {
+  const view = frameView("04");
+  // The oldest of the six, at the end of the history
+  const drawn = questions({ ...view, ui: { ...view.ui, historyOffset: 2 } }).text();
+  expect([...drawn[33]!].slice(2, 27).join("")).toBe("14:19:05  Q-04  ldr → mot");
+  expect([...drawn[34]!].slice(12, 65).join("")).toBe("✓ respondida por mother: API /v1/setlist, polling 30s");
+  const counted = DEVIATIONS["04"]!.filter((dev) => dev.line === 26);
+  expect(counted.map((dev) => [dev.class, dev.text])).toEqual([["D1", "6"]]);
+  expect(counted[0]!.why).toContain("answered by her at 14:19:05");
+  expect(counted[0]!.why).toContain("the history the prototype writes by hand leaves it out");
 });
 
 test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen of another slice", () => {

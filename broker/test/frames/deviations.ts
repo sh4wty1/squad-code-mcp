@@ -130,6 +130,12 @@ const REPROVED: [string, string][] = [
   ["14:47:30 ✗ [verdict]  jdg → ldr    REPROVADO · 4/5 · limite atingido", "reprovado 3ª vez: iOS"],
 ];
 
+// The tab of questions. A route takes 20 columns: from column 9 in the list, from column 18
+// in the history.
+const HOPS = ".design/squad-mvp.md line 490: the route shown is the sequence of the `question` of the log, and a question of the mock without a hop is an omission of the mock; the scenario has no `question` of the leader to the mother for this one, and the prototype writes that hop by hand";
+const hops = (line: number, col: number, route: string) => d("D1", HOPS, [line, col, 20, route]);
+const ASKED_MOTHER = "Assumptions, `Logs dos frames novos`: the question the leader asked the mother at 14:18:40, answered by her at 14:19:05, is a resolved question of the feature (QST-60), and the history the prototype writes by hand leaves it out; with six the history shows four and how many are below (QST-62)";
+
 export const DEVIATIONS: Record<string, Deviation[]> = {
   "01": [...skills(MOT, LDR, W2, JDG), ...doing(8, "tech lead · escalou TK…", ESCALATED), ...entered("01"), ...plan(9), ...loadout(33, 2)],
   "09a": [...skills(MOT, LDR, W1, W2, JDG), ...counts(15)],
@@ -364,6 +370,12 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ...d("D1", "the screen is frozen since the broker stopped answering, the 12 s of line 0 before the clock (TUI-51, `view.down`); the prototype writes the clock itself", [3, 45, 8, "14:31:55"]),
   ],
   "29c": [...skills(MOT, LDR, W2, JDG), ...doing(12, "worker · sem ticket", NO_TICKET), ...body(36, "Bash: Apagar …"), ...declared(23), ...loadout(27, 2)],
+  "04": [
+    ...hops(12, 9, "w2 → ldr → dev"),
+    ...d("D1", ASKED_MOTHER, [26, 15, 1, "6"], [35, 2, 116, "+2 mais antigas · h e j/k para rolar"], [36, 2, 116, ""]),
+    ...hops(31, 18, "w2 → ldr → dev"),
+    ...hops(33, 18, "w3 → ldr → dev"),
+  ],
 };
 
 // The lines the screen has to draw for the frame, and the deviations that change nothing

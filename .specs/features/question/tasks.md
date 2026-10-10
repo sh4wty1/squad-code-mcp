@@ -653,10 +653,10 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `test/unit/tui-frames.test.ts` desenha o frame 04 com `questions` e compara as 40 linhas
-- [ ] Todo desvio do frame 04 tem classe D1 ou D2 e um motivo que cita a spec ou o design; nenhum é D3
-- [ ] O histórico tem a pergunta do leader respondida pela mother às 14:19:05, e o desvio diz que o protótipo a deixa de fora
-- [ ] Gate build passa
+- [x] `test/unit/tui-frames.test.ts` desenha o frame 04 com `questions` e compara as 40 linhas
+- [x] Todo desvio do frame 04 tem classe D1 ou D2 e um motivo que cita a spec ou o design; nenhum é D3
+- [x] O histórico tem a pergunta do leader respondida pela mother às 14:19:05, e o desvio diz que o protótipo a deixa de fora
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build
