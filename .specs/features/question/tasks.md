@@ -673,11 +673,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Título, ordem das linhas e rodapé de QST-70 e QST-71 para uma bloqueante com 3 opções e para uma com 2: a linha `outra resposta…` é a de número n+1 e o rodapé diz `1-4` ou `1-3`
-- [ ] A linha selecionada tem `▶`; fora do modal, toda célula da tela de baixo é cinza
-- [ ] A caixa tem 82 colunas a partir da coluna 19 e fica centrada na altura para qualquer número de linhas de `por quê`
-- [ ] Testes em `test/unit/tui-answer.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Título, ordem das linhas e rodapé de QST-70 e QST-71 para uma bloqueante com 3 opções e para uma com 2: a linha `outra resposta…` é a de número n+1 e o rodapé diz `1-4` ou `1-3`
+- [x] A linha selecionada tem `▶`; fora do modal, toda célula da tela de baixo é cinza
+- [x] A caixa tem 82 colunas a partir da coluna 19 e fica centrada na altura para qualquer número de linhas de `por quê`
+- [x] Testes em `test/unit/tui-answer.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

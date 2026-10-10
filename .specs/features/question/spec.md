@@ -433,8 +433,8 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-67 | P1: Aba Perguntas | T31 | In Tasks |
 | QST-68 | P1: Aba Perguntas | T33 | In Tasks |
 | QST-69 | P1: Aba Perguntas | T21, T26, T37 | Implementing |
-| QST-70 | P1: Modal de resposta | T27 | In Tasks |
-| QST-71 | P1: Modal de resposta | T27 | In Tasks |
+| QST-70 | P1: Modal de resposta | T27 | Implementing |
+| QST-71 | P1: Modal de resposta | T27 | Implementing |
 | QST-72 | P1: Modal de resposta | T32 | In Tasks |
 | QST-73 | P1: Modal de resposta | T28 | In Tasks |
 | QST-74 | P1: Modal de resposta | T32 | In Tasks |

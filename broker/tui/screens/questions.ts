@@ -44,8 +44,21 @@ export function absorbed(q: Question, squad: Squad): string[] {
 // For how long the question is with the dev, as `2m27s`
 export const waited = (q: Question, now: number): string => age(Math.max(0, Math.floor((now - (q.reached_human_ts ?? now)) / 1000)));
 
+// The line of the ticket of a question: its title in the plan and its reworks
+export function ticket(q: Question, squad: Squad): Seg[] {
+  if (q.ticket_ref === null) return [["ticket  ", "gray"], ["—", "gray"]];
+  const planned = squad.tickets.find((t) => t.ticket_ref === q.ticket_ref);
+  return [["ticket  ", "gray"], [q.ticket_ref, "bwhite", true], [(planned?.title ? " " + planned.title : "") + (planned?.reworks ? ` · rework ${Math.min(planned.reworks, 2)}/2` : ""), "white"]];
+}
+
+// `TKT-12 · chegou ao dev 14:29:40`: the thread of a question and when it reached the dev
+export const arrived = (q: Question, now: number): string => (q.ticket_ref === null ? "" : `${q.ticket_ref} · `) + "chegou ao dev " + clock(q.reached_human_ts ?? now);
+
+// The lines of a text under its name, which only the first one has
+export const labeled = (name: string, lines: string[]): Line[] => lines.map((line, i): Seg[] => [[i ? "        " : name, "gray"], [line, "white"]]);
+
 // The segments cut at `room` columns
-function fit(segs: Seg[], room: number): Seg[] {
+export function fit(segs: Seg[], room: number): Seg[] {
   return segs.flatMap((seg): Seg[] => {
     if (!seg || room <= 0) return [];
     const text = cut(seg[0], room);
@@ -118,19 +131,14 @@ function detail(view: View, q: Question | undefined): Line[] {
   if (!q) return [[["nenhuma pergunta aberta", "gray"]], [], [["os agentes seguem sem depender do dev.", "white"]]];
   const { squad } = view;
   const who = q.asked_by;
-  const ticket = squad.tickets.find((t) => t.ticket_ref === q.ticket_ref);
   const badge: [string, Color, boolean] = q.blocking ? ["[BLOQUEANTE]", "bred", true] : ["timeout " + mmss(left(q, squad.now)), "byellow", true];
   const since = "no dev há " + waited(q, squad.now);
-  const arrived = "chegou ao dev " + clock(q.reached_human_ts ?? squad.now);
   const merged = absorbed(q, squad);
-  const labeled = (name: string, lines: string[]): Line[] => lines.map((line, i): Seg[] => [[i ? "        " : name, "gray"], [line, "white"]]);
 
   const head: Line[] = [
     [[qid(q.id) + "  ", "bwhite", true], badge, [" ".repeat(Math.max(1, W - len(qid(q.id)) - 2 - len(badge[0]) - len(since))), "white"], [since, "gray"]],
-    q.ticket_ref === null
-      ? [["ticket  ", "gray"], ["—", "gray"]]
-      : fit([["ticket  ", "gray"], [q.ticket_ref, "bwhite", true], [(ticket?.title ? " " + ticket.title : "") + (ticket?.reworks ? ` · rework ${Math.min(ticket.reworks, 2)}/2` : ""), "white"]], W),
-    fit([["thread  ", "gray"], [q.ticket_ref === null ? arrived : `${q.ticket_ref} · ${arrived}`, "white"]], W),
+    fit(ticket(q, squad), W),
+    fit([["thread  ", "gray"], [arrived(q, squad.now), "white"]], W),
     [["origem  ", "gray"], [label(who) + " ", tone(who), true], [who, tone(who)], [q.blocking ? "  (só ele pausa)" : "  (segue com o default)", "gray"]],
     [["rota    ", "gray"], ...route(q)],
     ...(merged.length ? [fit([["dedup   ", "gray"], [[...merged, "mesclada pela mother"].join(" · "), "white"]], W)] : []),
