@@ -566,13 +566,13 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `waiting`: bloqueantes da chegada mais antiga para a mais recente, depois não-bloqueantes do prazo mais próximo para o mais distante; pergunta com holder agente, fechada ou mesclada fica fora
-- [ ] `resolved`: toda pergunta da feature que não está `open`, da resolução mais recente para a mais antiga
-- [ ] `effect`: os quatro textos de QST-59, comparados por inteiro
-- [ ] `outcome`: as cinco linhas de QST-61, comparadas por inteiro, inclusive a mesclada cuja de destino já fechou e a mesclada fechada pelo próprio `result`
-- [ ] `left` nunca é negativo: prazo passado dá 0
-- [ ] Testes em `test/unit/tui-asked.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `waiting`: bloqueantes da chegada mais antiga para a mais recente, depois não-bloqueantes do prazo mais próximo para o mais distante; pergunta com holder agente, fechada ou mesclada fica fora
+- [x] `resolved`: toda pergunta da feature que não está `open`, da resolução mais recente para a mais antiga
+- [x] `effect`: os quatro textos de QST-59, comparados por inteiro
+- [x] `outcome`: as cinco linhas de QST-61, comparadas por inteiro, inclusive a mesclada cuja de destino já fechou e a mesclada fechada pelo próprio `result`
+- [x] `left` nunca é negativo: prazo passado dá 0
+- [x] Testes em `test/unit/tui-asked.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
