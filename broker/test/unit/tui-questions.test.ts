@@ -197,7 +197,7 @@ test("QST-58, QST-59: the detail of a non-blocking question has its timeout, its
     "Setlist sem capa: placeholder genérico ou logo da 89?",
     "por quê ~12% das faixas do upstream chegam sem capa.",
     SEP,
-    "default logo da 89  · aplicado em 3:08 sem resposta",
+    "default  logo da 89  · aplicado em 3:08 sem resposta",
     SEP,
     "efeito  worker-2 troca o default pela sua resposta;",
     "        nada é refeito.",
@@ -265,7 +265,7 @@ test("QST-57: without open question the detail says the agents go on without the
 test("QST-98: the detail shows `timeout 0:00` and a default applied in 0:00 once the deadline passed", () => {
   const drawn = draw("04", { question: 8 }, 240_000).text();
   expect(side(drawn, 3)).toBe("Q-08  timeout 0:00" + " ".repeat(22) + "no dev há 4m52s");
-  expect(side(drawn, 12)).toBe("default logo da 89  · aplicado em 0:00 sem resposta");
+  expect(side(drawn, 12)).toBe("default  logo da 89  · aplicado em 0:00 sem resposta");
 });
 
 test("QST-96: a text, a reason, an option and a ticket that do not fit are broken or cut with `…` inside the detail", () => {

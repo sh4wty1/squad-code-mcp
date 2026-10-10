@@ -739,12 +739,12 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `test/unit/tui-frames.test.ts` desenha cada um com `questions` e `answer` por cima e compara as 40 linhas
-- [ ] 20a: o efeito escrito à mão da Q-09 é desvio D2, e o selo da linha 1 segue a regra de selos da TUI leitura (D1, como no frame 10)
-- [ ] Nenhum desvio dos cinco é D3
-- [ ] O detalhe de uma não-bloqueante desenha `default  <default>  · aplicado em m:ss sem resposta` com dois espaços depois de `default`, como o protótipo e a QST-58 corrigida; o teste de T24 que afirma a linha passa a esperar os dois espaços, e os frames 06 e 07 não ganham desvio por ela
-- [ ] O comentário `SPEC_DEVIATION` de `tui/asked.ts` sai: o design passou a dar `outcome(q)`
-- [ ] Gate build passa
+- [x] `test/unit/tui-frames.test.ts` desenha cada um com `questions` e `answer` por cima e compara as 40 linhas
+- [x] 20a: o efeito escrito à mão da Q-09 é desvio D2, e o selo da linha 1 segue a regra de selos da TUI leitura (D1, como no frame 10)
+- [x] Nenhum desvio dos cinco é D3
+- [x] O detalhe de uma não-bloqueante desenha `default  <default>  · aplicado em m:ss sem resposta` com dois espaços depois de `default`, como o protótipo e a QST-58 corrigida; o teste de T24 que afirma a linha passa a esperar os dois espaços, e os frames 06 e 07 não ganham desvio por ela
+- [x] O comentário `SPEC_DEVIATION` de `tui/asked.ts` sai: o design passou a dar `outcome(q)`
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build

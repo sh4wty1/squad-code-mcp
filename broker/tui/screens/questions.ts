@@ -143,11 +143,10 @@ function detail(view: View, q: Question | undefined): Line[] {
     [["rota    ", "gray"], ...route(q)],
     ...(merged.length ? [fit([["dedup   ", "gray"], [[...merged, "mesclada pela mother"].join(" · "), "white"]], W)] : []),
   ];
-  // One space after `default`, as QST-58 writes the line: the prototype has two
   const answers: Line[] =
     q.blocking || q.options.length
       ? [...q.options, null].map((option, i): Seg[] => [[` ${i + 1}  `, "bwhite", true], option === null ? ["outra resposta (texto livre)", "gray"] : [cut(option, W - 4), "white"]])
-      : [fit([["default ", "gray"], [q.default ?? "", "byellow", true], [`  · aplicado em ${mmss(left(q, squad.now))} sem resposta`, "gray"]], W)];
+      : [fit([["default  ", "gray"], [q.default ?? "", "byellow", true], [`  · aplicado em ${mmss(left(q, squad.now))} sem resposta`, "gray"]], W)];
   const does = clip(wrap(effect(q, squad), W - 8), 2, W - 8);
   // The text and the reason take what the other lines leave of the 22 of the panel
   const room = 22 - head.length - 3 - answers.length - does.length - 1;

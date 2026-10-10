@@ -29,8 +29,6 @@ export function effect(q: Question, squad: Squad): string {
 }
 
 // How a resolved question ended, as the second line of the history says it
-// SPEC_DEVIATION: the design gives it the squad too
-// Reason: every name of the line is in the question itself
 export function outcome(q: Question): Seg[] {
   // A merged one without an answer of its own stays so after the one it follows closes
   if (q.merged_into !== null && q.answered_by === null) {

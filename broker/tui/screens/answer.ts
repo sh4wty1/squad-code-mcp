@@ -35,7 +35,7 @@ function drawInput(g: Grid, x: number, y: number, w: number, h: number, text: st
   g.put(x + w - 2 - len(count), y + h - 1, count, "gray");
 }
 
-// The box centered in the 40 lines, over an empty margin, and its items
+// The box centered in the 40 lines, over an empty margin, and its items: 32 lines at most
 function drawModal(g: Grid, items: Item[], title: string, tone: Color) {
   const h = items.reduce((sum, item) => sum + rows(item), 2);
   let y = Math.floor((40 - h) / 2);
