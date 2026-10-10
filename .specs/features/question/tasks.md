@@ -279,12 +279,12 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] O `answer` gravado é comparado por inteiro: `from`, `to` igual ao `asked_by`, `summary` `Q-NN: <resposta>` cortado em 80, `body`, `ticket_ref`, coluna e `data`
-- [ ] Entrega só para o `asked_by`; nenhuma quando quem responde é o próprio `asked_by` de uma mesclada (coberto em T10) nem para o autor
-- [ ] A ordem de recusas de QST-22, par a par; `answer` só com espaços é `missing_field`
-- [ ] QST-38: a segunda resposta à mesma pergunta recebe `question_closed` e o log tem um só `answer` do `question_id`
-- [ ] Testes em `test/unit/question-answer.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] O `answer` gravado é comparado por inteiro: `from`, `to` igual ao `asked_by`, `summary` `Q-NN: <resposta>` cortado em 80, `body`, `ticket_ref`, coluna e `data`
+- [x] Entrega só para o `asked_by`; nenhuma quando quem responde é o próprio `asked_by` de uma mesclada (coberto em T10) nem para o autor
+- [x] A ordem de recusas de QST-22, par a par; `answer` só com espaços é `missing_field`
+- [x] QST-38: a segunda resposta à mesma pergunta recebe `question_closed` e o log tem um só `answer` do `question_id`
+- [x] Testes em `test/unit/question-answer.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

@@ -384,9 +384,9 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-18 | P1: Escalar | T7 | Implementing |
 | QST-19 | P1: Escalar | T7, T11 | Implementing |
 | QST-20 | P1: Responder como holder | T1, T8 | Implementing |
-| QST-21 | P1: Responder como holder | T8 | In Tasks |
-| QST-22 | P1: Responder como holder | T8 | In Tasks |
-| QST-23 | P1: Responder como holder | T8 | In Tasks |
+| QST-21 | P1: Responder como holder | T8 | Implementing |
+| QST-22 | P1: Responder como holder | T8 | Implementing |
+| QST-23 | P1: Responder como holder | T8 | Implementing |
 | QST-24 | P1: Responder como dev | T9 | In Tasks |
 | QST-25 | P1: Responder como dev | T9 | In Tasks |
 | QST-26 | P1: Responder como dev | T9, T16 | In Tasks |
@@ -401,7 +401,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-35 | P1: Prazo, default e resolução única | T11, T16 | In Tasks |
 | QST-36 | P1: Prazo, default e resolução única | T12, T13 | In Tasks |
 | QST-37 | P1: Prazo, default e resolução única | T12 | In Tasks |
-| QST-38 | P1: Prazo, default e resolução única | T8 | In Tasks |
+| QST-38 | P1: Prazo, default e resolução única | T8 | Implementing |
 | QST-39 | P1: Prazo, default e resolução única | T12, T13 | In Tasks |
 | QST-40 | P1: Prazo, default e resolução única | T11 | In Tasks |
 | QST-41 | P1: Prazo, default e resolução única | T11 | In Tasks |

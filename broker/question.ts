@@ -1,10 +1,10 @@
 /**
- * squad broker /ask and /escalate
+ * squad broker /ask, /escalate and /answer
  *
  * An agent asks the level above what the spec does not settle, and the question
- * keeps its id until it closes (ADR-005): who holds it and cannot answer passes
- * it one level up. The table `questions` is the state the rules decide over: its
- * row, the event and the delivery are written together or not at all.
+ * keeps its id until it closes (ADR-005): who holds it answers who asked, or
+ * passes it one level up. The table `questions` is the state the rules decide
+ * over: its row, the event and the delivery are written together or not at all.
  */
 
 import type { Database } from "bun:sqlite";
@@ -35,6 +35,14 @@ function isTexts(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
+// Who closes a question, and with what
+interface Resolution {
+  from: string;
+  role_from: string;
+  answer: string;
+  resolved_by: "human" | "agent" | "timeout_default" | "result_default";
+}
+
 export function createQuestion(db: Database, log: Log, token: string, now: () => number = Date.now) {
   function find(id: number): QuestionRow | null {
     return db.query("SELECT * FROM questions WHERE id = ?").get(id) as QuestionRow | null;
@@ -45,6 +53,32 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
   function deadline(seq: number, to: string, blocking: boolean, timeout_s: number | null): number | null {
     if (to !== "human" || blocking) return null;
     return log.after(seq - 1)[0]!.ts + (timeout_s ?? TIMEOUT_S) * 1000;
+  }
+
+  // The only place a question closes by an `answer`. The status is read and the answer
+  // written in one transaction, so a question has one answer, the first to come (QST-38).
+  // Returns the seq of the answer, or null when the question is not open.
+  function resolve(id: number, by: Resolution): number | null {
+    return log.transaction(() => {
+      const row = find(id)!;
+      if (row.status !== "open") return null;
+      const seq = log.record({
+        kind: "answer",
+        from: by.from,
+        role_from: by.role_from,
+        to: row.asked_by,
+        summary: `${qid(id)}: ${by.answer}`.slice(0, SUMMARY_MAX),
+        body: by.answer,
+        ticket_ref: row.ticket_ref,
+        question_id: id,
+        // Who asked waits for it, unless it is who answers
+        recipients: [row.asked_by].filter((name) => name !== by.from),
+        data: { question_id: id, answer: by.answer, resolved_by: by.resolved_by },
+      });
+      const status = by.resolved_by === "human" || by.resolved_by === "agent" ? "answered" : "defaulted";
+      db.run("UPDATE questions SET status = ?, answer_seq = ? WHERE id = ?", [status, seq, id]);
+      return seq;
+    });
   }
 
   // `peer` is who the id of the request belongs to and `body` the JSON object received
@@ -213,5 +247,31 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
     });
   }
 
-  return { ask, escalate };
+  // The holder answers who asked. The answer is stored as it came.
+  function answer(peer: Caller, body: Record<string, unknown>): Answer {
+    const no = (error: string, hint: string) => log.refused(peer.name, "answer", error, hint);
+
+    const { question_id, answer: text } = body;
+    if (!Number.isInteger(question_id) || typeof text !== "string" || text.trim() === "") {
+      return no(
+        "missing_field",
+        "Send question_id as the integer id of the question and answer as a string with the answer in it."
+      );
+    }
+    const row = find(question_id as number);
+    if (!row) {
+      return no("invalid_field", "question_id is the id of a question: the one of the question you received.");
+    }
+    if (row.status === "open" && row.holder !== peer.name) {
+      return no("not_holder", `${qid(row.id)} is with ${row.holder}. Only who holds a question answers it.`);
+    }
+    // Whether it is closed is for `resolve` to say, in the transaction of the answer
+    const seq = resolve(row.id, { from: peer.name, role_from: peer.role, answer: text, resolved_by: "agent" });
+    if (seq === null) {
+      return no("question_closed", `${qid(row.id)} is closed and takes no answer. Go on without it.`);
+    }
+    return { ok: true, seq };
+  }
+
+  return { ask, escalate, answer };
 }
