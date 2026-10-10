@@ -414,6 +414,19 @@ test("QST-78: a chunk that opens the modal in the text mode and goes on with a t
   }
 });
 
+test("QST-78: a chunk that opens the modal of a question with options and ends in a line break posts nothing", async () => {
+  const { t, key, stop } = launch();
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    // the tab, enter over Q-07, a text and enter, pasted as one
+    key("4\rtexto\r");
+    expect(t.posts).toEqual([]);
+    expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 7, modal: modal(7, { choice: 0 }) })));
+  } finally {
+    stop();
+  }
+});
+
 test("QST-80, QST-81: a broker that fails leaves the modal to send again with the error in the footer, and the refusal of a closed question leaves it refused until esc", async () => {
   const { t, key, stop } = launch();
   try {

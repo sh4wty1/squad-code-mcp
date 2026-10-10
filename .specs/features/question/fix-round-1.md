@@ -108,3 +108,14 @@ tarefa marcada aqui.
 - [x] QST-67: `enter` com o foco no histórico abre o modal da selecionada e leva o foco à lista; QST-65: `b` dentro da aba leva o foco à lista
 - [x] QST-82: com um envio em curso e a pergunta fora das perguntas da feature aberta, `sync` não fecha o modal; ele fecha quando o resultado do envio chega
 - [x] Gate build passa
+
+### F11: Um bloco colado não confirma opção
+
+**Lacuna**: achada ao escrever F8. Com a regra tecla a tecla, `\rtexto\r` na aba sobre uma pergunta com opções abria o modal no modo escolha e o último `\r` enviava a opção 1. A spec passou a dizer que, no modo escolha, a quebra de linha de um bloco é ignorada.
+**Where**: `broker/tui/keys.ts`
+**Requirement**: QST-78
+
+- [x] `\rtexto\r` num bloco só, na aba sobre uma pergunta com opções, abre o modal e deixa `send` nulo, com o modal no modo escolha na opção 1; `4\rtexto\r` da tela principal sobre a Q-07 não faz `POST`
+- [x] Um bloco que é só `\r` no modo escolha continua confirmando a opção selecionada
+- [x] Os testes de QST-78 que já existiam mantêm o resultado esperado, menos os dois de F8 que afirmavam a regra antiga: `2\r` num bloco no modo escolha não envia mais a opção 2, só a seleciona, e `4\rtexto\r` sobre o modal aberto não passa mais ao modo texto por `outra resposta…`, só seleciona a linha
+- [x] Gate quick e gate build passam

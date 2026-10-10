@@ -447,9 +447,8 @@ test("QST-78: in a chunk of more than one key into the text mode a line break be
   expect(keysOf(UP + "\r")).toEqual([UP, "\r"]);
   expect(typed(UP + "\r")).toEqual([" "]);
   expect(keysOf(UP)).toEqual([UP]);
-  // Outside the text mode enter is enter: in the choice mode and with no modal
+  // With no modal enter is enter
   expect(keysOf("2\r")).toEqual(["2", "\r"]);
-  expect(chunk("2\r", open("05")).send).toEqual({ question_id: 7, answer: "5 tentativas" });
   expect(keysOf("j\r" + DOWN)).toEqual(["j", "\r", DOWN]);
   const tab = view("04", { question: 7 });
   expect(chunk("j\r" + DOWN, tab)).toEqual({ ...tab.ui, question: 8, modal: opened(8, null) });
@@ -465,15 +464,31 @@ test("QST-78: a pasted block with line breaks goes into the text and sends nothi
 });
 
 test("QST-78: a line break of a chunk becomes a space also when a key before it in the same chunk took the modal to the text mode", () => {
-  // In the choice mode of Q-07 the fourth line is the other answer, and enter over it goes to the text mode
-  const choosing = open("05");
-  expect(chunk("4\rtexto\r", choosing)).toEqual({ ...choosing.ui, modal: { ...m(choosing), choice: null, text: "texto " } });
   // Q-08 has no options: enter on the tab, or on the feed over its question, opens its modal in the text mode
   const tab = view("04", { question: 8 });
   expect(chunk("\rtexto\r\n", tab)).toEqual({ ...tab.ui, modal: { ...opened(8, null), text: "texto  " } });
   const main = view("01", { selected: 428 });
   expect(chunk("\rtexto\n", main)).toEqual({ ...main.ui, screen: "questions", question: 8, qfocus: "list", modal: { ...opened(8, null), text: "texto " } });
   // The same keys one chunk each are typed, and the last enter sends
+  const typed = ["\r", ..."texto", "\r"].reduce((ui, k) => input(ui, k, { ...tab, ui })!, tab.ui);
+  expect(typed.send).toEqual({ question_id: 8, answer: "texto" });
+});
+
+test("QST-78: in the choice mode a line break of a chunk of more than one key is ignored, and confirms no option", () => {
+  // Q-07 has three options: enter on the tab opens its modal on the first, where the letters do nothing
+  const tab = view("04", { question: 7 });
+  expect(chunk("\rtexto\r", tab)).toEqual({ ...tab.ui, modal: opened(7, 0) });
+  // From the main screen 4 shows the tab, and Q-07 is the first of its list
+  const main = view("01", { selected: 417 });
+  expect(chunk("4\rtexto\r", main)).toEqual({ ...main.ui, screen: "questions", question: 7, qfocus: "list", modal: opened(7, 0) });
+  // A digit of the chunk selects its line, and the break after it neither confirms it nor goes to the text mode
+  const choosing = open("05");
+  expect(chunk("2\r", choosing)).toEqual({ ...choosing.ui, modal: { ...m(choosing), choice: 1 } });
+  expect(chunk("2\r\n", choosing)).toEqual({ ...choosing.ui, modal: { ...m(choosing), choice: 1 } });
+  expect(chunk("4\rtexto\r", choosing)).toEqual({ ...choosing.ui, modal: { ...m(choosing), choice: 3 } });
+  // A chunk that is enter alone confirms the selected option, and over the other answer goes to the text mode
+  const second = open("05", { choice: 1 });
+  expect(chunk("\r", second)).toEqual({ ...second.ui, modal: { ...m(second), sending: true }, send: { question_id: 7, answer: "5 tentativas" } });
   const typed = ["4", "\r", ..."texto", "\r"].reduce((ui, k) => input(ui, k, { ...choosing, ui })!, choosing.ui);
   expect(typed.send).toEqual({ question_id: 7, answer: "texto" });
 });
