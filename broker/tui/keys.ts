@@ -7,7 +7,7 @@ import type { Color } from "./grid.ts";
 import { threadTicket } from "./screens/thread.ts";
 import type { Ui, View } from "./view.ts";
 
-export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0 };
+export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null };
 
 // How long the notice of a key stays in the footer
 const TOAST_MS = 4000;

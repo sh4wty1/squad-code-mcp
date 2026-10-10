@@ -27,7 +27,8 @@ import { thread } from "./tui/screens/thread.ts";
 import { topology } from "./tui/screens/topology.ts";
 import type { Ui, View } from "./tui/view.ts";
 
-const SCREENS = { main, topology, thread, help };
+// The tab of questions shows the main screen until T35 wires its own
+const SCREENS = { main, topology, thread, help, questions: main };
 
 // One complete key: a CSI escape sequence, or a character
 const KEY = /\x1b\[[0-9;]*[A-Za-z~]|[\s\S]/gu;

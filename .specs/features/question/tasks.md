@@ -528,8 +528,8 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `tsc` passa com os campos novos em `START`, em `frameView` e em todo teste que constrói um `Ui`
-- [ ] Nenhuma tela muda: gate build passa com a mesma contagem de testes
+- [x] `tsc` passa com os campos novos em `START`, em `frameView` e em todo teste que constrói um `Ui`
+- [x] Nenhuma tela muda: gate build passa com a mesma contagem de testes
 
 **Tests**: none
 **Gate**: build

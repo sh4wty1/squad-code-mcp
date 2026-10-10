@@ -22,7 +22,7 @@ const UP = "\x1b[A";
 const DOWN = "\x1b[B";
 
 test("the screen starts on the main one, with no line selected, the feed in focus and the tokens of the feature", () => {
-  expect(START).toEqual({ screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0 });
+  expect(START).toEqual({ screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null });
 });
 
 test("TUI-62: 1, 2, 3 and ? change the screen and esc goes back to the main one", () => {

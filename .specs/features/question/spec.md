@@ -427,7 +427,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-61 | P1: Aba Perguntas | T22, T25 | In Tasks |
 | QST-62 | P1: Aba Perguntas | T25 | In Tasks |
 | QST-63 | P1: Aba Perguntas | T25, T31 | In Tasks |
-| QST-64 | P1: Aba Perguntas | T20, T23, T31 | In Tasks |
+| QST-64 | P1: Aba Perguntas | T20, T23, T31 | Implementing |
 | QST-65 | P1: Aba Perguntas | T31 | In Tasks |
 | QST-66 | P1: Aba Perguntas | T31 | In Tasks |
 | QST-67 | P1: Aba Perguntas | T31 | In Tasks |
