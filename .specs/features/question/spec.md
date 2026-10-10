@@ -223,8 +223,8 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 2. **QST-34** The broker SHALL conferir os prazos ao subir, antes de atender a primeira requisição, e depois a cada 1000 ms.
 3. **QST-35** WHEN o broker sobe sobre um banco com pergunta `open` de `deadline_ts` já vencido THEN o broker SHALL fechá-la como em QST-33 nessa subida; uma pergunta de prazo ainda não vencido SHALL fechar no `deadline_ts` gravado, não num prazo recontado.
 4. **QST-36** WHEN `/send` grava o `result` de um worker para o judge com `ticket_ref` T THEN o broker SHALL gravar na mesma transação, depois do `result` e do `unblocked` se houver, um `answer` de `broker` com o `default_answer` e `resolved_by` `result_default` para cada pergunta não-bloqueante com `asked_by` igual a quem envia, `ticket_ref` igual a T e `status` `open` ou `merged`, em ordem crescente de id, e pôr cada uma em `defaulted`.
-5. **QST-37** WHEN o `result` fecha uma pergunta `merged` THEN o broker SHALL fechar só ela, sem mudar a pergunta de destino; depois disso o `answer` da de destino SHALL não ser entregue ao `asked_by` dela por causa dessa mescla nem mudar a sua linha.
-6. **QST-38** The broker SHALL gravar no máximo um `answer` com `resolved_by` de cada `question_id` que não seja de mesclada fechada por QST-37: a decisão de gravar e a leitura do `status` `open` acontecem na mesma transação, e quem chega depois recebe `question_closed`.
+5. **QST-37** WHEN o `result` fecha uma pergunta `merged` THEN o broker SHALL fechar ela e as mescladas dela (QST-31), sem mudar a pergunta de destino; depois disso o `answer` da de destino SHALL não ser entregue ao `asked_by` dela por causa dessa mescla nem mudar a sua linha.
+6. **QST-38** The broker SHALL gravar no máximo um `answer` por `question_id`: a leitura do `status` e a gravação acontecem na mesma transação, e quem chega depois recebe `question_closed`.
 7. **QST-39** IF o `result` é de um worker com pergunta bloqueante aberta do mesmo ticket, com não-bloqueante de outro ticket ou sem `ticket_ref`, ou é o `result` do leader para a mother THEN o broker SHALL não fechar essas perguntas.
 8. **QST-40** WHILE uma pergunta bloqueante está aberta the broker SHALL mantê-la `open` sem prazo, qualquer que seja o tempo passado.
 9. **QST-41** WHEN o prazo de uma pergunta e a resposta do dev a ela chegam no mesmo instante THEN o log SHALL ter exatamente um `answer` daquele `question_id`: o que foi gravado primeiro.
@@ -245,7 +245,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 2. **QST-43** WHEN `/close-feature` fecha a feature, com `delivered` ou `abandoned` THEN o broker SHALL pôr, na mesma transação, cada pergunta `open` ou `merged` da feature em `defaulted` se `default_answer` não é nulo, senão em `discarded`, com `answer_seq` nulo, sem gravar `answer`.
 3. **QST-44** WHEN uma pergunta foi fechada por QST-43 THEN `/answer`, `/escalate` e `/merge-question` sobre ela SHALL responder `question_closed`, e a conferência de prazos SHALL não gravar `answer` para ela.
 4. **QST-45** The broker SHALL nunca apagar uma linha de `questions`.
-5. **QST-46** The função `questions(eventos)` SHALL dar a cada pergunta um `status`: `answered` com `answer` próprio de `resolved_by` `human` ou `agent`; `defaulted` com `answer` próprio de `timeout_default` ou `result_default`; para a mesclada sem `answer` próprio, o status da pergunta de destino quando ela já fechou, senão `merged`; para a que não tem nenhuma dessas resoluções, `defaulted` com default ou `discarded` sem ele quando os eventos têm o `feature_closed` da feature, senão `open`.
+5. **QST-46** The função `questions(eventos)` SHALL dar a cada pergunta um `status`, pela primeira regra que valer: `answered` com `answer` próprio de `resolved_by` `human` ou `agent`; `defaulted` com `answer` próprio de `timeout_default` ou `result_default`; para a mesclada sem `answer` próprio, o status e o `answer_seq` da pergunta de destino quando a de destino tem `answer`, próprio ou herdado de outra mescla; `defaulted` se a própria pergunta tem default, ou `discarded` se não tem, quando os eventos têm o `feature_closed` da feature; `merged` se foi mesclada; `open`.
 6. **QST-47** The função `questions(eventos)` SHALL dar a cada pergunta `open` falso sempre que o `status` não é `open`.
 7. **QST-48** WHEN qualquer sequência de chamadas aceitas e recusadas desta fatia, de `/send` e de `/close-feature` termina THEN, para cada feature, `questions()` aplicada aos eventos daquela feature SHALL dar, para cada linha de `questions` da feature e só para elas, os mesmos `id`, `asked_by`, `holder`, `blocking`, `ticket_ref`, `default_answer`, `status`, `merged_into`, `deadline_ts` e `answer_seq`.
 8. **QST-49** The função `questions(eventos)` SHALL dar a cada pergunta o texto, o `why`, as `options` e o `default` do primeiro `question`, o `timeout_s` e a chegada do primeiro `question` com `to` `human`, a hora e o autor do `answer` que a resolveu, a hora do `question_merged` que a mesclou e os ids das perguntas mescladas nela.
@@ -364,106 +364,106 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| QST-01 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-02 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-03 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-04 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-05 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-06 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-07 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-08 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-09 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-10 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-11 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-12 | P1: Perguntar ao nível de cima | - | Pending |
-| QST-13 | P1: Escalar | - | Pending |
-| QST-14 | P1: Escalar | - | Pending |
-| QST-15 | P1: Escalar | - | Pending |
-| QST-16 | P1: Escalar | - | Pending |
-| QST-17 | P1: Escalar | - | Pending |
-| QST-18 | P1: Escalar | - | Pending |
-| QST-19 | P1: Escalar | - | Pending |
-| QST-20 | P1: Responder como holder | - | Pending |
-| QST-21 | P1: Responder como holder | - | Pending |
-| QST-22 | P1: Responder como holder | - | Pending |
-| QST-23 | P1: Responder como holder | - | Pending |
-| QST-24 | P1: Responder como dev | - | Pending |
-| QST-25 | P1: Responder como dev | - | Pending |
-| QST-26 | P1: Responder como dev | - | Pending |
-| QST-27 | P1: Responder como dev | - | Pending |
-| QST-28 | P1: Responder como dev | - | Pending |
-| QST-29 | P1: Mesclar | - | Pending |
-| QST-30 | P1: Mesclar | - | Pending |
-| QST-31 | P1: Mesclar | - | Pending |
-| QST-32 | P1: Mesclar | - | Pending |
-| QST-33 | P1: Prazo, default e resolução única | - | Pending |
-| QST-34 | P1: Prazo, default e resolução única | - | Pending |
-| QST-35 | P1: Prazo, default e resolução única | - | Pending |
-| QST-36 | P1: Prazo, default e resolução única | - | Pending |
-| QST-37 | P1: Prazo, default e resolução única | - | Pending |
-| QST-38 | P1: Prazo, default e resolução única | - | Pending |
-| QST-39 | P1: Prazo, default e resolução única | - | Pending |
-| QST-40 | P1: Prazo, default e resolução única | - | Pending |
-| QST-41 | P1: Prazo, default e resolução única | - | Pending |
-| QST-42 | P1: Encerramento da feature e paridade com o log | - | Pending |
-| QST-43 | P1: Encerramento da feature e paridade com o log | - | Pending |
-| QST-44 | P1: Encerramento da feature e paridade com o log | - | Pending |
-| QST-45 | P1: Encerramento da feature e paridade com o log | - | Pending |
-| QST-46 | P1: Encerramento da feature e paridade com o log | - | Pending |
-| QST-47 | P1: Encerramento da feature e paridade com o log | - | Pending |
-| QST-48 | P1: Encerramento da feature e paridade com o log | - | Pending |
-| QST-49 | P1: Encerramento da feature e paridade com o log | - | Pending |
-| QST-50 | P1: Encerramento da feature e paridade com o log | - | Pending |
-| QST-51 | P1: O que o agente vê | - | Pending |
-| QST-52 | P1: O que o agente vê | - | Pending |
-| QST-53 | P1: O que o agente vê | - | Pending |
-| QST-54 | P1: O que o agente vê | - | Pending |
-| QST-55 | P1: Aba Perguntas | - | Pending |
-| QST-56 | P1: Aba Perguntas | - | Pending |
-| QST-57 | P1: Aba Perguntas | - | Pending |
-| QST-58 | P1: Aba Perguntas | - | Pending |
-| QST-59 | P1: Aba Perguntas | - | Pending |
-| QST-60 | P1: Aba Perguntas | - | Pending |
-| QST-61 | P1: Aba Perguntas | - | Pending |
-| QST-62 | P1: Aba Perguntas | - | Pending |
-| QST-63 | P1: Aba Perguntas | - | Pending |
-| QST-64 | P1: Aba Perguntas | - | Pending |
-| QST-65 | P1: Aba Perguntas | - | Pending |
-| QST-66 | P1: Aba Perguntas | - | Pending |
-| QST-67 | P1: Aba Perguntas | - | Pending |
-| QST-68 | P1: Aba Perguntas | - | Pending |
-| QST-69 | P1: Aba Perguntas | - | Pending |
-| QST-70 | P1: Modal de resposta | - | Pending |
-| QST-71 | P1: Modal de resposta | - | Pending |
-| QST-72 | P1: Modal de resposta | - | Pending |
-| QST-73 | P1: Modal de resposta | - | Pending |
-| QST-74 | P1: Modal de resposta | - | Pending |
-| QST-75 | P1: Modal de resposta | - | Pending |
-| QST-76 | P1: Modal de resposta | - | Pending |
-| QST-77 | P1: Modal de resposta | - | Pending |
-| QST-78 | P1: Modal de resposta | - | Pending |
-| QST-79 | P1: Modal de resposta | - | Pending |
-| QST-80 | P1: Modal de resposta | - | Pending |
-| QST-81 | P1: Modal de resposta | - | Pending |
-| QST-82 | P1: Modal de resposta | - | Pending |
-| QST-83 | P1: Modal de resposta | - | Pending |
-| QST-84 | P1: Modal de resposta | - | Pending |
-| QST-85 | P1: Modal de resposta | - | Pending |
-| QST-86 | P1: Modal de resposta | - | Pending |
-| QST-87 | P1: Modal de resposta | - | Pending |
-| QST-88 | P2: Legenda e tabela de desvios | - | Pending |
-| QST-89 | P2: Legenda e tabela de desvios | - | Pending |
-| QST-90 | P2: Legenda e tabela de desvios | - | Pending |
-| QST-91 | P2: Legenda e tabela de desvios | - | Pending |
-| QST-92 | Edge cases | - | Pending |
-| QST-93 | Edge cases | - | Pending |
-| QST-94 | Edge cases | - | Pending |
-| QST-95 | Edge cases | - | Pending |
-| QST-96 | Edge cases | - | Pending |
-| QST-97 | Edge cases | - | Pending |
-| QST-98 | Edge cases | - | Pending |
+| QST-01 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-02 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-03 | P1: Perguntar ao nível de cima | T3, T6 | In Tasks |
+| QST-04 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-05 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-06 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-07 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-08 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-09 | P1: Perguntar ao nível de cima | T6, T8 | In Tasks |
+| QST-10 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-11 | P1: Perguntar ao nível de cima | T15 | In Tasks |
+| QST-12 | P1: Perguntar ao nível de cima | T6, T16 | In Tasks |
+| QST-13 | P1: Escalar | T7 | In Tasks |
+| QST-14 | P1: Escalar | T7 | In Tasks |
+| QST-15 | P1: Escalar | T7 | In Tasks |
+| QST-16 | P1: Escalar | T7 | In Tasks |
+| QST-17 | P1: Escalar | T7 | In Tasks |
+| QST-18 | P1: Escalar | T7 | In Tasks |
+| QST-19 | P1: Escalar | T7, T11 | In Tasks |
+| QST-20 | P1: Responder como holder | T1, T8 | In Tasks |
+| QST-21 | P1: Responder como holder | T8 | In Tasks |
+| QST-22 | P1: Responder como holder | T8 | In Tasks |
+| QST-23 | P1: Responder como holder | T8 | In Tasks |
+| QST-24 | P1: Responder como dev | T9 | In Tasks |
+| QST-25 | P1: Responder como dev | T9 | In Tasks |
+| QST-26 | P1: Responder como dev | T9, T16 | In Tasks |
+| QST-27 | P1: Responder como dev | T9 | In Tasks |
+| QST-28 | P1: Responder como dev | T9, T16 | In Tasks |
+| QST-29 | P1: Mesclar | T10 | In Tasks |
+| QST-30 | P1: Mesclar | T10 | In Tasks |
+| QST-31 | P1: Mesclar | T10 | In Tasks |
+| QST-32 | P1: Mesclar | T10 | In Tasks |
+| QST-33 | P1: Prazo, default e resolução única | T11 | In Tasks |
+| QST-34 | P1: Prazo, default e resolução única | T16 | In Tasks |
+| QST-35 | P1: Prazo, default e resolução única | T11, T16 | In Tasks |
+| QST-36 | P1: Prazo, default e resolução única | T12, T13 | In Tasks |
+| QST-37 | P1: Prazo, default e resolução única | T12 | In Tasks |
+| QST-38 | P1: Prazo, default e resolução única | T8 | In Tasks |
+| QST-39 | P1: Prazo, default e resolução única | T12, T13 | In Tasks |
+| QST-40 | P1: Prazo, default e resolução única | T11 | In Tasks |
+| QST-41 | P1: Prazo, default e resolução única | T11 | In Tasks |
+| QST-42 | P1: Encerramento da feature e paridade com o log | T2 | In Tasks |
+| QST-43 | P1: Encerramento da feature e paridade com o log | T14 | In Tasks |
+| QST-44 | P1: Encerramento da feature e paridade com o log | T14 | In Tasks |
+| QST-45 | P1: Encerramento da feature e paridade com o log | T18 | In Tasks |
+| QST-46 | P1: Encerramento da feature e paridade com o log | T4 | In Tasks |
+| QST-47 | P1: Encerramento da feature e paridade com o log | T4 | In Tasks |
+| QST-48 | P1: Encerramento da feature e paridade com o log | T18 | In Tasks |
+| QST-49 | P1: Encerramento da feature e paridade com o log | T4 | In Tasks |
+| QST-50 | P1: Encerramento da feature e paridade com o log | T3 | In Tasks |
+| QST-51 | P1: O que o agente vê | T5 | In Tasks |
+| QST-52 | P1: O que o agente vê | T17 | In Tasks |
+| QST-53 | P1: O que o agente vê | T17 | In Tasks |
+| QST-54 | P1: O que o agente vê | T17 | In Tasks |
+| QST-55 | P1: Aba Perguntas | T22, T23 | In Tasks |
+| QST-56 | P1: Aba Perguntas | T23 | In Tasks |
+| QST-57 | P1: Aba Perguntas | T23 | In Tasks |
+| QST-58 | P1: Aba Perguntas | T24 | In Tasks |
+| QST-59 | P1: Aba Perguntas | T22, T24 | In Tasks |
+| QST-60 | P1: Aba Perguntas | T22, T25 | In Tasks |
+| QST-61 | P1: Aba Perguntas | T22, T25 | In Tasks |
+| QST-62 | P1: Aba Perguntas | T25 | In Tasks |
+| QST-63 | P1: Aba Perguntas | T25, T31 | In Tasks |
+| QST-64 | P1: Aba Perguntas | T20, T23, T31 | In Tasks |
+| QST-65 | P1: Aba Perguntas | T31 | In Tasks |
+| QST-66 | P1: Aba Perguntas | T31 | In Tasks |
+| QST-67 | P1: Aba Perguntas | T31 | In Tasks |
+| QST-68 | P1: Aba Perguntas | T33 | In Tasks |
+| QST-69 | P1: Aba Perguntas | T21, T26, T37 | In Tasks |
+| QST-70 | P1: Modal de resposta | T27 | In Tasks |
+| QST-71 | P1: Modal de resposta | T27 | In Tasks |
+| QST-72 | P1: Modal de resposta | T32 | In Tasks |
+| QST-73 | P1: Modal de resposta | T28 | In Tasks |
+| QST-74 | P1: Modal de resposta | T32 | In Tasks |
+| QST-75 | P1: Modal de resposta | T28 | In Tasks |
+| QST-76 | P1: Modal de resposta | T32, T35 | In Tasks |
+| QST-77 | P1: Modal de resposta | T33 | In Tasks |
+| QST-78 | P1: Modal de resposta | T32 | In Tasks |
+| QST-79 | P1: Modal de resposta | T32, T35 | In Tasks |
+| QST-80 | P1: Modal de resposta | T29, T33 | In Tasks |
+| QST-81 | P1: Modal de resposta | T33, T34 | In Tasks |
+| QST-82 | P1: Modal de resposta | T33 | In Tasks |
+| QST-83 | P1: Modal de resposta | T35 | In Tasks |
+| QST-84 | P1: Modal de resposta | T33, T35 | In Tasks |
+| QST-85 | P1: Modal de resposta | T32 | In Tasks |
+| QST-86 | P1: Modal de resposta | T34, T35, T38 | In Tasks |
+| QST-87 | P1: Modal de resposta | T21, T30, T37 | In Tasks |
+| QST-88 | P2: Legenda e tabela de desvios | T36 | In Tasks |
+| QST-89 | P2: Legenda e tabela de desvios | T26, T30, T36 | In Tasks |
+| QST-90 | P2: Legenda e tabela de desvios | T19 | In Tasks |
+| QST-91 | P2: Legenda e tabela de desvios | T31, T36 | In Tasks |
+| QST-92 | Edge cases | T10 | In Tasks |
+| QST-93 | Edge cases | T10 | In Tasks |
+| QST-94 | Edge cases | T6 | In Tasks |
+| QST-95 | Edge cases | T7 | In Tasks |
+| QST-96 | Edge cases | T23, T28 | In Tasks |
+| QST-97 | Edge cases | T23 | In Tasks |
+| QST-98 | Edge cases | T22, T28 | In Tasks |
 
-**Coverage:** 98 total, 0 mapped to tasks, 98 unmapped ⚠️
+**Coverage:** 98 total, 98 mapped to tasks, 0 unmapped.
 
 ---
 

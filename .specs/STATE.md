@@ -92,25 +92,48 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 - **Date**: 2026-10-09
 - **Status**: active
 
+### AD-012
+- **Decision**: O `feature_closed` encerra as perguntas da feature, em `delivered` e em `abandoned`, sem evento novo. Na tabela `questions` a pergunta vira `defaulted` se tem default e `discarded` se não tem, um quinto status que o design não lista; a derivação trata pergunta de feature fechada do mesmo jeito.
+- **Reason**: O design só diz "resolvidas pelo default ou descartadas" e não dá evento nem status para isso. O `feature_closed` já é entregue a todos, e o envelope do ADR-004 fica como está. Decidido pelo dev em 2026-10-10.
+- **Trade-off**: O log não diz, pergunta a pergunta, o que aconteceu no encerramento, e o resumo da feature fechada não conta essas perguntas como respondidas nem como default. Um agente pausado numa bloqueante só sabe que ela acabou pelo `feature_closed`.
+- **Scope**: `broker/log.ts`, `broker/shared/derive.ts`, tabela `questions`, e a fatia Gate, que tem o mesmo caso com gates pendentes. Detalha o ADR-005.
+- **Date**: 2026-10-10
+- **Status**: active
+
+### AD-013
+- **Decision**: O que uma pergunta é sai do primeiro `question` dela: texto (`body`, ou `summary` se o `body` é vazio), `why`, `options`, `default`, `asked_by` e `blocking`. `/escalate` copia esses campos e o `timeout_s` para cada `question` novo; o `summary` e o `body` de quem escala são a nota do salto e aparecem só no feed e no thread.
+- **Reason**: Os frames têm um texto por pergunta e `/escalate` aceita `summary` e `body` novos a cada salto. É a regra que a derivação já usava para `asked_by`, `blocking` e `default`. Decidido pelo dev em 2026-10-10.
+- **Trade-off**: A mother não consegue reescrever a pergunta para o dev: se o texto do worker é ruim, o dev lê o texto ruim. A skill de papel tem de fazer o agente perguntar direito na origem.
+- **Scope**: `broker/question.ts`, `broker/shared/derive.ts`, TUI e as skills da fatia Papéis. Detalha o ADR-005.
+- **Date**: 2026-10-10
+- **Status**: active
+
+### AD-014
+- **Decision**: A TUI escreve por um comando que o redutor de teclas deixa no estado (`Ui.send`); o laço de `tui.ts` faz o `POST` e devolve o resultado a outro redutor puro (`settle`). A credencial humana é lida do arquivo a cada envio.
+- **Reason**: `press` é pura e testada sem rede; um `fetch` dentro dela acabaria com isso. O broker pode criar o arquivo do token depois de a TUI subir.
+- **Trade-off**: Um envio são dois passos no estado, e enquanto ele espera resposta o modal não aceita tecla.
+- **Scope**: `broker/tui/keys.ts`, `broker/tui.ts`, e os modais de gate e de permissão da fatia Gate. Detalha o AD-007 e o AD-010.
+- **Date**: 2026-10-10
+- **Status**: active
+
 ## Handoff
 
 Atualizado em 2026-10-10.
 
-- **Feature**: Question, `.specs/features/question/` (ainda sem arquivos).
-- **Phase / Task**: Specify, não iniciada.
-- **Completed**: nada desta fatia. A TUI leitura entrou na `main` pelo PR 8 (merge `9a4d921`, 2026-10-10).
+- **Feature**: Question, `.specs/features/question/`.
+- **Phase / Task**: Execute, antes da T1. Spec (98 requisitos), design e tarefas (38, em 7 fases) escritos e validados.
+- **Completed**: nenhuma tarefa. A TUI leitura entrou na `main` pelo PR 8 (merge `9a4d921`, 2026-10-10).
 - **In-progress** (file:line): nada.
-- **Next step**: escrever a spec da fatia Question a partir de `.design/squad-mvp.md` e dos frames 04 a 07, 20a e 20b do handoff.
+- **Next step**: executar a fase 1 de `.specs/features/question/tasks.md` (T1 a T5). Lotes combinados com o dev: fase 1; fase 2; fases 3 e 4; fase 5; fase 6; fase 7, um worker por lote, e o Verifier no fim.
 - **Blockers**: nenhum.
 - **Uncommitted files**: none.
 - **Branch**: `feat/question`, saído da `main` em `9a4d921`.
 
-### O que a TUI leitura deixou para esta fatia
+### Decidido com o dev nesta fatia
 
-- Os frames de Question entram no teste de frames do AD-010 e saem da classe D3 da tabela de desvios; os frames continuam sem edição.
-- `/escalate` copia `timeout_s` para o `question` que chega a `human`: é de onde a TUI lê o prazo.
-- As teclas `4` e `enter` sobre uma pergunta aberta só mostram o aviso "chega com a fatia Question" (TUI-63); passam a abrir a aba e o modal. Conferir o `b`, que no protótipo pula para a aba.
-- A derivação já lê `question`, `answer` e `question_merged`. A tabela `questions` e o que a TUI deriva do log têm de dizer a mesma coisa.
+- O `feature_closed` fecha as perguntas da feature (AD-012).
+- O texto da pergunta vem do primeiro `question` (AD-013).
+- Execução por workers em lote.
 
 ### Evidência e limites
 
