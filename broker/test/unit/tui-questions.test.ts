@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import type { Caller } from "../../send.ts";
 import { squad } from "../../shared/derive.ts";
 import { feed } from "../../tui/feed.ts";
+import { clock } from "../../tui/grid.ts";
 import { START } from "../../tui/keys.ts";
 import { questions } from "../../tui/screens/questions.ts";
 import type { Ui, View } from "../../tui/view.ts";
@@ -162,4 +163,130 @@ test("QST-97: with seven open questions the selected one is always drawn whole",
   expect(heads(1)).toEqual(["Q-01", "Q-02", "Q-03", "Q-04"]);
   expect(heads(4)).toEqual(["Q-01", "Q-02", "Q-03", "Q-04"]);
   expect(heads(7)).toEqual(["Q-04", "Q-05", "Q-06", "Q-07"]);
+});
+
+// The text of the detail: columns 62 to 116 of a line
+const side = (lines: string[], y: number) => cols(lines, 62, 116, y, y)[0]!.trimEnd();
+const sides = (lines: string[], y1: number, y2: number) => Array.from({ length: y2 - y1 + 1 }, (_, i) => side(lines, y1 + i));
+// A line of a panel of 60 columns, and its separator
+const boxed = (text: string) => "│ " + text.padEnd(57) + "│";
+const SEP = "─".repeat(55);
+const HINT = "enter responder   b próxima bloqueante";
+
+test("QST-58: the detail of the log of frame 04, with Q-07 selected, is the one of the frame", () => {
+  expect(cols(draw("04").text(), 60, 119, 2, 25)).toEqual(cols(frame("04"), 60, 119, 2, 25));
+});
+
+test("QST-58, QST-59: the detail of a non-blocking question has its timeout, its default and what an answer changes", () => {
+  const drawn = draw("04", { question: 8 }).text();
+  // Frame 06 has Q-08 selected and the modal from line 9 down. Its route has the hop the
+  // prototype writes by hand (.design/squad-mvp.md line 490).
+  const expected = cols(frame("06"), 60, 119, 2, 8);
+  expect(expected[5]).toBe(boxed("rota    w2 → ldr → mot → dev"));
+  expected[5] = boxed("rota    w2 → ldr → dev");
+  expect(cols(drawn, 60, 119, 2, 8)).toEqual(expected);
+  expect(sides(drawn, 3, 6)).toEqual([
+    "Q-08  timeout 3:08" + " ".repeat(24) + "no dev há 52s",
+    "ticket  TKT-13 API da setlist",
+    "thread  TKT-13 · chegou ao dev 14:31:15",
+    "origem  w2 worker-2  (segue com o default)",
+  ]);
+  expect(sides(drawn, 9, 24)).toEqual([
+    "Setlist sem capa: placeholder genérico ou logo da 89?",
+    "por quê ~12% das faixas do upstream chegam sem capa.",
+    SEP,
+    "default logo da 89  · aplicado em 3:08 sem resposta",
+    SEP,
+    "efeito  worker-2 troca o default pela sua resposta;",
+    "        nada é refeito.",
+    HINT,
+    ...Array.from({ length: 8 }, () => ""),
+  ]);
+});
+
+test("QST-58, QST-59: a question without ticket keeps the lines of the ticket and of the thread, and its effect is on the work", () => {
+  const b = open();
+  b.ask(WORKER_1);
+  b.clock.now = NOW + 75_000;
+  const drawn = b.lines();
+  expect(cols(drawn, 60, 119, 2, 2)).toEqual(["┌─ Q-01 · detalhe " + "─".repeat(41) + "┐"]);
+  expect(sides(drawn, 3, 17)).toEqual([
+    "Q-01  [BLOQUEANTE]" + " ".repeat(22) + "no dev há 1m15s",
+    "ticket  —",
+    "thread  chegou ao dev " + clock(NOW),
+    "origem  w1 worker-1  (só ele pausa)",
+    "rota    w1 → ldr → mot → dev",
+    SEP,
+    "which port?",
+    "por quê the spec gives two",
+    SEP,
+    " 1  outra resposta (texto livre)",
+    SEP,
+    "efeito  worker-1 retoma o trabalho assim que você",
+    "        confirmar.",
+    HINT,
+    "",
+  ]);
+  // The box is whole
+  expect(cols(drawn, 60, 119, 4, 7)).toEqual(sides(drawn, 4, 7).map(boxed));
+  expect(cols(drawn, 60, 119, 25, 25)).toEqual(["└" + "─".repeat(58) + "┘"]);
+});
+
+test("QST-58: a ticket without rework has none in its line, and the questions merged are named after the route", () => {
+  const b = open();
+  b.given.plan([{ ticket_ref: "T-1", title: "the player" }]);
+  b.given.task("T-1", "worker-1");
+  const kept = b.ask(WORKER_1, { ...BLOCKING, ticket_ref: "T-1" });
+  const merged = b.ask(WORKER_2);
+  b.question.merge(MOTHER, { question_id: merged, into: kept });
+  const drawn = b.lines();
+  expect(sides(drawn, 4, 9)).toEqual([
+    "ticket  T-1 the player",
+    "thread  T-1 · chegou ao dev " + clock(NOW),
+    "origem  w1 worker-1  (só ele pausa)",
+    "rota    w1 → ldr → mot → dev",
+    "dedup   absorveu Q-02 (worker) · mesclada pela mother",
+    SEP,
+  ]);
+  expect(sides(drawn, 15, 16)).toEqual(["efeito  worker-1 retoma o T-1 assim que você confirmar.", HINT]);
+});
+
+test("QST-57: without open question the detail says the agents go on without the dev", () => {
+  const drawn = draw("20b").text();
+  // Frame 20b has the modal from line 9 down
+  expect(cols(drawn, 60, 119, 2, 8)).toEqual(cols(frame("20b"), 60, 119, 2, 8));
+  expect(cols(drawn, 60, 119, 2, 2)).toEqual(["┌─ detalhe " + "─".repeat(48) + "┐"]);
+  expect(sides(drawn, 3, 5)).toEqual(["nenhuma pergunta aberta", "", "os agentes seguem sem depender do dev."]);
+  expect(cols(drawn, 60, 119, 6, 25)).toEqual([...Array.from({ length: 19 }, () => boxed("")), "└" + "─".repeat(58) + "┘"]);
+});
+
+test("QST-98: the detail shows `timeout 0:00` and a default applied in 0:00 once the deadline passed", () => {
+  const drawn = draw("04", { question: 8 }, 240_000).text();
+  expect(side(drawn, 3)).toBe("Q-08  timeout 0:00" + " ".repeat(22) + "no dev há 4m52s");
+  expect(side(drawn, 12)).toBe("default logo da 89  · aplicado em 0:00 sem resposta");
+});
+
+test("QST-96: a text, a reason, an option and a ticket that do not fit are broken or cut with `…` inside the detail", () => {
+  const b = open();
+  b.ask(WORKER_1, { ...BLOCKING, body: "x".repeat(400), why: "y".repeat(300), options: ["a".repeat(100), "b", "c"], ticket_ref: "T".repeat(60) });
+  const drawn = b.lines();
+
+  expect(sides(drawn, 4, 5)).toEqual(["ticket  " + "T".repeat(46) + "…", "thread  " + "T".repeat(46) + "…"]);
+  // The text and the reason take the lines the rest of the panel leaves: six and one here
+  expect(sides(drawn, 9, 15)).toEqual([...Array.from({ length: 5 }, () => "x".repeat(55)), "x".repeat(54) + "…", "por quê " + "y".repeat(46) + "…"]);
+  expect(sides(drawn, 16, 24)).toEqual([
+    SEP,
+    " 1  " + "a".repeat(50) + "…",
+    " 2  b",
+    " 3  c",
+    " 4  outra resposta (texto livre)",
+    SEP,
+    "efeito  worker-1 retoma o",
+    "        " + "T".repeat(46) + "…",
+    HINT,
+  ]);
+  // Every line is a line of the box or a separator of it
+  const lines = cols(drawn, 60, 119, 3, 24);
+  expect(lines.filter((line, i) => line !== boxed(side(drawn, 3 + i)) && line !== "├" + "─".repeat(58) + "┤")).toEqual([]);
+  expect(cols(drawn, 60, 119, 25, 25)).toEqual(["└" + "─".repeat(58) + "┘"]);
 });

@@ -421,7 +421,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-55 | P1: Aba Perguntas | T22, T23 | Implementing |
 | QST-56 | P1: Aba Perguntas | T23 | Implementing |
 | QST-57 | P1: Aba Perguntas | T23 | Implementing |
-| QST-58 | P1: Aba Perguntas | T24 | In Tasks |
+| QST-58 | P1: Aba Perguntas | T24 | Implementing |
 | QST-59 | P1: Aba Perguntas | T22, T24 | Implementing |
 | QST-60 | P1: Aba Perguntas | T22, T25 | Implementing |
 | QST-61 | P1: Aba Perguntas | T22, T25 | Implementing |

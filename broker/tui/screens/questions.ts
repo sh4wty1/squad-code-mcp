@@ -1,13 +1,14 @@
-// The tab of questions: the ones that wait for the dev, in the order he should answer them.
-// The layout is the one of `rQs` of the prototype; the questions come from the derived squad.
+// The tab of questions: the ones that wait for the dev, in the order he should answer them,
+// and the detail of the selected one. The layout is the one of `rQs` and `qDetailRows` of
+// the prototype; the questions come from the derived squad.
 
 import { qid } from "../../shared/contract.ts";
 import { SQUAD, type Question, type Squad } from "../../shared/derive.ts";
-import { left, waiting } from "../asked.ts";
+import { effect, left, waiting } from "../asked.ts";
 import { label } from "../feed.ts";
-import { age, cut, grid, len, mmss, wrap, type Grid, type Seg } from "../grid.ts";
+import { age, clock, cut, grid, len, mmss, wrap, type Color, type Grid, type Seg } from "../grid.ts";
 import type { View } from "../view.ts";
-import { chrome, stats, tone, type Keys } from "./chrome.ts";
+import { chrome, drawRows, stats, tone, type Keys, type Line } from "./chrome.ts";
 
 const KEYS: Keys = [
   ["j/k", "mover"],
@@ -52,11 +53,13 @@ function fit(segs: Seg[], room: number): Seg[] {
   });
 }
 
-// The lines of the text of a question in the list: two at most, the second saying there is more
-function text(q: Question): string[] {
-  const lines = wrap(q.text, 54);
-  return lines.length > 2 ? [lines[0]!, cut(`${lines[1]} …`, 54)] : lines;
+// At most `room` lines of `w` columns, the last one saying there is more
+function clip(lines: string[], room: number, w: number): string[] {
+  return lines.length > room ? [...lines.slice(0, room - 1), cut(`${lines[room - 1]} …`, w)] : lines;
 }
+
+// The lines of the text of a question in the list
+const text = (q: Question) => clip(wrap(q.text, 54), 2, 54);
 
 function list(g: Grid, view: View, asked: Question[]) {
   const { squad, ui } = view;
@@ -106,10 +109,62 @@ function list(g: Grid, view: View, asked: Question[]) {
   }
 }
 
+// The columns of the text of the detail
+const W = 55;
+
+// The lines of the panel of detail: of the selected question, or of the empty list
+function detail(view: View, q: Question | undefined): Line[] {
+  if (!q) return [[["nenhuma pergunta aberta", "gray"]], [], [["os agentes seguem sem depender do dev.", "white"]]];
+  const { squad } = view;
+  const who = q.asked_by;
+  const ticket = squad.tickets.find((t) => t.ticket_ref === q.ticket_ref);
+  const badge: [string, Color, boolean] = q.blocking ? ["[BLOQUEANTE]", "bred", true] : ["timeout " + mmss(left(q, squad.now)), "byellow", true];
+  const since = "no dev há " + waited(q, squad.now);
+  const arrived = "chegou ao dev " + clock(q.reached_human_ts ?? squad.now);
+  const merged = absorbed(q, squad);
+  const labeled = (name: string, lines: string[]): Line[] => lines.map((line, i): Seg[] => [[i ? "        " : name, "gray"], [line, "white"]]);
+
+  const head: Line[] = [
+    [[qid(q.id) + "  ", "bwhite", true], badge, [" ".repeat(Math.max(1, W - len(qid(q.id)) - 2 - len(badge[0]) - len(since))), "white"], [since, "gray"]],
+    q.ticket_ref === null
+      ? [["ticket  ", "gray"], ["—", "gray"]]
+      : fit([["ticket  ", "gray"], [q.ticket_ref, "bwhite", true], [(ticket?.title ? " " + ticket.title : "") + (ticket?.reworks ? ` · rework ${Math.min(ticket.reworks, 2)}/2` : ""), "white"]], W),
+    fit([["thread  ", "gray"], [q.ticket_ref === null ? arrived : `${q.ticket_ref} · ${arrived}`, "white"]], W),
+    [["origem  ", "gray"], [label(who) + " ", tone(who), true], [who, tone(who)], [q.blocking ? "  (só ele pausa)" : "  (segue com o default)", "gray"]],
+    [["rota    ", "gray"], ...route(q)],
+    ...(merged.length ? [fit([["dedup   ", "gray"], [[...merged, "mesclada pela mother"].join(" · "), "white"]], W)] : []),
+  ];
+  // One space after `default`, as QST-58 writes the line: the prototype has two
+  const answers: Line[] =
+    q.blocking || q.options.length
+      ? [...q.options, null].map((option, i): Seg[] => [[` ${i + 1}  `, "bwhite", true], option === null ? ["outra resposta (texto livre)", "gray"] : [cut(option, W - 4), "white"]])
+      : [fit([["default ", "gray"], [q.default ?? "", "byellow", true], [`  · aplicado em ${mmss(left(q, squad.now))} sem resposta`, "gray"]], W)];
+  const does = clip(wrap(effect(q, squad), W - 8), 2, W - 8);
+  // The text and the reason take what the other lines leave of the 22 of the panel
+  const room = 22 - head.length - 3 - answers.length - does.length - 1;
+  const said = clip(wrap(q.text, W), room - 1, W);
+  const why = clip(wrap(q.why, W - 8), room - said.length, W - 8);
+
+  return [
+    ...head,
+    "SEP",
+    ...said.map((line): Seg[] => [[line, "bwhite", true]]),
+    ...labeled("por quê ", why),
+    "SEP",
+    ...answers,
+    "SEP",
+    ...labeled("efeito  ", does),
+    [["enter ", "bwhite", true], ["responder", "gray"], ["   b ", "bwhite", true], ["próxima bloqueante", "gray"]],
+  ];
+}
+
 export function questions(view: View): Grid {
   const g = grid();
   chrome(g, view, "questions", KEYS);
   list(g, view, waiting(view.squad));
+  const chosen = selected(view);
+  g.box(60, 2, 60, 24, "gray", chosen ? `${qid(chosen.id)} · detalhe` : "detalhe", "bwhite");
+  drawRows(g, 62, 3, 24, detail(view, chosen), 60, 60, "gray");
   // No line of the feed is on this screen: the footer has no ticket to count the reworks of
   stats(g, { ...view, ui: { ...view.ui, selected: null } });
   return g;

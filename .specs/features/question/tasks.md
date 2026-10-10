@@ -611,11 +611,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] As linhas 2 a 25, colunas 60 a 119, do log do frame 04 com a Q-07 selecionada são as do frame, a não ser onde a spec dá outro texto
-- [ ] Com a Q-08 selecionada: `timeout 3:08`, `(segue com o default)`, a linha `default logo da 89  · aplicado em 3:08 sem resposta` e o efeito de não-bloqueante
-- [ ] Pergunta sem `ticket_ref`: as linhas `ticket` e `thread` não quebram a tela e o efeito diz `o trabalho`
-- [ ] Testes em `test/unit/tui-questions.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] As linhas 2 a 25, colunas 60 a 119, do log do frame 04 com a Q-07 selecionada são as do frame, a não ser onde a spec dá outro texto
+- [x] Com a Q-08 selecionada: `timeout 3:08`, `(segue com o default)`, a linha `default logo da 89  · aplicado em 3:08 sem resposta` e o efeito de não-bloqueante
+- [x] Pergunta sem `ticket_ref`: as linhas `ticket` e `thread` não quebram a tela e o efeito diz `o trabalho`
+- [x] Testes em `test/unit/tui-questions.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
