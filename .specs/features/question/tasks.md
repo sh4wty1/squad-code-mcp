@@ -872,11 +872,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] As linhas `h           foco no histórico`, `modal de resposta`, `1–4 enter   escolher · enviar · esc cancela` e `ctrl+e · u  expandir o texto · limpar` são desenhadas onde o frame 11 as tem
-- [ ] O desvio D3 do frame 11 fica só com as linhas de gate e de permissão, e o teste de TUI-49 lista só essas
-- [ ] `DEVIATIONS` não tem desvio D3 para 04, 05, 06, 07, 20a e 20b, nem motivo que cite a fatia Question como tela por vir (teste)
-- [ ] Testes em `test/unit/tui-frames.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] As linhas `h           foco no histórico`, `modal de resposta`, `1–4 enter   escolher · enviar · esc cancela` e `ctrl+e · u  expandir o texto · limpar` são desenhadas onde o frame 11 as tem
+- [x] O desvio D3 do frame 11 fica só com as linhas de gate e de permissão, e o teste de TUI-49 lista só essas
+- [x] `DEVIATIONS` não tem desvio D3 para 04, 05, 06, 07, 20a e 20b, nem motivo que cite a fatia Question como tela por vir (teste)
+- [x] Testes em `test/unit/tui-frames.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

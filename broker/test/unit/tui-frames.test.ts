@@ -131,10 +131,6 @@ test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen o
   const cut = DEVIATIONS["11"]!.map((dev) => [dev.class, dev.text, lines[dev.line]!.slice(dev.col, dev.col + dev.width).join("").trim()]);
   expect(cut).toEqual(
     [
-      "h           foco no histórico",
-      "modal de resposta",
-      "1–4 enter   escolher · enviar · esc cancela",
-      "ctrl+e · u  expandir o texto · limpar",
       "gate (modal)",
       "a           aprovar → pede confirmação (y)",
       "r · c       rejeitar · comentar, texto obrigatório",
@@ -146,6 +142,23 @@ test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen o
       "✓ P-01 fechado no terminal",
     ].map((text) => ["D3", "", text])
   );
+});
+
+test("QST-88: the legend has the four lines of Question where frame 11 has them, and the lines of gate and of permission empty", () => {
+  const drawn = help(frameView("11")).text();
+  // The text of the panel of the keys, inside its box
+  const keys = drawn.map((line) => [...line.padEnd(120)].slice(62, 118).join("").trimEnd());
+  expect(keys.slice(19, 25)).toEqual(["h           foco no histórico", "", "modal de resposta", "1–4 enter   escolher · enviar · esc cancela", "ctrl+e · u  expandir o texto · limpar", ""]);
+  for (const y of [19, 21, 22, 23]) expect(drawn[y]).toBe(frame("11")[y]!);
+  expect([25, 26, 27, 28, 30, 31, 32, 33].map((y) => keys[y])).toEqual(["", "", "", "", "", "", "", ""]);
+});
+
+test("QST-89: no frame of Question has a D3 deviation, and no deviation is there for a screen or a key of the slice Question", () => {
+  for (const id of ["04", "05", "06", "07", "20a", "20b"]) expect(DEVIATIONS[id]!.filter((dev) => dev.class === "D3").map((dev) => `${id} line ${dev.line}`)).toEqual([]);
+  const all = Object.entries(DEVIATIONS).flatMap(([id, list]) => list.map((dev) => ({ id, ...dev })));
+  // What the spec cut is of the slices to come, and Question is not one of them
+  expect(all.filter((dev) => dev.class === "D3" && /Question/.test(dev.why)).map((dev) => `${dev.id} line ${dev.line}`)).toEqual([]);
+  expect(all.filter((dev) => /of the slices? Question/.test(dev.why)).map((dev) => `${dev.id} line ${dev.line}`)).toEqual([]);
 });
 
 test("TUI-54: a terminal of 80 by 24 shows frame 21", () => {

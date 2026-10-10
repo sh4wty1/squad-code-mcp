@@ -161,7 +161,7 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ...KEY_SEAL,
     ...panel(
       "D2",
-      "Assumptions, `Detalhe de um blocked`: the reason, the detail and the last action of the event, then the questions of the ticket after it; `tipo`, `resolver em` and the key that answers are prose of the scenario or of the slice Question",
+      "Assumptions, `Detalhe de um blocked`: the reason, the detail and the last action of the event, then the questions of the ticket after it; `tipo`, `resolver em` and the key that answers are prose of the scenario",
       6,
       "---", "motivo", "RADIO_API_KEY ausente", "GET /v1/setlist → 401. A", "RADIO_API_KEY não está no .env", "do worktree do worker-2.", "última ação", "bun test src/api, 3 tentativas",
       "---", "escalação", " 14:29 w2→ldr [question]", " 14:30 ldr→mot [question]", " 14:30 mot→hum [question]", "---", "enter thread TKT-13", "", "", "", "", ""
@@ -368,8 +368,8 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
   "11": [
     ...d(
       "D3",
-      "TUI-49, Out of Scope: the focus on the history is a key of the tab of questions (slice Question), and the modals of answer, of gate and of permission are screens of the slices Question and Gate; their keys do nothing here",
-      ...[19, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33].map((line): At => [line, 62, 56, ""])
+      "TUI-49, QST-88, Out of Scope: the modals of gate and of permission are screens of the slice Gate; their keys do nothing here",
+      ...[25, 26, 27, 28, 30, 31, 32, 33].map((line): At => [line, 62, 56, ""])
     ),
     ...d("D3", "Out of Scope: the ids `P-nn` and the line of a request answered in the terminal only exist in the modal of permission (slice Gate); the feed of this slice never draws it", [30, 29, 29, ""]),
   ],
