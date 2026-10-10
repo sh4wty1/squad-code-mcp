@@ -55,9 +55,9 @@ tarefa marcada aqui.
 **Where**: `broker/shared/config.ts`
 **Requirement**: QST-34
 
-- [ ] `expireIntervalMs(env)` lê `SQUAD_EXPIRE_INTERVAL_MS` e dá 1000 sem a variável, ao lado de `cleanupIntervalMs`, com teste do literal em `test/unit/config.test.ts`; `broker.ts` usa a função
-- [ ] `broker/CLAUDE.md` não precisa mudar se as outras variáveis de intervalo não estão lá; se estão, a nova entra
-- [ ] Gate build passa
+- [x] `expireIntervalMs(env)` lê `SQUAD_EXPIRE_INTERVAL_MS` e dá 1000 sem a variável, ao lado de `cleanupIntervalMs`, com teste do literal em `test/unit/config.test.ts`; `broker.ts` usa a função
+- [x] `broker/CLAUDE.md` não precisa mudar se as outras variáveis de intervalo não estão lá; se estão, a nova entra
+- [x] Gate build passa
 
 ### F6: A entrada de terminal entrega a credencial
 

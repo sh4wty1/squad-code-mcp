@@ -10,7 +10,7 @@
  * Run directly: bun broker.ts
  */
 
-import { cleanupIntervalMs, dbPath, port, tokenPath } from "./shared/config.ts";
+import { cleanupIntervalMs, dbPath, expireIntervalMs, port, tokenPath } from "./shared/config.ts";
 import { openDatabase } from "./db.ts";
 import { createFeature, type Where } from "./feature.ts";
 import { createLog, type HistoryFilter } from "./log.ts";
@@ -68,7 +68,7 @@ setInterval(peers.cleanStale, cleanupIntervalMs());
 // The deadlines of the questions: one that came while the broker was down closes here,
 // before any request is served, and the others at the check of every second
 question.expire();
-setInterval(question.expire, 1000);
+setInterval(question.expire, expireIntervalMs());
 
 // Exactly one of the three filters, of its type. A filter that is null was not sent.
 function historyFilter(body: Record<string, unknown>): HistoryFilter | null {

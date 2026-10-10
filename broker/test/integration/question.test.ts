@@ -283,6 +283,18 @@ test("QST-34: a non-blocking question with timeout_s 1 that reaches the dev has 
   expect(readDb(b.dbFile).events).toHaveLength(6);
 });
 
+test("QST-34: the broker checks the deadlines every SQUAD_EXPIRE_INTERVAL_MS: with 60000 a question 1500 ms past its deadline is still open", async () => {
+  broker = await startBroker({ SQUAD_EXPIRE_INTERVAL_MS: "60000" });
+  const b = broker;
+  const { mother } = await squad(b);
+  expect((await post(b.url, "/ask", { id: mother, ...BRIEF })).json).toEqual({ ok: true, question_id: 1, seq: 5 });
+
+  // the check of every 1000 ms would have closed it within 1000 ms of its deadline
+  await Bun.sleep(2500);
+  expect(readDb(b.dbFile).events).toHaveLength(5);
+  expect(questionRows(b).map((q) => q.status)).toEqual(["open"]);
+});
+
 test("QST-35: a broker that comes up again over a question whose deadline passed has the answer of the default in the first reading of /events", async () => {
   const first = await startBroker();
   broker = first;
