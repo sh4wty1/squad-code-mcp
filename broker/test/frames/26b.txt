@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › busca de programas   workflow tlc                          ? 0   broker ● conectado  15:12:09
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ agentes · 6 ────────────┐┌─ feed · busca de programas ──────────────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ● mother        [working]││  hora     de    p/  kind            corpo              ││ ▶ feature aberta · mother      │
+│   objetivo · feature abe…││  14:21:00 w3  → ldr [question]      Q-05 formato de da…││ às       15:12:04              │
+│   tlc-discover to-spec t…││  14:21:30 mot → hum [question]      ? Q-05 timeout 4min││ aviso da mother a todos: sem   │
+│                          ││  14:23:40 w2  → ldr [question]      Q-06 público ou au…││ destinatário, não acende       │
+│ ○ leader           [idle]││  14:23:52 mot → hum [question]      ? Q-06 [BLOQUEANTE]││ aresta.                        │
+│   tech lead · sem tarefa…││  14:24:10 hum → w2  [answer]        Q-06: público, só …│├────────────────────────────────┤
+│   tlc-plan help-me       ││  14:25:30 ⟳ Q-05 timeout · default aplicado: HH:mm     ││ título                         │
+│                          ││  14:26:47 w1  → jdg [result]        player + controles…││ busca de programas             │
+│ ○ worker-1         [idle]││  14:27:30 w3  → jdg [result]        horários em HH:mm …││ workflow tlc                   │
+│   worker · sem ticket    ││  14:28:03 jdg → ldr [verdict]       rework: reconexão …││ branch   feat/busca-programas  │
+│   tlc-implement coding-g…││  14:28:30 ldr → w1  [task]          rework 1/2: retry …││ base     main                  │
+│                          ││  14:28:52 jdg → ldr [verdict]       approve 1/1        ││ spec                           │
+│ ○ worker-2         [idle]││  14:29:10 w1  → ldr [question]      Q-07 retry infinit…││   .specs/features/             │
+│   worker · sem ticket    ││  14:29:25 ldr → mot [question]      Q-07 encaminhada   ││   busca-programas/spec.md      │
+│   tlc-implement coding-g…││  14:29:40 mot → hum [question]      ? Q-07 [BLOQUEANTE]││ commit   7d02e4b               │
+│                          ││  14:30:20 w2  → ldr [question]      Q-10 caixa alta no…│├────────────────────────────────┤
+│ ○ worker-3         [idle]││  14:30:35 mot → hum [question]      ? Q-10 timeout 4min││ feature anterior               │
+│   worker · sem ticket    ││  14:30:55 w2  → jdg [result]        /api/setlist + cac…││ ✓ player ao vivo com setlist   │
+│   sem loadout            ││  14:30:56 ⟳ Q-10 fechada · w2 entregou antes da respos…││   entregue 14:53:31            │
+│                          ││  14:31:02 w2  → ldr [question]      Q-08 faixa sem cap…│├────────────────────────────────┤
+│ ○ judge            [idle]││  14:31:15 mot → hum [question]      ? Q-08 timeout 4min││ loadout mother                 │
+│   judge · sem review     ││  14:31:20 jdg → w2  [question]      Q-11 cache invalid…││ tlc-discover · to-spec ·       │
+│   spec-driven-eval ponyt…││  14:31:34 ldr → mot [question]      Q-12 limite de rec…││ the-fool                       │
+│                          ││  14:31:36 ⟳ Q-12 mesclada em Q-07 pela mother          ││                                │
+│                          ││  14:31:48 w2  → jdg [answer]        Q-11: sim, via ETag││                                │
+│                          ││  14:33:02 hum → w1  [answer]        Q-07: infinito com…││                                │
+├─ tickets ────────────────┤│  14:35:15 ⟳ Q-08 timeout · default aplicado: logo da 89││                                │
+│                          ││  14:39:52 w1  → jdg [result]        backoff + retomada…││                                │
+│ ○ nenhum ticket ainda    ││  14:43:50 jdg → ldr [verdict]       approve 5/5        ││                                │
+│   o leader publica o     ││  14:45:30 jdg → ldr [verdict]       approve 1/1        ││                                │
+│   plano ao receber a spec││  14:45:41 ldr → mot [result]        3/3 tickets aprova…││                                │
+│                          ││  14:53:31 ✓ feature encerrada · entregue               ││                                │
+│                          ││─ ▲ anterior · player ao vivo com setlist · ✓ entregue ─││                                │
+│                          ││▶ 15:12:04 ▶ feature aberta · busca de programas        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 1k  ldr —  w1 —  w2 —  w3 —  jdg —  │ feature ≈$0.02 est.                                                 rework —
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

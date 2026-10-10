@@ -60,59 +60,58 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 - **Date**: 2026-10-08
 - **Status**: active
 
+### AD-008
+- **Decision**: A derivação ganha um oitavo status de agente, `never`, exibido `[não lançado]`, acima de `offline` na precedência: o log não tem nenhum `peer_joined` nem `peer_left` do nome.
+- **Reason**: A regra de `offline` do design exige um `peer_left`. Sem a regra nova, um nome que nunca subiu cairia em `idle` e a tela mostraria uma sessão ociosa onde não há sessão; tratá-lo como `offline` diria "sessão morta" de uma sessão que nunca existiu. Decidido pelo dev em 2026-10-09, a partir dos frames 28a a 28c.
+- **Trade-off**: A regra de derivação do contrato tem um status que o design não lista, e a frase da fatia Peer "o nome continua `offline` na TUI" deixa de valer para quem nunca registrou. `never` é sobre o banco inteiro, não sobre a sessão do broker: um nome que entrou uma vez nunca mais volta a `never`.
+- **Scope**: `broker/shared/derive.ts`, TUI e qualquer consumidor do status derivado. Detalha o ADR-006.
+- **Date**: 2026-10-09
+- **Status**: active
+
+### AD-009
+- **Decision**: A TUI tira o nome do projeto do repositório de onde foi lançada, com a mesma regra `projectOf` que o broker aplica ao `git_root` da mother, e fora de um repositório mostra o rótulo `feature`. `project` continua fora de todo evento.
+- **Reason**: `project` não está no log e o design diz que não é campo do evento. As alternativas eram não mostrar projeto ou mudar o contrato congelado (ADR-004). Decidido pelo dev em 2026-10-09.
+- **Trade-off**: É o único dado da tela que não vem de `GET /events`. Lançada em outro repositório, a TUI mostra o nome errado, e nada avisa.
+- **Scope**: TUI. Detalha o ADR-002 e o ADR-004.
+- **Date**: 2026-10-09
+- **Status**: active
+
+### AD-010
+- **Decision**: A TUI vive em `broker/tui/`, com entrada em `broker/tui.ts`, no mesmo pacote do broker. Os frames do handoff são extraídos uma vez para `broker/test/frames/<id>.txt` e não são editados: o teste desenha cada frame a partir de um log e só aceita linha diferente se ela estiver na tabela de desvios, com classe D1 (a derivação do design vence o valor escrito à mão), D2 (conteúdo sem fonte no log) ou D3 (item cortado na spec).
+- **Reason**: O design manda usar cada frame como caso de teste, e o protótipo desenha estados escritos à mão que contradizem a derivação em vários cenários. Sem a tabela, ou os frames deixam de ser teste ou a tela copia o que o log não diz.
+- **Trade-off**: Comandos da TUI rodam de dentro de `broker/`. As fatias Question e Gate herdam a tabela: os frames de modal entram do mesmo jeito, e um frame novo do Claude Design exige nova extração.
+- **Scope**: TUI e as fatias Question e Gate. Detalha o AD-001.
+- **Date**: 2026-10-09
+- **Status**: active
+
+### AD-011
+- **Decision**: Quatro leituras da tabela de status do agente que o design não fecha. "Ticket em andamento", na regra de `waiting`, segue a cláusula de `working` de cada papel: worker com ticket cujo último evento é `task`, leader com algum ticket não concluído, judge com `result` sem `verdict`, mother nunca. "Escalou uma pergunta" inclui quem a fez. O ticket cujo último evento é um `verdict` de `rework` abaixo do limite é `working`, e o dono fica `idle`. "Nada pendente com o dev", da mother, são só as perguntas e os gates dela.
+- **Reason**: As linhas 356, 358 e 364 do design deixam os quatro pontos em aberto, e cada leitura muda o status na tela. Com estas, a derivação reproduz o protótipo em todo frame de leitura menos seis casos, cada um com a linha do design que o contradiz (tabela no `design.md` da fatia). Decidido pelo dev em 2026-10-09.
+- **Trade-off**: O leader do frame 10 sai `working` onde o protótipo desenha `waiting`; nenhuma leitura reproduz o 10 e o 01 ao mesmo tempo. O worker à espera da task de rework aparece `idle`, igual a um worker sem ticket: só o texto de atividade os distingue.
+- **Scope**: `broker/shared/derive.ts` e TUI. Detalha o ADR-006.
+- **Date**: 2026-10-09
+- **Status**: active
+
 ## Handoff
 
-Escrito em 2026-10-08, depois do merge. A fatia Feature está na `main` pelo PR 4 (https://github.com/sh4wty1/squad-code-mcp/pull/4), merge `4b59c12`.
+Atualizado em 2026-10-10. PR 8: https://github.com/sh4wty1/squad-code-mcp/pull/8.
 
-- **Feature**: fatia Feature, `.specs/features/feature/`
-- **Phase / Task**: concluída e mesclada. T1 a T31, de `c76e70b` a `ae14f01`, mais `47af274`, da revisão do `/the-judge`.
-- **Completed**: FEAT-01 a FEAT-33, todos verificados.
-- **In-progress** (file:line): nada
-- **Next step**: abrir a fatia TUI leitura. Os frames que ela pede estão todos no handoff.
-- **Blockers**: nenhum
-- **Uncommitted files**: none
-- **Branch**: `main` em `4b59c12`. `feat/feature` foi mesclado.
+- **Feature**: TUI leitura, `.specs/features/tui-leitura/`.
+- **Phase / Task**: concluída e verificada; o PR 8 espera só o merge.
+- **Completed**: T1–T30 e F1–F4. Verifier independente, rodada 3: PASS, 64/64 ACs, 9/9 bordas, 24/24 mutações mortas ao final. Requisitos Verified e TUI leitura marcada no ROADMAP. As quatro threads da review foram respondidas e resolvidas no GitHub em 2026-10-10. O gate passou no Windows no mesmo dia.
+- **In-progress** (file:line): nada.
+- **Next step**: o dev olha a TUI num terminal real (`bun tui/demo.ts 01`, de dentro de `broker/`) e decide o merge do PR 8. Depois do merge, a fatia Question sai da `main` atualizada; ela não foi iniciada. Não fazer merge sem instrução do dev.
+- **Blockers**: nenhum bloqueio técnico. O merge é decisão do dev.
+- **Uncommitted files**: none.
+- **Branch**: `feat/tui-leitura`. O head publicado é `7bdf4c9`; o commit que registra o gate do Windows e este handoff vem depois dele e é local até o dev pedir o push.
 
-### Como a verificação ficou
+### Evidência e limites
 
-Relatório em `.specs/features/feature/validation.md`, verificado em `ae14f01`, PASS. Ele é anterior à revisão do PR e não foi refeito.
-
-- 33 de 33 ACs e os 10 edge cases com evidência `file:line` e valor igual ao da spec.
-- 57 mutações, 55 mortas no relatório. As duas sobreviventes, em `features()` de `broker/shared/derive.ts` (a ordenação final por `id` e o `feature_closed` fechando a feature do seu `feature_id`), deixaram de sobreviver: `47af274` acrescentou a `broker/test/unit/derive.test.ts` um caso com log que o broker não escreve (`id` menor aberto depois), e as duas mutações, reaplicadas sobre a `main`, fazem esse caso falhar. O relatório ainda as lista como equivalentes.
-- `47af274` também renomeou em `broker/log.ts` o parâmetro de `transaction` que sombreava `write`. Sem mudança de comportamento.
-- Auditoria da migração dos testes: mesma contagem por arquivo, nenhum teste apagado, pulado ou afrouxado.
-- Lacunas não bloqueantes anotadas no relatório: o edge case de `/open-feature` com feature aberta só é exercitado com o `leader`, não com um worker; FEAT-09 "por qualquer conexão" é provado com SQL cru e arquivo reaberto, não com duas conexões simultâneas.
-- Nenhuma lição nova.
-
-### O que a fatia TUI leitura precisa saber
-
-- A segunda rodada de frames já está no handoff: `docs/claude-design-handoff/Handoff-Design.zip` (`1d1ae45`) tem os frames 22 a 25, com o modal de permissão, o agente `stalled`, a mensagem sem reação, os tickets `planned` e `dropped` e a linha de `refused` com contador. O pedido que os gerou é `PROMPT-estados-faltantes-2.md`.
-- A terceira rodada também: os frames 09a, 09b, 11 e 26 a 30 cobrem o que a fatia Feature criou (a linha 0 dependente do estado, a linha de sistema de `feature_opened`, a feature `abandoned`, o broker sem nenhuma feature no log, o squad sem feature com um agente `blocked` ou `offline`, e os tokens da feature e da sessão). O pedido é `PROMPT-estados-faltantes-3.md`.
-- O Claude Design decidiu coisas que a spec não tem, listadas em `docs/claude-design-handoff/DECISOES-rodada-3.md`. As que tocam a derivação: o rótulo `[não lançado]` para o nome que nunca entrou, a tecla `t` que alterna os tokens entre feature e sessão, e a linha 0 sem o nome do projeto. A spec da TUI leitura precisa adotar ou cortar cada uma.
-- `features(events)` em `broker/shared/derive.ts` devolve as linhas de `features` sem `project`, a partir de `GET /events`. `project` não está em nenhum evento: a TUI que quiser o nome do projeto não o tem pelo log.
-- `feature_opened` e `feature_closed` têm `to` `*` e uma entrega para cada um dos cinco nomes que não são `mother`, com sessão ou não. Um nome nunca lançado acumula duas entregas por feature.
-- Encerrar não grava nada além do `feature_closed`: um `blocked` aberto continua aberto e as entregas pendentes continuam pendentes.
-- `/close-feature` ainda não confere gate (`gate_required` entra com a fatia Gate).
-- O comentário sobre a tabela `features` em `broker/db.ts` ainda diz que a fatia Feature é quem a preenche; ficou desatualizado.
-- Brecha conhecida da Event, ainda aberta: ticket descartado que nunca recebeu `task` pode sumir de um `plan` e voltar no seguinte.
-- `SQUAD_POLL_INTERVAL_MS` não numérica vira `NaN` em `broker/shared/config.ts`; ninguém tratou.
-
-### Ambiente
-
-- O `bun` do `PATH` é o 1.3.14 (WinGet). O 1.4.2 de `~/.bun/bin` não existe mais. A fatia Feature rodou inteira no 1.3.14.
-- De dentro de `broker/`: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. No Windows, na `main` em `4b59c12`: 540 testes, 537 passam, 3 pulados, uns 45 s. Só `test/unit`: 404 testes, 403 passam, 1 pulado.
-- `bun x tsc` baixa um `tsc` 7 em vez de usar o TypeScript 5.9.3 instalado, e ele acusa centenas de erros de tipo global. `broker/CLAUDE.md` ainda mostra `bun x tsc --noEmit`.
-- Teste instável: `EVT-43: /ack confirms...` em `broker/test/integration/routes.test.ts` compara `Date.now()` do teste com o relógio do processo do broker e falha de vez em quando por poucos ms. Rodar de novo.
-- `broker/test/integration/server.test.ts` (`PEER-34`) copia uma lista fixa de fontes: módulo novo importado pelo `broker.ts` ou pelo `server.ts` tem de entrar nela.
-- Os testes de integração sobem processos reais, sempre com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Nunca subir `broker.ts` ou `server.ts` à mão sem os dois: ele cria `~/.squad-code-mcp.db` e `~/.squad-code-mcp.token`.
-- No bun, `await expect(promessa).rejects...` trava o laço de eventos nos testes de integração.
-- No Git Bash desta máquina, um heredoc pode trocar `\\` por `\` ao gravar um arquivo.
-- Python é `py -3`; `python3` não está instalado.
-- Mensagens de commit seguem a convenção do repositório (frase imperativa em minúsculas), não Conventional Commits.
-
-### Não verificado
-
-- Linux: nem a suíte da Event nem a da Feature rodaram lá. O WSL Debian desta máquina não tem bun.
-- Sessão real do Claude Code: abertura e encerramento de feature, push de evento e veredito de permissão só foram vistos por cliente MCP de teste.
-- O intervalo padrão de 1 s é testado por tempo de relógio.
-- Da Peer, continuam sem verificar: macOS e a sobrevivência do broker ao fechamento de uma janela de terminal real.
+- Linux, Bun 1.3.14: TypeScript passa; 929 testes passam, zero falham ou pulados, 5664 assertions, 48 arquivos.
+- Windows 11, Bun 1.4.2, em `7bdf4c9`: TypeScript passa; 926 passam, zero falham, 3 pulados por condição de plataforma anterior à fatia, 5650 assertions. O sensor de mutação não foi repetido no Windows.
+- `validate_state.py tui-leitura`: exit 0. Relatório em `.specs/features/tui-leitura/validation.md`; resolução de F1–F4 em `fix-round-2.md`; registros em `docs/tasks/`.
+- PR 8 em 2026-10-10: `MERGEABLE`, estado `CLEAN`, sem review nova depois da rodada 1 do The Judge (COMMENT, quatro should-fix, todos resolvidos).
+- Os 41 frames permanecem idênticos à extração original. L-049 continua candidata.
+- `bun tui/demo.ts [frame]` abre a TUI sobre o log de um frame, sem broker, sem banco e sem token. No Linux deu 39 linhas em tela cheia com a fonte padrão, uma abaixo do mínimo de 40 do design; o dev quer rever isso depois.
+- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários; não usar `bun x tsc`.
+- Não exercitados: terminal interativo real (teclas, resize, cores como a fonte desenha), macOS, sinais reais e uma sessão do Claude Code alimentando a TUI. Pendências anteriores continuam em ROADMAP, design e histórico deste STATE.

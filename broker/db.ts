@@ -45,7 +45,7 @@ export function openDatabase(path: string): Database {
     )
   `);
 
-  // Created here and read by this slice; the Feature slice is the one that fills it.
+  // Filled by log.ts, with the event that opens the feature and the one that closes it.
   // The open feature is the row with closed_seq NULL.
   db.run(`
     CREATE TABLE IF NOT EXISTS features (

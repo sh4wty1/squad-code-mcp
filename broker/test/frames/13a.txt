@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 1   broker ● conectado  14:32:22
+  1 principal   2 topologia   3 thread   4 perguntas 1   ? ajuda                            ◌ w2 offline · sessão morta
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother        [waiting]││  hora     de    p/  kind            corpo              ││ ◌ worker-2 [offline]           │
+│   objetivo · Q-07 → dev  ││  14:17:48 ▶ feature aberta · player ao vivo com setlist││ desde  14:30:12 · há 2m10s     │
+│   tlc-discover to-spec t…││  14:18:02 mot → ldr [task]          spec: player ao vi…││ ticket TKT-13 parado, com w2   │
+│                          ││  14:18:40 ldr → mot [question]      setlist vem da API…│├────────────────────────────────┤
+│ ● leader        [working]││  14:19:05 mot → ldr [answer]        API /v1/setlist, p…││ o que houve                    │
+│   tech lead · TKT-12/13  ││  14:19:50 ▶ plano v1 de ldr · 3 tickets · 1 dependência││ A sessão do Claude Code do     │
+│   tlc-plan help-me       ││  14:20:11 ldr → w1  [task]          player de áudio HLS││ worker-2 morreu: o peer sumiu  │
+│                          ││  14:20:12 ldr → w2  [task]          API da setlist + c…││ do broker no meio do TKT-13.   │
+│ ? worker-1    [waiting ?]││  14:20:13 ldr → w3  [task]          formato de data da…│├────────────────────────────────┤
+│   worker · TKT-12 ⟳1/2   ││  14:21:00 w3  → ldr [question]      Q-05 formato de da…││ o que fazer                    │
+│   ? Q-07 bloqueante · dev││  14:21:30 mot → hum [question]      ? Q-05 timeout 4min││ Relance a sessão no terminal   │
+│                          ││  14:23:40 w2  → ldr [question]      Q-06 público ou au…││ do worker-2 com o mesmo nome:  │
+│ ◌ worker-2      [offline]││  14:23:52 mot → hum [question]      ? Q-06 [BLOQUEANTE]││   worker-2                     │
+│   worker · TKT-13 parado ││  14:24:10 hum → w2  [answer]        Q-06: público, só …││ O TKT-13 continua atribuído a  │
+│   ◌ sessão morta há 2m10s││  14:25:30 ⟳ Q-05 timeout · default aplicado: HH:mm     ││ ele e segue de onde parou.     │
+│                          ││  14:26:47 w1  → jdg [result]        player + controles…││                                │
+│ ○ worker-3         [idle]││  14:27:30 w3  → jdg [result]        horários em HH:mm …││ a TUI não relança sessões;     │
+│   worker · TKT-14 ✓      ││  14:28:03 jdg → ldr [verdict]       rework: reconexão …││ isto é só instrução.           │
+│   sem loadout            ││  14:28:30 ldr → w1  [task]          rework 1/2: retry …│├────────────────────────────────┤
+│                          ││  14:28:52 jdg → ldr [verdict]       approve 1/1        ││ ao voltar                      │
+│ ○ judge            [idle]││  14:29:10 w1  → ldr [question]      Q-07 retry infinit…││ ● w2 voltou aparece no feed    │
+│   judge · sem review     ││  14:29:25 ldr → mot [question]      Q-07 encaminhada   │├────────────────────────────────┤
+│   spec-driven-eval ponyt…││  14:29:40 mot → hum [question]      ? Q-07 [BLOQUEANTE]││ loadout worker-2               │
+│                          ││▶ 14:30:12 ○ w2 saiu · sessão morta                     ││ tlc-implement ·                │
+│                          ││                                                        ││ coding-guidelines · ponytail · │
+│                          ││                                                        ││ codenavi                       │
+├─ tickets ────────────────┤│                                                        ││                                │
+│ TKT-12 player de áudio w1││                                                        ││                                │
+│ ⟳1/2 [waiting] ? dev     ││                                                        ││                                │
+│ TKT-13 API da setlist  w2││                                                        ││                                │
+│ ⟳0/2 [working] ◌ parado  ││                                                        ││                                │
+│ TKT-14 data na setlist w3││                                                        ││                                │
+│ ⟳0/2 [done]              ││                                                        ││                                │
+│                          ││                                                        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 39k  ldr 81k  w1 121k  w2 61k  w3 22k  jdg 52k  │ feature ≈$5.66 est.                        ◌ w2 offline há 2m10s
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:31:13
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda                         ‖ w2 parado · deve result TKT-13
+┌─ topologia · estrela ──────────────────────────────────────────────────────────────┐┌─ arestas ──────────────────────┐
+│                              ┌──────────────────────┐                              ││ ativa agora                    │
+│                              │ dev       via mother │                              ││ ▶ jdg → ldr  [verdict]         │
+│                              └──────────────────────┘                              ││   TKT-14 · 14:28:52            │
+│                                          │ gate · perguntas                        ││                                │
+│                             ┌────────────────────────┐                             ││ últimas mensagens              │
+│                             │ ○ mother     [waiting] │   workers nunca se falam    ││ 14:28 jdg → ldr [verdict]      │
+│                             │ aguarda squad          │   máx 2 reworks/ticket      ││ 14:28 jdg → ldr [verdict]      │
+│                             └────────────────────────┘   perguntas sobem até a     ││ 14:27 w3  → jdg [result]       │
+│                                          │ task ▼  ▲ resumother, que deduplica     ││ 14:26 w1  → jdg [result]       │
+│                                          │ ▲ escala após rework 2/2                ││ 14:24 hum → w2  [answer]       │
+│                             ┌────────────────────────┐      verdict                ││ 14:23 mot → hum [question]     │
+│                             │ ● leader     [working] │◀━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │├────────────────────────────────┤
+│                             │ TKT-12/13              │                           ┃ ││ perguntas abertas · 0          │
+│                             └────────────────────────┘                           ┃ ││ nenhuma                        │
+│                                          │                                       ┃ │├────────────────────────────────┤
+│                                          │ task + loadout                        ┃ ││ volume por aresta              │
+│               ┌──────────────────────────┼──────────────────────────┐            ┃ ││ mot → ldr  2 ━━━━              │
+│               ▼                          ▼                          ▼            ┃ ││ mot → hum  2 ━━━━              │
+│   ┌──────────────────────┐   ┌──────────────────────┐   ┌──────────────────────┐ ┃ ││ jdg → ldr  2 ━━━━              │
+│   │ ○ worker-1 [waiting] │   │ ‖ worker-2 [stalled] │   │ ○ worker-3    [idle] │ ┃ ││ ldr → mot  1 ━━                │
+│   │ TKT-12 aguarda ldr … │   │ TKT-13               │   │ TKT-14 ✓             │ ┃ ││ ldr → w1   1 ━━                │
+│   │ tlc-implement codin… │   │ ‖ deve result TKT-13 │   │ sem loadout          │ ┃ │├────────────────────────────────┤
+│   └──────────────────────┘   └──────────────────────┘   └──────────────────────┘ ┃ ││ reworks                        │
+│               │                          │                          │            ┃ ││ TKT-12 ⟳ 1/2  worker-1         │
+│               └──────────────────────────┼──────────────────────────┘            ┃ ││ TKT-13 ⟳ 0/2  worker-2         │
+│                                          │ result · answer                       ┃ ││                                │
+│                                          ▼                                       ┃ ││                                │
+│                             ┌────────────────────────┐                           ┃ ││                                │
+│                             │ ○ judge         [idle] │━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ││                                │
+│                             │ sem review             │      rework ⟳ · approve ✓   ││                                │
+│                             └────────────────────────┘                             ││                                │
+│                                                                                    ││                                │
+│ ▶ ativa  jdg → ldr  [verdict]  TKT-14 · approve 1/1 · 14:28:52                     ││                                │
+│ ━━ ativa = par da última mensagem   ── ociosa   ▼ ◀ direção                        ││                                │
+└────────────────────────────────────────────────────────────────────────────────────┘└────────────────────────────────┘
+
+ 1-4 telas   tab próx. nó   enter thread do nó   b próx. bloqueante   ? ajuda   q sair

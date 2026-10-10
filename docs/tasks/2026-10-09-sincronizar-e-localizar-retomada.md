@@ -1,0 +1,7 @@
+# Sincronizar e localizar o ponto de retomada
+
+**Por quê:** retomar neste computador o trabalho feito com Claude Opus 5.5 em outra máquina.
+**O quê:** `main` sincronizada com `origin/main` em `2fe4622`; identificado o trabalho mais recente na branch remota `feat/tui-leitura`, em `004fe43`, com o PR 8 aberto. O próximo passo registrado é revisar o PR com `/the-judge`; a conclusão da fatia depende de PASS de uma nova rodada do Verifier.
+**Como:** conferência do estado local e dos remotos; `git pull --ff-only`; leitura do histórico, do Handoff de `.specs/STATE.md`, do `ROADMAP.md` e de `validation.md` diretamente na branch remota; consulta dos PRs com `gh pr list`. O pull trouxe `docs/tasks/2026-10-08-sincronizar-main-e-mesclar-pr-6.md`; este arquivo registra a retomada. Checkout permanece em `main`.
+**Verificação:** pull concluído por fast-forward, sem conflitos; `main` e `origin/main` no mesmo commit; PR 8 confirmado OPEN. Segundo o handoff remoto, T1–T30 e duas rodadas de correções estão commitadas; as duas verificações registradas deram FAIL por lacunas de teste, corrigidas depois sem uma terceira verificação. Não foram executados testes nem revisão de código nesta tarefa.
+**Pendências:** revisão do PR 8 (https://github.com/sh4wty1/squad-code-mcp/pull/8), nova rodada independente do Verifier e, com PASS, atualização da rastreabilidade e do roadmap. O novo registro local não foi commitado.

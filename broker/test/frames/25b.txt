@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:52:10
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ thread TKT-12 · player de áudio ────────────────────────────────────────┐┌─ judge · nota por critério ──────────────┐
+│ worker-1 · aberto 14:20:11 · descartado 14:51:10 · [dropped]             ││ critério da spec            v1   v2   v3 │
+│                                                                          ││ 1 play/pause e volume       ✓    ✓    ✓  │
+│            … 7 eventos antes · v1 e v2 reprovados, 2 reworks · k rola    ││ 2 metadados da faixa        ✓    ✓    ✓  │
+│          │                                                               ││ 3 reconexão após queda      ✗    ✗    ✓  │
+│ 14:46:20 ● [result]   w1 → jdg     7m15s · 12.6k tok                     ││ 4 acessível por teclado     ✓    ✓    ✓  │
+│          │ liveSyncPosition do hls.js ao reconectar. +41 −9              ││ 6 funciona no iOS           ✓    ✓    ✗  │
+│          │                                                               │├──────────────────────────────────────────┤
+│ 14:47:30 ✗ [verdict]  jdg → ldr    REPROVADO · 4/5 · limite atingido     ││ v1 14:28:03  ✗ rework     4/5            │
+│          │ Reconexão ok, mas no iOS o áudio não volta a tocar.           ││ v2 14:38:40  ✗ rework     4/5            │
+│          │                                                               ││ v3 14:47:30  ✗ reprovado  4/5            │
+│ 14:47:55 ? [question] ldr → mot    ESCALADO · bloqueante · sem 3º rework │├──────────────────────────────────────────┤
+│          │ Reprovado 3x. Replanejar, aceitar com ressalva ou cancelar?   ││ desfecho                                 │
+│          │                                                               ││ ✗ [dropped] 14:51:10 · plano v2          │
+│ 14:48:10 ? [question] mot → hum    Q-13 [BLOQUEANTE] · ldr → mot → dev   ││ saiu do plano: não conta em 3/3          │
+│          │ Replanejar, aceitar com ressalva ou descartar o TKT-12?       ││ w1 liberado · sem ticket                 │
+│          │                                                               ││ nova tentativa TKT-15 [planned]          │
+│ 14:50:02 ● [answer]   hum → mot    Q-13 · 1m52s no dev                   ││   ⟳ 0/2 próprio · sem dono ainda         │
+│          │ Descartar e tentar de novo, com o iOS num ticket novo.        │├──────────────────────────────────────────┤
+│          │                                                               ││ caminho da decisão                       │
+│ 14:50:20 ● [answer]   mot → ldr    resposta à escalação                  ││ ldr → mot → dev  Q-13 · 1m52s            │
+│          │ Descartar o TKT-12 e planejar nova tentativa.                 ││ dev → mot → ldr  descartar e refazer     │
+│          │                                                               │├──────────────────────────────────────────┤
+│ 14:51:10 ✗ [dropped]  ldr          plano v2 · TKT-12 saiu · w1 liberado  ││ custo do thread (estimado)               │
+│          │ Nova tentativa planejada como TKT-15 [planned], com ⟳ 0/2     ││ w1 58.7k tok ≈$0.88  jdg 26.4k ≈$0.40    │
+│          │ próprio.                                                      ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│ fluxo  ✗ v1 ▶ ✗ v2 ▶ ✗ v3 ▶ ⚠ 2/2 ▶ ? Q-13 ▶ ✗ dropped ▶ TKT-15          ││                                          │
+│                                                                          ││                                          │
+└──────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────────┘
+
+ j/k rolar   [ ] ticket ant/próx   esc voltar   b próx. bloqueante   1-4 telas   ? ajuda   q sair

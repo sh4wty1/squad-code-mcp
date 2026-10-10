@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:20:20
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ thread TKT-13 · API da setlist ─────────────────────────────────────────┐┌─ judge · nota por critério ──────────────┐
+│ sem dono · no plano v1 desde 14:19:50 · [planned]                        ││ critério da spec                         │
+│                                                                          ││ 5 setlist atualiza em ≤30s               │
+│ ○ sem linha do tempo                                                     │├──────────────────────────────────────────┤
+│                                                                          ││ judge                                    │
+│ O TKT-13 está no plano mas ainda não recebeu task. A linha do tempo      ││ ○ sem avaliação · nada entregue          │
+│ começa na primeira task do leader; até lá só existe o que o plano diz.   │├──────────────────────────────────────────┤
+│                                                                          ││ perguntas no thread                      │
+│ no plano v1                                                              ││ nenhuma                                  │
+│ título     API da setlist                                                │├──────────────────────────────────────────┤
+│ depende de TKT-12 player de áudio · [working] w1                         ││ custo do thread                          │
+│ dono       —  definido quando a task sair                                ││ — sem uso ainda                          │
+│ rework     ⟳0/2                                                          ││                                          │
+│                                                                          ││                                          │
+│ próximo evento esperado                                                  ││                                          │
+│ ldr → worker  [task]  depois que o TKT-12 for aprovado                   ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│                                                                          ││                                          │
+│ fluxo  ▶ plano v1 ▶ aguarda TKT-12 ▶ task                                ││                                          │
+│                                                                          ││                                          │
+└──────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────────┘
+
+ j/k rolar   [ ] ticket ant/próx   esc voltar   b próx. bloqueante   1-4 telas   ? ajuda   q sair

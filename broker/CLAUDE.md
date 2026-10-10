@@ -18,9 +18,20 @@ Broker and MCP channel server of squad-code-mcp. A fork of claude-peers-mcp at `
 - `delivery.ts` — The loop of a session: poll, push in order, ack after the push. No MCP and no HTTP: the calls are injected.
 - `tools.ts` — The MCP tools of each role and the route each one calls.
 - `shared/contract.ts` — The event envelope, the twenty kinds, the edges and the read format.
-- `shared/derive.ts` — The state of the tickets, what each peer owes and the features, from the events alone. Pure functions.
+- `shared/derive.ts` — The state of the tickets, what each peer owes and the features, from the events alone. Pure functions. `squad(events, now)` is the status rule of the contract (ADR-006): from the whole log it gives the open feature, the status of each agent and of each ticket by precedence, the questions, the gates, the open permission requests and the tokens. `presence`, `blocks`, `openPermissions`, `questions`, `gates` and `usageTotals` are its parts.
 - `shared/config.ts`, `shared/git.ts` — Settings (`SQUAD_*`) and the git common directory.
 - `cli.ts` — CLI utility for the broker.
+- `tui.ts` — The TUI, a process of its own that only reads: `config` validates the settings, `start` is the loop of read, keys and drawing with `fetch`, clock, size, input and output injected, and the bottom of the file wires it to the terminal. Imported by neither `broker.ts` nor `server.ts`.
+- `tui/reader.ts` — `GET /events?after=<cursor>`, the only call of the TUI: the log by cursor, kept on a failed read and emptied when the broker comes back on a new database.
+- `tui/keys.ts` — `press(ui, key, view)`: what a key does to the state of the screen. Pure; null quits.
+- `tui/view.ts` — `Ui`, the state of the screen, and `View`, what a screen draws from.
+- `tui/feed.ts` — The lines of the feed from the log: one per message and the system lines.
+- `tui/activity.ts` — The text of activity of an agent, the seals of line 1 and the right side of the footer.
+- `tui/grid.ts`, `tui/ansi.ts` — The buffer of 120×40 cells and its primitives; the escapes that paint the lines that changed, the glyph substitutes and the alternate screen.
+- `tui/screens/` — One pure function of a `View` per screen: `main.ts` with `detail.ts`, `topology.ts`, `thread.ts`, `help.ts`, `small.ts` and `down.ts`; `chrome.ts` draws lines 0, 1, 38 and 39 of all of them.
+- `tui/config.ts`, `tui/prices.json` — The price table and the interval of read.
+- `tui/glyphs.ts`, `tui/probe.ts` — The glyphs outside ASCII the screens draw, and the probe that measures them in the terminal.
+- `test/frames/` — The frames of the prototype as text, the tool that extracts them and the logs that reproduce them; `test/unit/tui-frames.test.ts` draws each one.
 
 The design is in `../.design/squad-mvp.md`, the decisions in `../docs/adr/` and `../.specs/STATE.md`.
 
@@ -34,9 +45,13 @@ SQUAD_NAME=leader SQUAD_ROLE=leader claude --dangerously-load-development-channe
 bun cli.ts status
 bun cli.ts kill-broker
 
-# Tests and types:
+# The TUI, in a terminal of 120×40 or more, and the probe of its glyphs:
+bun tui.ts
+bun tui/probe.ts
+
+# Tests and types. Not `bun x tsc`: it downloads another tsc instead of the installed one.
 bun test
-bun x tsc --noEmit
+bun node_modules/typescript/bin/tsc --noEmit
 ```
 
 It has to run on Windows: no `HOME`, `ps` or `lsof`, and paths may have spaces.

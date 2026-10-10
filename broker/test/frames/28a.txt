@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › ○ nenhuma feature ainda                                    ? 0   broker ● conectado  15:02:14
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ agentes · 0/6 no ar ────┐┌─ feed · sem feature aberta ──────────────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ · mother    [não lançado]││  hora     de    p/  kind            corpo              ││ nenhuma feature ainda          │
+│   objetivo · nunca entrou││─ broker no ar desde 15:02:10 · nenhuma feature ainda ──││                                │
+│   sem sessão no broker   ││                                                        ││ O log deste broker não tem     │
+│                          ││  ○ log vazio                                           ││ feature aberta nem encerrada:  │
+│ · leader    [não lançado]││  o feed começa quando o primeiro agente entrar         ││ não há resumo, última entrega  │
+│   tech lead · nunca entr…││                                                        ││ nem ocioso desde.              │
+│   sem sessão no broker   ││                                                        │├────────────────────────────────┤
+│                          ││                                                        ││ sessão                         │
+│ · worker-1  [não lançado]││                                                        ││ broker no ar 15:02:10 · há 4s  │
+│   worker · nunca entrou  ││                                                        ││ agentes      0 de 6 entraram   │
+│   sem sessão no broker   ││                                                        ││ mensagens    0                 │
+│                          ││                                                        │├────────────────────────────────┤
+│ · worker-2  [não lançado]││                                                        ││ A mother abre a feature quando │
+│   worker · nunca entrou  ││                                                        ││ a spec estiver pronta; a linha │
+│   sem sessão no broker   ││                                                        ││ 0 passa a mostrá-la.           │
+│                          ││                                                        ││                                │
+│ · worker-3  [não lançado]││                                                        ││                                │
+│   worker · nunca entrou  ││                                                        ││                                │
+│   sem sessão no broker   ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│ · judge     [não lançado]││                                                        ││                                │
+│   judge · nunca entrou   ││                                                        ││                                │
+│   sem sessão no broker   ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+├─ tickets ────────────────┤│                                                        ││                                │
+│                          ││                                                        ││                                │
+│ ○ sem feature aberta     ││                                                        ││                                │
+│   aparecem com o plano   ││                                                        ││                                │
+│   da primeira feature    ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+│                          ││                                                        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot —  ldr —  w1 —  w2 —  w3 —  jdg —  │ sessão ≈$0.00 est.                                    ○ nenhuma feature ainda
+ j/k mover   tab painel   enter abrir   b bloqueante   1-4 telas   g gate   x permissão   p pausa   ? ajuda   q sair

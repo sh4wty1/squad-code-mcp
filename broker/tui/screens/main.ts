@@ -1,0 +1,229 @@
+// The main screen: the agents and the tickets at the left, the feed in the middle and the
+// detail of the selected line at the right. Ported from `rMain` of the prototype.
+
+import type { Agent } from "../../shared/derive.ts";
+import { activity, refs } from "../activity.ts";
+import { debt, label, qid, type FeedRow, type SysKind } from "../feed.ts";
+import { age, clock, cut, grid, len, mmss, type Color, type Grid } from "../grid.ts";
+import type { View } from "../view.ts";
+import { chrome, drawRows, kindTone, MAIN_KEYS, segLen, stats, STATUS, statusSegs, TICKET_TONE, tone } from "./chrome.ts";
+import { detailLines } from "./detail.ts";
+
+const ROLES = { mother: "objetivo", leader: "tech lead", worker: "worker", judge: "judge" };
+
+const seconds = (view: View, since: number) => Math.floor((view.squad.now - since) / 1000);
+
+// Three lines per agent: the status, the role with the activity, and the first thing to say of it
+function agents(g: Grid, view: View, frame: Color) {
+  const { squad, rows } = view;
+  const here = squad.agents.filter((a) => a.status !== "never").length;
+  g.box(0, 2, 28, 36, frame, "agentes · " + (here < 6 ? here + "/6 no ar" : "6"), "bwhite");
+
+  squad.agents.forEach((a: Agent, i) => {
+    const y = 3 + i * 4;
+    const asking = a.status === "waiting" && a.blockingQuestion !== null;
+    const quiet = a.status === "idle" || a.status === "offline" || a.status === "never";
+    const alert = a.status === "blocked" || a.status === "offline" || a.status === "stalled";
+    const glyph: Color = alert ? STATUS[a.status][0] : asking ? "bred" : quiet ? "gray" : tone(a.name);
+    g.put(2, y, asking ? "?" : STATUS[a.status][1], glyph, { bold: true });
+    g.put(4, y, a.name, a.status === "never" ? "gray" : quiet ? "white" : tone(a.name), { bold: !quiet });
+    const status = statusSegs(a);
+    g.segs(27 - segLen(status), y, status);
+
+    let x = g.put(4, y + 1, ROLES[a.role], "gray");
+    x = g.put(x, y + 1, " · ", "gray");
+    const doing = activity(a, squad, rows);
+    const rework = doing.rework !== null ? `⟳${doing.rework}/2` : null;
+    const left = doing.left !== null ? "? " + mmss(doing.left) : null;
+    x = g.put(x, y + 1, cut(doing.text, 27 - x - (rework ? len(rework) + 1 : 0) - (left ? len(left) + 1 : 0)), "white");
+    if (rework) x = g.put(x + 1, y + 1, rework, doing.rework! >= 2 ? "bred" : "byellow");
+    if (left) g.put(x + 1, y + 1, left, "byellow");
+
+    const ticket = squad.tickets.find((t) => t.ticket_ref === a.ticket);
+    const task = rows.find((row) => row.seq === ticket?.taskSeq)?.event;
+    const loadout = task?.kind === "task" ? (task.loadout ?? []) : [];
+    if (a.status === "never") g.put(4, y + 2, "sem sessão no broker", "gray");
+    else if (a.status === "offline") g.put(4, y + 2, cut("◌ sessão morta há " + age(seconds(view, a.since!)), 23), "red");
+    else if (a.permission) {
+      g.segs(4, y + 2, [["x", "bwhite", true], [" " + cut(`${a.permission.tool_name} · ${a.permission.input_preview.split("\n")[0]}`, 21), "bred"]]);
+    } else if (a.status === "stalled") g.put(4, y + 2, cut("‖ deve " + debt(a.owes!), 23), "byellow", { bold: true });
+    else if (a.blockedReason !== null) g.put(4, y + 2, cut("⚠ " + a.blockedReason, 23), "bred", { bold: true });
+    else if (a.blockingQuestion !== null) {
+      const holder = squad.questions.find((q) => q.id === a.blockingQuestion)!.holder;
+      g.put(4, y + 2, cut(`? ${qid(a.blockingQuestion)} bloqueante · ${holder === "human" ? "dev" : label(holder)}`, 23), "bred");
+    }
+    else if (a.noReactionSince !== null) g.put(4, y + 2, "sem reação há " + age(seconds(view, a.noReactionSince)), "byellow");
+    else g.put(4, y + 2, loadout.length ? cut(loadout.join(" "), 23) : "sem loadout", "gray");
+  });
+}
+
+// Two lines per ticket up to three tickets, one line from four to seven, and a count of the rest
+function tickets(g: Grid, view: View, frame: Color) {
+  const { squad } = view;
+  const all = squad.tickets;
+  g.sep(0, 29, 28, frame);
+  g.put(2, 29, ` tickets${all.some((t) => t.status === "planned") ? " · plano v" + squad.planVersion : ""} `, "gray");
+
+  if (all.length === 0) {
+    const empty: [string, Color][] = squad.feature
+      ? [["○ nenhum ticket ainda", "gray"], ["o leader publica o", "white"], ["plano ao receber a spec", "white"]]
+      : squad.features.length > 0
+        ? [["○ sem feature aberta", "gray"], ["os da última feature", "white"], ["ficam no resumo →", "white"]]
+        : [["○ sem feature aberta", "gray"], ["aparecem com o plano", "white"], ["da primeira feature", "white"]];
+    empty.forEach(([text, color], i) => g.put(i ? 4 : 2, 31 + i, cut(text, i ? 23 : 25), color));
+  }
+
+  const compact = all.length > 3;
+  const shown = all.length > 7 ? all.slice(0, 6) : all;
+  let y = 30;
+  for (const t of shown) {
+    const n = t.reworks;
+    const reworks: Color = t.dropped ? "gray" : n >= 2 ? "bred" : n ? "byellow" : "gray";
+    const strong = t.status === "escalated" || t.status === "blocked";
+    // A dropped ticket frees who had it
+    const owner = squad.agents.find((a) => a.name === t.owner && !t.dropped);
+    const short = owner?.short ?? "—";
+    g.put(2, y, t.ticket_ref, t.dropped ? "gray" : "bwhite", { bold: !t.dropped });
+    if (compact) {
+      g.put(9, y, `⟳${Math.min(n, 2)}/2`, reworks);
+      g.put(14, y, `[${t.status}]`, TICKET_TONE[t.status], { bold: strong });
+      g.put(27 - len(short), y, short, owner ? "green" : "gray");
+      y++;
+      continue;
+    }
+    g.put(9, y, cut(t.title, 15), "gray");
+    g.put(27 - len(short), y, short, owner ? "green" : "gray");
+    let x = g.put(2, y + 1, `⟳${Math.min(n, 2)}/2`, reworks, { bold: n >= 2 && !t.dropped });
+    x = g.put(x + 1, y + 1, `[${t.status}]`, TICKET_TONE[t.status], { bold: strong });
+    const going = t.status !== "planned" && t.status !== "done" && t.status !== "dropped";
+    const note: [string, Color] | null =
+      t.status === "planned" && t.depends_on.length > 0
+        ? ["dep " + refs(t.depends_on), "gray"]
+        : t.status === "escalated"
+          ? ["→ mot", "bred"]
+          : t.status === "waiting"
+            ? ["? dev", "bred"]
+            : going && owner?.status === "offline"
+              ? ["◌ parado", "red"]
+              : going && owner?.status === "stalled"
+                ? ["‖ parado", "byellow"]
+                : null;
+    if (note) g.put(x + 1, y + 1, cut(note[0], 27 - x - 1), note[1], { bold: note[1] !== "gray" });
+    y += 2;
+  }
+  if (all.length > 7) g.put(2, 36, `+${all.length - 6} tickets`, "gray");
+}
+
+// The color of a system line, and whether it is bold
+const SYS: Record<SysKind, [Color, boolean]> = {
+  opened: ["bmagenta", true],
+  closed: ["bgreen", true],
+  plan: ["cyan", true],
+  joined: ["bgreen", false],
+  left: ["red", false],
+  blocked: ["bred", true],
+  stalled: ["byellow", true],
+  limit: ["bred", true],
+  refused: ["bred", false],
+  default: ["byellow", false],
+  merged: ["byellow", false],
+};
+
+function feedRow(g: Grid, y: number, row: FeedRow, selected: boolean, dim: boolean) {
+  const e = row.event;
+  const C = (color: Color): Color => (dim ? "gray" : color);
+  if (selected) {
+    g.bg(29, y, 56, "black");
+    g.put(29, y, "▶", C("bwhite"), { bold: true });
+  }
+  g.put(31, y, clock(row.ts), C(selected ? "bwhite" : "gray"));
+  if (row.sys) {
+    const abandoned = e.kind === "feature_closed" && e.outcome === "abandoned";
+    g.put(40, y, cut(row.text, 45), C(abandoned ? "byellow" : SYS[row.sys][0]), { bold: SYS[row.sys][1] });
+    return;
+  }
+  const to = e.to ?? "";
+  g.put(40, y, label(e.from), C(tone(e.from)), { bold: selected });
+  g.put(44, y, "→", C("gray"));
+  g.put(46, y, label(to), C(tone(to)), { bold: selected });
+  const kind = `[${e.kind}]`;
+  g.put(50, y, kind, C(kindTone(e)));
+  const x = Math.max(66, 51 + len(kind));
+  // What waits for the dev stands out: a gate, a permission request, a question that reached him
+  const asks = e.kind === "question" && to === "human";
+  const hot = asks || e.kind === "gate" || e.kind === "permission_request";
+  const body: Color = e.kind === "gate" ? "bmagenta" : e.kind === "permission_request" ? "bcyan" : asks ? (e.blocking ? "bred" : "byellow") : selected ? "bwhite" : "white";
+  g.put(x, y, cut(row.text, 85 - x), C(body), { bold: hot });
+}
+
+// The last 33 lines of the feed, with what came before the feature in gray above a ruler
+// and, without a feature, a band that says since when
+function feedPanel(g: Grid, view: View, frame: Color) {
+  const { squad, rows, ui } = view;
+  const feature = squad.feature;
+  const lastEnd = rows.findLastIndex((row) => row.sys === "closed");
+  g.box(28, 2, 58, 36, frame, feature ? "feed · " + cut(feature.title, 32) : "feed · sem feature aberta", "bwhite");
+  const live: [string, Color] = ui.paused ? ["○ pausado", "byellow"] : !feature && lastEnd >= 0 ? ["○ ocioso", "gray"] : ["● ao vivo", "green"];
+  g.put(84 - len(live[0]) - 2, 2, ` ${live[0]} `, live[1]);
+  g.put(31, 3, "hora", "gray");
+  g.put(40, 3, "de", "gray");
+  g.put(46, 3, "p/", "gray");
+  g.put(50, 3, "kind", "gray");
+  g.put(66, 3, "corpo", "gray");
+
+  const lastOpen = feature ? rows.findIndex((row) => row.seq === feature.opened_seq) : -1;
+  let rule: string | null = null;
+  if (lastOpen > 0) {
+    const before = rows.slice(0, lastOpen).findLast((row) => row.sys === "closed");
+    rule = before
+      ? ` ▲ anterior · ${before.squad?.feature?.title ?? ""} · ${before.event.kind === "feature_closed" && before.event.outcome === "delivered" ? "✓ entregue" : "✗ abandonada"} `
+      : " ▲ antes da feature · entradas no broker ";
+  }
+  let band: string | null = null;
+  if (!feature && lastEnd >= 0) {
+    const out = squad.agents.filter((a) => a.status === "blocked" || a.status === "offline").length;
+    const since = clock(rows[lastEnd]!.ts);
+    band = out ? ` squad sem feature desde ${since} · ${out} fora de [idle] ` : ` squad ocioso desde ${since} · sem feature ativa `;
+  } else if (!feature && rows.length > 0) {
+    band = ` broker no ar desde ${clock(rows[0]!.ts)} · nenhuma feature ainda `;
+  }
+
+  const list: ({ rule: string } | { row: FeedRow; dim: boolean })[] = [];
+  rows.forEach((row, i) => {
+    if (rule && i === lastOpen) list.push({ rule });
+    list.push({ row, dim: feature ? i < lastOpen : i < lastEnd });
+    if (band && i === (lastEnd >= 0 ? lastEnd : rows.length - 1)) list.push({ rule: band });
+  });
+
+  let start = Math.max(0, list.length - 33);
+  const selected = list.findIndex((item) => "row" in item && item.row.seq === ui.selected);
+  if (selected >= 0 && selected < start) start = selected;
+  list.slice(start, start + 33).forEach((item, i) => {
+    const y = 4 + i;
+    if ("rule" in item) {
+      const text = cut(item.rule, 56);
+      const side = Math.floor((56 - len(text)) / 2);
+      g.put(29, y, "─".repeat(side) + text + "─".repeat(56 - side - len(text)), "gray");
+    } else {
+      const chosen = item.row.seq === ui.selected;
+      feedRow(g, y, item.row, chosen, item.dim && !chosen);
+    }
+  });
+  if (rows.length === 0) {
+    g.put(31, 6, "○ log vazio", "gray", { bold: true });
+    g.put(31, 7, "o feed começa quando o primeiro agente entrar", "white");
+  }
+}
+
+export function main(view: View): Grid {
+  const g = grid();
+  const frame = (panel: number): Color => (view.ui.focus === panel ? "bwhite" : "gray");
+  chrome(g, view, "main", MAIN_KEYS);
+  agents(g, view, frame(0));
+  tickets(g, view, frame(0));
+  feedPanel(g, view, frame(1));
+  g.box(86, 2, 34, 36, frame(2), "detalhe", "bwhite");
+  drawRows(g, 88, 3, 36, detailLines(view, view.rows.find((row) => row.seq === view.ui.selected)), 86, 34, frame(2));
+  stats(g, view);
+  return g;
+}

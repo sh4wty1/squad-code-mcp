@@ -1,0 +1,24 @@
+
+
+
+
+
+
+                                   squad-tui
+
+                            terminal pequeno demais
+
+                              atual       80 × 24
+                              necessário  120 × 40
+
+                       aumente a janela ou reduza a fonte
+                   a tela volta sozinha ao atingir o tamanho
+
+                                     q sair
+
+
+
+
+
+
+
