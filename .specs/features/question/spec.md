@@ -419,8 +419,8 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-53 | P1: O que o agente vê | T17 | Implementing |
 | QST-54 | P1: O que o agente vê | T17 | Implementing |
 | QST-55 | P1: Aba Perguntas | T22, T23 | Implementing |
-| QST-56 | P1: Aba Perguntas | T23 | In Tasks |
-| QST-57 | P1: Aba Perguntas | T23 | In Tasks |
+| QST-56 | P1: Aba Perguntas | T23 | Implementing |
+| QST-57 | P1: Aba Perguntas | T23 | Implementing |
 | QST-58 | P1: Aba Perguntas | T24 | In Tasks |
 | QST-59 | P1: Aba Perguntas | T22, T24 | Implementing |
 | QST-60 | P1: Aba Perguntas | T22, T25 | Implementing |
@@ -459,8 +459,8 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-93 | Edge cases | T10 | Implementing |
 | QST-94 | Edge cases | T6 | Implementing |
 | QST-95 | Edge cases | T7 | Implementing |
-| QST-96 | Edge cases | T23, T28 | In Tasks |
-| QST-97 | Edge cases | T23 | In Tasks |
+| QST-96 | Edge cases | T23, T28 | Implementing |
+| QST-97 | Edge cases | T23 | Implementing |
 | QST-98 | Edge cases | T22, T28 | Implementing |
 
 **Coverage:** 98 total, 98 mapped to tasks, 0 unmapped.

@@ -589,12 +589,12 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] As linhas 2 a 25, colunas 0 a 59, do log do frame 04 são as do frame, e as do log do frame 20b as do estado vazio
-- [ ] A aba `4 perguntas` está destacada e a linha 39 é a de QST-64
-- [ ] QST-96: um texto de 300 caracteres e uma opção de 100 não escrevem fora da caixa
-- [ ] QST-97: com sete perguntas abertas, a selecionada está sempre desenhada inteira, para a primeira, a do meio e a última
-- [ ] Testes em `test/unit/tui-questions.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] As linhas 2 a 25, colunas 0 a 59, do log do frame 04 são as do frame, e as do log do frame 20b as do estado vazio
+- [x] A aba `4 perguntas` está destacada e a linha 39 é a de QST-64
+- [x] QST-96: um texto de 300 caracteres e uma opção de 100 não escrevem fora da caixa
+- [x] QST-97: com sete perguntas abertas, a selecionada está sempre desenhada inteira, para a primeira, a do meio e a última
+- [x] Testes em `test/unit/tui-questions.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
