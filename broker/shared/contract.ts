@@ -35,6 +35,9 @@ export const KINDS = [
 
 export type Kind = (typeof KINDS)[number];
 
+// `Q-07` for question 7: what the broker writes in the summary of an answer and the TUI draws
+export const qid = (id: number): string => "Q-" + String(id).padStart(2, "0");
+
 // The only (kind, role of the sender, role of the recipient) trios /send accepts
 export const EDGES: { kind: "task" | "result" | "verdict"; from: Role; to: Role }[] = [
   { kind: "task", from: "mother", to: "leader" },

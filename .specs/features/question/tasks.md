@@ -131,9 +131,9 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `qid(7)` é `Q-07`, `qid(12)` é `Q-12` e `qid(123)` é `Q-123`, com teste em `test/unit/contract.test.ts`
-- [ ] `tui/feed.ts` não define mais `qid`; nenhuma tela muda (`bun test test/unit/tui-frames.test.ts` passa)
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `qid(7)` é `Q-07`, `qid(12)` é `Q-12` e `qid(123)` é `Q-123`, com teste em `test/unit/contract.test.ts`
+- [x] `tui/feed.ts` não define mais `qid`; nenhuma tela muda (`bun test test/unit/tui-frames.test.ts` passa)
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

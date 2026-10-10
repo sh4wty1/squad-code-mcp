@@ -383,7 +383,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-17 | P1: Escalar | T7 | In Tasks |
 | QST-18 | P1: Escalar | T7 | In Tasks |
 | QST-19 | P1: Escalar | T7, T11 | In Tasks |
-| QST-20 | P1: Responder como holder | T1, T8 | In Tasks |
+| QST-20 | P1: Responder como holder | T1, T8 | Implementing |
 | QST-21 | P1: Responder como holder | T8 | In Tasks |
 | QST-22 | P1: Responder como holder | T8 | In Tasks |
 | QST-23 | P1: Responder como holder | T8 | In Tasks |
