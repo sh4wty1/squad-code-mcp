@@ -893,10 +893,10 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `bun tui/demo.ts 04`: `4` mostra a aba; responder a Q-07 acrescenta o `answer` ao log do demo e a pergunta vai para o histórico
-- [ ] Uma pergunta que já tem `answer` no log do demo responde `question_closed`
-- [ ] O demo não toca `SQUAD_DB` nem o arquivo de token do usuário
-- [ ] Gate build passa
+- [x] `bun tui/demo.ts 04`: `4` mostra a aba; responder a Q-07 acrescenta o `answer` ao log do demo e a pergunta vai para o histórico
+- [x] Uma pergunta que já tem `answer` no log do demo responde `question_closed`
+- [x] O demo não toca `SQUAD_DB` nem o arquivo de token do usuário
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build
