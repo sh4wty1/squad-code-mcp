@@ -632,11 +632,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Com 5 resolvidas a tela mostra as 5; com 6, mostra 4 e `+2 mais antigas · h e j/k para rolar`; com `historyOffset` 1, as 4 seguintes e `+1 mais antigas`
-- [ ] O título diz `histórico · <n> resolvidas` com o total, não o que está visível
-- [ ] Com `qfocus` `history` a borda do histórico é branca e a da lista cinza, e o contrário com `list` (teste de cor das células da borda)
-- [ ] Testes em `test/unit/tui-questions.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Com 5 resolvidas a tela mostra as 5; com 6, mostra 4 e `+2 mais antigas · h e j/k para rolar`; com `historyOffset` 1, as 4 seguintes e `+1 mais antigas`
+- [x] O título diz `histórico · <n> resolvidas` com o total, não o que está visível
+- [x] Com `qfocus` `history` a borda do histórico é branca e a da lista cinza, e o contrário com `list` (teste de cor das células da borda)
+- [x] Testes em `test/unit/tui-questions.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

@@ -1,19 +1,21 @@
 import { expect, test } from "bun:test";
 import type { Caller } from "../../send.ts";
+import type { SquadEvent } from "../../shared/contract.ts";
 import { squad } from "../../shared/derive.ts";
 import { feed } from "../../tui/feed.ts";
-import { clock } from "../../tui/grid.ts";
+import { clock, type Color } from "../../tui/grid.ts";
 import { START } from "../../tui/keys.ts";
 import { questions } from "../../tui/screens/questions.ts";
 import type { Ui, View } from "../../tui/view.ts";
 import { LOGS, PRICES } from "../frames/logs.ts";
 import { frame, frameView } from "../frames/view.ts";
-import { LEADER, MOTHER, NOW, setup, WORKER_1, WORKER_2, WORKER_3 } from "./helpers.ts";
+import { HUMAN_TOKEN, LEADER, MOTHER, NOW, setup, WORKER_1, WORKER_2, WORKER_3 } from "./helpers.ts";
 
-// The tab drawn from the log of a frame, with the state of its screen changed and the clock `later` ms ahead
-function draw(id: string, ui: Partial<Ui> = {}, later = 0) {
-  const view = frameView(id);
-  return questions({ ...view, squad: squad(LOGS[id]!.events, LOGS[id]!.now + later), ui: { ...view.ui, ...ui } });
+// The tab drawn from the log of a frame, with the state of its screen changed, the clock
+// `later` ms ahead and, with `change`, another log
+function draw(id: string, ui: Partial<Ui> = {}, later = 0, change: (events: SquadEvent[]) => SquadEvent[] = (events) => events) {
+  const view = frameView(id, change);
+  return questions({ ...view, squad: squad(change(LOGS[id]!.events), LOGS[id]!.now + later), ui: { ...view.ui, ...ui } });
 }
 
 // Columns `from` to `to` of the lines y1 to y2
@@ -289,4 +291,84 @@ test("QST-96: a text, a reason, an option and a ticket that do not fit are broke
   const lines = cols(drawn, 60, 119, 3, 24);
   expect(lines.filter((line, i) => line !== boxed(side(drawn, 3 + i)) && line !== "├" + "─".repeat(58) + "┤")).toEqual([]);
   expect(cols(drawn, 60, 119, 25, 25)).toEqual(["└" + "─".repeat(58) + "┘"]);
+});
+
+// The text of the history: columns 2 to 117 of a line
+const past = (lines: string[], y1: number, y2: number) => cols(lines, 2, 117, y1, y2).map((line) => line.trimEnd());
+// The two lines of a resolved question: the hour, the label, the route, the ticket and the text, then how it ended
+const entry = (hour: string, id: string, route: string, ticket: string, text: string, ended: string) => [hour.padEnd(10) + id.padEnd(6) + route.padEnd(26) + ticket.padEnd(8) + text, " ".repeat(10) + ended];
+const MORE = " mais antigas · h e j/k para rolar";
+// The main scenario without the question the leader asked the mother at 14:18:40: the five of the history of the prototype
+const five = (events: SquadEvent[]) => events.filter((e) => e.seq !== 403 && e.seq !== 404);
+
+const Q11 = entry("14:31:48", "Q-11", "jdg → w2", "TKT-13", "O cache invalida quando a música muda antes dos 30s?", "✓ respondida por worker-2: sim, via ETag do upstream  · rota curta, não chegou ao dev");
+const Q12 = entry("14:31:36", "Q-12", "ldr → mot", "TKT-12", "Até quando o player deve tentar reconectar?", "▶ mesclada em Q-07 pela mother · recebe a mesma resposta");
+const Q10 = entry("14:30:56", "Q-10", "w2 → ldr → dev", "TKT-13", "Nomes de artista: caixa alta ou como vêm do upstream?", "⟳ default aplicado · worker-2 entregou o ticket antes da resposta: como vêm do upstream");
+const Q05 = entry("14:25:30", "Q-05", "w3 → ldr → dev", "TKT-14", "Formato de data na setlist?", "⟳ default aplicado · timeout: HH:mm");
+const Q06 = entry("14:24:10", "Q-06", "w2 → ldr → dev", "TKT-13", "Endpoint /api/setlist público ou autenticado?", "✓ respondida pelo dev: público, só leitura");
+const Q04 = entry("14:19:05", "Q-04", "ldr → mot", "", "A setlist vem da API da rádio ou é cadastrada no CMS? Isso muda o…", "✓ respondida por mother: API /v1/setlist, polling 30s  · rota curta, não chegou ao dev");
+
+test("QST-60, QST-61, QST-62: with five resolved questions the history shows the five, as frame 04 has them", () => {
+  const drawn = draw("04", {}, 0, five).text();
+  // The routes are the sequence of the `question` of the log (.design/squad-mvp.md line 490):
+  // the prototype writes by hand a hop of the leader to the mother in three of them
+  const expected = cols(frame("04"), 0, 119, 26, 37).map((line, i) => {
+    const hop = /(w\d → ldr) → mot → dev/.exec(line);
+    expect(hop !== null).toBe([5, 7, 9].includes(i));
+    return hop ? line.replace(hop[0], `${hop[1]} → dev`.padEnd(20)) : line;
+  });
+  expect(cols(drawn, 0, 119, 26, 37)).toEqual(expected);
+  expect(past(drawn, 27, 36)).toEqual([...Q11, ...Q12, ...Q10, ...Q05, ...Q06]);
+});
+
+test("QST-60, QST-62: with six the history shows four and how many are below, and its title counts them all", () => {
+  const drawn = draw("04").text();
+  expect(cols(drawn, 0, 30, 26, 26)).toEqual(["┌─ histórico · 6 resolvidas ───"]);
+  expect(past(drawn, 27, 36)).toEqual([...Q11, ...Q12, ...Q10, ...Q05, "+2" + MORE, ""]);
+});
+
+test("QST-62: the history starts at its offset, and never leaves fewer than four on the screen", () => {
+  expect(past(draw("04", { historyOffset: 1 }).text(), 27, 36)).toEqual([...Q12, ...Q10, ...Q05, ...Q06, "+1" + MORE, ""]);
+  // The last four have none below: the offset stops there
+  const last = [...Q10, ...Q05, ...Q06, ...Q04, "", ""];
+  expect(past(draw("04", { historyOffset: 2 }).text(), 27, 36)).toEqual(last);
+  expect(past(draw("04", { historyOffset: 9 }).text(), 27, 36)).toEqual(last);
+  expect(cols(draw("04", { historyOffset: 9 }).text(), 0, 30, 26, 26)).toEqual(["┌─ histórico · 6 resolvidas ───"]);
+});
+
+test("QST-60, QST-61: a merged question keeps its hour and its line after the one it follows is answered", () => {
+  // In the log of frame 20b the dev answered Q-07 at 14:33:02 and the deadline of Q-08 came at 14:35:15
+  const drawn = draw("20b").text();
+  expect(cols(drawn, 0, 119, 31, 34)).toEqual(cols(frame("20b"), 0, 119, 31, 34));
+  expect(past(drawn, 27, 36)).toEqual([
+    ...entry("14:35:15", "Q-08", "w2 → ldr → dev", "TKT-13", "Setlist sem capa: placeholder genérico ou logo da 89?", "⟳ default aplicado · timeout: logo da 89"),
+    ...entry("14:33:02", "Q-07", "w1 → ldr → mot → dev", "TKT-12", "Reconexão do stream: retry infinito ou desistir após 5 tentativas?", "✓ respondida pelo dev: infinito com backoff"),
+    ...Q11,
+    ...Q12,
+    "+4" + MORE,
+    "",
+  ]);
+});
+
+test("QST-60: the text of a resolved question is cut at 66 columns, and nothing is written outside the box", () => {
+  const b = open();
+  const id = b.ask(WORKER_1, { ...BLOCKING, body: "x".repeat(300), ticket_ref: "T".repeat(60) });
+  b.question.answerAsHuman({ human_token: HUMAN_TOKEN, question_id: id, answer: "r".repeat(300) });
+  const drawn = b.lines();
+  expect(past(drawn, 27, 28)).toEqual(entry(clock(NOW), "Q-01", "w1 → ldr → mot → dev", "T".repeat(6) + "…", "x".repeat(65) + "…", "✓ respondida pelo dev: " + "r".repeat(82) + "…"));
+  expect(cols(drawn, 0, 1, 27, 36)).toEqual(Array.from({ length: 10 }, () => "│ "));
+  expect(cols(drawn, 118, 119, 27, 36)).toEqual(Array.from({ length: 10 }, () => " │"));
+});
+
+test("QST-63: the panel in focus has the white border and the other the gray one", () => {
+  // A corner, a side and the bottom of each box; the title is white in both
+  const borders = (qfocus: Ui["qfocus"]) => {
+    const g = draw("04", { qfocus });
+    const at = (cells: [x: number, y: number][]) => cells.map(([x, y]) => g.rows[y]![x]!.fg);
+    return { list: at([[0, 2], [0, 10], [59, 25], [30, 25]]), history: at([[0, 26], [0, 30], [119, 37], [60, 37]]) };
+  };
+  const white: Color[] = ["bwhite", "bwhite", "bwhite", "bwhite"];
+  const gray: Color[] = ["gray", "gray", "gray", "gray"];
+  expect(borders("list")).toEqual({ list: white, history: gray });
+  expect(borders("history")).toEqual({ list: gray, history: white });
 });

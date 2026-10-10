@@ -1,10 +1,11 @@
 // The tab of questions: the ones that wait for the dev, in the order he should answer them,
-// and the detail of the selected one. The layout is the one of `rQs` and `qDetailRows` of
-// the prototype; the questions come from the derived squad.
+// the detail of the selected one and the history of the resolved ones. The layout is the
+// one of `rQs`, `qDetailRows` and `histRow` of the prototype; the questions come from the
+// derived squad.
 
 import { qid } from "../../shared/contract.ts";
 import { SQUAD, type Question, type Squad } from "../../shared/derive.ts";
-import { effect, left, waiting } from "../asked.ts";
+import { effect, left, outcome, resolved, waiting } from "../asked.ts";
 import { label } from "../feed.ts";
 import { age, clock, cut, grid, len, mmss, wrap, type Color, type Grid, type Seg } from "../grid.ts";
 import type { View } from "../view.ts";
@@ -158,6 +159,29 @@ function detail(view: View, q: Question | undefined): Line[] {
   ];
 }
 
+// The history: two lines for each resolved question, the latest first. Five fit; with more,
+// four from the offset and the line that says how many are below.
+function history(g: Grid, view: View) {
+  const { squad, ui } = view;
+  const past = resolved(squad);
+  g.box(0, 26, 120, 12, ui.qfocus === "history" ? "bwhite" : "gray", `histórico · ${past.length} resolvidas`, "bwhite");
+  const max = past.length > 5 ? 4 : 5;
+  // The offset never leaves fewer on the screen than fit
+  const from = Math.max(0, Math.min(ui.historyOffset, past.length - max));
+  let y = 27;
+  for (const q of past.slice(from, from + max)) {
+    g.put(2, y, clock(q.closed_ts ?? squad.now), "gray");
+    g.put(12, y, qid(q.id), "bwhite", { bold: true });
+    g.segs(18, y, fit(route(q), 25));
+    if (q.ticket_ref !== null) g.put(44, y, cut(q.ticket_ref, 7), "white");
+    g.put(52, y, cut(q.text, 66), "white");
+    g.segs(12, y + 1, fit(outcome(q), 106));
+    y += 2;
+  }
+  const below = past.length - from - max;
+  if (below > 0) g.put(2, y, `+${below} mais antigas · h e j/k para rolar`, "gray");
+}
+
 export function questions(view: View): Grid {
   const g = grid();
   chrome(g, view, "questions", KEYS);
@@ -165,6 +189,7 @@ export function questions(view: View): Grid {
   const chosen = selected(view);
   g.box(60, 2, 60, 24, "gray", chosen ? `${qid(chosen.id)} · detalhe` : "detalhe", "bwhite");
   drawRows(g, 62, 3, 24, detail(view, chosen), 60, 60, "gray");
+  history(g, view);
   // No line of the feed is on this screen: the footer has no ticket to count the reworks of
   stats(g, { ...view, ui: { ...view.ui, selected: null } });
   return g;
