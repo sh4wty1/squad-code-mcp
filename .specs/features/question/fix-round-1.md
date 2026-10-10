@@ -75,8 +75,8 @@ tarefa marcada aqui.
 **Where**: `broker/test/integration/question.test.ts`
 **Requirement**: QST-10, QST-16, QST-22, QST-29
 
-- [ ] `/ask`, `/escalate`, `/merge-question` e `/answer` sem `human_token`, com `id` desconhecido e um corpo que também falha `missing_field`, respondem `unknown_peer`
-- [ ] Gate full passa
+- [x] `/ask`, `/escalate`, `/merge-question` e `/answer` sem `human_token`, com `id` desconhecido e um corpo que também falha `missing_field`, respondem `unknown_peer`
+- [x] Gate full passa
 
 ### F8: Quebra de linha colada, tecla a tecla
 

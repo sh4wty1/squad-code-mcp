@@ -173,6 +173,25 @@ for (const [path, body] of [
   });
 }
 
+test("QST-10/16/22/29: an id that is not registered is refused with unknown_peer on the four routes, also when the body lacks the fields of the route", async () => {
+  broker = await startBroker();
+  const b = broker;
+  const { mother, worker } = await squad(b);
+  await post(b.url, "/ask", { id: worker, ...ASKED });
+  const before = snapshot(b);
+  const routes = ["/ask", "/escalate", "/merge-question", "/answer"];
+  for (const path of routes) {
+    expectRefusal(await post(b.url, path, { id: "not-an-id" }), "unknown_peer");
+    expectRefusal(await post(b.url, path, { id: "not-an-id", question_id: "1" }), "unknown_peer");
+  }
+  expect(snapshot(b)).toEqual(before);
+  // the same bodies with the id of the mother fail the next rule of each route
+  for (const path of routes) {
+    expectRefusal(await post(b.url, path, { id: mother }), "missing_field");
+    expectRefusal(await post(b.url, path, { id: mother, question_id: "1" }), "missing_field");
+  }
+});
+
 test("QST-09/30: the mother merges a question through /merge-question, and the refusal of the leader leaves a refused of a question_merged", async () => {
   broker = await startBroker();
   const b = broker;
