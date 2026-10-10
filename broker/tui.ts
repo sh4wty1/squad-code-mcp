@@ -205,6 +205,25 @@ export function start(io: Io, settings: Settings) {
   return { key, resize, stop, done };
 }
 
+// The world of the process: its terminal, its clock, its `fetch` and the file of the human
+// credential, read each time the token is asked for
+export function terminal(project: string | null, env: Record<string, string | undefined> = process.env): Io {
+  const { stdin, stdout } = process;
+  return {
+    fetch: (url, init) => fetch(url, init),
+    now: Date.now,
+    size: () => ({ cols: stdout.columns, rows: stdout.rows }),
+    write: (text) => void stdout.write(text),
+    raw: (on) => {
+      stdin.setRawMode(on);
+      if (on) stdin.resume();
+      else stdin.pause();
+    },
+    project,
+    token: () => credential(env),
+  };
+}
+
 if (import.meta.main) {
   const { stdin, stdout } = process;
   let settings: Settings;
@@ -218,22 +237,7 @@ if (import.meta.main) {
     console.error("tui needs a terminal on stdin and stdout");
     process.exit(1);
   }
-  const tui = start(
-    {
-      fetch: (url, init) => fetch(url, init),
-      now: Date.now,
-      size: () => ({ cols: stdout.columns, rows: stdout.rows }),
-      write: (text) => void stdout.write(text),
-      raw: (on) => {
-        stdin.setRawMode(on);
-        if (on) stdin.resume();
-        else stdin.pause();
-      },
-      project: await project(process.cwd()),
-      token: credential,
-    },
-    settings
-  );
+  const tui = start(terminal(await project(process.cwd())), settings);
   stdin.on("data", (chunk) => tui.key(chunk.toString()));
   stdout.on("resize", tui.resize);
   // In raw mode ctrl+c is a key. SIGTERM never fires on Windows, where listening is harmless.

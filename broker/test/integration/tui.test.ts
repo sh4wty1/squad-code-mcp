@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { config, credential, project, start } from "../../tui.ts";
+import { config, credential, project, start, terminal } from "../../tui.ts";
 import { ENTER, LEAVE } from "../../tui/ansi.ts";
 import { BROKER_DIR, cleanEnv, FEATURE, get, openFeature, post, removeDir, startBroker, tempDir, waitFor } from "./helpers.ts";
 
@@ -140,6 +140,23 @@ test("QST-83: the credential is what the file of SQUAD_TOKEN_FILE has when it is
     expect(credential(env)).toBe("0f".repeat(32));
     writeFileSync(env.SQUAD_TOKEN_FILE, "1e".repeat(32) + "\n");
     expect(credential(env)).toBe("1e".repeat(32));
+  } finally {
+    removeDir(dir);
+  }
+});
+
+test("QST-83: the token of the terminal entry is what the file of SQUAD_TOKEN_FILE has when it is asked for, and null without the file or with an empty one", () => {
+  const dir = tempDir();
+  try {
+    const env = { SQUAD_TOKEN_FILE: join(dir, "the token") };
+    const io = terminal("importer", env);
+    expect(io.token()).toBeNull();
+    writeFileSync(env.SQUAD_TOKEN_FILE, "");
+    expect(io.token()).toBeNull();
+    // The broker writes it after the entry was put together
+    writeFileSync(env.SQUAD_TOKEN_FILE, "0f".repeat(32) + "\n");
+    expect(io.token()).toBe("0f".repeat(32));
+    expect(io.project).toBe("importer");
   } finally {
     removeDir(dir);
   }

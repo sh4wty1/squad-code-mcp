@@ -65,9 +65,9 @@ tarefa marcada aqui.
 **Where**: `broker/tui.ts`
 **Requirement**: QST-83
 
-- [ ] O que monta o `Io` do processo real sai do bloco `import.meta.main` para uma função exportada, e um teste afirma que o `token` dela lê o arquivo de `SQUAD_TOKEN_FILE` no momento da chamada (arquivo criado depois da montagem é lido; arquivo vazio ou ausente dá nulo)
-- [ ] Nenhuma outra mudança de comportamento no bloco de entrada
-- [ ] Gate full passa
+- [x] O que monta o `Io` do processo real sai do bloco `import.meta.main` para uma função exportada, e um teste afirma que o `token` dela lê o arquivo de `SQUAD_TOKEN_FILE` no momento da chamada (arquivo criado depois da montagem é lido; arquivo vazio ou ausente dá nulo)
+- [x] Nenhuma outra mudança de comportamento no bloco de entrada
+- [x] Gate full passa
 
 ### F7: `unknown_peer` antes de qualquer outra recusa
 
