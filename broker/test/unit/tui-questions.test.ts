@@ -26,6 +26,8 @@ const row = (lines: string[], y: number) => cols(lines, 2, 57, y, y)[0]!.trimEnd
 
 const BLOCKING = { to: "leader", summary: "which port?", why: "the spec gives two", blocking: true };
 const DEFAULT = { ...BLOCKING, blocking: false, default: "9090" };
+// A non-blocking question with options: it goes on with its default, and still lists them
+const CHOICES = { ...DEFAULT, options: ["8080", "9090"] };
 
 // A broker with a feature open; `ask` leaves a question with the dev and gives its id
 function open() {
@@ -98,6 +100,15 @@ test("QST-56: a question without ticket has no ticket after the name, and a bloc
   const drawn = b.lines();
   expect(row(drawn, 3)).toBe("▶ Q-01 [BLOQUEANTE]  w1 worker-1" + " ".repeat(16) + "há 1m15s");
   expect([row(drawn, 4), row(drawn, 5), row(drawn, 6), row(drawn, 7)]).toEqual(["  which port?", "  opções 1 texto", "  rota w1 → ldr → mot → dev", ""]);
+});
+
+test("QST-56: a non-blocking question with options shows them and the number of the free text, and no line of its default", () => {
+  const b = open();
+  b.ask(WORKER_2, CHOICES);
+  const drawn = b.lines();
+  expect(row(drawn, 3).slice(0, 19)).toBe("▶ Q-01 timeout 4:00");
+  expect([row(drawn, 4), row(drawn, 5), row(drawn, 6), row(drawn, 7)]).toEqual(["  which port?", "  opções 1 8080 · 2 9090 · 3 texto", "  rota w2 → ldr → mot → dev", ""]);
+  expect(Array.from({ length: 21 }, (_, i) => row(drawn, 3 + i)).filter((line) => line.includes("default"))).toEqual([]);
 });
 
 test("QST-56: the route names each question merged into this one, with the role of who asked it", () => {
@@ -264,6 +275,29 @@ test("QST-58: a ticket without rework has none in its line, and the questions me
     SEP,
   ]);
   expect(sides(drawn, 15, 16)).toEqual(["efeito  worker-1 retoma o T-1 assim que você confirmar.", HINT]);
+});
+
+test("QST-58: the detail of a non-blocking question with options has them numbered and the other answer, and no line of its default", () => {
+  const b = open();
+  b.ask(WORKER_2, CHOICES);
+  const drawn = b.lines();
+  expect(sides(drawn, 3, 3)).toEqual(["Q-01  timeout 4:00" + " ".repeat(25) + "no dev há 0s"]);
+  expect(sides(drawn, 6, 18)).toEqual([
+    "origem  w2 worker-2  (segue com o default)",
+    "rota    w2 → ldr → mot → dev",
+    SEP,
+    "which port?",
+    "por quê the spec gives two",
+    SEP,
+    " 1  8080",
+    " 2  9090",
+    " 3  outra resposta (texto livre)",
+    SEP,
+    "efeito  worker-2 troca o default pela sua resposta;",
+    "        nada é refeito.",
+    HINT,
+  ]);
+  expect(sides(drawn, 3, 24).filter((line) => line.startsWith("default"))).toEqual([]);
 });
 
 test("QST-57: without open question the detail says the agents go on without the dev", () => {

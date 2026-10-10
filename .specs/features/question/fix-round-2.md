@@ -27,6 +27,6 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/tui-questions.test.ts`
 **Requirement**: QST-56, QST-58
 
-- [ ] Uma não-bloqueante com duas opções e default mostra na lista `opções 1 <a> · 2 <b> · 3 texto` e nenhuma linha `default`; no detalhe, as duas opções numeradas e `outra resposta (texto livre)`, e nenhuma linha `default`
-- [ ] O teste falha com `if (q.blocking)` no lugar da regra, na lista e no detalhe
-- [ ] Gate build passa
+- [x] Uma não-bloqueante com duas opções e default mostra na lista `opções 1 <a> · 2 <b> · 3 texto` e nenhuma linha `default`; no detalhe, as duas opções numeradas e `outra resposta (texto livre)`, e nenhuma linha `default`
+- [x] O teste falha com `if (q.blocking)` no lugar da regra, na lista e no detalhe
+- [x] Gate build passa
