@@ -233,13 +233,13 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Um teste por AC de QST-01 a QST-10, com a linha de `questions`, o evento como gravado e as entregas comparados por inteiro
-- [ ] QST-07: 3 opções aceitas e 4 recusadas, com o literal 3; QST-06: 80 caracteres aceitos e 81 recusados; QST-04: 240000 sem `timeout_s`, com o literal
-- [ ] QST-10: uma chamada que falha em duas regras responde a primeira, para cada par vizinho da ordem
-- [ ] QST-12: com a gravação da entrega forçada a falhar, não fica linha, evento nem entrega
-- [ ] QST-94: pergunta a um peer que não está registrado fica gravada com a entrega pendente
-- [ ] `test/unit/helpers.ts` expõe `question` em `setup()`; testes em `test/unit/question-ask.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Um teste por AC de QST-01 a QST-10, com a linha de `questions`, o evento como gravado e as entregas comparados por inteiro
+- [x] QST-07: 3 opções aceitas e 4 recusadas, com o literal 3; QST-06: 80 caracteres aceitos e 81 recusados; QST-04: 240000 sem `timeout_s`, com o literal
+- [x] QST-10: uma chamada que falha em duas regras responde a primeira, para cada par vizinho da ordem
+- [x] QST-12: com a gravação da entrega forçada a falhar, não fica linha, evento nem entrega
+- [x] QST-94: pergunta a um peer que não está registrado fica gravada com a entrega pendente
+- [x] `test/unit/helpers.ts` expõe `question` em `setup()`; testes em `test/unit/question-ask.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

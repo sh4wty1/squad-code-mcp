@@ -364,18 +364,18 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| QST-01 | P1: Perguntar ao nível de cima | T6 | In Tasks |
-| QST-02 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-01 | P1: Perguntar ao nível de cima | T6 | Implementing |
+| QST-02 | P1: Perguntar ao nível de cima | T6 | Implementing |
 | QST-03 | P1: Perguntar ao nível de cima | T3, T6 | Implementing |
-| QST-04 | P1: Perguntar ao nível de cima | T6 | In Tasks |
-| QST-05 | P1: Perguntar ao nível de cima | T6 | In Tasks |
-| QST-06 | P1: Perguntar ao nível de cima | T6 | In Tasks |
-| QST-07 | P1: Perguntar ao nível de cima | T6 | In Tasks |
-| QST-08 | P1: Perguntar ao nível de cima | T6 | In Tasks |
-| QST-09 | P1: Perguntar ao nível de cima | T6, T8 | In Tasks |
-| QST-10 | P1: Perguntar ao nível de cima | T6 | In Tasks |
+| QST-04 | P1: Perguntar ao nível de cima | T6 | Implementing |
+| QST-05 | P1: Perguntar ao nível de cima | T6 | Implementing |
+| QST-06 | P1: Perguntar ao nível de cima | T6 | Implementing |
+| QST-07 | P1: Perguntar ao nível de cima | T6 | Implementing |
+| QST-08 | P1: Perguntar ao nível de cima | T6 | Implementing |
+| QST-09 | P1: Perguntar ao nível de cima | T6, T8 | Implementing |
+| QST-10 | P1: Perguntar ao nível de cima | T6 | Implementing |
 | QST-11 | P1: Perguntar ao nível de cima | T15 | In Tasks |
-| QST-12 | P1: Perguntar ao nível de cima | T6, T16 | In Tasks |
+| QST-12 | P1: Perguntar ao nível de cima | T6, T16 | Implementing |
 | QST-13 | P1: Escalar | T7 | In Tasks |
 | QST-14 | P1: Escalar | T7 | In Tasks |
 | QST-15 | P1: Escalar | T7 | In Tasks |
@@ -457,7 +457,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-91 | P2: Legenda e tabela de desvios | T31, T36 | In Tasks |
 | QST-92 | Edge cases | T10 | In Tasks |
 | QST-93 | Edge cases | T10 | In Tasks |
-| QST-94 | Edge cases | T6 | In Tasks |
+| QST-94 | Edge cases | T6 | Implementing |
 | QST-95 | Edge cases | T7 | In Tasks |
 | QST-96 | Edge cases | T23, T28 | In Tasks |
 | QST-97 | Edge cases | T23 | In Tasks |

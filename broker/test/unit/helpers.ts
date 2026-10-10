@@ -5,6 +5,7 @@ import { createLog, type FeatureFields } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
 import { createPermission } from "../../permission.ts";
 import { createPlan } from "../../plan.ts";
+import { createQuestion } from "../../question.ts";
 import { createSend, type Caller } from "../../send.ts";
 import { createSession } from "../../session.ts";
 import { createState } from "../../state.ts";
@@ -79,6 +80,48 @@ export function readOpened(seq: number, feature_id: number) {
   };
 }
 
+// What worker-1 asks the leader in the tests of the questions, unless the test gives others
+export const ASKED = { to: "leader", summary: "which port?", why: "the spec gives two", blocking: true };
+
+// The question of `ASKED`, as stored
+export function storedQuestion(seq: number, feature_id: number, fields: Record<string, unknown> = {}) {
+  return {
+    seq,
+    ts: NOW,
+    kind: "question",
+    feature_id,
+    from_name: "worker-1",
+    role_from: "worker",
+    to_name: "leader",
+    summary: "which port?",
+    body: "",
+    ticket_ref: null,
+    question_id: 1,
+    gate_id: null,
+    data: { question_id: 1, asked_by: "worker-1", blocking: true, why: "the spec gives two" },
+    ...fields,
+  };
+}
+
+// The row of `questions` it leaves
+export function questionRow(id: number, feature_id: number, fields: Record<string, unknown> = {}) {
+  return {
+    id,
+    feature_id,
+    ticket_ref: null,
+    asked_by: "worker-1",
+    holder: "leader",
+    blocking: 1,
+    default_answer: null,
+    timeout_s: null,
+    deadline_ts: null,
+    status: "open",
+    merged_into: null,
+    answer_seq: null,
+    ...fields,
+  };
+}
+
 // A broker over an in-memory database, with fake liveness and a fixed clock
 export function setup() {
   const db = openDatabase(":memory:");
@@ -92,6 +135,7 @@ export function setup() {
   const permission = createPermission(log, HUMAN_TOKEN);
   const { state } = createState(log);
   const feature = createFeature(log);
+  const question = createQuestion(db, log, HUMAN_TOKEN, () => clock.now);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
@@ -134,6 +178,10 @@ export function setup() {
       recipient: string;
       acked_at: number | null;
     }[];
+  }
+
+  function questionRows() {
+    return db.query("SELECT * FROM questions ORDER BY id").all() as Record<string, unknown>[];
   }
 
   // Events of the cycle of a ticket put straight in the log, as the rules would leave
@@ -199,6 +247,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, plan, session, permission, state, feature, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, refusedWith, given,
+    db, peers, log, send, plan, session, permission, state, feature, question, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, questionRows, refusedWith, given,
   };
 }
