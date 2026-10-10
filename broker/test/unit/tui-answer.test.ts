@@ -357,3 +357,70 @@ test("QST-96: a text and a reason too long for the screen are cut with `…`, an
   expect(under[1]).toBe("  1 principal   2 topologia   3 thread   4 perguntas 1   ? ajuda");
   expect([drawn[1], drawn[38]]).toEqual([under[1]!, under[38]!]);
 });
+
+test("QST-80: the refused modal of frame 20b keeps the text that was sent, and says the default applied below the fixed warning", () => {
+  const drawn = over(frameView("20b")).text();
+  // The box takes lines 10 to 29; its route has the hop the prototype writes by hand
+  const expected = box(frame("20b"), 10, 29);
+  expect(expected[4]).toBe(boxed("rota    w2 → ldr → mot → você"));
+  expected[4] = boxed("rota    w2 → ldr → você");
+  expect(box(drawn, 10, 29)).toEqual(expected);
+  // Q-08 closed by its deadline two seconds before
+  expect(box(drawn, 10, 10)).toEqual([top("? responder Q-08 · timeout 0:00")]);
+  expect(box(drawn, 20, 29)).toEqual([
+    boxed("default logo da 89  · aplicado (o prazo venceu)"),
+    boxed("resposta  (uma linha · ctrl+e expande)"),
+    ...field(["logo da 89, com o nome do programa no ar█"], 40),
+    WARNING,
+    boxed("✗ recusada pelo broker: Q-08 já fechada · default aplicado: logo da 89"),
+    SEP,
+    boxed("efeito  worker-2 troca o default pela sua resposta; nada é refeito."),
+    BOTTOM,
+  ]);
+  expect(drawn[39]).toBe(" esc fechar");
+  expect(drawn[39]).toBe(frame("20b")[39]!);
+});
+
+test("QST-80: the field of a refused answer has the red border, and the one of any other does not", () => {
+  // The field of frames 06 and 20b takes lines 22 to 24, columns 22 to 97: its corners and its sides
+  const border = (id: string) => {
+    const g = over(frameView(id));
+    return [[22, 22], [22, 97], [23, 22], [23, 97], [24, 22], [24, 97]].map(([y, x]) => g.rows[y!]![x!]!.fg);
+  };
+  expect(border("20b")).toEqual(["bred", "bred", "bred", "bred", "bred", "bred"]);
+  expect(border("06")).not.toContain("bred");
+});
+
+test("QST-80: a refused option is drawn in the text mode with its text in the field, and without default the refusal names only the question", () => {
+  // In the log of frame 20b the dev answered Q-07, a blocking question with three options, at 14:33:02
+  const drawn = over(withModal("20b", modal(7, { choice: null, text: "5 tentativas", refused: true }))).text();
+  // 20 lines, from line 10
+  expect(box(drawn, 10, 10)).toEqual([top("? responder Q-07 · BLOQUEANTE")]);
+  expect(box(drawn, 19, 29)).toEqual([
+    boxed("Reconexão do stream: retry infinito ou desistir após 5 tentativas?"),
+    boxed(""),
+    boxed("resposta  (uma linha · ctrl+e expande)"),
+    ...field(["5 tentativas█"], 12),
+    WARNING,
+    boxed("✗ recusada pelo broker: Q-07 já fechada"),
+    SEP,
+    boxed("efeito  worker-1 retoma o TKT-12 (rework 1/2) assim que você confirmar."),
+    BOTTOM,
+  ]);
+  expect(drawn[39]).toBe(" esc fechar");
+});
+
+test("QST-80: the refusal comes below the fixed warning in the expanded field too", () => {
+  // The modal of frame 07 refused: 25 lines, from line 7, with the field in lines 19 to 26
+  const g = over(withModal("20b", { ...frameView("07").ui.modal!, refused: true }));
+  const drawn = g.text();
+  expect(box(drawn, 17, 19)).toEqual([boxed("default logo da 89  · aplicado (o prazo venceu)"), boxed("resposta  (expandido · ctrl+e recolhe)"), boxed("┌" + "─".repeat(74) + "┐")]);
+  expect(box(drawn, 26, 29)).toEqual([
+    boxed("└" + " 184 chars ─┘".padStart(75, "─")),
+    WARNING,
+    boxed("✗ recusada pelo broker: Q-08 já fechada · default aplicado: logo da 89"),
+    SEP,
+  ]);
+  expect([g.rows[19]![22]!.fg, g.rows[26]![97]!.fg]).toEqual(["bred", "bred"]);
+  expect(drawn[39]).toBe(" esc fechar");
+});

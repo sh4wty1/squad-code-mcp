@@ -717,12 +717,12 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] Com default: `default <default>  · aplicado (o prazo venceu)` e `✗ recusada pelo broker: Q-NN já fechada · default aplicado: <default>` abaixo do aviso fixo
-- [ ] Sem default: `✗ recusada pelo broker: Q-NN já fechada`, sem a linha do default
-- [ ] A borda do campo é vermelha e a linha 39 é só `esc fechar`
-- [ ] Uma pergunta de opções recusada é desenhada no modo texto com o texto da opção no campo
-- [ ] Testes em `test/unit/tui-answer.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Com default: `default <default>  · aplicado (o prazo venceu)` e `✗ recusada pelo broker: Q-NN já fechada · default aplicado: <default>` abaixo do aviso fixo
+- [x] Sem default: `✗ recusada pelo broker: Q-NN já fechada`, sem a linha do default
+- [x] A borda do campo é vermelha e a linha 39 é só `esc fechar`
+- [x] Uma pergunta de opções recusada é desenhada no modo texto com o texto da opção no campo
+- [x] Testes em `test/unit/tui-answer.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

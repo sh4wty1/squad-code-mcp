@@ -443,7 +443,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-77 | P1: Modal de resposta | T33 | In Tasks |
 | QST-78 | P1: Modal de resposta | T32 | In Tasks |
 | QST-79 | P1: Modal de resposta | T32, T35 | In Tasks |
-| QST-80 | P1: Modal de resposta | T29, T33 | In Tasks |
+| QST-80 | P1: Modal de resposta | T29, T33 | Implementing |
 | QST-81 | P1: Modal de resposta | T33, T34 | In Tasks |
 | QST-82 | P1: Modal de resposta | T33 | In Tasks |
 | QST-83 | P1: Modal de resposta | T35 | In Tasks |

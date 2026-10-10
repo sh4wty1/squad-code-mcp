@@ -1,7 +1,7 @@
 // The modal of answer of a question, over the tab of questions in gray: the context, what
-// was asked, the options to choose from or the field of the text, and what an answer does.
-// Ported from `qModal`, `drawModal` and `drawInput` of the prototype; the question comes
-// from the derived squad.
+// was asked, the options to choose from or the field of the text, and what an answer does;
+// once the broker refused the answer, the field in red and the refusal. Ported from `qModal`,
+// `drawModal` and `drawInput` of the prototype; the question comes from the derived squad.
 
 import { qid } from "../../shared/contract.ts";
 import { effect, left } from "../asked.ts";
@@ -17,14 +17,14 @@ const W = 76;
 
 // What the modal has from the top down: a line, a separator, a line of the choice mode or
 // the field of the text, which takes `rows` lines
-type Item = Line | { option: number; label: string; chosen: boolean; other: boolean } | { field: string; rows: number };
+type Item = Line | { option: number; label: string; chosen: boolean; other: boolean } | { field: string; rows: number; refused: boolean };
 
 const rows = (item: Item): number => (item !== "SEP" && "rows" in item ? item.rows : 1);
 
 // The field of `w` columns: with 3 rows, one line with the end of the text; with more, its
 // last lines. The cursor comes after the text, and the count of characters on the border.
-function drawInput(g: Grid, x: number, y: number, w: number, h: number, text: string) {
-  g.box(x, y, w, h, "bcyan");
+function drawInput(g: Grid, x: number, y: number, w: number, h: number, text: string, color: Color) {
+  g.box(x, y, w, h, color);
   const inner = w - 4;
   const lines = h > 3 ? wrap(text, inner).slice(2 - h) : [len(text) + 1 > inner ? "…" + [...text].slice(2 - inner).join("") : text];
   lines.forEach((line, i) => {
@@ -46,7 +46,7 @@ function drawModal(g: Grid, items: Item[], title: string, tone: Color) {
   for (const item of items) {
     if (item === "SEP") g.sep(X, y, BOX, "bwhite");
     else if (Array.isArray(item)) g.segs(x, y, fit(item, BOX - 5));
-    else if ("field" in item) drawInput(g, x, y, BOX - 6, item.rows, item.field);
+    else if ("field" in item) drawInput(g, x, y, BOX - 6, item.rows, item.field, item.refused ? "bred" : "bcyan");
     else {
       if (item.chosen) {
         g.bg(X + 1, y, BOX - 2, "black");
@@ -65,7 +65,7 @@ export function answer(g: Grid, view: View): Grid {
   const q = squad.questions.find((other) => other.id === ui.modal?.question);
   // Any question of the open feature, not only the ones that wait: a closed one has the modal of its refusal
   if (!ui.modal || !q) return g;
-  const { choice, text, expanded } = ui.modal;
+  const { choice, text, expanded, refused } = ui.modal;
   const who = q.asked_by;
   const merged = absorbed(q, squad);
   const choosing = choice !== null && q.options.length > 0;
@@ -79,14 +79,17 @@ export function answer(g: Grid, view: View): Grid {
     [["rota    ", "gray"], ...route(q, "você"), merged.length > 0 && [`   (${merged.join(" · ")})`, "gray"]],
   ];
   const asks: Seg[] = [[who + " pergunta", "gray"], ["   "], q.blocking ? [`[BLOQUEANTE] só ${who} está pausado`, "bred", true] : [`não-bloqueante · ${who} segue com o default`, "byellow"]];
-  const applies: Item[] = fallback === null ? [] : [[["default ", "gray"], [fallback, "byellow", true], [`  · aplicado em ${mmss(left(q, squad.now))} se você não responder`, "gray"]]];
+  const applies: Item[] =
+    fallback === null ? [] : [[["default ", "gray"], [fallback, "byellow", true], [refused ? "  · aplicado (o prazo venceu)" : `  · aplicado em ${mmss(left(q, squad.now))} se você não responder`, "gray"]]];
+  const refusal: Item[] = refused ? [[["✗ recusada pelo broker: ", "bred", true], [`${qid(q.id)} já fechada${fallback === null ? "" : " · default aplicado: " + fallback}`, "bred"]]] : [];
   const body: Item[] = choosing
     ? [...q.options, "outra resposta…"].map((label, i) => ({ option: i, label, chosen: i === choice, other: i === q.options.length }))
     : [
         ...applies,
         [["resposta", "gray"], [expanded ? "  (expandido · ctrl+e recolhe)" : "  (uma linha · ctrl+e expande)", "gray"]],
-        { field: text, rows: expanded ? 8 : 3 },
+        { field: text, rows: expanded ? 8 : 3, refused },
         [["⚠ a resposta fica gravada no log e não pode ser apagada", "byellow"]],
+        ...refusal,
       ];
   const does = clip(wrap(effect(q, squad), W - 8), 2, W - 8);
   // The modal and its margin have the 36 lines between the tabs and the tokens: the text and
@@ -105,9 +108,11 @@ export function answer(g: Grid, view: View): Grid {
   drawKeys(
     g,
     39,
-    choosing
-      ? [[`1-${q.options.length + 1}`, "escolher"], ["↑↓", "mover"], ["enter", "confirmar"], ["esc", "cancelar"]]
-      : [["enter", "enviar"], ["ctrl+e", expanded ? "recolher" : "expandir"], ["ctrl+u", "limpar"], ["esc", "cancelar"]]
+    refused
+      ? [["esc", "fechar"]]
+      : choosing
+        ? [[`1-${q.options.length + 1}`, "escolher"], ["↑↓", "mover"], ["enter", "confirmar"], ["esc", "cancelar"]]
+        : [["enter", "enviar"], ["ctrl+e", expanded ? "recolher" : "expandir"], ["ctrl+u", "limpar"], ["esc", "cancelar"]]
   );
   return g;
 }
