@@ -145,6 +145,18 @@ test("QST-30: the merge is stored from the mother to no one, with the ticket of 
   expect(b.deliveries()).toEqual(deliveries);
 });
 
+test("QST-12: when the row of the merged question cannot be written, the merge leaves no event and no row changes", () => {
+  const b = two();
+  const events = b.events();
+  const deliveries = b.deliveries();
+  const rows = b.questionRows();
+  b.db.run("CREATE TRIGGER broken BEFORE UPDATE ON questions BEGIN SELECT RAISE(ABORT, 'the disk is full'); END");
+  expect(() => b.question.merge(MOTHER, { question_id: 2, into: 1 })).toThrow("the disk is full");
+  expect(b.events()).toEqual(events);
+  expect(b.deliveries()).toEqual(deliveries);
+  expect(b.questionRows()).toEqual(rows);
+});
+
 test("QST-30: two non-blocking questions are merged whoever holds each one, and the merged one keeps its deadline", () => {
   const nonBlocking = { ...ASKED, blocking: false, default: "8080" };
   const b = two(nonBlocking, { ...nonBlocking, to: "mother", default: "9090" });

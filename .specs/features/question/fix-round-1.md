@@ -37,8 +37,8 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/question-merge.test.ts`
 **Requirement**: QST-12
 
-- [ ] Com a atualização da linha de `questions` forçada a falhar, `/merge-question` não deixa o `question_merged` nem muda linha alguma
-- [ ] Gate quick passa
+- [x] Com a atualização da linha de `questions` forçada a falhar, `/merge-question` não deixa o `question_merged` nem muda linha alguma
+- [x] Gate quick passa
 
 ### F4: Bloqueante com default no modal
 
