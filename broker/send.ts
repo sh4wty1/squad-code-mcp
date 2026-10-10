@@ -63,7 +63,9 @@ function isCriterion(value: unknown): value is Criterion {
   );
 }
 
-export function createSend(log: Log) {
+// `afterResult` runs inside the transaction of the result of a worker, with its name and the
+// ticket delivered: what it records is stored with the result or not at all
+export function createSend(log: Log, afterResult?: (worker: string, ticket_ref: string) => void) {
   // task mother → leader and result leader → mother: no ticket and no field of their own
   function untracked(body: Record<string, unknown>): Ruling {
     if (body.ticket_ref != null) {
@@ -273,6 +275,8 @@ export function createSend(log: Log) {
       if (kind === "result" && peer.role === "worker" && log.blocked(peer.name)) {
         log.record({ kind: "unblocked", from: "broker", role_from: "broker", data: { peer: peer.name } });
       }
+      // After the unblocked: what else the delivery of a ticket settles
+      if (kind === "result" && peer.role === "worker") afterResult?.(peer.name, ruling.ticket_ref!);
       return { ok: true, seq };
     });
   }

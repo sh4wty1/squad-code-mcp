@@ -388,11 +388,11 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] `/send` de um `result` de worker bloqueado com uma não-bloqueante aberta grava, nesta ordem de `seq`: `result`, `unblocked`, `answer` (L-001: o teste falha se dois deles trocam de lugar)
-- [ ] O `result` do leader para a mother não fecha pergunta alguma
-- [ ] Se `afterResult` lança, o `result` não fica gravado
-- [ ] Testes em `test/unit/send-result.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `/send` de um `result` de worker bloqueado com uma não-bloqueante aberta grava, nesta ordem de `seq`: `result`, `unblocked`, `answer` (L-001: o teste falha se dois deles trocam de lugar)
+- [x] O `result` do leader para a mother não fecha pergunta alguma
+- [x] Se `afterResult` lança, o `result` não fica gravado
+- [x] Testes em `test/unit/send-result.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

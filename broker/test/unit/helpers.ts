@@ -129,13 +129,13 @@ export function setup() {
   const clock = { now: NOW };
   const peers = createPeers(db, (pid) => alive.has(pid), () => clock.now);
   const log = createLog(db, () => clock.now);
-  const { send } = createSend(log);
+  const question = createQuestion(db, log, HUMAN_TOKEN, () => clock.now);
+  const { send } = createSend(log, question.delivered);
   const { plan } = createPlan(log);
   const session = createSession(log);
   const permission = createPermission(log, HUMAN_TOKEN);
   const { state } = createState(log);
   const feature = createFeature(log);
-  const question = createQuestion(db, log, HUMAN_TOKEN, () => clock.now);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
