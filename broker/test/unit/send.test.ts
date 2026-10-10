@@ -171,6 +171,19 @@ test("EVT-05: the hint of invalid_kind points to the route of a kind that has on
   }
 });
 
+test("QST-11: a question, an answer and a question_merged sent here are refused with invalid_kind, and the hint names the route of each", () => {
+  const b = setup();
+  b.openFeature();
+  const routes = { question: "/ask", answer: "/answer", question_merged: "/merge-question" };
+  for (const [kind, route] of Object.entries(routes)) {
+    const answer = b.refusedWith(() => b.send(MOTHER, { ...KICKOFF, kind }), "mother", kind, "invalid_kind");
+    expect(answer.hint).toContain(route);
+    // its own route and not the ones of the other two
+    for (const other of Object.values(routes).filter((r) => r !== route)) expect(answer.hint).not.toContain(other);
+  }
+  expect(b.questionRows()).toEqual([]);
+});
+
 test("EVT-06: a summary of more than 80 characters is refused with invalid_field, and one of 80 is stored", () => {
   const b = setup();
   const id = b.openFeature();

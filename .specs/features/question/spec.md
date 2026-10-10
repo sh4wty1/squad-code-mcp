@@ -374,7 +374,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-08 | P1: Perguntar ao nível de cima | T6 | Implementing |
 | QST-09 | P1: Perguntar ao nível de cima | T6, T8 | Implementing |
 | QST-10 | P1: Perguntar ao nível de cima | T6 | Implementing |
-| QST-11 | P1: Perguntar ao nível de cima | T15 | In Tasks |
+| QST-11 | P1: Perguntar ao nível de cima | T15 | Implementing |
 | QST-12 | P1: Perguntar ao nível de cima | T6, T16 | Implementing |
 | QST-13 | P1: Escalar | T7 | Implementing |
 | QST-14 | P1: Escalar | T7 | Implementing |

@@ -430,8 +430,8 @@ T31 → T32 → T33 → T34 → T35 → T36 → T37 → T38
 
 **Done when**:
 
-- [ ] O `hint` de cada um dos três kinds nomeia `/ask`, `/answer` e `/merge-question`; teste em `test/unit/send.test.ts`
-- [ ] Gate build passa
+- [x] O `hint` de cada um dos três kinds nomeia `/ask`, `/answer` e `/merge-question`; teste em `test/unit/send.test.ts`
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build

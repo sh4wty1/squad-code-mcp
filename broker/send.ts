@@ -37,6 +37,9 @@ const ROUTE_OF: Record<string, string> = {
   turn_started: "/turn-started",
   permission_request: "/permission-request",
   permission_decision: "/permission-decision",
+  question: "/ask",
+  answer: "/answer",
+  question_merged: "/merge-question",
 };
 
 // What the rule of an edge decides: the refusal, or what is stored besides the envelope
