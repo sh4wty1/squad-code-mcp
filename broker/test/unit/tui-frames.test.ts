@@ -105,7 +105,6 @@ test("QST-87: in frame 20a the effect of Q-09 written by hand is a D2 deviation,
   const all = DEVIATIONS["20a"]!;
   const seal = all.filter((dev) => dev.line === 1);
   expect(seal.map((dev) => [dev.class, dev.text.trim()])).toEqual([["D1", "⚠ w2 bloqueado · RADIO_API_KEY ausente"]]);
-  expect(seal).toEqual(DEVIATIONS["10"]!.filter((dev) => dev.line === 1));
   // The frame has the effect in lines 26 and 27 of the modal; the one the TUI writes takes one
   expect(frame("20a").slice(26, 28).map((line) => [...line].slice(22, 99).join("").trim())).toEqual([
     "efeito  pronto: worker-2 relê o .env e retoma o TKT-13. Não vou fornecer: o",

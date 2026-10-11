@@ -71,8 +71,8 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/tui-frames.test.ts`
 **Requirement**: QST-87
 
-- [ ] A linha 108 sai; a 107 já fixa a classe e o texto
-- [ ] Gate build passa
+- [x] A linha 108 sai; a 107 já fixa a classe e o texto
+- [x] Gate build passa
 
 ### F19: Um `TIMEOUT_S` só
 
