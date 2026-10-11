@@ -45,7 +45,8 @@ gate aprovado usando só o terminal da mother e a TUI.
 
 - [x] Segunda rodada de frames no Claude Design: modal de pedido de permissão, agente
       `stalled`, ticket `planned`, ticket `dropped` e a linha de `refused` com contador
-      (frames 22 a 25 no handoff).
+      (frames 22 a 25 no handoff). O que os frames 12 a 25 mostram e o que ele decidiu
+      por conta própria está em `docs/claude-design-handoff/DECISOES-rodada-2.md`.
 - [x] Terceira rodada de frames no Claude Design (frames 26 a 30 no handoff): a linha 0
       sem feature aberta, a abertura da feature no feed, a feature abandonada, o broker
       sem nenhuma feature e o squad sem feature com um agente `blocked` ou `offline`.
