@@ -132,9 +132,17 @@ Adequação: critérios completos, valores antigos preservados; segue `broker/CL
 **Where**: `.specs/features/question/spec.md`, `broker/test/unit/tui-loop.test.ts`
 **Requirement**: QST-78, QST-99
 
-- [ ] QST-78 diz que um marcador é um marcador em quantas leituras vier
-- [ ] Teste, nos três tamanhos: o modal de Q-08, o terminal encolhe, `ESC[20` e `0~` em duas leituras, cresce, `logo`, `\r`: o texto é `logo ` e nada é enviado
-- [ ] Gate quick passa
+- [x] QST-78 diz que um marcador é um marcador em quantas leituras vier
+- [x] Teste, nos três tamanhos: o modal de Q-08, o terminal encolhe, `ESC[20` e `0~` em duas leituras, cresce, `logo`, `\r`: o texto é `logo ` e nada é enviado
+- [x] Gate quick passa
+
+**Evidência F34**: V8 (não reter sequência incompleta só quando pequeno, tamanho protegido por try) morto no scratch; arquivo restaurado. Quick: 1142 pass, 1 skip, 0 fail.
+
+| Critério / mapa reverso | Asserção (`broker/`) | Resultado da spec | Manter |
+| --- | --- | --- | --- |
+| QST-78/99, marcador em duas leituras | `test/unit/tui-loop.test.ts:752` `expect(t.posts).toEqual([])`; `:753` `expect(t.lines()).toEqual(tab(t.view(...)))` | enter vira espaço em logo, zero POST, nos três tamanhos | sim |
+
+Adequação: novo texto da spec explícito; teste pela entrada do laço, sem mudar produção; segue `broker/CLAUDE.md` e a matriz.
 
 ### F35: O terminal pequeno pelo produto das dimensões
 

@@ -733,6 +733,29 @@ test("QST-99: esc in a small terminal does not end a paste through the loop, alo
   }
 });
 
+test("QST-78, QST-99: a paste mark split across reads starts the paste in each small terminal", async () => {
+  for (const size of SMALL) {
+    const { t, key, resize, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      for (const k of ["4", "j", "\r"]) key(k);
+      t.size = size;
+      resize();
+      key("\x1b[20");
+      key("0~");
+      expect(t.posts).toEqual([]);
+      t.size = { cols: 120, rows: 40 };
+      resize();
+      key("logo");
+      key("\r");
+      expect(t.posts).toEqual([]);
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo " }) })));
+    } finally {
+      stop();
+    }
+  }
+});
+
 test("QST-99, QST-78: the marks of a delimited paste are read in a terminal smaller than 120×40, alone in a read or among other keys, with no modal, in the text mode and in the choice mode: a paste that ends there has ended, and one that starts there sends nothing by its line break", async () => {
   const START_MARK = "\x1b[200~";
   const END_MARK = "\x1b[201~";
