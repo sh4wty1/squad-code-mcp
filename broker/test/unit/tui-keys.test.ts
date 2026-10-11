@@ -535,6 +535,26 @@ test("QST-78: esc ends a delimited paste whose mark of the end did not come, and
   expect(sent.send).toEqual({ question_id: 8, answer: "texto" });
 });
 
+test("QST-78: with no modal open a line break of a delimited paste, alone in its read, does what enter does, and what comes after it is pasted into the modal it opened", () => {
+  // Q-08 has no options: its modal opens in the text mode
+  const tab = view("04", { question: 8 });
+  expect(reads([PASTE, "\r"], tab)).toEqual({ ...tab.ui, modal: opened(8, null), pasting: true });
+  const pasted = reads([PASTE, "\r", "texto", "\r", PASTED], tab);
+  expect(pasted).toEqual({ ...tab.ui, modal: { ...opened(8, null), text: "texto " } });
+  expect(pasted.send).toBeNull();
+});
+
+test("QST-78: esc ends a delimited paste with no modal open too", () => {
+  const tab = view("04", { question: 8 });
+  // esc goes to the main screen: the tab again, the modal of Q-08, a text and enter
+  expect(reads([PASTE, "\x1b", "4", "\r", "texto", "\r"], tab).send).toEqual({ question_id: 8, answer: "texto" });
+});
+
+test("QST-78: with no modal open a line break does what enter does also when the loop holds back keys that came after it", () => {
+  const tab = view("04", { question: 8 });
+  expect(input(tab.ui, "\r", tab, true)).toEqual({ ...tab.ui, modal: opened(8, null) });
+});
+
 test("TUI-62: a chunk with q or ctrl+c among its keys quits", () => {
   const v = view("01", { selected: 417 });
   expect(input(v.ui, "jq", v)).toBeNull();

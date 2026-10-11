@@ -470,6 +470,24 @@ test("QST-78: a line break and an unfinished escape in one chunk confirm no opti
   }
 });
 
+test("QST-78: with no modal open a line break and an unfinished escape in one chunk do what enter and esc do: the modal opens, nothing is posted, and it closes after the wait of the escape", async () => {
+  for (const chunk of ["\r\x1b", "\r\x1b["]) {
+    const { t, key, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      // The tab, on Q-08
+      for (const k of ["4", "j"]) key(k);
+      key(chunk);
+      expect(t.posts).toEqual([]);
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8) })));
+      await t.shows(questions(t.view({ screen: "questions", question: 8 })).text(), "the tab without the modal");
+      expect(t.posts).toEqual([]);
+    } finally {
+      stop();
+    }
+  }
+});
+
 test("QST-78: the loop turns the delimited paste of the terminal on and off, and a line break alone in a read between its marks sends nothing, in the text mode and in the choice mode", async () => {
   const { t, key, stop } = launch();
   try {

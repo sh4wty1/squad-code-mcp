@@ -44,11 +44,11 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/tui-keys.test.ts`, `broker/test/unit/tui-loop.test.ts`
 **Requirement**: QST-78
 
-- [ ] Na aba, sem modal, dentro de uma colagem delimitada: `\r` sozinho numa leitura abre o modal da pergunta selecionada; o texto e a quebra que vêm depois ficam no campo e nada é enviado
-- [ ] Sem modal, `esc` encerra a colagem delimitada: o `enter` seguinte no modal envia
-- [ ] No laço, na aba sem modal, `key("\r\x1b")` mostra o modal da pergunta selecionada, não faz `POST` e, depois da espera, mostra a aba sem ele
-- [ ] Cada teste falha sob o seu mutante
-- [ ] Gate build passa
+- [x] Na aba, sem modal, dentro de uma colagem delimitada: `\r` sozinho numa leitura abre o modal da pergunta selecionada; o texto e a quebra que vêm depois ficam no campo e nada é enviado
+- [x] Sem modal, `esc` encerra a colagem delimitada: o `enter` seguinte no modal envia
+- [x] No laço, na aba sem modal, `key("\r\x1b")` mostra o modal da pergunta selecionada, não faz `POST` e, depois da espera, mostra a aba sem ele
+- [x] Cada teste falha sob o seu mutante
+- [x] Gate build passa
 
 ### F24: `\n` sem modal aberto
 
