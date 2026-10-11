@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { questions } from "../../shared/derive.ts";
-import { ASKED, LEADER, MOTHER, NOW, questionRow, setup, WORKER_1, WORKER_2, WORKER_3 } from "./helpers.ts";
+import { ASKED, JUDGE, LEADER, MOTHER, NOW, questionRow, setup, WORKER_1, WORKER_2, WORKER_3 } from "./helpers.ts";
 
 // What worker-1 asks about the ticket T-1 and goes on without waiting
 const ON_TICKET = { ...ASKED, blocking: false, default: "8080", ticket_ref: "T-1" };
@@ -276,6 +276,49 @@ test("QST-36: a question of the worker about another ticket, or about none, merg
       { event_seq: 7, recipient: "worker-3", acked_at: null },
     ]);
   }
+});
+
+test("QST-36: another asker about the same ticket follows the default, straight or through a question about another ticket", () => {
+  for (const peer of [WORKER_3, JUDGE]) {
+    const b = setup();
+    const id = b.openFeature();
+    b.question.ask(WORKER_1, ON_TICKET);
+    b.question.ask(peer, { ...ON_TICKET, default: "7070" });
+    b.question.merge(MOTHER, { question_id: 2, into: 1 });
+    const deliveries = b.deliveries();
+
+    b.question.delivered("worker-1", "T-1");
+    expect(b.events().slice(4)).toEqual([storedDefault(5, id)]);
+    expect(b.questionRows()).toEqual([
+      questionRow(1, id, { ...ROW, status: "defaulted", answer_seq: 5 }),
+      questionRow(2, id, { ...ROW, asked_by: peer.name, default_answer: "7070", status: "defaulted", merged_into: 1, answer_seq: 5 }),
+    ]);
+    expect(b.deliveries()).toEqual([
+      ...deliveries,
+      ...[peer.name, "worker-1"].sort().map((recipient) => ({ event_seq: 5, recipient, acked_at: null })),
+    ]);
+  }
+
+  const b = setup();
+  const id = b.openFeature();
+  b.question.ask(WORKER_1, ON_TICKET);
+  b.question.ask(WORKER_2, { ...ON_TICKET, ticket_ref: "T-9", default: "9090" });
+  b.question.ask(WORKER_3, { ...ON_TICKET, default: "7070" });
+  b.question.merge(MOTHER, { question_id: 3, into: 2 });
+  b.question.merge(MOTHER, { question_id: 2, into: 1 });
+  const deliveries = b.deliveries();
+
+  b.question.delivered("worker-1", "T-1");
+  expect(b.events().slice(6)).toEqual([storedDefault(7, id)]);
+  expect(b.questionRows()).toEqual([
+    questionRow(1, id, { ...ROW, status: "defaulted", answer_seq: 7 }),
+    questionRow(2, id, { ...ROW, asked_by: "worker-2", ticket_ref: "T-9", default_answer: "9090", status: "defaulted", merged_into: 1, answer_seq: 7 }),
+    questionRow(3, id, { ...ROW, asked_by: "worker-3", default_answer: "7070", status: "defaulted", merged_into: 2, answer_seq: 7 }),
+  ]);
+  expect(b.deliveries()).toEqual([
+    ...deliveries,
+    ...["worker-1", "worker-2", "worker-3"].map((recipient) => ({ event_seq: 7, recipient, acked_at: null })),
+  ]);
 });
 
 test("QST-39: a blocking question of the ticket, a non-blocking one of another ticket, one without ticket and one of another worker stay open", () => {

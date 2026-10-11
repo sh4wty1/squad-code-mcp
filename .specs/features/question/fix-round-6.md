@@ -37,10 +37,19 @@ Nenhuma tarefa pede mudança de código de produção. Se um teste novo falhar n
 **Where**: `broker/test/unit/question-result.test.ts`
 **Requirement**: QST-36
 
-- [ ] Q-01 de worker-1 sobre T-1; Q-02 sobre T-1 também, de worker-3 e, numa segunda volta, do judge; Q-02 mesclada em Q-01; `delivered("worker-1", "T-1")` grava um `answer` só, Q-02 fica `defaulted` com `merged_into` 1 e o `answer_seq` dele, e a entrega vai para worker-1 e para quem perguntou Q-02
-- [ ] Q-03 de worker-3 sobre T-1 mesclada em Q-02 de worker-2 sobre T-9, mesclada em Q-01: um `answer`, as três linhas com ele, entregas aos três
-- [ ] O teste falha com a busca filtrando pelo ticket da linha no lugar do `NOT IN`, em `:71` e em `:74`
-- [ ] Gate quick passa
+- [x] Q-01 de worker-1 sobre T-1; Q-02 sobre T-1 também, de worker-3 e, numa segunda volta, do judge; Q-02 mesclada em Q-01; `delivered("worker-1", "T-1")` grava um `answer` só, Q-02 fica `defaulted` com `merged_into` 1 e o `answer_seq` dele, e a entrega vai para worker-1 e para quem perguntou Q-02
+- [x] Q-03 de worker-3 sobre T-1 mesclada em Q-02 de worker-2 sobre T-9, mesclada em Q-01: um `answer`, as três linhas com ele, entregas aos três
+- [x] O teste falha com a busca filtrando pelo ticket da linha no lugar do `NOT IN`, em `:71` e em `:74`
+- [x] Gate quick passa
+
+**Evidência F29**: código de produção idêntico a `6cd28e2`; R3 e R2 mortos separadamente no scratch, restaurado após cada execução. Quick: 1138 pass, 1 skip, 0 fail. Full: tsc 0; 1296 pass, 3 skip, 0 fail.
+
+| Critério / mapa reverso | Asserção (`broker/`) | Resultado da spec | Manter |
+| --- | --- | --- | --- |
+| QST-36, outro autor no mesmo ticket | `test/unit/question-result.test.ts:291` `expect(b.events().slice(4)).toEqual([storedDefault(5, id)])`; `:292` `expect(b.questionRows()).toEqual(...)`; `:296` `expect(b.deliveries()).toEqual(...)` | um answer completo, duas linhas defaulted e uma entrega por nome | sim |
+| QST-36, mesmo ticket a duas mesclas | `test/unit/question-result.test.ts:312` `expect(b.events().slice(6)).toEqual([storedDefault(7, id)])`; `:313` linhas; `:318` entregas | um answer, três linhas defaulted e entregas aos três | sim |
+
+Adequação: critérios completos; valores e campos do payload conferidos; nenhum teste enfraquecido; segue `broker/CLAUDE.md` e a matriz de `tasks.md`.
 
 ### F30: A duas mesclas de distância
 
