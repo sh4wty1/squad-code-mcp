@@ -38,7 +38,8 @@ function screen(out: string): string[] {
     const at = /^\x1b\[(\d+);1H$/.exec(part);
     if (at) lines[(y = Number(at[1]) - 1)] = "";
     else if (part === CLEAR) lines.length = 0;
-    else if (!part.startsWith("\x1b[")) lines[y] = (lines[y] ?? "") + part;
+    // No text between two escapes writes no line: after an erase, the cursor is still where it was
+    else if (part && !part.startsWith("\x1b[")) lines[y] = (lines[y] ?? "") + part;
   }
   return Array.from(lines, (line) => (line ?? "").trimEnd());
 }
@@ -539,6 +540,84 @@ test("QST-84: while the broker does not answer the reads, enter over a question 
     expect(t.calls.every((call) => call.method === "GET")).toBe(true);
   } finally {
     stop();
+  }
+});
+
+// A terminal too narrow, too short by one line, and too small both ways
+const SMALL = [
+  { cols: 119, rows: 40 },
+  { cols: 120, rows: 39 },
+  { cols: 100, rows: 30 },
+];
+
+test("QST-99: in a terminal smaller than 120×40, b, enter and enter over a blocking question with options post nothing and change no state", async () => {
+  for (const size of SMALL) {
+    const { t, key, resize, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      t.size = size;
+      resize();
+      // Where the terminal fits: the tab on Q-07, its modal, and the first of its options sent
+      for (const k of ["b", "\r", "\r"]) key(k);
+      expect(t.posts).toEqual([]);
+      expect(t.calls.every((call) => call.method === "GET")).toBe(true);
+      expect(t.lines()).toEqual(small(size.cols, size.rows).text());
+
+      t.size = { cols: 120, rows: 40 };
+      resize();
+      expect(t.lines()).toEqual(main(t.view()).text());
+      // Q-07 still waits for the dev, and the keys count again
+      for (const k of ["b", "\r"]) key(k);
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 7, modal: modal(7, { choice: 0 }) })));
+    } finally {
+      stop();
+    }
+  }
+});
+
+test("QST-99: in a terminal smaller than 120×40, q and ctrl+c quit with the modal in the text mode, and nothing is posted", async () => {
+  for (const quit of ["q", "\x03"]) {
+    const { t, key, resize, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      for (const k of ["4", "j", "\r", "logo"]) key(k);
+      t.size = { cols: 100, rows: 30 };
+      resize();
+      // In the text mode of a terminal that fits, q is a character of the answer
+      for (const k of [quit, "q", "\r"]) key(k);
+      expect(t.raw).toEqual([true, false]);
+      expect(t.out.endsWith(LEAVE)).toBe(true);
+      expect(t.posts).toEqual([]);
+    } finally {
+      stop();
+    }
+  }
+});
+
+test("QST-99: the keys pressed in a terminal smaller than 120×40 leave the modal and its text as they were, and at 120×40 the keys count again", async () => {
+  for (const size of SMALL) {
+    const { t, key, resize, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      for (const k of ["4", "j", "\r", "logo"]) key(k);
+      const open = tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo" }) }));
+      expect(t.lines()).toEqual(open);
+
+      t.size = size;
+      resize();
+      // A text, backspace, ctrl+u, ctrl+e, enter, and an escape with the key of the main screen after it
+      for (const k of [" da 89", "\x7f", "\x15", "\x05", "\r", "\x1b1"]) key(k);
+      expect(t.posts).toEqual([]);
+      expect(t.lines()).toEqual(small(size.cols, size.rows).text());
+
+      t.size = { cols: 120, rows: 40 };
+      resize();
+      expect(t.lines()).toEqual(open);
+      key("\r");
+      expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo" } }]);
+    } finally {
+      stop();
+    }
   }
 });
 

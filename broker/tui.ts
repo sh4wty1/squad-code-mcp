@@ -19,7 +19,7 @@ import { CLEAR, ENTER, LEAVE, paint, parseGlyphs } from "./tui/ansi.ts";
 import { prices, readIntervalMs, type PriceTable } from "./tui/config.ts";
 import { feed, type FeedRow } from "./tui/feed.ts";
 import type { Grid } from "./tui/grid.ts";
-import { input, settle, START, sync, visible } from "./tui/keys.ts";
+import { input, keysOf, settle, START, sync, visible } from "./tui/keys.ts";
 import { createReader, type Fetch } from "./tui/reader.ts";
 import { answer } from "./tui/screens/answer.ts";
 import { down as frozen } from "./tui/screens/down.ts";
@@ -33,6 +33,9 @@ import type { Ui, View } from "./tui/view.ts";
 import { createWriter } from "./tui/writer.ts";
 
 const SCREENS = { main, topology, thread, help, questions };
+
+// A terminal with no room for the grid of the screens
+const cramped = ({ cols, rows }: { cols: number; rows: number }) => cols < 120 || rows < 40;
 
 export interface Settings {
   url: string;
@@ -110,8 +113,8 @@ export function start(io: Io, settings: Settings) {
   }
 
   function draw(whole = false) {
-    const { cols, rows: lines } = io.size();
-    const next = cols < 120 || lines < 40 ? small(cols, lines) : down ? frozen(view()) : screen();
+    const size = io.size();
+    const next = cramped(size) ? small(size.cols, size.rows) : down ? frozen(view()) : screen();
     io.write((whole ? CLEAR : "") + paint(next, whole ? null : prev, settings.glyphs));
     prev = next;
   }
@@ -160,6 +163,9 @@ export function start(io: Io, settings: Settings) {
   function dispatch(chunk: string, more = false) {
     if (stopped) return;
     try {
+      // The small screen covers the state and offers one key: no other key changes what the
+      // dev does not see, nor sends an answer
+      if (cramped(io.size())) return keysOf(chunk).some((k) => k === "q" || k === "\x03") ? stop() : undefined;
       const sending = ui.send;
       const next = input(ui, chunk, view(), more);
       if (!next) return stop();

@@ -22,13 +22,13 @@ tarefa marcada aqui.
 
 **Lacuna**: achado F1 da review, `broker/tui.ts:160`. `draw` troca a tela por `small()` em `broker/tui.ts:114`, mas `dispatch` reduz toda tecla e posta. Num terminal de 100×30 sobre uma bloqueante com opções, `b`, `enter`, `enter` posta `8080` e a pergunta vira `answered` com a tela em `terminal pequeno demais`. Com o modal no modo texto e a janela encolhida, `q`, `q`, `enter` grava `qq` como resposta do dev.
 **Where**: `broker/tui.ts`
-**Requirement**: nenhum requisito de Question cita o terminal menor que 120×40; escrever o requisito na spec antes do teste
+**Requirement**: QST-99, escrito nesta tarefa: nenhum requisito de Question citava o terminal menor que 120×40
 
-- [ ] Com o tamanho abaixo de 120×40, `dispatch` deixa passar só `q` e ctrl+c, as teclas que `broker/tui/screens/small.ts:20` oferece; nenhuma outra tecla muda o estado nem faz `POST`
-- [ ] Teste: 100×30, bloqueante com opções, `b`, `enter`, `enter` não faz `POST` e a pergunta continua aberta
-- [ ] Teste: modal no modo texto, janela encolhida, `q` sai da TUI e nada é gravado
-- [ ] De volta a 120×40 as teclas valem de novo, com o estado que a tela tinha antes de encolher
-- [ ] Gate full passa
+- [x] Com o tamanho abaixo de 120×40, `dispatch` deixa passar só `q` e ctrl+c, as teclas que `broker/tui/screens/small.ts:20` oferece; nenhuma outra tecla muda o estado nem faz `POST`
+- [x] Teste: 100×30, bloqueante com opções, `b`, `enter`, `enter` não faz `POST` e a pergunta continua aberta
+- [x] Teste: modal no modo texto, janela encolhida, `q` sai da TUI e nada é gravado
+- [x] De volta a 120×40 as teclas valem de novo, com o estado que a tela tinha antes de encolher
+- [x] Gate full passa
 
 ### F15: Colagem pelo sinal do terminal
 

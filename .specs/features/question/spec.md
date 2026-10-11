@@ -326,6 +326,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 16. **QST-85** WHEN `esc` é pressionada com o modal aberto THEN a TUI SHALL fechá-lo sem enviar, e a tela de perguntas SHALL continuar com a mesma seleção; `ctrl+c` SHALL sair da TUI em qualquer modo.
 17. **QST-86** The TUI SHALL fazer `POST` só para `/answer`, e só pelo `enter` do modal.
 18. **QST-87** WHEN o modal é desenhado a partir do log e do estado de cada um dos frames 05, 06, 07, 20a e 20b THEN as 40 linhas SHALL ser as do frame, a não ser nas linhas declaradas na tabela de desvios com classe D1 ou D2.
+19. **QST-99** WHILE o terminal tem menos de 120 colunas ou menos de 40 linhas `q` e `ctrl+c` SHALL sair da TUI, com ou sem modal aberto, e nenhuma outra tecla SHALL mudar o estado da tela nem fazer `POST`; WHEN o tamanho volta a bastar THEN a tela SHALL voltar com o estado que tinha antes de encolher, com o modal e o texto dele, e as teclas SHALL valer de novo.
 
 **Independent Test**: com um broker de teste, abrir a Q-08, escrever, `enter`: o log ganha `hum → w2 [answer]` e a pergunta passa ao histórico como `✓ respondida pelo dev`.
 
@@ -462,8 +463,9 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-96 | Edge cases | T23, T28 | Verified |
 | QST-97 | Edge cases | T23 | Verified |
 | QST-98 | Edge cases | T22, T28 | Verified |
+| QST-99 | P1: Modal de resposta | F14 | Implementing |
 
-**Coverage:** 98 total, 98 mapped to tasks, 0 unmapped. Verificados em `2ac91fe`, na terceira rodada do Verifier; relatório em `validation.md`, rodadas de correção em `fix-round-1.md` e `fix-round-2.md`.
+**Coverage:** 99 total, 99 mapped to tasks, 0 unmapped. QST-01 a QST-98 verificados em `2ac91fe`, na terceira rodada do Verifier; relatório em `validation.md`, rodadas de correção em `fix-round-1.md` e `fix-round-2.md`. QST-99 veio da review do PR 9 e está em `fix-round-3.md`.
 
 ---
 
