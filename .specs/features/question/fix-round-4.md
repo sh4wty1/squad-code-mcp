@@ -67,7 +67,9 @@ Respondidas em 2026-10-11.
 **Lacuna**: SP1, `broker/tui.ts:168`. `dispatch` descarta toda tecla no terminal pequeno, os marcadores também: um redimensionamento entre os dois marcadores de uma colagem deixa `enter` escrevendo espaço até um `esc`, ou deixa uma quebra colada enviar.
 **Where**: `.specs/features/question/spec.md`, e `broker/tui.ts` com o seu teste se os marcadores passam a ser lidos
 **Requirement**: QST-78, QST-99
-**Depende de**: decisão do dev sobre F25
+**Depende de**: decisão do dev sobre F25: lidos em qualquer tamanho
 
-- [ ] A spec diz o que os marcadores fazem no terminal pequeno, e o código e um teste a seguem
-- [ ] Gate build passa
+- [x] QST-99 diz que os marcadores não são teclas e são lidos em qualquer tamanho do terminal
+- [x] No terminal pequeno o laço aplica `marks` de `broker/tui/keys.ts` ao bloco antes de descartar as teclas dele
+- [x] Teste: a colagem que termina com o terminal pequeno terminou, e o `enter` seguinte envia; a que começa com o terminal pequeno não envia pela quebra sozinha numa leitura
+- [x] Gate build passa

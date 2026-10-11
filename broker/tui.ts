@@ -19,7 +19,7 @@ import { CLEAR, ENTER, LEAVE, paint, parseGlyphs } from "./tui/ansi.ts";
 import { prices, readIntervalMs, type PriceTable } from "./tui/config.ts";
 import { feed, type FeedRow } from "./tui/feed.ts";
 import type { Grid } from "./tui/grid.ts";
-import { input, keysOf, settle, START, sync, visible } from "./tui/keys.ts";
+import { input, keysOf, marks, settle, START, sync, visible } from "./tui/keys.ts";
 import { createReader, type Fetch } from "./tui/reader.ts";
 import { answer } from "./tui/screens/answer.ts";
 import { down as frozen } from "./tui/screens/down.ts";
@@ -164,8 +164,12 @@ export function start(io: Io, settings: Settings) {
     if (stopped) return;
     try {
       // The small screen covers the state and offers one key: no other key changes what the
-      // dev does not see, nor sends an answer
-      if (cramped(io.size())) return keysOf(chunk).some((k) => k === "q" || k === "\x03") ? stop() : undefined;
+      // dev does not see, nor sends an answer. The marks of a paste are not keys: without
+      // them the paste would have another start or end when the screen comes back.
+      if (cramped(io.size())) {
+        ui = marks(ui, chunk);
+        return keysOf(chunk).some((k) => k === "q" || k === "\x03") ? stop() : undefined;
+      }
       const sending = ui.send;
       const next = input(ui, chunk, view(), more);
       if (!next) return stop();

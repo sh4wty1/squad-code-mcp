@@ -669,6 +669,46 @@ test("QST-99: the keys pressed in a terminal smaller than 120×40 leave the moda
   }
 });
 
+test("QST-99, QST-78: the marks of a delimited paste are read in a terminal smaller than 120×40: a paste that ends there has ended, and one that starts there sends nothing by its line break", async () => {
+  for (const size of SMALL) {
+    // The mark of the end comes while the terminal is small: back at 120×40, enter alone is enter
+    const ended = launch();
+    try {
+      const { t, key, resize } = ended;
+      await t.shows(main(t.view()).text(), "the main screen");
+      for (const k of ["4", "j", "\r", "\x1b[200~logo"]) key(k);
+      t.size = size;
+      resize();
+      key("\x1b[201~");
+      t.size = { cols: 120, rows: 40 };
+      resize();
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo" }) })));
+      key("\r");
+      expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo" } }]);
+    } finally {
+      ended.stop();
+    }
+
+    // The mark of the start comes while the terminal is small: back at 120×40, the line break alone in its read is pasted
+    const started = launch();
+    try {
+      const { t, key, resize } = started;
+      await t.shows(main(t.view()).text(), "the main screen");
+      for (const k of ["4", "j", "\r"]) key(k);
+      t.size = size;
+      resize();
+      key("\x1b[200~");
+      t.size = { cols: 120, rows: 40 };
+      resize();
+      for (const k of ["logo", "\r", "\x1b[201~"]) key(k);
+      expect(t.posts).toEqual([]);
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo " }) })));
+    } finally {
+      started.stop();
+    }
+  }
+});
+
 test("TUI-56, TUI-57, TUI-58: the settings come from the environment, and an invalid one throws before the loop starts", () => {
   const settings = config({ SQUAD_PORT: "7911", SQUAD_POLL_INTERVAL_MS: "250", SQUAD_TUI_GLYPHS: "⚠=!" });
   expect(settings.url).toBe("http://127.0.0.1:7911");

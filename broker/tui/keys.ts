@@ -45,6 +45,14 @@ export function keysOf(chunk: string): string[] {
 const PASTE_START = "\x1b[200~";
 const PASTE_END = "\x1b[201~";
 
+const paste = (ui: Ui, on: boolean): Ui => (ui.pasting === on ? ui : { ...ui, pasting: on });
+
+// What the marks of a delimited paste in a chunk leave of the paste, with none of its keys
+// pressed: the marks are not keys, and the loop reads them where it takes no key
+export function marks(ui: Ui, chunk: string): Ui {
+  return keysOf(chunk).reduce((next, k) => (k === PASTE_START || k === PASTE_END ? paste(next, k === PASTE_START) : next), ui);
+}
+
 // What a key does with the modal of answer open. The answer is not sent here: it is left in
 // `send`, for the loop.
 function answering(ui: Ui, m: Modal, key: string, view: View): Ui | null {
@@ -188,7 +196,6 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
 // of a screen, and esc ends a paste whose mark of the end did not come.
 export function input(ui: Ui, chunk: string, view: View, more = false): Ui | null {
   const keys = keysOf(chunk);
-  const paste = (state: Ui, on: boolean): Ui => (state.pasting === on ? state : { ...state, pasting: on });
   let next: Ui | null = ui;
   for (const k of keys) {
     if (k === PASTE_START || k === PASTE_END) {

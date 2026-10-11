@@ -3,7 +3,7 @@ import type { SquadEvent } from "../../shared/contract.ts";
 import { squad } from "../../shared/derive.ts";
 import { resolved, waiting } from "../../tui/asked.ts";
 import { feed } from "../../tui/feed.ts";
-import { input, keysOf, press, settle, START, sync, visible } from "../../tui/keys.ts";
+import { input, keysOf, marks, press, settle, START, sync, visible } from "../../tui/keys.ts";
 import type { Modal, Ui, View } from "../../tui/view.ts";
 import { LOGS } from "../frames/logs.ts";
 import { frameView } from "../frames/view.ts";
@@ -563,6 +563,17 @@ test("QST-78: with no modal open \\n does nothing, alone, after another key and 
     expect(chunk("p\n", v)).toEqual({ ...v.ui, paused: true });
     expect(reads([PASTE, "\n"], v)).toEqual({ ...v.ui, pasting: true });
   }
+});
+
+test("QST-99: the marks of a chunk start and end the paste and press none of its keys", () => {
+  const v = open("06");
+  expect(marks(v.ui, PASTE + "um\rq")).toEqual({ ...v.ui, pasting: true });
+  expect(marks({ ...v.ui, pasting: true }, "x\r" + PASTED)).toEqual(v.ui);
+  expect(marks(v.ui, PASTE + "um" + PASTED)).toEqual(v.ui);
+  // Without a mark the state is the one it was, and esc is a key like the others
+  expect(marks(v.ui, "um\rq\x03")).toBe(v.ui);
+  const pasting = { ...v.ui, pasting: true };
+  expect(marks(pasting, "\x1b")).toBe(pasting);
 });
 
 test("TUI-62: a chunk with q or ctrl+c among its keys quits", () => {
