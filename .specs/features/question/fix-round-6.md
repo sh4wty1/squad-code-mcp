@@ -57,9 +57,17 @@ Adequação: critérios completos; valores e campos do payload conferidos; nenhu
 **Where**: `broker/test/unit/question-result.test.ts`
 **Requirement**: QST-36
 
-- [ ] Q-03 de worker-3 sobre T-3 mesclada em Q-02, mesclada em Q-01, com Q-02 de worker-2 sobre T-2 e depois de worker-1 sobre T-2: um `answer`, as três linhas `defaulted` com o `answer_seq` dele, uma entrega por nome
-- [ ] O teste falha com `AND q.asked_by =` quem envia, e com `AND m.asked_by !=` quem envia, no passo recursivo
-- [ ] Gate quick passa
+- [x] Q-03 de worker-3 sobre T-3 mesclada em Q-02, mesclada em Q-01, com Q-02 de worker-2 sobre T-2 e depois de worker-1 sobre T-2: um `answer`, as três linhas `defaulted` com o `answer_seq` dele, uma entrega por nome
+- [x] O teste falha com `AND q.asked_by =` quem envia, e com `AND m.asked_by !=` quem envia, no passo recursivo
+- [x] Gate quick passa
+
+**Evidência F30**: R18 e R15 mortos separadamente no scratch, restaurado. Quick: 1139 pass, 1 skip, 0 fail.
+
+| Critério / mapa reverso | Asserção (`broker/`) | Resultado da spec | Manter |
+| --- | --- | --- | --- |
+| QST-36, dois autores possíveis no meio | `test/unit/question-result.test.ts:336` `expect(b.events().slice(6)).toEqual([storedDefault(7, id)])`; `:337` `expect(b.questionRows()).toEqual(...)`; `:342` `expect(b.deliveries()).toEqual(...)` | um answer, três linhas defaulted com seq 7 e uma entrega por autor | sim |
+
+Adequação: critérios completos, payload e linhas conferidos; sem enfraquecimento; segue `broker/CLAUDE.md` e a matriz.
 
 ### F31: Sair do terminal pequeno com uma colagem em curso
 

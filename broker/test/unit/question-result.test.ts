@@ -321,6 +321,31 @@ test("QST-36: another asker about the same ticket follows the default, straight 
   ]);
 });
 
+test("QST-36: another worker two merges away follows the answer through a third worker or through the sender about another ticket", () => {
+  for (const middle of [WORKER_2, WORKER_1]) {
+    const b = setup();
+    const id = b.openFeature();
+    b.question.ask(WORKER_1, ON_TICKET);
+    b.question.ask(middle, { ...ON_TICKET, ticket_ref: "T-2", default: "9090" });
+    b.question.ask(WORKER_3, { ...ON_TICKET, ticket_ref: "T-3", default: "7070" });
+    b.question.merge(MOTHER, { question_id: 3, into: 2 });
+    b.question.merge(MOTHER, { question_id: 2, into: 1 });
+    const deliveries = b.deliveries();
+
+    b.question.delivered("worker-1", "T-1");
+    expect(b.events().slice(6)).toEqual([storedDefault(7, id)]);
+    expect(b.questionRows()).toEqual([
+      questionRow(1, id, { ...ROW, status: "defaulted", answer_seq: 7 }),
+      questionRow(2, id, { ...ROW, asked_by: middle.name, ticket_ref: "T-2", default_answer: "9090", status: "defaulted", merged_into: 1, answer_seq: 7 }),
+      questionRow(3, id, { ...ROW, asked_by: "worker-3", ticket_ref: "T-3", default_answer: "7070", status: "defaulted", merged_into: 2, answer_seq: 7 }),
+    ]);
+    expect(b.deliveries()).toEqual([
+      ...deliveries,
+      ...[...new Set(["worker-1", middle.name, "worker-3"])].sort().map((recipient) => ({ event_seq: 7, recipient, acked_at: null })),
+    ]);
+  }
+});
+
 test("QST-39: a blocking question of the ticket, a non-blocking one of another ticket, one without ticket and one of another worker stay open", () => {
   const b = setup();
   const id = b.openFeature();
