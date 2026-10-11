@@ -87,10 +87,10 @@ tarefa marcada aqui.
 
 **Lacuna**: achado F7 da review, `broker/test/integration/tui.test.ts:240`. `await Bun.sleep(200)` faz as vezes de esperar uma leitura; uma leitura mais lenta que 200 ms derruba o teste, no tipo de contêiner em que a suíte já esgota o tempo.
 **Where**: `broker/test/integration/tui.test.ts`
-**Requirement**: o do teste da linha 240
+**Requirement**: QST-80, o do trecho do teste que espera a leitura
 
-- [ ] O teste espera um `GET` registrado em `asked` (`:190`) depois de `stale = true`, sem `Bun.sleep`
-- [ ] Gate full passa
+- [x] O teste espera um `GET` registrado em `asked` (`:190`) depois de `stale = true`, sem `Bun.sleep`
+- [x] Gate full passa
 
 ## Fora das tarefas, anotado pela review
 

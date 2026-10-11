@@ -237,7 +237,9 @@ test("QST-76, QST-80, QST-86: over a real broker the TUI, fed with keys, answers
     await shows("? responder Q-03 · BLOQUEANTE");
     tui.key("sa-east-1");
     stale = true;
-    await Bun.sleep(200);
+    // The loop reads one at a time: once it asks again, a read from before has been answered
+    const reads = asked.length;
+    await waitFor(() => asked.length > reads, "a read of the TUI with no news");
     expect((await post(broker.url, "/close-feature", { id: ids.mother, outcome: "abandoned" })).json.ok).toBe(true);
     tui.key("\r");
     await shows("✗ recusada pelo broker: Q-03 já fechada");
