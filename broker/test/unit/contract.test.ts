@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { EDGES, KINDS, qid, toRead, type EventRow } from "../../shared/contract.ts";
+import { EDGES, KINDS, qid, TIMEOUT_S, toRead, type EventRow } from "../../shared/contract.ts";
 
 const TASK_ROW: EventRow = {
   seq: 7,
@@ -83,6 +83,10 @@ test("QST-20: the label of a question is Q- and the id with two digits, and the 
   expect(qid(7)).toBe("Q-07");
   expect(qid(12)).toBe("Q-12");
   expect(qid(123)).toBe("Q-123");
+});
+
+test("QST-04, QST-18: a non-blocking question without timeout_s waits 240 s for the dev", () => {
+  expect(TIMEOUT_S).toBe(240);
 });
 
 test("the contract has the twenty kinds", () => {

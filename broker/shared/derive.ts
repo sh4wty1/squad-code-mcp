@@ -9,7 +9,7 @@
 
 import type { FeatureFields } from "../log.ts";
 import type { Role } from "../peers.ts";
-import { KINDS, type Kind, type SquadEvent } from "./contract.ts";
+import { KINDS, TIMEOUT_S, type Kind, type SquadEvent } from "./contract.ts";
 
 export interface Ticket {
   ticket_ref: string;
@@ -281,9 +281,6 @@ export interface Question {
   first_seq: number;
   last_seq: number;
 }
-
-// A non-blocking question without timeout_s waits this long for the dev
-const TIMEOUT_S = 240;
 
 // Every question with at least one `question`, in the order they were asked. `events`
 // are those of one feature, the open one in `squad`, here and in `gates`.

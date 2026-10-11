@@ -80,8 +80,8 @@ tarefa marcada aqui.
 **Where**: `broker/shared/contract.ts`, `broker/question.ts`, `broker/shared/derive.ts`
 **Requirement**: QST-04, QST-18
 
-- [ ] `broker/shared/contract.ts` exporta a constante, e os dois arquivos a importam
-- [ ] Gate full passa
+- [x] `broker/shared/contract.ts` exporta a constante, e os dois arquivos a importam
+- [x] Gate full passa
 
 ### F20: O teste espera a leitura, não 200 ms
 

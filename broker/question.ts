@@ -13,12 +13,9 @@ import type { QuestionRow } from "./db.ts";
 import type { Log } from "./log.ts";
 import { refuse, ROSTER, type Refusal, type Role } from "./peers.ts";
 import { isText, SUMMARY_MAX, type Answer, type Caller } from "./send.ts";
-import { qid, type SquadEvent } from "./shared/contract.ts";
+import { qid, TIMEOUT_S, type SquadEvent } from "./shared/contract.ts";
 
 const OPTIONS_MAX = 3;
-
-// A non-blocking question without timeout_s waits this long for the dev
-const TIMEOUT_S = 240;
 
 // Who asks whom, by role: each one the level above, and the judge a worker or the leader
 const ASK_EDGES: { from: Role; to: Role | "human" }[] = [
