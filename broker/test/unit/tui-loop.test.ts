@@ -701,6 +701,38 @@ test("QST-99: the keys pressed in a terminal smaller than 120×40 leave the moda
   }
 });
 
+test("QST-99: esc in a small terminal does not end a paste through the loop, alone after its wait or beside another key", async () => {
+  for (const size of SMALL) {
+    for (const escape of ["\x1b", "\x1b1"]) {
+      const { t, key, resize, stop } = launch();
+      try {
+        await t.shows(main(t.view()).text(), "the main screen");
+        for (const k of ["4", "j", "\r", "\x1b[200~logo"]) key(k);
+        const open = { screen: "questions", question: 8, modal: modal(8, { text: "logo" }) } as const;
+        expect(t.lines()).toEqual(tab(t.view(open)));
+        t.size = size;
+        resize();
+        key(escape);
+        // A lone esc is held for 40 ms; let that dispatch happen while still small.
+        if (escape === "\x1b") await Bun.sleep(60);
+        expect(t.posts).toEqual([]);
+        expect(t.lines()).toEqual(small(size.cols, size.rows).text());
+        t.size = { cols: 120, rows: 40 };
+        resize();
+        expect(t.lines()).toEqual(tab(t.view(open)));
+        key("\r");
+        expect(t.posts).toEqual([]);
+        expect(t.lines()).toEqual(tab(t.view({ ...open, modal: modal(8, { text: "logo " }) })));
+        key("\x1b[201~");
+        key("\r");
+        expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo" } }]);
+      } finally {
+        stop();
+      }
+    }
+  }
+});
+
 test("QST-99, QST-78: the marks of a delimited paste are read in a terminal smaller than 120×40, alone in a read or among other keys, with no modal, in the text mode and in the choice mode: a paste that ends there has ended, and one that starts there sends nothing by its line break", async () => {
   const START_MARK = "\x1b[200~";
   const END_MARK = "\x1b[201~";

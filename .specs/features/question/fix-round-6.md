@@ -93,9 +93,17 @@ Adequação: critérios completos; asserções antigas preservadas; segue `broke
 **Where**: `broker/test/unit/tui-loop.test.ts`
 **Requirement**: QST-99
 
-- [ ] Nos três tamanhos: o modal de Q-08, `ESC[200~logo`, o terminal encolhe, `esc` sozinho com os seus 40 ms e, numa segunda volta, `esc` e `1` numa leitura, o terminal cresce: o modal com `logo`; `\r`: nada enviado e o texto é `logo `; `ESC[201~`, `\r`: `logo` é enviado
-- [ ] O teste falha com o laço encerrando a colagem ao ver um `esc` no terminal pequeno
-- [ ] Gate quick passa
+- [x] Nos três tamanhos: o modal de Q-08, `ESC[200~logo`, o terminal encolhe, `esc` sozinho com os seus 40 ms e, numa segunda volta, `esc` e `1` numa leitura, o terminal cresce: o modal com `logo`; `\r`: nada enviado e o texto é `logo `; `ESC[201~`, `\r`: `logo` é enviado
+- [x] O teste falha com o laço encerrando a colagem ao ver um `esc` no terminal pequeno
+- [x] Gate quick passa
+
+**Evidência F32**: V13 morto no scratch e arquivo restaurado. Quick: 1140 pass, 1 skip, 0 fail.
+
+| Critério / mapa reverso | Asserção (`broker/`) | Resultado da spec | Manter |
+| --- | --- | --- | --- |
+| QST-99, esc nos três tamanhos, sozinho ou acompanhado | `test/unit/tui-loop.test.ts:722` `expect(t.lines()).toEqual(tab(t.view(open)))`; `:724` `expect(t.posts).toEqual([])`; `:725` tela com `logo `; `:728` POST completo | esc não encerra a colagem; enter vira espaço; só depois do marcador final enter envia logo | sim |
+
+Adequação: fluxo testado pela entrada do laço, campos do POST conferidos; segue `broker/CLAUDE.md` e a matriz.
 
 ### F33: `\n` com teclas retidas e o modal aberto, e a tecla entre duas outras
 
