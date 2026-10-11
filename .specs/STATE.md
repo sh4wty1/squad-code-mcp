@@ -118,14 +118,14 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-10.
+Atualizado em 2026-10-11.
 
 - **Feature**: Question, `.specs/features/question/`.
-- **Phase / Task**: concluída e verificada; falta a review e o merge do PR.
-- **Completed**: T1–T38, F1–F11 (`fix-round-1.md`) e F12–F13 (`fix-round-2.md`). Verifier independente, rodada 3: PASS, 98/98 requisitos, 36 de 38 mutações mortas (as duas que sobraram estão fora da fatia ou fora da spec). Requisitos Verified e Question marcada no ROADMAP.
-- **In-progress** (file:line): nada.
-- **Next step**: o dev olha a aba e o modal num terminal real (`bun tui/demo.ts 04`, de dentro de `broker/`: `4`, `enter`, responder) e decide a review e o merge do PR. Depois do merge, a fatia Papéis sai da `main` atualizada. Não fazer merge sem instrução do dev.
-- **Blockers**: nenhum bloqueio técnico. O merge é decisão do dev.
+- **Phase / Task**: verificada e com a review do PR 9 postada (COMMENT, sem bloqueio); a rodada de correção 3 está escrita e não começou.
+- **Completed**: T1–T38, F1–F11 (`fix-round-1.md`) e F12–F13 (`fix-round-2.md`). Verifier independente, rodada 3: PASS, 98/98 requisitos, 36 de 38 mutações mortas (as duas que sobraram estão fora da fatia ou fora da spec). Requisitos Verified e Question marcada no ROADMAP. Review do PR 9 em 2026-10-10 sobre `d867b57`: dois achados para corrigir e cinco nits, que viraram F14–F20 em `fix-round-3.md`.
+- **In-progress** (file:line): nada. Nenhuma tarefa de `fix-round-3.md` tem código escrito.
+- **Next step**: o dev responde as duas decisões no topo de `fix-round-3.md` (colagem delimitada em F15, direção da mescla em F16). F14, F17, F18, F19 e F20 não dependem delas e podem começar antes; F14 vem primeiro, porque é o único caminho em que uma resposta que o dev não viu é gravada com a credencial dele. Depois, o dev olha a aba e o modal num terminal real (`bun tui/demo.ts 04`, de dentro de `broker/`: `4`, `enter`, responder) e decide o merge. Depois do merge, a fatia Papéis sai da `main` atualizada. Não fazer merge sem instrução do dev.
+- **Blockers**: nenhum bloqueio técnico. F15 e F16 esperam a decisão do dev. O merge é decisão do dev, e a recomendação da review é não fazer antes de F14.
 - **Uncommitted files**: none.
 - **Branch**: `feat/question`, saído da `main` em `9a4d921`.
 
