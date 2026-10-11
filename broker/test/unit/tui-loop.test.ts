@@ -601,21 +601,25 @@ test("QST-99: in a terminal smaller than 120×40, b, enter and enter over a bloc
   }
 });
 
-test("QST-99: in a terminal smaller than 120×40, q and ctrl+c quit with the modal in the text mode, and nothing is posted", async () => {
-  for (const quit of ["q", "\x03"]) {
-    const { t, key, resize, stop } = launch();
-    try {
-      await t.shows(main(t.view()).text(), "the main screen");
-      for (const k of ["4", "j", "\r", "logo"]) key(k);
-      t.size = { cols: 100, rows: 30 };
-      resize();
-      // In the text mode of a terminal that fits, q is a character of the answer
-      for (const k of [quit, "q", "\r"]) key(k);
-      expect(t.raw).toEqual([true, false]);
-      expect(t.out.endsWith(LEAVE)).toBe(true);
-      expect(t.posts).toEqual([]);
-    } finally {
-      stop();
+test("QST-99: in a terminal smaller than 120×40, q, ctrl+c and a chunk with q among its keys quit, with no modal and with the modal in the text mode, and nothing is posted", async () => {
+  // No modal, and the modal of Q-08 with a text: where the terminal fits, q is a character of the answer
+  for (const before of [[], ["4", "j", "\r", "logo"]]) {
+    for (const quit of ["q", "\x03", "aq"]) {
+      const { t, key, resize, stop } = launch();
+      try {
+        await t.shows(main(t.view()).text(), "the main screen");
+        for (const k of before) key(k);
+        t.size = { cols: 100, rows: 30 };
+        resize();
+        expect(t.raw).toEqual([true]);
+        // Nothing comes after it: the key under test is the one that quits
+        key(quit);
+        expect(t.raw).toEqual([true, false]);
+        expect(t.out.endsWith(LEAVE)).toBe(true);
+        expect(t.posts).toEqual([]);
+      } finally {
+        stop();
+      }
     }
   }
 });

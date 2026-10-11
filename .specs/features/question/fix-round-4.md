@@ -34,9 +34,9 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/tui-loop.test.ts`
 **Requirement**: QST-99
 
-- [ ] Sem modal e com o modal no modo texto, cada um de `q`, `ctrl+c` e um bloco com `q` entre outras teclas, sozinho e sem tecla depois, devolve o terminal e não faz `POST`
-- [ ] O teste falha com `q` como única tecla que sai, com a saída só de modal aberto e com a saída só da tecla sozinha no bloco
-- [ ] Gate quick passa
+- [x] Sem modal e com o modal no modo texto, cada um de `q`, `ctrl+c` e um bloco com `q` entre outras teclas, sozinho e sem tecla depois, devolve o terminal e não faz `POST`
+- [x] O teste falha com `q` como única tecla que sai, com a saída só de modal aberto e com a saída só da tecla sozinha no bloco
+- [x] Gate quick passa
 
 ### F23: A colagem sem modal aberto
 
