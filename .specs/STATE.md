@@ -121,11 +121,11 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 Atualizado em 2026-10-11.
 
 - **Feature**: Question, `.specs/features/question/`.
-- **Phase / Task**: verificada e com a review do PR 9 postada (COMMENT, sem bloqueio); a rodada de correção 3 está escrita e não começou.
-- **Completed**: T1–T38, F1–F11 (`fix-round-1.md`) e F12–F13 (`fix-round-2.md`). Verifier independente, rodada 3: PASS, 98/98 requisitos, 36 de 38 mutações mortas (as duas que sobraram estão fora da fatia ou fora da spec). Requisitos Verified e Question marcada no ROADMAP. Review do PR 9 em 2026-10-10 sobre `d867b57`: dois achados para corrigir e cinco nits, que viraram F14–F20 em `fix-round-3.md`.
-- **In-progress** (file:line): nada. Nenhuma tarefa de `fix-round-3.md` tem código escrito.
-- **Next step**: o dev responde as duas decisões no topo de `fix-round-3.md` (colagem delimitada em F15, direção da mescla em F16). F14, F17, F18, F19 e F20 não dependem delas e podem começar antes; F14 vem primeiro, porque é o único caminho em que uma resposta que o dev não viu é gravada com a credencial dele. Depois, o dev olha a aba e o modal num terminal real (`bun tui/demo.ts 04`, de dentro de `broker/`: `4`, `enter`, responder) e decide o merge. Depois do merge, a fatia Papéis sai da `main` atualizada. Não fazer merge sem instrução do dev.
-- **Blockers**: nenhum bloqueio técnico. F15 e F16 esperam a decisão do dev. O merge é decisão do dev, e a recomendação da review é não fazer antes de F14.
+- **Phase / Task**: rodada de correção 3 (`fix-round-3.md`), da review do PR 9: cinco de sete tarefas feitas; F15 e F16 esperam a decisão do dev.
+- **Completed**: T1–T38, F1–F11 (`fix-round-1.md`), F12–F13 (`fix-round-2.md`) e, da rodada 3, F14 (`487ac06`), F17 (`b525fce`), F18 (`4baef4a`), F19 (`faf7ab1`) e F20 (`3dc3c77`). F14 escreveu o requisito QST-99 (terminal menor que 120×40 só aceita `q` e ctrl+c) e F17 completou a QST-49; os dois estão em `Implementing` na spec até o Verifier da rodada. O Verifier independente passou na rodada 3 de verificação sobre `2ac91fe` (98/98), antes desta rodada de correção.
+- **In-progress** (file:line): nada. F15 e F16 não têm código escrito.
+- **Next step**: o dev responde as duas decisões no topo de `fix-round-3.md` (colagem delimitada em F15, direção da mescla em F16). Feitas F15 e F16, ou declaradas fora, o Verifier roda sobre `db27b7f..HEAD`, QST-49 e QST-99 passam a Verified e `validate_state.py question` fecha a rodada. Depois, o dev olha a aba e o modal num terminal real (`bun tui/demo.ts 04`, de dentro de `broker/`: `4`, `enter`, responder; e encolher a janela com o modal aberto) e decide o merge. Depois do merge, a fatia Papéis sai da `main` atualizada. Não fazer merge nem push sem instrução do dev.
+- **Blockers**: nenhum bloqueio técnico. F15 e F16 esperam a decisão do dev. O merge é decisão do dev; o achado que a review pedia antes do merge (F14) está corrigido, sem push.
 - **Uncommitted files**: none.
 - **Branch**: `feat/question`, saído da `main` em `9a4d921`.
 
@@ -137,7 +137,7 @@ Atualizado em 2026-10-11.
 
 ### Evidência e limites
 
-- Windows 11, Bun 1.4.2, em `2ac91fe`: `tsc` passa; 1270 passam, 3 pulados por condição de plataforma anterior à fatia, zero falham, 63 arquivos. Antes da fatia: 926 passam, 3 pulados.
+- Windows 11, Bun 1.4.2, em `2ac91fe`: `tsc` passa; 1270 passam, 3 pulados por condição de plataforma anterior à fatia, zero falham, 63 arquivos. Antes da fatia: 926 passam, 3 pulados. Em `3dc3c77`, com F14 e F17 a F20: `tsc` passa; 1277 passam, 3 pulados, zero falham. A rodada 3 não rodou no Linux.
 - Linux, contêiner `oven/bun:1.4.2` (kernel 6.18 do WSL2) sobre um clone limpo: `tsc` passa e a suíte inteira passou em 10 de 13 execuções sobre o código final, com 1273 passando e zero pulados. As 3 que falharam caíram cada uma num teste de integração anterior à fatia (`EVT-85` duas vezes, `EVT-89` uma), por tempo esgotado à espera de um broker ou servidor MCP real. A `main` falha do mesmo jeito no mesmo contêiner (`EVT-81`, 1 de 14 repetições de `server-delivery.test.ts` e `server-tools.test.ts`; o HEAD passou 14 de 14): a instabilidade é anterior à fatia e não teve a causa investigada.
 - `validate_state.py question`: exit 0. Relatório em `.specs/features/question/validation.md`.
 - Os 41 frames de leitura permanecem idênticos à extração original; os 6 de Question (04, 05, 06, 07, 20a, 20b) são a saída da ferramenta, sem edição, e nenhum tem desvio D3.
