@@ -426,6 +426,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: SP4, QST-78 with QST-99; V8 tui.ts:191 (round 6) (spec)
 - last seen: 2026-10-11T08:09:52Z
 
+### L-070 - Test fragmented terminal control sequences through successive incomplete reads before the terminator, for both paste markers and every terminal size class.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker/tui` · harmful: 0
+- features: question
+- evidence: I4; broker/tui.ts:191; QST-78/QST-99; .specs/features/question/validation.md round 7 (broker/tui)
+- last seen: 2026-10-11T09:38:31Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

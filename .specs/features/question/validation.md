@@ -2,6 +2,183 @@
 
 **Result**: FAIL
 
+**Round**: 7
+**Date**: 2026-10-11
+**Verifier**: independent sub-agent, author ≠ verifier. It wrote no implementation, tests, fix plan or earlier report. Its only tracked real-tree changes are this report and the lessons script's output. Ignored dependencies were restored after the cleanup incident documented below.
+**Spec**: `.specs/features/question/spec.md`, whole QST-36, QST-78 and QST-99 at the fixed HEAD; effects on QST-37/QST-48; the other 96 requirements retain their previous verification subject to regression and expectation-integrity checks here.
+**Diff range**: `6cd28e2..832a1d74c5157fc885c93d3a4b7aaa5160a9c766`, branch `feat/question`, ten commits, F29–F36 and their preceding documentation. No production or frame diff. In `broker/test`, four files, +438 −40.
+**Environment**: Windows 11, Bun 1.4.2; installed TypeScript via its local binary. Linux, macOS and a real interactive terminal were not exercised in this round.
+
+All `broker/` citations below are relative to that directory. The previous round is retained below as history, not a second global verdict.
+
+The six ranked gaps and SP4 of round 6 closed. All 20 mutants required by F35 die in its 800-case test alone, and all nine required by F36 die in its generated-chain test alone. The full gate and the 33,600-case product pass at HEAD. One independent mutant survives both: using the new chunk rather than the accumulated input to retain an unfinished escape. The tests divide a marker into at most two reads; the new QST-78 sentence requires recognition in however many reads it arrives. A scratch probe in three and six reads passes on production and fails on the mutant. This is a coverage gap, with no production failure found by that probe.
+
+## Ranked residue and decision
+
+| # | Gap | Criterion | Evidence | Consequence under the mutant |
+| - | --- | --------- | -------- | ---------------------------- |
+| 1 | No committed test retains a marker's prefix across a second incomplete read. Both F35 variants use only whole markers or one internal cut into two reads | QST-78, final sentence, `spec.md:319`; QST-99's markers in any terminal size, `spec.md:329` | `tui-loop.test.ts:830` constructs exactly two reads; `:943` invokes the same generator for the complete product. I4 at `tui.ts:191` survives full and complete | In a small terminal the start marker is lost, so after growing the next `\r` can send the text of a paste. If the end marker is lost, the next `\r` remains a space. At normal size the broken escape also closes the modal |
+
+Priority: **Major**, because a missed start marker can send an answer the dev did not confirm. The predicate changed by I4 is an existing expression, not an invented condition: `exec(input)` → `exec(chunk)`. It compiles, passes the full suite, and is not equivalent to production.
+
+The decision returns to the dev, as expressly required by `fix-round-6.md`, "Depois da última tarefa". No F37, new fix round, test change or production correction was created. If the dev chooses to close the residue, the proof is a committed test of a marker with at least two consecutive partial prefixes before its terminator, through `start(...).key`, for both markers and small/normal sizes. Its expected screen, paste state observed by the following enter, and exact POST must come from QST-78/QST-99. The scratch probe below is a concrete reviewable reproduction; it is not a committed test.
+
+## Gate check
+
+- Full, from `broker/`: `bun node_modules/typescript/bin/tsc --noEmit`, then `bun test`. TypeScript exit 0; **1302 pass, 4 skip, 0 fail**, 107286 `expect()` calls, 1306 tests in 63 files, 106.79 s.
+- Complete, on the same fixed HEAD: `$env:SQUAD_TEST_FULL='1'; bun test test/unit/tui-loop.test.ts --test-name-pattern 'the full product'`. **1 pass, 0 fail, 38 filtered out, 187862 assertions, 33600 cases, 548521.82 ms for the test and 548.56 s total, exit 0**. Literal timeout: 1800000 ms (`tui-loop.test.ts:945`). No case or assertion was changed to get this result.
+- Before the feature: 926 pass, 3 platform skips. Before this round, `6cd28e2`: 1295 pass, 3 skip. This round adds seven passing tests and one explicitly authorized optional complete test. No test count decreased.
+- Skips: the two PEER-44 checks for finding/signalling a listener on this platform; PEER-14 for a pid owned by another user; F35 complete outside the ordinary gate, as explicitly authorized. The fourth was executed separately above.
+- Logs: `%TEMP%/question-verifier7-full.log`, `%TEMP%/question-verifier7-complete.log`. The tests manage their own temporary DB/token settings; no broker/server was launched manually.
+
+## Task completion and the generated oracles
+
+All F29–F36 boxes are checked. Their done-when assertions match the defined outcomes. F29/F30 add complete event, row and delivery assertions for another asker on the same ticket and another asker two merges away. F31 adds the paste state and middle positions to the quit scenarios. F32 drives esc through the loop while small. F33 asserts both line breaks with held-back keys in both modes. F34 adds the explicit split-marker sentence and a two-read scenario. F35 and F36 add the requested generators. The task list itself is fulfilled; the whole new marker clause is broader than F35's two-read cases and leaves the residue above.
+
+F35: 10 one-key inputs plus 10 cuts, in 30 contexts (three sizes × five UI states × two paste states), produce 600 cases. Its 100 two-key and 100 three-key cases rotate through contexts and assert each required marginal at each position (`tui-loop.test.ts:919`, `:921`, `:925`, `:930`, `:931`, `:932`, `:934`). The complete generator has 10 + 100 + 1000 = 1110 whole-key words and ten cuts, crossed with 30 contexts: 33600 (`:825`, `:942`). These arithmetic results follow the stated dimensions. Both variants call `checkSmallCases` and `checkSmall`; neither gets a weaker oracle.
+
+The UI before shrinking is stated in `smallCases`, then compared before the action (`tui-loop.test.ts:860`). The oracle walks the generated marker list and changes only the paste boolean (`:884`); it does not call `input`, `marks`, `press` or `keysOf` to calculate that value. It compares complete screens and exact POST bodies. It observes paste state by the next enter, then ends the paste and confirms the exact answer (`:897`, `:900`, `:903`). This distinguishes no key action while small, state restoration, markers, and subsequent key handling.
+
+F36: six independent asker/ticket classes; chains of two to four nodes; at least one own T-1 question and at least two askers; both creation orders. This gives 684 chains × two orders = 1368 sequences (`question-replay.test.ts:462`), with depths 1/2/3 and both orders asserted (`:463`, `:464`). Calls are accepted through ask/merge/send/answer, and parity is compared after each. Defaults are distinct by chain position. The oracle uses the generated calls: each own question gets its own answer in id order, and each follower walks toward the root to the nearest own question (`:402`). It compares whole events (`:420`), all rows (`:427`) and all deliveries (`:434`), rather than merely comparing two implementations that might share a bug. The later root answer preserves previous defaults and excludes their old merges from delivery (`:441`, `:447`, `:450`).
+
+## Spec-anchored acceptance criteria
+
+Evidence-or-zero, clause by clause. An assertion expression below targets the spec's value, not merely an existing test. There is one shared residual gap, appearing in the two linked marker clauses.
+
+### QST-36 (`spec.md:225`)
+
+| Clause | Defined outcome | `file:line` and assertion | Evaluation |
+| ------ | --------------- | ------------------------- | ---------- |
+| a | Full broker answer with the question's own default and `result_default`; row defaulted with its seq | `send-result.test.ts:288` `expect(b.events()[7]).toEqual({... body:"8080", data:{... resolved_by:"result_default"}})`; `question-replay.test.ts:420` whole events, `:427` whole rows | PASS |
+| b | Same transaction; result, unblocked if any, then answers | `send-result.test.ts:283` exact `[[6,"result","worker-1"],[7,"unblocked","broker"],[8,"answer","broker"]]`; `:370` thrown write and `:371`, `:372`, `:373` exact old events/deliveries/rows | PASS |
+| c | All and only the sender's non-blocking T questions in open/merged, id ascending | `question-result.test.ts:43` full two-answer list, `:98` merged closure; `send-result.test.ts:317` exact result/answer order; `question-result.test.ts:367`, `:368`, `:369` excluded cases; replay `:420` | PASS |
+| d | Own questions merged directly into each other keep each answer/default in either direction | `question-result.test.ts:170` exact two `storedDefault` events, `:171` rows and `:181` parity; replay `:420`, `:427`, creation orders `:464` | PASS |
+| e | Same through another merged question | `question-result.test.ts:226` exact answers, `:227` rows; replay `:420`, `:427` | PASS |
+| f | Other asker directly follows the closed question, including same ticket | `question-result.test.ts:291` one exact answer, `:292` rows and `:296` exact recipients; replay `:427`, `:434` | PASS |
+| g | Same asker on another ticket directly follows, without own answer | `question-result.test.ts:250` one answer, `:251` rows; replay `:420`, `:427` | PASS |
+| h | Same asker without ticket does the same | `question-result.test.ts:241` includes undefined ticket, `:250`, `:251` exact one-answer/row outcome; replay `:427` null ticket | PASS |
+| i | Every foregoing follower shape also works indirectly; nearest own closure wins | `question-result.test.ts:312` one answer, `:313` rows, `:318` recipients; `:336`, `:337`, `:342` both middle askers; replay `:420`, `:427`, `:434` over all six classes and depths | PASS |
+| j | Followers have no own answer | `question-result.test.ts:291`, `:312`, `:336` exact singleton event arrays; replay `:420` only own answers, `:427` inherited seqs | PASS |
+
+### QST-78 (`spec.md:319`)
+
+| Clause | Defined outcome | `file:line` and assertion | Evaluation |
+| ------ | --------------- | ------------------------- | ---------- |
+| a | Multi-key r/n in text are spaces, no send, including a modal entered earlier in the block | `tui-keys.test.ts:441` exact character array; `:471` complete state, `:478`, `:480` complete state after entering; `:463` r/n with more; `tui-loop.test.ts:439`, `:440` no POST and exact screen | PASS |
+| b | In choice, the breaks ignore rather than confirm/send | `tui-keys.test.ts:492`, `:495`, `:497` exact modal choice; `:464` with more; `tui-loop.test.ts:460`, `:461` no POST/whole screen | PASS |
+| c | No modal: r is enter and can open it | `tui-keys.test.ts:454` exact opened modal; `:577` `input(...,"\r",...,true)`; `tui-loop.test.ts:482` opened screen | PASS |
+| d | No modal: n does nothing | `tui-keys.test.ts:584`, `:585`, `:586`, `:588` exact identity/state, including paste and more | PASS |
+| e | Mode 2004 requested at entry and released at exit | `tui-ansi.test.ts:8`, `:9` exact ENTER/LEAVE strings; `tui-loop.test.ts:494`, `:514` actual output contains request/release | PASS |
+| f | A break alone in a delimited paste stays a space in text | `tui-keys.test.ts:513`, `:514` whole state/send null; `tui-loop.test.ts:499`, `:500` no POST/whole screen | PASS |
+| g | Same break ignored in choice | `tui-keys.test.ts:523`, `:524`, `:525` unchanged/send null or exact send after end; `tui-loop.test.ts:508` one prior POST only | PASS |
+| h | No modal in paste: r can open, n remains inert | `tui-keys.test.ts:550`, `:552`, `:553` exact state/send; `:586` exact paste state | PASS |
+| i | End marker restores ordinary enter | `tui-keys.test.ts:516`, `:525` exact send; `tui-loop.test.ts:502` exact POST after end | PASS |
+| j | Esc ends a paste at ordinary size, also beside another key and in every modal mode | `tui-keys.test.ts:559`, `:561`, `:567`, `:569`, `:572` exact send after esc | PASS |
+| k | Whole markers enter no text and change no screen | `tui-keys.test.ts:531`, `:533`, `:536` complete state, including all screens; full screen assertions in `tui-loop.test.ts:879` | PASS |
+| l | Each marker recognized in however many reads it comes, at every size | `tui-loop.test.ts:751`, `:752`, `:879`, `:897` assert outcomes for two reads; generator `:830` never makes three. Scratch `verifier-fragment.test.ts:110`, `:113` pins three/six reads and kills I4, but is absent from the committed suite | GAP, I4 |
+
+### QST-99 (`spec.md:329`)
+
+| Clause | Defined outcome | `file:line` and assertion | Evaluation |
+| ------ | --------------- | ------------------------- | ---------- |
+| a | q quits any small dimension, with/without either modal and with/without paste | `tui-loop.test.ts:638`, `:639`, `:640` raw `[true,false]`, LEAVE, zero POST; generator `:867`, `:868`, `:869`, including q in each word position | PASS |
+| b | ctrl+c does the same | `tui-loop.test.ts:638` `expect(t.raw).toEqual([true,false])`, `:639` LEAVE, `:640` zero POST; `:867`, `:868`, `:869` likewise for ctrl+c in each position and an active paste | PASS |
+| c | Other keys do not change the covered UI or POST while small | `tui-loop.test.ts:874`, `:875`, `:876` raw active, no POST, exact small screen; `:879` full screen of before | PASS |
+| d | On growing, original screen/modal/text/choice returns and keys work | `tui-loop.test.ts:879`, `:897`, `:900`, `:903` exact prior screen, exact POST or retained text-space/choice, then exact POST | PASS |
+| e | Markers start/end paste at every size, regardless of modal | `tui-loop.test.ts:897`, `:900`, `:903` observe last-marker result in all generated contexts; `:830` covers only two reads for fragmented markers | GAP only for three-or-more reads, same I4 as QST-78 l |
+| f | Esc while small is ignored and cannot end paste | `tui-loop.test.ts:722`, `:724`, `:725`, `:728` retained logo, no POST, logo-space, then exact POST; generated oracle `:884`, `:897` includes esc in every word position | PASS |
+
+**Status**: QST-36 10/10 clauses; QST-78 11/12; QST-99 5/6. **26 of 28 clauses have full discriminating evidence; two linked clauses share one residual coverage gap.** No new spec-precision gap: the new sentence explicitly decides the fragment rule.
+
+QST-37: `question-replay.test.ts:441` asserts the later full root answer, `:447` changes only rows without an earlier answer_seq, and `:450` compares exactly the new recipients. QST-48: `:84` `expect(derived.sort((x,y)=>x.id-y.id)).toEqual(stored)` compares all ten named fields, and `:87` excludes unmatched rows. They run after every generated call; the earlier 200×40 generator and its assertions remain intact (`:302`, `:303`, `:308`, `:338`–`:344`).
+
+## Discrimination sensor
+
+Two detached temporary worktrees at the fixed HEAD, outside the real tree, with a shared node_modules junction for runtime resolution. Mutations were sequential within each scratch. Each file was restored byte-for-byte after its attempt. No stash. Real-tree porcelain before sensor was empty; empty again before report/lesson writes, HEAD unchanged; ignored dependencies required recovery, as documented below.
+
+The targeted tests are themselves members of the ordinary gate. F35 rows below ran `bun test test/unit/tui-loop.test.ts --test-name-pattern '800 generated'`; F36 rows ran `bun test test/unit/question-replay.test.ts --test-name-pattern 'generated merge chains'`. Each reported one failed test with a behavioral expect mismatch, not timeout or syntax failure. W4 ran the F33 test alone. I4 alone survived the ordinary full gate and therefore also ran the required complete product. These results recheck the task authors' mutation claims independently.
+
+| Id | Production citation | Exact behavioral mutation | Evidence |
+| -- | ------------------- | ------------------------- | -------- |
+| X3 | `tui.ts:171` | In some, ctrl+c allowed only when `keysOf(chunk).length === 1`; q unchanged | F35 killed |
+| X5 | `tui.ts:171` | Prepend `io.size().cols < 120 && io.size().rows < 40 &&` to the quit predicate | F35 killed |
+| X6 | `tui.ts:171` | Prepend only `io.size().cols < 120 &&` | F35 killed |
+| X7 | `tui.ts:171` | Prepend only `io.size().rows < 40 &&` | F35 killed |
+| N8 | `tui.ts:170` | `ui = marks(ui,chunk)` only `if (ui.modal)` | F35 killed |
+| N11 | `tui.ts:170` | Same call only `if (keysOf(chunk).length === 1)` | F35 killed |
+| N5 | `tui/keys.ts:53` | In marks, include `k === "\x1b"` among inputs passed to paste; esc makes it false | F35 killed |
+| V1 | `tui.ts:171` | Quit predicate gated by `(!ui.modal || ui.modal.choice === null)` | F35 killed; corrected parentheses in the harness before recording this result |
+| V2 | `tui.ts:171` | some over `[keysOf(chunk)[0],keysOf(chunk).at(-1)]` only | F35 killed |
+| V3 | `tui.ts:171` | some over `[keysOf(chunk).at(-1)]` only | F35 killed |
+| V4 | `tui.ts:171` | Prepend `!ui.pasting &&` to some | F35 killed |
+| V5 | `tui.ts:170` | Call marks only `if (!ui.modal || ui.modal.choice === null)` | F35 killed |
+| V7 | `tui.ts:170` | With no modal, remove every `"\x1b[201~"` from chunk before marks | F35 killed |
+| V7b | `tui.ts:170` | With no modal, remove every `"\x1b[200~"` instead | F35 killed |
+| V8 | `tui.ts:191` | Read cramped inside try/catch; when small set pending to `""` instead of the unfinished-escape regex result | F35 killed |
+| V11 | `tui.ts:169` | Small branch requires `cramped(io.size()) && ui.modal` | F35 killed |
+| V13 | `tui.ts:170` | After marks, `if (keysOf(chunk).includes("\x1b")) ui = {...ui,pasting:false}` | F35 killed |
+| V14 | `tui.ts:171` | Quit predicate gated by `(!ui.modal || ui.modal.choice !== null)` | F35 killed |
+| V15 | `tui.ts:171` | some over `[keysOf(chunk)[0]]` only | F35 killed |
+| V16 | `tui.ts:171` | Predicate is any ctrl+c or only `keysOf(chunk).at(-1) === "q"` | F35 killed |
+| C2 | `question.ts:74` | Remove recursive `AND q.id NOT IN (SELECT value FROM json_each(?2))` | F36 killed |
+| Q5 | `question.ts:392` | Pass `[row.id]` instead of `own` to each resolve | F36 killed |
+| Q6 | `question.ts:74` | Replace recursive id exclusion by `(?2 = '[]' OR q.asked_by != (SELECT asked_by FROM questions WHERE id = ?1))` | F36 killed |
+| Q6a | `question.ts:71` | Same substitution in first step, unqualified asked_by | F36 killed |
+| Q7 | `question.ts:74` | Remove `q.status = 'merged' AND` from recursive WHERE | F36 killed |
+| R2 | `question.ts:74` | Replace recursive id exclusion by `(?2 = '[]' OR q.ticket_ref IS NOT (SELECT ticket_ref FROM questions WHERE id = ?1))` | F36 killed |
+| R3 | `question.ts:71` | Same substitution in first step, unqualified ticket_ref | F36 killed |
+| R15 | `question.ts:74` | Append `AND (?2 = '[]' OR m.asked_by != (SELECT asked_by FROM questions WHERE id = ?1))` | F36 killed |
+| R18 | `question.ts:74` | Append `AND (?2 = '[]' OR q.asked_by = (SELECT asked_by FROM questions WHERE id = ?1))` | F36 killed |
+| W4 | `tui/keys.ts:206` | Replace more by `(more && k === "\r")` in pasted predicate | F33 killed at `tui-keys.test.ts:463`, missing space for n |
+| I1, independent | `question.ts:387` | Result selection `ORDER BY id` → `ORDER BY id DESC` | F36 killed at `question-replay.test.ts:420` |
+| I2, independent | `question.ts:392` | `answer:row.default_answer` → `answer:"wrong default"` | F36 killed at `question-replay.test.ts:420` |
+| I3, independent | `tui.ts:170` | Give marks only the first key equal to either marker (`keysOf(chunk).find(...) ?? ""`), rather than the whole chunk | F35 killed at `tui-loop.test.ts:897`; last marker must win |
+| I4, independent | `tui.ts:191` | In pending's regex only, `/u.exec(input)?.[0]` → `/u.exec(chunk)?.[0]`; the preceding `const input = pending + chunk` stays | Survived: full tsc exit 0, 1302 pass/4 skip/0 fail, 107286 assertions, 97.52 s; complete exit 0, 1 pass/0 fail, 38 filtered out, 187862 assertions, 33600 cases, 504220.69 ms (504.27 s total) |
+
+**Sensor depth**: manual P0 depth, 34 distinct behavioral faults, 33 killed and one survivor (I4). No mutants killed only by the complete test: zero. The original F35 list's corrected ids were honored; undefined X8/X9 and unrelated N16–N20/K1–K3 were not substituted.
+
+Exact substitutions and targeted exits are in `%TEMP%/question-verifier7-evidence/sensor.json`, one `<id>.log` per mutation. I4 full and complete logs are `I4-full.log` and `I4-complete.log`. Mutation/probe harnesses are `%TEMP%/question-verifier7-sensor.py`, `question-verifier7-fix-v1.py` and `question-verifier7-probe.py`. An initial V1 harness expression had ternary precedence wrong; that attempt is excluded, and the reported V1 result is the correctly gated predicate above.
+
+### Independent fragment probe
+
+`%TEMP%/question-verifier7-evidence/verifier-fragment.test.ts` contains the scratch-only probe. It reuses the existing injected fake terminal but derives these expected outcomes directly from the spec. It opens Q-08 with `logo`. For start it begins with no paste; for end it starts a paste first. At 120×40, 119×40, 120×39 and 100×30 it sends the marker as `["ESC[2","0","0~"]` / `["ESC[2","0","1~"]`, and separately one byte per read. All fragments arrive synchronously, before the 40 ms escape timer, so this is not a timing ambiguity. It grows to 120×40, asserts the original complete screen (`:110`), then sends r and asserts the exact POST list (`:113`) and retained text-space for the start marker (`:114`).
+
+- Production: **8 pass, 0 fail, 72 assertions**, both markers in three and six reads at all four sizes. `probe-original.log`.
+- I4: **0 pass, 8 fail, 30 assertions**. Normal size fails the original-screen assertion; all three small sizes with start fail because the exact `logo` POST appears when zero is expected; with end they fail because zero POST appears when `logo` is expected. `probe-I4.log`. Each marker/size is a separate test, so the first failure does not hide other sizes.
+- The probe was removed before scratch cleanup. It never entered the real suite or the real-tree report's gate counts.
+
+
+### Cleanup incident and environment recovery
+
+The mutation and probe results above were obtained before cleanup. The initial cleanup failed the ignored-file isolation condition: `git worktree remove` without `--force` traversed the Windows junction to the real `broker/node_modules` and removed installed dependencies. The real TypeScript binary became absent. Empty porcelain did not detect this, because node_modules is ignored. No tracked source, test, frame, manifest or lockfile changed; no other directory was targeted. Both scratch worktrees were removed, and this operation was not repeated after detecting the effect.
+
+Dependencies were restored with `bun install --frozen-lockfile`, exit 0: 96 packages. Installed TypeScript is 5.9.3, SDK 1.32.1 and @types/bun 1.3.11. A separate audit compared every installed package.json name and version with all 96 lockfile entries: zero missing entries and zero mismatches (`%TEMP%/question-verifier7-dependency-audit.log`). The actual and HEAD Git blob hashes for `broker/bun.lock` are both `08fc3b66dc2ddc0d6f69c91fbf887fe2c454b15e`; `git diff --quiet` is exit 0 before this report. This proves recovery to the lockfile, not an unmeasured byte-for-byte equivalence of the prior ignored directory.
+
+The full gate was then repeated on the real HEAD after restoring dependencies: TypeScript exit 0; **1302 pass, 4 skip, 0 fail**, 107285 assertions, 1306 tests in 63 files, 85.20 s; test exit 0 (`%TEMP%/question-verifier7-recovery-full.log`). This is the verification of the recovered environment. The complete HEAD and mutant executions above remain evidence from the pre-cleanup environment; they were not rerun or relabeled as post-recovery results. The scratch source mutations never entered the real code tree, but the cleanup was not fully isolated, and the report does not claim otherwise.
+
+## Integrity, quality and limits
+
+The original 200×40 replay's ten-field comparison moved verbatim into `compareQuestions`; field names, boolean conversion, feature filtering, sort and exact equality did not change. Row-count monotonicity, contiguous ids, uniqueness of answer ids, accepted/refused route coverage, all statuses/resolutions, and closed-alone checks remain (`question-replay.test.ts:302`, `:303`, `:308`, `:338`–`:344`). F36's generator is additive. The question-result and keys diffs add tests; their removed lines are import changes. The four changed loop lines only extend existing scenario lists. Their expected raw mode, LEAVE, screen and POST assertions are unchanged. No old expectation was weakened, test deleted, frame edited or additional production behavior introduced.
+
+All new tests map to QST-36/37/48/78/99 or a named F29–F36 criterion. Shared test oracles have their two requested consumers. They follow `broker/CLAUDE.md` and the coverage matrix in `tasks.md`; routes still have the real-process happy/edge/error tests in the full gate. The quality shortfall is the single discrimination gap for successive marker fragments, not unrelated implementation changes.
+
+The F36 reference added to QST-45's traceability row (`spec.md:412`) is broader than F36's declared QST-36/37/48 scope. QST-45's old assertions remain; its behavior regressed in no check. The orchestrator has identified and reserved removal of that extra reference for the subsequent documentary handoff. This verifier did not change the spec or its status table.
+
+Not exercised here: a real terminal's mode 2004 behavior, real resize, macOS/Linux, real signals, an actual Claude Code conversation, or interactive UAT. Existing historical platform findings and known risks in STATE/earlier rounds remain. The fragment probe uses fetch injection, not a live terminal. No new production defect was observed.
+
+## Requirement disposition and lessons
+
+- QST-36: independently satisfies its entire scoped requirement; suitable for Verified if the orchestrator later closes the feature under the dev's decision. No spec edit by this verifier.
+- QST-78/QST-99: remain Implementing under this FAIL, by the single residual coverage gap.
+- QST-37/QST-48 and the other 96's prior status: no observed regression or weakened expectation.
+- No further correction round opened. `validate_state.py question`: exit 1 after writing this report, as required for a FAIL report.
+- Lesson: L-070, candidate (recurrence 1), signal surviving_mutant, script exit 0, grounded in I4 and QST-78's successive partial reads, via the skill's script only. No lesson for a killed mutant or a clean clause. The cleanup incident is documented above; no gate_fail lesson was fabricated because the build-level gate passed, and scratch-lifecycle guidance concerns verifier tooling rather than a project-local code rule.
+
+---
+## Round 6 (historical report)
+
+**Verdict**: FAIL
+
 **Round**: 6
 **Date**: 2026-10-11
 **Verifier**: independent sub-agent (author ≠ verifier). It did not write the code, the tests, any fix round or any earlier report. It wrote this file and, through `scripts/lessons.py`, the two lessons files. No code, no test, no spec, no task, no commit.

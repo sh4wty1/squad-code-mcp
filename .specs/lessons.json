@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 70,
+  "next_id": 71,
   "lessons": [
     {
       "id": "L-001",
@@ -1285,6 +1285,24 @@
       ],
       "created": "2026-10-11T08:09:52Z",
       "last_seen": "2026-10-11T08:09:52Z"
+    },
+    {
+      "id": "L-070",
+      "key": "surviving_mutant::test fragmented terminal control sequences through successive incomplete reads before the terminator for both paste markers and every terminal size class",
+      "text": "Test fragmented terminal control sequences through successive incomplete reads before the terminator, for both paste markers and every terminal size class.",
+      "signal": "surviving_mutant",
+      "scope": "broker/tui",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "I4; broker/tui.ts:191; QST-78/QST-99; .specs/features/question/validation.md round 7 (broker/tui)"
+      ],
+      "created": "2026-10-11T09:38:31Z",
+      "last_seen": "2026-10-11T09:38:31Z"
     }
   ]
 }
