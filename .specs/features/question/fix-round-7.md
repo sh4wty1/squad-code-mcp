@@ -3,8 +3,8 @@
 O Verifier independente deu FAIL em `832a1d7` (`validation.md`, rodada 7) por um resíduo só:
 gate verde com 1302 testes, o produto completo de F35 passando, 33 de 34 mutantes mortos,
 26 de 28 cláusulas fechadas por inteiro, QST-36 com as dez. O dev decidiu em 2026-10-11
-fechar o resíduo com uma tarefa e uma verificação restrita. F37 está concluída; a rodada 8
-restrita do Verifier é o próximo passo.
+fechar o resíduo com uma tarefa e uma verificação restrita. F37 está concluída em `0e49bfe`;
+a rodada 8 restrita do Verifier deu PASS, registrado no topo de `validation.md`.
 
 ## O problema
 
@@ -86,7 +86,8 @@ isso. Logs em
 
 Adequação: suficiência e necessidade fechadas pelos mapas acima. Tela e payload completos,
 sem asserções rasas, desvios, enfraquecimentos ou testes pulados novos. Segue `broker/CLAUDE.md`
-e a matriz de `tasks.md`. QST-36, QST-78 e QST-99 ficam `Implementing` até o PASS independente.
+e a matriz de `tasks.md`. QST-36, QST-78 e QST-99 ficaram `Implementing` neste commit de
+F37 e passam a `Verified` após o PASS independente da rodada 8.
 
 ## Depois da tarefa: a rodada 8, restrita
 

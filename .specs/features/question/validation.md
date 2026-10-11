@@ -1,6 +1,73 @@
 # Question Validation
 
-**Result**: FAIL
+**Result**: PASS
+
+**Round**: 8, restrita
+**Date**: 2026-10-11
+**Verifier**: agente novo e independente; não escreveu implementação, testes, planos de correção nem relatórios anteriores.
+**Spec**: `.specs/features/question/spec.md:319`, QST-78 l; `spec.md:329`, QST-99 e. Escopo de `fix-round-7.md`, seção "Depois da tarefa", e Handoff de `STATE.md`.
+**Diff range**: `832a1d7..0e49bfe68d00d05a9c8a71b72e5867b0a5808b6c`, branch `feat/question`, HEAD fixo.
+**Environment**: Windows, Bun 1.4.2, TypeScript instalado localmente. Gate full fora do sandbox, com os DBs e tokens temporários do harness.
+
+O resíduo I4 da rodada 7 está fechado. As duas cláusulas agora têm evidência discriminante no teste F37 comprometido. As outras 26 cláusulas e os outros 33 mutantes conservam a evidência da rodada 7, sem nova execução ou reavaliação nesta rodada. O full passa. Nenhum defeito de produção foi observado.
+
+## Evidência por cláusula
+
+Citações de testes são relativas a `broker/`. Os resultados esperados foram conferidos contra a spec, independentemente da evidência do autor.
+
+| Cláusula | Resultado definido pela spec | `file:line` + asserção | Veredito |
+| --- | --- | --- | --- |
+| QST-78 l | Cada marcador é reconhecido em quantas leituras vier, em qualquer tamanho; não acrescenta texto nem altera a tela. O início torna o próximo `\r` um espaço; o fim devolve o enter que envia | `test/unit/tui-loop.test.ts:825`, `expect(cases.length).toBe(256)`; `:839`, `expect(t.posts).toEqual([])`; `:843`, `expect(t.lines()).toEqual(tab(t.view(open)))`; `:846`, nenhum POST; `:847`, tela inteira com `text: "logo "`; `:849`, POST inteiro de Q-08 com `answer: "logo"` | PASS, F37 sozinho mata I4 |
+| QST-99 e, resíduo de três ou mais leituras | Os marcadores começam/terminam a colagem também no terminal pequeno. Ao crescer, o modal/texto original retorna e a próxima quebra observa o estado de colagem correto | `test/unit/tui-loop.test.ts:835`, tamanho aplicado antes de `:838`, leituras consecutivas; `:839`, nenhum POST; `:840`–`:843`, crescimento e tela inteira com `logo`; `:846`–`:849`, nenhum envio/texto com espaço após início, POST exato após fim | PASS; os três tamanhos pequenos integram o produto |
+
+O produto de `:811`–`:824` cruza dois marcadores de seis bytes, quatro tamanhos (120×40, 119×40, 120×39, 100×30) e os 32 subconjuntos dos cinco intervalos internos. Uma auditoria independente confirmou partições distintas, ordenadas e não vazias, distribuídas em 1/5/10/10/5/1 partições de uma/duas/três/quatro/cinco/seis leituras por marcador. São 256 casos. `:830`–`:834` abre Q-08 com `logo` e inicia a colagem antes do marcador final. `:838` entrega todos os pedaços consecutivamente, sem espera.
+
+O oráculo escreve o estado esperado e textos literais, usa o desenho da tela para comparar o modal completo e observa a colagem pelo próximo enter. Não consulta `key`, `input`, `press` ou `marks` para calcular o resultado. O POST de `:849` fixa URL `/answer`, token, `question_id: 8` e `answer: "logo"`. Contagem/preparação, preservação da tela/texto, estado de colagem e payload exato são asserções necessárias para F37 e QST-78/99; o payload também respeita QST-76. Nenhuma asserção nova está sem âncora.
+
+## Evidência histórica conservada
+
+A rodada 7 abaixo permanece como história do HEAD `832a1d7`: seção "Spec-anchored acceptance criteria", QST-36 a–j (10), QST-78 a–k (11) e QST-99 a–d/f (5). São 26 cláusulas com evidência `file:line` e resultado definido pela spec. O complemento novo é QST-78 l e o resíduo de QST-99 e. Resultado acumulado: **28/28 cláusulas**, duas verificadas nesta rodada e 26 conservadas.
+
+A seção "Discrimination sensor" da rodada 7 conserva os 33 mortos: X3/X5/X6/X7, N8/N11/N5, V1/V2/V3/V4/V5/V7/V7b/V8/V11/V13/V14/V15/V16, C2, Q5/Q6/Q6a/Q7, R2/R3/R15/R18, W4 e I1/I2/I3. Nenhum foi reinjetado. I4 foi o único sensor executado aqui. Evidência acumulada: **34/34 mutantes mortos**, 1/1 reavaliado nesta rodada e 33/33 conservados; isso não é uma nova execução de todos.
+
+O completo da F35 permanece com o resultado independente da rodada 7: 1 pass, 0 fail, 33600 casos e 187862 asserções, 548,56 s. Não foi repetido: `smallCases`, `checkSmall`, `checkSmallCases`, consumidores e asserções estão byte a byte iguais nos blobs Git, salvo o deslocamento das linhas. A auditoria `verifier8-integrity.json` confirma isso. QST-37/QST-48 e os demais requisitos conservam suas disposições históricas sob o gate de regressão atual.
+
+Apenas o rótulo do veredito da rodada 7 foi apresentado como `Historical verdict`, mantendo FAIL e todo o restante do conteúdo. `validate_state.py` agrega os rótulos `Result` do arquivo e confundiria PASS atual com FAIL histórico como placeholder. O script e a conclusão histórica não foram alterados.
+
+## Gate no HEAD, integridade e qualidade
+
+- De `broker/`: `bun node_modules/typescript/bin/tsc --noEmit`, exit 0; `bun test`, exit 0: **1303 pass, 4 skip, 0 fail**, 108438 asserções, 1307 testes em 63 arquivos, **94,18 s**.
+- Skips: dois PEER-44 de busca/sinalização de listener no Windows; PEER-14 de pid de outro usuário; completo opcional F35 sem `SQUAD_TEST_FULL`, conforme decisão do dev. Os três primeiros são anteriores de plataforma; o quarto retém o completo histórico, pois nenhuma função autorizada a disparar sua repetição mudou.
+- Antes da feature: 926 pass/3 skip; rodada 7: 1302 pass/4 skip; esta rodada: 1303 pass/4 skip. Um teste adicionado, sem remoções ou skips novos.
+- O diff em `broker/test` é exatamente +50/−0, só em `test/unit/tui-loop.test.ts`. Retirar a adição F37 do blob HEAD reproduz integralmente o blob `832a1d7` do arquivo. Nenhuma asserção anterior mudou de valor esperado. Não há diff de produção, frames, dependências, manifestos ou lockfile.
+- Mudança cirúrgica, conforme a matriz de `tasks.md` e `broker/CLAUDE.md`: F37 cobre a junção das leituras em `tui.ts:185`–`:200` com o laço real e fetch/terminal injetados. Sem flexibilidade, abstração ou comportamento extra de produção. As alterações documentais mantêm as regras QST-78/99; a referência F36 em QST-45 foi retirada conforme a disposição da rodada 7.
+
+## Sensor e isolamento
+
+Cópia física de `broker/`, com `node_modules` próprio, em `verifier8-scratch/broker` dentro do diretório de evidências abaixo. Sem worktree, junction, link ou stash. Auditoria de reparse points antes/depois da cópia: zero. Todos os **4316 arquivos** copiados tinham SHA-256 igual ao real antes do sensor.
+
+| Execução | Mutação e teste | Resultado |
+| --- | --- | --- |
+| Controle | Original, `bun test test/unit/tui-loop.test.ts --test-name-pattern 'all 32 partitions'` | Exit 0, 1 pass, 39 filtrados, 0 fail, 1153 asserções, 256 casos, 5,67 s |
+| I4 | Só `/u.exec(input)?.[0]` → `/u.exec(chunk)?.[0]` em `tui.ts:191`; F37 sozinho pelo mesmo comando | **Morto**, exit 1, 0 pass, 1 fail, 39 filtrados, 19 asserções, 181 ms. Diferença comportamental da tela em `tui-loop.test.ts:843`; sem timeout ou erro de sintaxe |
+
+Nenhum mutante adicional foi criado. I4 já era o mutante comportamental definido na rodada 7; sua discriminação independente foi confirmada no teste comprometido.
+
+`tui.ts` foi restaurado byte a byte e comparado com o arquivo real. Antes da remoção, os 4316 arquivos da cópia restaurada e da árvore real conferiram com os hashes anteriores. A remoção usou PowerShell `Remove-Item -LiteralPath`, após conferir o caminho absoluto dentro do scratch escolhido e zero reparse points. Depois da remoção, os 4316 arquivos reais, inclusive dependências ignoradas, continuavam idênticos ao baseline. Scratch removido. Porcelain real vazio antes e depois do sensor; HEAD fixo. A auditoria também cobre o estado ignorado que porcelain sozinho não detecta.
+
+## Logs, limites e disposição
+
+Evidências em `C:/Users/lucas/.codex/visualizations/2026/10/11/01a12cd7-55fd-7563-9df1-e47734f1ae61/`: `verifier8-tsc.log`, `verifier8-full.log`, `verifier8-F37-original.log`, `verifier8-I4.log`, `verifier8-integrity.json`, `verifier8-copy-hashes.json`, `verifier8-cleanup.log`, `verifier8-porcelain-before.txt`, `verifier8-porcelain-after-sensor.txt`, `verifier8-state.log`. O backup `verifier8-tui-original.bin` e a rodada 7 original `verifier8-validation-history.bin` conservam os bytes de referência.
+
+Fragmentos consecutivos chegam antes do temporizador de escape de 40 ms. Intervalos maiores, terminal interativo real, modo 2004 real, macOS/Linux, sinais reais e conversa Claude Code continuam fora do exercício desta rodada; os limites históricos não foram reavaliados. O sensor termina no primeiro mismatch, suficiente para matar I4, e não mede separadamente cada contexto do mutante.
+
+**Resíduos**: nenhum no escopo autorizado. QST-36/78/99 podem passar a Verified pelo orquestrador sob a evidência acumulada. Este Verifier não altera spec, STATE, produção ou testes; não faz commit/push/merge nem abre nova rodada. Nenhuma lição nova: PASS sem sinal de falha. `validate_state.py question`: exit 0, zero erros, após escrever o relatório; log acima.
+
+---
+
+# Question Validation
+
+**Historical verdict**: FAIL
 
 **Round**: 7
 **Date**: 2026-10-11
