@@ -34,7 +34,7 @@ com a credencial humana do AD-007.
 | Conferir `ticket_ref` de uma pergunta contra o `plan` | A fatia não lista a recusa; o campo é opcional e só casa perguntas com o `result` |
 | Reabrir, corrigir ou apagar uma resposta | Resolução única (ADR-005); `events` é append-only |
 | Aba Perguntas com o histórico de uma feature já fechada | `squad.questions` é da feature aberta; sem feature a aba fica vazia |
-| Cursor dentro do campo de texto, seleção e colagem delimitada | O protótipo só acrescenta no fim, apaga o último e limpa |
+| Cursor dentro do campo de texto e seleção; a colagem delimitada na edição do campo, onde o texto colado entra tecla a tecla como hoje | O protótipo só acrescenta no fim, apaga o último e limpa. A colagem delimitada vale só para a regra de QST-78 |
 | Bloco "resolver em" e a linha `b responder Q-09` no detalhe de um `blocked` (frame 10) | Prosa do cenário; o desvio D2 da TUI leitura continua |
 | Linha de sistema no feed para pergunta fechada pelo encerramento da feature | Nenhum evento novo: o `feature_closed` já tem a sua linha |
 | Corrigir logs de frames de leitura que têm dois `answer` para a mesma pergunta (Q-13 em 25b) | São da TUI leitura; a derivação lê só o primeiro |
@@ -76,7 +76,7 @@ com a credencial humana do AD-007.
 | Opção escolhida e recusada | O modal passa ao estado recusado do frame 20b com o texto da opção no campo | O frame só desenha a recusa no modo texto | y |
 | Broker sem responder | Sem modal aberto, `enter` avisa `broker desconectado · responder desabilitado`. Com modal aberto, as teclas não mudam o modal e ele volta com o texto quando o broker responde | Frame 12: "responder, gate e permissão desabilitados"; a tela congelada da TUI leitura continua | y |
 | Token do dev | Lido de `SQUAD_TOKEN_FILE` (default `<home>/.squad-code-mcp.token`) a cada envio; nunca desenhado | AD-007; o broker pode criar o arquivo depois de a TUI subir | y |
-| Colagem com quebra de linha | Num bloco de entrada com mais de uma tecla, `\r` e `\n` viram espaço e não enviam | A resposta fica gravada e não pode ser apagada: uma colagem não pode enviá-la pela metade | y |
+| Colagem com quebra de linha | Num bloco de entrada com mais de uma tecla, `\r` e `\n` viram espaço e não enviam. A TUI pede ao terminal a colagem delimitada (modo 2004); entre os dois marcadores a regra vale para toda quebra, mesmo sozinha numa leitura. A regra do bloco é a reserva para o terminal que não manda os marcadores | A resposta fica gravada e não pode ser apagada: uma colagem não pode enviá-la pela metade. Decidido pelo dev em 2026-10-11, depois da review do PR 9 | y |
 | Logs dos frames novos | 04 a 07 e 20b usam o log do cenário principal e 20a o do cenário de erro, com `body`, `why` e `options` das perguntas como o protótipo os escreve em `QS`. A pergunta do leader respondida pela mother às 14:19:05, que o protótipo deixa fora do histórico, entra: desvio D1 | AD-010: um frame, um log; o mesmo cenário não ganha um log que esconde evento | y |
 | Legenda (frame 11) | As quatro linhas de Question (`h`, `modal de resposta` e as duas de teclas) voltam a ser desenhadas e saem da tabela de desvios; as de gate e de permissão continuam D3 | Pendência da TUI leitura | y |
 | TUI-63 e a leitura de `b` da TUI leitura | Substituídos por QST-64 a QST-67 para `4`, `enter` e `b`; `g` e `x` continuam como estão | Esta fatia entrega a aba | y |
@@ -316,7 +316,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 6. **QST-75** WHEN o texto não cabe na linha única THEN o campo SHALL mostrar `…` e o fim do texto; WHEN está expandido THEN SHALL quebrar o texto na largura do campo e mostrar as últimas 6 linhas.
 7. **QST-76** WHEN `enter` é pressionada no modo texto com ao menos um caractere que não seja espaço THEN a TUI SHALL enviar `POST /answer` com `{ human_token, question_id, answer }`, com `answer` sem os espaços das pontas; IF o campo só tem espaços ou está vazio THEN a TUI SHALL não enviar nada e manter o modal.
 8. **QST-77** WHEN o broker responde `{ ok: true }` ao envio THEN a TUI SHALL fechar o modal e avisar `✓ Q-NN respondida` em verde por 4 s.
-9. **QST-78** IF um bloco de entrada com mais de uma tecla contém `\r` ou `\n` e, na vez dessa tecla, o modal está no modo texto THEN a TUI SHALL pôr um espaço no lugar dela e não enviar, mesmo que o modal tenha entrado no modo texto por uma tecla anterior do mesmo bloco; IF, na vez dessa tecla, o modal está no modo escolha THEN a TUI SHALL ignorá-la, sem confirmar opção nem enviar: um bloco colado nunca envia uma resposta. Sem modal aberto na vez dela, a tecla faz o que `enter` faz naquela tela, e pode abrir o modal.
+9. **QST-78** IF um bloco de entrada com mais de uma tecla contém `\r` ou `\n` e, na vez dessa tecla, o modal está no modo texto THEN a TUI SHALL pôr um espaço no lugar dela e não enviar, mesmo que o modal tenha entrado no modo texto por uma tecla anterior do mesmo bloco; IF, na vez dessa tecla, o modal está no modo escolha THEN a TUI SHALL ignorá-la, sem confirmar opção nem enviar: um bloco colado nunca envia uma resposta. Sem modal aberto na vez dela, a tecla faz o que `enter` faz naquela tela, e pode abrir o modal. The TUI SHALL pedir ao terminal a colagem delimitada ao entrar (`CSI ? 2004 h`) e desfazer o pedido ao sair (`CSI ? 2004 l`); WHILE uma colagem delimitada está em curso, do marcador `ESC [ 200 ~` até o marcador `ESC [ 201 ~` ou até um `esc`, a regra SHALL valer para todo `\r` e `\n`, também o que chega sozinho num bloco; os dois marcadores SHALL não entrar no texto nem mudar tela alguma.
 10. **QST-79** WHILE um envio espera a resposta do broker the TUI SHALL não fazer outro `POST` e não mudar o modal por tecla alguma.
 11. **QST-80** WHEN o broker responde `question_closed` ao envio THEN o modal SHALL ficar no estado recusado: o campo com o texto enviado e a borda vermelha, `default <default>  · aplicado (o prazo venceu)` quando a pergunta é não-bloqueante, a linha `✗ recusada pelo broker: Q-NN já fechada · default aplicado: <default>` (sem a parte do default numa bloqueante) abaixo do aviso fixo, o rodapé `esc fechar`, e só `esc` SHALL fechá-lo.
 12. **QST-81** IF o broker responde outra recusa, um status que não é 200, um corpo que não é `{ ok }`, ou não responde em 2000 ms THEN a TUI SHALL manter o modal com o texto e avisar em vermelho por 4 s `✗ resposta não enviada · <erro>`, com o `error` da recusa ou `broker não respondeu`.
@@ -442,7 +442,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-75 | P1: Modal de resposta | T28 | Verified |
 | QST-76 | P1: Modal de resposta | T32, T35 | Verified |
 | QST-77 | P1: Modal de resposta | T33 | Verified |
-| QST-78 | P1: Modal de resposta | T32 | Verified |
+| QST-78 | P1: Modal de resposta | T32, F15 | Implementing |
 | QST-79 | P1: Modal de resposta | T32, T35 | Verified |
 | QST-80 | P1: Modal de resposta | T29, T33 | Verified |
 | QST-81 | P1: Modal de resposta | T33, T34 | Verified |

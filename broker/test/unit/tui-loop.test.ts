@@ -470,6 +470,32 @@ test("QST-78: a line break and an unfinished escape in one chunk confirm no opti
   }
 });
 
+test("QST-78: the loop turns the delimited paste of the terminal on and off, and a line break alone in a read between its marks sends nothing, in the text mode and in the choice mode", async () => {
+  const { t, key, stop } = launch();
+  try {
+    expect(t.out).toContain("\x1b[?2004h");
+    await t.shows(main(t.view()).text(), "the main screen");
+    // Q-08, in the text mode: the mark of the end comes in two reads
+    for (const k of ["4", "j", "\r"]) key(k);
+    for (const k of ["\x1b[200~logo", "\r", "da 89\x1b[20", "1~"]) key(k);
+    expect(t.posts).toEqual([]);
+    expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo da 89" }) })));
+    key("\r");
+    expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo da 89" } }]);
+    await until(() => t.lines()[38]!.includes("✓ Q-08 respondida"), "the notice of the answer");
+
+    // Q-07, on the first of its options
+    for (const k of ["k", "\r"]) key(k);
+    for (const k of ["\x1b[200~", "\r", "\x1b[201~"]) key(k);
+    expect(t.posts).toHaveLength(1);
+    key("\r");
+    expect(t.posts[1]).toEqual({ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 7, answer: "infinito com backoff" } });
+  } finally {
+    stop();
+  }
+  expect(t.out.endsWith("\x1b[?2004l\x1b[?25h\x1b[?1049l")).toBe(true);
+});
+
 test("QST-80, QST-81: a broker that fails leaves the modal to send again with the error in the footer, and the refusal of a closed question leaves it refused until esc", async () => {
   const { t, key, stop } = launch();
   try {

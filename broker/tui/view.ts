@@ -42,6 +42,8 @@ export interface Ui {
   modal: Modal | null;
   // the answer the loop has to send to the broker
   send: { question_id: number; answer: string } | null;
+  // the terminal sent the mark of the start of a paste, and not yet the one of its end
+  pasting: boolean;
 }
 
 export interface View {

@@ -36,14 +36,15 @@ Respondidas em 2026-10-11.
 **Lacuna**: achado F2 da review, `broker/tui/keys.ts:187`. `pasted` só vale quando a quebra de linha divide o bloco com outra tecla; uma colagem que chega com a quebra sozinha numa leitura envia a resposta. Depois de `CSI ? 2004 h` o terminal entrega a colagem entre `ESC [ 200 ~` e `ESC [ 201 ~`, e `KEY` já lê cada marcador como uma tecla.
 **Where**: `broker/tui/ansi.ts`, `broker/tui/keys.ts`, `.specs/features/question/spec.md`
 **Requirement**: QST-78
-**Depende de**: decisão do dev sobre F15
+**Depende de**: decisão do dev sobre F15: entra na spec
 
-- [ ] A spec diz que a colagem delimitada vale para a regra de QST-78 e continua fora para a edição do campo
-- [ ] `ENTER` e `LEAVE` (`broker/tui/ansi.ts:29`) ligam e desligam o modo 2004
-- [ ] `input` troca por espaço as quebras entre os dois marcadores, no modo texto, e as ignora no modo escolha, mesmo com a quebra sozinha numa leitura
-- [ ] A regra do bloco continua valendo para o terminal que não manda os marcadores
-- [ ] O risco de colagem em `STATE.md` (Evidência e limites) é atualizado
-- [ ] Gate full passa
+- [x] A spec diz que a colagem delimitada vale para a regra de QST-78 e continua fora para a edição do campo
+- [x] `ENTER` e `LEAVE` (`broker/tui/ansi.ts:29`) ligam e desligam o modo 2004. O teste de TUI-60 em `test/unit/tui-ansi.test.ts` fixava os dois literais e mudou de valor esperado com eles
+- [x] `input` troca por espaço as quebras entre os dois marcadores, no modo texto, e as ignora no modo escolha, mesmo com a quebra sozinha numa leitura. A colagem em curso fica em `Ui.pasting`, porque atravessa leituras; o teste que fixa `START` ganhou o campo
+- [x] `esc` encerra uma colagem cujo marcador de fim não veio: sem isso, um marcador perdido deixaria `enter` sem enviar até a TUI reiniciar. Não estava na tarefa; está em QST-78
+- [x] A regra do bloco continua valendo para o terminal que não manda os marcadores: os testes de QST-78 que já existiam passam sem mudar valor esperado
+- [x] O risco de colagem em `STATE.md` (Evidência e limites) é atualizado
+- [x] Gate full passa
 
 ### F16: A direção da mescla e o default da segunda pergunta
 

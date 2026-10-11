@@ -23,7 +23,7 @@ const UP = "\x1b[A";
 const DOWN = "\x1b[B";
 
 test("the screen starts on the main one, with no line selected, the feed in focus and the tokens of the feature", () => {
-  expect(START).toEqual({ screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null });
+  expect(START).toEqual({ screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null, pasting: false });
 });
 
 test("TUI-62: 1, 2, 3 and ? change the screen and esc goes back to the main one", () => {
@@ -491,6 +491,48 @@ test("QST-78: in the choice mode a line break of a chunk of more than one key is
   expect(chunk("\r", second)).toEqual({ ...second.ui, modal: { ...m(second), sending: true }, send: { question_id: 7, answer: "5 tentativas" } });
   const typed = ["4", "\r", ..."texto", "\r"].reduce((ui, k) => input(ui, k, { ...choosing, ui })!, choosing.ui);
   expect(typed.send).toEqual({ question_id: 7, answer: "texto" });
+});
+
+// The marks of a delimited paste, and the state after each chunk of a list, one read each
+const PASTE = "\x1b[200~";
+const PASTED = "\x1b[201~";
+const reads = (chunks: string[], v: View) => chunks.reduce((ui, keys) => input(ui, keys, { ...v, ui })!, v.ui);
+
+test("QST-78: between the marks of a delimited paste a line break that comes alone in a read is a space in the text mode, and sends nothing", () => {
+  const v = open("06", { text: "" });
+  const pasted = reads([PASTE + "logo", "\r", "da 89", "\n", PASTED], v);
+  expect(pasted).toEqual({ ...v.ui, modal: { ...m(v), text: "logo da 89 " } });
+  expect(pasted.send).toBeNull();
+  // After the mark of the end, enter alone is enter
+  expect(reads([PASTE + "logo", "\r", "da 89", "\n", PASTED, "\r"], v).send).toEqual({ question_id: 8, answer: "logo da 89" });
+  // A paste that comes whole in one read
+  expect(chunk(PASTE + "um\rdois" + PASTED, v)).toEqual({ ...v.ui, modal: { ...m(v), text: "um dois" } });
+});
+
+test("QST-78: between the marks of a delimited paste a line break that comes alone in a read confirms no option in the choice mode", () => {
+  const v = open("05", { choice: 1 });
+  expect(reads([PASTE, "\r", "\n", PASTED], v)).toEqual(v.ui);
+  expect(reads([PASTE, "\r"], v).send).toBeNull();
+  expect(reads([PASTE, "\r", PASTED, "\r"], v).send).toEqual({ question_id: 7, answer: "5 tentativas" });
+});
+
+test("QST-78: the marks of a delimited paste put nothing in the text and change no screen", () => {
+  const text = open("06");
+  expect(chunk(PASTE + PASTED, text)).toEqual(text.ui);
+  expect(chunk(PASTED, text)).toBe(text.ui);
+  const choosing = open("05");
+  expect(chunk(PASTE + PASTED, choosing)).toEqual(choosing.ui);
+  for (const screen of ["main", "topology", "thread", "questions", "help"] as const) {
+    const v = view("01", { screen, selected: 417 });
+    expect(chunk(PASTE + PASTED, v)).toEqual(v.ui);
+  }
+});
+
+test("QST-78: esc ends a delimited paste whose mark of the end did not come, and enter alone sends again", () => {
+  const tab = view("04", { question: 8 });
+  // The modal of Q-08, the start of a paste, esc, the modal again, a text and enter
+  const sent = reads(["\r", PASTE + "logo", "\x1b", "\r", "texto", "\r"], tab);
+  expect(sent.send).toEqual({ question_id: 8, answer: "texto" });
 });
 
 test("TUI-62: a chunk with q or ctrl+c among its keys quits", () => {

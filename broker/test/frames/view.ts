@@ -23,7 +23,7 @@ export function frameView(id: string, change: (events: SquadEvent[]) => SquadEve
   return {
     squad: squad(events, now),
     rows: feed(events),
-    ui: { screen: "main", selected, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: ticket ?? null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null, ...ui },
+    ui: { screen: "main", selected, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: ticket ?? null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null, pasting: false, ...ui },
     project: "portal-89fm",
     down: null,
     prices: PRICES,

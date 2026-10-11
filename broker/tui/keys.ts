@@ -12,7 +12,7 @@ import { threadTicket } from "./screens/thread.ts";
 import type { Modal, Ui, View } from "./view.ts";
 import type { Sent } from "./writer.ts";
 
-export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null };
+export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null, pasting: false };
 
 // How long a notice stays in the footer
 const TOAST_MS = 4000;
@@ -40,6 +40,10 @@ const KEY = /\x1b\[[0-9;]*[A-Za-z~]|[\s\S]/gu;
 export function keysOf(chunk: string): string[] {
   return chunk.match(KEY) ?? [];
 }
+
+// The marks a terminal puts around what is pasted, once `ENTER` asked it to
+const PASTE_START = "\x1b[200~";
+const PASTE_END = "\x1b[201~";
 
 // What a key does with the modal of answer open. The answer is not sent here: it is left in
 // `send`, for the loop.
@@ -179,12 +183,20 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
 // from the log: a line break whose turn comes with the modal open becomes a space, also when
 // a key before it in the chunk opened the modal. In the text mode the space goes to the text;
 // in the choice mode it does nothing, where enter would confirm an option. `more` says the
-// chunk had keys after these, which the loop holds back.
+// chunk had keys after these, which the loop holds back. Between the two marks of a delimited
+// paste every chunk is of the paste, a line break alone in its read too; the marks are no key
+// of a screen, and esc ends a paste whose mark of the end did not come.
 export function input(ui: Ui, chunk: string, view: View, more = false): Ui | null {
   const keys = keysOf(chunk);
+  const paste = (state: Ui, on: boolean): Ui => (state.pasting === on ? state : { ...state, pasting: on });
   let next: Ui | null = ui;
   for (const k of keys) {
-    const pasted = (more || keys.length > 1) && next.modal !== null && (k === "\r" || k === "\n");
+    if (k === PASTE_START || k === PASTE_END) {
+      next = paste(next, k === PASTE_START);
+      continue;
+    }
+    if (k === "\x1b") next = paste(next, false);
+    const pasted = (next.pasting || more || keys.length > 1) && next.modal !== null && (k === "\r" || k === "\n");
     next = press(next, pasted ? " " : k, { ...view, ui: next });
     if (!next) return null;
   }
