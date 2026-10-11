@@ -24,9 +24,9 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/question-result.test.ts`
 **Requirement**: QST-36
 
-- [ ] worker-1 pergunta Q-01 e Q-02 sobre T-1, worker-3 pergunta Q-03 sobre T-3; Q-02 mesclada em Q-03 e Q-03 em Q-01; o `result` de worker-1 grava `Q-01: 8080` e `Q-02: 9090`, Q-03 fecha com o `answer` de Q-01, e as entregas são a de Q-01 para worker-1 e worker-3 e a de Q-02 para worker-1
-- [ ] O teste falha sem o `NOT IN` do passo recursivo da busca das mescladas
-- [ ] Gate quick passa
+- [x] worker-1 pergunta Q-01 e Q-02 sobre T-1, worker-3 pergunta Q-03 sobre T-3; Q-02 mesclada em Q-03 e Q-03 em Q-01; o `result` de worker-1 grava `Q-01: 8080` e `Q-02: 9090`, Q-03 fecha com o `answer` de Q-01, e as entregas são a de Q-01 para worker-1 e worker-3 e a de Q-02 para worker-1
+- [x] O teste falha sem o `NOT IN` do passo recursivo da busca das mescladas
+- [x] Gate quick passa
 
 ### F22: `q` e `ctrl+c` no terminal pequeno, cada um no seu caso
 
