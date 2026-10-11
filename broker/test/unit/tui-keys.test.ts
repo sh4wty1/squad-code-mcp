@@ -548,6 +548,19 @@ test("QST-78: esc ends a delimited paste with no modal open too", () => {
   const tab = view("04", { question: 8 });
   // esc goes to the main screen: the tab again, the modal of Q-08, a text and enter
   expect(reads([PASTE, "\x1b", "4", "\r", "texto", "\r"], tab).send).toEqual({ question_id: 8, answer: "texto" });
+  // And when esc comes with another key in its read
+  expect(reads([PASTE, "\x1b4", "\r", "texto", "\r"], tab).send).toEqual({ question_id: 8, answer: "texto" });
+});
+
+test("QST-78: esc ends a delimited paste in the choice mode, and with another key in its read", () => {
+  // The modal of Q-07, the start of a paste, esc, the modal again and enter on the first of its options
+  const options = view("04", { question: 7 });
+  expect(reads(["\r", PASTE, "\x1b", "\r", "\r"], options).send).toEqual({ question_id: 7, answer: "infinito com backoff" });
+  // esc and the enter that opens the modal again in one read: the enter after them is alone
+  expect(reads(["\r", PASTE, "\x1b\r", "\r"], options).send).toEqual({ question_id: 7, answer: "infinito com backoff" });
+  // The text mode, with esc and the enter that opens the modal again in one read
+  const text = view("04", { question: 8 });
+  expect(reads(["\r", PASTE + "logo", "\x1b\r", "texto", "\r"], text).send).toEqual({ question_id: 8, answer: "texto" });
 });
 
 test("QST-78: with no modal open a line break does what enter does also when the loop holds back keys that came after it", () => {
@@ -562,6 +575,8 @@ test("QST-78: with no modal open \\n does nothing, alone, after another key and 
     expect(chunk("\n", v)).toBe(v.ui);
     expect(chunk("p\n", v)).toEqual({ ...v.ui, paused: true });
     expect(reads([PASTE, "\n"], v)).toEqual({ ...v.ui, pasting: true });
+    // And when the loop holds back keys that came after it
+    expect(input(v.ui, "\n", v, true)).toBe(v.ui);
   }
 });
 

@@ -31,9 +31,9 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/tui-keys.test.ts`
 **Requirement**: QST-78
 
-- [ ] `input(ui, "\n", view, true)` sem modal devolve o mesmo estado, na aba e no feed
-- [ ] `esc` encerra a colagem também junto de outra tecla na leitura e com o modal no modo escolha
-- [ ] Gate quick passa
+- [x] `input(ui, "\n", view, true)` sem modal devolve o mesmo estado, na aba e no feed
+- [x] `esc` encerra a colagem também junto de outra tecla na leitura e com o modal no modo escolha
+- [x] Gate quick passa
 
 ### F28: A pergunta do mesmo worker que o `result` não fecha
 
