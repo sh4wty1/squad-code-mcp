@@ -222,7 +222,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 1. **QST-33** WHEN o relógio do broker alcança o `deadline_ts` de uma pergunta `open` THEN o broker SHALL gravar um `answer` com `from_name` `broker`, `role_from` `broker`, `to_name` igual ao `asked_by`, `answer` igual ao `default_answer`, `resolved_by` `timeout_default`, `summary` e `body` como em QST-20, pôr a linha em `defaulted` com `answer_seq`, e gravar as entregas de QST-23.
 2. **QST-34** The broker SHALL conferir os prazos ao subir, antes de atender a primeira requisição, e depois a cada 1000 ms, o default de `SQUAD_EXPIRE_INTERVAL_MS`.
 3. **QST-35** WHEN o broker sobe sobre um banco com pergunta `open` de `deadline_ts` já vencido THEN o broker SHALL fechá-la como em QST-33 nessa subida; uma pergunta de prazo ainda não vencido SHALL fechar no `deadline_ts` gravado, não num prazo recontado.
-4. **QST-36** WHEN `/send` grava o `result` de um worker para o judge com `ticket_ref` T THEN o broker SHALL gravar na mesma transação, depois do `result` e do `unblocked` se houver, um `answer` de `broker` com o `default_answer` e `resolved_by` `result_default` para cada pergunta não-bloqueante com `asked_by` igual a quem envia, `ticket_ref` igual a T e `status` `open` ou `merged`, em ordem crescente de id, e pôr cada uma em `defaulted`.
+4. **QST-36** WHEN `/send` grava o `result` de um worker para o judge com `ticket_ref` T THEN o broker SHALL gravar na mesma transação, depois do `result` e do `unblocked` se houver, um `answer` de `broker` com o `default_answer` e `resolved_by` `result_default` para cada pergunta não-bloqueante com `asked_by` igual a quem envia, `ticket_ref` igual a T e `status` `open` ou `merged`, em ordem crescente de id, e pôr cada uma em `defaulted`; WHEN uma dessas perguntas está mesclada em outra delas, direto ou por outra mesclada, THEN cada uma SHALL fechar com o seu `answer` e o seu `default_answer`, qualquer que seja a mesclada, e uma pergunta de outro `asked_by` mesclada numa delas SHALL fechar com o `answer` daquela (QST-37).
 5. **QST-37** WHEN o `result` fecha uma pergunta `merged` THEN o broker SHALL fechar ela e as mescladas dela (QST-31), sem mudar a pergunta de destino; depois disso o `answer` da de destino SHALL não ser entregue ao `asked_by` dela por causa dessa mescla nem mudar a sua linha.
 6. **QST-38** The broker SHALL gravar no máximo um `answer` por `question_id`: a leitura do `status` e a gravação acontecem na mesma transação, e quem chega depois recebe `question_closed`.
 7. **QST-39** IF o `result` é de um worker com pergunta bloqueante aberta do mesmo ticket, com não-bloqueante de outro ticket ou sem `ticket_ref`, ou é o `result` do leader para a mother THEN o broker SHALL não fechar essas perguntas.
@@ -400,7 +400,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-33 | P1: Prazo, default e resolução única | T11 | Verified |
 | QST-34 | P1: Prazo, default e resolução única | T16 | Verified |
 | QST-35 | P1: Prazo, default e resolução única | T11, T16 | Verified |
-| QST-36 | P1: Prazo, default e resolução única | T12, T13 | Verified |
+| QST-36 | P1: Prazo, default e resolução única | T12, T13, F16 | Implementing |
 | QST-37 | P1: Prazo, default e resolução única | T12 | Verified |
 | QST-38 | P1: Prazo, default e resolução única | T8 | Verified |
 | QST-39 | P1: Prazo, default e resolução única | T12, T13 | Verified |

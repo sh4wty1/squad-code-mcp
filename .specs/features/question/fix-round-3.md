@@ -8,13 +8,14 @@ começou: nenhuma tarefa abaixo tem código escrito.
 Valem as regras, a matriz de testes e os gates de `tasks.md`. Um commit por tarefa, com a
 tarefa marcada aqui.
 
-## Decisões do dev antes de começar
+## Decisões do dev
+
+Respondidas em 2026-10-11.
 
 - **F15**: a colagem delimitada entra na spec só para a regra de QST-78, com a regra do
-  bloco como reserva, ou fica como risco declarado? Hoje `spec.md:37` deixa a colagem
-  delimitada de fora.
-- **F16**: o comportamento de hoje é o que QST-36 quer dizer, ou as linhas `merged` do
-  worker fecham antes das `open`?
+  bloco como reserva. Até aqui `spec.md:37` deixava a colagem delimitada de fora.
+- **F16**: o comportamento de `d867b57` não é o que QST-36 quer dizer. Cada pergunta do
+  worker fecha com o próprio default, nas duas direções da mescla.
 
 ## Tarefas
 
@@ -49,11 +50,12 @@ tarefa marcada aqui.
 **Lacuna**: achado F3 da review, `broker/question.ts:381`. Quando um `result` fecha duas perguntas do mesmo worker e ticket, Q2 mesclada em Q1 dá um `answer` só, e Q2 fecha com o default de Q1; Q1 mesclada em Q2 dá dois, cada uma com o seu.
 **Where**: `broker/question.ts`, `broker/test/unit/question-result.test.ts`
 **Requirement**: QST-36
-**Depende de**: decisão do dev sobre F16
+**Depende de**: decisão do dev sobre F16: cada uma com o seu default
 
-- [ ] Se o comportamento de hoje vale: a spec diz isso em QST-36 e um teste fixa as duas direções
-- [ ] Se não vale: o `result` fecha as linhas `merged` do worker antes das `open`, e cada pergunta fecha com o próprio default nas duas direções
-- [ ] Gate full passa
+- [x] QST-36 diz que cada pergunta do worker fecha com o seu `answer` e o seu default, qualquer que seja a mesclada
+- [x] Cada pergunta fecha com o próprio default nas duas direções, em ordem crescente de id. A tarefa previa fechar as linhas `merged` antes das `open`; isso tiraria a ordem crescente de id que QST-36 fixa e deixaria uma cadeia de três perguntas do mesmo worker fechar pelo default de outra. No lugar, a busca das mescladas para numa pergunta que o mesmo `result` fecha, e as mescladas dessa a seguem
+- [x] Teste: as duas direções dão dois `answer`, e a pergunta de outro worker mesclada numa das duas fecha com o `answer` dela
+- [x] Gate full passa
 
 ### F17: Quem saiu da mescla sai de `absorbed`
 

@@ -55,23 +55,27 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
 
   // The only place a question closes by an `answer`. The status is read and the answer
   // written in one transaction, so a question has one answer, the first to come (QST-38).
-  // Returns the seq of the answer, or null when the question is not open. With `merged` a
-  // merged one closes too, by an answer of its own.
-  function resolve(id: number, by: Resolution, merged = false): number | null {
+  // Returns the seq of the answer, or null when the question is not open. `own` are the
+  // questions a result closes, each by an answer of its own: with it a merged one closes too.
+  function resolve(id: number, by: Resolution, own: number[] | null = null): number | null {
     return log.transaction(() => {
       const row = find(id)!;
-      if (row.status !== "open" && !(merged && row.status === "merged")) return null;
-      // The questions merged into it, straight or through another merged one, close with it
+      if (row.status !== "open" && !(own && row.status === "merged")) return null;
+      // The questions merged into it, straight or through another merged one, close with it.
+      // The walk stops at one of `own`, which has its answer, and the ones merged into that
+      // one follow it.
       const followers = db
         .query(
           `WITH RECURSIVE merged (id, asked_by) AS (
-             SELECT id, asked_by FROM questions WHERE merged_into = ? AND status = 'merged'
+             SELECT id, asked_by FROM questions
+             WHERE merged_into = ?1 AND status = 'merged' AND id NOT IN (SELECT value FROM json_each(?2))
              UNION ALL
-             SELECT q.id, q.asked_by FROM questions q JOIN merged m ON q.merged_into = m.id WHERE q.status = 'merged'
+             SELECT q.id, q.asked_by FROM questions q JOIN merged m ON q.merged_into = m.id
+             WHERE q.status = 'merged' AND q.id NOT IN (SELECT value FROM json_each(?2))
            )
            SELECT id, asked_by FROM merged`
         )
-        .all(id) as { id: number; asked_by: string }[];
+        .all(id, JSON.stringify(own ?? [])) as { id: number; asked_by: string }[];
       // Who asked waits for it, and the mother for what the dev answers: each name once,
       // and never who writes it
       const waiting = new Set([
@@ -374,7 +378,8 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
 
   // The default by the result: a worker that delivers a ticket went on with the default of
   // what it asked about it without blocking. Those questions close, open or merged, in
-  // ascending id. Called by /send, inside the transaction of the result.
+  // ascending id, each by its own default, also when one of them is merged into another.
+  // Called by /send, inside the transaction of the result.
   function delivered(worker: string, ticket_ref: string): void {
     const asked = db
       .query(
@@ -382,8 +387,9 @@ export function createQuestion(db: Database, log: Log, token: string, now: () =>
          WHERE asked_by = ? AND ticket_ref = ? AND blocking = 0 AND status IN ('open', 'merged') ORDER BY id`
       )
       .all(worker, ticket_ref) as { id: number; default_answer: string }[];
+    const own = asked.map((row) => row.id);
     for (const row of asked) {
-      resolve(row.id, { from: "broker", role_from: "broker", answer: row.default_answer, resolved_by: "result_default" }, true);
+      resolve(row.id, { from: "broker", role_from: "broker", answer: row.default_answer, resolved_by: "result_default" }, own);
     }
   }
 

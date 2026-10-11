@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { questions } from "../../shared/derive.ts";
 import { ASKED, LEADER, MOTHER, NOW, questionRow, setup, WORKER_1, WORKER_2, WORKER_3 } from "./helpers.ts";
 
 // What worker-1 asks about the ticket T-1 and goes on without waiting
@@ -151,6 +152,61 @@ test("QST-37: a question closed by its own result two merges away from the end o
   // the answer is for who asked the two that closed by it, not for who went on with its default
   expect(b.deliveries().filter((d) => d.event_seq === 8)).toEqual([
     { event_seq: 8, recipient: "worker-2", acked_at: null },
+    { event_seq: 8, recipient: "worker-3", acked_at: null },
+  ]);
+});
+
+test("QST-36: two questions of the worker about the ticket, one merged into the other, close each by its own default in ascending id, whichever was merged", () => {
+  for (const [merged, into] of [[2, 1], [1, 2]] as const) {
+    const b = setup();
+    const id = b.openFeature();
+    b.question.ask(WORKER_1, ON_TICKET);
+    b.question.ask(WORKER_1, { ...ON_TICKET, default: "9090" });
+    b.question.merge(MOTHER, { question_id: merged, into });
+    const deliveries = b.deliveries();
+
+    b.question.delivered("worker-1", "T-1");
+    const second = { summary: "Q-02: 9090", body: "9090", question_id: 2, data: { question_id: 2, answer: "9090", resolved_by: "result_default" } };
+    expect(b.events().slice(4)).toEqual([storedDefault(5, id), storedDefault(6, id, second)]);
+    expect(b.questionRows()).toEqual([
+      questionRow(1, id, { ...ROW, status: "defaulted", merged_into: merged === 1 ? 2 : null, answer_seq: 5 }),
+      questionRow(2, id, { ...ROW, default_answer: "9090", status: "defaulted", merged_into: merged === 2 ? 1 : null, answer_seq: 6 }),
+    ]);
+    expect(b.deliveries()).toEqual([
+      ...deliveries,
+      { event_seq: 5, recipient: "worker-1", acked_at: null },
+      { event_seq: 6, recipient: "worker-1", acked_at: null },
+    ]);
+    // The log says the same of each one
+    expect(questions(b.log.after(0)).map((q) => [q.id, q.status, q.answer, q.answer_seq])).toEqual([
+      [1, "defaulted", "8080", 5],
+      [2, "defaulted", "9090", 6],
+    ]);
+  }
+});
+
+test("QST-36, QST-37: a question of another worker merged into one of the two follows that one, and not the one at the end of the chain", () => {
+  const b = setup();
+  const id = b.openFeature();
+  b.question.ask(WORKER_1, ON_TICKET);
+  b.question.ask(WORKER_1, { ...ON_TICKET, default: "9090" });
+  b.question.ask(WORKER_3, { ...ON_TICKET, default: "7070", ticket_ref: "T-3" });
+  b.question.merge(MOTHER, { question_id: 3, into: 2 });
+  b.question.merge(MOTHER, { question_id: 2, into: 1 });
+  const deliveries = b.deliveries();
+
+  b.question.delivered("worker-1", "T-1");
+  const second = { summary: "Q-02: 9090", body: "9090", question_id: 2, data: { question_id: 2, answer: "9090", resolved_by: "result_default" } };
+  expect(b.events().slice(6)).toEqual([storedDefault(7, id), storedDefault(8, id, second)]);
+  expect(b.questionRows()).toEqual([
+    questionRow(1, id, { ...ROW, status: "defaulted", answer_seq: 7 }),
+    questionRow(2, id, { ...ROW, default_answer: "9090", status: "defaulted", merged_into: 1, answer_seq: 8 }),
+    questionRow(3, id, { ...ROW, asked_by: "worker-3", ticket_ref: "T-3", default_answer: "7070", status: "defaulted", merged_into: 2, answer_seq: 8 }),
+  ]);
+  expect(b.deliveries()).toEqual([
+    ...deliveries,
+    { event_seq: 7, recipient: "worker-1", acked_at: null },
+    { event_seq: 8, recipient: "worker-1", acked_at: null },
     { event_seq: 8, recipient: "worker-3", acked_at: null },
   ]);
 });
