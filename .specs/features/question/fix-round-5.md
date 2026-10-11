@@ -19,11 +19,11 @@ tarefa marcada aqui.
 **Where**: `broker/test/unit/tui-loop.test.ts`, `broker/test/unit/tui-keys.test.ts`, `.specs/features/question/spec.md`
 **Requirement**: QST-99
 
-- [ ] `q`, `ctrl+c` e cada um deles entre outras teclas saem em 119×40, 120×39 e 100×30, sem modal, com o modal no modo texto e com o modal no modo escolha
-- [ ] Os marcadores são lidos nos três tamanhos, sem modal, no modo texto e no modo escolha, sozinhos na leitura e junto de outras teclas: a colagem que termina ali terminou, e a que começa ali não envia pela quebra sozinha
-- [ ] `marks` sobre um estado sem modal
-- [ ] QST-99 diz que `esc` no terminal pequeno é uma tecla como as outras e não encerra a colagem (SP3); o teste que já fixa isso é `marks(pasting, "\x1b")`
-- [ ] Gate quick passa
+- [x] `q`, `ctrl+c` e cada um deles entre outras teclas saem em 119×40, 120×39 e 100×30, sem modal, com o modal no modo texto e com o modal no modo escolha
+- [x] Os marcadores são lidos nos três tamanhos, sem modal, no modo texto e no modo escolha, sozinhos na leitura e junto de outras teclas: a colagem que termina ali terminou, e a que começa ali não envia pela quebra sozinha
+- [x] `marks` sobre um estado sem modal
+- [x] QST-99 diz que `esc` no terminal pequeno é uma tecla como as outras e não encerra a colagem (SP3); o teste que já fixa isso é `marks(pasting, "\x1b")`
+- [x] Gate quick passa
 
 ### F27: `\n` e `esc` em cada caso de QST-78
 

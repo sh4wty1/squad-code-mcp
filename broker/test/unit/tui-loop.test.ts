@@ -619,24 +619,28 @@ test("QST-99: in a terminal smaller than 120×40, b, enter and enter over a bloc
   }
 });
 
-test("QST-99: in a terminal smaller than 120×40, q, ctrl+c and a chunk with q among its keys quit, with no modal and with the modal in the text mode, and nothing is posted", async () => {
-  // No modal, and the modal of Q-08 with a text: where the terminal fits, q is a character of the answer
-  for (const before of [[], ["4", "j", "\r", "logo"]]) {
-    for (const quit of ["q", "\x03", "aq"]) {
-      const { t, key, resize, stop } = launch();
-      try {
-        await t.shows(main(t.view()).text(), "the main screen");
-        for (const k of before) key(k);
-        t.size = { cols: 100, rows: 30 };
-        resize();
-        expect(t.raw).toEqual([true]);
-        // Nothing comes after it: the key under test is the one that quits
-        key(quit);
-        expect(t.raw).toEqual([true, false]);
-        expect(t.out.endsWith(LEAVE)).toBe(true);
-        expect(t.posts).toEqual([]);
-      } finally {
-        stop();
+test("QST-99: in a terminal narrower than 120 columns or shorter than 40 lines, q, ctrl+c and a chunk with either among its keys quit, with no modal, with the modal in the text mode and with it in the choice mode, and nothing is posted", async () => {
+  // No modal, the modal of Q-08 with a text, where q is a character of the answer in a
+  // terminal that fits, and the modal of Q-07 on its first option
+  const places = [[], ["4", "j", "\r", "logo"], ["4", "\r"]];
+  for (const size of SMALL) {
+    for (const before of places) {
+      for (const quit of ["q", "\x03", "aq", "a\x03", "qa", "\x03a"]) {
+        const { t, key, resize, stop } = launch();
+        try {
+          await t.shows(main(t.view()).text(), "the main screen");
+          for (const k of before) key(k);
+          t.size = size;
+          resize();
+          expect(t.raw).toEqual([true]);
+          // Nothing comes after it: the key under test is the one that quits
+          key(quit);
+          expect(t.raw).toEqual([true, false]);
+          expect(t.out.endsWith(LEAVE)).toBe(true);
+          expect(t.posts).toEqual([]);
+        } finally {
+          stop();
+        }
       }
     }
   }
@@ -669,42 +673,78 @@ test("QST-99: the keys pressed in a terminal smaller than 120×40 leave the moda
   }
 });
 
-test("QST-99, QST-78: the marks of a delimited paste are read in a terminal smaller than 120×40: a paste that ends there has ended, and one that starts there sends nothing by its line break", async () => {
+test("QST-99: the keys pressed in a terminal smaller than 120×40 leave the modal in the choice mode on the option it was, and confirm none", async () => {
   for (const size of SMALL) {
-    // The mark of the end comes while the terminal is small: back at 120×40, enter alone is enter
-    const ended = launch();
+    const { t, key, resize, stop } = launch();
     try {
-      const { t, key, resize } = ended;
       await t.shows(main(t.view()).text(), "the main screen");
-      for (const k of ["4", "j", "\r", "\x1b[200~logo"]) key(k);
-      t.size = size;
-      resize();
-      key("\x1b[201~");
-      t.size = { cols: 120, rows: 40 };
-      resize();
-      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo" }) })));
-      key("\r");
-      expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo" } }]);
-    } finally {
-      ended.stop();
-    }
+      // Q-07, on the second of its options
+      for (const k of ["4", "\r", "2"]) key(k);
+      const open = tab(t.view({ screen: "questions", question: 7, modal: modal(7, { choice: 1 }) }));
+      expect(t.lines()).toEqual(open);
 
-    // The mark of the start comes while the terminal is small: back at 120×40, the line break alone in its read is pasted
-    const started = launch();
-    try {
-      const { t, key, resize } = started;
-      await t.shows(main(t.view()).text(), "the main screen");
-      for (const k of ["4", "j", "\r"]) key(k);
       t.size = size;
       resize();
-      key("\x1b[200~");
+      // Another option by its digit and by the arrow, enter, the other answer, a text, and an escape with a key after it
+      for (const k of ["3", "j", "\x1b[B", "\r", "4", "\r", "texto", "\r", "\x1b1"]) key(k);
+      expect(t.posts).toEqual([]);
+      expect(t.lines()).toEqual(small(size.cols, size.rows).text());
+
       t.size = { cols: 120, rows: 40 };
       resize();
-      for (const k of ["logo", "\r", "\x1b[201~"]) key(k);
-      expect(t.posts).toEqual([]);
-      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8, { text: "logo " }) })));
+      expect(t.lines()).toEqual(open);
+      key("\r");
+      expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 7, answer: "5 tentativas" } }]);
     } finally {
-      started.stop();
+      stop();
+    }
+  }
+});
+
+test("QST-99, QST-78: the marks of a delimited paste are read in a terminal smaller than 120×40, alone in a read or among other keys, with no modal, in the text mode and in the choice mode: a paste that ends there has ended, and one that starts there sends nothing by its line break", async () => {
+  const START_MARK = "\x1b[200~";
+  const END_MARK = "\x1b[201~";
+  type Post = { url: string; body: unknown };
+  const post = (question_id: number, answer: string): Post => ({ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id, answer } });
+  // The tab on Q-08, which has no options, and on Q-07, with the modal on the first of its options
+  const Q8 = { screen: "questions", question: 8 } as const;
+  const Q7 = { screen: "questions", question: 7, modal: modal(7, { choice: 0 }) } as const;
+  // `pre` are the keys before the terminal shrinks and `small` what comes while it is small,
+  // one launch for each. `back` is the screen when it fits again, `kept` the posts after the
+  // keys of `after`, with the screen `shown`, and `sent` the posts after the keys of `then`.
+  const cases: { pre: string[]; small: string[]; back: Partial<Ui>; after: string[]; kept: Post[]; shown?: Partial<Ui>; then: string[]; sent: Post[] }[] = [
+    // The mark of the end comes while the terminal is small: enter alone is enter again
+    { pre: ["4", "j", START_MARK], small: [END_MARK, "fim\r" + END_MARK], back: Q8, after: ["\r", "logo", "\r"], kept: [post(8, "logo")], then: [], sent: [post(8, "logo")] },
+    { pre: ["4", "j", "\r", START_MARK + "logo"], small: [END_MARK, "fim\r" + END_MARK], back: { ...Q8, modal: modal(8, { text: "logo" }) }, after: ["\r"], kept: [post(8, "logo")], then: [], sent: [post(8, "logo")] },
+    { pre: ["4", "\r", START_MARK], small: [END_MARK, "fim\r" + END_MARK], back: Q7, after: ["\r"], kept: [post(7, "infinito com backoff")], then: [], sent: [post(7, "infinito com backoff")] },
+    // The mark of the start comes while the terminal is small: a line break alone in its read is pasted, until the mark of the end
+    { pre: ["4", "j"], small: [START_MARK, START_MARK + "logo\r"], back: Q8, after: ["\r", "logo", "\r"], kept: [], shown: { ...Q8, modal: modal(8, { text: "logo " }) }, then: [END_MARK, "\r"], sent: [post(8, "logo")] },
+    { pre: ["4", "j", "\r"], small: [START_MARK, START_MARK + "logo\r"], back: { ...Q8, modal: modal(8) }, after: ["mais", "\r"], kept: [], shown: { ...Q8, modal: modal(8, { text: "mais " }) }, then: [END_MARK, "\r"], sent: [post(8, "mais")] },
+    { pre: ["4", "\r"], small: [START_MARK, START_MARK + "logo\r"], back: Q7, after: ["\r"], kept: [], shown: Q7, then: [END_MARK, "\r"], sent: [post(7, "infinito com backoff")] },
+  ];
+  for (const size of SMALL) {
+    for (const c of cases) {
+      for (const small of c.small) {
+        const { t, key, resize, stop } = launch();
+        try {
+          await t.shows(main(t.view()).text(), "the main screen");
+          for (const k of c.pre) key(k);
+          t.size = size;
+          resize();
+          key(small);
+          t.size = { cols: 120, rows: 40 };
+          resize();
+          expect(t.posts).toEqual([]);
+          expect(t.lines()).toEqual(tab(t.view(c.back)));
+          for (const k of c.after) key(k);
+          expect(t.posts).toEqual(c.kept);
+          if (c.shown) expect(t.lines()).toEqual(tab(t.view(c.shown)));
+          for (const k of c.then) key(k);
+          expect(t.posts).toEqual(c.sent);
+        } finally {
+          stop();
+        }
+      }
     }
   }
 });

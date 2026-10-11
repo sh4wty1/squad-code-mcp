@@ -574,6 +574,11 @@ test("QST-99: the marks of a chunk start and end the paste and press none of its
   expect(marks(v.ui, "um\rq\x03")).toBe(v.ui);
   const pasting = { ...v.ui, pasting: true };
   expect(marks(pasting, "\x1b")).toBe(pasting);
+  // With no modal open and in the choice mode the marks are the same marks
+  for (const other of [view("04", { question: 8 }), view("01", { selected: 417 }), open("05")]) {
+    expect(marks(other.ui, "um" + PASTE)).toEqual({ ...other.ui, pasting: true });
+    expect(marks({ ...other.ui, pasting: true }, PASTED + "um")).toEqual(other.ui);
+  }
 });
 
 test("TUI-62: a chunk with q or ctrl+c among its keys quits", () => {
