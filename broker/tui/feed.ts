@@ -1,7 +1,7 @@
 // The lines of the feed, from the log: one per message, and the system lines of the
 // records that have one. Text only; the screen gives the columns and the colors.
 
-import { KINDS, type SquadEvent } from "../shared/contract.ts";
+import { KINDS, qid, type SquadEvent } from "../shared/contract.ts";
 import { REWORK_LIMIT, squad, SQUAD, tickets, type Owed, type Squad } from "../shared/derive.ts";
 
 export type SysKind = "opened" | "closed" | "plan" | "joined" | "left" | "blocked" | "stalled" | "limit" | "refused" | "default" | "merged";
@@ -34,7 +34,6 @@ export function label(name: string): string {
   return SQUAD.find((a) => a.name === name)?.short ?? [...name].slice(0, 3).join("");
 }
 
-export const qid = (id: number): string => "Q-" + String(id).padStart(2, "0");
 export const gid = (id: number): string => "G-" + String(id).padStart(2, "0");
 
 // `result TKT-13`, `plan`, `answer Q-07`

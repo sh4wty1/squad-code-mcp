@@ -23,7 +23,6 @@ export const MAIN_KEYS: Keys = [
   ["q", "sair"],
 ];
 
-// The fourth is the tab of the slice Question: it is drawn and has no screen here
 const TABS = [
   ["1", "principal", "main"],
   ["2", "topologia", "topology"],

@@ -251,3 +251,40 @@ test("FEAT-09: a database without the index gains it at the next openDatabase an
   db.close();
   rmSync(dir, { recursive: true, force: true });
 });
+
+const QUESTION_COLUMNS = [
+  "id", "feature_id", "ticket_ref", "asked_by", "holder", "blocking", "default_answer", "timeout_s", "deadline_ts",
+  "status", "merged_into", "answer_seq",
+];
+
+test("QST-42: questions has exactly the twelve columns of the slice, with id as the primary key", () => {
+  const db = openDatabase(":memory:");
+  const info = db.query("PRAGMA table_info(questions)").all() as { name: string; pk: number }[];
+  expect(info.map((c) => c.name)).toEqual(QUESTION_COLUMNS);
+  expect(info.filter((c) => c.pk > 0).map((c) => c.name)).toEqual(["id"]);
+});
+
+test("QST-42: a database file without the table gains it at the next openDatabase and keeps its rows and events", () => {
+  const dir = mkdtempSync(join(tmpdir(), "squad-db-"));
+  const file = join(dir, "squad.db");
+  const old = openDatabase(file);
+  old.run("DROP TABLE questions");
+  const opened = appendEvent(old, { ts: 1000, kind: "feature_opened", feature_id: 1, from_name: "mother", role_from: "mother", to_name: "*" });
+  appendEvent(old, { ts: 2000, kind: "task", feature_id: 1, from_name: "mother", role_from: "mother", to_name: "leader", summary: "build it" });
+  old.run(
+    `INSERT INTO features (id, project, title, workflow, branch, base_branch, spec_ref, spec_commit, opened_seq)
+     VALUES (1, 'repo', 'the feature', 'tlc', 'feat/x', 'main', 'spec.md', 'abc1234', ?)`,
+    [opened]
+  );
+  const before = { features: old.query("SELECT * FROM features").all(), events: stored(old) };
+  expect(columns(old, "questions")).toEqual([]);
+  old.close();
+
+  const db = openDatabase(file);
+  expect(columns(db, "questions")).toEqual(QUESTION_COLUMNS);
+  expect({ features: db.query("SELECT * FROM features").all(), events: stored(db) }).toEqual(before);
+  expect(before.features).toHaveLength(1);
+  expect(before.events).toHaveLength(2);
+  db.close();
+  rmSync(dir, { recursive: true, force: true });
+});

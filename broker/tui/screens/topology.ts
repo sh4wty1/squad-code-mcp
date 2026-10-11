@@ -1,9 +1,10 @@
 // The topology screen: the star, with the edge of the latest message drawn thick, and the
 // panel of edges at the right. Ported from `rTopo`, `node` and `edgePath` of the prototype.
 
+import { qid } from "../../shared/contract.ts";
 import type { Agent } from "../../shared/derive.ts";
 import { activity } from "../activity.ts";
-import { debt, label, qid } from "../feed.ts";
+import { debt, label } from "../feed.ts";
 import { age, clock, cut, grid, len, mmss, pad, type Color, type Grid, type Seg } from "../grid.ts";
 import type { View } from "../view.ts";
 import { chrome, drawRows, kindTone, segLen, STATUS, statusSegs, tone, type Keys, type Line } from "./chrome.ts";

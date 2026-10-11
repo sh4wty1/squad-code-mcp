@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 1   broker ● conectado  14:31:05
+  1 principal   2 topologia   3 thread   4 perguntas 1   ? ajuda                            ⚠ w2 bloqueado · Q-09 é sua
+┌─ perguntas abertas · 1 ─────────────────── 1 bloqueante ─┐┌─ Q-09 · detalhe ─────────────────────────────────────────┐
+│ ▶ Q-09 [BLOQUEANTE]  w2 worker-2 · TKT-13         há 45s ││ Q-09  [BLOQUEANTE]                        no dev há 45s  │
+│   A RADIO_API_KEY não está no worktree do worker-2.      ││ ticket  TKT-13 API da setlist                            │
+│   Coloque-a no .env de lá e confirme.                    ││ thread  TKT-13 · chegou ao dev 14:30:20                  │
+│   opções 1 pronto · 2 não vou fornecer · 3 texto         ││ origem  w2 worker-2  (só ele pausa)                      │
+│   rota w2 → ldr → mot → dev                              ││ rota    w2 → ldr → mot → dev                             │
+│                                                          │├──────────────────────────────────────────────────────────┤
+│                                                                                                     worker-2.        │
+│                  ┌─ ? responder Q-09 · BLOQUEANTE ────────────────────────────────────────────────┐                  │
+│                  │  contexto                                                                      │ e não está no    │
+│                  │  ticket  TKT-13 API da setlist                                                 │                  │
+│                  │  thread  TKT-13 · chegou ao dev 14:30:20 · há 45s                              │ ─────────────────┤
+│                  │  rota    w2 → ldr → mot → você                                                 │                  │
+│                  │  por quê /v1/setlist responde 401; a chave não está no .env do worktree do     │                  │
+│                  │          worker-2.                                                             │                  │
+│                  ├────────────────────────────────────────────────────────────────────────────────┤ ─────────────────┤
+│                  │  worker-2 pergunta   [BLOQUEANTE] só worker-2 está pausado                     │ etoma o TKT-13.  │
+│                  │  A RADIO_API_KEY não está no worktree do worker-2. Coloque-a no .env de lá e   │ neja o ticket    │
+│                  │  confirme.                                                                     │                  │
+│                  │                                                                                │                  │
+│                  │  ▶ 1  pronto                                                                   │                  │
+│                  │    2  não vou fornecer                                                         │                  │
+│ bloqueantes prim │    3  outra resposta…                                                          │                  │
+└───────────────── ├────────────────────────────────────────────────────────────────────────────────┤ ─────────────────┘
+┌─ histórico · 2 r │  efeito  pronto: worker-2 relê o .env e retoma o TKT-13. Não vou fornecer: o   │ ─────────────────┐
+│ 14:25:30  Q-05   │          leader replaneja o ticket sem a API.                                  │                  │
+│           ⟳ defa └────────────────────────────────────────────────────────────────────────────────┘                  │
+│ 14:24:10  Q-06                                                                                                       │
+│           ✓ respondida pelo dev: público, só leitura                                                                 │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ mot 47k  ldr 92k  w1 118k  w2 54k  w3 22k  jdg 31k  │ feature ≈$5.47 est.                      ⚠ w2 bloqueado há 1m24s
+ 1-3 escolher   ↑↓ mover   enter confirmar   esc cancelar

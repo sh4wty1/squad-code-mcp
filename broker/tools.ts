@@ -216,15 +216,87 @@ const CLOSE_FEATURE_TOOL: Tool = {
   },
 };
 
+const ASK_TOOL: Tool = {
+  name: "ask",
+  description:
+    "Ask the level above what the spec does not settle: a worker asks the leader, the leader the mother, the mother the dev (to: human), and the judge a worker or the leader. Returns the question_id, which the question keeps until it closes. A non-blocking question takes a default: you go on with it, and it stands if no answer comes.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      to: string("Who is asked: leader, mother, human, or a worker by its name"),
+      summary: string("The question in one line of up to 80 characters"),
+      body: string("The full question. Optional."),
+      why: string("Why you need the answer: what depends on it"),
+      blocking: {
+        type: "boolean",
+        description: "True if you stop until the answer comes, false if you go on with the default",
+      },
+      options: {
+        type: "array",
+        items: { type: "string" },
+        description: "Up to 3 answers to choose from. The answer may always be another text. Optional.",
+      },
+      default: string("The answer you go on with. Required when blocking is false."),
+      timeout_s: integer("How many seconds the dev has to answer a non-blocking question. Optional: 240 without it."),
+      ticket_ref: string("The ticket the question is about. Optional."),
+    },
+    required: ["to", "summary", "why", "blocking"],
+  },
+};
+
+const ANSWER_TOOL: Tool = {
+  name: "answer",
+  description:
+    "Answer a question you hold. The answer goes to who asked it and the question closes. If you cannot answer it, escalate it.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      question_id: integer("The id of the question"),
+      answer: string("The answer"),
+    },
+    required: ["question_id", "answer"],
+  },
+};
+
+const ESCALATE_TOOL: Tool = {
+  name: "escalate",
+  description:
+    "Pass a question you hold to the level above, with the same id: a worker to the leader, the leader to the mother, the mother to the dev.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      question_id: integer("The id of the question"),
+      summary: string("One line of up to 80 characters in place of the one you received. Optional."),
+      body: string("The full text in place of the one you received. Optional."),
+    },
+    required: ["question_id"],
+  },
+};
+
+const MERGE_QUESTION_TOOL: Tool = {
+  name: "merge_question",
+  description:
+    "Merge an open question into another open one that asks the same, so it is answered once: the merged question closes with the answer of the other. Both blocking or both non-blocking.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      question_id: integer("The id of the question to merge"),
+      into: integer("The id of the question it follows"),
+    },
+    required: ["question_id", "into"],
+  },
+};
+
 // What every registered session has
 const COMMON = [LIST_PEERS_TOOL, STATE_TOOL, HISTORY_TOOL, BLOCKED_TOOL, UNBLOCKED_TOOL];
 
-// What each role sends, after the edges of the star
+// What each role sends, after the edges of the star. Every role asks; the judge holds no
+// question, so it neither answers nor escalates, and only the mother merges.
 const OF_ROLE: Record<string, Tool[]> = {
-  mother: [SEND_TASK_TOOL, OPEN_FEATURE_TOOL, CLOSE_FEATURE_TOOL],
-  leader: [PLAN_TOOL, SEND_TASK_TOOL, SEND_RESULT_TOOL],
-  worker: [SEND_RESULT_TOOL],
-  judge: [SEND_VERDICT_TOOL],
+  mother: [SEND_TASK_TOOL, OPEN_FEATURE_TOOL, CLOSE_FEATURE_TOOL, ASK_TOOL, ANSWER_TOOL, ESCALATE_TOOL, MERGE_QUESTION_TOOL],
+  leader: [PLAN_TOOL, SEND_TASK_TOOL, SEND_RESULT_TOOL, ASK_TOOL, ANSWER_TOOL, ESCALATE_TOOL],
+  worker: [SEND_RESULT_TOOL, ASK_TOOL, ANSWER_TOOL, ESCALATE_TOOL],
+  judge: [SEND_VERDICT_TOOL, ASK_TOOL],
 };
 
 // The tools of a registered session of the role, and none for a role that does not exist
@@ -245,4 +317,8 @@ export const ROUTE_OF: Record<string, { path: string; kind?: "task" | "result" |
   history: { path: "/history" },
   open_feature: { path: "/open-feature" },
   close_feature: { path: "/close-feature" },
+  ask: { path: "/ask" },
+  answer: { path: "/answer" },
+  escalate: { path: "/escalate" },
+  merge_question: { path: "/merge-question" },
 };

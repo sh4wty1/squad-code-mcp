@@ -92,26 +92,62 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 - **Date**: 2026-10-09
 - **Status**: active
 
+### AD-012
+- **Decision**: O `feature_closed` encerra as perguntas da feature, em `delivered` e em `abandoned`, sem evento novo. Na tabela `questions` a pergunta vira `defaulted` se tem default e `discarded` se não tem, um quinto status que o design não lista; a derivação trata pergunta de feature fechada do mesmo jeito.
+- **Reason**: O design só diz "resolvidas pelo default ou descartadas" e não dá evento nem status para isso. O `feature_closed` já é entregue a todos, e o envelope do ADR-004 fica como está. Decidido pelo dev em 2026-10-10.
+- **Trade-off**: O log não diz, pergunta a pergunta, o que aconteceu no encerramento, e o resumo da feature fechada não conta essas perguntas como respondidas nem como default. Um agente pausado numa bloqueante só sabe que ela acabou pelo `feature_closed`.
+- **Scope**: `broker/log.ts`, `broker/shared/derive.ts`, tabela `questions`, e a fatia Gate, que tem o mesmo caso com gates pendentes. Detalha o ADR-005.
+- **Date**: 2026-10-10
+- **Status**: active
+
+### AD-013
+- **Decision**: O que uma pergunta é sai do primeiro `question` dela: texto (`body`, ou `summary` se o `body` é vazio), `why`, `options`, `default`, `asked_by` e `blocking`. `/escalate` copia esses campos e o `timeout_s` para cada `question` novo; o `summary` e o `body` de quem escala são a nota do salto e aparecem só no feed e no thread.
+- **Reason**: Os frames têm um texto por pergunta e `/escalate` aceita `summary` e `body` novos a cada salto. É a regra que a derivação já usava para `asked_by`, `blocking` e `default`. Decidido pelo dev em 2026-10-10.
+- **Trade-off**: A mother não consegue reescrever a pergunta para o dev: se o texto do worker é ruim, o dev lê o texto ruim. A skill de papel tem de fazer o agente perguntar direito na origem.
+- **Scope**: `broker/question.ts`, `broker/shared/derive.ts`, TUI e as skills da fatia Papéis. Detalha o ADR-005.
+- **Date**: 2026-10-10
+- **Status**: active
+
+### AD-014
+- **Decision**: A TUI escreve por um comando que o redutor de teclas deixa no estado (`Ui.send`); o laço de `tui.ts` faz o `POST` e devolve o resultado a outro redutor puro (`settle`). A credencial humana é lida do arquivo a cada envio.
+- **Reason**: `press` é pura e testada sem rede; um `fetch` dentro dela acabaria com isso. O broker pode criar o arquivo do token depois de a TUI subir.
+- **Trade-off**: Um envio são dois passos no estado, e enquanto ele espera resposta o modal não aceita tecla.
+- **Scope**: `broker/tui/keys.ts`, `broker/tui.ts`, e os modais de gate e de permissão da fatia Gate. Detalha o AD-007 e o AD-010.
+- **Date**: 2026-10-10
+- **Status**: active
+
 ## Handoff
 
-Atualizado em 2026-10-10. PR 8: https://github.com/sh4wty1/squad-code-mcp/pull/8.
+Atualizado em 2026-10-11.
 
-- **Feature**: TUI leitura, `.specs/features/tui-leitura/`.
-- **Phase / Task**: concluída e verificada; o PR 8 espera só o merge.
-- **Completed**: T1–T30 e F1–F4. Verifier independente, rodada 3: PASS, 64/64 ACs, 9/9 bordas, 24/24 mutações mortas ao final. Requisitos Verified e TUI leitura marcada no ROADMAP. As quatro threads da review foram respondidas e resolvidas no GitHub em 2026-10-10. O gate passou no Windows no mesmo dia.
-- **In-progress** (file:line): nada.
-- **Next step**: o dev olha a TUI num terminal real (`bun tui/demo.ts 01`, de dentro de `broker/`) e decide o merge do PR 8. Depois do merge, a fatia Question sai da `main` atualizada; ela não foi iniciada. Não fazer merge sem instrução do dev.
-- **Blockers**: nenhum bloqueio técnico. O merge é decisão do dev.
-- **Uncommitted files**: none.
-- **Branch**: `feat/tui-leitura`. O head publicado é `7bdf4c9`; o commit que registra o gate do Windows e este handoff vem depois dele e é local até o dev pedir o push.
+- **Feature**: Question, `.specs/features/question/`.
+- **Phase / Task**: rodada de correção 7 (`.specs/features/question/fix-round-7.md`), F37 concluída em `0e49bfe`; rodada 8 restrita do Verifier novo concluída com PASS. Resíduo I4 fechado conforme a decisão do dev de 2026-10-11.
+- **Completed**: T1–T38 e F1–F28 anteriores; F29 `1b6bb61`, F30 `e32b1c0`, F31 `bb3b853`, F32 `546af2a`, F33 `327ed65`, F34 `1ddf501`, F35 `9db4ad5`, F36 `832a1d7` e F37 `0e49bfe`, cada uma com tarefa marcada no mesmo commit. Rodada 8 independente sobre `832a1d7..0e49bfe`, com full e I4 morto por F37 sozinho; as outras 26 cláusulas, 33 mutantes e o completo da F35 conservam a evidência da rodada 7. Nenhum código de produção mudou. QST-36, QST-78 e QST-99 passam a `Verified`.
+- **In-progress** (file:line): nada. `broker/test/unit/tui-loop.test.ts:807` cobre os 256 casos da F37 e `validation.md:3` registra PASS da rodada 8.
+- **Next step**: o dev decide o merge do PR 9. Ele conferiu a aba e o modal num terminal real em 2026-10-11 e mandou fazer o push, que está feito. Depois do merge, a fatia Papéis sai da `main` atualizada. Não fazer merge sem instrução do dev.
+- **Blockers**: nenhum. I4 confirmado morto por F37 sozinho pelo autor, pelo Verifier novo e numa terceira cópia isolada. O merge é decisão do dev; nenhuma falha de produção observada.
+- **Uncommitted files**: nenhum. Nenhuma alteração descartada ou guardada em stash.
+- **Branch**: `feat/question`, produção em `832a1d7`, F37 em `0e49bfe`, documental da rodada 8 em `4f3fa89`, seguido pelo commit desta atualização do handoff. Push feito em 2026-10-11 por instrução do dev, com o PR 9 aberto; sem merge.
+- **Evidência F37**: 256 casos (dois marcadores × quatro tamanhos × 32 partições), 1 pass, 0 fail, 1153 asserções. I4 morto pelo teste sozinho, arquivo da cópia restaurado byte a byte; dependências copiadas sem links ou junctions e scratch removido com caminho conferido. Full: tsc 0, 1303 pass, 4 skip, 0 fail, 108439 asserções, 63 arquivos em 100,10 s, fora do sandbox após timeouts de `/health` na primeira tentativa. PEER-22 passou no controle fora dele. Logs e mapas de adequação em `fix-round-7.md`. Nenhuma asserção anterior, função da F35, produção ou frame mudou.
+- **Evidência independente da rodada 8**: PASS nas duas cláusulas abertas (QST-78 l e QST-99 e), 28/28 cláusulas e 34/34 mutantes na evidência acumulada. Full: tsc 0, 1303 pass, 4 skip, 0 fail, 108438 asserções, 63 arquivos em 94,18 s. F37 original sozinho: 1 pass, 0 fail, 256 casos, 1153 asserções, 5,67 s; I4: 0 pass, 1 fail, exit 1, diferença de tela em `tui-loop.test.ts:843`, sem timeout/sintaxe. Cópia física com node_modules próprio, zero reparse points; 4316 arquivos conferidos por hash no baseline, após restauração e após remoção segura. Porcelain vazio antes/depois do sensor. Nenhuma asserção anterior mudou. Completo F35 não repetido porque suas três funções não mudaram. `validate_state.py question` exit 0. Relatório e logs em `validation.md`; rodada 7 preservada como histórico, com rótulo `Historical verdict` para evitar conflito com o PASS atual no script. Sem lição nova em PASS sem sinal.
+- **Conferência em `4f3fa89`, depois da rodada 8**: outra sessão, que não escreveu código nem teste, rodou no Windows: tsc 0; full 1303 pass, 4 skip, 0 fail, 108438 asserções, 63 arquivos em 103,58 s; completo de F35 com `SQUAD_TEST_FULL=1`, 1 pass, 0 fail, 33600 casos e 187862 asserções em 538,36 s; `validate_state.py question` exit 0. F37 sozinho numa cópia sem link para a árvore real: 1 pass com 1153 asserções no original, e 1 fail com I4, por diferença de tela em `tui-loop.test.ts:843`.
+- **Decisão do dev nesta retomada**: autorizou corrigir apenas a lista de mutantes de F35 para os de terminal pequeno definidos nas rodadas 5 e 6, mantendo o produto completo e registrando a divergência. X8/X9 não têm definição nos relatórios; N16–N20 históricos são do broker, e K1–K3 não são da regra de terminal pequeno. A lista corrigida foi registrada no commit F35 em `fix-round-6.md`. A decisão sobre o custo autorizou 800 casos no gate e os 33600 do mesmo gerador/oráculo sob `SQUAD_TEST_FULL`, executados pelo autor e pelo Verifier.
+- **Evidência desta retomada**: F35, 800 casos no gate e os 20 mutantes definidos mortos pelo teste de 800 sozinho em cópias isoladas e restauradas; nenhum caso extra no gate. Full: tsc 0, 1301 pass, 4 skip, 0 fail, 63 arquivos. Completo: 1 pass, 0 fail, 33600 casos em 481,08 s. F36 isolado: 1 pass, 0 fail, 1368 sequências, 46983 asserções; nove mutantes mortos e restaurados. Build de F36: tsc 0, 1302 pass, 4 skip, 0 fail, 63 arquivos. Gates quick de F29–F34 verdes, full de F29: tsc 0, 1296 pass, 3 skip, 0 fail. Logs e cópias restauradas em `%TEMP%/squad-question-round6/`; a árvore real nunca recebeu mutantes.
+- **Evidência independente da rodada 7**: tsc 0; full 1302 pass, 4 skip, 0 fail, 63 arquivos; completo 1 pass, 0 fail, 33600 casos e 187862 asserções em 548,56 s. I4 também passou o full e o completo em 504,27 s. Todos os 29 mutantes exigidos por F35/F36 foram mortos pelos testes novos sozinhos. Probe fora da suíte: original 8 pass, mutante 8 fail. L-070 candidata registrada pelo script da skill. A limpeza dos worktrees atravessou a junction de `node_modules` e apagou dependências ignoradas da árvore real; restauradas por `bun install --frozen-lockfile`, com os 96 nomes/versões iguais ao lock, sem alteração rastreada. Full repetido após a recuperação: tsc 0, 1302 pass, 4 skip, 0 fail em 85,20 s. Só o worktree principal permanece. Incidente, logs e limites detalhados em `validation.md`.
+
+### O que esta fatia deixa para as próximas
+
+- Papéis: as skills de papel têm de fazer o agente perguntar direito na origem, porque o texto que o dev lê é o do primeiro `question` (AD-013), e de pedir uma credencial com "coloque no lugar e confirme". Um agente pausado numa bloqueante só sabe que ela acabou no encerramento pelo `feature_closed` (AD-012).
+- Gate: os modais de gate e de permissão escrevem como o de resposta, por um comando em `Ui` (AD-014), e a regra de colagem do modal de resposta (QST-78) vale para o campo de texto deles. `g` e `x` continuam com o aviso `chega com a fatia Gate`.
+- Gate: gates pendentes no encerramento da feature são o mesmo caso das perguntas (AD-012).
 
 ### Evidência e limites
 
-- Linux, Bun 1.3.14: TypeScript passa; 929 testes passam, zero falham ou pulados, 5664 assertions, 48 arquivos.
-- Windows 11, Bun 1.4.2, em `7bdf4c9`: TypeScript passa; 926 passam, zero falham, 3 pulados por condição de plataforma anterior à fatia, 5650 assertions. O sensor de mutação não foi repetido no Windows.
-- `validate_state.py tui-leitura`: exit 0. Relatório em `.specs/features/tui-leitura/validation.md`; resolução de F1–F4 em `fix-round-2.md`; registros em `docs/tasks/`.
-- PR 8 em 2026-10-10: `MERGEABLE`, estado `CLEAN`, sem review nova depois da rodada 1 do The Judge (COMMENT, quatro should-fix, todos resolvidos).
-- Os 41 frames permanecem idênticos à extração original. L-049 continua candidata.
-- `bun tui/demo.ts [frame]` abre a TUI sobre o log de um frame, sem broker, sem banco e sem token. No Linux deu 39 linhas em tela cheia com a fonte padrão, uma abaixo do mínimo de 40 do design; o dev quer rever isso depois.
-- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários; não usar `bun x tsc`.
-- Não exercitados: terminal interativo real (teclas, resize, cores como a fonte desenha), macOS, sinais reais e uma sessão do Claude Code alimentando a TUI. Pendências anteriores continuam em ROADMAP, design e histórico deste STATE.
+- Windows 11, Bun 1.4.2, em `2ac91fe`: `tsc` passa; 1270 passam, 3 pulados por condição de plataforma anterior à fatia, zero falham, 63 arquivos. Antes da fatia: 926 passam, 3 pulados. Em `6cd28e2`, com F14 a F28: `tsc` passa; 1295 passam, 3 pulados, zero falham. As rodadas de correção 3 a 5 não rodaram no Linux.
+- Linux, contêiner `oven/bun:1.4.2` (kernel 6.18 do WSL2) sobre um clone limpo: `tsc` passa e a suíte inteira passou em 10 de 13 execuções sobre o código final, com 1273 passando e zero pulados. As 3 que falharam caíram cada uma num teste de integração anterior à fatia (`EVT-85` duas vezes, `EVT-89` uma), por tempo esgotado à espera de um broker ou servidor MCP real. A `main` falha do mesmo jeito no mesmo contêiner (`EVT-81`, 1 de 14 repetições de `server-delivery.test.ts` e `server-tools.test.ts`; o HEAD passou 14 de 14): a instabilidade é anterior à fatia e não teve a causa investigada.
+- `validate_state.py question`: exit 0 após a rodada 8 sobre `0e49bfe`, com PASS; era 1 após a rodada 7 em `832a1d7` e após a rodada 6 em `6cd28e2`, e 0 em `2ac91fe`. Relatório em `.specs/features/question/validation.md`. Rodadas 7 e 8 executadas no Windows; os limites históricos de Linux acima não foram reavaliados.
+- Os 41 frames de leitura permanecem idênticos à extração original; os 6 de Question (04, 05, 06, 07, 20a, 20b) são a saída da ferramenta, sem edição, e nenhum tem desvio D3.
+- Riscos conhecidos, não corrigidos: `expire` roda num `setInterval` sem `try` em `broker.ts`, como o `cleanStale`, e uma exceção num temporizador do Bun encerra o broker; num terminal que não manda os marcadores da colagem delimitada (modo 2004), uma colagem entregue em várias leituras, com o `\r` sozinho numa delas, envia a resposta, e nenhum terminal real foi conferido quanto aos marcadores; `tui/demo.ts` não tem teste automático.
+- Rodar de dentro de `broker/`: `bun test` e `bun node_modules/typescript/bin/tsc --noEmit`. Não usar `bun x tsc`. No Linux desta máquina a suíte roda num contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` instalados dentro dele, sobre um clone do repositório; o WSL Debian não tem `bun`.
+- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários.
+- Não exercitados: terminal interativo real (teclas, colagem, cores como a fonte desenha), macOS, sinais reais e uma sessão do Claude Code perguntando e recebendo a resposta. Pendências anteriores continuam em ROADMAP, design e histórico deste STATE. O dev conferiu a aba e o modal num terminal real em 2026-10-11; o que ele observou não está detalhado aqui, e nenhum agente ou teste exercitou um terminal real.

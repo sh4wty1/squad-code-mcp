@@ -1,6 +1,6 @@
 // The legend of colors, statuses and glyphs, and the keys. Ported from `rHelp` of the
-// prototype, without what is of the slices Question and Gate: the keys of the modals, the
-// focus on the history of questions and the line of a permission closed in the terminal.
+// prototype, without what is of the slice Gate: the keys of the modals of gate and of
+// permission and the line of a permission closed in the terminal.
 
 import type { AgentStatus, TicketStatus } from "../../shared/derive.ts";
 import { grid, pad, type Grid, type Seg } from "../grid.ts";
@@ -51,7 +51,7 @@ const LEGEND: Line[] = [
   [["≈", "bwhite", true], [" custo estimado   ", "white"], ["━━", "bcyan", true], [" aresta ativa   ", "white"], ["broker ", "gray"], ["○", "bred", true], [" congela", "white"]],
 ];
 
-// Each key where the frame has it: the lines of what is not of this slice stay empty
+// Each key where the frame has it: the lines of the modals of the slice Gate stay empty
 const SHORTCUTS: Line[] = [
   [["global", "gray"]],
   key("1 2 3 4", "principal · topologia · thread · perguntas"),
@@ -69,7 +69,12 @@ const SHORTCUTS: Line[] = [
   [["perguntas", "gray"]],
   key("b", "ir direto à próxima bloqueante"),
   key("enter", "responder a selecionada"),
-  ...Array.from({ length: 15 }, (): Seg[] => []),
+  key("h", "foco no histórico"),
+  [],
+  [["modal de resposta", "gray"]],
+  key("1–4 enter", "escolher · enviar · esc cancela"),
+  key("ctrl+e · u", "expandir o texto · limpar"),
+  ...Array.from({ length: 10 }, (): Seg[] => []),
   [["a TUI escreve três coisas: respostas a", "gray"]],
   [["perguntas, decisões de gate e decisões de", "gray"]],
   [["pedido de permissão. O resto é leitura do broker.", "gray"]],

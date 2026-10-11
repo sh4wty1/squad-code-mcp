@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 50,
+  "next_id": 71,
   "lessons": [
     {
       "id": "L-001",
@@ -14,17 +14,19 @@
       "status": "confirmed",
       "features": [
         "peer",
-        "tui-leitura"
+        "tui-leitura",
+        "question"
       ],
-      "recurrence": 2,
+      "recurrence": 3,
       "harmful": 0,
       "evidence": [
         "P7 broker/peers.ts:117 (PEER-09) (broker-rules)",
         "mutant M11 broker/peers.ts:110 (cleanup order vs input refusals) (broker-rules)",
-        "S14 broker/tui/screens/main.ts:47 (TUI-35) (broker-rules)"
+        "S14 broker/tui/screens/main.ts:47 (TUI-35) (broker-rules)",
+        "B06 broker/broker.ts:190 (QST-10, QST-16, QST-22, QST-29: unknown_peer never sent with a second failing rule) (broker-rules)"
       ],
       "created": "2026-10-07T18:54:22Z",
-      "last_seen": "2026-10-09T17:54:51Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-002",
@@ -68,17 +70,19 @@
       "text": "Put every spec-defined default in the config module and unit-test the default value",
       "signal": "surviving_mutant",
       "scope": "config",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "peer"
+        "peer",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "B3 broker/broker.ts:18, S7 broker/server.ts:39 (PEER-38, PEER-28) (config)"
+        "B3 broker/broker.ts:18, S7 broker/server.ts:39 (PEER-38, PEER-28) (config)",
+        "B04 broker/broker.ts:71 (QST-34: 1000 ms as a bare literal, bounded at 3 s) (config)"
       ],
       "created": "2026-10-07T18:54:23Z",
-      "last_seen": "2026-10-07T18:54:23Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-005",
@@ -178,19 +182,21 @@
       "text": "When an AC lists several triggers, give each trigger its own assertion or a recorded platform skip",
       "signal": "surviving_mutant",
       "scope": "mcp-server",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "peer"
+        "peer",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
         "mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server)",
         "mutant C3 broker/cli.ts:78 (PEER-44 lookup finds nothing) (cli)",
-        "mutant C5 broker/cli.ts:80 (PEER-44 signal fails) (cli)"
+        "mutant C5 broker/cli.ts:80 (PEER-44 signal fails) (cli)",
+        "X01 broker/question.ts:351 (QST-12: /merge-question has no test of a failed write) (broker tests)"
       ],
       "created": "2026-10-07T19:35:33Z",
-      "last_seen": "2026-10-07T22:57:31Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-011",
@@ -436,17 +442,19 @@
       "text": "State for every optional field whether null counts as absent or as a present value of the wrong type",
       "signal": "spec_precision_gap",
       "scope": "spec routes",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "event"
+        "event",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "EVT-51 vs EVT-04; broker/session.ts:24 (spec routes)"
+        "EVT-51 vs EVT-04; broker/session.ts:24 (spec routes)",
+        "QST-05 (null in an optional field of /ask); broker/question.ts:119 (spec routes)"
       ],
       "created": "2026-10-08T04:22:31Z",
-      "last_seen": "2026-10-08T04:22:31Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-025",
@@ -652,17 +660,19 @@
       "text": "State for every optional text field what the empty string means: refused, absent or stored as sent",
       "signal": "spec_precision_gap",
       "scope": "spec routes",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "event"
+        "event",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)"
+        "EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)",
+        "QST-05, QST-43 (empty default on a blocking question); broker/question.ts:121 (spec routes)"
       ],
       "created": "2026-10-08T04:58:15Z",
-      "last_seen": "2026-10-08T04:58:15Z"
+      "last_seen": "2026-10-10T11:07:43Z"
     },
     {
       "id": "L-037",
@@ -869,18 +879,21 @@
       "text": "When an AC lists alternatives that can hold together, state which one wins",
       "signal": "spec_precision_gap",
       "scope": "spec",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "tui-leitura"
+        "tui-leitura",
+        "question"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
         "TUI-37 (spec)",
-        "TUI-44 (spec)"
+        "TUI-44 (spec)",
+        "QST-56, QST-58 (options line or default line); broker/tui/screens/questions.ts:118 (spec)",
+        "QST-82 (a send in course and a question that is gone); K08 broker/tui/keys.ts:207 (spec)"
       ],
       "created": "2026-10-09T18:48:24Z",
-      "last_seen": "2026-10-09T18:48:24Z"
+      "last_seen": "2026-10-10T11:07:42Z"
     },
     {
       "id": "L-049",
@@ -899,6 +912,397 @@
       ],
       "created": "2026-10-09T22:42:40Z",
       "last_seen": "2026-10-09T22:42:40Z"
+    },
+    {
+      "id": "L-050",
+      "key": "surviving_mutant::test through the real process each callback the composition root injects into a module not only through the wiring of the test helper",
+      "text": "Test through the real process each callback the composition root injects into a module, not only through the wiring of the test helper",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "B08 broker/broker.ts:57 (QST-36: /send not wired to delivered, whole suite green) (broker tests)",
+        "T07 broker/tui.ts:233 (QST-83: token of the terminal entry) (tui)"
+      ],
+      "created": "2026-10-10T11:07:41Z",
+      "last_seen": "2026-10-10T11:07:41Z"
+    },
+    {
+      "id": "L-051",
+      "key": "surviving_mutant::test the filter of a recursive walk on a member reached through another member not only on one reached directly",
+      "text": "Test the filter of a recursive walk on a member reached through another member, not only on one reached directly",
+      "signal": "surviving_mutant",
+      "scope": "broker-rules",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M10b broker/question.ts:73 (QST-37: follower two merges away already closed) (broker-rules)",
+        "C2 broker/question.ts:74 (QST-36: a question of the result merged into another of them through a third; validation.md round 4) (broker-rules)",
+        "R18, R15 question.ts:73-74; test/unit/question-result.test.ts:260 (QST-36, round 6 gap 2) (broker-rules)"
+      ],
+      "created": "2026-10-10T11:07:42Z",
+      "last_seen": "2026-10-11T08:09:51Z"
+    },
+    {
+      "id": "L-052",
+      "key": "surviving_mutant::test a condition with a fixture where it differs from the conditions that coincide with it in every other fixture",
+      "text": "Test a condition with a fixture where it differs from the conditions that coincide with it in every other fixture",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N01 broker/tui/screens/answer.ts:73 (QST-73, QST-80: no blocking question with a default) (tui)",
+        "B6 broker/tui/keys.ts:199 (QST-78: K4 of round 3 again, now inside the spec; validation.md round 4) (tui)",
+        "R3 question.ts:71, R2 question.ts:74; test/unit/question-result.test.ts:193 (QST-36, round 6 gap 1) (broker-rules)"
+      ],
+      "created": "2026-10-10T11:07:42Z",
+      "last_seen": "2026-10-11T08:09:51Z"
+    },
+    {
+      "id": "L-053",
+      "key": "spec_precision_gap::state what a line that carries a count shows when the count is zero",
+      "text": "State what a line that carries a count shows when the count is zero",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-62 (+n mais antigas with n = 0); broker/tui/screens/questions.ts:189 (spec)"
+      ],
+      "created": "2026-10-10T11:07:43Z",
+      "last_seen": "2026-10-10T11:07:43Z"
+    },
+    {
+      "id": "L-054",
+      "key": "spec_precision_gap::state for each key and each mark of a screen with more than one focus what it does in every focus",
+      "text": "State for each key and each mark of a screen with more than one focus what it does in every focus",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-56 (mark of the selected question); Q01 broker/tui/screens/questions.ts:105 (spec)",
+        "QST-67, QST-65 (enter and b with the focus on the history); K21 broker/tui/keys.ts:132 (spec)"
+      ],
+      "created": "2026-10-10T11:07:43Z",
+      "last_seen": "2026-10-10T11:07:43Z"
+    },
+    {
+      "id": "L-055",
+      "key": "spec_precision_gap::state at which moment of a multi key input a rule that depends on the mode reads the mode",
+      "text": "State at which moment of a multi-key input a rule that depends on the mode reads the mode",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-78 (mode read at the start of the chunk); broker/tui/keys.ts:44 (spec)"
+      ],
+      "created": "2026-10-10T11:07:43Z",
+      "last_seen": "2026-10-10T11:07:43Z"
+    },
+    {
+      "id": "L-056",
+      "key": "ac_gap::when a layer reshapes its input before a rule about that input applies test the rule at the entry of the layer with an input the reshaping changes",
+      "text": "When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes",
+      "signal": "ac_gap",
+      "scope": "tui input",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-78 broker/tui.ts:182 (validation.md round 2, gap 1) (tui input)"
+      ],
+      "created": "2026-10-10T11:55:55Z",
+      "last_seen": "2026-10-10T11:55:55Z"
+    },
+    {
+      "id": "L-057",
+      "key": "spec_precision_gap::when an ac states a rule for each mode of a component state what the same input does when the component is in none of them",
+      "text": "When an AC states a rule for each mode of a component, state what the same input does when the component is in none of them",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-78 vs Assumptions row 'Colagem com quebra de linha'; mutant K4 broker/tui/keys.ts:187 (validation.md round 3, P3) (spec)"
+      ],
+      "created": "2026-10-10T12:21:06Z",
+      "last_seen": "2026-10-10T12:21:06Z"
+    },
+    {
+      "id": "L-058",
+      "key": "surviving_mutant::in a test that loops over alternative triggers send after each trigger no other input that alone produces the asserted outcome",
+      "text": "In a test that loops over alternative triggers, send after each trigger no other input that alone produces the asserted outcome",
+      "signal": "surviving_mutant",
+      "scope": "tui tests",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "A3 broker/tui.ts:168, broker/test/unit/tui-loop.test.ts:613 (QST-99: q pressed after ctrl+c quits in its place; validation.md round 4) (tui tests)"
+      ],
+      "created": "2026-10-11T06:12:12Z",
+      "last_seen": "2026-10-11T06:12:12Z"
+    },
+    {
+      "id": "L-059",
+      "key": "surviving_mutant::when an ac says a rule holds with or without a state assert it in both",
+      "text": "When an AC says a rule holds with or without a state, assert it in both",
+      "signal": "surviving_mutant",
+      "scope": "tui tests",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "A6 broker/tui.ts:168 (QST-99: q in a small terminal with no modal open; validation.md round 4) (tui tests)"
+      ],
+      "created": "2026-10-11T06:12:12Z",
+      "last_seen": "2026-10-11T06:12:12Z"
+    },
+    {
+      "id": "L-060",
+      "key": "surviving_mutant::test a key rule of an input loop with the key inside a chunk of several keys not only alone in its read",
+      "text": "Test a key rule of an input loop with the key inside a chunk of several keys, not only alone in its read",
+      "signal": "surviving_mutant",
+      "scope": "tui input",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "A8 broker/tui.ts:168 (QST-99: q among other keys of a chunk in a small terminal; validation.md round 4) (tui input)",
+        "N11 broker/tui.ts:170 (QST-99: a mark of a paste among other keys of one read in a small terminal, through the loop; validation.md round 5, gap 3) (tui input)",
+        "X3 broker/tui.ts:171 (QST-99: ctrl+c among other keys of a chunk in a small terminal; validation.md round 5, gap 4) (tui input)"
+      ],
+      "created": "2026-10-11T06:12:12Z",
+      "last_seen": "2026-10-11T07:20:50Z"
+    },
+    {
+      "id": "L-061",
+      "key": "surviving_mutant::when a rule gains a new trigger test every branch of the rule under the new trigger not only the branches the change was made for",
+      "text": "When a rule gains a new trigger, test every branch of the rule under the new trigger, not only the branches the change was made for",
+      "signal": "surviving_mutant",
+      "scope": "tui input",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "B5 broker/tui/keys.ts:199 (QST-78: a delimited paste with no modal open; validation.md round 4) (tui input)",
+        "B14 broker/tui/keys.ts:198 (QST-78: esc with no modal open ends a paste; validation.md round 4) (tui input)",
+        "N8 broker/tui.ts:170 (QST-99: the marks of a paste read in a small terminal with no modal open; validation.md round 5, gap 2) (tui input)"
+      ],
+      "created": "2026-10-11T06:12:12Z",
+      "last_seen": "2026-10-11T07:20:50Z"
+    },
+    {
+      "id": "L-062",
+      "key": "ac_gap::when an ac names several inputs for one rule assert the rule with each input in every state the ac gives",
+      "text": "When an AC names several inputs for one rule, assert the rule with each input in every state the AC gives",
+      "signal": "ac_gap",
+      "scope": "spec tests",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-78 broker/tui/keys.ts:132 (a line feed with no modal open is not enter, the AC says it is; validation.md round 4, gap 6) (spec tests)"
+      ],
+      "created": "2026-10-11T06:12:13Z",
+      "last_seen": "2026-10-11T06:12:13Z"
+    },
+    {
+      "id": "L-063",
+      "key": "spec_precision_gap::when an ac makes a state ignore input state what happens to an input sequence that starts in one state and ends in the other",
+      "text": "When an AC makes a state ignore input, state what happens to an input sequence that starts in one state and ends in the other",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-78 with QST-99 broker/tui.ts:168 (the marks of a paste in a small terminal; validation.md round 4, SP1) (spec)",
+        "QST-78 with QST-99 broker/tui/keys.ts:53 (esc during a paste in a small terminal; validation.md round 5, SP3) (spec)"
+      ],
+      "created": "2026-10-11T06:12:13Z",
+      "last_seen": "2026-10-11T07:20:51Z"
+    },
+    {
+      "id": "L-064",
+      "key": "surviving_mutant::when the condition of an ac is an or assert each outcome of the ac with a fixture where only one side of the or holds",
+      "text": "When the condition of an AC is an or, assert each outcome of the AC with a fixture where only one side of the or holds",
+      "signal": "surviving_mutant",
+      "scope": "tui tests",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "X5, X6, X7 broker/tui.ts:171, broker/test/unit/tui-loop.test.ts:630 (QST-99: q and ctrl+c quit asserted at 100x30 only, not at 119x40 nor 120x39; validation.md round 5, gap 1) (tui tests)"
+      ],
+      "created": "2026-10-11T07:20:50Z",
+      "last_seen": "2026-10-11T07:20:50Z"
+    },
+    {
+      "id": "L-065",
+      "key": "surviving_mutant::when an ac names several inputs for one rule assert the rule with each input in every state the ac gives",
+      "text": "When an AC names several inputs for one rule, assert the rule with each input in every state the AC gives",
+      "signal": "surviving_mutant",
+      "scope": "spec tests",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "L4 broker/tui/keys.ts:207 (QST-78: a line feed with no modal open and keys held back after it, where the carriage return has its assertion; validation.md round 5, gap 5) (spec tests)",
+        "V4 tui.ts:171; test/unit/tui-loop.test.ts:625 (QST-99, round 6 gap 3) (spec tests)",
+        "W4 tui/keys.ts:206; test/unit/tui-loop.test.ts:432 (QST-78, round 6 gap 5) (spec tests)"
+      ],
+      "created": "2026-10-11T07:20:50Z",
+      "last_seen": "2026-10-11T08:09:52Z"
+    },
+    {
+      "id": "L-066",
+      "key": "spec_precision_gap::when an ac says what happens to the items a rule acts on and to linked items of another owner state what happens to a linked item of the same owner the rule does not act on",
+      "text": "When an AC says what happens to the items a rule acts on and to linked items of another owner, state what happens to a linked item of the same owner the rule does not act on",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-36 with QST-31 and QST-39; mutants Q6, Q6a broker/question.ts:74, :71 (a question of the same worker about another ticket merged into one the result closes; validation.md round 5, SP2) (spec)"
+      ],
+      "created": "2026-10-11T07:20:51Z",
+      "last_seen": "2026-10-11T07:20:51Z"
+    },
+    {
+      "id": "L-067",
+      "key": "surviving_mutant::assert a rule an ac states for an input loop through the loop not only on the pure function the loop calls",
+      "text": "Assert a rule an AC states for an input loop through the loop, not only on the pure function the loop calls",
+      "signal": "surviving_mutant",
+      "scope": "tui input",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "V13 tui.ts:170; test/unit/tui-keys.test.ts:591 (QST-99, round 6 gap 4) (tui input)"
+      ],
+      "created": "2026-10-11T08:09:51Z",
+      "last_seen": "2026-10-11T08:09:51Z"
+    },
+    {
+      "id": "L-068",
+      "key": "surviving_mutant::test a rule that holds for any item of a list with the item first last and between two others",
+      "text": "Test a rule that holds for any item of a list with the item first, last and between two others",
+      "signal": "surviving_mutant",
+      "scope": "tui input",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "V2 tui.ts:171; test/unit/tui-loop.test.ts:628 (QST-99, round 6 gap 6) (tui input)"
+      ],
+      "created": "2026-10-11T08:09:52Z",
+      "last_seen": "2026-10-11T08:09:52Z"
+    },
+    {
+      "id": "L-069",
+      "key": "spec_precision_gap::when an ac names an input of several bytes state what happens when it arrives split across two reads",
+      "text": "When an AC names an input of several bytes, state what happens when it arrives split across two reads",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SP4, QST-78 with QST-99; V8 tui.ts:191 (round 6) (spec)"
+      ],
+      "created": "2026-10-11T08:09:52Z",
+      "last_seen": "2026-10-11T08:09:52Z"
+    },
+    {
+      "id": "L-070",
+      "key": "surviving_mutant::test fragmented terminal control sequences through successive incomplete reads before the terminator for both paste markers and every terminal size class",
+      "text": "Test fragmented terminal control sequences through successive incomplete reads before the terminator, for both paste markers and every terminal size class.",
+      "signal": "surviving_mutant",
+      "scope": "broker/tui",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "I4; broker/tui.ts:191; QST-78/QST-99; .specs/features/question/validation.md round 7 (broker/tui)"
+      ],
+      "created": "2026-10-11T09:38:31Z",
+      "last_seen": "2026-10-11T09:38:31Z"
     }
   ]
 }

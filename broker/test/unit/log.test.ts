@@ -624,3 +624,115 @@ test("FEAT-22: close keeps the events and the deliveries of the feature, pending
   expect(b.deliveries().filter((d) => d.event_seq !== seq)).toEqual(deliveries);
   expect(deliveries).toContainEqual({ event_seq: task, recipient: "worker-1", acked_at: null });
 });
+
+// A question as its route records it: the id in the column and in data
+function asked(question_id: number, fields: Partial<NewRecord> = {}): NewRecord {
+  return {
+    kind: "question",
+    from: "worker-1",
+    role_from: "worker",
+    to: "leader",
+    summary: "which port?",
+    question_id,
+    recipients: ["leader"],
+    data: { question_id, asked_by: "worker-1", blocking: true, why: "the spec gives two" },
+    ...fields,
+  };
+}
+
+test("QST-50: a record with question_id fills the column, and history by question_id answers every event of the question in ascending seq", () => {
+  const b = setup();
+  const id = b.openFeature();
+  const upward: Partial<NewRecord> = { from: "leader", role_from: "leader", to: "mother", recipients: ["mother"] };
+  const first = b.log.record(asked(5));
+  const other = b.log.record(asked(6, upward));
+  const escalated = b.log.record(asked(5, upward));
+  const merged = b.log.record({
+    kind: "question_merged", from: "mother", role_from: "mother", question_id: 6, data: { question_id: 6, into: 5 },
+  });
+  const answered = b.log.record({
+    kind: "answer", from: "mother", role_from: "mother", to: "worker-1", summary: "Q-05: 8080", body: "8080",
+    question_id: 5, recipients: ["worker-1"], data: { question_id: 5, answer: "8080", resolved_by: "agent" },
+  });
+  expect(b.events().map((e) => [e.seq, e.kind, e.question_id])).toEqual([
+    [1, "feature_opened", null],
+    [first, "question", 5],
+    [other, "question", 6],
+    [escalated, "question", 5],
+    [merged, "question_merged", 6],
+    [answered, "answer", 5],
+  ]);
+  expect(b.log.history({ question_id: 5 }).map((e) => [e.seq, e.kind])).toEqual([
+    [first, "question"],
+    [escalated, "question"],
+    [answered, "answer"],
+  ]);
+  expect(b.log.history({ question_id: 6 }).map((e) => [e.seq, e.kind])).toEqual([
+    [other, "question"],
+    [merged, "question_merged"],
+  ]);
+  expect(b.log.history({ question_id: 5 })[0] as object).toEqual({
+    seq: first,
+    ts: NOW,
+    kind: "question",
+    feature_id: id,
+    from: "worker-1",
+    role_from: "worker",
+    to: "leader",
+    summary: "which port?",
+    body: "",
+    ticket_ref: null,
+    question_id: 5,
+    asked_by: "worker-1",
+    blocking: true,
+    why: "the spec gives two",
+  });
+});
+
+test("QST-03: with recipients the event leaves one pending delivery for each of those names, whatever its kind", () => {
+  const b = setup();
+  b.openFeature();
+  const question = b.log.record(asked(5));
+  const answer = b.log.record({
+    kind: "answer", from: "human", role_from: "human", to: "worker-1", recipients: ["leader", "mother"],
+  });
+  expect(b.deliveries()).toEqual([
+    ...toOthers(1),
+    { event_seq: question, recipient: "leader", acked_at: null },
+    { event_seq: answer, recipient: "leader", acked_at: null },
+    { event_seq: answer, recipient: "mother", acked_at: null },
+  ]);
+});
+
+test("QST-03: with empty recipients the event leaves no delivery, even in a kind the rule delivers", () => {
+  const b = setup();
+  b.openFeature();
+  b.log.record(asked(5, { from: "mother", role_from: "mother", to: "human", recipients: [] }));
+  b.log.record({ ...TASK, recipients: [] });
+  expect(b.events().map((e) => [e.kind, e.to_name])).toEqual([
+    ["feature_opened", "*"],
+    ["question", "human"],
+    ["task", "worker-1"],
+  ]);
+  // only the deliveries of the feature_opened
+  expect(b.deliveries()).toEqual(toOthers(1));
+});
+
+test("QST-03: without recipients the rule of the kind decides as before: a task waits for its recipient and a feature_opened for the other five", () => {
+  const b = setup();
+  const opened = b.log.record({ kind: "feature_opened", from: "mother", role_from: "mother", to: "*" });
+  const task = b.log.record(TASK);
+  expect(b.deliveries()).toEqual([...toOthers(opened), { event_seq: task, recipient: "worker-1", acked_at: null }]);
+});
+
+test("QST-03: event and deliveries are stored together: a name repeated in recipients leaves no event and no delivery", () => {
+  const b = setup();
+  b.openFeature();
+  const kept = b.log.record(asked(5));
+  expect(() => b.log.record(asked(6, { recipients: ["leader", "leader"] }))).toThrow("UNIQUE constraint failed");
+  expect(b.events().map((e) => [e.seq, e.kind, e.question_id])).toEqual([
+    [1, "feature_opened", null],
+    [kept, "question", 5],
+  ]);
+  expect(b.deliveries()).toEqual([...toOthers(1), { event_seq: kept, recipient: "leader", acked_at: null }]);
+});

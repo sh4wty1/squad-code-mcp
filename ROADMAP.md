@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** TUI leitura concluída localmente com PASS do Verifier na rodada 3. F1–F4 do PR 8 corrigidos e publicados após aprovação do dev, com as quatro threads da review respondidas e resolvidas, sem merge. O gate também passa no Windows. A próxima fatia é Question. Terminal interativo real e macOS não foram exercitados. O estado está no Handoff de `.specs/STATE.md`.
+**Agora:** Question concluída no branch `feat/question`, com PASS do Verifier na terceira rodada, à espera de review e merge. A suíte passa no Windows; no Linux passa com uma instabilidade de tempo em testes de integração que a `main` também tem. A próxima fatia é Papéis. Terminal interativo real e macOS não foram exercitados. O estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 
@@ -33,7 +33,7 @@ tarefas, implementação e verificação independente, com PR revisado por `/the
 | [x] | Event | 1 | Log append-only, envio com recusa por topologia, entrega, leitura por cursor | Peer |
 | [x] | Feature | 1 | Abertura e encerramento de feature com workflow travado | Event |
 | [x] | TUI leitura | 2 | Feed, agentes, tickets, topologia e detalhe de ticket | Feature, frames |
-| [ ] | Question | 3 | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas | TUI leitura |
+| [x] | Question | 3 | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas | TUI leitura |
 | [ ] | Papéis | 4 | `roles.json`, quatro skills de papel, launcher, plugin com hooks | Question |
 | [ ] | Gate | 5 | Pedido e decisão de gate; modal com texto e confirmação | Papéis |
 

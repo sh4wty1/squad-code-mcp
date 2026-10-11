@@ -4,9 +4,9 @@ import { grid, type Color } from "../../tui/grid.ts";
 
 const ESC = "\x1b";
 
-test("TUI-60: entering hides the cursor and leaving shows it again", () => {
-  expect(ENTER).toBe("\x1b[?1049h\x1b[?25l");
-  expect(LEAVE).toBe("\x1b[?25h\x1b[?1049l");
+test("TUI-60, QST-78: entering hides the cursor and turns the delimited paste on, and leaving undoes both", () => {
+  expect(ENTER).toBe("\x1b[?1049h\x1b[?25l\x1b[?2004h");
+  expect(LEAVE).toBe("\x1b[?2004l\x1b[?25h\x1b[?1049l");
 });
 
 function scene() {

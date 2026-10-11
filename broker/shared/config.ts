@@ -29,6 +29,11 @@ export function cleanupIntervalMs(env: Env = process.env): number {
   return parseInt(env.SQUAD_CLEANUP_INTERVAL_MS ?? "30000", 10);
 }
 
+// How often the broker checks the deadlines of the questions
+export function expireIntervalMs(env: Env = process.env): number {
+  return parseInt(env.SQUAD_EXPIRE_INTERVAL_MS ?? "1000", 10);
+}
+
 // How often a registered session asks the broker for what was sent to it
 export function pollIntervalMs(env: Env = process.env): number {
   return parseInt(env.SQUAD_POLL_INTERVAL_MS ?? "1000", 10);

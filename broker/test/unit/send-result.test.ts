@@ -270,3 +270,106 @@ test("EVT-54: the result and its unblocked are one transaction: without the unbl
   expect(b.events().map((e) => e.kind)).toEqual(["feature_opened", "plan", "task", "blocked"]);
   expect(b.deliveries().map((d) => d.event_seq)).toEqual([1, 1, 1, 1, 1, 3]);
 });
+
+// What a worker asks the leader about the ticket A and goes on without waiting
+const ASKED = { to: "leader", summary: "which port?", why: "the spec gives two", blocking: false, default: "8080", ticket_ref: "A" };
+
+test("QST-36: the result of a blocked worker with a non-blocking question open is followed by the unblocked and then by the answer of the default", () => {
+  const b = working();
+  b.question.ask(WORKER_1, ASKED);
+  b.log.record({ ...BLOCKED, from: "worker-1", ticket_ref: "A" });
+  b.clock.now = NOW + 20;
+  expect(b.send(WORKER_1, result("A", 3))).toEqual({ ok: true, seq: 6 });
+  expect(b.events().slice(5).map((e) => [e.seq, e.kind, e.from_name])).toEqual([
+    [6, "result", "worker-1"],
+    [7, "unblocked", "broker"],
+    [8, "answer", "broker"],
+  ]);
+  expect(b.events()[7]).toEqual({
+    seq: 8,
+    ts: NOW + 20,
+    kind: "answer",
+    feature_id: b.feature,
+    from_name: "broker",
+    role_from: "broker",
+    to_name: "worker-1",
+    summary: "Q-01: 8080",
+    body: "8080",
+    ticket_ref: "A",
+    question_id: 1,
+    gate_id: null,
+    data: { question_id: 1, answer: "8080", resolved_by: "result_default" },
+  });
+  expect(b.questionRows().map((q) => [q.id, q.status, q.answer_seq])).toEqual([[1, "defaulted", 8]]);
+  // the task, the question, the result and the answer: the unblocked has no delivery
+  expect(b.deliveries().slice(5)).toEqual([
+    { event_seq: 3, recipient: "worker-1", acked_at: null },
+    { event_seq: 4, recipient: "leader", acked_at: null },
+    { event_seq: 6, recipient: "judge", acked_at: null },
+    { event_seq: 8, recipient: "worker-1", acked_at: null },
+  ]);
+});
+
+test("QST-36: the result of a worker that is not blocked is followed by one answer per question, in ascending id", () => {
+  const b = working();
+  b.question.ask(WORKER_1, ASKED);
+  b.question.ask(WORKER_1, { ...ASKED, default: "9090" });
+  expect(b.send(WORKER_1, result("A", 3))).toEqual({ ok: true, seq: 6 });
+  expect(b.events().slice(5).map((e) => [e.seq, e.kind, e.question_id, e.body])).toEqual([
+    [6, "result", null, "what was done"],
+    [7, "answer", 1, "8080"],
+    [8, "answer", 2, "9090"],
+  ]);
+});
+
+test("QST-39: the result of a worker leaves open its blocking question of the ticket, its question of another ticket and the one of another worker", () => {
+  const b = working();
+  b.question.ask(WORKER_1, { ...ASKED, blocking: true, default: undefined });
+  b.question.ask(WORKER_1, { ...ASKED, ticket_ref: "B" });
+  b.question.ask(WORKER_1, { ...ASKED, ticket_ref: undefined });
+  b.question.ask(WORKER_2, ASKED);
+  expect(b.send(WORKER_1, result("A", 3))).toEqual({ ok: true, seq: 8 });
+  expect(b.events().slice(7).map((e) => e.kind)).toEqual(["result"]);
+  expect(b.questionRows().map((q) => [q.id, q.status, q.answer_seq])).toEqual([
+    [1, "open", null],
+    [2, "open", null],
+    [3, "open", null],
+    [4, "open", null],
+  ]);
+});
+
+test("QST-39: the result of the leader to the mother closes no question", () => {
+  const b = working();
+  b.question.ask(WORKER_1, ASKED);
+  b.question.ask(LEADER, { ...ASKED, to: "mother" });
+  expect(b.send(LEADER, { kind: "result", to: "mother", summary: "batch" })).toEqual({ ok: true, seq: 6 });
+  expect(b.events().slice(5).map((e) => e.kind)).toEqual(["result"]);
+  expect(b.questionRows().map((q) => [q.id, q.status, q.answer_seq])).toEqual([
+    [1, "open", null],
+    [2, "open", null],
+  ]);
+});
+
+test("QST-36: a refused result closes no question", () => {
+  const b = working();
+  b.question.ask(WORKER_1, ASKED);
+  b.refusedWith(() => b.send(WORKER_1, result("A", 1)), "worker-1", "result", "stale_reference");
+  expect(b.questionRows().map((q) => [q.id, q.status, q.answer_seq])).toEqual([[1, "open", null]]);
+});
+
+test("QST-36: the result and the answer of the default are one transaction: without the answer there is no result", () => {
+  const b = working();
+  b.question.ask(WORKER_1, ASKED);
+  b.log.record({ ...BLOCKED, from: "worker-1" });
+  const events = b.events();
+  const deliveries = b.deliveries();
+  const rows = b.questionRows();
+  b.db.run(
+    "CREATE TRIGGER no_answer BEFORE INSERT ON events WHEN NEW.kind = 'answer' BEGIN SELECT RAISE(ABORT, 'no answer'); END"
+  );
+  expect(() => b.send(WORKER_1, result("A", 3))).toThrow("no answer");
+  expect(b.events()).toEqual(events);
+  expect(b.deliveries()).toEqual(deliveries);
+  expect(b.questionRows()).toEqual(rows);
+  expect(b.log.blocked("worker-1")).toBe(true);
+});

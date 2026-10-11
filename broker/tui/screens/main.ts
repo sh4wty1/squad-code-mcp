@@ -1,9 +1,10 @@
 // The main screen: the agents and the tickets at the left, the feed in the middle and the
 // detail of the selected line at the right. Ported from `rMain` of the prototype.
 
+import { qid } from "../../shared/contract.ts";
 import type { Agent } from "../../shared/derive.ts";
 import { activity, refs } from "../activity.ts";
-import { debt, label, qid, type FeedRow, type SysKind } from "../feed.ts";
+import { debt, label, type FeedRow, type SysKind } from "../feed.ts";
 import { age, clock, cut, grid, len, mmss, type Color, type Grid } from "../grid.ts";
 import type { View } from "../view.ts";
 import { chrome, drawRows, kindTone, MAIN_KEYS, segLen, stats, STATUS, statusSegs, TICKET_TONE, tone } from "./chrome.ts";

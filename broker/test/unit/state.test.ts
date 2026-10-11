@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import type { Caller } from "../../send.ts";
 import type { Owed } from "../../shared/derive.ts";
 import { HUMAN_TOKEN, JUDGE, LEADER, MOTHER, setup, WORKER_1, WORKER_2, WORKER_3 } from "./helpers.ts";
 
@@ -240,4 +241,70 @@ test("EVT-80: a pending delivery is owed without an open feature too, and only b
   expect(b.state(WORKER_2)).toEqual({ feature: null, ticket: null, owed: [] });
   b.log.ack("worker-1", [2]);
   expect(b.state(WORKER_1).owed).toEqual([]);
+});
+
+// A question put straight in the log, as its route would leave it: blocking, with the
+// delivery to a holder that is a peer. Returns its seq.
+function asked(b: ReturnType<typeof setup>, id: number, from: Caller, to: string, asked_by = from.name): number {
+  return b.log.record({
+    kind: "question", from: from.name, role_from: from.role, to, summary: "which port?", question_id: id,
+    recipients: to === "human" ? [] : [to],
+    data: { question_id: id, asked_by, blocking: true, why: "the spec gives two" },
+  });
+}
+
+test("QST-51: the holder of an open question owes its answer, with the seq of the latest question of it, in order of seq with the other items", () => {
+  const b = setup();
+  b.openFeature();
+  const first = asked(b, 1, WORKER_1, "leader");
+  expect(b.send(MOTHER, { kind: "task", to: "leader", summary: "kickoff" })).toEqual({ ok: true, seq: 3 });
+  const second = asked(b, 2, WORKER_2, "leader");
+  expect([first, second]).toEqual([2, 4]);
+  expect(b.state(LEADER).owed).toEqual([
+    { owes: "delivery", seq: 1 },
+    { owes: "delivery", seq: 2 },
+    { owes: "answer", question_id: 1, seq: 2 },
+    { owes: "delivery", seq: 3 },
+    { owes: "plan", seq: 3 },
+    { owes: "delivery", seq: 4 },
+    { owes: "answer", question_id: 2, seq: 4 },
+  ]);
+  expect(b.state(WORKER_1).owed).toEqual([{ owes: "delivery", seq: 1 }]);
+  expect(b.state(MOTHER).owed).toEqual([]);
+
+  // passed on, the answer is owed by the new holder, with the seq of the question that reached it
+  expect(asked(b, 1, LEADER, "mother", "worker-1")).toBe(5);
+  expect(b.state(MOTHER).owed).toEqual([
+    { owes: "delivery", seq: 5 },
+    { owes: "answer", question_id: 1, seq: 5 },
+  ]);
+  expect(b.state(LEADER).owed).toEqual([
+    { owes: "delivery", seq: 1 },
+    { owes: "delivery", seq: 2 },
+    { owes: "delivery", seq: 3 },
+    { owes: "plan", seq: 3 },
+    { owes: "delivery", seq: 4 },
+    { owes: "answer", question_id: 2, seq: 4 },
+  ]);
+});
+
+test("QST-51: a closed question, a merged one and one of another holder are not in what the peer owes", () => {
+  const b = setup();
+  b.openFeature();
+  asked(b, 1, WORKER_1, "leader");
+  asked(b, 2, WORKER_2, "leader");
+  const open = asked(b, 3, WORKER_3, "leader");
+  const above = asked(b, 4, LEADER, "mother");
+  asked(b, 5, MOTHER, "human");
+  b.log.record({
+    kind: "answer", from: "leader", role_from: "leader", to: "worker-1", summary: "Q-01: 8080", body: "8080", question_id: 1,
+    recipients: ["worker-1"], data: { question_id: 1, answer: "8080", resolved_by: "agent" },
+  });
+  b.log.record({ kind: "question_merged", from: "mother", role_from: "mother", question_id: 2, data: { question_id: 2, into: 3 } });
+  for (const peer of EVERYONE) b.log.ack(peer.name, b.log.pending(peer.name).map((e) => e.seq));
+
+  // 1 is answered and 2 merged into 3; 4 is of the mother and 5 of the dev
+  expect(b.state(LEADER).owed).toEqual([{ owes: "answer", question_id: 3, seq: open }]);
+  expect(b.state(MOTHER).owed).toEqual([{ owes: "answer", question_id: 4, seq: above }]);
+  for (const peer of [JUDGE, WORKER_1, WORKER_2, WORKER_3]) expect(b.state(peer).owed).toEqual([]);
 });

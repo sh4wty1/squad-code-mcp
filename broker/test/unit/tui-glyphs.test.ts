@@ -7,7 +7,7 @@ const FRAMES = join(import.meta.dir, "..", "frames");
 
 test("TUI-59: every character above U+024F in a frame is a glyph the probe measures", () => {
   const frames = readdirSync(FRAMES).filter((file) => file.endsWith(".txt"));
-  expect(frames.length).toBe(41);
+  expect(frames.length).toBe(47);
   const drawn = new Set<string>();
   for (const file of frames) {
     for (const char of readFileSync(join(FRAMES, file), "utf8")) {

@@ -8,6 +8,7 @@
 import type { Criterion, Envelope, PlannedTicket, SquadEvent } from "../../shared/contract.ts";
 import { SQUAD } from "../../shared/derive.ts";
 import type { PriceTable } from "../../tui/config.ts";
+import type { Modal, Ui } from "../../tui/view.ts";
 
 export interface FrameLog {
   events: SquadEvent[];
@@ -17,6 +18,8 @@ export interface FrameLog {
   selected: number | null;
   // the ticket of the thread screen, when it is not the one of the selected line
   ticket?: string;
+  // what the state of the screen of the frame has that the one every frame starts with does not
+  ui?: Partial<Ui>;
 }
 
 // The dollars of the prototype are its thousands of tokens times 0.015
@@ -56,7 +59,7 @@ function verdict(seq: number, t: string, tk: string, outcome: "approve" | "rewor
 
 function ask(
   seq: number, t: string, from: string, to: string, tk: string | null, s: string, b: string,
-  question_id: number, asked_by: string, blocking: boolean, more: { default?: string; timeout_s?: number } = {}
+  question_id: number, asked_by: string, blocking: boolean, more: { why?: string; options?: string[]; default?: string; timeout_s?: number } = {}
 ): SquadEvent {
   return { ...env(seq, t, from, to, tk, s, b), kind: "question", question_id, asked_by, blocking, why: "", ...more };
 }
@@ -186,6 +189,12 @@ const PLAN1: PlannedTicket[] = [
 const W2RES = (seq: number) =>
   result(seq, "14:30:55", W2, JDG, "TKT-13", "/api/setlist + cache 30s", "/api/setlist pronto: normaliza artista, faixa e horário; cache em memória de 30s. +144 −3, 9 testes.", 407);
 
+// The text of a question is the body of its first `question`, as `QS` and `H05` to `H12` of
+// the prototype have it; an escalation copies the reason and the options (QST-13)
+const Q07 = { why: 'A spec exige "reconexão após queda" mas não define limite; o judge reprovou a v1 nesse critério.', options: ["infinito com backoff", "5 tentativas", "configurável"] };
+const Q08 = { why: "~12% das faixas do upstream chegam sem capa." };
+const Q09 = { why: "/v1/setlist responde 401; a chave não está no .env do worktree do worker-2.", options: ["pronto", "não vou fornecer"] };
+
 const MAIN = [
   OPEN1,
   task(402, "14:18:02", MOT, LDR, null, "spec: player ao vivo com setlist", "Objetivo aprovado pelo dev: player de áudio ao vivo fixo no topo do portal, com a música atual e as últimas 10 da setlist. Spec em specs/player-ao-vivo.md (6 critérios). Quebre em tickets."),
@@ -195,9 +204,9 @@ const MAIN = [
   task(406, "14:20:11", LDR, W1, "TKT-12", "player de áudio HLS", "Implementar o player do stream HLS: play/pause, volume e metadados da faixa atual. Acessível por teclado. Critérios 1–4 e 6 da spec."),
   task(407, "14:20:12", LDR, W2, "TKT-13", "API da setlist + cache", "Criar /api/setlist consumindo /v1/setlist da rádio: normalizar campos e cachear por 30s. Critério 5 da spec."),
   task(408, "14:20:13", LDR, W3, "TKT-14", "formato de data da setlist", "Formatar o horário de cada faixa da setlist no fuso de Brasília."),
-  ask(409, "14:21:00", W3, LDR, "TKT-14", "Q-05 formato de data?", "Formato de data na setlist? Não-bloqueante: sem resposta sigo com HH:mm.", 5, W3, false, { default: "HH:mm" }),
+  ask(409, "14:21:00", W3, LDR, "TKT-14", "Q-05 formato de data?", "Formato de data na setlist?", 5, W3, false, { default: "HH:mm" }),
   ask(410, "14:21:30", MOT, HUM, "TKT-14", "? Q-05 timeout 4min", "Q-05 encaminhada ao dev. Não-bloqueante, default HH:mm; o prazo de 4min começa agora, na chegada ao dev.", 5, W3, false, { default: "HH:mm", timeout_s: 240 }),
-  ask(411, "14:23:40", W2, LDR, "TKT-13", "Q-06 público ou autenticado?", "O endpoint /api/setlist deve ser público ou autenticado? Bloqueante: muda o middleware.", 6, W2, true),
+  ask(411, "14:23:40", W2, LDR, "TKT-13", "Q-06 público ou autenticado?", "Endpoint /api/setlist público ou autenticado?", 6, W2, true),
   ask(412, "14:23:52", MOT, HUM, "TKT-13", "? Q-06 [BLOQUEANTE]", "Q-06 encaminhada ao dev (bloqueante). Só o worker-2 está pausado.", 6, W2, true),
   answer(413, "14:24:10", HUM, W2, "TKT-13", "Q-06: público, só leitura", "Resposta do dev pela TUI, entregue a quem perguntou: público, só leitura.", 6, "público, só leitura", "human"),
   answer(414, "14:25:30", "broker", W3, "TKT-14", "", "Q-05 expirou 4min depois de chegar ao dev. worker-3 seguiu com o default HH:mm.", 5, "HH:mm", "timeout_default"),
@@ -206,17 +215,17 @@ const MAIN = [
   verdict(417, "14:28:03", "TKT-12", "rework", "rework: reconexão após queda", 'TKT-12 não atende o critério "reconexão após queda do stream". Ao derrubar o HLS o player fica em erro e não tenta reconectar.\nEsperado: retry com backoff e retomada sem ação do usuário.', 415, CR5(1, 1, 0, 1, 1, "player fica em erro ao derrubar o HLS; nenhuma tentativa de reconexão.")),
   task(418, "14:28:30", LDR, W1, "TKT-12", "rework 1/2: retry c/ backoff", "Rework 1/2. Adicionar retry com backoff exponencial no useHlsStream e retomar a reprodução sem ação do usuário. Não mexer no layout."),
   verdict(419, "14:28:52", "TKT-14", "approve", "approve 1/1", "Horários corretos no fuso de Brasília.", 416, [[1, "horário legível na setlist"]]),
-  ask(420, "14:29:10", W1, LDR, "TKT-12", "Q-07 retry infinito ou 5?", "Reconexão do stream: retry infinito ou desistir após 5 tentativas? A spec não define. Pausando TKT-12 até a resposta.", 7, W1, true),
-  ask(421, "14:29:25", LDR, MOT, "TKT-12", "Q-07 encaminhada", "Encaminhando Q-07 do worker-1: a spec não define limite de reconexão.", 7, W1, true),
-  ask(422, "14:29:40", MOT, HUM, "TKT-12", "? Q-07 [BLOQUEANTE]", "Q-07 encaminhada ao dev (bloqueante). Só o worker-1 está pausado.", 7, W1, true),
-  ask(423, "14:30:20", W2, LDR, "TKT-13", "Q-10 caixa alta nos artistas?", "Nomes de artista: caixa alta ou como vêm do upstream? Não-bloqueante, default: como vêm.", 10, W2, false, { default: "como vêm do upstream" }),
+  ask(420, "14:29:10", W1, LDR, "TKT-12", "Q-07 retry infinito ou 5?", "Reconexão do stream: retry infinito ou desistir após 5 tentativas?", 7, W1, true, Q07),
+  ask(421, "14:29:25", LDR, MOT, "TKT-12", "Q-07 encaminhada", "Encaminhando Q-07 do worker-1: a spec não define limite de reconexão.", 7, W1, true, Q07),
+  ask(422, "14:29:40", MOT, HUM, "TKT-12", "? Q-07 [BLOQUEANTE]", "Q-07 encaminhada ao dev (bloqueante). Só o worker-1 está pausado.", 7, W1, true, Q07),
+  ask(423, "14:30:20", W2, LDR, "TKT-13", "Q-10 caixa alta nos artistas?", "Nomes de artista: caixa alta ou como vêm do upstream?", 10, W2, false, { default: "como vêm do upstream" }),
   ask(424, "14:30:35", MOT, HUM, "TKT-13", "? Q-10 timeout 4min", "Q-10 encaminhada ao dev (não-bloqueante, default: como vêm do upstream).", 10, W2, false, { default: "como vêm do upstream", timeout_s: 240 }),
   W2RES(425),
   answer(426, "14:30:56", "broker", W2, "TKT-13", "", "worker-2 entregou o TKT-13 antes de a Q-10 ser respondida. Vale o default: como vêm do upstream.", 10, "como vêm do upstream", "result_default"),
-  ask(427, "14:31:02", W2, LDR, "TKT-13", "Q-08 faixa sem capa?", "Setlist sem capa: placeholder genérico ou logo da 89? Não-bloqueante, default: logo da 89.", 8, W2, false, { default: "logo da 89" }),
-  ask(428, "14:31:15", MOT, HUM, "TKT-13", "? Q-08 timeout 4min", "Q-08 encaminhada ao dev (não-bloqueante, default: logo da 89).", 8, W2, false, { default: "logo da 89", timeout_s: 240 }),
-  ask(429, "14:31:20", JDG, W2, "TKT-13", "Q-11 cache invalida na troca?", "O cache invalida quando a música muda antes dos 30s? Pergunta direta ao worker-2: não sobe ao dev.", 11, JDG, false),
-  ask(430, "14:31:34", LDR, MOT, "TKT-12", "Q-12 limite de reconexão?", "Até quando o player deve tentar reconectar? Preciso disso para planejar o rework.", 12, LDR, false),
+  ask(427, "14:31:02", W2, LDR, "TKT-13", "Q-08 faixa sem capa?", "Setlist sem capa: placeholder genérico ou logo da 89?", 8, W2, false, { ...Q08, default: "logo da 89" }),
+  ask(428, "14:31:15", MOT, HUM, "TKT-13", "? Q-08 timeout 4min", "Q-08 encaminhada ao dev (não-bloqueante, default: logo da 89).", 8, W2, false, { ...Q08, default: "logo da 89", timeout_s: 240 }),
+  ask(429, "14:31:20", JDG, W2, "TKT-13", "Q-11 cache invalida na troca?", "O cache invalida quando a música muda antes dos 30s?", 11, JDG, false),
+  ask(430, "14:31:34", LDR, MOT, "TKT-12", "Q-12 limite de reconexão?", "Até quando o player deve tentar reconectar?", 12, LDR, false),
   { ...env(431, "14:31:36", MOT, null, "TKT-12"), kind: "question_merged", question_id: 12, into: 7 } satisfies SquadEvent,
   answer(432, "14:31:48", W2, JDG, "TKT-13", "Q-11: sim, via ETag", "Sim: o polling usa If-None-Match com o ETag do upstream e invalida o cache ao receber 200.", 11, "sim, via ETag do upstream", "agent"),
 ];
@@ -237,9 +246,9 @@ const END = closed(441, "14:53:31", "delivered", 'Merge em main concluído. A fe
 
 const ERR_X = [
   blocked(442, "14:29:41", W2, "TKT-13", "RADIO_API_KEY ausente", "GET /v1/setlist → 401. A RADIO_API_KEY não está no .env do worktree do worker-2.", "bun test src/api, 3 tentativas"),
-  ask(443, "14:29:50", W2, LDR, "TKT-13", "Q-09 chave fora do worktree", "/v1/setlist responde 401. A RADIO_API_KEY não está no .env do meu worktree. Tentei 3x.", 9, W2, true),
-  ask(444, "14:30:02", LDR, MOT, "TKT-13", "Q-09 encaminhada", "Credencial fora do alcance do squad. Encaminhando Q-09.", 9, W2, true),
-  ask(445, "14:30:20", MOT, HUM, "TKT-13", "? Q-09 [BLOQUEANTE]", "Q-09 encaminhada ao dev (bloqueante).", 9, W2, true),
+  ask(443, "14:29:50", W2, LDR, "TKT-13", "Q-09 chave fora do worktree", "A RADIO_API_KEY não está no worktree do worker-2. Coloque-a no .env de lá e confirme.", 9, W2, true, Q09),
+  ask(444, "14:30:02", LDR, MOT, "TKT-13", "Q-09 encaminhada", "Credencial fora do alcance do squad. Encaminhando Q-09.", 9, W2, true, Q09),
+  ask(445, "14:30:20", MOT, HUM, "TKT-13", "? Q-09 [BLOQUEANTE]", "Q-09 encaminhada ao dev (bloqueante).", 9, W2, true, Q09),
 ];
 const OFF = left(446, "14:30:12", W2);
 const ON = [joined(447, "14:34:05", W2), turn(447.1, "14:34:06", W2)];
@@ -367,7 +376,13 @@ const stalled = [
   usage(414.5, "14:26:00", W2, 58000),
   tokens({ mot: 36000, ldr: 79333, w1: 104000, w3: 22000, jdg: 46000 }),
 ];
+const error = [early, ERR_X, tokens({ mot: 47333, ldr: 92000, w1: 118000, w2: 54000, w3: 22000, jdg: 31333 })];
 const partial = [joined(483, "15:02:24", MOT), joined(484, "15:02:31", LDR), usage(484.1, "15:03:10", MOT, 9300)];
+
+// The modal of a frame: in the text mode, unless it has a choice
+const modal = (question: number, more: Partial<Modal>): Modal => ({ question, choice: null, text: "", expanded: false, sending: false, refused: false, ...more });
+const TXT06 = "logo da 89, com o nome do programa no ar";
+const TXT07 = "Logo da 89 por enquanto, na versão quadrada para caber no card do mobile. Abra um ticket separado para buscar capas no Discogs/MusicBrainz depois da entrega; não bloqueia esta feature.";
 
 export const LOGS: Record<string, FrameLog> = {
   "01": log("14:32:07", 417, main),
@@ -375,7 +390,7 @@ export const LOGS: Record<string, FrameLog> = {
   "03": log("14:44:10", null, JOINS1, MAIN, until(FINAL, 436), TURNS, tokens(TOKF)),
   "09a": log("15:07:44", null, idle),
   "09b": log("15:07:44", null, idle, G01, APPROVED),
-  "10": log("14:31:05", 442, early, ERR_X, tokens({ mot: 47333, ldr: 92000, w1: 118000, w2: 54000, w3: 22000, jdg: 31333 })),
+  "10": log("14:31:05", 442, error),
   "11": log("14:32:07", 417, main),
   "12": log("14:32:07", 417, main),
   "13a": log("14:32:22", 446, offline),
@@ -409,4 +424,12 @@ export const LOGS: Record<string, FrameLog> = {
   "29a": log("15:07:44", null, idle, left(436.5, "14:44:20", W3), blocked(438.5, "14:50:10", W2, "TKT-13", "RADIO_API_KEY ausente", "GET /v1/setlist → 401.", "bun test src/api")),
   "29b": log("15:07:44", null, idle, left(436.5, "14:44:20", W3), blocked(438.5, "14:50:10", W2, "TKT-13", "RADIO_API_KEY ausente", "GET /v1/setlist → 401.", "bun test src/api")),
   "29c": log("14:57:40", 487, idle, PREQX),
+  // The tab of questions, and the modal of answer over it
+  "04": { ...log("14:32:07", 417, main), ui: { screen: "questions", question: 7 } },
+  "05": { ...log("14:32:07", 417, main), ui: { screen: "questions", question: 7, modal: modal(7, { choice: 0 }) } },
+  "06": { ...log("14:32:07", 417, main), ui: { screen: "questions", question: 8, modal: modal(8, { text: TXT06 }) } },
+  "07": { ...log("14:32:07", 417, main), ui: { screen: "questions", question: 8, modal: modal(8, { text: TXT07, expanded: true }) } },
+  "20a": { ...log("14:31:05", 442, error), ui: { screen: "questions", question: 9, modal: modal(9, { choice: 0 }) } },
+  // The deadline of Q-08 came two seconds before: the answer the dev sent was refused
+  "20b": { ...log("14:35:17", 417, main, FINAL.slice(0, 4)), ui: { screen: "questions", modal: modal(8, { text: TXT06, refused: true }) } },
 };

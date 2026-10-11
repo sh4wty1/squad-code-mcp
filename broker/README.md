@@ -103,6 +103,7 @@ It prints the width of each glyph and exits 0 if all are one cell, 2 if some is 
 | `SQUAD_PING_INTERVAL_MS` | `10000` | Interval of the channel ping |
 | `SQUAD_HEARTBEAT_INTERVAL_MS` | `15000` | Interval of the heartbeat of a registered session |
 | `SQUAD_CLEANUP_INTERVAL_MS` | `30000` | Interval of the dead-session cleanup |
+| `SQUAD_EXPIRE_INTERVAL_MS` | `1000` | Interval at which the broker checks the deadlines of the questions |
 | `SQUAD_POLL_INTERVAL_MS` | `1000` | Interval at which a registered session asks for what was sent to it, and at which the TUI reads the log. The TUI uses 1000 when it is not a positive integer |
 | `SQUAD_TUI_GLYPHS` | none | Glyphs the TUI writes as another character: pairs `glyph=substitute` separated by commas, as in `⚠=!,⟳=~`. A pair without one character on each side stops the TUI with exit code 1 |
 | `SQUAD_PRICES` | `tui/prices.json` | JSON file of the price table of the TUI: `{ "<model>": { "input", "output", "cache_write", "cache_read" } }`, in dollars per million tokens. A model outside the table costs zero. A file that is missing or has another format stops the TUI with exit code 1 |

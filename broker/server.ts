@@ -146,6 +146,8 @@ IMPORTANT: When a <channel source="squad" kind="ping" ...> message arrives, call
 
 After ready, what the squad sends you arrives as <channel source="squad" kind="task|result|verdict" seq="..." from="..." ticket_ref="..."> messages. The seq is what you cite when you answer: task_seq in a result, result_seq in a verdict.
 
+A question and its answer arrive the same way: kind="question" is a question for you to answer or to escalate, and kind="answer" is the answer to a question. Both carry the question_id in their text. The question_id, not the seq, is what you cite about a question.
+
 The mother opens and closes the feature the squad works on. Everyone else is told through the channel: kind="feature_opened" carries its title, workflow, branch, base_branch, spec_ref and spec_commit, and kind="feature_closed" its outcome.
 
 Available tools after ready:
@@ -324,9 +326,11 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         if (isRefusal(result)) {
           return text(`${name} refused: ${result.error}. ${result.hint}`, true);
         }
-        const { seq, feature_id } = result as { seq?: unknown; feature_id?: unknown };
+        const { seq, feature_id, question_id } = result as { seq?: unknown; feature_id?: unknown; question_id?: unknown };
         // Only /open-feature answers a feature_id, and the mother needs it
         if (typeof feature_id === "number") return text(`Feature ${feature_id} opened with seq ${seq}.`);
+        // Only /ask answers a question_id: what the history of the question is read by
+        if (typeof question_id === "number") return text(`Question ${question_id} asked with seq ${seq}.`);
         return text(typeof seq === "number" ? `Recorded with seq ${seq}.` : JSON.stringify(result, null, 2));
       } catch (e) {
         return text(`Error calling ${name}: ${e instanceof Error ? e.message : String(e)}`, true);

@@ -10,13 +10,14 @@
  * Run directly: bun broker.ts
  */
 
-import { cleanupIntervalMs, dbPath, port, tokenPath } from "./shared/config.ts";
+import { cleanupIntervalMs, dbPath, expireIntervalMs, port, tokenPath } from "./shared/config.ts";
 import { openDatabase } from "./db.ts";
 import { createFeature, type Where } from "./feature.ts";
 import { createLog, type HistoryFilter } from "./log.ts";
 import { createPeers, refuse, type RegisterRequest } from "./peers.ts";
 import { createPermission, loadHumanToken } from "./permission.ts";
 import { createPlan } from "./plan.ts";
+import { createQuestion } from "./question.ts";
 import { createSend, type Caller } from "./send.ts";
 import { createSession } from "./session.ts";
 import { createState } from "./state.ts";
@@ -39,24 +40,35 @@ const CREDENTIAL_ROUTES = [
   "/permission-request",
   "/open-feature",
   "/close-feature",
+  "/ask",
+  "/escalate",
+  "/merge-question",
 ];
-// The human is not a peer: the decision of a permission is authorized by its own credential
-const ROUTES = [...PEER_ROUTES, ...CREDENTIAL_ROUTES, "/permission-decision"];
+// The human is not a peer: the decision of a permission is authorized by its own credential.
+// So is the answer of the dev, on the route the holder of a question answers with its id.
+const ROUTES = [...PEER_ROUTES, ...CREDENTIAL_ROUTES, "/permission-decision", "/answer"];
 
 const db = openDatabase(DB_PATH);
 const peers = createPeers(db);
 const log = createLog(db);
-const { send } = createSend(log);
+// Read once, here, and created if it is not there. No answer and no event carries it.
+const humanToken = loadHumanToken(tokenPath());
+const question = createQuestion(db, log, humanToken);
+const { send } = createSend(log, question.delivered);
 const { plan } = createPlan(log);
 const session = createSession(log);
-// Read once, here, and created if it is not there. No answer and no event carries it.
-const permission = createPermission(log, loadHumanToken(tokenPath()));
+const permission = createPermission(log, humanToken);
 const { state } = createState(log);
 const feature = createFeature(log);
 
 // Clean up stale peers (PIDs that no longer exist) on startup, then periodically
 peers.cleanStale();
 setInterval(peers.cleanStale, cleanupIntervalMs());
+
+// The deadlines of the questions: one that came while the broker was down closes here,
+// before any request is served, and the others at the check of every second
+question.expire();
+setInterval(question.expire, expireIntervalMs());
 
 // Exactly one of the three filters, of its type. A filter that is null was not sent.
 function historyFilter(body: Record<string, unknown>): HistoryFilter | null {
@@ -119,6 +131,14 @@ function answer(path: string, peer: Caller & Where, body: Record<string, unknown
       return feature.open(peer, body);
     case "/close-feature":
       return feature.close(peer, body);
+    case "/ask":
+      return question.ask(peer, body);
+    case "/escalate":
+      return question.escalate(peer, body);
+    case "/merge-question":
+      return question.merge(peer, body);
+    case "/answer":
+      return question.answer(peer, body);
     default:
       return permission.request(peer, body);
   }
@@ -159,7 +179,13 @@ Bun.serve({
         return Response.json(permission.decision(body as Record<string, unknown>));
       }
 
-      if (CREDENTIAL_ROUTES.includes(path)) {
+      // The key human_token, whatever its value, makes it the answer of the dev: a wrong
+      // token is never the refusal of the peer whose id came along
+      if (path === "/answer" && "human_token" in body) {
+        return Response.json(question.answerAsHuman(body as Record<string, unknown>));
+      }
+
+      if (path === "/answer" || CREDENTIAL_ROUTES.includes(path)) {
         // Before any rule: who is not registered leaves no event, not even a refused
         const peer = peers.find((body as Record<string, unknown>).id);
         if (!peer) {
