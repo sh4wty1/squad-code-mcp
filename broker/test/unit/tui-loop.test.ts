@@ -429,7 +429,7 @@ test("QST-78: a chunk that opens the modal of a question with options and ends i
 });
 
 test("QST-78: a line break and an unfinished escape in one chunk send nothing in the text mode: the break is a space, the escape closes the modal after its wait, and enter alone still sends", async () => {
-  for (const chunk of ["\r\x1b", "\r\x1b["]) {
+  for (const chunk of ["\r\x1b", "\r\x1b[", "\n\x1b["]) {
     const { t, key, stop } = launch();
     try {
       await t.shows(main(t.view()).text(), "the main screen");
@@ -450,7 +450,7 @@ test("QST-78: a line break and an unfinished escape in one chunk send nothing in
 });
 
 test("QST-78: a line break and an unfinished escape in one chunk confirm no option in the choice mode, the escape closes the modal after its wait, and enter alone still confirms", async () => {
-  for (const chunk of ["\r\x1b", "\r\x1b["]) {
+  for (const chunk of ["\r\x1b", "\r\x1b[", "\n\x1b["]) {
     const { t, key, stop } = launch();
     try {
       await t.shows(main(t.view()).text(), "the main screen");
@@ -625,7 +625,7 @@ test("QST-99: in a terminal narrower than 120 columns or shorter than 40 lines, 
   const places = [[], ["4", "j", "\r", "logo"], ["4", "\r"], ["\x1b[200~"], ["4", "j", "\r", "\x1b[200~logo"], ["4", "\r", "\x1b[200~"]];
   for (const size of SMALL) {
     for (const before of places) {
-      for (const quit of ["q", "\x03", "aq", "a\x03", "qa", "\x03a", "\x1b[200~q"]) {
+      for (const quit of ["q", "\x03", "aq", "a\x03", "qa", "\x03a", "aqa", "a\x03a", "\x1b[200~q"]) {
         const { t, key, resize, stop } = launch();
         try {
           await t.shows(main(t.view()).text(), "the main screen");

@@ -111,10 +111,20 @@ Adequação: fluxo testado pela entrada do laço, campos do POST conferidos; seg
 **Where**: `broker/test/unit/tui-keys.test.ts`, `broker/test/unit/tui-loop.test.ts`
 **Requirement**: QST-78, QST-99
 
-- [ ] `input(v.ui, k, v, true)` para `\r` e para `\n` sobre `open("06", { text: "logo" })` dá o modal com `logo `, e sobre `open("05", { choice: 1 })` dá o mesmo estado; no laço, `"\n\x1b["` ao lado de `"\r\x1b["`
-- [ ] `"aqa"` e `"a\x03a"` na lista do teste da saída
-- [ ] O primeiro teste falha com `(more && k === "\r")` no lugar de `more`
-- [ ] Gate quick passa
+- [x] `input(v.ui, k, v, true)` para `\r` e para `\n` sobre `open("06", { text: "logo" })` dá o modal com `logo `, e sobre `open("05", { choice: 1 })` dá o mesmo estado; no laço, `"\n\x1b["` ao lado de `"\r\x1b["`
+- [x] `"aqa"` e `"a\x03a"` na lista do teste da saída
+- [x] O primeiro teste falha com `(more && k === "\r")` no lugar de `more`
+- [x] Gate quick passa
+
+**Evidência F33**: W4 e V2 mortos separadamente no scratch e arquivos restaurados. Quick: 1141 pass, 1 skip, 0 fail.
+
+| Critério / mapa reverso | Asserção (`broker/`) | Resultado da spec | Manter |
+| --- | --- | --- | --- |
+| QST-78, r/n com mais teclas retidas, texto e escolha | `test/unit/tui-keys.test.ts:463` `expect(input(text.ui, k, text, true)).toEqual(...)`; `:464` `expect(input(choice.ui, k, choice, true)).toEqual(choice.ui)` | logo com espaço, ou escolha inalterada; sem send | sim |
+| QST-78, entrada do laço | `test/unit/tui-loop.test.ts:440` `expect(t.posts).toEqual([])`; `:441` tela com logo e espaço; `:460` e `:461` escolha inalterada | quebra antes do escape retido não envia | sim |
+| QST-99, tecla entre outras duas | `test/unit/tui-loop.test.ts:638` `expect(t.raw).toEqual([true, false])`; `:640` zero POST | aqa e ctrl+c entre letras devolvem terminal | sim |
+
+Adequação: critérios completos, valores antigos preservados; segue `broker/CLAUDE.md` e a matriz.
 
 ### F34: Um marcador cortado por uma leitura
 

@@ -456,6 +456,15 @@ test("QST-78: in a chunk of more than one key into the text mode a line break be
   expect(chunk("", text)).toBe(text.ui);
 });
 
+test("QST-78: either line break with keys held back is a space in the text mode and does nothing in the choice mode", () => {
+  const text = open("06", { text: "logo" });
+  const choice = open("05", { choice: 1 });
+  for (const k of ["\r", "\n"]) {
+    expect(input(text.ui, k, text, true)).toEqual({ ...text.ui, modal: { ...m(text), text: "logo " } });
+    expect(input(choice.ui, k, choice, true)).toEqual(choice.ui);
+  }
+});
+
 test("QST-78: a pasted block with line breaks goes into the text and sends nothing", () => {
   const v = open("06", { text: "" });
   const pasted = chunk("logo da 89\r\nna versão quadrada\r", v);
