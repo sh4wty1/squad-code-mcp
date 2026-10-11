@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 64,
+  "next_id": 67,
   "lessons": [
     {
       "id": "L-001",
@@ -1110,10 +1110,12 @@
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "A8 broker/tui.ts:168 (QST-99: q among other keys of a chunk in a small terminal; validation.md round 4) (tui input)"
+        "A8 broker/tui.ts:168 (QST-99: q among other keys of a chunk in a small terminal; validation.md round 4) (tui input)",
+        "N11 broker/tui.ts:170 (QST-99: a mark of a paste among other keys of one read in a small terminal, through the loop; validation.md round 5, gap 3) (tui input)",
+        "X3 broker/tui.ts:171 (QST-99: ctrl+c among other keys of a chunk in a small terminal; validation.md round 5, gap 4) (tui input)"
       ],
       "created": "2026-10-11T06:12:12Z",
-      "last_seen": "2026-10-11T06:12:12Z"
+      "last_seen": "2026-10-11T07:20:50Z"
     },
     {
       "id": "L-061",
@@ -1129,10 +1131,11 @@
       "harmful": 0,
       "evidence": [
         "B5 broker/tui/keys.ts:199 (QST-78: a delimited paste with no modal open; validation.md round 4) (tui input)",
-        "B14 broker/tui/keys.ts:198 (QST-78: esc with no modal open ends a paste; validation.md round 4) (tui input)"
+        "B14 broker/tui/keys.ts:198 (QST-78: esc with no modal open ends a paste; validation.md round 4) (tui input)",
+        "N8 broker/tui.ts:170 (QST-99: the marks of a paste read in a small terminal with no modal open; validation.md round 5, gap 2) (tui input)"
       ],
       "created": "2026-10-11T06:12:12Z",
-      "last_seen": "2026-10-11T06:12:12Z"
+      "last_seen": "2026-10-11T07:20:50Z"
     },
     {
       "id": "L-062",
@@ -1165,10 +1168,65 @@
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "QST-78 with QST-99 broker/tui.ts:168 (the marks of a paste in a small terminal; validation.md round 4, SP1) (spec)"
+        "QST-78 with QST-99 broker/tui.ts:168 (the marks of a paste in a small terminal; validation.md round 4, SP1) (spec)",
+        "QST-78 with QST-99 broker/tui/keys.ts:53 (esc during a paste in a small terminal; validation.md round 5, SP3) (spec)"
       ],
       "created": "2026-10-11T06:12:13Z",
-      "last_seen": "2026-10-11T06:12:13Z"
+      "last_seen": "2026-10-11T07:20:51Z"
+    },
+    {
+      "id": "L-064",
+      "key": "surviving_mutant::when the condition of an ac is an or assert each outcome of the ac with a fixture where only one side of the or holds",
+      "text": "When the condition of an AC is an or, assert each outcome of the AC with a fixture where only one side of the or holds",
+      "signal": "surviving_mutant",
+      "scope": "tui tests",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "X5, X6, X7 broker/tui.ts:171, broker/test/unit/tui-loop.test.ts:630 (QST-99: q and ctrl+c quit asserted at 100x30 only, not at 119x40 nor 120x39; validation.md round 5, gap 1) (tui tests)"
+      ],
+      "created": "2026-10-11T07:20:50Z",
+      "last_seen": "2026-10-11T07:20:50Z"
+    },
+    {
+      "id": "L-065",
+      "key": "surviving_mutant::when an ac names several inputs for one rule assert the rule with each input in every state the ac gives",
+      "text": "When an AC names several inputs for one rule, assert the rule with each input in every state the AC gives",
+      "signal": "surviving_mutant",
+      "scope": "spec tests",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "L4 broker/tui/keys.ts:207 (QST-78: a line feed with no modal open and keys held back after it, where the carriage return has its assertion; validation.md round 5, gap 5) (spec tests)"
+      ],
+      "created": "2026-10-11T07:20:50Z",
+      "last_seen": "2026-10-11T07:20:50Z"
+    },
+    {
+      "id": "L-066",
+      "key": "spec_precision_gap::when an ac says what happens to the items a rule acts on and to linked items of another owner state what happens to a linked item of the same owner the rule does not act on",
+      "text": "When an AC says what happens to the items a rule acts on and to linked items of another owner, state what happens to a linked item of the same owner the rule does not act on",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "QST-36 with QST-31 and QST-39; mutants Q6, Q6a broker/question.ts:74, :71 (a question of the same worker about another ticket merged into one the result closes; validation.md round 5, SP2) (spec)"
+      ],
+      "created": "2026-10-11T07:20:51Z",
+      "last_seen": "2026-10-11T07:20:51Z"
     }
   ]
 }
