@@ -804,6 +804,56 @@ test("QST-99, QST-78: the marks of a delimited paste are read in a terminal smal
   }
 });
 
+test("QST-78, QST-99: each paste mark is recognized in all 32 partitions into one to six reads at all four terminal sizes", async () => {
+  const begin = "\x1b[200~";
+  const end = "\x1b[201~";
+  // Each of the five gaps between the six bytes either ends a read or does not.
+  const cases = [begin, end].flatMap((mark) => [{ cols: 120, rows: 40 }, ...SMALL].flatMap((size) =>
+    Array.from({ length: 32 }, (_, cuts) => {
+      const reads: string[] = [];
+      let from = 0;
+      for (let gap = 0; gap < 5; gap++) {
+        if (cuts & (1 << gap)) {
+          reads.push(mark.slice(from, gap + 1));
+          from = gap + 1;
+        }
+      }
+      reads.push(mark.slice(from));
+      return { mark, size, reads };
+    })
+  ));
+  expect(cases.length).toBe(256);
+  for (const { mark, size, reads } of cases) {
+    const { t, key, resize, stop } = launch(EVENTS, { intervalMs: 60000 });
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      for (const k of ["4", "j", "\r", "logo"]) key(k);
+      const open = { screen: "questions", question: 8, modal: modal(8, { text: "logo" }) } as const;
+      expect(t.lines()).toEqual(tab(t.view(open)));
+      // QST-78: an end marker ends a paste already started at the normal size.
+      if (mark === end) key(begin);
+      t.size = size;
+      resize();
+      // No wait between reads: an interval longer than 40 ms is outside F37.
+      for (const read of reads) key(read);
+      expect(t.posts).toEqual([]);
+      t.size = { cols: 120, rows: 40 };
+      resize();
+      // QST-78/99: markers add no text; growing restores the original modal.
+      expect(t.lines()).toEqual(tab(t.view(open)));
+      key("\r");
+      if (mark === begin) {
+        expect(t.posts).toEqual([]);
+        expect(t.lines()).toEqual(tab(t.view({ ...open, modal: modal(8, { text: "logo " }) })));
+      } else {
+        expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo" } }]);
+      }
+    } finally {
+      stop();
+    }
+  }
+}, 60000);
+
 function smallCases(full: boolean) {
   const begin = "\x1b[200~";
   const end = "\x1b[201~";
