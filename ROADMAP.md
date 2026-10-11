@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** Question concluída no branch `feat/question`, com PASS do Verifier na terceira rodada, à espera de review e merge. A suíte passa no Windows; no Linux passa com uma instabilidade de tempo em testes de integração que a `main` também tem. A próxima fatia é Papéis. Terminal interativo real e macOS não foram exercitados. O estado está no Handoff de `.specs/STATE.md`.
+**Agora:** Question mesclada na `main` pelo PR 9, com PASS do Verifier na oitava rodada. A próxima fatia é Papéis; depois dela, Gate fecha o MVP. A suíte passa no Windows. No Linux as rodadas de correção 3 em diante da Question não rodaram, e a suíte tinha lá uma instabilidade de tempo em testes de integração que a `main` também tem. O dev conferiu a aba e o modal num terminal real; macOS não foi exercitado. O estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 
