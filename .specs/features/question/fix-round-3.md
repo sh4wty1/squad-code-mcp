@@ -59,11 +59,11 @@ tarefa marcada aqui.
 
 **Lacuna**: achado F4 da review, `broker/shared/derive.ts:353`. Uma pergunta que deixou a mescla pelo próprio `result_default` continua em `absorbed` da que ela seguia: a lista, o detalhe e o modal de Q-02 mostram `absorveu Q-01 (worker)` e a resposta do dev a Q-02 só vai para `mother` e `worker-2`.
 **Where**: `broker/shared/derive.ts`
-**Requirement**: identificar na spec o requisito da linha `absorveu`
+**Requirement**: QST-49, que ganhou a frase sobre quem sai da lista; as linhas `absorveu` são de QST-56, QST-58 e QST-70
 
-- [ ] Depois de lidas as respostas, `absorbed` guarda só os ids cujo `answered_by` é nulo
-- [ ] Teste: Q-01 mesclada em Q-02, o `result` do worker de Q-01 a fecha, e Q-02 não mostra mais `absorveu Q-01` na lista, no detalhe nem no modal
-- [ ] Gate full passa
+- [x] Depois de lidas as respostas, `absorbed` guarda só os ids cujo `answered_by` é nulo
+- [x] Teste: Q-01 mesclada em Q-02, o `result` do worker de Q-01 a fecha, e Q-02 não mostra mais `absorveu Q-01` na lista, no detalhe nem no modal
+- [x] Gate full passa
 
 ### F18: A asserção que compara `KEY_SEAL` com ele mesmo
 

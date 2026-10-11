@@ -133,6 +133,19 @@ test("QST-70: a non-blocking question has the time left in the title and says wh
   ]);
 });
 
+test("QST-70: the route of the modal no longer names a question that left the merge by the result of who asked it", () => {
+  const b = open();
+  const left = b.ask(WORKER_1, { ...DEFAULT, ticket_ref: "T-1" });
+  const kept = b.ask(WORKER_2, DEFAULT);
+  b.question.merge(MOTHER, { question_id: left, into: kept });
+  const route = () => box(b.lines(modal(kept, { choice: null })), 0, 39).filter((line) => line.startsWith("│  rota"));
+  expect(route()).toEqual([boxed("rota    w2 → ldr → mot → você   (absorveu Q-01 (worker))")]);
+
+  // worker-1 delivers T-1: Q-01 closes by its own default
+  b.question.delivered("worker-1", "T-1");
+  expect(route()).toEqual([boxed("rota    w2 → ldr → mot → você")]);
+});
+
 test("QST-71: only the selected line of the choice mode has the mark, on a black background", () => {
   // The four lines of the choice of frame 05 are lines 22 to 25
   for (const choice of [0, 2, 3]) {

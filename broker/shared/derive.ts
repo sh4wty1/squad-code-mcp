@@ -257,7 +257,8 @@ export interface Question {
   // it was merged into closes.
   open: boolean;
   merged_into: number | null;
-  // the questions merged straight into this one, in the order they were
+  // the questions merged straight into this one that have no answer of their own, in the
+  // order they were merged
   absorbed: number[];
   default: string | null;
   // of the first question to "human", as it came
@@ -354,6 +355,10 @@ export function questions(events: SquadEvent[]): Question[] {
       }
     }
   }
+
+  // A merged question with an answer of its own left the merge: the one it was merged into
+  // no longer answers for it
+  for (const q of all.values()) q.absorbed = q.absorbed.filter((id) => all.get(id)!.answered_by === null);
 
   // A merged question without an answer of its own closes with the one it was merged
   // into. The walk stops after as many steps as there are questions: a cycle closes nothing.

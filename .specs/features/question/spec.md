@@ -248,7 +248,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 5. **QST-46** The função `questions(eventos)` SHALL dar a cada pergunta um `status`, pela primeira regra que valer: `answered` com `answer` próprio de `resolved_by` `human` ou `agent`; `defaulted` com `answer` próprio de `timeout_default` ou `result_default`; para a mesclada sem `answer` próprio, o status e o `answer_seq` da pergunta de destino quando a de destino tem `answer`, próprio ou herdado de outra mescla; `defaulted` se a própria pergunta tem default, ou `discarded` se não tem, quando os eventos têm o `feature_closed` da feature; `merged` se foi mesclada; `open`.
 6. **QST-47** The função `questions(eventos)` SHALL dar a cada pergunta `open` falso sempre que o `status` não é `open`.
 7. **QST-48** WHEN qualquer sequência de chamadas aceitas e recusadas desta fatia, de `/send` e de `/close-feature` termina THEN, para cada feature, `questions()` aplicada aos eventos daquela feature SHALL dar, para cada linha de `questions` da feature e só para elas, os mesmos `id`, `asked_by`, `holder`, `blocking`, `ticket_ref`, `default_answer`, `status`, `merged_into`, `deadline_ts` e `answer_seq`.
-8. **QST-49** The função `questions(eventos)` SHALL dar a cada pergunta o texto, o `why`, as `options` e o `default` do primeiro `question`, o `timeout_s` e a chegada do primeiro `question` com `to` `human`, a hora e o autor do `answer` que a resolveu, a hora do `question_merged` que a mesclou e os ids das perguntas mescladas nela.
+8. **QST-49** The função `questions(eventos)` SHALL dar a cada pergunta o texto, o `why`, as `options` e o `default` do primeiro `question`, o `timeout_s` e a chegada do primeiro `question` com `to` `human`, a hora e o autor do `answer` que a resolveu, a hora do `question_merged` que a mesclou e os ids das perguntas mescladas nela; uma pergunta que fechou por um `answer` próprio depois de mesclada (QST-37) SHALL sair dessa lista, e com isso das linhas `absorveu` de QST-56, QST-58 e QST-70.
 9. **QST-50** WHEN `POST /history` recebe `question_id` THEN o broker SHALL devolver todo `question`, `answer` e `question_merged` daquela pergunta, em ordem de `seq`.
 
 **Independent Test**: um teste gera sequências de chamadas, lê `GET /events` e a tabela, e compara linha a linha.
@@ -413,7 +413,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-46 | P1: Encerramento da feature e paridade com o log | T4 | Verified |
 | QST-47 | P1: Encerramento da feature e paridade com o log | T4 | Verified |
 | QST-48 | P1: Encerramento da feature e paridade com o log | T18 | Verified |
-| QST-49 | P1: Encerramento da feature e paridade com o log | T4 | Verified |
+| QST-49 | P1: Encerramento da feature e paridade com o log | T4, F17 | Implementing |
 | QST-50 | P1: Encerramento da feature e paridade com o log | T3 | Verified |
 | QST-51 | P1: O que o agente vê | T5 | Verified |
 | QST-52 | P1: O que o agente vê | T17 | Verified |

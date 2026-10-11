@@ -714,6 +714,37 @@ test("QST-49: absorbed has the ids of the questions merged straight into it, in 
   ]);
 });
 
+test("QST-49: a merged question that closed by an answer of its own leaves the absorbed of the one it was merged into, and keeps the ones merged into it", () => {
+  const absorbed = (events: SquadEvent[]) => questions(events).map((q) => [q.id, q.absorbed]);
+  const merged = [
+    asked(2, 7, "mother", "human"),
+    asked(3, 8, "worker-1", "leader"),
+    asked(4, 9, "worker-2", "leader"),
+    asked(5, 10, "worker-3", "leader"),
+    mergedInto(6, 10, 8),
+    mergedInto(7, 8, 7),
+    mergedInto(8, 9, 7),
+  ];
+  expect(absorbed(merged)).toEqual([
+    [7, [8, 9]],
+    [8, [10]],
+    [9, []],
+    [10, []],
+  ]);
+
+  // The result of worker-1 closes Q-08, and Q-10 with it
+  const left = [...merged, answered(9, 8, "broker", "result_default", "8080")];
+  const after = [
+    [7, [9]],
+    [8, [10]],
+    [9, []],
+    [10, []],
+  ];
+  expect(absorbed(left)).toEqual(after);
+  // The answer of the dev to Q-07 closes Q-09 and is not its own: Q-09 is still absorbed
+  expect(absorbed([...left, answered(10, 7, "human", "human")])).toEqual(after);
+});
+
 test("QST-51: the holder of an open question owes its answer, with the seq of the latest question of it, in order of seq with its other debts", () => {
   const events = [
     kickoff(1),

@@ -277,6 +277,22 @@ test("QST-58: a ticket without rework has none in its line, and the questions me
   expect(sides(drawn, 15, 16)).toEqual(["efeito  worker-1 retoma o T-1 assim que você confirmar.", HINT]);
 });
 
+test("QST-56, QST-58: a question that left the merge by the result of who asked it is no longer named in the route of the list nor in the detail of the one it was merged into", () => {
+  const b = open();
+  const left = b.ask(WORKER_1, { ...DEFAULT, ticket_ref: "T-1" });
+  const kept = b.ask(WORKER_2, DEFAULT);
+  b.question.merge(MOTHER, { question_id: left, into: kept });
+  expect(row(b.lines(), 3).slice(0, 6)).toBe("▶ Q-02");
+  expect(row(b.lines(), 6)).toBe("  rota w2 → ldr → mot → dev  · absorveu Q-01 (worker)");
+  expect(sides(b.lines(), 7, 8)).toEqual(["rota    w2 → ldr → mot → dev", "dedup   absorveu Q-01 (worker) · mesclada pela mother"]);
+
+  // worker-1 delivers T-1: Q-01 closes by its own default, and Q-02 goes on alone
+  b.question.delivered("worker-1", "T-1");
+  expect(row(b.lines(), 3).slice(0, 6)).toBe("▶ Q-02");
+  expect(row(b.lines(), 6)).toBe("  rota w2 → ldr → mot → dev");
+  expect(sides(b.lines(), 7, 8)).toEqual(["rota    w2 → ldr → mot → dev", SEP]);
+});
+
 test("QST-58: the detail of a non-blocking question with options has them numbered and the other answer, and no line of its default", () => {
   const b = open();
   b.ask(WORKER_2, CHOICES);
