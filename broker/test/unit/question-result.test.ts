@@ -237,6 +237,47 @@ test("QST-36: a question of the worker merged into another of its own through th
   ]);
 });
 
+test("QST-36: a question of the worker about another ticket, or about none, merged into one the result closes follows the answer of that one, straight or through the question of another worker", () => {
+  for (const ticket_ref of ["T-2", undefined]) {
+    // Q-02, which the result of T-1 does not close by itself, merged straight into Q-01
+    const b = setup();
+    const id = b.openFeature();
+    b.question.ask(WORKER_1, ON_TICKET);
+    b.question.ask(WORKER_1, { ...ON_TICKET, default: "9090", ticket_ref });
+    b.question.merge(MOTHER, { question_id: 2, into: 1 });
+    const deliveries = b.deliveries();
+    b.question.delivered("worker-1", "T-1");
+    expect(b.events().slice(4)).toEqual([storedDefault(5, id)]);
+    expect(b.questionRows()).toEqual([
+      questionRow(1, id, { ...ROW, status: "defaulted", answer_seq: 5 }),
+      questionRow(2, id, { ...ROW, ticket_ref: ticket_ref ?? null, default_answer: "9090", status: "defaulted", merged_into: 1, answer_seq: 5 }),
+    ]);
+    expect(b.deliveries()).toEqual([...deliveries, { event_seq: 5, recipient: "worker-1", acked_at: null }]);
+
+    // And merged into Q-03 of worker-3, which is merged into Q-01
+    const c = setup();
+    const feature = c.openFeature();
+    c.question.ask(WORKER_1, ON_TICKET);
+    c.question.ask(WORKER_1, { ...ON_TICKET, default: "9090", ticket_ref });
+    c.question.ask(WORKER_3, { ...ON_TICKET, default: "7070", ticket_ref: "T-3" });
+    c.question.merge(MOTHER, { question_id: 2, into: 3 });
+    c.question.merge(MOTHER, { question_id: 3, into: 1 });
+    const before = c.deliveries();
+    c.question.delivered("worker-1", "T-1");
+    expect(c.events().slice(6)).toEqual([storedDefault(7, feature)]);
+    expect(c.questionRows()).toEqual([
+      questionRow(1, feature, { ...ROW, status: "defaulted", answer_seq: 7 }),
+      questionRow(2, feature, { ...ROW, ticket_ref: ticket_ref ?? null, default_answer: "9090", status: "defaulted", merged_into: 3, answer_seq: 7 }),
+      questionRow(3, feature, { ...ROW, asked_by: "worker-3", ticket_ref: "T-3", default_answer: "7070", status: "defaulted", merged_into: 1, answer_seq: 7 }),
+    ]);
+    expect(c.deliveries()).toEqual([
+      ...before,
+      { event_seq: 7, recipient: "worker-1", acked_at: null },
+      { event_seq: 7, recipient: "worker-3", acked_at: null },
+    ]);
+  }
+});
+
 test("QST-39: a blocking question of the ticket, a non-blocking one of another ticket, one without ticket and one of another worker stay open", () => {
   const b = setup();
   const id = b.openFeature();

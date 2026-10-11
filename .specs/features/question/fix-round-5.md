@@ -41,7 +41,7 @@ tarefa marcada aqui.
 **Where**: `.specs/features/question/spec.md`, `broker/test/unit/question-result.test.ts`
 **Requirement**: QST-36
 
-- [ ] QST-36 diz que toda pergunta que o `result` não fecha por si, mesclada numa que ele fecha, segue o `answer` daquela, como QST-31
-- [ ] Teste: Q-02 de worker-1 sobre T-2 mesclada em Q-01 sobre T-1, direto e por meio da pergunta de outro worker; o `result` de T-1 grava um `answer` só, e Q-02 fecha com ele
-- [ ] O teste falha com a busca filtrando por `asked_by` no lugar dos ids que o `result` fecha
-- [ ] Gate build passa
+- [x] QST-36 diz que toda pergunta que o `result` não fecha por si, mesclada numa que ele fecha, segue o `answer` daquela, como QST-31
+- [x] Teste: Q-02 de worker-1 sobre T-2 mesclada em Q-01 sobre T-1, direto e por meio da pergunta de outro worker; o `result` de T-1 grava um `answer` só, e Q-02 fecha com ele
+- [x] O teste falha com a busca filtrando por `asked_by` no lugar dos ids que o `result` fecha
+- [x] Gate build passa
