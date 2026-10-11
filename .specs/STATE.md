@@ -121,15 +121,15 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 Atualizado em 2026-10-11.
 
 - **Feature**: Question, `.specs/features/question/`.
-- **Phase / Task**: rodada de correção 6, F35 concluída; F36 é a próxima tarefa. Rodada 7 do Verifier ainda não começou.
-- **Completed**: T1–T38 e F1–F28 anteriores; nesta rodada F29 `1b6bb61`, F30 `e32b1c0`, F31 `bb3b853`, F32 `546af2a`, F33 `327ed65`, F34 `1ddf501` e F35 (commit desta atualização), cada uma com tarefa marcada no mesmo commit. Nenhum código de produção mudou. QST-36, QST-78 e QST-99 continuam `Implementing`.
-- **In-progress** (file:line): F36, `broker/test/unit/question-replay.test.ts`, ainda sem alteração.
-- **Next step**: concluir F36 com oráculo independente para os casos gerados e matar os nove mutantes pelo teste sozinho. Depois, Verifier novo sobre `6cd28e2..HEAD`, full mais completo na rodada 7. Com PASS, verificar QST-36/78/99 e atualizar o handoff; com FAIL, devolver o resíduo ao dev sem nova rodada automática.
-- **Blockers**: nenhum. F35 completo passou em 481033,83 ms com timeout de 1800000 ms, 33600 casos, 187862 asserções. Asserções e oráculo preservados; montagem e custo seguem a decisão registrada pelo dev.
-- **Uncommitted files**: F35 e registros desta retomada entram neste commit; F36 ainda não começou. Nenhuma alteração descartada ou guardada em stash.
-- **Branch**: `feat/question`, sobre F34 `1ddf501`, sem push nem merge.
+- **Phase / Task**: rodada de correção 6 concluída; rodada 7 do Verifier é o próximo passo.
+- **Completed**: T1–T38 e F1–F28 anteriores; nesta rodada F29 `1b6bb61`, F30 `e32b1c0`, F31 `bb3b853`, F32 `546af2a`, F33 `327ed65`, F34 `1ddf501`, F35 `9db4ad5` e F36 (commit desta atualização), cada uma com tarefa marcada no mesmo commit. Nenhum código de produção mudou. QST-36, QST-78 e QST-99 continuam `Implementing`.
+- **In-progress** (file:line): `.specs/features/question/validation.md`, ainda com a rodada 6 FAIL; falta o relatório independente da rodada 7.
+- **Next step**: Verifier novo que não escreveu código, testes nem relatórios, sobre `6cd28e2..HEAD`, com `references/validate.md` da skill como checklist, full mais completo na rodada 7. Mutante de tui.ts/marks sobrevivente ao gate também roda contra o completo. Com PASS, verificar QST-36/78/99 e atualizar o handoff; com FAIL, devolver o resíduo ao dev sem nova rodada automática.
+- **Blockers**: nenhum. F35 completo passou em 481033,83 ms, com 33600 casos e 187862 asserções. F36 gerou 1368 sequências, passou e matou os nove mutantes pelo teste sozinho.
+- **Uncommitted files**: registros e teste de F36 entram neste commit. Nenhuma alteração descartada ou guardada em stash.
+- **Branch**: `feat/question`, F35 `9db4ad5` e commit de F36 desta atualização, sem push nem merge.
 - **Decisão do dev nesta retomada**: autorizou corrigir apenas a lista de mutantes de F35 para os de terminal pequeno definidos nas rodadas 5 e 6, mantendo o produto completo e registrando a divergência. X8/X9 não têm definição nos relatórios; N16–N20 históricos são do broker, e K1–K3 não são da regra de terminal pequeno. A lista corrigida consta em `fix-round-6.md`, ainda sem commit porque F35 está incompleta.
-- **Evidência desta retomada**: F35, 800 casos no gate: 1 pass, 0 fail; os 20 mutantes definidos mortos pelo teste de 800 sozinho em cópias isoladas e restauradas; nenhum caso extra no gate. Full: tsc 0, 1301 pass, 4 skip, 0 fail, 63 arquivos. Completo: 1 pass, 0 fail, 33600 casos em 481,08 s. Gates quick de F29–F34 verdes, full de F29: tsc 0, 1296 pass, 3 skip, 0 fail. Logs e cópias restauradas em `%TEMP%/squad-question-round6/`; a árvore real nunca recebeu mutantes.
+- **Evidência desta retomada**: F35, 800 casos no gate e os 20 mutantes definidos mortos pelo teste de 800 sozinho em cópias isoladas e restauradas; nenhum caso extra no gate. Full: tsc 0, 1301 pass, 4 skip, 0 fail, 63 arquivos. Completo: 1 pass, 0 fail, 33600 casos em 481,08 s. F36 isolado: 1 pass, 0 fail, 1368 sequências, 46983 asserções; nove mutantes mortos e restaurados. Build de F36: tsc 0, 1302 pass, 4 skip, 0 fail, 63 arquivos. Gates quick de F29–F34 verdes, full de F29: tsc 0, 1296 pass, 3 skip, 0 fail. Logs e cópias restauradas em `%TEMP%/squad-question-round6/`; a árvore real nunca recebeu mutantes.
 
 ### O que esta fatia deixa para as próximas
 

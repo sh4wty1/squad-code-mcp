@@ -400,8 +400,8 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-33 | P1: Prazo, default e resolução única | T11 | Verified |
 | QST-34 | P1: Prazo, default e resolução única | T16 | Verified |
 | QST-35 | P1: Prazo, default e resolução única | T11, T16 | Verified |
-| QST-36 | P1: Prazo, default e resolução única | T12, T13, F16 | Implementing |
-| QST-37 | P1: Prazo, default e resolução única | T12 | Verified |
+| QST-36 | P1: Prazo, default e resolução única | T12, T13, F16, F36 | Implementing |
+| QST-37 | P1: Prazo, default e resolução única | T12, F36 | Verified |
 | QST-38 | P1: Prazo, default e resolução única | T8 | Verified |
 | QST-39 | P1: Prazo, default e resolução única | T12, T13 | Verified |
 | QST-40 | P1: Prazo, default e resolução única | T11 | Verified |
@@ -409,10 +409,10 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-42 | P1: Encerramento da feature e paridade com o log | T2 | Verified |
 | QST-43 | P1: Encerramento da feature e paridade com o log | T14 | Verified |
 | QST-44 | P1: Encerramento da feature e paridade com o log | T14 | Verified |
-| QST-45 | P1: Encerramento da feature e paridade com o log | T18 | Verified |
+| QST-45 | P1: Encerramento da feature e paridade com o log | T18, F36 | Verified |
 | QST-46 | P1: Encerramento da feature e paridade com o log | T4 | Verified |
 | QST-47 | P1: Encerramento da feature e paridade com o log | T4 | Verified |
-| QST-48 | P1: Encerramento da feature e paridade com o log | T18 | Verified |
+| QST-48 | P1: Encerramento da feature e paridade com o log | T18, F36 | Verified |
 | QST-49 | P1: Encerramento da feature e paridade com o log | T4, F17 | Verified |
 | QST-50 | P1: Encerramento da feature e paridade com o log | T3 | Verified |
 | QST-51 | P1: O que o agente vê | T5 | Verified |

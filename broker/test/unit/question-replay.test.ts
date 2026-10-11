@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { QuestionRow } from "../../db.ts";
 import type { Caller } from "../../send.ts";
 import { questions, tickets } from "../../shared/derive.ts";
-import { HUMAN_TOKEN, JUDGE, LEADER, MOTHER, OPENED, setup, WORKER_1, WORKER_2, WORKER_3 } from "./helpers.ts";
+import { HUMAN_TOKEN, JUDGE, LEADER, MOTHER, NOW, OPENED, questionRow, setup, WORKER_1, WORKER_2, WORKER_3 } from "./helpers.ts";
 
 // The seed of the first sequence; the one of index i runs with SEED + i, so a failure is
 // replayed alone by its seed
@@ -47,6 +47,45 @@ function tally() {
     // the seeds with a merged question closed by its own result whose destination closed after it (QST-37)
     closedAlone: new Set<number>(),
   };
+}
+
+// QST-48: compare the ten fields for every feature after each generated call.
+function compareQuestions(b: ReturnType<typeof setup>) {
+  const table = b.questionRows() as unknown as QuestionRow[];
+  const events = b.log.after(0);
+  const features = (b.db.query("SELECT id FROM features ORDER BY id").all() as { id: number }[]).map((f) => f.id);
+  for (const feature of features) {
+    const derived = questions(events.filter((e) => e.feature_id === feature)).map((q) => ({
+      id: q.id,
+      asked_by: q.asked_by,
+      holder: q.holder,
+      blocking: q.blocking,
+      ticket_ref: q.ticket_ref,
+      default_answer: q.default,
+      status: q.status,
+      merged_into: q.merged_into,
+      deadline_ts: q.deadline,
+      answer_seq: q.answer_seq,
+    }));
+    const stored = table
+      .filter((row) => row.feature_id === feature)
+      .map((row) => ({
+        id: row.id,
+        asked_by: row.asked_by,
+        holder: row.holder,
+        blocking: row.blocking === 1,
+        ticket_ref: row.ticket_ref,
+        default_answer: row.default_answer,
+        status: row.status,
+        merged_into: row.merged_into,
+        deadline_ts: row.deadline_ts,
+        answer_seq: row.answer_seq,
+      }));
+    expect(derived.sort((x, y) => x.id - y.id)).toEqual(stored);
+  }
+  // every row is of one of the features compared
+  expect(table.filter((row) => !features.includes(row.feature_id))).toEqual([]);
+
 }
 
 // One sequence of STEPS calls over a broker of its own, compared after each one. Throws with
@@ -254,43 +293,10 @@ function run(seed: number, seen: ReturnType<typeof tally>) {
     }
   }
 
-  // QST-48: for each feature, the ten fields of each row are the ones `questions` gives over
-  // the events of that feature, with no question on one side only
   function compare() {
+    compareQuestions(b);
     const table = rows();
     const events = b.log.after(0);
-    const features = (b.db.query("SELECT id FROM features ORDER BY id").all() as { id: number }[]).map((f) => f.id);
-    for (const feature of features) {
-      const derived = questions(events.filter((e) => e.feature_id === feature)).map((q) => ({
-        id: q.id,
-        asked_by: q.asked_by,
-        holder: q.holder,
-        blocking: q.blocking,
-        ticket_ref: q.ticket_ref,
-        default_answer: q.default,
-        status: q.status,
-        merged_into: q.merged_into,
-        deadline_ts: q.deadline,
-        answer_seq: q.answer_seq,
-      }));
-      const stored = table
-        .filter((row) => row.feature_id === feature)
-        .map((row) => ({
-          id: row.id,
-          asked_by: row.asked_by,
-          holder: row.holder,
-          blocking: row.blocking === 1,
-          ticket_ref: row.ticket_ref,
-          default_answer: row.default_answer,
-          status: row.status,
-          merged_into: row.merged_into,
-          deadline_ts: row.deadline_ts,
-          answer_seq: row.answer_seq,
-        }));
-      expect(derived.sort((x, y) => x.id - y.id)).toEqual(stored);
-    }
-    // every row is of one of the features compared
-    expect(table.filter((row) => !features.includes(row.feature_id))).toEqual([]);
 
     // QST-45: no row leaves the table, and no id is given twice
     expect(table.length).toBeGreaterThanOrEqual(rowCount);
@@ -337,3 +343,124 @@ test("QST-48/45/38: after each step of 200 generated sequences of 40 calls, the 
   // and through the one state where the table and the log may part (QST-37)
   expect(seen.closedAlone.size).toBeGreaterThan(0);
 });
+
+// A chain points from each place to the previous one. The classes separate the asker
+// from the ticket, including the same asker on another ticket or without one.
+function mergedSequences() {
+  const kinds = [
+    { peer: WORKER_1, ticket: "T-1" },
+    { peer: WORKER_1, ticket: "T-2" },
+    { peer: WORKER_1, ticket: null },
+    { peer: WORKER_2, ticket: "T-1" },
+    { peer: WORKER_3, ticket: "T-1" },
+    { peer: JUDGE, ticket: "T-1" },
+  ];
+  const sequences: { chain: typeof kinds; reverse: boolean }[] = [];
+  function extend(chain: typeof kinds) {
+    if (chain.length >= 2 && chain.some((q) => q.peer === WORKER_1 && q.ticket === "T-1") && new Set(chain.map((q) => q.peer.name)).size >= 2) {
+      for (const reverse of [false, true]) sequences.push({ chain, reverse });
+    }
+    if (chain.length === 4) return;
+    for (const kind of kinds) extend([...chain, kind]);
+  }
+  extend([]);
+  return sequences;
+}
+
+function replayMerged(sequence: ReturnType<typeof mergedSequences>[number]) {
+  const b = setup();
+  try {
+    const feature = b.openFeature();
+    expect(b.plan(LEADER, { tickets: TICKETS.map((ticket_ref) => ({ ticket_ref, title: ticket_ref })) })).toEqual({ ok: true, seq: 2 });
+    expect(b.send(LEADER, { kind: "task", to: "worker-1", summary: "do it", ticket_ref: "T-1", loadout: [] })).toEqual({ ok: true, seq: 3 });
+    compareQuestions(b);
+    const chain = sequence.chain.map((q, index, all) => ({
+      ...q,
+      id: sequence.reverse ? all.length - index : index + 1,
+      fallback: `default at ${index}`,
+    }));
+    const byId = [...chain].sort((a, b) => a.id - b.id);
+    let seq = 3;
+    for (const q of byId) {
+      expect(b.question.ask(q.peer, {
+        to: "leader", summary: "which port?", why: "the spec gives two", blocking: false,
+        default: q.fallback, ...(q.ticket !== null && { ticket_ref: q.ticket }),
+      })).toEqual({ ok: true, question_id: q.id, seq: ++seq });
+      compareQuestions(b);
+    }
+    // Merge from the tail so every destination is still open when the call arrives.
+    for (let at = chain.length - 1; at > 0; at--) {
+      expect(b.question.merge(MOTHER, { question_id: chain[at]!.id, into: chain[at - 1]!.id })).toEqual({ ok: true, seq: ++seq });
+      compareQuestions(b);
+    }
+    const before = b.events();
+    const deliveries = b.deliveries();
+    const own = byId.filter((q) => q.peer.name === "worker-1" && q.ticket === "T-1");
+    // Spec oracle, from the generated calls: an own question has its own answer; any
+    // other follows the first own question encountered toward the root, if there is one.
+    const closesWith = chain.map((_, at) => {
+      for (let into = at; into >= 0; into--) {
+        if (own.includes(chain[into]!)) return chain[into]!.id;
+      }
+      return null;
+    });
+    const resultSeq = ++seq;
+    expect(b.send(WORKER_1, { kind: "result", to: "judge", summary: "done", ticket_ref: "T-1", task_seq: 3, branch: "squad/x", commit: "abc1234" })).toEqual({ ok: true, seq: resultSeq });
+    const answers = own.map((q) => ({
+      seq: ++seq, ts: NOW, kind: "answer", feature_id: feature, from_name: "broker", role_from: "broker",
+      to_name: q.peer.name, summary: `Q-${String(q.id).padStart(2, "0")}: ${q.fallback}`, body: q.fallback,
+      ticket_ref: q.ticket, question_id: q.id, gate_id: null,
+      data: { question_id: q.id, answer: q.fallback, resolved_by: "result_default" },
+    }));
+    const result = {
+      seq: resultSeq, ts: NOW, kind: "result", feature_id: feature, from_name: "worker-1", role_from: "worker",
+      to_name: "judge", summary: "done", body: "", ticket_ref: "T-1", question_id: null, gate_id: null,
+      data: { task_seq: 3, branch: "squad/x", commit: "abc1234" },
+    };
+    expect(b.events()).toEqual([...before, result, ...answers]);
+    const expectedRows = chain.map((q, at) => questionRow(q.id, feature, {
+      asked_by: q.peer.name, ticket_ref: q.ticket, blocking: 0, default_answer: q.fallback,
+      merged_into: at === 0 ? null : chain[at - 1]!.id,
+      status: closesWith[at] === null ? at === 0 ? "open" : "merged" : "defaulted",
+      answer_seq: answers.find((a) => a.question_id === closesWith[at])?.seq ?? null,
+    })).sort((a, b) => a.id - b.id);
+    expect(b.questionRows()).toEqual(expectedRows);
+    const expectedDeliveries = [...deliveries, { event_seq: resultSeq, recipient: "judge", acked_at: null }];
+    for (const answer of answers) {
+      const recipients = new Set(chain.filter((_, at) => closesWith[at] === answer.question_id).map((q) => q.peer.name));
+      recipients.delete(answer.from_name);
+      for (const recipient of [...recipients].sort()) expectedDeliveries.push({ event_seq: answer.seq, recipient, acked_at: null });
+    }
+    expect(b.deliveries()).toEqual(expectedDeliveries);
+    compareQuestions(b);
+    // QST-37: the destination can answer later, without overwriting a default or
+    // delivering its answer through a merge that the result already closed.
+    if (closesWith[0] === null) {
+      const root = chain[0]!;
+      expect(b.question.answer(LEADER, { question_id: root.id, answer: "resolved later" })).toEqual({ ok: true, seq: ++seq });
+      expect(b.events()).toEqual([...before, result, ...answers, {
+        seq, ts: NOW, kind: "answer", feature_id: feature, from_name: "leader", role_from: "leader",
+        to_name: root.peer.name, summary: `Q-${String(root.id).padStart(2, "0")}: resolved later`, body: "resolved later",
+        ticket_ref: root.ticket, question_id: root.id, gate_id: null,
+        data: { question_id: root.id, answer: "resolved later", resolved_by: "agent" },
+      }]);
+      expect(b.questionRows()).toEqual(expectedRows.map((q) => q.answer_seq === null ? { ...q, status: "answered", answer_seq: seq } : q));
+      const recipients = new Set(chain.filter((_, at) => closesWith[at] === null).map((q) => q.peer.name));
+      recipients.delete("leader");
+      expect(b.deliveries()).toEqual([...expectedDeliveries, ...[...recipients].sort().map((recipient) => ({ event_seq: seq, recipient, acked_at: null }))]);
+      compareQuestions(b);
+    }
+  } catch (error) {
+    throw new Error(`merged-result sequence ${JSON.stringify(sequence)}\n${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    b.db.close();
+  }
+}
+
+test("QST-36, QST-37, QST-48: generated merge chains and a result keep each own default, the nearest closed answer and its distinct deliveries", () => {
+  const sequences = mergedSequences();
+  expect(sequences.length).toBe(1368);
+  expect([...new Set(sequences.map((s) => s.chain.length - 1))].sort()).toEqual([1, 2, 3]);
+  expect([...new Set(sequences.map((s) => s.reverse))]).toEqual([false, true]);
+  for (const sequence of sequences) replayMerged(sequence);
+}, 60000);

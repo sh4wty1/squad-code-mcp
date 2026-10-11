@@ -186,10 +186,25 @@ Adequação: critérios completos e mapa reverso acima; asserções do oráculo 
 **Where**: `broker/test/unit/question-replay.test.ts`
 **Requirement**: QST-36, QST-37, QST-48
 
-- [ ] O gerador produz perguntas de dois ou mais `asked_by` sobre o mesmo ticket, mesclas em cadeia de até três, e o `result` de um deles
-- [ ] Além da paridade com a derivação, o teste afirma o que QST-36 define, calculado da sequência gerada: cada pergunta que o `result` fecha por si tem `answer` próprio com o seu default, em ordem crescente de id; cada mesclada que ele não fecha por si tem o `answer_seq` da mais próxima que ele fecha na cadeia; e cada `answer` é entregue uma vez a cada `asked_by` que fechou com ele, menos a quem o escreveu
-- [ ] Os mutantes C2, Q5, Q6, Q6a, Q7, R2, R3, R15 e R18 morrem por este teste sozinho
-- [ ] Gate build passa
+- [x] O gerador produz perguntas de dois ou mais `asked_by` sobre o mesmo ticket, mesclas em cadeia de até três, e o `result` de um deles
+- [x] Além da paridade com a derivação, o teste afirma o que QST-36 define, calculado da sequência gerada: cada pergunta que o `result` fecha por si tem `answer` próprio com o seu default, em ordem crescente de id; cada mesclada que ele não fecha por si tem o `answer_seq` da mais próxima que ele fecha na cadeia; e cada `answer` é entregue uma vez a cada `asked_by` que fechou com ele, menos a quem o escreveu
+- [x] Os mutantes C2, Q5, Q6, Q6a, Q7, R2, R3, R15 e R18 morrem por este teste sozinho
+- [x] Gate build passa
+
+**Evidência F36**: `mergedSequences` produz o produto de seis classes de pergunta, em cadeias de dois a quatro nós, com ao menos dois autores e uma pergunta que o result de worker-1 fecha por si. As classes: worker-1 sobre T-1, sobre T-2 e sem ticket; worker-2, worker-3 e judge sobre T-1. São 684 cadeias em duas ordens de criação de id, 1368 sequências. Cada pergunta tem default próprio por posição; as mesclas chegam da cauda até a raiz; o result é enviado por `/send`, e depois o holder responde à raiz, quando ela continuou aberta. QST-48 é comparada após cada ask, merge, result e answer. O gerador aleatório anterior de 200 sequências/40 chamadas e todas as suas asserções ficam; a comparação dos dez campos foi extraída, sem mudar os valores, para uso comum.
+
+Oráculo de QST-36 calculado só das chamadas geradas: perguntas próprias em ordem de id recebem seu default, e cada seguidora encontra a primeira própria em direção à raiz. Confere eventos completos, linhas completas e uma entrega por nome, com o seq da própria mais próxima. Confere a resposta posterior da raiz e que linhas e entregas já encerradas pelo result não são alteradas por ela (QST-37). Isolado: 1 pass, 0 fail, 46983 asserções, 2374,52 ms. C2, Q5, Q6, Q6a, Q7, R2, R3, R15 e R18 mortos separadamente pelo novo teste sozinho, em scratch, com arquivos restaurados após cada execução; sensor repetido sobre o teste final depois de compartilhar o objeto esperado do result. Logs em `%TEMP%/squad-question-round6/F36-<id>.log`. Build: tsc 0, 1302 pass, 4 skip, 0 fail, 63 arquivos, 84,10 s. Nenhum código de produção mudou.
+
+| Critério / mapa reverso | Asserção (`broker/`) | Resultado da spec | Manter |
+| --- | --- | --- | --- |
+| Gerador com profundidades e ordens | `test/unit/question-replay.test.ts:462` `expect(sequences.length).toBe(1368)`; `:463` profundidades `[1, 2, 3]`; `:464` duas ordens | cadeias com pelo menos dois autores, perguntas próprias e de outro autor sobre o mesmo ticket, em até três mesclas | sim |
+| QST-36, defaults e ordem | `test/unit/question-replay.test.ts:420` `expect(b.events()).toEqual([...before, result, ...answers])` | result seguido dos answers de broker por id crescente, com default e resolved_by próprios, payload completo | sim |
+| QST-36, answer mais próximo e linhas | `test/unit/question-replay.test.ts:427` `expect(b.questionRows()).toEqual(expectedRows)` | cada própria defaulted por si; seguidora usa o seq da mais próxima; destino não fechado continua open | sim |
+| QST-36, entregas | `test/unit/question-replay.test.ts:434` `expect(b.deliveries()).toEqual(expectedDeliveries)` | uma entrega por nome de quem fechou com cada answer, excluindo escritor | sim |
+| QST-37, resposta posterior do destino | `test/unit/question-replay.test.ts:441` eventos completos; `:447` `expect(b.questionRows()).toEqual(expectedRows.map(...))`; `:450` entregas completas | root pode responder depois; defaults e answer_seq anteriores são preservados; nenhuma entrega pela mescla já fechada | sim |
+| QST-48, paridade após cada chamada | `test/unit/question-replay.test.ts:84` `expect(derived.sort((x, y) => x.id - y.id)).toEqual(stored)`; `:87` linhas sem feature comparada vazias | os dez campos e o conjunto de perguntas iguais entre tabela e derivação | sim |
+
+Adequação: todos os critérios e o mapa reverso acima fechados; payload/conjunção conferidos em objetos completos. Nenhuma asserção antiga enfraquecida, eliminada ou pulada. Segue `broker/CLAUDE.md`, nomes por requisito e a matriz de `tasks.md`.
 
 ## Depois da última tarefa
 
