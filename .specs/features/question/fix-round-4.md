@@ -11,10 +11,12 @@ tarefa marcada aqui.
 
 ## Decisões do dev
 
-- **F24**: sem modal aberto, `\n` faz o que `enter` faz, como QST-78 diz hoje, ou não faz
-  nada, como o código faz?
-- **F25**: os marcadores de uma colagem delimitada são lidos num terminal menor que 120×40,
-  ou uma colagem que atravessa um redimensionamento não é delimitada?
+Respondidas em 2026-10-11.
+
+- **F24**: sem modal aberto, `\n` não faz nada. A spec passa a dizer o que o código faz:
+  `\r` é o `enter`.
+- **F25**: os marcadores de uma colagem delimitada são lidos em qualquer tamanho do
+  terminal. Não são teclas.
 
 ## Tarefas
 
@@ -55,10 +57,10 @@ tarefa marcada aqui.
 **Lacuna**: lacuna 6, `broker/tui/keys.ts:132`. QST-78 diz que sem modal "a tecla", `\r` ou `\n`, faz o que `enter` faz; `press` só conhece `\r`.
 **Where**: `.specs/features/question/spec.md` ou `broker/tui/keys.ts`, e `broker/test/unit/tui-keys.test.ts`
 **Requirement**: QST-78
-**Depende de**: decisão do dev sobre F24
+**Depende de**: decisão do dev sobre F24: `\n` não faz nada
 
-- [ ] A spec e o código dizem a mesma coisa de `\n` sem modal aberto, e um teste a fixa
-- [ ] Gate quick passa
+- [x] A spec diz que sem modal aberto `\r` é o `enter` e `\n` não faz nada, como o código, e um teste fixa isso na aba e no feed: sozinho, depois de outra tecla e numa colagem delimitada
+- [x] Gate quick passa
 
 ### F25: Os marcadores de colagem no terminal pequeno
 

@@ -555,6 +555,16 @@ test("QST-78: with no modal open a line break does what enter does also when the
   expect(input(tab.ui, "\r", tab, true)).toEqual({ ...tab.ui, modal: opened(8, null) });
 });
 
+test("QST-78: with no modal open \\n does nothing, alone, after another key and in a delimited paste, where \\r opens the modal", () => {
+  // The tab on Q-08, and the feed over the question of Q-08: enter opens its modal on both
+  for (const v of [view("04", { question: 8 }), view("01", { selected: 428 })]) {
+    expect(chunk("\r", v).modal).toEqual(opened(8, null));
+    expect(chunk("\n", v)).toBe(v.ui);
+    expect(chunk("p\n", v)).toEqual({ ...v.ui, paused: true });
+    expect(reads([PASTE, "\n"], v)).toEqual({ ...v.ui, pasting: true });
+  }
+});
+
 test("TUI-62: a chunk with q or ctrl+c among its keys quits", () => {
   const v = view("01", { selected: 417 });
   expect(input(v.ui, "jq", v)).toBeNull();
