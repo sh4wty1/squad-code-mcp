@@ -150,12 +150,35 @@ Adequação: novo texto da spec explícito; teste pela entrada do laço, sem mud
 **Where**: `broker/test/unit/tui-loop.test.ts`, ou um arquivo novo `broker/test/unit/tui-small.test.ts`
 **Requirement**: QST-99, QST-78
 
-- [ ] Um teste monta os casos do produto de: tamanho (119×40, 120×39, 100×30); estado antes de encolher (tela principal, aba sem modal, modal no modo texto com e sem texto, modal no modo escolha); colagem em curso ou não; e uma leitura feita de uma a três teclas tiradas de `q`, `ctrl+c`, `esc`, `\r`, `\n`, um dígito, uma letra, uma seta e os dois marcadores
-- [ ] Para cada caso afirma o que QST-99 define: com `q` ou `ctrl+c` na leitura o terminal é devolvido; sem eles nada é enviado, a tela é a de `small`, e de volta a 120×40 a tela é a de antes; a colagem em curso depois da leitura é a que os marcadores dela dizem, e nenhuma outra tecla a muda, o `esc` também não
-- [ ] O que a colagem em curso é depois da leitura se vê pelo `\r` seguinte, de volta a 120×40: envia ou vira espaço
-- [ ] Os valores esperados saem da spec, escritos no teste como regra, não de uma chamada ao código sob teste
-- [ ] Os mutantes X3, X5 a X9, N8, N11, N16 a N20, K1 a K3, V2, V4, V8 e V13 morrem por este teste sozinho
-- [ ] Gate full passa
+- [x] Uma função monta os casos e um oráculo só os confere, para os dois testes abaixo. As dimensões: tamanho (119×40, 120×39, 100×30); estado antes de encolher (tela principal, aba sem modal, modal no modo texto com e sem texto, modal no modo escolha); colagem em curso ou não; e uma leitura feita de uma a três teclas tiradas de `q`, `ctrl+c`, `esc`, `\r`, `\n`, um dígito, uma letra, uma seta e os dois marcadores, mais os dez cortes internos dos dois marcadores em duas leituras
+- [x] Teste do gate, 800 casos, sem semente: as dez leituras de uma tecla e os dez cortes, cruzados com os 30 contextos (tamanho × estado × colagem), 600 casos; as 100 leituras de duas teclas e 100 de três, em que a terceira tecla é a de índice (primeira + segunda) módulo 10, cada leitura num contexto em rodízio, 200 casos. O rodízio faz cada tecla em cada posição encontrar, nas leituras de duas teclas e nas de três, os dois valores de colagem, os cinco estados e os três tamanhos. O teste afirma a contagem e essa cobertura
+- [x] Teste completo, os 33600 casos do produto, registrado com `test.skipIf(!process.env.SQUAD_TEST_FULL)` e timeout próprio de 1800000 ms. Fica fora do gate, onde aparece como um pulado a mais (4 no Windows), e roda de dentro de `broker/` com `SQUAD_TEST_FULL=1 bun test test/unit/tui-loop.test.ts --test-name-pattern` e o nome dele
+- [x] Para cada caso afirma o que QST-99 define: com `q` ou `ctrl+c` na leitura o terminal é devolvido; sem eles nada é enviado, a tela é a de `small`, e de volta a 120×40 a tela é a de antes; a colagem em curso depois da leitura é a que os marcadores dela dizem, e nenhuma outra tecla a muda, o `esc` também não
+- [x] O que a colagem em curso é depois da leitura se vê pelo `\r` seguinte, de volta a 120×40: envia ou vira espaço
+- [x] Os valores esperados saem da spec, escritos no teste como regra, não de uma chamada ao código sob teste
+- [x] Os mutantes de terminal pequeno definidos nas rodadas 5 e 6, X3, X5, X6, X7, N8, N11, N5, V1, V2, V3, V4, V5, V7, V7b, V8, V11, V13, V14, V15 e V16, morrem pelo teste do gate sozinho. Se um sobreviver a ele, a célula que falta entra no teste do gate e fica registrada aqui; não se troca o mutante nem a asserção
+- [x] O teste completo passa uma vez no código de produção de `6cd28e2`, com o tempo anotado na evidência
+- [x] Gate full passa
+
+**Divergência autorizada pelo dev em 2026-10-11**: corrigida apenas a lista de mutantes, mantendo o produto completo. X8 e X9 não têm definição nos relatórios; N16 a N20 no histórico são mutantes de `question.ts` e `log.ts`, fora do caminho de um teste de TUI com fetch falso. K1 e K2 tratam `more` em terminal normal, e K3 o default desse argumento; não são mutantes da regra de terminal pequeno. A lista corrigida usa os 20 mutantes de QST-99 rastreáveis aos sensores das rodadas 5 e 6, incluindo os vizinhos já mortos por exemplos.
+
+**Interrupção F35 em 2026-10-11**: o teste do produto completo foi escrito, mas sua primeira execução no código de produção de `6cd28e2` saiu com 1 por timeout após 601272 ms (limite 600000 ms), com 0 pass, 1 fail, 37 filtered out e 141047 asserções executadas. Não foi registrada falha de asserção de comportamento; a execução não terminou. O tsc passou. Nenhuma asserção, caso ou timeout foi alterado depois da falha. A tarefa permanece aberta e sem commit; os mutantes de F35 foram preparados, mas não executados. F36 e o Verifier não começaram. Decisão devolvida ao dev, conforme a regra de parar se um teste novo falhar no código original.
+
+**Decisão do dev sobre o custo, em 2026-10-11**: o produto completo custa cerca de 24 ms por caso, perto de 13 minutos, e não cabe no gate. O gate passa a ter um desenho de pares de 800 casos, e o produto completo fica atrás de `SQUAD_TEST_FULL`, os dois com os mesmos casos gerados e o mesmo oráculo; as caixas acima já dizem isso. O teste escrito antes da interrupção é o ponto de partida: o oráculo e as asserções ficam, muda a montagem dos casos. O teste completo conta para o Verifier, como está em "Depois da última tarefa". Quem executa é o autor desta rodada.
+
+**Evidência F35 nesta retomada**: montagem comum em `smallCases`, com 800 casos no gate e 33600 no completo; oráculo e asserções da interrupção preservados em `checkSmall`. O rodízio usa índice módulo 30, com passos e offsets determinísticos para cada par; as asserções conferem todas as marginais exigidas em cada posição. Nenhuma célula adicional foi necessária. Isolado de 800: 1 pass, 0 fail, 5320 asserções, 14636 ms (antes de recolocar a asserção da contagem de 1110 palavras no gerador comum). Completo: 1 pass, 0 fail, 187862 asserções, 481033,83 ms, timeout 1800000 ms. Código de produção idêntico a `6cd28e2`.
+
+X3, X5, X6, X7, N8, N11, N5, V1, V2, V3, V4, V5, V7, V7b, V8, V11, V13, V14, V15 e V16 mortos separadamente pelo teste de 800 sozinho no scratch; cada execução falhou em asserção de comportamento, não por timeout. Arquivos restaurados e comparados byte a byte à produção real. Logs em `%TEMP%/squad-question-round6/F35-<id>.log`. Gate full: tsc 0; 1301 pass, 4 skip, 0 fail, 63 arquivos, 91,76 s; os três skips de plataforma anteriores e o completo fora do gate. O full e o completo correram simultaneamente em processos separados, sobre os mesmos arquivos finais, sem mutações na árvore real.
+
+| Critério / mapa reverso | Asserção (`broker/`) | Resultado da spec | Manter |
+| --- | --- | --- | --- |
+| Montagem e cobertura do gate | `test/unit/tui-loop.test.ts:919` `expect(cases.length).toBe(800)`; `:925` 100 leituras por comprimento; `:930` `expect(new Set(visits.map((c) => c.pasting)).size).toBe(2)`; `:931` cinco estados; `:932` três tamanhos | 600 casos de uma tecla/corte e 200 de duas/três, sem semente; cada tecla em cada posição cobre as marginais | sim |
+| Produto preservado | `test/unit/tui-loop.test.ts:825` `expect(words.length).toBe(1110)`; `:942` `expect(cases.length).toBe(33600)` | 1110 leituras inteiras e dez cortes, em 30 contextos | sim |
+| QST-99, saída em qualquer posição e contexto | `test/unit/tui-loop.test.ts:867` `expect(t.raw).toEqual([true, false])`; `:868` `expect(t.out.endsWith(LEAVE)).toBe(true)`; `:869` zero POST | terminal devolvido por q ou ctrl+c, com e sem colagem | sim |
+| QST-99, demais teclas e volta do tamanho | `test/unit/tui-loop.test.ts:874` raw; `:875` `expect(t.posts).toEqual([])`; `:876` tela small; `:879` `expect(t.lines()).toEqual(before)` | nada enviado, tela pequena e estado anterior restaurado | sim |
+| QST-78/99, colagem observada pelo enter seguinte | `test/unit/tui-loop.test.ts:897` `expect(t.posts).toEqual(pasting ? [] : [post])`; `:900` tela com espaço ou escolha mantida; `:903` `expect(t.posts).toEqual([post])` | só os marcadores mudam a colagem, esc não a encerra no terminal pequeno; POST com token, id e texto exatos | sim |
+
+Adequação: critérios completos e mapa reverso acima; asserções do oráculo preservadas, sem enfraquecimento. Tela e payload completos conferidos, no padrão de `broker/CLAUDE.md` e da matriz de `tasks.md`. O skip e o timeout próprios do completo são a decisão explícita do dev, não uma dispensa de execução.
 
 ### F36: O gerador de `question-replay` com mescla e `result`
 
@@ -172,7 +195,15 @@ Adequação: novo texto da spec explícito; teste pela entrada do laço, sem mud
 
 O Verifier roda de novo, como agente novo que não escreveu o código, os testes nem os
 relatórios, com `references/validate.md` da skill como checklist, sobre `6cd28e2..HEAD`, e
-escreve a rodada 7 no topo de `validation.md`. Com PASS: QST-36, QST-78 e QST-99 passam a
+escreve a rodada 7 no topo de `validation.md`.
+
+O teste completo de F35 conta para o Verifier (decisão do dev, 2026-10-11). O gate da
+rodada 7 é o full mais uma execução do teste completo sobre o HEAD, com `SQUAD_TEST_FULL=1`.
+No sensor de discriminação, um mutante do ramo do terminal pequeno do laço (`broker/tui.ts`)
+ou de `marks` (`broker/tui/keys.ts`) que sobreviver ao gate roda contra o teste completo, e
+só é sobrevivente se passar pelos dois. O relatório diz quais mutantes só o completo matou.
+
+Com PASS: QST-36, QST-78 e QST-99 passam a
 `Verified` na tabela da spec, `validate_state.py question` sai com 0, e o handoff de
 `STATE.md` é atualizado. Com FAIL: o resíduo e a decisão voltam ao dev, sem outra rodada por
 conta própria.

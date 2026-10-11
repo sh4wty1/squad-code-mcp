@@ -442,7 +442,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-75 | P1: Modal de resposta | T28 | Verified |
 | QST-76 | P1: Modal de resposta | T32, T35 | Verified |
 | QST-77 | P1: Modal de resposta | T33 | Verified |
-| QST-78 | P1: Modal de resposta | T32, F15 | Implementing |
+| QST-78 | P1: Modal de resposta | T32, F15, F35 | Implementing |
 | QST-79 | P1: Modal de resposta | T32, T35 | Verified |
 | QST-80 | P1: Modal de resposta | T29, T33 | Verified |
 | QST-81 | P1: Modal de resposta | T33, T34 | Verified |
@@ -463,7 +463,7 @@ Valem as das specs da Event, da Feature e da TUI leitura. Mais:
 | QST-96 | Edge cases | T23, T28 | Verified |
 | QST-97 | Edge cases | T23 | Verified |
 | QST-98 | Edge cases | T22, T28 | Verified |
-| QST-99 | P1: Modal de resposta | F14 | Implementing |
+| QST-99 | P1: Modal de resposta | F14, F35 | Implementing |
 
 **Coverage:** 99 total, 99 mapped to tasks, 0 unmapped. QST-01 a QST-98 verificados em `2ac91fe`, na terceira rodada do Verifier; relatório em `validation.md`, rodadas de correção em `fix-round-1.md` e `fix-round-2.md`. QST-99 veio da review do PR 9 e está em `fix-round-3.md`.
 

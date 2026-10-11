@@ -804,6 +804,145 @@ test("QST-99, QST-78: the marks of a delimited paste are read in a terminal smal
   }
 });
 
+function smallCases(full: boolean) {
+  const begin = "\x1b[200~";
+  const end = "\x1b[201~";
+  const alphabet = ["q", "\x03", "\x1b", "\r", "\n", "1", "a", "\x1b[B", begin, end];
+  const places: { keys: string[]; ui: Partial<Ui>; mode: "none" | "text" | "choice"; text: string }[] = [
+    { keys: [], ui: {}, mode: "none", text: "" },
+    { keys: ["4", "j"], ui: { screen: "questions", question: 8 }, mode: "none", text: "" },
+    { keys: ["4", "j", "\r"], ui: { screen: "questions", question: 8, modal: modal(8) }, mode: "text", text: "" },
+    { keys: ["4", "j", "\r", "logo"], ui: { screen: "questions", question: 8, modal: modal(8, { text: "logo" }) }, mode: "text", text: "logo" },
+    { keys: ["4", "\r", "2"], ui: { screen: "questions", question: 7, modal: modal(7, { choice: 1 }) }, mode: "choice", text: "" },
+  ];
+  const words: string[][] = [];
+  function extend(prefix: string[]) {
+    if (prefix.length) words.push(prefix);
+    if (prefix.length === 3) return;
+    for (const k of alphabet) extend([...prefix, k]);
+  }
+  extend([]);
+  expect(words.length).toBe(1110);
+  // QST-78 also names a marker split across reads. Generate every internal cut of each
+  // marker, independently of the product of complete one-to-three-key reads.
+  const inputs = words.map((keys) => ({ keys, reads: [keys.join("")] }));
+  for (const mark of [begin, end]) {
+    for (let cut = 1; cut < mark.length; cut++) inputs.push({ keys: [mark], reads: [mark.slice(0, cut), mark.slice(cut)] });
+  }
+  const contexts = SMALL.flatMap((size) => places.flatMap((place) => [false, true].map((pasting) => ({ size, place, pasting }))));
+  if (full) return contexts.flatMap((context) => inputs.map((input) => ({ ...context, ...input })));
+  const singles = inputs.filter((input) => input.keys.length === 1);
+  const cases = contexts.flatMap((context) => singles.map((input) => ({ ...context, ...input })));
+  for (const length of [2, 3]) {
+    for (let first = 0; first < 10; first++) {
+      for (let second = 0; second < 10; second++) {
+        const keys = [alphabet[first]!, alphabet[second]!];
+        if (length === 3) keys.push(alphabet[(first + second) % 10]!);
+        // Rotate through the 30 contexts; stagger the two halves so a fixed key in any
+        // position meets both paste states, all five places and all three sizes.
+        const at = (2 * first + 9 * second + 5 * Math.floor(first / 5) + Math.floor(second / 5)) % 30;
+        cases.push({ ...contexts[at]!, keys, reads: [keys.join("")] });
+      }
+    }
+  }
+  return cases;
+}
+
+async function checkSmall(c: ReturnType<typeof smallCases>[number]) {
+  const begin = "\x1b[200~";
+  const end = "\x1b[201~";
+  const { t, key, resize, stop } = launch(EVENTS, { intervalMs: 60000 });
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    for (const k of c.place.keys) key(k);
+    // The expected UI is stated above, not obtained from input/marks or the loop.
+    const before = c.place.ui.screen === "questions" ? tab(t.view(c.place.ui)) : main(t.view()).text();
+    expect(t.lines()).toEqual(before);
+    if (c.pasting) key(begin);
+    t.size = c.size;
+    resize();
+    for (const read of c.reads) key(read);
+    // QST-99: either quit key anywhere in the read returns the terminal, even in a paste.
+    if (c.keys.includes("q") || c.keys.includes("\x03")) {
+      expect(t.raw).toEqual([true, false]);
+      expect(t.out.endsWith(LEAVE)).toBe(true);
+      expect(t.posts).toEqual([]);
+      return;
+    }
+    // A trailing esc has its own dispatch after 40 ms, still at the small size.
+    if (c.keys.at(-1) === "\x1b") await Bun.sleep(60);
+    expect(t.raw).toEqual([true]);
+    expect(t.posts).toEqual([]);
+    expect(t.lines()).toEqual(small(c.size.cols, c.size.rows).text());
+    t.size = { cols: 120, rows: 40 };
+    resize();
+    expect(t.lines()).toEqual(before);
+    // Spec oracle: only the two markers change the paste state while small; the last
+    // marker wins. In particular esc cannot end it (QST-99).
+    let pasting = c.pasting;
+    for (const k of c.keys) {
+      if (k === begin) pasting = true;
+      if (k === end) pasting = false;
+    }
+    let question = 8;
+    let text = c.place.text;
+    if (c.place.mode === "none") {
+      if (!c.place.ui.screen) { key("4"); key("j"); }
+      key("\r");
+    }
+    if (c.place.mode !== "choice" && !text) { key("logo"); text = "logo"; }
+    if (c.place.mode === "choice") { question = 7; text = "5 tentativas"; }
+    key("\r");
+    const post = { url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: question, answer: text } };
+    expect(t.posts).toEqual(pasting ? [] : [post]);
+    if (pasting) {
+      const kept = c.place.mode === "choice" ? modal(7, { choice: 1 }) : modal(8, { text: text + " " });
+      expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question, modal: kept })));
+      key(end);
+      key("\r");
+      expect(t.posts).toEqual([post]);
+    }
+  } catch (error) {
+    throw new Error(`small-terminal case ${JSON.stringify(c)}\n${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    stop();
+  }
+}
+
+async function checkSmallCases(cases: ReturnType<typeof smallCases>) {
+  // Independent fake terminals in bounded batches let the real esc timers elapse together.
+  for (let at = 0; at < cases.length; at += 100) await Promise.all(cases.slice(at, at + 100).map(checkSmall));
+}
+
+test("QST-99, QST-78: 800 generated cases of size, screen, paste and one to three keys preserve the small terminal rules", async () => {
+  const cases = smallCases(false);
+  expect(cases.length).toBe(800);
+  const singles = cases.filter((c) => c.keys.length === 1);
+  expect(singles.length).toBe(600);
+  expect(singles.filter((c) => c.reads.length === 2).length).toBe(300);
+  for (const length of [2, 3]) {
+    const words = cases.filter((c) => c.keys.length === length);
+    expect(words.length).toBe(100);
+    expect(new Set(words.map((c) => JSON.stringify(c.keys))).size).toBe(100);
+    for (let position = 0; position < length; position++) {
+      for (const key of new Set(words.map((c) => c.keys[position]))) {
+        const visits = words.filter((c) => c.keys[position] === key);
+        expect(new Set(visits.map((c) => c.pasting)).size).toBe(2);
+        expect(new Set(visits.map((c) => JSON.stringify(c.place))).size).toBe(5);
+        expect(new Set(visits.map((c) => JSON.stringify(c.size))).size).toBe(3);
+      }
+      expect(new Set(words.map((c) => c.keys[position])).size).toBe(10);
+    }
+  }
+  await checkSmallCases(cases);
+}, 60000);
+
+test.skipIf(!process.env.SQUAD_TEST_FULL)("QST-99, QST-78: the full product of size, screen, paste and one to three keys preserves the small terminal rules", async () => {
+  const cases = smallCases(true);
+  expect(cases.length).toBe(33600);
+  await checkSmallCases(cases);
+}, 1800000);
+
 test("TUI-56, TUI-57, TUI-58: the settings come from the environment, and an invalid one throws before the loop starts", () => {
   const settings = config({ SQUAD_PORT: "7911", SQUAD_POLL_INTERVAL_MS: "250", SQUAD_TUI_GLYPHS: "⚠=!" });
   expect(settings.url).toBe("http://127.0.0.1:7911");
