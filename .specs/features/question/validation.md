@@ -2,269 +2,291 @@
 
 **Result**: FAIL
 
-**Round**: 5
+**Round**: 6
 **Date**: 2026-10-11
 **Verifier**: independent sub-agent (author ≠ verifier). It did not write the code, the tests, any fix round or any earlier report. It wrote this file and, through `scripts/lessons.py`, the two lessons files. No code, no test, no spec, no task, no commit.
-**Spec**: `.specs/features/question/spec.md`, 99 requirements. In scope, whole: QST-36, QST-78 and QST-99 as they read at `5fa9b80` (the three still `Implementing`), over the code of the third and fourth fix rounds. The other 96 were verified before and are checked here by the gate and by the expected values of existing tests that this round changed.
-**Diff range**: `89007b8..5fa9b80` on `feat/question` (6 commits: the report of round 4 `4aa5978`, F21 `f0ec599`, F22 `0390797`, F23 `e2bd84d`, F24 `6a9a115`, F25 `5fa9b80`; in `broker/`: `tui.ts` +7 −3, `tui/keys.ts` +8 −1, three test files +145 −16, `CLAUDE.md` 1 line). The task list is `fix-round-4.md`. The code the three requirements are judged over is `db27b7f..5fa9b80`.
+**Spec**: `.specs/features/question/spec.md`, 99 requirements. In scope, whole: QST-36, QST-78 and QST-99 as they read at `6cd28e2` (the three still `Implementing`), over the code of the third to fifth fix rounds. The other 96 were verified before and are checked here by the gate and by the expected values of existing tests that this round changed.
+**Diff range**: `5fa9b80..6cd28e2` on `feat/question` (4 commits: the report of round 5 with `fix-round-5.md` `27f1ac3`, F26 `2cc0822`, F27 `7433101`, F28 `6cd28e2`; in `broker/`: three test files +144 −43 and no production code; in `spec.md`: one sentence of QST-36 rewritten and one added to QST-99). The task list is `fix-round-5.md`. The code the three requirements are judged over is `db27b7f..6cd28e2`.
 **Environment**: Windows 11 Pro 10.0.26200, Bun 1.4.2, installed TypeScript 5.9.3, Python 3.12.9. Linux and macOS did not run here. No real interactive terminal was used.
 
 All code and test citations below are relative to `broker/`.
 
-The fourth fix round did what it was asked: the six ranked gaps of round 4 and SP1 are closed, each by an assertion on the value the spec defines, and the seven survivors of round 4 are all killed. The gate is green with 1292 tests, and in every probe the code of `5fa9b80` did what the spec says. The verdict is still FAIL, by the tests of QST-99 and one input of QST-78: **7 of 41 mutants survive the whole suite inside what the spec defines**. The first of them is the one that carries the verdict: nothing asserts that `q` or `ctrl+c` quits a terminal that is small on one side only (119×40, 120×39), the commonest shape of a terminal that is too small. All seven add a branch the code does not have; no mutant that drops, flips or swaps a construct that is in the code survives. Nothing found here makes the TUI send an answer the dev did not send. QST-36 holds whole.
+The fifth fix round did what it was asked: the five ranked gaps of round 5, SP2 and SP3 are closed, each by an assertion on the value the spec defines, and the nine survivors of round 5 are all killed. The gate is green with 1295 tests, and in every one of ten probes the code of `6cd28e2` did what the spec says. The verdict is still FAIL, by the tests: **8 of 40 mutants survive the whole suite inside what the spec defines**, and a ninth on a point the spec leaves open. The ones that carry the verdict are in QST-36: every test that merges a question of another asker into one the `result` closes gives that asker another ticket, and none puts it two merges away, so a walk that filters by ticket, or that does not go past a first merge for another asker, passes 1295 tests. The other four are on QST-99 and QST-78 and are small. As in rounds 4 and 5, every mutant that drops, flips or swaps a construct that is in the code is killed; all nine survivors add a condition the code does not have. Nothing found here makes the broker write a wrong answer, and one survivor only (V13) has a path, a remote one, to the TUI sending an answer the dev did not send.
+
+This is the third fix and re-verify iteration since the third fix round. The bound is reached: the decision goes to the dev. See "The decision for the dev".
 
 ## Ranked gaps
 
 | # | Gap | Criterion | Where | Mutant |
 | - | --- | --------- | ----- | ------ |
-| 1 | `q` and `ctrl+c` quit a small terminal at 100×30 only. At 119×40 and at 120×39, the two sizes where one side of the "ou" of the requirement holds, no assertion says they quit. The three other tests of QST-99 run at the three sizes of `SMALL`; this one does not | QST-99, "WHILE o terminal tem menos de 120 colunas ou menos de 40 linhas `q` e `ctrl+c` SHALL sair" | `tui.ts:171` · `test/unit/tui-loop.test.ts:630` `t.size = { cols: 100, rows: 30 }` | X5, X6, X7 |
-| 2 | The marks of a paste in a small terminal are asserted with the modal open in the text mode only. A paste that starts or ends there with no modal open has no assertion, in the loop or in the reducer | QST-99, "a TUI SHALL lê-los em qualquer tamanho do terminal, e a colagem começa e termina neles também enquanto o terminal é pequeno" | `tui.ts:170` · `test/unit/tui-loop.test.ts:679`, `:697` open the modal before the terminal shrinks · `test/unit/tui-keys.test.ts:569` `const v = open("06")` | N8 |
-| 3 | Through the loop, a mark reaches a small terminal alone in its read only. A terminal sends the mark of the start with the pasted text after it, and the mark of the end with the text before it; that shape is asserted on `marks` and not on the loop that calls it | QST-99, the same sentence | `tui.ts:170` · `test/unit/tui-loop.test.ts:682` `key("\x1b[201~")`, `:700` `key("\x1b[200~")` | N11 |
-| 4 | `ctrl+c` among other keys of a chunk in a small terminal: the test has `aq` and no chunk with `ctrl+c` | QST-99, "`q` e `ctrl+c` SHALL sair" | `tui.ts:171` · `test/unit/tui-loop.test.ts:625` `for (const quit of ["q", "\x03", "aq"])` | X3 |
-| 5 | With no modal open, `\n` followed by keys the loop holds back: `\r` has that assertion since F23, `\n` does not | QST-78, "Sem modal aberto na vez dela … `\n` não faz nada" | `tui/keys.ts:207` · `test/unit/tui-keys.test.ts:562`–`:564` (alone, after another key, in a paste) against `:555` (`\r` with `more`) | L4 |
+| 1 | A question of another `asked_by` merged into one the `result` closes is tested only when it is about another ticket. About the same ticket T, the commonest reason for the mother to merge two questions, no assertion says it closes with the `answer` of that one | QST-36, "uma pergunta que o `result` não fecha por si, de outro `asked_by` …, mesclada numa delas, direto ou por outra mesclada, SHALL fechar com o `answer` daquela" | `question.ts:71`, `:74` · `test/unit/question-result.test.ts:193`, `:219`, `:262` `b.question.ask(WORKER_3, { ...ON_TICKET, default: "7070", ticket_ref: "T-3" })` · `:84`, `:86` | R3, R2 |
+| 2 | "Por outra mesclada" is tested for one shape: a question of the same worker behind the question of another worker. A question of another `asked_by` two merges away, behind a question of a third worker or behind one of the same worker about another ticket, has no assertion | QST-36, the same sentence | `question.ts:73`–`:74` · `test/unit/question-result.test.ts:260`–`:264` | R18, R15 |
+| 3 | `q` and `ctrl+c` quit a small terminal in every test with no paste in course. With one in course, a state QST-99 itself gives to a small terminal, no assertion says they quit | QST-99, "`q` e `ctrl+c` SHALL sair da TUI, com ou sem modal aberto" with "a colagem começa e termina neles também enquanto o terminal é pequeno" | `tui.ts:170`–`:171` · `test/unit/tui-loop.test.ts:625` `const places = [[], ["4", "j", "\r", "logo"], ["4", "\r"]]` | V4 |
+| 4 | The sentence this round added to QST-99 is asserted on `marks` and not on the loop: nothing presses `esc` in a small terminal with a paste in course and looks at the paste when the screen is back | QST-99, "`esc` é ali uma tecla como as outras: não encerra a colagem em curso" | `tui.ts:170` · `test/unit/tui-keys.test.ts:591` `expect(marks(pasting, "\x1b")).toBe(pasting)` | V13 |
+| 5 | `\n` followed by keys the loop holds back, with the modal in the text mode: `\r` has that assertion through the loop, `\n` has none, and the reducer is called with `more` only with no modal open | QST-78, "IF um bloco de entrada com mais de uma tecla contém `\r` ou `\n` e … o modal está no modo texto THEN a TUI SHALL pôr um espaço no lugar dela" | `tui/keys.ts:206` · `test/unit/tui-loop.test.ts:432` `for (const chunk of ["\r\x1b", "\r\x1b["])` · `test/unit/tui-keys.test.ts:568`, `:579` | W4 |
+| 6 | `q` and `ctrl+c` among other keys of a read quit a small terminal as the first or the last key; between two others, no assertion | QST-99, "`q` e `ctrl+c` SHALL sair" | `tui.ts:171` · `test/unit/tui-loop.test.ts:628` `for (const quit of ["q", "\x03", "aq", "a\x03", "qa", "\x03a"])` | V2 |
 
-Two spec-precision gaps, SP2 (QST-36 with QST-31 and QST-39) and SP3 (QST-78 with QST-99). See "Spec-precision gaps".
+One spec-precision gap, SP4 (QST-78 with QST-99, a mark cut by a read). See "Spec-precision gaps".
 
-## How each gap of round 4 closed
+## The survivors, plainly
 
-| Round 4 | Closed by | `file:line` + assertion | The asserted value is what the spec defines? |
+For each: can an outcome the spec defines break with the suite green, and what would the dev see.
+
+| Mutant | Can a defined outcome break unnoticed? | What it would look like | A wrong answer sent? |
+| ------ | -------------------------------------- | ----------------------- | -------------------- |
+| R3, R2 `question.ts:71`, `:74` | Yes | The judge, or another worker, asked about the ticket T what worker-1 also asked; the mother merged the two; worker-1 delivers T. The other question would stay `merged` in the table with no `answer_seq` until the feature closes, and who asked it would get no delivery of the `answer`. The TUI reads the log, where a merged question follows its destination, so the screen would show nothing wrong: the table and `questions()` would disagree | No |
+| R18, R15 `question.ts:73`–`:74` | Yes | The same, for a question two merges away from the one the `result` closes | No |
+| V4 `tui.ts:171` | Yes | In a terminal too small, after a paste whose mark of the end did not come, `q` and `ctrl+c` would do nothing. The screen says the terminal is small and offers `q`; the dev could not leave by it until the window grows, since `esc` does not end the paste there | No |
+| V13 `tui.ts:170` | Yes | `esc` pressed in a small terminal would end the paste in course. Back at 120×40, a line break of that paste, alone in its read, would be an `enter`: it would send the text or confirm the option. It needs a paste that is still arriving after a resize, an `esc` and a resize back, which a paste of a few milliseconds does not do | Only in that sequence |
+| W4 `tui/keys.ts:206` | Yes | A pasted `\n` that is the last whole key of a read ending in a cut escape would leave no space in the text. `\n` is never `enter` in the modal (`tui/keys.ts:76`, `:80`), so nothing can be sent by it | No |
+| V2 `tui.ts:171` | Yes, by the words; the mutant is contrived | `q` or `ctrl+c` with a key before it and a key after it in one read would not quit a small terminal; pressed again alone it would | No |
+| V8 `tui.ts:191` | The spec does not define it (SP4) | A mark of a paste cut in two by a read while the terminal is small would be lost: the paste would not start, or not end, there | Not ranked |
+
+## How each gap of round 5 closed
+
+| Round 5 | Closed by | `file:line` + assertion | The asserted value is what the spec defines? |
 | ------- | --------- | ----------------------- | -------------------------------------------- |
-| Gap 1, C2 · QST-36 through a third question | F21 `f0ec599`, one test | `test/unit/question-result.test.ts:226` `expect(b.events().slice(6)).toEqual([storedDefault(7, id), storedDefault(8, id, second)])` · `:227`–`:231` the three rows: Q-01 `answer_seq: 7`, Q-02 `merged_into: 3, answer_seq: 8`, Q-03 `merged_into: 1, answer_seq: 7` · `:232`–`:237` the deliveries: 7 to worker-1 and worker-3, 8 to worker-1 | Yes. Q-01 and Q-02 close each by its own `answer` and `default_answer` (`8080`, `9090`), in ascending id; Q-03 of another `asked_by`, merged into Q-01, closes by the `answer` of Q-01. Whole events, whole rows. C2 fails this test and no other |
-| Gap 2, A3 · `ctrl+c` in a small terminal | F22 `0390797`, the test rewritten | `test/unit/tui-loop.test.ts:632` `expect(t.raw).toEqual([true])` · `:634` `key(quit)` with nothing after it · `:635` `expect(t.raw).toEqual([true, false])` · `:636` `expect(t.out.endsWith(LEAVE)).toBe(true)` · `:637` `expect(t.posts).toEqual([])` | Yes: the terminal is given back and nothing is posted, by the key under test alone |
-| Gap 4, A6, A8 · `q` with no modal, and among other keys | F22, the same test | `test/unit/tui-loop.test.ts:624` `for (const before of [[], ["4", "j", "\r", "logo"]])` · `:625` `for (const quit of ["q", "\x03", "aq"])` | Yes, at 100×30. The size is gap 1 of this round |
-| Gap 3, B5, B14 · the delimited paste with no modal open | F23 `e2bd84d`, two tests | `test/unit/tui-keys.test.ts:541` `expect(reads([PASTE, "\r"], tab)).toEqual({ ...tab.ui, modal: opened(8, null), pasting: true })` · `:543` `expect(pasted).toEqual({ ...tab.ui, modal: { ...opened(8, null), text: "texto " } })` · `:544` `expect(pasted.send).toBeNull()` · `:550` `expect(reads([PASTE, "\x1b", "4", "\r", "texto", "\r"], tab).send).toEqual({ question_id: 8, answer: "texto" })` | Yes: with no modal the break does what `enter` does and opens the modal; the break after it is a space and sends nothing; after `esc`, `enter` alone sends |
-| Gap 5, B6 · a line break before a held back escape, no modal | F23, one test of the reducer and one of the loop | `test/unit/tui-keys.test.ts:555` `expect(input(tab.ui, "\r", tab, true)).toEqual({ ...tab.ui, modal: opened(8, null) })` · `test/unit/tui-loop.test.ts:481` `expect(t.posts).toEqual([])` · `:482` `expect(t.lines()).toEqual(tab(t.view({ screen: "questions", question: 8, modal: modal(8) })))` · `:483` the tab without the modal after the wait | Yes: the modal opens, nothing is posted, the escape closes it. For `\r\x1b` and `\r\x1b[` |
-| Gap 6 · `\n` with no modal open | F24 `6a9a115`: the dev decided (`fix-round-4.md:16`–`:17`), the spec says what the code does, one test | `spec.md:319` "`\r` faz o que `enter` faz naquela tela, e pode abrir o modal, e `\n` não faz nada" · `test/unit/tui-keys.test.ts:561` `expect(chunk("\r", v).modal).toEqual(opened(8, null))` · `:562` `expect(chunk("\n", v)).toBe(v.ui)` · `:563` `expect(chunk("p\n", v)).toEqual({ ...v.ui, paused: true })` · `:564` `expect(reads([PASTE, "\n"], v)).toEqual({ ...v.ui, pasting: true })`, on the tab and on the feed | Yes: text and code agree, and the state is the same object after `\n` |
-| SP1 · the marks of a paste in a small terminal | F25 `5fa9b80`: the dev decided (`fix-round-4.md:18`–`:19`), one sentence in QST-99 (`spec.md:329`), `marks` (`tui/keys.ts:52`–`:54`) called before the keys are dropped (`tui.ts:170`), two tests | `test/unit/tui-loop.test.ts:685` the modal with `logo` after the mark of the end came small · `:687` `expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 8, answer: "logo" } }])` · `:704` `expect(t.posts).toEqual([])` · `:705` the modal with `logo ` after the mark of the start came small · `test/unit/tui-keys.test.ts:570`–`:572`, `:574`, `:576` | Yes: the paste ends and starts at its marks while the terminal is small, at 119×40, 120×39 and 100×30, with the modal open. With no modal it is gap 2 |
+| Gap 1, X5, X6, X7 · the quit at one size | F26 `2cc0822`, the test rewritten | `test/unit/tui-loop.test.ts:626` `for (const size of SMALL)` · `:633` `t.size = size` · `:635` `expect(t.raw).toEqual([true])` · `:638` `expect(t.raw).toEqual([true, false])` · `:639` `expect(t.out.endsWith(LEAVE)).toBe(true)` · `:640` `expect(t.posts).toEqual([])` | Yes: the terminal is given back and nothing is posted at 119×40, 120×39 and 100×30, with no modal, the modal in the text mode and the modal in the choice mode (`:625`) |
+| Gap 4, X3 · `ctrl+c` among other keys | F26, the same test | `test/unit/tui-loop.test.ts:628` `for (const quit of ["q", "\x03", "aq", "a\x03", "qa", "\x03a"])` | Yes, as the first and as the last key of two. Between two keys it is gap 6 of this round |
+| Gap 2, N8 · the marks with no modal | F26, the test of the marks rewritten as a table, and three lines in the test of `marks` | `test/unit/tui-loop.test.ts:717` the paste started on the tab, its end comes small: `:740` `expect(t.posts).toEqual(c.kept)` with `[post(8, "logo")]` · `:721` the start comes small on the tab: `:740` no post, `:741` the modal with `logo `, `:743` `expect(t.posts).toEqual(c.sent)` with `[post(8, "logo")]` after the mark of the end and `enter` · `:719`, `:723` the same two in the choice mode · `test/unit/tui-keys.test.ts:594` `expect(marks(other.ui, "um" + PASTE)).toEqual({ ...other.ui, pasting: true })` · `:595` `expect(marks({ ...other.ui, pasting: true }, PASTED + "um")).toEqual(other.ui)`, on the tab, the feed and the choice modal (`:593`) | Yes: a paste that ended small has ended and `enter` alone sends; one that started small is a paste and its break alone in a read sends nothing |
+| Gap 3, N11 · a mark among other keys through the loop | F26, the same table | `test/unit/tui-loop.test.ts:717`–`:719` `small: [END_MARK, "fim\r" + END_MARK]` · `:721`–`:723` `small: [START_MARK, START_MARK + "logo\r"]` · `:727` `for (const small of c.small)` · `:738` `expect(t.lines()).toEqual(tab(t.view(c.back)))` | Yes: the mark is read and the keys beside it are not pressed, the field is as it was when the screen is back |
+| Gap 5, L4 · `\n` with keys held back, no modal | F27 `7433101`, one line | `test/unit/tui-keys.test.ts:579` `expect(input(v.ui, "\n", v, true)).toBe(v.ui)`, on the tab and on the feed (`:573`) | Yes: the same state object |
+| SP2 · a question of the same worker the `result` does not close, merged into one it closes | F28 `6cd28e2`: one sentence of QST-36 (`spec.md:225`) and one test | `test/unit/question-result.test.ts:250` `expect(b.events().slice(4)).toEqual([storedDefault(5, id)])` · `:251`–`:254` Q-02 `status: "defaulted", merged_into: 1, answer_seq: 5` · `:255` one delivery to worker-1 · `:267` `expect(c.events().slice(6)).toEqual([storedDefault(7, feature)])` · `:268`–`:272` · `:273`–`:277`, for `T-2` and for no ticket (`:241`) | Yes: one `answer`, the one of Q-01; Q-02 closes with it, straight and behind the question of another worker, with no `answer` of its own |
+| SP3 · `esc` in a small terminal during a paste | F26: one sentence in QST-99 (`spec.md:329`); the test that was there | `test/unit/tui-keys.test.ts:591` `expect(marks(pasting, "\x1b")).toBe(pasting)` | Yes, on `marks`. Through the loop it is gap 4 of this round |
+
+F27 also gave `esc` its cases in QST-78: `test/unit/tui-keys.test.ts:552` `expect(reads([PASTE, "\x1b4", "\r", "texto", "\r"], tab).send).toEqual({ question_id: 8, answer: "texto" })` · `:558` the choice mode · `:560` `esc` and `enter` in one read · `:563` the text mode with the two in one read.
 
 ## How each task ended
 
-Every "done when" box of `fix-round-4.md` is ticked (16 boxes, none open). Each was checked against the diff, a test and a mutant.
+Every "done when" box of `fix-round-5.md` is ticked (12 boxes, none open). Each was checked against the diff, a test and a mutant.
 
 | Task | Done when | Evidence | Ended |
 | ---- | --------- | -------- | ----- |
-| F21 | the chain Q-02 into Q-03 into Q-01 writes `Q-01: 8080` and `Q-02: 9090`, Q-03 closes by the answer of Q-01, the deliveries are 7 to worker-1 and worker-3 and 8 to worker-1 | `test/unit/question-result.test.ts:226`–`:237` | ✅ |
-| F21 | the test fails without the `NOT IN` of the recursive step | C2 at `question.ts:74`: killed by this test | ✅ |
-| F22 | with no modal and with the modal in the text mode, each of `q`, `ctrl+c` and a chunk with `q`, alone and with no key after it, gives the terminal back and posts nothing | `test/unit/tui-loop.test.ts:624`–`:637` | ✅ at 100×30 · ❌ at the other two sizes (gap 1) |
-| F22 | the test fails with `q` as the only key that quits, with the quit of an open modal only, and with the quit of a key alone in its chunk only | A3, A6, A6b, A8 at `tui.ts:171`: killed | ✅ |
-| F23 | on the tab, no modal, in a delimited paste: `\r` alone opens the modal; the text and the break after it stay in the field and nothing is sent | `test/unit/tui-keys.test.ts:541`–`:544` | ✅ |
-| F23 | with no modal, `esc` ends the paste: the next `enter` in the modal sends | `test/unit/tui-keys.test.ts:550` | ✅ |
-| F23 | in the loop, `key("\r\x1b")` shows the modal, posts nothing and, after the wait, shows the tab without it | `test/unit/tui-loop.test.ts:480`–`:484` | ✅ |
-| F23 | each test fails under its mutant | B5, B14, B6: killed | ✅ |
-| F24 | the spec says `\r` is the `enter` and `\n` does nothing with no modal, and a test pins it on the tab and on the feed: alone, after another key and in a delimited paste | `spec.md:319` · `test/unit/tui-keys.test.ts:560`–`:565` | ✅ · with keys held back it is gap 5 |
-| F25 | QST-99 says the marks are not keys and are read at any size | `spec.md:329` | ✅ |
-| F25 | in a small terminal the loop applies `marks` to the chunk before it drops its keys | `tui.ts:169`–`:172` | ✅ |
-| F25 | test: the paste that ends small has ended and the next `enter` sends; the one that starts small does not send by the break alone in a read | `test/unit/tui-loop.test.ts:672`–`:710` | ✅ with the modal in the text mode · ❌ with none (gap 2) |
+| F26 | `q`, `ctrl+c` and each among other keys quit at the three sizes, with no modal, in the text mode and in the choice mode | `test/unit/tui-loop.test.ts:622`–`:647` · X5, X6, X7, X3, V1, V14, V3, V15, V16 killed | ✅ |
+| F26 | the marks are read at the three sizes, in the three states, alone in a read and among other keys | `test/unit/tui-loop.test.ts:704`–`:750` · N8, N11, V5, V7, V7b killed | ✅ |
+| F26 | `marks` over a state with no modal | `test/unit/tui-keys.test.ts:593`–`:596` | ✅ |
+| F26 | QST-99 says `esc` is a key like the others in a small terminal; the test that pins it is `marks(pasting, "\x1b")` | `spec.md:329` · `test/unit/tui-keys.test.ts:591` · N5 killed | ✅ on `marks` · ❌ through the loop (gap 4) |
+| F27 | `input(ui, "\n", view, true)` with no modal gives the same state, on the tab and on the feed | `test/unit/tui-keys.test.ts:579` · L4 killed | ✅ |
+| F27 | `esc` ends the paste also beside another key in its read and in the choice mode | `test/unit/tui-keys.test.ts:552`, `:558`, `:560`, `:563` · W1, W2, W3 killed | ✅ |
+| F28 | QST-36 says a question the `result` does not close by itself, merged into one it closes, follows the `answer` of that one | `spec.md:225` | ✅ |
+| F28 | test: Q-02 of worker-1 about T-2 merged into Q-01 about T-1, straight and through the question of another worker | `test/unit/question-result.test.ts:240`–`:279` | ✅ |
+| F28 | the test fails with the walk filtered by `asked_by` in the place of the ids | Q6, Q6a: killed by this test and no other | ✅ |
 | all | the gates pass | see "Gate check" | ✅ |
-
-`fix-round-3.md:5`–`:6` no longer says the round did not start; `broker/CLAUDE.md` describes `marks`.
 
 ## Gate check
 
 - **Command**, from `broker/`: `bun node_modules/typescript/bin/tsc --noEmit` then `bun test`
-- **Outcome**: `tsc` exit 0. **1292 pass, 3 skip, 0 fail**, 54091 `expect()` calls, 1295 tests in 63 files, 79.39 s. One run; `EVT-43` did not flake. `git status --porcelain` of the real tree was empty after it.
-- **Round 4** (`89007b8`): 1284 pass, 3 skip. **Delta**: +8 tests, all of this fix round: F21 1, F23 4, F24 1, F25 2; F22 rewrote one test in place. No count went down.
+- **Outcome**: `tsc` exit 0. **1295 pass, 3 skip, 0 fail**, 54472 `expect()` calls, 1298 tests in 63 files, 60.91 s. One run; `EVT-43` did not flake. `git status --porcelain` of the real tree was empty after it.
+- **Round 5** (`5fa9b80`): 1292 pass, 3 skip. **Delta**: +3 tests, all of this fix round: F26 1 (the choice mode in a small terminal), F27 1 (`esc` in the choice mode), F28 1; F26 rewrote two tests in place. No count went down.
 - **Skipped**: the same three platform conditions as before the feature.
-- The whole suite also ran nine more times in the scratch worktree, once under each mutant that survived the unit tests, each with 1292 pass.
+- The whole suite also ran nine more times in the scratch worktree, once under each mutant that survived the unit tests, each with 1295 pass.
 
 ## Spec-anchored acceptance criteria
 
-Clause by clause, the three requirements as they read at `5fa9b80`. ✅ an assertion pins what the spec defines and a mutant of it fails · ❌ no assertion that can fail · ⚠️ the spec leaves it open.
+Clause by clause, the three requirements as they read at `6cd28e2`. ✅ an assertion pins what the spec defines and a mutant of it fails · ❌ a case inside the clause has no assertion that can fail · ⚠️ the spec leaves it open.
 
 ### QST-36 (`spec.md:225`)
 
 | Criterion | Spec-defined outcome | `file:line` + assertion | Outcome |
 | --------- | -------------------- | ----------------------- | ------- |
-| a · the `result` writes one `answer` of `broker` with the `default_answer` and `resolved_by` `result_default` per question, and puts it in `defaulted` | the whole event; the row `defaulted` with its `answer_seq` | `test/unit/send-result.test.ts:289`–`:303` `expect(b.events()[7]).toEqual({ seq: 8, … from_name: "broker", … body: "8080", … data: { question_id: 1, answer: "8080", resolved_by: "result_default" } })` · `:304` · `test/unit/question-result.test.ts:43`–`:57` | ✅ |
-| b · in the same transaction, after the `result` and the `unblocked` | `result`, `unblocked`, `answer`; no `result` without the `answer` | `test/unit/send-result.test.ts:284`–`:288` `…toEqual([[6, "result", "worker-1"], [7, "unblocked", "broker"], [8, "answer", "broker"]])` · `:370`–`:374` after a trigger that refuses the `answer`: events, deliveries and rows as before | ✅ |
-| c · for each non-blocking question of who sends, about T, `open` or `merged`, in ascending id | Q-01 then Q-02; a merged one closes too | `test/unit/send-result.test.ts:317`–`:321` · `test/unit/question-result.test.ts:43`–`:53` · `:98`–`:112` a merged one · `:258`–`:260` the ones it does not close (QST-39) | ✅ (C4, C5 of round 4) |
-| d · one of them merged straight into another of them: each by its own answer and default, whichever was merged | answers 5 `8080` and 6 `9090` in both directions | `test/unit/question-result.test.ts:170` `expect(b.events().slice(4)).toEqual([storedDefault(5, id), storedDefault(6, id, second)])` · `:171`–`:174` · `:175`–`:179` · `:181`–`:184` | ✅ (Q5 killed) |
-| e · the same "por outra mesclada" | Q-01 by 7 `8080`, Q-02 by 8 `9090`, with Q-03 of another worker between them | `test/unit/question-result.test.ts:226` · `:227`–`:231` · `:232`–`:237` | ✅ (C2 killed). The chain in the other direction, Q-01 into Q-03 into Q-02, gave the same in probe G8 and is asserted by no test; no mutant of the code tells the two apart |
-| f · a question of another `asked_by` merged into one of them closes by the answer of that one | Q-03 with `answer_seq` 8 when merged into Q-02, 7 when merged into Q-01; one delivery to worker-3 | `test/unit/question-result.test.ts:204` `questionRow(3, id, { …, merged_into: 2, answer_seq: 8 })` · `:210` · `:230` · `:235` | ✅ (Q7 killed) |
-| g · a question of the same `asked_by` that the `result` does not close (another ticket, or none), merged into one of them | not defined: QST-31 says it follows, QST-39 says the `result` does not close it | none | ⚠️ SP2 (Q6, Q6a survive) |
+| a · the `result` writes one `answer` of `broker` with the `default_answer` and `resolved_by` `result_default` per question, and puts it in `defaulted` | the whole event; the row `defaulted` with its `answer_seq` | `test/unit/send-result.test.ts:288`–`:302` `expect(b.events()[7]).toEqual({ seq: 8, … from_name: "broker", … body: "8080", … data: { question_id: 1, answer: "8080", resolved_by: "result_default" } })` · `:303` · `test/unit/question-result.test.ts:43`–`:57` | ✅ |
+| b · in the same transaction, after the `result` and the `unblocked` | `result`, `unblocked`, `answer`; no `result` without the `answer` | `test/unit/send-result.test.ts:283`–`:287` `…toEqual([[6, "result", "worker-1"], [7, "unblocked", "broker"], [8, "answer", "broker"]])` · `:370`–`:373` after a trigger that refuses the `answer` | ✅ |
+| c · for each non-blocking question of who sends, about T, `open` or `merged`, in ascending id | Q-01 then Q-02; a merged one closes too; the others stay | `test/unit/question-result.test.ts:43`–`:53` · `:98`–`:112` · `:299`–`:301` (QST-39) | ✅ (R9, R4, R5 killed) |
+| d · one of them merged straight into another of them: each by its own answer and default, whichever was merged | answers 5 `8080` and 6 `9090` in both directions | `test/unit/question-result.test.ts:170` `expect(b.events().slice(4)).toEqual([storedDefault(5, id), storedDefault(6, id, second)])` · `:171`–`:179` · `:181`–`:184` | ✅ |
+| e · the same "por outra mesclada" | Q-01 by 7 `8080`, Q-02 by 8 `9090`, with Q-03 of another worker between them | `test/unit/question-result.test.ts:226` · `:227`–`:231` · `:232`–`:237` | ✅ (R16 killed) |
+| f · a question of another `asked_by` merged straight into one of them closes with the `answer` of that one | Q-03 with the `answer_seq` of the one it was merged into; one delivery to who asked it | `test/unit/question-result.test.ts:204` `questionRow(3, id, { …, asked_by: "worker-3", ticket_ref: "T-3", …, merged_into: 2, answer_seq: 8 })` · `:210` · `:230` · `:235` | ✅ about another ticket (R17 killed) · ❌ about the same ticket T (gap 1; R3) |
+| g · a question of the same `asked_by` about another ticket, merged straight into one of them, closes with the `answer` of that one | Q-02 `defaulted` with the `answer_seq` of Q-01 | `test/unit/question-result.test.ts:251`–`:254`, with `ticket_ref` `T-2` | ✅ (Q6a, R10 killed) |
+| h · the same with no ticket | the same | the same lines with `ticket_ref` `undefined` (`:241`), the row with `ticket_ref: null` | ✅ |
+| i · the same three "por outra mesclada" | every question behind one the `result` closes takes its `answer_seq`; one delivery each | `test/unit/question-result.test.ts:267` · `:268`–`:272` Q-02 of worker-1 behind Q-03 of worker-3 · `:273`–`:277` | ✅ for a question of the same worker behind the one of another (Q6 killed) · ❌ for a question of another worker two merges away (gap 2; R18, R2) · ❌ behind a question of the same worker about another ticket (gap 2; R15) |
+| j · "sem `answer` próprio" | one `answer` only | `test/unit/question-result.test.ts:250` `expect(b.events().slice(4)).toEqual([storedDefault(5, id)])` · `:267` | ✅ |
 
 ### QST-78 (`spec.md:319`)
 
 | Criterion | Spec-defined outcome | `file:line` + assertion | Outcome |
 | --------- | -------------------- | ----------------------- | ------- |
-| a · a chunk of more than one key, text mode: the break is a space and nothing is sent, also when a key of the same chunk took the modal there | the text with spaces, `send` null, no `POST` | `test/unit/tui-keys.test.ts:441` · `:462`–`:463` · `:469`, `:471` · `test/unit/tui-loop.test.ts:395`–`:396`, `:411`–`:412` · `:439`–`:440` with the escape held back | ✅ |
-| b · the same in the choice mode: ignored, no option confirmed | the modal on the option it was | `test/unit/tui-keys.test.ts:480`, `:483`, `:486`–`:488` · `test/unit/tui-loop.test.ts:424`–`:425`, `:460`–`:461` | ✅ |
-| c · with no modal open, `\r` does what `enter` does and may open the modal | the modal of the selected question | `test/unit/tui-keys.test.ts:454` `expect(chunk("j\r" + DOWN, tab)).toEqual({ ...tab.ui, question: 8, modal: opened(8, null) })` · `:541` in a paste · `:555` with keys held back · `test/unit/tui-loop.test.ts:482` | ✅ (B5, B6 killed) |
-| d · with no modal open, `\n` does nothing | the state unchanged | `test/unit/tui-keys.test.ts:562` `expect(chunk("\n", v)).toBe(v.ui)` · `:563` · `:564`, on the tab and on the feed | ✅ alone, after a key and in a paste (L1, L2, L3 killed) · ❌ with keys held back (gap 5, L4) |
-| e · asks for the delimited paste on entering and undoes it on leaving | `CSI ? 2004 h`, `CSI ? 2004 l` | `test/unit/tui-ansi.test.ts:8` `expect(ENTER).toBe("\x1b[?1049h\x1b[?25l\x1b[?2004h")` · `:9` `expect(LEAVE).toBe("\x1b[?2004l\x1b[?25h\x1b[?1049l")` · `test/unit/tui-loop.test.ts:494`, `:514` | ✅ |
-| f · in a delimited paste the rule holds for a break alone in a read: text mode | text `logo da 89 `, `send` null | `test/unit/tui-keys.test.ts:504` `expect(pasted).toEqual({ ...v.ui, modal: { ...m(v), text: "logo da 89 " } })` · `:505` · `test/unit/tui-loop.test.ts:499`–`:500` | ✅ |
-| g · the same in the choice mode | the state unchanged | `test/unit/tui-keys.test.ts:514` `expect(reads([PASTE, "\r", "\n", PASTED], v)).toEqual(v.ui)` · `:515` · `test/unit/tui-loop.test.ts:508` | ✅ |
-| h · the same with no modal open: `\r` is `enter`, `\n` nothing | the modal opens and what follows is pasted into it; `\n` leaves the state | `test/unit/tui-keys.test.ts:541`, `:543`–`:544` · `:564` | ✅ (B5 killed) |
-| i · until the mark `ESC [ 201 ~` | `enter` alone sends again after it | `test/unit/tui-keys.test.ts:507` `…toEqual({ question_id: 8, answer: "logo da 89" })` · `:516` · `test/unit/tui-loop.test.ts:498`, `:501`–`:502` the mark in two reads | ✅ |
-| j · or until an `esc` | `enter` alone sends again after it | `test/unit/tui-keys.test.ts:534`–`:535` with the modal · `:550` with none | ✅ (B14 killed) |
-| k · the two marks enter no text and change no screen | the state unchanged | `test/unit/tui-keys.test.ts:521` `expect(chunk(PASTE + PASTED, text)).toEqual(text.ui)` · `:522` · `:524` · `:525`–`:528` on the five screens | ✅ |
+| a · a chunk of more than one key, text mode: the break is a space and nothing is sent, also when a key of the same chunk took the modal there | the text with spaces, `send` null, no `POST` | `test/unit/tui-keys.test.ts:441` · `:462`–`:463` · `:469`, `:471` · `test/unit/tui-loop.test.ts:395`–`:396`, `:411`–`:412` · `:439`–`:440` `\r` with the escape held back | ✅ · ❌ `\n` with keys held back (gap 5; W4) |
+| b · the same in the choice mode: ignored, no option confirmed | the modal on the option it was | `test/unit/tui-keys.test.ts:480`, `:483`, `:486`–`:488` · `test/unit/tui-loop.test.ts:424`–`:425`, `:460`–`:461` | ✅ (W4b, W6 killed) |
+| c · with no modal open, `\r` does what `enter` does and may open the modal | the modal of the selected question | `test/unit/tui-keys.test.ts:454` · `:541` in a paste · `:568` with keys held back · `test/unit/tui-loop.test.ts:482` | ✅ |
+| d · with no modal open, `\n` does nothing | the state unchanged | `test/unit/tui-keys.test.ts:575` `expect(chunk("\n", v)).toBe(v.ui)` · `:576` · `:577` · `:579` `expect(input(v.ui, "\n", v, true)).toBe(v.ui)`, on the tab and on the feed | ✅ (L4 killed) |
+| e · asks for the delimited paste on entering and undoes it on leaving | `CSI ? 2004 h`, `CSI ? 2004 l` | `test/unit/tui-ansi.test.ts:8` `expect(ENTER).toBe("\x1b[?1049h\x1b[?25l\x1b[?2004h")` · `:9` · `test/unit/tui-loop.test.ts:494`, `:514` | ✅ |
+| f · in a delimited paste the rule holds for a break alone in a read: text mode | text `logo da 89 `, `send` null | `test/unit/tui-keys.test.ts:504`–`:505` · `test/unit/tui-loop.test.ts:499`–`:500` | ✅ |
+| g · the same in the choice mode | the state unchanged | `test/unit/tui-keys.test.ts:514`–`:515` · `test/unit/tui-loop.test.ts:508` | ✅ |
+| h · the same with no modal open: `\r` is `enter`, `\n` nothing | the modal opens and what follows is pasted into it | `test/unit/tui-keys.test.ts:541`, `:543`–`:544` · `:577` | ✅ (W9 killed) |
+| i · until the mark `ESC [ 201 ~` | `enter` alone sends again after it | `test/unit/tui-keys.test.ts:507`, `:516` · `test/unit/tui-loop.test.ts:498`, `:501`–`:502` | ✅ |
+| j · or until an `esc` | `enter` alone sends again after it | `test/unit/tui-keys.test.ts:534`–`:535` · `:550` with no modal · `:552` with another key in its read · `:558`, `:560` the choice mode · `:563` | ✅ (W1, W2, W3 killed) |
+| k · the two marks enter no text and change no screen | the state unchanged | `test/unit/tui-keys.test.ts:521`–`:528` | ✅ |
 
 ### QST-99 (`spec.md:329`)
 
 | Criterion | Spec-defined outcome | `file:line` + assertion | Outcome |
 | --------- | -------------------- | ----------------------- | ------- |
-| a · `q` quits a terminal with less than 120 columns or less than 40 lines, with or without the modal | the terminal is given back, nothing posted | `test/unit/tui-loop.test.ts:635` `expect(t.raw).toEqual([true, false])` · `:636` · `:637` `expect(t.posts).toEqual([])`, for no modal and the modal in the text mode, `q` and `aq` | ✅ at 100×30 (A2, A6, A6b, A7, A8, X4 killed) · ❌ at 119×40 and 120×39 (gap 1; X5, X6, X7) |
-| b · `ctrl+c` quits it, with or without the modal | the same | the same lines with `\x03` | ✅ at 100×30, alone in its read (A3, X1, X2 killed) · ❌ at the other two sizes (gap 1) · ❌ among other keys (gap 4, X3) |
-| c · no other key changes the state or posts | no `POST`; the screen of before when the size is back | `test/unit/tui-loop.test.ts:606` `expect(t.posts).toEqual([])` · `:607` · `:608` · `:612` `expect(t.lines()).toEqual(main(t.view()).text())` · `:658`–`:659`, each at the three sizes | ✅ (N10 killed) |
-| d · when the size is back, the state of before with the modal and its text, and the keys count | the modal of Q-08 with `logo`; `enter` posts it | `test/unit/tui-loop.test.ts:663` `expect(t.lines()).toEqual(open)` · `:665` · `:615` | ✅ (N9 killed) |
-| e · the two marks are not keys: read at any size, and the paste starts and ends at them while the terminal is small | a paste that ended small has ended: `enter` sends. One that started small is a paste: the break alone in its read is a space | `test/unit/tui-loop.test.ts:685`, `:687` · `:704`, `:705`, each at the three sizes · `test/unit/tui-keys.test.ts:570` `expect(marks(v.ui, PASTE + "um\rq")).toEqual({ ...v.ui, pasting: true })` · `:571` · `:572` · `:574` `expect(marks(v.ui, "um\rq\x03")).toBe(v.ui)` | ✅ with the modal in the text mode, the mark alone in its read (N1 to N7, N12a, N12b, N13, N14, N15 killed) · ❌ with no modal (gap 2, N8) · ❌ the mark among other keys through the loop (gap 3, N11) |
-| f · `esc` in a small terminal during a paste | QST-78 ends the paste at an `esc`; QST-99 lets no key change the state there | `test/unit/tui-keys.test.ts:576` `expect(marks(pasting, "\x1b")).toBe(pasting)` pins what the code does | ⚠️ SP3 |
+| a · `q` quits a terminal with less than 120 columns or less than 40 lines, with or without the modal | the terminal is given back, nothing posted | `test/unit/tui-loop.test.ts:638` `expect(t.raw).toEqual([true, false])` · `:639` · `:640` `expect(t.posts).toEqual([])`, at the three sizes, in the three states of the modal, `q` alone, first and last of two keys | ✅ (X5, X6, X7, V1, V14, V3, V15, V16 killed) · ❌ with a paste in course (gap 3; V4) · ❌ between two keys (gap 6; V2) |
+| b · `ctrl+c` quits it, with or without the modal | the same | the same lines with `\x03`, `a\x03`, `\x03a` | ✅ (X3 killed) · ❌ the same two cases |
+| c · no other key changes the state or posts | no `POST`; the screen of before when the size is back | `test/unit/tui-loop.test.ts:606`–`:608` · `:612` · `:662`–`:663` · `:690`–`:691`, each at the three sizes | ✅ (V11 killed) |
+| d · when the size is back, the state of before with the modal and its text, and the keys count | the modal of Q-08 with `logo`, the modal of Q-07 on its second option; `enter` posts each | `test/unit/tui-loop.test.ts:667` `expect(t.lines()).toEqual(open)` · `:669` · `:695` · `:697` `…answer: "5 tentativas"` · `:615` | ✅ |
+| e · the two marks are not keys: read at any size, and the paste starts and ends at them while the terminal is small | a paste that ended small has ended: `enter` sends. One that started small is a paste: the break alone in its read sends nothing | `test/unit/tui-loop.test.ts:737` `expect(t.posts).toEqual([])` · `:738` · `:740` · `:741` · `:743`, six cases (`:717`–`:723`) at the three sizes, the mark alone and among other keys · `test/unit/tui-keys.test.ts:585`–`:587`, `:589`, `:594`–`:595` | ✅ (N8, N11, V5, V7, V7b killed) |
+| f · `esc` is there a key like the others: it does not end the paste in course | the paste goes on: a break alone in its read is still pasted when the screen is back | `test/unit/tui-keys.test.ts:591` `expect(marks(pasting, "\x1b")).toBe(pasting)` | ✅ on `marks` (N5 killed) · ❌ through the loop (gap 4; V13) |
 
-**Status**: 22 clauses the spec defines, and 2 it leaves open. 18 of the 22 hold in full; 4 have an assertion on the defined outcome and a case inside the clause with none: QST-99 a, b and e, QST-78 d. QST-36 holds whole.
+**Status**: 27 clauses the spec defines. 21 hold in full; 6 have an assertion on the defined outcome and a case inside the clause with none: QST-36 f and i, QST-78 a, QST-99 a, b and f. No clause is without evidence. One point the spec leaves open (SP4).
 
-Payload and conjunction rule: the tests of the round compare whole events, whole rows and the lists of deliveries (`storedDefault`, `questionRow`), the whole state of the reducer (`toEqual({ ...tab.ui, … })`, `toBe(v.ui)`), the whole screen and the whole body of the `POST`. None only counts calls where the spec gives a value.
+Payload and conjunction rule: the tests of the round compare whole events, whole rows and the lists of deliveries (`storedDefault`, `questionRow`), the whole state of the reducer (`toEqual({ ...other.ui, pasting: true })`, `toBe(v.ui)`), the whole screen and the whole body of the `POST`. None only counts calls where the spec gives a value.
 
-## What the code of `5fa9b80` does: probes
+## What the code of `6cd28e2` does: probes
 
-Fourteen tests written in a second scratch, a copy of `broker/` outside the repository, through `start(...).key`, `input`, `marks` and `createQuestion`, and deleted with it. All fourteen pass at `5fa9b80`: the code is right in each.
+Ten tests written in the scratch worktree beside the three test files, through `start(...).key`, `input` and `createQuestion`, and deleted with it. All ten pass at `6cd28e2`: the code is right in each. Each survivor fails the probe named for it.
 
 | # | Input | What came out | Spec |
 | - | ----- | ------------- | ---- |
-| G1a | 119×40, 120×39 and 100×30; no modal and the modal with `logo`; `q` alone, `ctrl+c` alone | each of the twelve quits, nothing posted | QST-99: as defined; at the first two sizes asserted by no test (gap 1) |
-| G1b | 100×30; no modal and the modal; the chunks `a` `ctrl+c` and `ctrl+c` `a` | each of the four quits | QST-99: as defined, asserted by no test (gap 4) |
-| G2a | the tab on Q-08, no modal; the terminal shrinks; `ESC[200~`; it grows; `\r`, `logo`, `\r`, `ESC[201~` | the modal opens, the text is `logo `, nothing posted; `enter` then posts `logo`. At the three sizes | QST-99, QST-78: as defined, asserted by no test (gap 2) |
-| G2b | the tab, no modal, `ESC[200~`; the terminal shrinks; `ESC[201~`; it grows; `\r`, `logo`, `\r` | `logo` is posted. At the three sizes | the same |
-| G2c | the modal of Q-07 on its first option; 120×39; `ESC[200~`; it grows; `\r` | nothing posted, the option still selected; after `ESC[201~`, `enter` posts it | QST-99, QST-78: as defined, asserted by no test |
-| G3a | the modal of Q-08; 119×40; `ESC[200~logo\r` in one read; it grows; `mais`, `\r` | the field empty when the screen is back, then `mais `, nothing posted; after `ESC[201~`, `enter` posts `mais` | QST-99: as defined, asserted through the loop by no test (gap 3) |
-| G3b | the modal of Q-08, `ESC[200~logo`; 119×40; `fim\r ESC[201~` in one read; it grows; `\r` | `logo` is posted | the same |
-| G4 | the tab, no modal: `input(ui, "\n", view, true)`; in the loop `\n\x1b` and `\n\x1b[` | the same state object; no modal opens, nothing posted | QST-78: as defined, asserted by no test (gap 5) |
-| G5 | the modal of Q-08; 100×30; the mark of the start in two reads, `ESC[20` and `0~`; it grows; `logo`, `\r` | the text is `logo `, nothing posted | QST-99: as defined. The loop joins the two halves before it looks at the size |
-| G6 | the modal of Q-08, `ESC[200~`; 100×30; `esc`; it grows; `x`, `\r` | the modal is still open, the text is `x `, nothing posted: the paste did not end | SP3 |
-| G7 | 100×30; `ESC[200~quero ESC[201~` in one read | the TUI quits | QST-99 says it of `q`; a pasted `q` is a key at any size (TUI-62) |
-| G8 | worker-1 asks Q-01 about T-1 and Q-02 about T-2; Q-02 merged into Q-01; the `result` of T-1. Then the same with Q-02 merged into Q-03 of worker-3 and Q-03 into Q-01 | one `answer`, the one of Q-01 with `8080`; Q-02 `defaulted` with the `answer_seq` of Q-01, in the table and in the derivation | SP2 |
-| G8 reverse | Q-01 and Q-02 of worker-1 about T-1, Q-03 of worker-3; Q-01 merged into Q-03 and Q-03 into Q-02; the `result` | answers 7 `8080` for Q-01 and 8 `9090` for Q-02; Q-03 by 8; deliveries 7 to worker-1, 8 to worker-1 and worker-3 | QST-36: as defined |
-| G9 | `marks` over a state with no modal: the mark of the start, then the one of the end | `pasting` on, then the state of before | QST-99: as defined |
+| P1 | 119×40, 120×39 and 100×30; no modal, the modal with `logo`, the modal on an option; the reads `aqa` and `a` `ctrl+c` `a` | each of the eighteen quits, nothing posted | QST-99: as defined, asserted by no test (gap 6; V2 fails it) |
+| P2 | the three sizes; `ESC[200~` on the main screen, in the text modal and in the choice modal, then the terminal shrinks; `q`, `ctrl+c`. And `ESC[200~q` in one read while small | each quits | QST-99: as defined, asserted by no test (gap 3; V4) |
+| P3 | the modal of Q-08, `ESC[200~logo`; the terminal shrinks; `esc` alone and 60 ms, or `esc` `1` in one read; it grows; `\r` | the modal with `logo` when the screen is back; after `\r` the text is `logo `, nothing posted; after `ESC[201~` and `\r`, `logo` is posted. At the three sizes | QST-99: as defined, asserted through the loop by no test (gap 4; V13) |
+| P4 | `input(ui, "\n", view, true)` and the same with `\r`, over the modal of Q-08 with `logo`, and over the modal of Q-07 on its second option | the text is `logo `, `send` null; the choice modal unchanged | QST-78: as defined, asserted by no test (gap 5; W4) |
+| P5 | the modal of Q-08 with `logo`; `\n ESC[` in one read, then `A` | the text is `logo `, nothing posted | the same |
+| P6 | the modal of Q-08; the terminal shrinks; `ESC[20` and `0~` in two reads; it grows; `logo`, `\r` | the text is `logo `, nothing posted. At the three sizes | SP4 (V8) |
+| P7 | worker-1 asks Q-01 about T-1; worker-3, and in a second run the judge, asks Q-02 about T-1 too; Q-02 merged into Q-01; the `result` of T-1 | one `answer`, 5, with `8080`; Q-02 `defaulted`, `answer_seq` 5; deliveries of 5 to worker-1 and to who asked Q-02; `questions()` says the same | QST-36: as defined, asserted by no test (gap 1; R3) |
+| P8 | Q-01 of worker-1 about T-1, Q-02 of worker-2 about T-9, Q-03 of worker-3 about T-1; Q-03 merged into Q-02, Q-02 into Q-01; the `result` of T-1 | one `answer`, 7; the three rows `defaulted` with `answer_seq` 7; deliveries to the three workers; `questions()` the same | QST-36: as defined, asserted by no test (gaps 1 and 2; R2, R18) |
+| P9 | Q-01 of worker-1 about T-1, Q-02 of worker-1 about T-2, Q-03 of worker-3 about T-3; Q-03 into Q-02, Q-02 into Q-01; the `result` of T-1 | one `answer`, 7; the three rows with it; deliveries to worker-1 and worker-3 | QST-36: as defined, asserted by no test (gap 2; R15, R18) |
+| P10 | the same with Q-02 of worker-2 | the three rows with `answer_seq` 7; deliveries to the three workers | QST-36: as defined, asserted by no test (gap 2; R18) |
 
 ## Spec-precision gaps
 
 | # | AC | What the spec leaves open | What the code does | Pinned by a test? |
 | - | -- | ------------------------- | ------------------ | ----------------- |
-| SP2 | QST-36 with QST-31 and QST-39 | QST-36 names two kinds of merged question: one of the questions the `result` closes, which keeps its own answer, and one of another `asked_by`, which closes by the answer of the one it was merged into. A question of the **same** `asked_by` that the `result` does not close, about another ticket or about none, merged into one it closes, is neither. QST-31 says a merged question takes the status and the `answer_seq` of its destination; QST-39 says the `result` shall not close a non-blocking question of another ticket | It follows: Q-02 about T-2 closes `defaulted` by the `answer` of Q-01, straight or through a third question (G8). The filter of the walk is by id (`question.ts:71`, `:74`) | No. With the filter by `asked_by` in the place of the id, on either line, the whole suite passes (Q6, Q6a) |
-| SP3 | QST-78 with QST-99 | QST-78 says a paste lasts until its mark of the end "ou até um `esc`"; QST-99 says no key but `q` and `ctrl+c` changes the state in a small terminal, and takes only the two marks out of the keys. An `esc` pressed in a small terminal during a paste is under both | The paste does not end (G6): `marks` reads the two marks and nothing else (`tui/keys.ts:53`) | Yes, `test/unit/tui-keys.test.ts:576` |
+| SP4 | QST-78 with QST-99 | QST-99 says the two marks are read at any size. Neither requirement says a mark, six bytes, may come cut by a read, nor what happens then. QST-78 counts keys by "bloco de entrada" and has no word for a sequence that crosses two of them | The loop joins an unfinished escape with the next read before it looks at the size (`tui.ts:188`–`:194`), so the mark is read at any size (P6) | At 120×40, `test/unit/tui-loop.test.ts:498` `"da 89\x1b[20", "1~"`. In a small terminal, no: with `cramped(io.size()) ? "" :` before the expression of `tui.ts:191` the first form of V8 fails `TUI-60: an error in the loop gives the terminal back…` and the test after it, only because TUI-60 sets the size to `null` and the mutant throws outside the `try`; with the size read inside a `try`, the whole suite passes |
 
-SP2 is the reading that leaves no question merged into a closed one, and it is what QST-31 says; one sentence in QST-36 or in QST-39 settles it, and probe G8 is its test. SP3 takes an `esc` in a small terminal in the middle of a paste whose mark of the end never comes; the reading of the code is the one that keeps QST-99 whole. Neither is ranked.
+SP2 and SP3 of round 5 are closed in the spec (`spec.md:225`, `:329`). QST-39 was left as it was: it says the `result` shall not close a non-blocking question of another ticket or of none, and the new sentence of QST-36 says such a question merged into one the `result` closes closes with that one. The words "que o `result` não fecha por si" of QST-36 are what makes the two read together; the outcome is defined and `test/unit/question-result.test.ts:240`–`:279` pins it.
 
-SP1 of round 4 is closed in the spec (`spec.md:329`) and in the code; what is left of it in the tests is gaps 2 and 3.
+One more reading worth the dev's word, though the text decides it: QST-99 says `q` quits a small terminal and that only the marks are not keys, so a `q` between the marks of a paste quits it too (P2). It is gap 3 and not a spec gap; a design where a pasted `q` does not quit is what V4 does, and no test tells the two apart.
 
 ## Test integrity: expectations of existing tests that changed
 
-`git diff --numstat 89007b8..5fa9b80 -- broker/test`: 145 lines added, 16 removed or changed, in 3 files (`question-result.test.ts` 26 0, `tui-keys.test.ts` 42 1, `tui-loop.test.ts` 77 15). The 16, judged against the spec:
+`git diff --numstat 5fa9b80..6cd28e2 -- broker/test`: 144 lines added, 43 removed or changed, in 3 files (`question-result.test.ts` 41 0, `tui-keys.test.ts` 20 0, `tui-loop.test.ts` 83 43). The two files with no line removed only gained tests and assertions. The 43 are two tests rewritten in `tui-loop.test.ts`, judged against the spec:
 
-| Where | Change | Judgement |
-| ----- | ------ | --------- |
-| `test/unit/tui-keys.test.ts:6` | the import gains `marks` | For the new test at `:568`–`:577`. No expectation |
-| `test/unit/tui-loop.test.ts:622`–`:643` (QST-99) | the name of the test; the loop gains no modal beside the modal in the text mode, and the chunk `aq` beside `q` and `ctrl+c`; `for (const k of [quit, "q", "\r"]) key(k)` becomes `key(quit)`, with `expect(t.raw).toEqual([true])` before it | Stronger. The three expected values are the ones of before: `t.raw` `[true, false]`, the output ending in `LEAVE`, no `POST`. The `q` and the `enter` that came after the key under test are what let A3 survive round 4; what they showed, that a key after the quit does nothing, is still asserted at `:143`–`:148` (TUI-60) |
+| Where | What the old assertion pinned | What pins it now | Judgement |
+| ----- | ----------------------------- | ---------------- | --------- |
+| `test/unit/tui-loop.test.ts:622`–`:647` (QST-99, the quit; before `:622`–`:643`) | At 100×30, with no modal and with the modal of Q-08 with `logo`, each of `q`, `ctrl+c` and `aq`, with nothing after it: `t.raw` `[true]` before and `[true, false]` after, the output ending in `LEAVE`, no `POST` | The same four assertions, word for word (`:635`, `:638`, `:639`, `:640`), in a loop over `SMALL` (`:626`), three places (`:625`) and six reads (`:628`). 100×30, the two places and the three reads of before are all among them | Stronger. No expected value changed; the name of the test says what it now covers |
+| `test/unit/tui-loop.test.ts:704`–`:750` (QST-99 and QST-78, the marks; before `:672`–`:710`), the paste that ends small | The modal of Q-08, `ESC[200~logo`, the terminal shrinks, `ESC[201~`, it grows: the screen is the modal with `logo`; `\r` posts `logo` | The case of `:718` with the first of its `small`: the same keys; `:738` the same screen; `:740` the same `POST`. New before them: `:737` nothing posted when the screen is back | The same values, and one more |
+| the same test, the paste that starts small | The modal of Q-08, the terminal shrinks, `ESC[200~`, it grows, then `logo`, `\r`, `ESC[201~`: nothing posted and the text is `logo ` | The case of `:722` with the first of its `small`: `:738` the empty field when the screen is back; `mais`, `\r`: `:740` nothing posted, `:741` the text is `mais `; then `ESC[201~`, `\r`: `:743` `mais` is posted | The same outcome with another word: no `POST` by the break, and the break is a space. The old test looked at the screen after the mark of the end; the new one looks before it and then at the body of the `POST` after it, `mais` with no character of a mark. Nothing weaker |
 
-No test was deleted, no skip added, no expected value of a test of another requirement changed. The tests of QST-78, QST-36 and QST-37 that existed have every expected value they had.
+A third test was added between them (`:676`–`:702`, the choice mode in a small terminal) and is new, not a change. No test was deleted, no skip added, no expected value of a test of another requirement changed.
 
 ## Discrimination sensor
 
-42 behaviour-level mutants, one at a time, in a `git worktree` at `5fa9b80` under the scratchpad with a copy of `node_modules`. Each ran `bun test test/unit` (1135 tests, 5 s) and the file was restored with `git checkout`; the nine that survived ran again under the whole suite and survived it with 1292 pass. No stash. One of the 42 is equivalent and is not counted.
+41 behaviour-level faults, one at a time, in a `git worktree` at `6cd28e2` under the scratchpad with a copy of `node_modules`, applied by a script that matches each line once and writes the file back after the run. Each ran `tsc --noEmit` and `bun test test/unit` (1137 tests, 6 s); the nine that survived ran again under the whole suite and survived it with 1295 pass. No stash. Two of the 41 are two forms of one fault (V8) and count as one.
 
-**Of 41: 32 killed, 9 survived. 7 of the 9 are inside what the spec defines; the other 2 sit on SP2.**
+**Of 40: 31 killed, 9 survived. 8 of the 9 are inside what the spec defines; the other sits on SP4.**
 
-The seven survivors of round 4, as that report describes them (8, with a second form of A6):
-
-| Id | `file:line` | Fault | Outcome |
-| -- | ----------- | ----- | ------- |
-| C2 | `question.ts:74` | no `NOT IN` in the recursive step of the walk | ✅ Killed · `QST-36: a question of the worker merged into another of its own through the question of another worker closes by its own default, and the one between them by the answer of the end` |
-| A3 | `tui.ts:171` | in a small terminal only `q` quits | ✅ Killed · `QST-99: in a terminal smaller than 120×40, q, ctrl+c and a chunk with q among its keys quit, with no modal and with the modal in the text mode, and nothing is posted` |
-| A6 | `tui.ts:171` | in a small terminal `q` quits only with the modal open | ✅ Killed · the same test |
-| A6b | `tui.ts:171` | in a small terminal `q` and `ctrl+c` quit only with the modal open | ✅ Killed · the same test |
-| A8 | `tui.ts:171` | `every` in the place of `some`: the key quits only when its chunk has no other | ✅ Killed · the same test |
-| B5 | `tui/keys.ts:206` | in a delimited paste a break is a space also with no modal open | ✅ Killed · `QST-78: with no modal open a line break of a delimited paste, alone in its read, does what enter does, and what comes after it is pasted into the modal it opened` |
-| B14 | `tui/keys.ts:205` | `esc` ends a paste only with the modal open | ✅ Killed · `QST-78: esc ends a delimited paste with no modal open too` |
-| B6 | `tui/keys.ts:206` | with keys held back a break is a space also with no modal open | ✅ Killed · `QST-78: with no modal open a line break does what enter does also when the loop holds back keys that came after it` and `QST-78: with no modal open a line break and an unfinished escape in one chunk do what enter and esc do…` |
-
-New, on `marks` and its call (16):
+The nine survivors of round 5, as that report describes them:
 
 | Id | `file:line` | Fault | Outcome |
 | -- | ----------- | ----- | ------- |
-| N1 | `tui.ts:170` | the call of `marks` removed, the code of `89007b8` | ✅ Killed · `QST-99, QST-78: the marks of a delimited paste are read in a terminal smaller than 120×40: a paste that ends there has ended, and one that starts there sends nothing by its line break` |
-| N2 | `tui/keys.ts:53` | `marks` reads only the mark of the start | ✅ Killed · the test of N1 and `QST-99: the marks of a chunk start and end the paste and press none of its keys` |
-| N3 | `tui/keys.ts:53` | `marks` reads only the mark of the end | ✅ Killed · the same two |
-| N4 | `tui/keys.ts:53` | the two marks swapped | ✅ Killed · the same two |
-| N5 | `tui/keys.ts:53` | `esc` ends the paste in `marks` too | ✅ Killed · `QST-99: the marks of a chunk…` |
-| N6 | `tui/keys.ts:53` | `marks` reads only the first key of the chunk | ✅ Killed · `QST-99: the marks of a chunk…` |
-| N7 | `tui/keys.ts:53` | `marks` reads only the last key of the chunk | ✅ Killed · `QST-99: the marks of a chunk…` |
-| N8 | `tui.ts:170` | the marks are read in a small terminal only with the modal open | ❌ Survived · gap 2 |
-| N9 | `tui.ts:170` | `marks` starts from the initial state: a mark in a small terminal loses the screen | ✅ Killed · the test of N1 and `QST-99: the keys pressed in a terminal smaller than 120×40 leave the modal and its text as they were…` |
-| N10 | `tui.ts:170` | the chunk goes to `input`: the small terminal takes its keys | ✅ Killed · `QST-99: …b, enter and enter…` and `QST-99: the keys pressed in a terminal smaller than 120×40…` |
-| N11 | `tui.ts:170` | the marks are read in a small terminal only when the chunk is one key | ❌ Survived · gap 3 |
-| N12a | `tui.ts:170` | the marks are read only when the columns are short | ✅ Killed · the test of N1, at 120×39 |
-| N12b | `tui.ts:170` | the marks are read only when the lines are short | ✅ Killed · the test of N1, at 119×40 |
-| N13 | `tui.ts:170` | the marks are read in a small terminal only with no modal | ✅ Killed · the test of N1 |
-| N14 | `tui.ts:170` | only a mark of the start is read there (no paste in course) | ✅ Killed · the test of N1 |
-| N15 | `tui.ts:170` | only a mark of the end is read there (a paste in course) | ✅ Killed · the test of N1 |
+| X5 | `tui.ts:171` | `q` and `ctrl+c` quit only when both sides are small | ✅ Killed · `QST-99: in a terminal narrower than 120 columns or shorter than 40 lines, q, ctrl+c and a chunk with either among its keys quit, with no modal, with the modal in the text mode and with it in the choice mode, and nothing is posted` |
+| X6 | `tui.ts:171` | they quit only when the columns are short | ✅ Killed · the same test |
+| X7 | `tui.ts:171` | they quit only when the lines are short | ✅ Killed · the same test |
+| X3 | `tui.ts:171` | `ctrl+c` quits only alone in its chunk | ✅ Killed · the same test |
+| N8 | `tui.ts:170` | the marks are read in a small terminal only with the modal open | ✅ Killed · `QST-99, QST-78: the marks of a delimited paste are read in a terminal smaller than 120×40, alone in a read or among other keys, with no modal, in the text mode and in the choice mode: a paste that ends there has ended, and one that starts there sends nothing by its line break` |
+| N11 | `tui.ts:170` | the marks are read there only when the chunk is one key | ✅ Killed · the same test |
+| L4 | `tui/keys.ts:207` | `\n` is `enter` with no modal open when the loop holds back keys after it | ✅ Killed · `QST-78: with no modal open \n does nothing, alone, after another key and in a delimited paste, where \r opens the modal` |
+| Q6 | `question.ts:74` | the recursive step keeps out every question of the same `asked_by`, not the ones of `own` | ✅ Killed · `QST-36: a question of the worker about another ticket, or about none, merged into one the result closes follows the answer of that one, straight or through the question of another worker` |
+| Q6a | `question.ts:71` | the first step does the same | ✅ Killed · the same test |
 
-New, on the line feed with no modal open, QST-78 (5):
+New, on the keys that quit a small terminal, QST-99 (7):
 
 | Id | `file:line` | Fault | Outcome |
 | -- | ----------- | ----- | ------- |
-| L1 | `tui/keys.ts:140` | `\n` is `enter` with no modal open | ✅ Killed · `QST-78: with no modal open \n does nothing, alone, after another key and in a delimited paste, where \r opens the modal` |
-| L2 | `tui/keys.ts:207` | `\n` is `enter` with no modal open in a delimited paste | ✅ Killed · the same test |
-| L3 | `tui/keys.ts:207` | `\n` is `enter` with no modal open in a chunk of several keys | ✅ Killed · the same test |
-| L4 | `tui/keys.ts:207` | `\n` is `enter` with no modal open when the loop holds back keys after it | ❌ Survived · gap 5 |
-| L5 | `tui/keys.ts:206` | a pasted `\n` becomes a space also with no modal open | Equivalent, not counted: a space is a key of no screen, as `\n` is |
+| V1 | `tui.ts:171` | they do not quit with the modal in the choice mode | ✅ Killed · the test of X5 |
+| V14 | `tui.ts:171` | they do not quit with the modal in the text mode | ✅ Killed · the same test |
+| V3 | `tui.ts:171` | only the last key of the chunk can quit | ✅ Killed · the same test, by `qa` |
+| V15 | `tui.ts:171` | only the first key of the chunk can quit | ✅ Killed · the same test, by `aq` |
+| V16 | `tui.ts:171` | `q` quits only alone or as the last key | ✅ Killed · the same test |
+| V2 | `tui.ts:171` | only the first or the last key of the chunk can quit | ❌ Survived · gap 6 |
+| V4 | `tui.ts:171` | they do not quit while a paste is in course | ❌ Survived · gap 3 |
 
-New, on the keys that quit a small terminal, QST-99 (9):
-
-| Id | `file:line` | Fault | Outcome |
-| -- | ----------- | ----- | ------- |
-| A2 | `tui.ts:171` | only `ctrl+c` quits (killed in round 4 by the test F22 rewrote) | ✅ Killed · `QST-99: in a terminal smaller than 120×40, q, ctrl+c and a chunk with q among its keys quit…` |
-| A7 | `tui.ts:171` | `q` quits only with no modal (the same) | ✅ Killed · the same test |
-| X1 | `tui.ts:171` | `ctrl+c` quits only with no modal | ✅ Killed · the same test |
-| X2 | `tui.ts:171` | `ctrl+c` quits only with the modal open | ✅ Killed · the same test |
-| X3 | `tui.ts:171` | `ctrl+c` quits only alone in its chunk | ❌ Survived · gap 4 |
-| X4 | `tui.ts:171` | only the first key of the chunk can quit | ✅ Killed · the same test, by `aq` |
-| X5 | `tui.ts:171` | `q` and `ctrl+c` quit only when both sides are small | ❌ Survived · gap 1 |
-| X6 | `tui.ts:171` | `q` and `ctrl+c` quit only when the columns are short | ❌ Survived · gap 1 |
-| X7 | `tui.ts:171` | `q` and `ctrl+c` quit only when the lines are short | ❌ Survived · gap 1 |
-
-New, on the `result` and the merged questions, QST-36 (4):
+New, on the marks and on the keys a small terminal drops, QST-99 (7):
 
 | Id | `file:line` | Fault | Outcome |
 | -- | ----------- | ----- | ------- |
-| Q5 | `question.ts:392` | each question of the `result` is resolved with itself alone as `own` | ✅ Killed · the three tests of QST-36 with a merge (`:159`, `:188`, `:214` of `test/unit/question-result.test.ts`) |
-| Q6 | `question.ts:74` | the recursive step keeps out every question of the same `asked_by`, not the ones of `own` | ❌ Survived · SP2, not ranked |
-| Q6a | `question.ts:71` | the first step does the same | ❌ Survived · SP2, not ranked |
-| Q7 | `question.ts:74` | the recursive step no longer asks for `status = 'merged'` | ✅ Killed · `QST-37: a question closed by its own result two merges away from the end of the chain keeps its default when the end is answered…` |
+| V5 | `tui.ts:170` | the marks are not read with the modal in the choice mode | ✅ Killed · the test of N8 |
+| V7 | `tui.ts:170` | with no modal the mark of the end is not read | ✅ Killed · the same test |
+| V7b | `tui.ts:170` | with no modal the mark of the start is not read | ✅ Killed · the same test |
+| V11 | `tui.ts:169` | the keys are dropped only with the modal open | ✅ Killed · `QST-99: in a terminal smaller than 120×40, b, enter and enter over a blocking question with options post nothing and change no state` and the test of N8 |
+| N5 | `tui/keys.ts:53` | `esc` ends the paste in `marks` too (killed in round 5) | ✅ Killed · `QST-99: the marks of a chunk start and end the paste and press none of its keys` |
+| V13 | `tui.ts:170` | after `marks`, the loop ends the paste when the chunk has an `esc` | ❌ Survived · gap 4 |
+| V8 | `tui.ts:191` | in a small terminal the loop does not wait for the rest of an unfinished escape | ❌ Survived · SP4, not ranked |
 
-**Sensor depth**: P0-full, by hand: no mutation tool is installed for Bun.
+New, on the line break and on `esc`, QST-78 (7):
+
+| Id | `file:line` | Fault | Outcome |
+| -- | ----------- | ----- | ------- |
+| W1 | `tui/keys.ts:205` | `esc` ends a paste only alone in its read | ✅ Killed · `QST-78: esc ends a delimited paste with no modal open too` and `QST-78: esc ends a delimited paste in the choice mode, and with another key in its read` |
+| W2 | `tui/keys.ts:205` | `esc` does not end a paste with the modal in the choice mode | ✅ Killed · the second of the two |
+| W3 | `tui/keys.ts:205` | `esc` beside another key does not end a paste with the modal open | ✅ Killed · the same test |
+| W4 | `tui/keys.ts:206` | with keys held back only `\r` is pasted, not `\n` | ❌ Survived · gap 5 |
+| W4b | `tui/keys.ts:206` | with keys held back a break is pasted only in the text mode | ✅ Killed · `QST-78: a line break and an unfinished escape in one chunk confirm no option in the choice mode, the escape closes the modal after its wait, and enter alone still confirms` |
+| W6 | `tui/keys.ts:206` | a pasted break is `enter` on the line of the other answer | ✅ Killed · `QST-78: in the choice mode a line break of a chunk of more than one key is ignored, and confirms no option` |
+| W9 | `tui/keys.ts:202` | the mark of the start starts a paste only with the modal open | ✅ Killed · `QST-78: with no modal open a line break of a delimited paste, alone in its read, does what enter does, and what comes after it is pasted into the modal it opened` and the test of L4 |
+
+New, on the `result` and the merged questions, QST-36 (10):
+
+| Id | `file:line` | Fault | Outcome |
+| -- | ----------- | ----- | ------- |
+| R3 | `question.ts:71` | the first step keeps out every question about the ticket of the one that closes, not the ones of `own` | ❌ Survived · gap 1 |
+| R2 | `question.ts:74` | the recursive step does the same | ❌ Survived · gap 1 |
+| R18 | `question.ts:74` | past the first merge the walk takes only questions of who sends the `result` | ❌ Survived · gap 2 |
+| R15 | `question.ts:73`–`:74` | the walk does not go on through a question of who sends the `result` | ❌ Survived · gap 2 |
+| R16 | `question.ts:74` | one of `own` is kept out of the recursive step only when merged straight into another of `own` | ✅ Killed · `QST-36: a question of the worker merged into another of its own through the question of another worker closes by its own default, and the one between them by the answer of the end` |
+| R10 | `question.ts:100` | a follower of the same `asked_by` is delivered and its row is not closed | ✅ Killed · the test of Q6 |
+| R17 | `question.ts:83` | by a `result` the `answer` is not delivered to who asked the followers | ✅ Killed · four tests of `test/unit/question-result.test.ts` (`:81`, `:188`, `:214`, `:240`) |
+| R9 | `question.ts:387` | the `result` closes the questions of any worker about the ticket | ✅ Killed · `QST-39: a blocking question of the ticket, a non-blocking one of another ticket, one without ticket and one of another worker stay open` and its twin in `test/unit/send-result.test.ts:325` |
+| R4 | `question.ts:387` | it closes the blocking ones too | ✅ Killed · the same two |
+| R5 | `question.ts:387` | in descending id | ✅ Killed · `QST-36: the result of a worker closes its two non-blocking questions of the ticket in ascending id, each by its own default` and three others |
+
+**Sensor depth**: P0-full, by hand: no mutation tool is installed for Bun. The mutants of this round were kept to one added condition each, on what the words of the three requirements name: which side of the size, the state of the modal, which of the two keys, where the key is in its read, a paste in course or not, which mark, who asked, which ticket, straight or through another. Combinations of two of them, the screens other than the main one and the tab, and a broker that does not answer were not tried.
 
 ### The survivors
 
-What kind of mutant survives matters for how much weight to give them. Every mutant that changes a construct the round wrote, the call of `marks` removed, its two marks swapped or cut to one, `some` turned into `every`, one of the two quit keys dropped, the `NOT IN` removed, is killed, most by more than one test. The seven that survive each add a condition the code does not have, on a case the requirement covers and no test visits. That is the same kind as A6, A8, B5 and B14 of round 4, and the reason they are ranked is the same: the spec defines the outcome and nothing would notice it break.
+All nine add a condition the code does not have. Every mutant of a construct that is written, among them the `some` of the quit cut to the first or to the last key, `marks` reading an `esc`, the filter of `own` loosened, the order of the ids, the deliveries of the followers, is killed, most by more than one test.
 
-- **X5, X6, X7** are one hole. QST-99 starts with "menos de 120 colunas ou menos de 40 linhas", and the quit is tested where both hold. A terminal of 120×30 is short and not narrow; it is the default window of Windows Terminal, and the one a dev is most likely to open the TUI in before reading that it needs 40 lines. The other three tests of QST-99 loop over `SMALL`; this one sets `{ cols: 100, rows: 30 }` at `test/unit/tui-loop.test.ts:630`.
-- **N8**: the two cases of the new test open the modal of Q-08 before the terminal shrinks (`:679`, `:697`), and the test of `marks` starts from `open("06")`. It is the shape of gap 3 of round 4, on the trigger this round added.
-- **N11**: the test of `marks` has the marks among other keys (`test/unit/tui-keys.test.ts:570`–`:572`); the tests of the loop hand it each mark alone. The call passes the whole chunk, so the two halves do compose (G3a, G3b); no assertion says so.
-- **X3**: `aq` is in the list of F22 and its twin with `ctrl+c` is not.
-- **L4**: F23 gave `\r` its case with keys held back (`:555`); F24 gave `\n` the three cases of its task and not that one.
-- **Q6, Q6a** differ from the code only for a question of the worker that the `result` does not close and that was merged into one it closes. The spec does not say what closes it (SP2), so they are not ranked.
+- **R3, R2** are one hole, and an old one: the fixture of every test of QST-36 and QST-37 with a question of another worker gives it `ticket_ref` `T-3` or `T-2` (`test/unit/question-result.test.ts:84`, `:86`, `:129`, `:193`, `:219`, `:262`), so "of another `asked_by`" and "about another ticket" are the same questions in all of them. Round 5 tried the filter by `asked_by` (Q6, Q6a) and not the one by ticket. `own` is a list of ids; a walk that asks "is it about this ticket?" in its place is the nearest wrong way to write it, and it differs exactly where two agents asked the same thing about the same ticket.
+- **R18, R15**: F28 put the new kind of question, the one of the same worker the `result` does not close, at the end of a chain behind the question of another worker. No test has a question of another worker behind another question that follows, which is the plain reading of "por outra mesclada", nor the new kind in the middle. The tests that reach the recursive step with a `result` reach it with a question of who sends it.
+- **V4**: the three places of the quit test are states of the modal. F25 gave the small terminal a second state, a paste in course, and the quit is decided on the line after the one that reads it.
+- **V13**: the same shape as gap 3 of round 5 (N11), which was closed for the marks: the sentence is asserted on `marks`, and the loop is what the sentence is about.
+- **W4**: `more` reaches the reducer in two tests, both with no modal open (`test/unit/tui-keys.test.ts:568`, `:579`), and the loop holds an escape back after `\r` only (`test/unit/tui-loop.test.ts:432`, `:453`).
+- **V2**: `aq` and `qa` are the two ends; `some` cut to either end is killed, cut to both is not. Nothing a person would write gives this mutant.
+- **V8** is on SP4.
 
-Each of the seven fails an assertion written in the scratch that passes at `5fa9b80`: G1a for X5, X6 and X7, G1b for X3, G2a and G2b for N8, G3a and G3b for N11, G4 for L4. The assertions were deleted with the scratch.
+## The decision for the dev
+
+Three verifications in a row (rounds 4, 5 and 6) ended the same way: the gate green, every probe of the code giving what the spec says, every mutant of a written construct killed, and a handful of mutants that add a condition on a combination no test visits. Each fix round closed exactly the survivors it was given, and the next verifier found the neighbours. The example tests of the small terminal now run 54 launches for the quit and 36 for the marks, and the space they sample (size, modal, key, place in the read, paste, mark) still has unvisited cells; one more round of the same kind would close six cells and leave others.
+
+What is at stake, by weight:
+
+1. **Gaps 1 and 2 (QST-36)** are the only ones on the state of the broker, and gap 1 is on the commonest merge there is. The outcome if the code ever broke there is a question left `merged` and one delivery not made, with nothing on the screen. Two tests close them (P7 to P10 are those tests).
+2. **Gaps 3 and 4 (QST-99)** need a paste whose end did not come, or one that spans two resizes. One test each.
+3. **Gaps 5 and 6** are cosmetic: a missing space, and a mutant nobody would write.
+
+The choices are the dev's: close gaps 1 and 2, or all six, in one more round of tests only (see "Fix plans"; each was run in the scratch against its mutant); or accept the residue as known risk, with the list above as its record; or, for the small terminal, replace the lists of examples by one test that builds the cases from the product of the dimensions, as `test/unit/question-replay.test.ts` does for the table and the derivation. That generator did not reach gap 1 either with its seeds: a question of another asker about the ticket of the worker, merged into one its `result` closes, is a case to give it.
 
 ## Code quality
 
-Over what the round touched: `tui.ts`, `tui/keys.ts`.
+No production code changed in `5fa9b80..6cd28e2`. Over the tests of the round:
 
 | Principle | Status |
 | --------- | ------ |
-| Minimum code | ✅ `marks` is one reduction over `keysOf`; `paste` moved from inside `input` to the module so both use it; the loop gained one assignment |
-| Surgical changes | ✅ `input` is as it was but for the helper it lost; `dispatch` still returns before `input` in a small terminal |
-| No scope creep | ✅ No setting, no new state: `Ui.pasting` is the field of F15 |
-| Matches patterns | ✅ `marks` is pure and takes and gives a `Ui`, as `sync` and `settle`; the same object comes back when no mark is in the chunk |
-| Spec-anchored outcome check | ❌ 18 of 22 clauses in full |
-| Per-layer coverage expectation | ❌ The rule of the loop for a small terminal has no case per side of its "ou" for the quit, and the reducer has no case of `marks` with no modal |
-| Every test maps to a requirement | ✅ The 8 new tests name QST-36, QST-78 and QST-99 |
-| Documented guidelines followed: `broker/CLAUDE.md`, `.specs/LESSONS.md` | ⚠️ `broker/CLAUDE.md` is up to date. L-010, confirmed (each trigger of an AC its own assertion), does not hold for the two sides of the size in the quit of QST-99 |
+| Minimum code | ✅ The test of the marks became a table of six cases run by one body; the quit test gained two loops |
+| Surgical changes | ✅ Three test files and two sentences of the spec |
+| No scope creep | ✅ |
+| Matches patterns | ✅ `launch`, `tab`, `modal`, `reads`, `storedDefault` and `questionRow` as the files had them |
+| Spec-anchored outcome check | ❌ 21 of 27 clauses in full |
+| Per-layer coverage expectation | ❌ The walk of `resolve` has no case of another asker about the same ticket nor two merges away; the sentence on `esc` of QST-99 has no case in the loop |
+| Every test maps to a requirement | ✅ The three new tests and the two rewritten name QST-36, QST-78 and QST-99 |
+| Documented guidelines followed: `broker/CLAUDE.md`, `.specs/LESSONS.md` | ⚠️ `broker/CLAUDE.md` is up to date. L-052 and L-051, candidates of this feature since round 1, are what gaps 1 and 2 repeat |
 
 Smaller notes, none blocking:
 
-- In a small terminal `dispatch` splits the chunk twice, once in `marks` and once for the quit (`tui.ts:170`–`:171`).
-- A pasted `q` quits a small terminal (G7), now also when the TUI knows it is inside a paste. It is what QST-99 says of `q` and what TUI-62 says of a chunk with `q` at any size.
-- `key` still has a local `input` (`tui.ts:188`) with the name of the reducer `dispatch` calls (`:174`), as rounds 3 and 4 noted.
+- The table of `test/unit/tui-loop.test.ts:715`–`:724` has eight fields per case on one line each; it reads with the comment above it and not without.
+- The three places of the quit test are not asserted before the terminal shrinks (`:632`); that `4`, `\r` opens the modal of Q-07 on its first option is asserted by the tests around it (`:461`, `:683`).
+- The notes of round 5 on `dispatch` splitting the chunk twice and on the local `input` of `key` stand.
 
 ## Not exercised
 
@@ -274,41 +296,56 @@ Stated, not assumed:
 - **Whether a given terminal sends `ESC [ 200 ~` and `ESC [ 201 ~`** after `CSI ? 2004 h`, and in how many reads: Windows Terminal, conhost, or any terminal of Linux or macOS, and whether Bun in raw mode on Windows hands them to `stdin` unchanged. Where they do not arrive, the rule of the chunk is all there is.
 - **A real resize.** `resize` and `size` are the injected ones; no window was resized.
 - **Linux and macOS.** The suite ran on Windows only.
+- **The real broker for the cases of gaps 1 and 2.** P7 to P10 call `createQuestion` over an in-memory database, as `test/unit/question-result.test.ts` does; `/send` over HTTP was not driven with them.
 - The interactive UAT (step 7) is not this agent's.
 
-The known risks rounds 3 and 4 listed stand, untouched by this round.
+The known risks rounds 3 to 5 listed stand, untouched by this round.
 
 ## Fix plans
 
-Three edits of tests and two sentences. No code has to change.
+Tests only. No code has to change. Each was written and run in the scratch: it passes at `6cd28e2` and fails under its mutant.
 
-### Fix 1: the quit at each small size, and `ctrl+c` in a chunk (gaps 1 and 4; X5, X6, X7, X3)
+### Fix 1: another asker about the same ticket (gap 1; R3, R2)
 
-- **Root cause**: `test/unit/tui-loop.test.ts:630` sets 100×30 where its three neighbours loop over `SMALL`, and `:625` has `aq` without its twin.
-- **Fix task**: in that test, loop over `SMALL` in the place of the fixed size, and add `"a\x03"` to the list of `:625`.
-- **Done when**: it fails with `io.size().cols < 120 &&` and with `io.size().rows < 40 &&` before the `some` of `tui.ts:171`, and with `keysOf(chunk).some((k) => k === "q") || chunk === "\x03"` in its place.
-- **Priority**: Minor for the sizes, Cosmetic for the chunk.
+- **Root cause**: every question of another worker in `test/unit/question-result.test.ts` is about `T-3` or `T-2`.
+- **Fix task**: one test. Q-01 of worker-1 about T-1; Q-02 about T-1 too, of worker-3 and, in a second run, of the judge; Q-02 merged into Q-01; `delivered("worker-1", "T-1")`: `events().slice(4)` is `[storedDefault(5, id)]`, Q-02 is `defaulted` with `merged_into: 1, answer_seq: 5`, and 5 is delivered to worker-1 and to who asked Q-02. And Q-03 of worker-3 about T-1 merged into Q-02 of worker-2 about T-9, merged into Q-01: one `answer`, 7, the three rows with it, deliveries to the three.
+- **Done when**: it fails with `ticket_ref IS NOT` the ticket of the row in the place of the `NOT IN` of `question.ts:71`, and of `:74`.
+- **Priority**: Major.
 
-### Fix 2: the marks in a small terminal with no modal, and among other keys (gaps 2 and 3; N8, N11)
+### Fix 2: two merges away (gap 2; R18, R15)
 
-- **Root cause**: both cases of `test/unit/tui-loop.test.ts:672`–`:710` open the modal first and hand the loop each mark alone.
-- **Fix task**: in that test, two more cases. No modal: the tab on Q-08, the terminal shrinks, `ESC[200~`, it grows, then `\r`, `logo`, `\r`, `ESC[201~`: no `POST`, the modal with `logo `; and the tab, `ESC[200~`, shrink, `ESC[201~`, grow, `\r`, `logo`, `\r`: `logo` posted. Among other keys: the modal of Q-08, shrink, `ESC[200~logo\r` in one read, grow: the field empty, then `mais`, `\r`: no `POST`, the text `mais `; and the modal with `ESC[200~logo`, shrink, `fim\r ESC[201~` in one read, grow, `\r`: `logo` posted. In `test/unit/tui-keys.test.ts`, `marks` over a state with no modal.
-- **Done when**: the first two fail with `if (ui.modal)` before the call of `tui.ts:170`, and the other two with `if (keysOf(chunk).length === 1)` there.
+- **Fix task**: in the same test or beside it, Q-03 of worker-3 about T-3 merged into Q-02, merged into Q-01, with Q-02 of worker-2 about T-2 and then of worker-1 about T-2: one `answer`, 7; the three rows `defaulted` with `answer_seq` 7; 7 delivered to each asker once.
+- **Done when**: it fails with `AND q.asked_by =` who sends, and with `AND m.asked_by !=` who sends, added to the recursive step of `question.ts:73`–`:74` when `own` is given.
+- **Priority**: Major.
+
+### Fix 3: the quit with a paste in course (gap 3; V4)
+
+- **Fix task**: in `test/unit/tui-loop.test.ts:625`, three more places: `["\x1b[200~"]`, `["4", "j", "\r", "\x1b[200~logo"]`, `["4", "\r", "\x1b[200~"]`. And `"\x1b[200~q"` among the reads of `:628`.
+- **Done when**: it fails with `!ui.pasting &&` before the `some` of `tui.ts:171`.
 - **Priority**: Minor.
 
-### Fix 3: `\n` with keys held back (gap 5; L4)
+### Fix 4: `esc` in a small terminal through the loop (gap 4; V13)
 
-- **Fix task**: in the loop of `test/unit/tui-keys.test.ts:560`–`:565`, `expect(input(v.ui, "\n", v, true)).toBe(v.ui)`.
-- **Done when**: it fails with `more && next.modal === null && k === "\n" ? "\r" : k` as the key of `tui/keys.ts:207`.
+- **Fix task**: one test at the three sizes. The modal of Q-08, `ESC[200~logo`, the terminal shrinks, `esc` alone with its 40 ms and, in a second run, `esc` `1` in one read, it grows: the modal with `logo`; `\r`: nothing posted, the text is `logo `; `ESC[201~`, `\r`: `logo` is posted.
+- **Done when**: it fails with `if (keysOf(chunk).includes("\x1b")) ui = { ...ui, pasting: false }` after the call of `tui.ts:170`.
+- **Priority**: Minor.
+
+### Fix 5: `\n` with keys held back, with the modal open (gap 5; W4)
+
+- **Fix task**: in `test/unit/tui-keys.test.ts`, `input(v.ui, k, v, true)` for `\r` and `\n` over `open("06", { text: "logo" })`, equal to the modal with `logo `, and over `open("05", { choice: 1 })`, equal to its state. In the loop of `test/unit/tui-loop.test.ts:432`, `"\n\x1b["`.
+- **Done when**: it fails with `(more && k === "\r")` in the place of `more` at `tui/keys.ts:206`.
 - **Priority**: Cosmetic.
 
-### SP2 and SP3
+### Fix 6: the key between two others (gap 6; V2)
 
-- SP2: one sentence, by the dev, in QST-36 or QST-39, for a question of the same worker that the `result` does not close and that is merged into one it closes, and then the test of probe G8, direct and through a third. If the answer is "it follows", no code changes.
-- SP3: one sentence in QST-99 for `esc` during a paste in a small terminal. If it is "it is a key like the others", `test/unit/tui-keys.test.ts:576` already pins it.
-- **Priority**: Cosmetic, both.
+- **Fix task**: `"aqa"` and `"a\x03a"` in the list of `test/unit/tui-loop.test.ts:628`.
+- **Priority**: Cosmetic.
 
-This is the second verification since the third fix round. One more fix and re-verify iteration is left before the bound of three sends it to the user.
+### SP4
+
+- One sentence in QST-78 saying a mark is a mark in however many reads it comes, and P6 as its test; or the line under "Not exercised" as it stands. **Priority**: Cosmetic.
+
+This was the third fix and re-verify iteration since the third fix round. The bound of three is reached: what comes next is for the dev to say.
 
 ## Requirement traceability update
 
@@ -316,40 +353,53 @@ Not applied: this agent does not edit `spec.md`. Proposed:
 
 | Requirement | Current status | Proposed |
 | ----------- | -------------- | -------- |
-| QST-36 | Implementing | ✅ Verified. Every clause the spec defines has its assertion and no mutant inside the spec survives; SP2 is a sentence the spec lacks, not a failure of the requirement |
-| QST-78 | Implementing | ❌ stays Implementing until Fix 3, one line. Everything else of it holds, the delimited paste whole |
-| QST-99 | Implementing | ❌ stays Implementing until Fix 1 and Fix 2 |
+| QST-36 | Implementing | ❌ stays Implementing until Fix 1 and Fix 2. Clauses a to e, g, h and j hold whole; f and i each have a case with no assertion. Round 5 proposed Verified: it did not try the filter by ticket |
+| QST-78 | Implementing | ❌ stays Implementing by the rule, held by Fix 5 alone, which is cosmetic: ten of its eleven clauses hold whole, the delimited paste and `esc` among them, and nothing of gap 5 can send an answer. If the dev accepts gap 5 as a known risk it can go to Verified as it is |
+| QST-99 | Implementing | ❌ stays Implementing until Fix 3 and Fix 4; Fix 6 is cosmetic |
 | the other 96 | Verified | Verified: the gate is green and no expected value of their tests changed |
 
 ## Lessons recorded
 
-Through `scripts/lessons.py add`, seven calls for seven signals. The script answered `ADDED` for L-064, L-065 and L-066, and `UPDATED` for L-061, L-060 (twice) and L-063, each still a candidate with one feature, this one; it changed `.specs/lessons.json` and `.specs/LESSONS.md`.
+Through `scripts/lessons.py add`, seven calls for seven signals. The script answered `UPDATED` for L-052, L-051 and L-065 (twice), each still a candidate with one feature, this one, and `ADDED` for L-067, L-068 and L-069; it changed `.specs/lessons.json` and `.specs/LESSONS.md`.
 
 | Signal | Lesson | Effect |
 | ------ | ------ | ------ |
-| X5, X6, X7 `tui.ts:171`, `test/unit/tui-loop.test.ts:630` (QST-99, gap 1) | When the condition of an AC is an or, assert each outcome of the AC with a fixture where only one side of the or holds | New, L-064 |
-| N8 `tui.ts:170` (QST-99, gap 2) | When a rule gains a new trigger, test every branch of the rule under the new trigger, not only the branches the change was made for | L-061 reinforced: the shape of B5 of round 4, on the trigger this round added |
-| N11 `tui.ts:170` (QST-99, gap 3) | Test a key rule of an input loop with the key inside a chunk of several keys, not only alone in its read | L-060 reinforced |
-| X3 `tui.ts:171` (QST-99, gap 4) | the same sentence | L-060 reinforced |
-| L4 `tui/keys.ts:207` (QST-78, gap 5) | When an AC names several inputs for one rule, assert the rule with each input in every state the AC gives | L-065. It is the sentence of L-062 word for word, meant to reinforce it; the script keeps the two apart because the signal differs (`surviving_mutant` here, `ac_gap` there). Left as the script wrote it |
-| SP2, QST-36 with QST-31 and QST-39; Q6, Q6a `question.ts:74`, `:71` | When an AC says what happens to the items a rule acts on and to linked items of another owner, state what happens to a linked item of the same owner the rule does not act on | New, L-066 |
-| SP3, QST-78 with QST-99 `tui/keys.ts:53` | When an AC makes a state ignore input, state what happens to an input sequence that starts in one state and ends in the other | L-063 reinforced: SP1 of round 4 was settled for the marks and not for `esc` |
+| R3, R2 `question.ts:71`, `:74`, `test/unit/question-result.test.ts:193` (QST-36, gap 1) | Test a condition with a fixture where it differs from the conditions that coincide with it in every other fixture | L-052 reinforced: another asker and another ticket are the same questions in every fixture |
+| R18, R15 `question.ts:73`–`:74` (QST-36, gap 2) | Test the filter of a recursive walk on a member reached through another member, not only on one reached directly | L-051 reinforced |
+| V4 `tui.ts:171` (QST-99, gap 3) | When an AC names several inputs for one rule, assert the rule with each input in every state the AC gives | L-065 reinforced: the state is the paste in course |
+| V13 `tui.ts:170`, `test/unit/tui-keys.test.ts:591` (QST-99, gap 4) | Assert a rule an AC states for an input loop through the loop, not only on the pure function the loop calls | New, L-067 |
+| W4 `tui/keys.ts:206` (QST-78, gap 5) | the sentence of L-065 | L-065 reinforced |
+| V2 `tui.ts:171` (QST-99, gap 6) | Test a rule that holds for any item of a list with the item first, last and between two others | New, L-068 |
+| SP4, QST-78 with QST-99; V8 `tui.ts:191` | When an AC names an input of several bytes, state what happens when it arrives split across two reads | New, L-069 |
 
-No lesson was penalized. L-010 is confirmed and gap 1 is near it, two alternatives of one condition asserted together; the sentence of L-064 says what was missing more exactly than a penalty on L-010 would.
+No lesson was penalized: none of the seven confirmed lessons is the one a gap of this round repeats. L-051 and L-052 are candidates of this feature alone and were not loaded as guidance; that the same two signals came back in rounds 1, 4 and 6 is said here and in "The decision for the dev".
 
 ## Summary
 
-**Overall**: ❌ Not ready, by a short distance. The code holds in every probe; the tests of QST-99 leave four cases of its own words unvisited, and the tests of QST-78 one.
+**Overall**: ❌ Not ready by the rule of the gate, and the decision is the dev's. The code holds in every probe of three rounds; the tests leave six cases of the words of the three requirements unvisited, two of them on the state of the broker.
 
-**Spec-anchored check**: 18 of 22 clauses in full, 4 in part (QST-99 a, b, e; QST-78 d); QST-36 whole; 2 spec-precision gaps (SP2, SP3).
-**Sensor**: 32 of 41 mutants killed. The seven of round 4 all killed. 9 survive: 7 inside the spec, X5, X6, X7, X3, N8, N11 (QST-99) and L4 (QST-78), and 2 on SP2, Q6 and Q6a (QST-36).
-**Gate**: `tsc` exit 0; 1292 pass, 3 skip, 0 fail.
+**Spec-anchored check**: 21 of 27 clauses in full, 6 in part (QST-36 f, i; QST-78 a; QST-99 a, b, f); 1 spec-precision gap (SP4).
+**Sensor**: 31 of 40 mutants killed. The nine of round 5 all killed. 9 survive: 8 inside the spec, R3, R2, R18, R15 (QST-36), V4, V13, V2 (QST-99) and W4 (QST-78), and V8 on SP4.
+**Gate**: `tsc` exit 0; 1295 pass, 3 skip, 0 fail.
 
-**What works**: two questions of a worker merged into each other through the question of another worker close each by its own default, and the one between them by the answer of the end; `q`, `ctrl+c` and a chunk with `q` quit a terminal of 100×30 each by itself, with and without the modal; a line break of a delimited paste with no modal open does what `enter` does, and `esc` ends the paste there too; a line break before a held back escape opens the modal and sends nothing; `\n` with no modal does nothing, and the spec says so; the marks of a paste are read in a small terminal, so a paste that crosses a resize starts and ends where its marks say, at the three sizes.
+**What works**: `q`, `ctrl+c` and a read with either at its start or its end quit a terminal that is narrow, short or both, with no modal, in the text mode and in the choice mode; the marks of a paste are read there in the three states, alone or among other keys, so a paste that crosses a resize starts and ends where its marks say; `\n` with no modal does nothing also when the loop holds keys back; `esc` ends a paste in the choice mode and beside another key; a question of the worker about another ticket, or about none, merged into one its `result` closes, closes with the `answer` of that one, straight or behind the question of another worker, and the spec says so.
 
-**Issues found**: the five ranked gaps, SP2 and SP3, above.
+**Issues found**: the six ranked gaps and SP4, above.
 
-**Next steps**: Fix 1 to Fix 3 are tests only, about thirty lines, and each was tried in the scratch against its mutant; SP2 and SP3 wait for a word of the dev. Then verify again over the new commits.
+**Next steps**: the dev decides between one more round of tests (Fix 1 and Fix 2 first), the residue accepted as known risk, or a generated test for the small terminal.
+
+## Round 5
+
+Kept for the history. The full report is in `git show 27f1ac3:.specs/features/question/validation.md`.
+
+- **Verdict**: FAIL, at `5fa9b80` (`89007b8..5fa9b80`, 6 commits), the second verification since the third fix round.
+- **Gate**: `tsc` exit 0; 1292 pass, 3 skip, 0 fail.
+- **Spec-anchored check**: 18 of 22 clauses in full, 4 in part (QST-99 a, b, e; QST-78 d); QST-36 whole. The six gaps and SP1 of round 4 closed. Fourteen probes of the code, each giving what the spec says.
+- **Sensor**: 32 of 41 mutants killed. The seven survivors of round 4 all killed. The nine survivors: X5, X6, X7 and X3 `tui.ts:171`, N8 and N11 `tui.ts:170`, L4 `tui/keys.ts:207`, inside the spec, and Q6 `question.ts:74` and Q6a `question.ts:71` on SP2.
+- **Ranked gaps**: 1 `q` and `ctrl+c` quit a small terminal at 100×30 only · 2 the marks of a paste in a small terminal with the modal open only · 3 a mark alone in its read only, through the loop · 4 `ctrl+c` among other keys of a chunk · 5 `\n` with keys held back, no modal open.
+- **Spec-precision gaps**: SP2 QST-36 with QST-31 and QST-39, a question of the same worker the `result` does not close, merged into one it closes · SP3 QST-78 with QST-99, `esc` in a small terminal during a paste.
+- **Test integrity**: no test weakened; F22 rewrote one test in place, with the three expected values it had.
+- **Lessons**: L-064, L-065 and L-066 new; L-060, L-061 and L-063 reinforced.
 
 ## Round 4
 

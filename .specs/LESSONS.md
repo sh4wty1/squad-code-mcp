@@ -315,14 +315,14 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-051 - Test the filter of a recursive walk on a member reached through another member, not only on one reached directly
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker-rules` · harmful: 0
 - features: question
-- evidence: M10b broker/question.ts:73 (QST-37: follower two merges away already closed) (broker-rules) (+1 more)
-- last seen: 2026-10-11T06:12:12Z
+- evidence: M10b broker/question.ts:73 (QST-37: follower two merges away already closed) (broker-rules) (+2 more)
+- last seen: 2026-10-11T08:09:51Z
 
 ### L-052 - Test a condition with a fixture where it differs from the conditions that coincide with it in every other fixture
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
 - features: question
-- evidence: N01 broker/tui/screens/answer.ts:73 (QST-73, QST-80: no blocking question with a default) (tui) (+1 more)
-- last seen: 2026-10-11T06:12:13Z
+- evidence: N01 broker/tui/screens/answer.ts:73 (QST-73, QST-80: no blocking question with a default) (tui) (+2 more)
+- last seen: 2026-10-11T08:09:51Z
 
 ### L-053 - State what a line that carries a count shows when the count is zero
 - signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
@@ -399,14 +399,32 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-065 - When an AC names several inputs for one rule, assert the rule with each input in every state the AC gives
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `spec tests` · harmful: 0
 - features: question
-- evidence: L4 broker/tui/keys.ts:207 (QST-78: a line feed with no modal open and keys held back after it, where the carriage return has its assertion; validation.md round 5, gap 5) (spec tests)
-- last seen: 2026-10-11T07:20:50Z
+- evidence: L4 broker/tui/keys.ts:207 (QST-78: a line feed with no modal open and keys held back after it, where the carriage return has its assertion; validation.md round 5, gap 5) (spec tests) (+2 more)
+- last seen: 2026-10-11T08:09:52Z
 
 ### L-066 - When an AC says what happens to the items a rule acts on and to linked items of another owner, state what happens to a linked item of the same owner the rule does not act on
 - signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
 - features: question
 - evidence: QST-36 with QST-31 and QST-39; mutants Q6, Q6a broker/question.ts:74, :71 (a question of the same worker about another ticket merged into one the result closes; validation.md round 5, SP2) (spec)
 - last seen: 2026-10-11T07:20:51Z
+
+### L-067 - Assert a rule an AC states for an input loop through the loop, not only on the pure function the loop calls
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui input` · harmful: 0
+- features: question
+- evidence: V13 tui.ts:170; test/unit/tui-keys.test.ts:591 (QST-99, round 6 gap 4) (tui input)
+- last seen: 2026-10-11T08:09:51Z
+
+### L-068 - Test a rule that holds for any item of a list with the item first, last and between two others
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui input` · harmful: 0
+- features: question
+- evidence: V2 tui.ts:171; test/unit/tui-loop.test.ts:628 (QST-99, round 6 gap 6) (tui input)
+- last seen: 2026-10-11T08:09:52Z
+
+### L-069 - When an AC names an input of several bytes, state what happens when it arrives split across two reads
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: question
+- evidence: SP4, QST-78 with QST-99; V8 tui.ts:191 (round 6) (spec)
+- last seen: 2026-10-11T08:09:52Z
 
 ## Quarantined (failed when applied - ignore)
 

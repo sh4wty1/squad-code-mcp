@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 67,
+  "next_id": 70,
   "lessons": [
     {
       "id": "L-001",
@@ -946,10 +946,11 @@
       "harmful": 0,
       "evidence": [
         "M10b broker/question.ts:73 (QST-37: follower two merges away already closed) (broker-rules)",
-        "C2 broker/question.ts:74 (QST-36: a question of the result merged into another of them through a third; validation.md round 4) (broker-rules)"
+        "C2 broker/question.ts:74 (QST-36: a question of the result merged into another of them through a third; validation.md round 4) (broker-rules)",
+        "R18, R15 question.ts:73-74; test/unit/question-result.test.ts:260 (QST-36, round 6 gap 2) (broker-rules)"
       ],
       "created": "2026-10-10T11:07:42Z",
-      "last_seen": "2026-10-11T06:12:12Z"
+      "last_seen": "2026-10-11T08:09:51Z"
     },
     {
       "id": "L-052",
@@ -965,10 +966,11 @@
       "harmful": 0,
       "evidence": [
         "N01 broker/tui/screens/answer.ts:73 (QST-73, QST-80: no blocking question with a default) (tui)",
-        "B6 broker/tui/keys.ts:199 (QST-78: K4 of round 3 again, now inside the spec; validation.md round 4) (tui)"
+        "B6 broker/tui/keys.ts:199 (QST-78: K4 of round 3 again, now inside the spec; validation.md round 4) (tui)",
+        "R3 question.ts:71, R2 question.ts:74; test/unit/question-result.test.ts:193 (QST-36, round 6 gap 1) (broker-rules)"
       ],
       "created": "2026-10-10T11:07:42Z",
-      "last_seen": "2026-10-11T06:12:13Z"
+      "last_seen": "2026-10-11T08:09:51Z"
     },
     {
       "id": "L-053",
@@ -1205,10 +1207,12 @@
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "L4 broker/tui/keys.ts:207 (QST-78: a line feed with no modal open and keys held back after it, where the carriage return has its assertion; validation.md round 5, gap 5) (spec tests)"
+        "L4 broker/tui/keys.ts:207 (QST-78: a line feed with no modal open and keys held back after it, where the carriage return has its assertion; validation.md round 5, gap 5) (spec tests)",
+        "V4 tui.ts:171; test/unit/tui-loop.test.ts:625 (QST-99, round 6 gap 3) (spec tests)",
+        "W4 tui/keys.ts:206; test/unit/tui-loop.test.ts:432 (QST-78, round 6 gap 5) (spec tests)"
       ],
       "created": "2026-10-11T07:20:50Z",
-      "last_seen": "2026-10-11T07:20:50Z"
+      "last_seen": "2026-10-11T08:09:52Z"
     },
     {
       "id": "L-066",
@@ -1227,6 +1231,60 @@
       ],
       "created": "2026-10-11T07:20:51Z",
       "last_seen": "2026-10-11T07:20:51Z"
+    },
+    {
+      "id": "L-067",
+      "key": "surviving_mutant::assert a rule an ac states for an input loop through the loop not only on the pure function the loop calls",
+      "text": "Assert a rule an AC states for an input loop through the loop, not only on the pure function the loop calls",
+      "signal": "surviving_mutant",
+      "scope": "tui input",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "V13 tui.ts:170; test/unit/tui-keys.test.ts:591 (QST-99, round 6 gap 4) (tui input)"
+      ],
+      "created": "2026-10-11T08:09:51Z",
+      "last_seen": "2026-10-11T08:09:51Z"
+    },
+    {
+      "id": "L-068",
+      "key": "surviving_mutant::test a rule that holds for any item of a list with the item first last and between two others",
+      "text": "Test a rule that holds for any item of a list with the item first, last and between two others",
+      "signal": "surviving_mutant",
+      "scope": "tui input",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "V2 tui.ts:171; test/unit/tui-loop.test.ts:628 (QST-99, round 6 gap 6) (tui input)"
+      ],
+      "created": "2026-10-11T08:09:52Z",
+      "last_seen": "2026-10-11T08:09:52Z"
+    },
+    {
+      "id": "L-069",
+      "key": "spec_precision_gap::when an ac names an input of several bytes state what happens when it arrives split across two reads",
+      "text": "When an AC names an input of several bytes, state what happens when it arrives split across two reads",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "question"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SP4, QST-78 with QST-99; V8 tui.ts:191 (round 6) (spec)"
+      ],
+      "created": "2026-10-11T08:09:52Z",
+      "last_seen": "2026-10-11T08:09:52Z"
     }
   ]
 }
