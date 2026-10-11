@@ -75,9 +75,17 @@ Adequação: critérios completos, payload e linhas conferidos; sem enfraquecime
 **Where**: `broker/test/unit/tui-loop.test.ts`
 **Requirement**: QST-99
 
-- [ ] Três lugares a mais na lista do teste da saída: `["\x1b[200~"]`, `["4", "j", "\r", "\x1b[200~logo"]` e `["4", "\r", "\x1b[200~"]`; e `"\x1b[200~q"` entre as leituras
-- [ ] O teste falha com `!ui.pasting &&` antes do `some`
-- [ ] Gate quick passa
+- [x] Três lugares a mais na lista do teste da saída: `["\x1b[200~"]`, `["4", "j", "\r", "\x1b[200~logo"]` e `["4", "\r", "\x1b[200~"]`; e `"\x1b[200~q"` entre as leituras
+- [x] O teste falha com `!ui.pasting &&` antes do `some`
+- [x] Gate quick passa
+
+**Evidência F31**: V4 morto no scratch e arquivo restaurado. Teste isolado: 126 lançamentos, 504 asserções, passa. Quick: 1139 pass, 1 skip, 0 fail.
+
+| Critério / mapa reverso | Asserção (`broker/`) | Resultado da spec | Manter |
+| --- | --- | --- | --- |
+| QST-99, saída durante colagem | `test/unit/tui-loop.test.ts:638` `expect(t.raw).toEqual([true, false])`; `:639` `expect(t.out.endsWith(LEAVE)).toBe(true)`; `:640` `expect(t.posts).toEqual([])` | terminal devolvido e zero POST para todos os tamanhos, estados e leituras | sim |
+
+Adequação: critérios completos; asserções antigas preservadas; segue `broker/CLAUDE.md` e a matriz.
 
 ### F32: `esc` no terminal pequeno, pelo laço
 

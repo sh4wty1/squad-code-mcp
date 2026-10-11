@@ -622,10 +622,10 @@ test("QST-99: in a terminal smaller than 120×40, b, enter and enter over a bloc
 test("QST-99: in a terminal narrower than 120 columns or shorter than 40 lines, q, ctrl+c and a chunk with either among its keys quit, with no modal, with the modal in the text mode and with it in the choice mode, and nothing is posted", async () => {
   // No modal, the modal of Q-08 with a text, where q is a character of the answer in a
   // terminal that fits, and the modal of Q-07 on its first option
-  const places = [[], ["4", "j", "\r", "logo"], ["4", "\r"]];
+  const places = [[], ["4", "j", "\r", "logo"], ["4", "\r"], ["\x1b[200~"], ["4", "j", "\r", "\x1b[200~logo"], ["4", "\r", "\x1b[200~"]];
   for (const size of SMALL) {
     for (const before of places) {
-      for (const quit of ["q", "\x03", "aq", "a\x03", "qa", "\x03a"]) {
+      for (const quit of ["q", "\x03", "aq", "a\x03", "qa", "\x03a", "\x1b[200~q"]) {
         const { t, key, resize, stop } = launch();
         try {
           await t.shows(main(t.view()).text(), "the main screen");
