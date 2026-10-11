@@ -2,8 +2,8 @@
 
 A review do PR 9 (https://github.com/sh4wty1/squad-code-mcp/pull/9, postada em 2026-10-10
 sobre `d867b57`) deu COMMENT: nenhum bloqueio, dois achados para corrigir e cinco nits. O
-texto de cada achado, com a evidência, está nos comentários do PR. Esta rodada ainda não
-começou: nenhuma tarefa abaixo tem código escrito.
+texto de cada achado, com a evidência, está nos comentários do PR. As sete tarefas estão
+feitas, em `487ac06..89007b8`; o que o Verifier achou nelas está em `fix-round-4.md`.
 
 Valem as regras, a matriz de testes e os gates de `tasks.md`. Um commit por tarefa, com a
 tarefa marcada aqui.

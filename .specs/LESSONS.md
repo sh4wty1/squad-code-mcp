@@ -315,14 +315,14 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-051 - Test the filter of a recursive walk on a member reached through another member, not only on one reached directly
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker-rules` · harmful: 0
 - features: question
-- evidence: M10b broker/question.ts:73 (QST-37: follower two merges away already closed) (broker-rules)
-- last seen: 2026-10-10T11:07:42Z
+- evidence: M10b broker/question.ts:73 (QST-37: follower two merges away already closed) (broker-rules) (+1 more)
+- last seen: 2026-10-11T06:12:12Z
 
 ### L-052 - Test a condition with a fixture where it differs from the conditions that coincide with it in every other fixture
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
 - features: question
-- evidence: N01 broker/tui/screens/answer.ts:73 (QST-73, QST-80: no blocking question with a default) (tui)
-- last seen: 2026-10-10T11:07:42Z
+- evidence: N01 broker/tui/screens/answer.ts:73 (QST-73, QST-80: no blocking question with a default) (tui) (+1 more)
+- last seen: 2026-10-11T06:12:13Z
 
 ### L-053 - State what a line that carries a count shows when the count is zero
 - signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
@@ -353,6 +353,42 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: question
 - evidence: QST-78 vs Assumptions row 'Colagem com quebra de linha'; mutant K4 broker/tui/keys.ts:187 (validation.md round 3, P3) (spec)
 - last seen: 2026-10-10T12:21:06Z
+
+### L-058 - In a test that loops over alternative triggers, send after each trigger no other input that alone produces the asserted outcome
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui tests` · harmful: 0
+- features: question
+- evidence: A3 broker/tui.ts:168, broker/test/unit/tui-loop.test.ts:613 (QST-99: q pressed after ctrl+c quits in its place; validation.md round 4) (tui tests)
+- last seen: 2026-10-11T06:12:12Z
+
+### L-059 - When an AC says a rule holds with or without a state, assert it in both
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui tests` · harmful: 0
+- features: question
+- evidence: A6 broker/tui.ts:168 (QST-99: q in a small terminal with no modal open; validation.md round 4) (tui tests)
+- last seen: 2026-10-11T06:12:12Z
+
+### L-060 - Test a key rule of an input loop with the key inside a chunk of several keys, not only alone in its read
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui input` · harmful: 0
+- features: question
+- evidence: A8 broker/tui.ts:168 (QST-99: q among other keys of a chunk in a small terminal; validation.md round 4) (tui input)
+- last seen: 2026-10-11T06:12:12Z
+
+### L-061 - When a rule gains a new trigger, test every branch of the rule under the new trigger, not only the branches the change was made for
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui input` · harmful: 0
+- features: question
+- evidence: B5 broker/tui/keys.ts:199 (QST-78: a delimited paste with no modal open; validation.md round 4) (tui input) (+1 more)
+- last seen: 2026-10-11T06:12:12Z
+
+### L-062 - When an AC names several inputs for one rule, assert the rule with each input in every state the AC gives
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `spec tests` · harmful: 0
+- features: question
+- evidence: QST-78 broker/tui/keys.ts:132 (a line feed with no modal open is not enter, the AC says it is; validation.md round 4, gap 6) (spec tests)
+- last seen: 2026-10-11T06:12:13Z
+
+### L-063 - When an AC makes a state ignore input, state what happens to an input sequence that starts in one state and ends in the other
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: question
+- evidence: QST-78 with QST-99 broker/tui.ts:168 (the marks of a paste in a small terminal; validation.md round 4, SP1) (spec)
+- last seen: 2026-10-11T06:12:13Z
 
 ## Quarantined (failed when applied - ignore)
 
