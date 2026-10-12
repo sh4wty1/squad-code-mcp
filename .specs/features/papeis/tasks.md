@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/papeis/design.md`
-**Status**: Approved
+**Status**: In Progress
 
 Regras do repositório que valem para toda tarefa:
 
@@ -600,12 +600,12 @@ T23
 
 **Done when**:
 
-- [ ] Cada linha de RS-01 a RS-14 está em `real-sessions.md` como exercitada, com data, versão do Claude Code, sistema, o comando e o que foi visto (o evento no log, a tela gravada ou a saída), ou como não exercitada, com o motivo
-- [ ] RS-01, RS-02 e RS-03 são repetidos com o plugin da fatia, não com o `spk`
-- [ ] Toda sessão sobe com `SQUAD_PORT`, `SQUAD_DB`, `SQUAD_TOKEN_FILE` e `SQUAD_WORKTREES` temporários e sem as variáveis `CLAUDE*`, num repositório descartável; o broker de teste é encerrado no fim
-- [ ] Um defeito que uma sessão real mostra vira tarefa de correção com teste e commit próprios, antes de esta fechar
-- [ ] A pergunta do spike B (RS-13) fica respondida ou registrada como não exercitada
-- [ ] Gate build passa
+- [x] Cada linha de RS-01 a RS-14 está em `real-sessions.md` como exercitada, com data, versão do Claude Code, sistema, o comando e o que foi visto (o evento no log, a tela gravada ou a saída), ou como não exercitada, com o motivo
+- [x] RS-01, RS-02 e RS-03 são repetidos com o plugin da fatia, não com o `spk`
+- [x] Toda sessão sobe com `SQUAD_PORT`, `SQUAD_DB`, `SQUAD_TOKEN_FILE` e `SQUAD_WORKTREES` temporários e sem as variáveis `CLAUDE*`, num repositório descartável; o broker de teste é encerrado no fim
+- [x] Um defeito que uma sessão real mostra vira tarefa de correção com teste e commit próprios, antes de esta fechar
+- [x] A pergunta do spike B (RS-13) fica respondida ou registrada como não exercitada
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build
