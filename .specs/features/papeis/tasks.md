@@ -782,10 +782,10 @@ T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Com `events` igual a `7`, a um objeto e a `true`, um caso por valor, `start worker` abre a sessão como `worker-1`, sem feature aberta, e sai com o código da sessão
-- [ ] Morre, conferido e desfeito, o mutante do Verifier em `launch.ts`: sem o `Array.isArray` da leitura
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Com `events` igual a `7`, a um objeto e a `true`, um caso por valor, `start worker` abre a sessão como `worker-1`, sem feature aberta, e sai com o código da sessão
+- [x] Morre, conferido e desfeito, o mutante do Verifier em `launch.ts`: sem o `Array.isArray` da leitura
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

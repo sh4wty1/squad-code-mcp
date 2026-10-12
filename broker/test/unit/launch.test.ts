@@ -303,6 +303,27 @@ for (const [what, fetch] of [
   }, SLOW);
 }
 
+// 200 with `events` that is not a list is a read that failed. The object has the shape of a
+// list in which worker-1 is online and a feature is open: read as one, it would give worker-2
+// at the tip of the branch.
+for (const [what, events] of [
+  ["a number", 7],
+  ["an object", { 0: joined(1, "worker-1"), 1: opened(2), length: 2 }],
+  ["true", true],
+] as [string, unknown][]) {
+  test(`PAP-38: without a name a worker is worker-1, with no feature open, when the broker answers 200 with events that is ${what}`, async () => {
+    const { main, worktrees } = repo();
+    const { code, spawned, lines } = await run(["worker"], main, { fetch: async () => Response.json({ events }) });
+    expect(spawned.map(session)).toEqual([["worker-1", "worker"]]);
+    same(spawned[0]!.cwd, join(worktrees, "worker-1"));
+    expect(head(spawned[0]!.cwd)).toBe(head(main));
+    expect(head(spawned[0]!.cwd)).not.toBe(tip(main));
+    expect(branch(spawned[0]!.cwd)).toBe("");
+    expect(code).toBe(7);
+    expect(lines).toEqual([]);
+  }, SLOW);
+}
+
 test("PAP-38: without a name a worker is worker-1 when the broker does not answer in 2000 ms", async () => {
   const { main } = namesRepo();
   // neither an answer nor a failure, whatever the signal says
