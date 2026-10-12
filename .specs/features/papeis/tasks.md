@@ -121,12 +121,12 @@ T22
 
 **Done when**:
 
-- [ ] `idPath("worker-1", { SQUAD_DB: "/tmp/x.db" })` é `/tmp/x.db.worker-1.id`; sem `SQUAD_DB` é `<home>/.squad-code-mcp.db.worker-1.id`
-- [ ] `pluginDir()` é absoluto, termina em `plugin`, e o pai dele contém `broker/`; `rolesPath({})` é `<pluginDir>/roles.json` e `SQUAD_ROLES` vence
-- [ ] `worktreesDir("/a/b/repo", {})` é `/a/b/repo.squad` (pai do checkout, nome do checkout mais `.squad`) e `SQUAD_WORKTREES` vence
-- [ ] `claudeCommand({})` é `claude` e `SQUAD_CLAUDE` vence; `HOOK_TIMEOUT_MS` é 2000, afirmado com o literal
-- [ ] Testes em `test/unit/config.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `idPath("worker-1", { SQUAD_DB: "/tmp/x.db" })` é `/tmp/x.db.worker-1.id`; sem `SQUAD_DB` é `<home>/.squad-code-mcp.db.worker-1.id`
+- [x] `pluginDir()` é absoluto, termina em `plugin`, e o pai dele contém `broker/`; `rolesPath({})` é `<pluginDir>/roles.json` e `SQUAD_ROLES` vence
+- [x] `worktreesDir("/a/b/repo", {})` é `/a/b/repo.squad` (pai do checkout, nome do checkout mais `.squad`) e `SQUAD_WORKTREES` vence
+- [x] `claudeCommand({})` é `claude` e `SQUAD_CLAUDE` vence; `HOOK_TIMEOUT_MS` é 2000, afirmado com o literal
+- [x] Testes em `test/unit/config.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

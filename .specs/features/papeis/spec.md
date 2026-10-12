@@ -392,9 +392,9 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Pending |
 | PAP-33 | P1: `roles.json` | T10 | Pending |
 | PAP-34 | P1: `roles.json` | T11 | Pending |
-| PAP-35 | P1: `roles.json` | T1, T14 | Pending |
+| PAP-35 | P1: `roles.json` | T1, T14 | Implementing |
 | PAP-36 | P1: `roles.json` | T14 | Pending |
-| PAP-37 | P1: Lançar uma sessão | T1, T14, T22 | Pending |
+| PAP-37 | P1: Lançar uma sessão | T1, T14, T22 | Implementing |
 | PAP-38 | P1: Lançar uma sessão | T14 | Pending |
 | PAP-39 | P1: Lançar uma sessão | T12 | Pending |
 | PAP-40 | P1: Lançar uma sessão | T12, T22 | Pending |

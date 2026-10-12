@@ -1,16 +1,23 @@
 import { expect, test } from "bun:test";
+import { realpathSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { basename, dirname, isAbsolute, join } from "node:path";
 import {
   brokerUrl,
+  claudeCommand,
   cleanupIntervalMs,
   dbPath,
   expireIntervalMs,
   heartbeatIntervalMs,
+  HOOK_TIMEOUT_MS,
+  idPath,
   pingIntervalMs,
+  pluginDir,
   pollIntervalMs,
   port,
+  rolesPath,
   tokenPath,
+  worktreesDir,
 } from "../../shared/config.ts";
 
 test("PEER-19: default database is in the system home directory", () => {
@@ -62,4 +69,50 @@ test("EVT-62: SQUAD_TOKEN_FILE overrides the default file of the human credentia
 test("EVT-81: the polling repeats every 1 s unless SQUAD_POLL_INTERVAL_MS says otherwise", () => {
   expect(pollIntervalMs({})).toBe(1000);
   expect(pollIntervalMs({ SQUAD_POLL_INTERVAL_MS: "250" })).toBe(250);
+});
+
+// A path with the separator of the system written with "/"
+function slashed(path: string): string {
+  return path.replaceAll("\\", "/");
+}
+
+test("PAP-06: the credential file of a name is the path of the database followed by .<name>.id", () => {
+  expect(idPath("worker-1", { SQUAD_DB: "/tmp/x.db" })).toBe("/tmp/x.db.worker-1.id");
+  expect(idPath("judge", { SQUAD_DB: "/tmp/x.db" })).toBe("/tmp/x.db.judge.id");
+});
+
+test("PAP-06: without SQUAD_DB the credential file is next to the default database, in the system home directory", () => {
+  expect(idPath("worker-1", {})).toBe(join(homedir(), ".squad-code-mcp.db.worker-1.id"));
+});
+
+test("PAP-35: the plugin directory is absolute, is called plugin and sits next to broker/", () => {
+  const dir = pluginDir();
+  expect(isAbsolute(dir)).toBe(true);
+  expect(basename(dir)).toBe("plugin");
+  // the squad root is the directory that has this broker/ in it
+  expect(realpathSync(join(dirname(dir), "broker"))).toBe(realpathSync(join(import.meta.dir, "..", "..")));
+});
+
+test("PAP-35: the roles file is roles.json of the plugin directory unless SQUAD_ROLES says otherwise", () => {
+  expect(rolesPath({})).toBe(join(pluginDir(), "roles.json"));
+  expect(basename(rolesPath({}))).toBe("roles.json");
+  expect(rolesPath({ SQUAD_ROLES: "/tmp/other roles.json" })).toBe("/tmp/other roles.json");
+});
+
+test("PAP-52: the worktrees directory is the name of the main checkout plus .squad, in its parent", () => {
+  expect(slashed(worktreesDir("/a/b/repo", {}))).toBe("/a/b/repo.squad");
+  expect(slashed(worktreesDir("/a/b c/the repo", {}))).toBe("/a/b c/the repo.squad");
+});
+
+test("PAP-52: SQUAD_WORKTREES overrides the default worktrees directory", () => {
+  expect(worktreesDir("/a/b/repo", { SQUAD_WORKTREES: "/tmp/trees" })).toBe("/tmp/trees");
+});
+
+test("PAP-37: the command of the session is claude unless SQUAD_CLAUDE says otherwise", () => {
+  expect(claudeCommand({})).toBe("claude");
+  expect(claudeCommand({ SQUAD_CLAUDE: "/opt/claude dev/claude" })).toBe("/opt/claude dev/claude");
+});
+
+test("PAP-13: a hook waits 2000 ms for the broker", () => {
+  expect(HOOK_TIMEOUT_MS).toBe(2000);
 });
