@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { toolsFor } from "../../tools.ts";
 
@@ -16,21 +16,41 @@ const SECTIONS = [
   "When the feature closes",
 ];
 
+// PAP-72: the mother has one more, right after `Irreversible actions`
+const OF_THE_MOTHER = [
+  "Start",
+  "No acknowledgements",
+  "Your work",
+  "Asking",
+  "Credentials",
+  "Irreversible actions",
+  "Delivery (until the gate exists)",
+  "When the feature closes",
+];
+
+// PAP-72: the line that marks what the Gate slice rewrites
+const GATE_LINE = "<!-- Gate slice: rewrite this section to use the gate -->";
+
 // PAP-61: the squad tools the skill of each role has to cite
 const REQUIRED: Record<string, string[]> = {
   worker: ["ready", "state", "ask", "blocked", "send_result", "answer", "history"],
   judge: ["ready", "state", "ask", "blocked", "send_verdict", "history"],
   leader: ["ready", "state", "ask", "blocked", "plan", "send_task", "send_result", "answer", "escalate"],
+  mother: [
+    "ready", "state", "ask", "blocked", "open_feature", "send_task", "answer", "escalate", "merge_question", "close_feature",
+  ],
 };
 
 // What one section has to have in backticks: `cited` in any place, `ordered` with the first
-// citation of each one after that of the one before, and `never` a command it does not have
+// citation of each one after that of the one before, and `never` a command it does not have.
+// `lines` are whole lines of the section.
 interface Rule {
   id: string;
   section: string;
   cited?: string[];
   ordered?: string[];
   never?: string[];
+  lines?: string[];
 }
 
 const OF_EVERY_ROLE: Rule[] = [
@@ -59,6 +79,22 @@ const OF_ROLE: Record<string, Rule[]> = {
       section: "Your work",
       cited: ["git switch", "git merge", "ticket_ref", "loadout", "criteria", "rework_limit", "dropped"],
       ordered: ["plan", "send_task"],
+    },
+  ],
+  mother: [
+    {
+      id: "PAP-71",
+      section: "Your work",
+      cited: ["merge_question"],
+      // the branch of the feature, the spec in it and the way back, before the feature opens
+      ordered: ["git switch -c", "git commit", "git switch <base_branch>", "open_feature"],
+    },
+    { id: "PAP-72", section: "Irreversible actions", lines: [GATE_LINE] },
+    {
+      id: "PAP-72",
+      section: "Delivery (until the gate exists)",
+      lines: [GATE_LINE],
+      cited: ["close_feature", "delivered"],
     },
   ],
 };
@@ -101,7 +137,8 @@ const cites = (span: string, literal: string) => span === literal || span.starts
 
 // What the skill of a role has wrong, one line for each thing and none for a skill that
 // follows PAP-60 to PAP-62 and has the literals of its role. A squad tool is cited when a
-// code is its name; a tool of another role is refused wherever a code has its name.
+// code is its name; a tool of another role is refused wherever a code has its name, and
+// so is any code with `gate` in it.
 function problems(role: string, text: string): string[] {
   const found: string[] = [];
 
@@ -117,7 +154,7 @@ function problems(role: string, text: string): string[] {
   }
   const parts = sections(text);
   const titles = parts.map((part) => part.title).join(" | ");
-  if (titles !== SECTIONS.join(" | ")) found.push(`PAP-60: the sections are ${titles}`);
+  if (titles !== (role === "mother" ? OF_THE_MOTHER : SECTIONS).join(" | ")) found.push(`PAP-60: the sections are ${titles}`);
 
   const mine = squadTools(role);
   const all = code(text);
@@ -127,9 +164,17 @@ function problems(role: string, text: string): string[] {
   for (const name of REQUIRED[role] ?? []) {
     if (!all.includes(name)) found.push(`PAP-61: ${name} is not cited`);
   }
+  // No tool of the gate exists yet, and no skill cites one
+  for (const span of all) {
+    if (/gate/i.test(span)) found.push(`PAP-72: ${span} is cited, and has gate in it`);
+  }
 
-  for (const { id, section, cited = [], ordered = [], never = [] } of [...OF_EVERY_ROLE, ...(OF_ROLE[role] ?? [])]) {
-    const spans = code(parts.find((part) => part.title === section)?.body ?? "");
+  for (const { id, section, cited = [], ordered = [], never = [], lines = [] } of [...OF_EVERY_ROLE, ...(OF_ROLE[role] ?? [])]) {
+    const body = parts.find((part) => part.title === section)?.body ?? "";
+    const spans = code(body);
+    for (const line of lines) {
+      if (!body.split("\n").includes(line)) found.push(`${id}: ${section} does not have the line ${line}`);
+    }
     const first = (literal: string) => spans.findIndex((span) => cites(span, literal));
     for (const literal of [...ordered, ...cited]) {
       if (first(literal) < 0) found.push(`${id}: ${section} does not cite ${literal}`);
@@ -155,7 +200,7 @@ function changed(text: string, from: string | RegExp, to: string): string {
 
 // --- The skills as they are ---
 
-for (const role of ["worker", "judge", "leader"]) {
+for (const role of ["worker", "judge", "leader", "mother"]) {
   const of = (id: string) => problems(role, read(role)).filter((problem) => problem.startsWith(id));
 
   test(`PAP-60: the ${role} skill starts with the frontmatter of its role and has its sections, in order`, () => {
@@ -181,6 +226,27 @@ test("PAP-69: Your work of the judge skill has the literals of a verdict", () =>
 
 test("PAP-70: Your work of the leader skill has the literals of its git, of a task and of the rework limit, and plan before send_task", () => {
   expect(problems("leader", read("leader")).filter((problem) => problem.startsWith("PAP-70"))).toEqual([]);
+});
+
+test("PAP-71: Your work of the mother skill cites merge_question, and the branch, the commit of the spec and the way back to the base branch before open_feature", () => {
+  expect(problems("mother", read("mother")).filter((problem) => problem.startsWith("PAP-71"))).toEqual([]);
+});
+
+test("PAP-72: the mother skill has the line of the Gate slice in Irreversible actions and in Delivery, close_feature and delivered in Delivery, and no gate tool", () => {
+  expect(problems("mother", read("mother")).filter((problem) => problem.startsWith("PAP-72"))).toEqual([]);
+});
+
+test("PAP-72: no skill of another role cites a gate tool", () => {
+  for (const role of ["worker", "judge", "leader"]) {
+    expect(problems(role, read(role)).filter((problem) => problem.startsWith("PAP-72"))).toEqual([]);
+  }
+});
+
+test("PAP-04: the plugin has exactly the skills mother, leader, worker and judge, each one with SKILL.md alone", () => {
+  expect(readdirSync(SKILLS).sort()).toEqual(["judge", "leader", "mother", "worker"]);
+  for (const role of ["mother", "leader", "worker", "judge"]) {
+    expect([role, readdirSync(join(SKILLS, role))]).toEqual([role, ["SKILL.md"]]);
+  }
 });
 
 // --- What the checker refuses: the worker skill with one thing changed ---
@@ -325,4 +391,90 @@ test("PAP-70: Your work of the leader without one of its seven literals fails", 
 test("PAP-70: Your work of the leader that cites send_task before plan fails", () => {
   const swapped = changed(changed(changed(read("leader"), "`plan`", "`@`"), "`send_task`", "`plan`"), "`@`", "`send_task`");
   expect(problems("leader", swapped)).toEqual(["PAP-70: Your work does not cite plan, then send_task in this order"]);
+});
+
+// --- The same for the mother skill ---
+
+test("PAP-61: a skill of the mother that leaves one of its ten tools out of the backticks fails", () => {
+  const tools = [
+    "ready", "state", "ask", "blocked", "open_feature", "send_task", "answer", "escalate", "merge_question", "close_feature",
+  ];
+  for (const name of tools) {
+    expect(problems("mother", changed(read("mother"), `\`${name}\``, name))).toContain(`PAP-61: ${name} is not cited`);
+  }
+});
+
+test("PAP-72: a skill of the mother without Delivery, or with it after When the feature closes, fails", () => {
+  const without = changed(read("mother"), "## Delivery (until the gate exists)", "### Delivery (until the gate exists)");
+  expect(problems("mother", without)).toContain(
+    "PAP-60: the sections are Start | No acknowledgements | Your work | Asking | Credentials | Irreversible actions | When the feature closes"
+  );
+  const after = changed(
+    changed(changed(read("mother"), "## Delivery (until the gate exists)", "## @"), "## When the feature closes", "## Delivery (until the gate exists)"),
+    "## @",
+    "## When the feature closes"
+  );
+  expect(problems("mother", after)).toContain(
+    "PAP-60: the sections are Start | No acknowledgements | Your work | Asking | Credentials | Irreversible actions | When the feature closes | Delivery (until the gate exists)"
+  );
+});
+
+test("PAP-72: a skill of the mother without the whole line of the Gate slice in one of its two sections fails", () => {
+  const line = "<!-- Gate slice: rewrite this section to use the gate -->";
+  const mother = read("mother");
+  const missing = (section: string) => `PAP-72: ${section} does not have the line ${line}`;
+  expect(problems("mother", changed(mother, `## Irreversible actions\n\n${line}\n`, "## Irreversible actions\n"))).toEqual([
+    missing("Irreversible actions"),
+  ]);
+  expect(
+    problems("mother", changed(mother, `## Delivery (until the gate exists)\n\n${line}\n`, "## Delivery (until the gate exists)\n"))
+  ).toEqual([missing("Delivery (until the gate exists)")]);
+  // the line with something else in it is not the line
+  expect(problems("mother", changed(mother, line, `${line} later`))).toEqual([
+    missing("Irreversible actions"),
+    missing("Delivery (until the gate exists)"),
+  ]);
+});
+
+test("PAP-72: a skill with a gate tool in backticks fails", () => {
+  expect(problems("mother", `${read("mother")}\nThen call \`request_gate\`.\n`)).toEqual([
+    "PAP-72: request_gate is cited, and has gate in it",
+  ]);
+  expect(problems("worker", `${read("worker")}\nThen wait for the \`gate_decision\`.\n`)).toEqual([
+    "PAP-72: gate_decision is cited, and has gate in it",
+  ]);
+});
+
+test("PAP-72: Delivery of the mother without close_feature or without delivered fails", () => {
+  const mother = read("mother");
+  for (const name of ["close_feature", "delivered"]) {
+    expect(problems("mother", changed(mother, `\`${name}\``, name))).toContain(
+      `PAP-72: Delivery (until the gate exists) does not cite ${name}`
+    );
+  }
+});
+
+test("PAP-71: Your work of the mother without merge_question, open_feature or one of the three git steps before it fails", () => {
+  const mother = read("mother");
+  for (const name of ["merge_question", "open_feature", "git commit", "git switch <base_branch>"]) {
+    expect(problems("mother", changed(mother, `\`${name}\``, name))).toContain(`PAP-71: Your work does not cite ${name}`);
+  }
+  expect(problems("mother", changed(mother, "git switch -c", "git branch"))).toContain(
+    "PAP-71: Your work does not cite git switch -c"
+  );
+});
+
+test("PAP-71: Your work of the mother that cites open_feature before the branch, the commit and the way back fails", () => {
+  const order = [
+    "PAP-71: Your work does not cite git switch -c, then git commit, then git switch <base_branch>, then open_feature in this order",
+  ];
+  const mother = read("mother");
+  expect(problems("mother", changed(mother, "## Your work\n", "## Your work\n\nCall `open_feature` first.\n"))).toEqual(order);
+  // the way back to the base branch before the commit of the spec
+  const swapped = changed(
+    changed(changed(mother, "`git commit`", "`@`"), "`git switch <base_branch>`", "`git commit`"),
+    "`@`",
+    "`git switch <base_branch>`"
+  );
+  expect(problems("mother", swapped)).toEqual(order);
 });

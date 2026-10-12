@@ -362,7 +362,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-01 | P1: Plugin em diretório próprio | T4 | Implementing |
 | PAP-02 | P1: Plugin em diretório próprio | T4, T22 | Implementing |
 | PAP-03 | P1: Plugin em diretório próprio | T4, T22 | Implementing |
-| PAP-04 | P1: Plugin em diretório próprio | T19 | Pending |
+| PAP-04 | P1: Plugin em diretório próprio | T19 | Implementing |
 | PAP-05 | P1: Plugin em diretório próprio | T3 | Implementing |
 | PAP-06 | P1: Credencial da sessão para os hooks | T2 | Implementing |
 | PAP-07 | P1: Credencial da sessão para os hooks | T2 | Implementing |
@@ -429,8 +429,8 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-68 | P1: Skills de protocolo | T16 | Implementing |
 | PAP-69 | P1: Skills de protocolo | T17 | Implementing |
 | PAP-70 | P1: Skills de protocolo | T18 | Implementing |
-| PAP-71 | P1: Skills de protocolo | T19 | Pending |
-| PAP-72 | P1: Skills de protocolo | T19 | Pending |
+| PAP-71 | P1: Skills de protocolo | T19 | Implementing |
+| PAP-72 | P1: Skills de protocolo | T19 | Implementing |
 | PAP-73 | P2: Documentação | T20, T21 | Pending |
 
 **Coverage:** 73 total, 73 mapped to tasks, 0 unmapped.

@@ -536,13 +536,13 @@ T22
 
 **Done when**:
 
-- [ ] O conferidor passa para `mother`, com `ready`, `state`, `ask`, `blocked`, `open_feature`, `send_task`, `answer`, `escalate`, `merge_question` e `close_feature` citadas
-- [ ] PAP-72: as seções de nível 2 são as sete mais `Delivery (until the gate exists)`, logo depois de `Irreversible actions`; cada uma das duas tem a linha `<!-- Gate slice: rewrite this section to use the gate -->` por inteiro; nenhum texto entre crases cita uma tool de gate; `Delivery` cita `close_feature` e `delivered`
-- [ ] PAP-71: `Your work` cita `open_feature` e `merge_question`, e manda criar o branch da feature, commitar a spec e voltar ao branch base antes de `open_feature`
-- [ ] PAP-04: `plugin/skills/` tem exatamente os diretórios `mother`, `leader`, `worker` e `judge`, cada um só com `SKILL.md`
-- [ ] PAP-62 a PAP-65, PAP-67 e o resto de PAP-71 e PAP-72 estão no texto, cada regra numa frase
-- [ ] Testes em `test/unit/skills.test.ts`
-- [ ] Gate build passa
+- [x] O conferidor passa para `mother`, com `ready`, `state`, `ask`, `blocked`, `open_feature`, `send_task`, `answer`, `escalate`, `merge_question` e `close_feature` citadas
+- [x] PAP-72: as seções de nível 2 são as sete mais `Delivery (until the gate exists)`, logo depois de `Irreversible actions`; cada uma das duas tem a linha `<!-- Gate slice: rewrite this section to use the gate -->` por inteiro; nenhum texto entre crases cita uma tool de gate; `Delivery` cita `close_feature` e `delivered`
+- [x] PAP-71: `Your work` cita `open_feature` e `merge_question`, e manda criar o branch da feature, commitar a spec e voltar ao branch base antes de `open_feature`
+- [x] PAP-04: `plugin/skills/` tem exatamente os diretórios `mother`, `leader`, `worker` e `judge`, cada um só com `SKILL.md`
+- [x] PAP-62 a PAP-65, PAP-67 e o resto de PAP-71 e PAP-72 estão no texto, cada regra numa frase
+- [x] Testes em `test/unit/skills.test.ts`
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build
@@ -647,6 +647,8 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
 | Leitura do log pelo launcher que responde outro status, ou algo sem `events` lista ("se a leitura falha", na definição de feature aberta para o launcher) | Leitura que falhou, como em PAP-31: sem feature aberta e ninguém online | T14 |
 | Tool do squad "citada entre crases" e literal de uma seção (PAP-61, PAP-62, PAP-68 a PAP-72) | Proibida: todo identificador de um trecho entre crases, ou de uma linha de bloco cercado, que é nome de tool de outro papel (`kind="answer"` conta na skill do judge). Exigida: um trecho entre crases que é só o nome. Um comando literal vale no trecho que é o literal ou começa por ele | T16 |
 | Merge ou push pedido a um worker com resposta que autoriza (PAP-66 lista os dois, PAP-68 diz nunca) | Continua proibido: a skill do worker diz que nenhuma resposta levanta a regra de `Your work` | T16 |
+| Como o teste confere "antes de `open_feature`" (PAP-71) | Em `Your work` da mother, a primeira citação de `git switch -c`, a de `git commit`, a de `git switch <base_branch>` e a de `open_feature`, nessa ordem | T19 |
+| Tool de gate nas skills de worker, leader e judge (PAP-72 só fala da mother) | A mesma regra nas quatro: nenhuma tool de gate existe para papel algum | T19 |
 
 ---
 
