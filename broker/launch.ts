@@ -11,8 +11,10 @@
 import { copyFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { namesOf, type Role } from "./peers.ts";
-import type { RoleEntry } from "./roles.ts";
-import { pluginDir, worktreesDir } from "./shared/config.ts";
+import { readRoles, type RoleEntry } from "./roles.ts";
+import { brokerUrl, claudeCommand, HOOK_TIMEOUT_MS, pluginDir, rolesPath, worktreesDir } from "./shared/config.ts";
+import type { SquadEvent } from "./shared/contract.ts";
+import { features, presence } from "./shared/derive.ts";
 import { toolsFor } from "./tools.ts";
 
 type Env = Record<string, string | undefined>;
@@ -151,4 +153,78 @@ export function worktree(main: string, name: string, role: Role, branch: string 
     if (!existsSync(to)) copyFileSync(join(main, file.name), to);
   }
   return dir;
+}
+
+// What `launch` is given in place of the machine: the tests give a repository of their
+// own, a log and a spawn that only records. git is the only thing it runs by itself.
+export interface Deps {
+  env: Env;
+  cwd: string;
+  platform: string;
+  fetch: (url: string, init: { signal: AbortSignal }) => Promise<Response>;
+  // Runs the command on the terminal of the launcher and gives its exit code
+  spawn: (command: string, args: string[], options: { cwd: string; env: Env }) => Promise<number>;
+  stderr: (line: string) => void;
+}
+
+// The whole log, or an empty one when the broker does not give it in time: then no
+// feature is open and nobody is online
+async function readLog(deps: Deps): Promise<SquadEvent[]> {
+  const abort = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  // A deadline of its own: it holds for a fetch that ignores the signal too
+  const late = new Promise<null>((done) => {
+    timer = setTimeout(() => {
+      abort.abort();
+      done(null);
+    }, HOOK_TIMEOUT_MS);
+  });
+  const read = async () => {
+    const res = await deps.fetch(`${brokerUrl(deps.env)}/events?after=0`, { signal: abort.signal });
+    if (res.status !== 200) return null;
+    const body = (await res.json()) as { events?: unknown } | null;
+    return Array.isArray(body?.events) ? (body.events as SquadEvent[]) : null;
+  };
+  try {
+    return (await Promise.race([read(), late])) ?? [];
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// `squad start`: opens the session and gives its exit code. Whatever fails before the
+// session opens is one line on the standard error and the exit code 1, and what a wrong
+// call or a wrong file would fail comes before anything is written.
+export async function launch(argv: string[], deps: Deps): Promise<number> {
+  try {
+    const start = parseStart(argv);
+    if ("error" in start) throw new Error(start.error);
+    const { role } = start;
+    const main = mainCheckout(deps.cwd);
+    const path = rolesPath(deps.env);
+    const entry = readRoles(path).find((e) => e.name === role);
+    if (!entry) throw new Error(`${path}: the roles file does not have the role ${role}`);
+
+    const events = await readLog(deps);
+    // A name that is given goes as it is: the one that refuses a name in use is the broker
+    const name = start.name ?? (role === "worker" ? namesOf(role).find((n) => !presence(events).get(n)?.online) : role);
+    if (name === undefined) {
+      throw new Error("worker-1, worker-2 and worker-3 are online. Close one of them, or give the name of the one to relaunch.");
+    }
+    const open = features(events).find((feature) => feature.closed_seq === null);
+    // The mother stays in the main checkout
+    const cwd = role === "mother" ? main : worktree(main, name, role, open?.branch ?? null, deps.env);
+
+    const command = claudeCommand(deps.env);
+    return await deps
+      .spawn(command, sessionArgs(name, entry, deps.platform, start.skip), { cwd, env: sessionEnv(deps.env, name, role) })
+      .catch((e) => {
+        throw new Error(`could not run ${command}: ${e instanceof Error ? e.message : String(e)}`);
+      });
+  } catch (e) {
+    deps.stderr(`squad: ${e instanceof Error ? e.message : String(e)}`);
+    return 1;
+  }
 }

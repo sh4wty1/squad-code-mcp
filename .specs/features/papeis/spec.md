@@ -394,12 +394,12 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-33 | P1: `roles.json` | T10 | Implementing |
 | PAP-34 | P1: `roles.json` | T11 | Implementing |
 | PAP-35 | P1: `roles.json` | T1, T14 | Implementing |
-| PAP-36 | P1: `roles.json` | T14 | Pending |
+| PAP-36 | P1: `roles.json` | T14 | Implementing |
 | PAP-37 | P1: Lançar uma sessão | T1, T14, T22 | Implementing |
-| PAP-38 | P1: Lançar uma sessão | T14 | Pending |
+| PAP-38 | P1: Lançar uma sessão | T14 | Implementing |
 | PAP-39 | P1: Lançar uma sessão | T12 | Implementing |
 | PAP-40 | P1: Lançar uma sessão | T12, T22 | Implementing |
-| PAP-41 | P1: Lançar uma sessão | T14 | Pending |
+| PAP-41 | P1: Lançar uma sessão | T14 | Implementing |
 | PAP-42 | P1: Lançar uma sessão | T12, T14 | Implementing |
 | PAP-43 | P1: Lançar uma sessão | T12 | Implementing |
 | PAP-44 | P1: Lançar uma sessão | T12 | Implementing |
@@ -407,10 +407,10 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-46 | P1: Lançar uma sessão | T12 | Implementing |
 | PAP-47 | P1: Lançar uma sessão | T12 | Implementing |
 | PAP-48 | Edge case | T13 | Implementing |
-| PAP-49 | Edge case | T14 | Pending |
-| PAP-50 | P1: Lançar uma sessão | T14, T15 | Pending |
-| PAP-51 | P1: Worktree por papel | T14 | Pending |
-| PAP-52 | P1: Worktree por papel | T14 | Pending |
+| PAP-49 | Edge case | T14 | Implementing |
+| PAP-50 | P1: Lançar uma sessão | T14, T15 | Implementing |
+| PAP-51 | P1: Worktree por papel | T14 | Implementing |
+| PAP-52 | P1: Worktree por papel | T14 | Implementing |
 | PAP-53 | P1: Worktree por papel | T13 | Implementing |
 | PAP-54 | P1: Worktree por papel | T13 | Implementing |
 | PAP-55 | P1: Worktree por papel | T13, T14 | Implementing |

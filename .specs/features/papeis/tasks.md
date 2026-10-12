@@ -420,17 +420,17 @@ T22
 
 **Done when**:
 
-- [ ] PAP-37: `launch(["worker"])` num repositório temporário chama o `spawn` uma vez, com `claude` (e com o valor de `SQUAD_CLAUDE` quando há), os argumentos de PAP-40, o ambiente de PAP-39 e o diretório do worktree, e devolve o código que o `spawn` devolveu (7 no teste)
-- [ ] PAP-38: `mother`, `leader` e `judge` usam o próprio papel; `worker` usa `worker-1` com o log vazio, `worker-2` com `worker-1` online, `worker-1` de novo depois do `peer_left` dele, e `worker-1` com o `fetch` que falha e com o que não responde em 2000 ms
-- [ ] PAP-49: com o nome dado e online no log, a sessão abre do mesmo jeito
-- [ ] PAP-51: `mother` abre no checkout principal, também quando o comando roda de dentro de um worktree; `git worktree list` continua com as mesmas árvores e nenhum arquivo é criado
-- [ ] PAP-52 e PAP-58: `leader`, `worker` e `judge` abrem em `<diretório de worktrees>/<nome>`, com o default e com `SQUAD_WORKTREES`, também a partir de dentro de outro worktree
-- [ ] Com uma feature aberta no log e o branch dela no repositório, o worktree do `worker` nasce na ponta do branch; a segunda chamada não muda nada (PAP-55)
-- [ ] PAP-35 e PAP-36: o arquivo de `SQUAD_ROLES` é o lido; um arquivo válido sem o papel lançado falha
-- [ ] PAP-41 e PAP-42, um teste por causa: papel ausente, papel fora dos quatro, posicional a mais, opção desconhecida, nome de outro papel, os três workers online sem nome dado, diretório fora de um repositório, `roles.json` inválido e `roles.json` sem o papel. Em todos: uma linha em `stderr` que começa com `squad: `, nenhum `spawn`, código 1, e o diretório de worktrees não existe depois
-- [ ] PAP-50: um `spawn` que rejeita dá `squad: ` com o nome do comando e código 1
-- [ ] Testes em `test/unit/launch.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] PAP-37: `launch(["worker"])` num repositório temporário chama o `spawn` uma vez, com `claude` (e com o valor de `SQUAD_CLAUDE` quando há), os argumentos de PAP-40, o ambiente de PAP-39 e o diretório do worktree, e devolve o código que o `spawn` devolveu (7 no teste)
+- [x] PAP-38: `mother`, `leader` e `judge` usam o próprio papel; `worker` usa `worker-1` com o log vazio, `worker-2` com `worker-1` online, `worker-1` de novo depois do `peer_left` dele, e `worker-1` com o `fetch` que falha e com o que não responde em 2000 ms
+- [x] PAP-49: com o nome dado e online no log, a sessão abre do mesmo jeito
+- [x] PAP-51: `mother` abre no checkout principal, também quando o comando roda de dentro de um worktree; `git worktree list` continua com as mesmas árvores e nenhum arquivo é criado
+- [x] PAP-52 e PAP-58: `leader`, `worker` e `judge` abrem em `<diretório de worktrees>/<nome>`, com o default e com `SQUAD_WORKTREES`, também a partir de dentro de outro worktree
+- [x] Com uma feature aberta no log e o branch dela no repositório, o worktree do `worker` nasce na ponta do branch; a segunda chamada não muda nada (PAP-55)
+- [x] PAP-35 e PAP-36: o arquivo de `SQUAD_ROLES` é o lido; um arquivo válido sem o papel lançado falha
+- [x] PAP-41 e PAP-42, um teste por causa: papel ausente, papel fora dos quatro, posicional a mais, opção desconhecida, nome de outro papel, os três workers online sem nome dado, diretório fora de um repositório, `roles.json` inválido e `roles.json` sem o papel. Em todos: uma linha em `stderr` que começa com `squad: `, nenhum `spawn`, código 1, e o diretório de worktrees não existe depois
+- [x] PAP-50: um `spawn` que rejeita dá `squad: ` com o nome do comando e código 1
+- [x] Testes em `test/unit/launch.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
@@ -643,6 +643,8 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
 | `message.id` que não é texto não vazio (PAP-15, "sem `message.id`") | Linha sem id: conta sozinha | T5 |
 | `message.usage` que é uma lista (PAP-17, "`message.usage` objeto") | Não é objeto: a linha é ignorada | T5 |
 | Arquivo de `subagents/` que não pode ser lido (PAP-18; PAP-19 só fala do principal) | Não conta nada; o principal e os outros arquivos contam | T5 |
+| O que é uma opção em `squad start` (PAP-42, "uma opção que não é `--skip-permissions`") | Todo argumento que começa com `-`; nunca é lido como papel nem como nome | T12 |
+| Leitura do log pelo launcher que responde outro status, ou algo sem `events` lista ("se a leitura falha", na definição de feature aberta para o launcher) | Leitura que falhou, como em PAP-31: sem feature aberta e ninguém online | T14 |
 
 ---
 
