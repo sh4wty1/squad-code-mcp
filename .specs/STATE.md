@@ -166,21 +166,27 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-12, numa pausa pedida pelo dev para outra sessão, ou o Codex, seguir.
+Atualizado em 2026-10-12, a pedido do dev, com a segunda volta do Verifier em andamento.
 
 - **Feature**: Papéis, `.specs/features/papeis/`.
-- **Phase / Task**: Execute. As 23 tarefas estão commitadas (T1 a T22, e a T23, correção que as sessões reais pediram). Falta o fechamento: o relatório do Verifier, as correções que ele pedir, e os documentos de estado.
-- **Completed**: T1 a T23, um commit por tarefa, de `f9ec67e` a `0848c8f`; `real-sessions.md` (11 de 14 itens exercitados, 1 em parte, 2 não); a suíte no Windows e no Linux sobre o código final.
-- **In-progress** (file:line): a primeira volta do Verifier rodava como sub-agente da sessão que pausou, e o resultado dela não era conhecido na pausa. Ela escreve `.specs/features/papeis/validation.md`; na pausa o arquivo não existia.
-- **Next step**: ver se `.specs/features/papeis/validation.md` existe. Se existe, ler o veredito e rodar `python .claude/skills/tlc-spec-driven/scripts/validate_state.py papeis --root .`. Se não existe, despachar um Verifier novo (volta 1) como descrito abaixo. Depois, os passos de "Fechamento".
+- **Phase / Task**: Execute, no fechamento. As 26 tarefas estão commitadas: T1 a T22, a T23 (correção que as sessões reais pediram) e T24 a T26 (correções da primeira volta do Verifier). Falta o veredito da segunda volta e os documentos de estado.
+- **Completed**: T1 a T26, um commit por tarefa, de `f9ec67e` a `8f4e442`; `real-sessions.md`; a primeira volta do Verifier (`validation-round-1.md`, FAIL); a suíte no Windows sobre `8f4e442` e no Linux sobre `0848c8f`.
+- **In-progress** (file:line): duas coisas rodavam em segundo plano na sessão que escreveu isto, e o resultado delas não era conhecido. A segunda volta do Verifier, que sobrescreve `.specs/features/papeis/validation.md`; enquanto ela não termina, esse arquivo é a cópia da volta 1, com FAIL. E a suíte no Linux sobre `8f4e442`, três execuções.
+- **Next step**: abrir `.specs/features/papeis/validation.md`. Se o relatório é da volta 2 (tem a seção "Voltas" e a faixa `f162184..8f4e442`), ler o veredito e rodar `python .claude/skills/tlc-spec-driven/scripts/validate_state.py papeis --root .`. Se ainda é o da volta 1 (igual a `validation-round-1.md`), a volta 2 não terminou: despachar um Verifier novo como no passo 1 de "Fechamento". Depois, rodar a suíte no Linux sobre o HEAD se o resultado dela não estiver registrado, e seguir os passos de "Fechamento".
 - **Blockers**: nenhum. O login do Claude Code do dev avisava "expires in 1 day" em 2026-10-12.
-- **Uncommitted files**: nenhum depois do commit desta pausa, a menos que o Verifier tenha escrito `validation.md`, `.specs/lessons.json` ou `.specs/LESSONS.md` depois dela: esses três são dele e entram no commit de fechamento.
-- **Branch**: `feat/papeis`, saído da `main` em `f162184`. Só local: nada foi enviado ao remoto. `handoff-codex.md`, na pasta da fatia, é o mesmo estado escrito para um agente sem a skill.
+- **Uncommitted files**: nenhum depois do commit desta atualização, a menos que o Verifier da volta 2 tenha escrito `validation.md`, `.specs/lessons.json` ou `.specs/LESSONS.md` depois dela: esses três são dele e entram no commit seguinte.
+- **Branch**: `feat/papeis`, saído da `main` em `f162184`. Só local: nada foi enviado ao remoto. O repositório tem um segundo worktree, `squad-code-mcp.worktrees/tui-clicavel` no branch `spec/tui-clicavel`, que é de outro trabalho do dev: não tocar. `handoff-codex.md`, na pasta da fatia, é o mesmo estado escrito para um agente sem a skill.
+
+### As voltas do Verifier
+
+- **Volta 1**, sobre `f162184..0848c8f`: FAIL. Nenhum defeito de produção. 73 de 75 requisitos com evidência; sensor com 76 mutações, 71 mortas e 5 vivas, em três testes que não distinguiam o código certo de um mutante: `squad start` nunca rodava até o fim com um comando que existe (PAP-37, três mutantes em `cli.ts`); o teste do arquivo de credencial que não pode ser apagado não separava encerrar de cair (PAP-08); `/events` com outro status não tinha teste (PAP-31). Relatório em `validation-round-1.md`, lições L-050 e L-071 a L-077.
+- **Correções**: T24 (`efb6d74`), T25 (`fa75877`) e T26 (`8f4e442`), só de teste. O worker conferiu um a um que os cinco mutantes morrem. Nenhum arquivo de produção mudou depois de `6609630`.
+- **Volta 2**, sobre `f162184..8f4e442`: em andamento na pausa, com outro agente e outra cópia física. É a segunda de três.
 
 ### Fechamento, na ordem
 
 1. **Verifier.** Um agente que não escreveu código, teste nem relatório, numa cópia física (`git clone --no-hardlinks` para um diretório temporário e `bun install --frozen-lockfile` em `broker/`), sem junction para o `node_modules` real. Checklist: `references/validate.md` da skill. Faixa: `f162184..HEAD`. Sensor com 8 mutações ou mais, só na cópia. Ele lê as quatro skills contra PAP-62 a PAP-72, PAP-74 e PAP-75, frase a frase, e confere `real-sessions.md` contra `real-sessions-log.txt`. Escreve só `validation.md` e as lições.
-2. **Lacunas.** Cada lacuna vira tarefa de correção com teste primeiro e commit próprio, e o Verifier roda de novo. Limite de três voltas; depois o resíduo e a decisão voltam para o dev.
+2. **Lacunas.** Cada lacuna vira tarefa de correção com teste primeiro e commit próprio, e o Verifier roda de novo, com outro agente. Limite de três voltas, e a segunda está em andamento; depois da terceira o resíduo e a decisão voltam para o dev.
 3. **Com PASS:** status `Verified` nos 75 requisitos da tabela da spec e a linha "Coverage"; as caixas de "Goals" e "Success Criteria" da spec, com os números das duas plataformas (abaixo); `**Status**: Done` em `tasks.md`; `validate_state.py papeis` com exit 0.
 4. **`ROADMAP.md`:** marcar a fatia Papéis, as duas pendências já resolvidas (formato do `roles.json` conferido contra o manifest; modo de permissão decidido) e reescrever o parágrafo "Agora".
 5. **Este Handoff**, apontando para a fatia Gate.
@@ -189,8 +195,9 @@ Atualizado em 2026-10-12, numa pausa pedida pelo dev para outra sessão, ou o Co
 ### O que mudou na spec durante a execução
 
 - **PAP-32**: o caso do `permission_request` aberto saiu da lista dos não bloqueados. Decidido pelo dev em 2026-10-12 (linha em "Assumptions").
+- **PAP-08 e PAP-31**: o texto foi completado a pedido da volta 1 (o que se observa em "do mesmo jeito"; status diferente de 200 é leitura que falhou). Confirmado pelo dev em 2026-10-12.
 - **PAP-74 e PAP-75**: acrescentados pelo orquestrador a partir de dois defeitos vistos em sessões reais (a mother tomou o diretório do plugin pelo projeto; worker e judge pararam depois de `ready` sem `state`). Confirmados pelo dev em 2026-10-12.
-- "Leituras da spec", em `tasks.md`: nove pontos em que uma tarefa fixou o que a spec não diz. O Verifier julga cada um.
+- "Leituras da spec", em `tasks.md`: treze pontos em que uma tarefa fixou o que a spec não diz. A volta 1 não discordou de nenhum e apontou oito que a spec deveria dizer ela mesma (PAP-01, PAP-08, PAP-15, PAP-18, PAP-31, PAP-33, PAP-42 e o par PAP-66 e PAP-68). PAP-08 e PAP-31 já foram para o texto; levar os outros é cosmético e fica para o dev decidir.
 
 ### Para o dev decidir (nada disto bloqueia o fechamento)
 
@@ -219,10 +226,10 @@ Atualizado em 2026-10-12, numa pausa pedida pelo dev para outra sessão, ou o Co
 
 ### Evidência e limites
 
-- Windows, `6609630` (o código final; `0848c8f` só acrescenta documentos): `tsc` 0 e 1623 pass, 5 skip, 0 fail, 75 arquivos. Antes da fatia: 1303 pass, 4 skip. O skip novo é a asserção do modo `0600` do arquivo de credencial, que o Windows não tem.
-- Linux, `0848c8f`: contêiner `oven/bun:1.4.2` sobre clone limpo, `tsc` 0 e 3 de 3 execuções com 1627 pass, 1 skip, 0 fail, 75 arquivos, em cerca de 150 s cada. Antes da fatia: 1306 pass, 1 skip.
+- Windows, `8f4e442`: `tsc` 0 e 1626 pass, 5 skip, 0 fail, 75 arquivos. Antes da fatia: 1303 pass, 4 skip. O skip novo é a asserção do modo `0600` do arquivo de credencial, que o Windows não tem. O código de produção é o de `6609630`; depois dele só entraram testes e documentos.
+- Linux, `0848c8f`: contêiner `oven/bun:1.4.2` sobre clone limpo, `tsc` 0 e 3 de 3 execuções com 1627 pass, 1 skip, 0 fail, 75 arquivos, em cerca de 150 s cada. Antes da fatia: 1306 pass, 1 skip. Sobre `8f4e442`, com os três testes novos, a rodada estava em andamento na pausa (`tsc` 0 já visto): repetir se o resultado não estiver aqui.
 - Sessões reais: `real-sessions.md`, com o log em `real-sessions-log.txt` e as ferramentas para repetir em `real-session-driver.py` e `real-session-tools/`. Tudo em `haiku`, no Windows.
-- Rodar de dentro de `broker/`: `bun test` e `bun node_modules/typescript/bin/tsc --noEmit`. Não usar `bun x tsc`. `EVT-43` em `test/integration/routes.test.ts` falha de vez em quando por poucos ms: rodar de novo. No Linux a suíte roda num contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` instalados dentro dele, sobre um clone montado só para leitura.
+- Rodar de dentro de `broker/`: `bun test` e `bun node_modules/typescript/bin/tsc --noEmit`. Não usar `bun x tsc`. `EVT-43` em `test/integration/routes.test.ts` falha de vez em quando por poucos ms, e `PEER-28` e `PEER-29` em `test/integration/server.test.ts` estouraram o tempo de 5 s uma vez com a suíte inteira e a máquina ocupada: rodar de novo. No Linux a suíte roda num contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` instalados dentro dele, sobre um clone montado só para leitura.
 - Docker Desktop: em 2026-10-12 ele não subia por causa de um socket velho em `%LOCALAPPDATA%\Docker\run`, que o Windows não deixa apagar. Renomear a pasta `run` resolve (ficaram `run.stale-20261010` e `run.stale-20261012`). Ele ficou de pé no fim desta sessão.
 - Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Sessão real de teste: só em repositório descartável, com `SQUAD_PORT`, `SQUAD_DB`, `SQUAD_TOKEN_FILE` e `SQUAD_WORKTREES` temporários e sem as variáveis `CLAUDE*`.
 - As sessões de teste deixaram cinco pastas de transcript em `~/.claude/projects/` com `scratchpad-rs` no nome. São descartáveis; ninguém as apagou.
