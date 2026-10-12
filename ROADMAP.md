@@ -35,11 +35,16 @@ tarefas, implementação e verificação independente, com PR revisado por `/the
 | [x] | TUI leitura | 2 | Feed, agentes, tickets, topologia e detalhe de ticket | Feature, frames |
 | [x] | Question | 3 | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas | TUI leitura |
 | [x] | Papéis | 4 | `roles.json`, quatro skills de papel, launcher, plugin com hooks | Question |
-| [ ] | Gate | 5 | Pedido e decisão de gate; modal com texto e confirmação | Papéis |
+| [ ] | TUI clicável | — | Clique em abas, linhas, tickets, perguntas, atalhos e no modal de resposta; roda do mouse; `m` liga e desliga | Question |
+| [ ] | Gate | 5 | Pedido e decisão de gate; modal com texto e confirmação | Papéis, TUI clicável |
 
 **Marco do broker:** com Peer, Event e Feature prontas, duas sessões trocam mensagens pelo
-fork. **Marco do MVP:** com as sete prontas, uma feature de dois tickets vai do kickoff ao
+fork. **Marco do MVP:** com as oito prontas, uma feature de dois tickets vai do kickoff ao
 gate aprovado usando só o terminal da mother e a TUI.
+
+A TUI clicável não está no design do MVP nem no START: o dev a pediu em 2026-10-12. A
+fonte dela é [`.specs/features/tui-clicavel/spec.md`](.specs/features/tui-clicavel/spec.md),
+já escrita; faltam o design, as tarefas e a execução.
 
 ## Pendências fora da ordem
 
@@ -137,6 +142,33 @@ ou o contrato:
 - o status do nome que nunca entrou no broker ([não lançado] nos frames), que a regra de
   offline do design não cobre;
 - a tecla t, que alterna os tokens entre a feature e a sessão.
+
+Precisa rodar no Windows e no Linux: rode a suíte nos dois antes de fechar, ou registre
+qual dos dois ficou sem rodar. Mensagens de commit seguem a convenção do repositório.
+Trabalhe num branch e abra um PR no fim. Ao terminar, marque a fatia em ROADMAP.md.
+```
+
+A fatia TUI clicável já tem spec e não está no design. Para ela, use este prompt no lugar
+do modelo:
+
+```text
+/tlc-spec-driven
+
+Implemente a fatia TUI clicável. Ela não está em .design/squad-mvp.md: a spec já existe em
+.specs/features/tui-clicavel/spec.md, com as decisões do dev em context.md. Parta dela para
+o design e as tarefas; não reabra o que está marcado `y` em "Assumptions". As linhas
+marcadas `n` são defaults do agente: me mostre as que mudam o que eu vejo antes do design.
+
+Comece pelo Handoff de .specs/STATE.md, que diz como rodar a suíte nesta máquina.
+
+Antes de qualquer outra tarefa, resolva a suposição aberta da spec: se o stdin do Bun em
+modo cru entrega os relatórios de mouse no Windows Terminal. A sonda de CLK-17 é a
+primeira tarefa, e sou eu quem a roda, porque um agente não clica. Se os relatórios não
+chegam, pare e me diga.
+
+Registre no STATE.md a regra geral do clique (todo efeito do mouse é o de uma tecla que já
+existe) como decisão nova. O que só um terminal real mostra fica em real-terminal.md, com
+o que ficou sem conferir.
 
 Precisa rodar no Windows e no Linux: rode a suíte nos dois antes de fechar, ou registre
 qual dos dois ficou sem rodar. Mensagens de commit seguem a convenção do repositório.
