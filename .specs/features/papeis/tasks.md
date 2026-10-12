@@ -692,10 +692,10 @@ T24 → T25 → T26
 
 **Done when**:
 
-- [ ] Com `/events` respondendo 500 e um corpo `{ events: [...] }` em que o worker deve o `result`, a saída padrão do hook é vazia, o `usage` é enviado e o código é 0
-- [ ] O mutante do Verifier morre, conferido e desfeito: sem a conferência do status em `plugin/hooks/stop.ts`, o teste falha
-- [ ] Nenhum código de produção muda
-- [ ] Gate build passa
+- [x] Com `/events` respondendo 500 e um corpo `{ events: [...] }` em que o worker deve o `result`, a saída padrão do hook é vazia, o `usage` é enviado e o código é 0
+- [x] O mutante do Verifier morre, conferido e desfeito: sem a conferência do status em `plugin/hooks/stop.ts`, o teste falha
+- [x] Nenhum código de produção muda
+- [x] Gate build passa
 
 **Tests**: integration
 **Gate**: build
