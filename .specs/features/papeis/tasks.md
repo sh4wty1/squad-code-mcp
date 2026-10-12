@@ -300,18 +300,18 @@ T22
 
 **Done when**:
 
-- [ ] PAP-23: com um transcript de dois modelos em que o segundo no alfabeto aparece primeiro no arquivo, o log ganha dois `usage` em ordem crescente de modelo, com as somas escritas à mão e o `session_id` do payload; saída padrão vazia, código 0
-- [ ] PAP-24 e PAP-21: sem transcript, e sem `transcript_path` no payload, um único `usage` com `model` `unknown` e os quatro números 0
-- [ ] PAP-25: duas execuções sobre os mesmos transcripts gravam os mesmos números
-- [ ] PAP-26: payload que não é JSON, e payload sem `session_id`, gravam `session_id` `unknown`
-- [ ] PAP-27: código 0 e saída padrão vazia com `/usage` recusado, com status 500 e com o broker fora do ar
-- [ ] PAP-28: com um `task` para `worker-1` num broker real, o hook como `worker-1` imprime exatamente um objeto JSON `{ decision: "block", reason }` com o ticket e o `seq`, o log não ganha `usage` e o código é 0
-- [ ] PAP-30: na mesma situação com `stop_hook_active` `true`, a saída é vazia e o `usage` é gravado; um servidor que conta chamadas não recebe `GET /events`
-- [ ] PAP-31: `/events` que não responde em 2000 ms, e `/events` que responde algo sem `events` lista, não bloqueiam e o `usage` é enviado
-- [ ] PAP-32, pelo processo: o worker que declarou `blocked` com o `task` em aberto não é bloqueado e grava `usage`; PAP-22: `SQUAD_NAME` fora do squad não bloqueia e envia o `usage`
-- [ ] PAP-12: sem `SQUAD_ROLE`, e sem arquivo de credencial, nenhuma chamada, saída vazia e código 0
-- [ ] Testes em `test/integration/hook-stop.test.ts`
-- [ ] Gate build passa
+- [x] PAP-23: com um transcript de dois modelos em que o segundo no alfabeto aparece primeiro no arquivo, o log ganha dois `usage` em ordem crescente de modelo, com as somas escritas à mão e o `session_id` do payload; saída padrão vazia, código 0
+- [x] PAP-24 e PAP-21: sem transcript, e sem `transcript_path` no payload, um único `usage` com `model` `unknown` e os quatro números 0
+- [x] PAP-25: duas execuções sobre os mesmos transcripts gravam os mesmos números
+- [x] PAP-26: payload que não é JSON, e payload sem `session_id`, gravam `session_id` `unknown`
+- [x] PAP-27: código 0 e saída padrão vazia com `/usage` recusado, com status 500 e com o broker fora do ar
+- [x] PAP-28: com um `task` para `worker-1` num broker real, o hook como `worker-1` imprime exatamente um objeto JSON `{ decision: "block", reason }` com o ticket e o `seq`, o log não ganha `usage` e o código é 0
+- [x] PAP-30: na mesma situação com `stop_hook_active` `true`, a saída é vazia e o `usage` é gravado; um servidor que conta chamadas não recebe `GET /events`
+- [x] PAP-31: `/events` que não responde em 2000 ms, e `/events` que responde algo sem `events` lista, não bloqueiam e o `usage` é enviado
+- [x] PAP-32, pelo processo: o worker que declarou `blocked` com o `task` em aberto não é bloqueado e grava `usage`; PAP-22: `SQUAD_NAME` fora do squad não bloqueia e envia o `usage`
+- [x] PAP-12: sem `SQUAD_ROLE`, e sem arquivo de credencial, nenhuma chamada, saída vazia e código 0
+- [x] Testes em `test/integration/hook-stop.test.ts`
+- [x] Gate build passa
 
 **Tests**: integration
 **Gate**: build

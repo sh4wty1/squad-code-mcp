@@ -381,15 +381,15 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-20 | Edge case | T6 | Implementing |
 | PAP-21 | Edge case | T5, T9 | Implementing |
 | PAP-22 | Edge case | T8, T9 | Implementing |
-| PAP-23 | P1: Uso no fim do turno | T9, T22 | Pending |
-| PAP-24 | P1: Uso no fim do turno | T9 | Pending |
-| PAP-25 | P1: Uso no fim do turno | T9 | Pending |
-| PAP-26 | P1: Uso no fim do turno | T9 | Pending |
-| PAP-27 | P1: Uso no fim do turno | T9 | Pending |
+| PAP-23 | P1: Uso no fim do turno | T9, T22 | Implementing |
+| PAP-24 | P1: Uso no fim do turno | T9 | Implementing |
+| PAP-25 | P1: Uso no fim do turno | T9 | Implementing |
+| PAP-26 | P1: Uso no fim do turno | T9 | Implementing |
+| PAP-27 | P1: Uso no fim do turno | T9 | Implementing |
 | PAP-28 | P1: Devolver ao trabalho quem para devendo | T8, T9, T22 | Implementing |
 | PAP-29 | P1: Devolver ao trabalho quem para devendo | T8 | Implementing |
-| PAP-30 | P1: Devolver ao trabalho quem para devendo | T9 | Pending |
-| PAP-31 | P1: Devolver ao trabalho quem para devendo | T9 | Pending |
+| PAP-30 | P1: Devolver ao trabalho quem para devendo | T9 | Implementing |
+| PAP-31 | P1: Devolver ao trabalho quem para devendo | T9 | Implementing |
 | PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Implementing |
 | PAP-33 | P1: `roles.json` | T10 | Pending |
 | PAP-34 | P1: `roles.json` | T11 | Pending |
