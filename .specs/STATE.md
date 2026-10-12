@@ -189,7 +189,7 @@ Atualizado em 2026-10-12, numa pausa pedida pelo dev para outra sessão, ou o Co
 ### O que mudou na spec durante a execução
 
 - **PAP-32**: o caso do `permission_request` aberto saiu da lista dos não bloqueados. Decidido pelo dev em 2026-10-12 (linha em "Assumptions").
-- **PAP-74 e PAP-75**: acrescentados pelo orquestrador a partir de dois defeitos vistos em sessões reais (a mother tomou o diretório do plugin pelo projeto; worker e judge pararam depois de `ready` sem `state`). O dev foi avisado e ainda não os confirmou em palavras: perguntar antes do PR.
+- **PAP-74 e PAP-75**: acrescentados pelo orquestrador a partir de dois defeitos vistos em sessões reais (a mother tomou o diretório do plugin pelo projeto; worker e judge pararam depois de `ready` sem `state`). Confirmados pelo dev em 2026-10-12.
 - "Leituras da spec", em `tasks.md`: nove pontos em que uma tarefa fixou o que a spec não diz. O Verifier julga cada um.
 
 ### Para o dev decidir (nada disto bloqueia o fechamento)

@@ -127,7 +127,7 @@ sessão você **não corrige nada**: só verifica e escreve o relatório.
   decisão do dev em 2026-10-12. Contradizia PAP-28 e o contrato.
 - **PAP-74 e PAP-75**: novos, de dois defeitos vistos em sessões reais. A mother tomou o
   diretório do plugin pelo projeto; worker e judge pararam depois de `ready` sem chamar
-  `state`. Corrigidos em `6609630`. O dev foi avisado e ainda não os confirmou.
+  `state`. Corrigidos em `6609630` e confirmados pelo dev em 2026-10-12.
 
 ## Pontos em aberto para o dev (não são lacunas da spec)
 
