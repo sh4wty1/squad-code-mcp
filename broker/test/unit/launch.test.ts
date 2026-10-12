@@ -83,15 +83,15 @@ function left(seq: number, peer: string): SquadEvent {
   return event(seq, { kind: "peer_left", from: "broker", peer, reason: "unregistered" });
 }
 
-function opened(seq: number, name = FEATURE): SquadEvent {
+function opened(seq: number, name = FEATURE, id = 1): SquadEvent {
   return event(seq, {
-    kind: "feature_opened", feature_id: 1, from: "mother", to: "*", title: "the importer", workflow: "tlc",
+    kind: "feature_opened", feature_id: id, from: "mother", to: "*", title: "the importer", workflow: "tlc",
     branch: name, base_branch: "main", spec_ref: ".specs/features/importer/spec.md", spec_commit: "9f8e7d6",
   });
 }
 
-function closed(seq: number): SquadEvent {
-  return event(seq, { kind: "feature_closed", feature_id: 1, from: "mother", to: "*", outcome: "delivered" });
+function closed(seq: number, id = 1): SquadEvent {
+  return event(seq, { kind: "feature_closed", feature_id: id, from: "mother", to: "*", outcome: "delivered" });
 }
 
 // A broker that answers the log with these events
@@ -431,6 +431,37 @@ test("PAP-53: a feature the log closed is not open: the worktree is born at the 
   expect(head(spawned[0]!.cwd)).toBe(head(main));
   expect(head(spawned[0]!.cwd)).not.toBe(tip(main));
   expect(branch(spawned[0]!.cwd)).toBe("");
+}, SLOW);
+
+// The log of a squad on its second feature: the first was opened and closed, and the second
+// is open on a branch of its own, born from main with one commit
+const SECOND = "feat/exporter";
+const SECOND_LOG = [joined(1, "mother"), opened(2), closed(3), opened(4, SECOND, 2)];
+
+// The repository with the branch of the second feature, and the three commits there are to
+// be born at, none equal to another
+function secondFeature() {
+  const { main } = repo();
+  git(main, "switch", "-q", "-c", SECOND);
+  commit(main, "exporter.txt", "the exporter\n");
+  git(main, "switch", "-q", "main");
+  const second = git(main, "rev-parse", `refs/heads/${SECOND}`);
+  expect(new Set([head(main), tip(main), second]).size).toBe(3);
+  return { main, second };
+}
+
+test("PAP-53: with a feature closed and a second one open, the worktree of the worker is born detached at the tip of the branch of the second", async () => {
+  const { main, second } = secondFeature();
+  const { spawned } = await run(["worker"], main, { fetch: logOf(SECOND_LOG) });
+  expect(head(spawned[0]!.cwd)).toBe(second);
+  expect(branch(spawned[0]!.cwd)).toBe("");
+}, SLOW);
+
+test("PAP-54: with a feature closed and a second one open, the worktree of the leader is born on the branch of the second", async () => {
+  const { main, second } = secondFeature();
+  const { spawned } = await run(["leader"], main, { fetch: logOf(SECOND_LOG) });
+  expect(branch(spawned[0]!.cwd)).toBe(SECOND);
+  expect(head(spawned[0]!.cwd)).toBe(second);
 }, SLOW);
 
 test("PAP-53: when the read of the log fails no feature is open: the worktree is born at the HEAD of the main checkout", async () => {

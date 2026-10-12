@@ -741,10 +741,10 @@ T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Com a feature 1 fechada e a feature 2 aberta, o worktree do `worker` nasce destacado na ponta do branch da feature 2, e o do `leader` nasce nesse branch; os dois branches têm commits diferentes entre si e do `HEAD` do checkout principal
-- [ ] Morre, conferido e desfeito, o mutante do Verifier em `launch.ts`: a busca da feature aberta só na primeira feature do log
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Com a feature 1 fechada e a feature 2 aberta, o worktree do `worker` nasce destacado na ponta do branch da feature 2, e o do `leader` nasce nesse branch; os dois branches têm commits diferentes entre si e do `HEAD` do checkout principal
+- [x] Morre, conferido e desfeito, o mutante do Verifier em `launch.ts`: a busca da feature aberta só na primeira feature do log
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
