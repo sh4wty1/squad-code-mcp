@@ -406,17 +406,17 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-45 | P1: Lançar uma sessão | T12 | Implementing |
 | PAP-46 | P1: Lançar uma sessão | T12 | Implementing |
 | PAP-47 | P1: Lançar uma sessão | T12 | Implementing |
-| PAP-48 | Edge case | T13 | Pending |
+| PAP-48 | Edge case | T13 | Implementing |
 | PAP-49 | Edge case | T14 | Pending |
 | PAP-50 | P1: Lançar uma sessão | T14, T15 | Pending |
 | PAP-51 | P1: Worktree por papel | T14 | Pending |
 | PAP-52 | P1: Worktree por papel | T14 | Pending |
-| PAP-53 | P1: Worktree por papel | T13 | Pending |
-| PAP-54 | P1: Worktree por papel | T13 | Pending |
-| PAP-55 | P1: Worktree por papel | T13, T14 | Pending |
-| PAP-56 | P1: Worktree por papel | T13 | Pending |
-| PAP-57 | P1: Worktree por papel | T13 | Pending |
-| PAP-58 | P1: Worktree por papel | T13, T14 | Pending |
+| PAP-53 | P1: Worktree por papel | T13 | Implementing |
+| PAP-54 | P1: Worktree por papel | T13 | Implementing |
+| PAP-55 | P1: Worktree por papel | T13, T14 | Implementing |
+| PAP-56 | P1: Worktree por papel | T13 | Implementing |
+| PAP-57 | P1: Worktree por papel | T13 | Implementing |
+| PAP-58 | P1: Worktree por papel | T13, T14 | Implementing |
 | PAP-59 | P1: Comando `squad` | T15 | Pending |
 | PAP-60 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
 | PAP-61 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |

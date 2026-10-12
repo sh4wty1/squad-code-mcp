@@ -394,16 +394,16 @@ T22
 
 **Done when**:
 
-- [ ] PAP-58: `mainCheckout` dá o mesmo caminho a partir do checkout principal, de um subdiretório dele e de dentro de um worktree; fora de um repositório dá a falha que `launch` reporta
-- [ ] PAP-53: com o branch da feature num commit diferente do `HEAD` do checkout principal, o worktree de `worker` e o de `judge` nascem com HEAD destacado nesse commit; sem feature aberta, e com um branch de feature que não existe, nascem destacados no `HEAD` do checkout principal, uma asserção por gatilho
-- [ ] PAP-54: o worktree do `leader` nasce no branch da feature (`git branch --show-current`); sem feature aberta, e com branch que não existe, nasce destacado no `HEAD` do checkout principal
-- [ ] PAP-48: com o branch da feature em checkout no checkout principal, a criação do worktree do `leader` falha com a mensagem do git e nada é copiado
-- [ ] PAP-56: `.env` e `.env.local` não versionados são copiados com o mesmo conteúdo; um `.env.example` versionado não é copiado por cima do que veio no checkout; um diretório `.env.d` e um arquivo `env.txt` ficam de fora; um `.env.shared` que já veio no checkout do branch da feature não é sobrescrito pelo não versionado do checkout principal
-- [ ] PAP-55: com o diretório já existente, o `HEAD` do worktree não muda mesmo com o branch da feature adiantado, e um `.env.new` criado depois no checkout principal não é copiado
-- [ ] PAP-57: uma falha de `git worktree add` (caminho do worktree ocupado por um arquivo) devolve a mensagem do git e não copia nada
-- [ ] Um dos repositórios de teste fica num caminho com espaço
-- [ ] Testes em `test/unit/launch-worktree.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] PAP-58: `mainCheckout` dá o mesmo caminho a partir do checkout principal, de um subdiretório dele e de dentro de um worktree; fora de um repositório dá a falha que `launch` reporta
+- [x] PAP-53: com o branch da feature num commit diferente do `HEAD` do checkout principal, o worktree de `worker` e o de `judge` nascem com HEAD destacado nesse commit; sem feature aberta, e com um branch de feature que não existe, nascem destacados no `HEAD` do checkout principal, uma asserção por gatilho
+- [x] PAP-54: o worktree do `leader` nasce no branch da feature (`git branch --show-current`); sem feature aberta, e com branch que não existe, nasce destacado no `HEAD` do checkout principal
+- [x] PAP-48: com o branch da feature em checkout no checkout principal, a criação do worktree do `leader` falha com a mensagem do git e nada é copiado
+- [x] PAP-56: `.env` e `.env.local` não versionados são copiados com o mesmo conteúdo; um `.env.example` versionado não é copiado por cima do que veio no checkout; um diretório `.env.d` e um arquivo `env.txt` ficam de fora; um `.env.shared` que já veio no checkout do branch da feature não é sobrescrito pelo não versionado do checkout principal
+- [x] PAP-55: com o diretório já existente, o `HEAD` do worktree não muda mesmo com o branch da feature adiantado, e um `.env.new` criado depois no checkout principal não é copiado
+- [x] PAP-57: uma falha de `git worktree add` (caminho do worktree ocupado por um arquivo) devolve a mensagem do git e não copia nada
+- [x] Um dos repositórios de teste fica num caminho com espaço
+- [x] Testes em `test/unit/launch-worktree.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

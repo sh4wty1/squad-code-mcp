@@ -4,12 +4,15 @@
  * What `squad start <role> [name] [--skip-permissions]` does: opens one Claude Code
  * session as a member of the squad, with its name and role in the environment, the
  * plugin loaded as a channel, the allowed list of the role and the skill of the role
- * as its first instruction (AD-015, AD-019).
+ * as its first instruction (AD-015, AD-019). Every role but the mother works in a
+ * worktree of its own, outside the repository (ADR-012, AD-020).
  */
 
+import { copyFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { namesOf, type Role } from "./peers.ts";
 import type { RoleEntry } from "./roles.ts";
-import { pluginDir } from "./shared/config.ts";
+import { pluginDir, worktreesDir } from "./shared/config.ts";
 import { toolsFor } from "./tools.ts";
 
 type Env = Record<string, string | undefined>;
@@ -103,4 +106,49 @@ export function sessionArgs(name: string, entry: RoleEntry, platform: string, sk
     systemPrompt(name, entry),
     `/squad:${entry.name}`,
   ];
+}
+
+// git for real, in `cwd`. Each path goes as an argument of its own.
+function git(cwd: string, ...args: string[]): { ok: boolean; out: string; err: string } {
+  const result = Bun.spawnSync(["git", ...args], { cwd });
+  return { ok: result.exitCode === 0, out: result.stdout.toString(), err: result.stderr.toString() };
+}
+
+// The main checkout of the repository `cwd` is in: the first working tree git lists, the
+// same from the main checkout and from any worktree of it
+export function mainCheckout(cwd: string): string {
+  const list = git(cwd, "worktree", "list", "--porcelain");
+  const first = list.out.split(/\r?\n/)[0] ?? "";
+  if (!list.ok || !first.startsWith("worktree ")) throw new Error(`${cwd} is not inside a git repository`);
+  // git writes the path with / on Windows too
+  return resolve(first.slice("worktree ".length));
+}
+
+// The directory of the session of a name: its worktree, created when it is not there yet.
+// With an open feature whose branch exists, the leader is born on the branch and the
+// others detached at its tip; otherwise all are born detached at the HEAD of the main
+// checkout. Throws an Error with the message of git when the worktree cannot be added.
+export function worktree(main: string, name: string, role: Role, branch: string | null, env: Env): string {
+  const dir = join(worktreesDir(main, env), name);
+  // A relaunched session: the worktree may have work without a commit, and stays as it is
+  if (existsSync(dir) && statSync(dir).isDirectory()) return dir;
+
+  const ref = `refs/heads/${branch}`;
+  const at =
+    branch !== null && git(main, "rev-parse", "--verify", "--quiet", ref).ok
+      ? role === "leader"
+        ? [dir, branch]
+        : ["--detach", dir, ref]
+      : ["--detach", dir, "HEAD"];
+  const added = git(main, "worktree", "add", "--quiet", ...at);
+  if (!added.ok) throw new Error(added.err.trim().replace(/\s*\n\s*/g, " "));
+
+  // The credentials of the project: what git does not track did not come with the checkout
+  const tracked = new Set(git(main, "ls-files", "-z", "--", ".env*").out.split("\0"));
+  for (const file of readdirSync(main, { withFileTypes: true })) {
+    if (!file.isFile() || !file.name.startsWith(".env") || tracked.has(file.name)) continue;
+    const to = join(dir, file.name);
+    if (!existsSync(to)) copyFileSync(join(main, file.name), to);
+  }
+  return dir;
 }
