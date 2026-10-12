@@ -166,61 +166,65 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-12, numa pausa pedida pelo dev para outra sessão seguir.
+Atualizado em 2026-10-12, numa pausa pedida pelo dev para outra sessão, ou o Codex, seguir.
 
 - **Feature**: Papéis, `.specs/features/papeis/`.
-- **Phase / Task**: Specify e Design fechados. `tasks.md` não foi escrito e nenhum código da fatia existe. A Question está na `main` (PR 9); o relatório dela é `.specs/features/question/validation.md`.
-- **Completed**: suíte da `main` no Linux antes da fatia; spike da fatia resolvido; as quatro perguntas ao dev respondidas; `spec.md` com 73 requisitos (`validate_spec.py papeis` exit 0); `design.md`; AD-015 a AD-020. Tudo num commit de documentos no branch.
-- **In-progress** (file:line): nada. Nenhuma tarefa começada.
-- **Next step**: escrever `.specs/features/papeis/tasks.md` a partir da lista "Tarefas planejadas" abaixo, rodar `validate_tasks.py papeis`, e antes de executar apresentar ao dev a oferta de sub-agentes da skill (são cerca de 19 tarefas; ele ainda não foi perguntado). Depois: executar com um commit por tarefa, exercitar RS-01 a RS-14 e escrever `real-sessions.md`, rodar a suíte no Linux, despachar o Verifier, abrir o PR sem merge e marcar o ROADMAP.
-- **Blockers**: nenhum. Para o Linux o Docker Desktop tem de estar de pé (`docker desktop start`); ele estava parado no fim desta sessão. O login do Claude Code do dev avisava "expires in 1 day" em 2026-10-12: as sessões reais (RS) precisam dele válido.
-- **Uncommitted files**: nenhum depois do commit desta pausa. Nada descartado nem em stash.
-- **Branch**: `feat/papeis`, saído da `main` em `f162184`. Só local: nada foi enviado ao remoto.
+- **Phase / Task**: Execute. As 23 tarefas estão commitadas (T1 a T22, e a T23, correção que as sessões reais pediram). Falta o fechamento: o relatório do Verifier, as correções que ele pedir, e os documentos de estado.
+- **Completed**: T1 a T23, um commit por tarefa, de `f9ec67e` a `0848c8f`; `real-sessions.md` (11 de 14 itens exercitados, 1 em parte, 2 não); a suíte no Windows e no Linux sobre o código final.
+- **In-progress** (file:line): a primeira volta do Verifier rodava como sub-agente da sessão que pausou, e o resultado dela não era conhecido na pausa. Ela escreve `.specs/features/papeis/validation.md`; na pausa o arquivo não existia.
+- **Next step**: ver se `.specs/features/papeis/validation.md` existe. Se existe, ler o veredito e rodar `python .claude/skills/tlc-spec-driven/scripts/validate_state.py papeis --root .`. Se não existe, despachar um Verifier novo (volta 1) como descrito abaixo. Depois, os passos de "Fechamento".
+- **Blockers**: nenhum. O login do Claude Code do dev avisava "expires in 1 day" em 2026-10-12.
+- **Uncommitted files**: nenhum depois do commit desta pausa, a menos que o Verifier tenha escrito `validation.md`, `.specs/lessons.json` ou `.specs/LESSONS.md` depois dela: esses três são dele e entram no commit de fechamento.
+- **Branch**: `feat/papeis`, saído da `main` em `f162184`. Só local: nada foi enviado ao remoto. `handoff-codex.md`, na pasta da fatia, é o mesmo estado escrito para um agente sem a skill.
+
+### Fechamento, na ordem
+
+1. **Verifier.** Um agente que não escreveu código, teste nem relatório, numa cópia física (`git clone --no-hardlinks` para um diretório temporário e `bun install --frozen-lockfile` em `broker/`), sem junction para o `node_modules` real. Checklist: `references/validate.md` da skill. Faixa: `f162184..HEAD`. Sensor com 8 mutações ou mais, só na cópia. Ele lê as quatro skills contra PAP-62 a PAP-72, PAP-74 e PAP-75, frase a frase, e confere `real-sessions.md` contra `real-sessions-log.txt`. Escreve só `validation.md` e as lições.
+2. **Lacunas.** Cada lacuna vira tarefa de correção com teste primeiro e commit próprio, e o Verifier roda de novo. Limite de três voltas; depois o resíduo e a decisão voltam para o dev.
+3. **Com PASS:** status `Verified` nos 75 requisitos da tabela da spec e a linha "Coverage"; as caixas de "Goals" e "Success Criteria" da spec, com os números das duas plataformas (abaixo); `**Status**: Done` em `tasks.md`; `validate_state.py papeis` com exit 0.
+4. **`ROADMAP.md`:** marcar a fatia Papéis, as duas pendências já resolvidas (formato do `roles.json` conferido contra o manifest; modo de permissão decidido) e reescrever o parágrafo "Agora".
+5. **Este Handoff**, apontando para a fatia Gate.
+6. **`git push` e PR sem merge:** só com o sim do dev na hora. O PR é revisado com `/the-judge`.
+
+### O que mudou na spec durante a execução
+
+- **PAP-32**: o caso do `permission_request` aberto saiu da lista dos não bloqueados. Decidido pelo dev em 2026-10-12 (linha em "Assumptions").
+- **PAP-74 e PAP-75**: acrescentados pelo orquestrador a partir de dois defeitos vistos em sessões reais (a mother tomou o diretório do plugin pelo projeto; worker e judge pararam depois de `ready` sem `state`). O dev foi avisado e ainda não os confirmou em palavras: perguntar antes do PR.
+- "Leituras da spec", em `tasks.md`: nove pontos em que uma tarefa fixou o que a spec não diz. O Verifier julga cada um.
+
+### Para o dev decidir (nada disto bloqueia o fechamento)
+
+- A mother, em `haiku`, perguntou ao dev com `ask` em vez de `escalate` nas perguntas do leader, e não chamou `unblocked` depois da credencial. A skill manda os dois; se repetir com outro modelo, a regra precisa de outro texto.
+- Todo comando do projeto e todo comando composto pede permissão: 13 pedidos em duas features pequenas. É o que a spec define; sem o modal da Gate o dev decide em cada terminal.
+- O launcher não repassa Ctrl+C à sessão; lê o log também para a mother (até 2 s com o broker travado); `claude` que é só o `claude.cmd` do npm não foi testado.
+- O hook de parada não bloqueia quando `/events` responde 500, mesmo com `events` no corpo: PAP-31 não fala de status.
+- O Bun carrega o `.env` do diretório do hook: um `.env` de projeto com `SQUAD_*` chegaria aos hooks. Não exercitado.
+- A linha de status do `README.md` ("does not carry messages yet"), o `broker/README.md` e o comentário de uso no topo de `broker/server.ts` ainda descrevem a forma `server:squad` de antes da fatia.
 
 ### O que o dev pediu para esta fatia (o prompt não está no repositório)
 
 - A spec deriva da fatia; não reabrir decisões. No STATE só decisão nova, apontando para o ADR.
-- Fora: pedido e decisão de gate, modais de gate e de permissão da TUI (fatia Gate). Se a spec precisar de um deles para fechar um estado da tabela do design, parar e perguntar. Isso já aconteceu duas vezes e está respondido (AD-020).
-- O plugin fica em diretório separado do broker. A spec diz o que os testes automáticos cobrem e o que só uma sessão real mostra; exercitar o que der com sessões reais e registrar o que ficou sem exercitar.
-- Windows e Linux: a suíte da `main` no Linux antes de começar (feito) e de novo antes de fechar, ou registrar qual dos dois ficou sem rodar.
-- Verificação: o Verifier é um agente que não escreveu código, teste nem relatório, e a cópia de trabalho dele não tem junction nem link para o `node_modules` real (cópia física, `bun install` próprio). Limite de três voltas de correção e verificação; depois o resíduo e a decisão voltam para o dev.
-- Commits na convenção do repositório (uma frase imperativa em inglês, minúsculas, sem prefixo, com `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`). Trabalhar no branch, abrir um PR no fim, sem merge. Ao terminar, marcar a fatia em `ROADMAP.md`, e lá também as duas pendências já resolvidas: o formato do `roles.json` conferido contra o manifest e o modo de permissão decidido.
+- Fora: pedido e decisão de gate, modais de gate e de permissão da TUI (fatia Gate).
+- O plugin fica em diretório separado do broker. A spec diz o que os testes automáticos cobrem e o que só uma sessão real mostra.
+- Windows e Linux: a suíte nos dois antes de fechar, ou registrar qual ficou sem rodar.
+- Verificação: como no passo 1 acima.
+- Commits na convenção do repositório (uma frase imperativa em inglês, minúsculas, sem prefixo, com `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`). Trabalhar no branch, abrir um PR no fim, sem merge. Ao terminar, marcar a fatia em `ROADMAP.md`.
 
-### Respostas do dev em 2026-10-11
-
-1. Modo de permissão (default 3): `acceptEdits` mais lista de permitidos; `--skip-permissions` por escolha (AD-019).
-2. Formato do `roles.json` (default 4): o padrão do manifest com as skills de cada workflow separadas (AD-019). A comparação com o manifest está na spec, em "Assumptions".
-3. "Sessão para num pedido de permissão": a fatia fecha até a rota `POST /permission-decision`, provada com sessão real; a tecla na TUI é da Gate (AD-020).
-4. "Agente precisa de ação irreversível": até a Gate a mother escala a pergunta bloqueante ao dev, e faz uma pergunta bloqueante antes da entrega (AD-020).
-
-### Tarefas planejadas (ainda não estão em `tasks.md`)
-
-- Fase 1, fundação: T1 `broker/shared/config.ts` (`idPath`, `rolesPath`, `pluginDir`, `worktreesDir`, `claudeCommand`), teste de unidade. T2 `broker/server.ts` grava e apaga o arquivo de credencial e tira `source="squad"` dos quatro textos (linhas 145, 147, 166 e 263), integração, PAP-05 a PAP-09. T3 `plugin/` com `plugin.json`, `.mcp.json` e `hooks/hooks.json`, mais `include` de `../plugin` em `broker/tsconfig.json`, PAP-01 a PAP-03.
-- Fase 2, hooks: T4 `plugin/hooks/usage.ts`, unidade, PAP-14 a PAP-19. T5 `plugin/hooks/session.ts` (credencial, chamada com prazo, payload), unidade, PAP-12 e PAP-20. T6 `plugin/hooks/turn-started.ts`, integração com broker real, PAP-10 a PAP-13. T7 `plugin/hooks/nudge.ts`, unidade, PAP-22, PAP-28, PAP-29 e PAP-32. T8 `plugin/hooks/stop.ts`, integração, PAP-21, PAP-23 a PAP-27, PAP-30 e PAP-31.
-- Fase 3, launcher: T9 `broker/roles.ts`, unidade, PAP-33. T10 `plugin/roles.json`, PAP-34. T11 `broker/launch.ts`, partes puras (argumentos, lista de permitidos, texto do sistema, ambiente), unidade, PAP-39, PAP-40, PAP-43 a PAP-47. T12 `broker/launch.ts`, `launch` com git real em repositório temporário e `spawn` injetado, PAP-35 a PAP-38, PAP-41, PAP-42, PAP-48 a PAP-58. T13 `broker/cli.ts` com `start` e `tui`, e `bin.squad` no `package.json`, PAP-59.
-- Fase 4, skills: T14 worker e o teste de conteúdo das skills, T15 judge, T16 leader, T17 mother (com PAP-04 e PAP-72); PAP-60 a PAP-72.
-- Fase 5, fechamento: T18 documentação (PAP-73). T19 sessões reais e `real-sessions.md`.
-- Os testes do plugin ficam em `broker/test/`, importando `../../../plugin/...`, para um `bun test` e um `tsc` só.
-
-### Sessões reais: o que já foi visto e como repetir
-
-- Visto em 2026-10-11 e 12, Claude Code 2.1.296, Windows: a tabela "Pesquisa" do `design.md`. Já respondem em parte RS-01, RS-02 e RS-03, com um plugin descartável chamado `spk`, não com o plugin da fatia: repetir com o de verdade.
-- `.specs/features/papeis/real-session-driver.py` dirige uma sessão interativa do `claude` num ConPTY e grava a tela a cada passo. Precisa de `pywinpty` (já no Python do dev) e de `pyte` (`pip install pyte` num venv). Uso no cabeçalho do arquivo. Só serve no Windows.
-- Toda sessão de teste sobe com as variáveis `CLAUDE*` removidas e com `SQUAD_PORT`, `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários; depois, `SQUAD_PORT=<porta> bun cli.ts kill-broker`. `--model haiku` deixa o teste barato.
-- Dois diálogos aparecem ao subir: a confiança na pasta, na primeira vez em cada diretório (a opção marcada é "No, exit"), e o aviso do canal de desenvolvimento, em toda subida (a opção marcada é "I am using this for local development").
-- `-p` não carrega canal: serve para hooks, skills e nomes de tools (`--output-format stream-json --verbose` lista tudo no `init`), não para o ping.
-- `--allowedTools` é variádico: o prompt posicional vem depois de uma opção de um valor só (`--append-system-prompt`), como PAP-40 manda.
-
-### O que a Question deixa para a Gate
+### O que a Question e a Papéis deixam para a Gate
 
 - Os modais de gate e de permissão escrevem como o de resposta, por um comando em `Ui` (AD-014), e a regra de colagem do modal de resposta (QST-78) vale para o campo de texto deles. `g` e `x` continuam com o aviso `chega com a fatia Gate`.
 - Gates pendentes no encerramento da feature são o mesmo caso das perguntas (AD-012).
+- A skill da mother tem duas seções com a linha `<!-- Gate slice: rewrite this section to use the gate -->` (AD-020), e a tool de gate entra na lista de permitidos de `broker/launch.ts` (AD-015).
+- A decisão de permissão por tecla: a rota `POST /permission-decision` foi provada com sessão real (RS-09).
 
 ### Evidência e limites
 
-- Linux, `main` em `f162184`, antes da fatia Papéis: contêiner `oven/bun:1.4.2` sobre clone limpo, `tsc` 0 e 3 de 3 execuções com 1306 pass, 1 skip, 0 fail, 63 arquivos, em cerca de 90 s cada. A instabilidade de tempo em testes de integração que a Question registrou não apareceu nessas três.
-- Windows, `main`: o último registro é o da Question em `4f3fa89`, `tsc` 0 e 1303 pass, 4 skip, 0 fail. Não foi rodada de novo nesta sessão.
-- Rodar de dentro de `broker/`: `bun test` e `bun node_modules/typescript/bin/tsc --noEmit`. Não usar `bun x tsc`. No Linux desta máquina a suíte roda num contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` instalados dentro dele (`apt-get`), sobre um clone do repositório montado só para leitura, com `bun install --frozen-lockfile`; o WSL Debian não tem `bun`.
-- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários.
-- Riscos conhecidos, não corrigidos: `expire` e `cleanStale` rodam em `setInterval` sem `try` em `broker.ts`, e uma exceção num temporizador do Bun encerra o broker; a colagem num terminal sem os marcadores do modo 2004; `tui/demo.ts` sem teste automático.
-- Não exercitados: macOS, e tudo de RS-04 a RS-14 da spec da Papéis.
+- Windows, `6609630` (o código final; `0848c8f` só acrescenta documentos): `tsc` 0 e 1623 pass, 5 skip, 0 fail, 75 arquivos. Antes da fatia: 1303 pass, 4 skip. O skip novo é a asserção do modo `0600` do arquivo de credencial, que o Windows não tem.
+- Linux, `0848c8f`: contêiner `oven/bun:1.4.2` sobre clone limpo, `tsc` 0 e 3 de 3 execuções com 1627 pass, 1 skip, 0 fail, 75 arquivos, em cerca de 150 s cada. Antes da fatia: 1306 pass, 1 skip.
+- Sessões reais: `real-sessions.md`, com o log em `real-sessions-log.txt` e as ferramentas para repetir em `real-session-driver.py` e `real-session-tools/`. Tudo em `haiku`, no Windows.
+- Rodar de dentro de `broker/`: `bun test` e `bun node_modules/typescript/bin/tsc --noEmit`. Não usar `bun x tsc`. `EVT-43` em `test/integration/routes.test.ts` falha de vez em quando por poucos ms: rodar de novo. No Linux a suíte roda num contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` instalados dentro dele, sobre um clone montado só para leitura.
+- Docker Desktop: em 2026-10-12 ele não subia por causa de um socket velho em `%LOCALAPPDATA%\Docker\run`, que o Windows não deixa apagar. Renomear a pasta `run` resolve (ficaram `run.stale-20261010` e `run.stale-20261012`). Ele ficou de pé no fim desta sessão.
+- Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Sessão real de teste: só em repositório descartável, com `SQUAD_PORT`, `SQUAD_DB`, `SQUAD_TOKEN_FILE` e `SQUAD_WORKTREES` temporários e sem as variáveis `CLAUDE*`.
+- As sessões de teste deixaram cinco pastas de transcript em `~/.claude/projects/` com `scratchpad-rs` no nome. São descartáveis; ninguém as apagou.
+- Riscos conhecidos, não corrigidos: `expire` e `cleanStale` rodam em `setInterval` sem `try` em `broker.ts`; a colagem num terminal sem os marcadores do modo 2004; `tui/demo.ts` sem teste automático; o formato do transcript do Claude Code é interno e pode mudar (AD-018).
+- Não exercitados: macOS; sessão real no Linux; outro modelo que não `haiku`; o resto da lista em `real-sessions.md`.
