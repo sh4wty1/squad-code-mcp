@@ -208,14 +208,14 @@ T22
 
 **Done when**:
 
-- [ ] PAP-14: dois modelos num transcript dão as quatro somas de cada um, escritas à mão no teste
-- [ ] PAP-15: uma mensagem em três linhas com o mesmo `message.id` e `usage` diferentes conta só a última; uma linha contada sem `message.id` conta sozinha, mesmo ao lado de outra igual
-- [ ] PAP-16: campo ausente, negativo, fracionário e texto contam 0, um caso por valor
-- [ ] PAP-17: linha que não é JSON, `type` diferente de `assistant`, `message.usage` que não é objeto, `message.model` vazio e `<synthetic>` são ignoradas, e as linhas vizinhas contam
-- [ ] PAP-18: as linhas de dois arquivos de `subagents/` somam às do principal, e um `message.id` repetido entre o principal e um subagente conta uma vez, com os números do arquivo lido por último
-- [ ] PAP-19: transcript principal ausente, e caminho que é um diretório, dão `{}` sem lançar, mesmo com `subagents/` preenchido; PAP-21: `sessionUsage` de `undefined`, de número e de texto vazio dá `{}`
-- [ ] Testes em `test/unit/hook-usage.test.ts`, com transcripts criados pelo teste em diretório temporário
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] PAP-14: dois modelos num transcript dão as quatro somas de cada um, escritas à mão no teste
+- [x] PAP-15: uma mensagem em três linhas com o mesmo `message.id` e `usage` diferentes conta só a última; uma linha contada sem `message.id` conta sozinha, mesmo ao lado de outra igual
+- [x] PAP-16: campo ausente, negativo, fracionário e texto contam 0, um caso por valor
+- [x] PAP-17: linha que não é JSON, `type` diferente de `assistant`, `message.usage` que não é objeto, `message.model` vazio e `<synthetic>` são ignoradas, e as linhas vizinhas contam
+- [x] PAP-18: as linhas de dois arquivos de `subagents/` somam às do principal, e um `message.id` repetido entre o principal e um subagente conta uma vez, com os números do arquivo lido por último
+- [x] PAP-19: transcript principal ausente, e caminho que é um diretório, dão `{}` sem lançar, mesmo com `subagents/` preenchido; PAP-21: `sessionUsage` de `undefined`, de número e de texto vazio dá `{}`
+- [x] Testes em `test/unit/hook-usage.test.ts`, com transcripts criados pelo teste em diretório temporário
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
@@ -639,6 +639,9 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
 | `--skip-permissions` antes do papel (PAP-37 mostra depois) | Aceito em qualquer posição | T12 |
 | "Arquivo do plugin dentro de `broker/`" (PAP-01) | `.claude-plugin`, `hooks`, `skills` e `roles.json`. O `broker/.mcp.json` do upstream não é do plugin e fica | T4 |
 | Tool de gate que a skill da mother não cita (PAP-72) | Nenhum texto entre crases com `gate` no nome | T19 |
+| `message.id` que não é texto não vazio (PAP-15, "sem `message.id`") | Linha sem id: conta sozinha | T5 |
+| `message.usage` que é uma lista (PAP-17, "`message.usage` objeto") | Não é objeto: a linha é ignorada | T5 |
+| Arquivo de `subagents/` que não pode ser lido (PAP-18; PAP-19 só fala do principal) | Não conta nada; o principal e os outros arquivos contam | T5 |
 
 ---
 
