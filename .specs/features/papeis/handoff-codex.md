@@ -24,9 +24,8 @@ deixa para os hooks.
 - O código de produção é o de `6609630`. Depois dele só entraram testes e documentos; o
   último commit de teste é `8f4e442`.
 - Windows, `8f4e442`: `tsc` 0 e 1626 pass, 5 skip, 0 fail. Linux (contêiner
-  `oven/bun:1.4.2`), `0848c8f`: `tsc` 0 e 3 de 3 execuções com 1627 pass, 1 skip, 0 fail.
-  No Linux sobre `8f4e442` a rodada estava em andamento quando isto foi escrito: veja a
-  seção "Handoff" de `.specs/STATE.md`, e repita se o resultado não estiver lá.
+  `oven/bun:1.4.2` sobre clone limpo), `8f4e442`: `tsc` 0 e 3 de 3 execuções com 1630 pass,
+  1 skip, 0 fail. A asserção do modo `0600` de PAP-06, pulada no Windows, passa no Linux.
 - Sessões reais: `.specs/features/papeis/real-sessions.md`.
 - O repositório tem um segundo worktree, `squad-code-mcp.worktrees/tui-clicavel`, de outro
   trabalho do dev. Não toque nele.
