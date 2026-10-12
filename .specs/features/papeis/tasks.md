@@ -494,11 +494,11 @@ T22
 
 **Done when**:
 
-- [ ] O conferidor passa para `judge`: frontmatter, as sete seções, tools só do papel, com `ready`, `state`, `ask`, `blocked`, `send_verdict` e `history` citadas; `answer` e `escalate` não aparecem entre crases
-- [ ] PAP-69: `Your work` tem os literais `git switch --detach`, `result_seq`, `outcome`, `criteria` e `stale_reference`
-- [ ] PAP-62 a PAP-67 e o resto de PAP-69 estão no texto, cada regra numa frase
-- [ ] Testes em `test/unit/skills.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] O conferidor passa para `judge`: frontmatter, as sete seções, tools só do papel, com `ready`, `state`, `ask`, `blocked`, `send_verdict` e `history` citadas; `answer` e `escalate` não aparecem entre crases
+- [x] PAP-69: `Your work` tem os literais `git switch --detach`, `result_seq`, `outcome`, `criteria` e `stale_reference`
+- [x] PAP-62 a PAP-67 e o resto de PAP-69 estão no texto, cada regra numa frase
+- [x] Testes em `test/unit/skills.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
