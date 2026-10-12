@@ -254,12 +254,12 @@ T22
 
 **Done when**:
 
-- [ ] PAP-10: rodado como processo com o arquivo de credencial de um peer registrado, o log de um broker real ganha exatamente um `turn_started` do nome, e um servidor que conta chamadas recebe um único `POST /turn-started` com o corpo `{ id }` por inteiro, a partir de um arquivo com espaços nas pontas
-- [ ] PAP-11: a saída padrão é vazia em todos os casos desta tarefa
-- [ ] PAP-12: sem `SQUAD_ROLE`, e sem arquivo de credencial, o servidor que conta chamadas não recebe nenhuma e o código é 0
-- [ ] PAP-13: código 0 com o broker fora do ar, com uma credencial que o broker recusa (`unknown_peer`), com um status 500 e com um servidor que não responde, este em menos de 4 s
-- [ ] Testes em `test/integration/hook-turn-started.test.ts`
-- [ ] Gate full passa
+- [x] PAP-10: rodado como processo com o arquivo de credencial de um peer registrado, o log de um broker real ganha exatamente um `turn_started` do nome, e um servidor que conta chamadas recebe um único `POST /turn-started` com o corpo `{ id }` por inteiro, a partir de um arquivo com espaços nas pontas
+- [x] PAP-11: a saída padrão é vazia em todos os casos desta tarefa
+- [x] PAP-12: sem `SQUAD_ROLE`, e sem arquivo de credencial, o servidor que conta chamadas não recebe nenhuma e o código é 0
+- [x] PAP-13: código 0 com o broker fora do ar, com uma credencial que o broker recusa (`unknown_peer`), com um status 500 e com um servidor que não responde, este em menos de 4 s
+- [x] Testes em `test/integration/hook-turn-started.test.ts`
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

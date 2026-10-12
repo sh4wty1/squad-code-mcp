@@ -367,10 +367,10 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-07 | P1: Credencial da sessão para os hooks | T2 | Implementing |
 | PAP-08 | P1: Credencial da sessão para os hooks | T2 | Implementing |
 | PAP-09 | P1: Credencial da sessão para os hooks | T2 | Implementing |
-| PAP-10 | P1: Início de turno | T7, T22 | Pending |
-| PAP-11 | P1: Início de turno | T7 | Pending |
+| PAP-10 | P1: Início de turno | T7, T22 | Implementing |
+| PAP-11 | P1: Início de turno | T7 | Implementing |
 | PAP-12 | P1: Início de turno | T6, T7, T9 | Implementing |
-| PAP-13 | P1: Início de turno | T7 | Pending |
+| PAP-13 | P1: Início de turno | T7 | Implementing |
 | PAP-14 | P1: Uso no fim do turno | T5 | Implementing |
 | PAP-15 | P1: Uso no fim do turno | T5 | Implementing |
 | PAP-16 | P1: Uso no fim do turno | T5 | Implementing |
