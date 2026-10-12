@@ -165,11 +165,11 @@ T22
 
 **Done when**:
 
-- [ ] As instruções que o cliente MCP recebe, a `description` de `ready` na lista de tools e o texto da resposta de `ready` a um número errado contêm `kind="ping"` e não contêm `source=`, uma asserção por texto
-- [ ] A frase das instruções sobre `task|result|verdict` também não contém `source=`
-- [ ] Nenhum teste anterior do servidor muda de expectativa além do `source`
-- [ ] Testes em `test/integration/server.test.ts`
-- [ ] Gate full passa
+- [x] As instruções que o cliente MCP recebe, a `description` de `ready` na lista de tools e o texto da resposta de `ready` a um número errado contêm `kind="ping"` e não contêm `source=`, uma asserção por texto
+- [x] A frase das instruções sobre `task|result|verdict` também não contém `source=`
+- [x] Nenhum teste anterior do servidor muda de expectativa além do `source`
+- [x] Testes em `test/integration/server.test.ts`
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

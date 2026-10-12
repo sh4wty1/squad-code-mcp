@@ -362,7 +362,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-02 | P1: Plugin em diretório próprio | T4, T22 | Pending |
 | PAP-03 | P1: Plugin em diretório próprio | T4, T22 | Pending |
 | PAP-04 | P1: Plugin em diretório próprio | T19 | Pending |
-| PAP-05 | P1: Plugin em diretório próprio | T3 | Pending |
+| PAP-05 | P1: Plugin em diretório próprio | T3 | Implementing |
 | PAP-06 | P1: Credencial da sessão para os hooks | T2 | Implementing |
 | PAP-07 | P1: Credencial da sessão para os hooks | T2 | Implementing |
 | PAP-08 | P1: Credencial da sessão para os hooks | T2 | Implementing |

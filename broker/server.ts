@@ -145,9 +145,9 @@ const mcp = new Server(
     instructions: ROLE
       ? `You are a member of a squad of Claude Code sessions. Your name is ${NAME} and your role is ${ROLE}.
 
-IMPORTANT: When a <channel source="squad" kind="ping" ...> message arrives, call the ready tool with the number it carries, right away. That registers this session in the squad. Until then the squad cannot reach you and ready is the only squad tool.
+IMPORTANT: When a <channel kind="ping" ...> message arrives, call the ready tool with the number it carries, right away. That registers this session in the squad. Until then the squad cannot reach you and ready is the only squad tool.
 
-After ready, what the squad sends you arrives as <channel source="squad" kind="task|result|verdict" seq="..." from="..." ticket_ref="..."> messages. The seq is what you cite when you answer: task_seq in a result, result_seq in a verdict.
+After ready, what the squad sends you arrives as <channel kind="task|result|verdict" seq="..." from="..." ticket_ref="..."> messages. The seq is what you cite when you answer: task_seq in a result, result_seq in a verdict.
 
 A question and its answer arrive the same way: kind="question" is a question for you to answer or to escalate, and kind="answer" is the answer to a question. Both carry the question_id in their text. The question_id, not the seq, is what you cite about a question.
 
@@ -166,7 +166,7 @@ ${toolsFor(ROLE)
 const READY_TOOL = {
   name: "ready",
   description:
-    'Answer the squad ping. Call it with the number from the <channel source="squad" kind="ping"> message to register this session in the squad.',
+    'Answer the squad ping. Call it with the number from the <channel kind="ping"> message to register this session in the squad.',
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -263,7 +263,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
     case "ready": {
       if (String((args as { number?: unknown } | undefined)?.number) !== String(pingNumber)) {
         return text(
-          'That is not the number of the ping. Wait for the <channel source="squad" kind="ping"> message and call ready with the number it carries.',
+          'That is not the number of the ping. Wait for the <channel kind="ping"> message and call ready with the number it carries.',
           true
         );
       }
