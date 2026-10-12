@@ -358,81 +358,81 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| PAP-01 | P1: Plugin em diretório próprio | - | Pending |
-| PAP-02 | P1: Plugin em diretório próprio | - | Pending |
-| PAP-03 | P1: Plugin em diretório próprio | - | Pending |
-| PAP-04 | P1: Plugin em diretório próprio | - | Pending |
-| PAP-05 | P1: Plugin em diretório próprio | - | Pending |
-| PAP-06 | P1: Credencial da sessão para os hooks | - | Pending |
-| PAP-07 | P1: Credencial da sessão para os hooks | - | Pending |
-| PAP-08 | P1: Credencial da sessão para os hooks | - | Pending |
-| PAP-09 | P1: Credencial da sessão para os hooks | - | Pending |
-| PAP-10 | P1: Início de turno | - | Pending |
-| PAP-11 | P1: Início de turno | - | Pending |
-| PAP-12 | P1: Início de turno | - | Pending |
-| PAP-13 | P1: Início de turno | - | Pending |
-| PAP-14 | P1: Uso no fim do turno | - | Pending |
-| PAP-15 | P1: Uso no fim do turno | - | Pending |
-| PAP-16 | P1: Uso no fim do turno | - | Pending |
-| PAP-17 | P1: Uso no fim do turno | - | Pending |
-| PAP-18 | P1: Uso no fim do turno | - | Pending |
-| PAP-19 | P1: Uso no fim do turno | - | Pending |
-| PAP-20 | Edge case | - | Pending |
-| PAP-21 | Edge case | - | Pending |
-| PAP-22 | Edge case | - | Pending |
-| PAP-23 | P1: Uso no fim do turno | - | Pending |
-| PAP-24 | P1: Uso no fim do turno | - | Pending |
-| PAP-25 | P1: Uso no fim do turno | - | Pending |
-| PAP-26 | P1: Uso no fim do turno | - | Pending |
-| PAP-27 | P1: Uso no fim do turno | - | Pending |
-| PAP-28 | P1: Devolver ao trabalho quem para devendo | - | Pending |
-| PAP-29 | P1: Devolver ao trabalho quem para devendo | - | Pending |
-| PAP-30 | P1: Devolver ao trabalho quem para devendo | - | Pending |
-| PAP-31 | P1: Devolver ao trabalho quem para devendo | - | Pending |
-| PAP-32 | P1: Devolver ao trabalho quem para devendo | - | Pending |
-| PAP-33 | P1: `roles.json` | - | Pending |
-| PAP-34 | P1: `roles.json` | - | Pending |
-| PAP-35 | P1: `roles.json` | - | Pending |
-| PAP-36 | P1: `roles.json` | - | Pending |
-| PAP-37 | P1: Lançar uma sessão | - | Pending |
-| PAP-38 | P1: Lançar uma sessão | - | Pending |
-| PAP-39 | P1: Lançar uma sessão | - | Pending |
-| PAP-40 | P1: Lançar uma sessão | - | Pending |
-| PAP-41 | P1: Lançar uma sessão | - | Pending |
-| PAP-42 | P1: Lançar uma sessão | - | Pending |
-| PAP-43 | P1: Lançar uma sessão | - | Pending |
-| PAP-44 | P1: Lançar uma sessão | - | Pending |
-| PAP-45 | P1: Lançar uma sessão | - | Pending |
-| PAP-46 | P1: Lançar uma sessão | - | Pending |
-| PAP-47 | P1: Lançar uma sessão | - | Pending |
-| PAP-48 | Edge case | - | Pending |
-| PAP-49 | Edge case | - | Pending |
-| PAP-50 | P1: Lançar uma sessão | - | Pending |
-| PAP-51 | P1: Worktree por papel | - | Pending |
-| PAP-52 | P1: Worktree por papel | - | Pending |
-| PAP-53 | P1: Worktree por papel | - | Pending |
-| PAP-54 | P1: Worktree por papel | - | Pending |
-| PAP-55 | P1: Worktree por papel | - | Pending |
-| PAP-56 | P1: Worktree por papel | - | Pending |
-| PAP-57 | P1: Worktree por papel | - | Pending |
-| PAP-58 | P1: Worktree por papel | - | Pending |
-| PAP-59 | P1: Comando `squad` | - | Pending |
-| PAP-60 | P1: Skills de protocolo | - | Pending |
-| PAP-61 | P1: Skills de protocolo | - | Pending |
-| PAP-62 | P1: Skills de protocolo | - | Pending |
-| PAP-63 | P1: Skills de protocolo | - | Pending |
-| PAP-64 | P1: Skills de protocolo | - | Pending |
-| PAP-65 | P1: Skills de protocolo | - | Pending |
-| PAP-66 | P1: Skills de protocolo | - | Pending |
-| PAP-67 | P1: Skills de protocolo | - | Pending |
-| PAP-68 | P1: Skills de protocolo | - | Pending |
-| PAP-69 | P1: Skills de protocolo | - | Pending |
-| PAP-70 | P1: Skills de protocolo | - | Pending |
-| PAP-71 | P1: Skills de protocolo | - | Pending |
-| PAP-72 | P1: Skills de protocolo | - | Pending |
-| PAP-73 | P2: Documentação | - | Pending |
+| PAP-01 | P1: Plugin em diretório próprio | T4 | Pending |
+| PAP-02 | P1: Plugin em diretório próprio | T4, T22 | Pending |
+| PAP-03 | P1: Plugin em diretório próprio | T4, T22 | Pending |
+| PAP-04 | P1: Plugin em diretório próprio | T19 | Pending |
+| PAP-05 | P1: Plugin em diretório próprio | T3 | Pending |
+| PAP-06 | P1: Credencial da sessão para os hooks | T2 | Pending |
+| PAP-07 | P1: Credencial da sessão para os hooks | T2 | Pending |
+| PAP-08 | P1: Credencial da sessão para os hooks | T2 | Pending |
+| PAP-09 | P1: Credencial da sessão para os hooks | T2 | Pending |
+| PAP-10 | P1: Início de turno | T7, T22 | Pending |
+| PAP-11 | P1: Início de turno | T7 | Pending |
+| PAP-12 | P1: Início de turno | T6, T7, T9 | Pending |
+| PAP-13 | P1: Início de turno | T7 | Pending |
+| PAP-14 | P1: Uso no fim do turno | T5 | Pending |
+| PAP-15 | P1: Uso no fim do turno | T5 | Pending |
+| PAP-16 | P1: Uso no fim do turno | T5 | Pending |
+| PAP-17 | P1: Uso no fim do turno | T5 | Pending |
+| PAP-18 | P1: Uso no fim do turno | T5 | Pending |
+| PAP-19 | P1: Uso no fim do turno | T5 | Pending |
+| PAP-20 | Edge case | T6 | Pending |
+| PAP-21 | Edge case | T5, T9 | Pending |
+| PAP-22 | Edge case | T8, T9 | Pending |
+| PAP-23 | P1: Uso no fim do turno | T9, T22 | Pending |
+| PAP-24 | P1: Uso no fim do turno | T9 | Pending |
+| PAP-25 | P1: Uso no fim do turno | T9 | Pending |
+| PAP-26 | P1: Uso no fim do turno | T9 | Pending |
+| PAP-27 | P1: Uso no fim do turno | T9 | Pending |
+| PAP-28 | P1: Devolver ao trabalho quem para devendo | T8, T9, T22 | Pending |
+| PAP-29 | P1: Devolver ao trabalho quem para devendo | T8 | Pending |
+| PAP-30 | P1: Devolver ao trabalho quem para devendo | T9 | Pending |
+| PAP-31 | P1: Devolver ao trabalho quem para devendo | T9 | Pending |
+| PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Pending |
+| PAP-33 | P1: `roles.json` | T10 | Pending |
+| PAP-34 | P1: `roles.json` | T11 | Pending |
+| PAP-35 | P1: `roles.json` | T1, T14 | Pending |
+| PAP-36 | P1: `roles.json` | T14 | Pending |
+| PAP-37 | P1: Lançar uma sessão | T1, T14, T22 | Pending |
+| PAP-38 | P1: Lançar uma sessão | T14 | Pending |
+| PAP-39 | P1: Lançar uma sessão | T12 | Pending |
+| PAP-40 | P1: Lançar uma sessão | T12, T22 | Pending |
+| PAP-41 | P1: Lançar uma sessão | T14 | Pending |
+| PAP-42 | P1: Lançar uma sessão | T12, T14 | Pending |
+| PAP-43 | P1: Lançar uma sessão | T12 | Pending |
+| PAP-44 | P1: Lançar uma sessão | T12 | Pending |
+| PAP-45 | P1: Lançar uma sessão | T12 | Pending |
+| PAP-46 | P1: Lançar uma sessão | T12 | Pending |
+| PAP-47 | P1: Lançar uma sessão | T12 | Pending |
+| PAP-48 | Edge case | T13 | Pending |
+| PAP-49 | Edge case | T14 | Pending |
+| PAP-50 | P1: Lançar uma sessão | T14, T15 | Pending |
+| PAP-51 | P1: Worktree por papel | T14 | Pending |
+| PAP-52 | P1: Worktree por papel | T14 | Pending |
+| PAP-53 | P1: Worktree por papel | T13 | Pending |
+| PAP-54 | P1: Worktree por papel | T13 | Pending |
+| PAP-55 | P1: Worktree por papel | T13, T14 | Pending |
+| PAP-56 | P1: Worktree por papel | T13 | Pending |
+| PAP-57 | P1: Worktree por papel | T13 | Pending |
+| PAP-58 | P1: Worktree por papel | T13, T14 | Pending |
+| PAP-59 | P1: Comando `squad` | T15 | Pending |
+| PAP-60 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
+| PAP-61 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
+| PAP-62 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
+| PAP-63 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
+| PAP-64 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
+| PAP-65 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
+| PAP-66 | P1: Skills de protocolo | T16, T17, T18 | Pending |
+| PAP-67 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
+| PAP-68 | P1: Skills de protocolo | T16 | Pending |
+| PAP-69 | P1: Skills de protocolo | T17 | Pending |
+| PAP-70 | P1: Skills de protocolo | T18 | Pending |
+| PAP-71 | P1: Skills de protocolo | T19 | Pending |
+| PAP-72 | P1: Skills de protocolo | T19 | Pending |
+| PAP-73 | P2: Documentação | T20, T21 | Pending |
 
-**Coverage:** 73 total, 0 mapped to tasks, 73 unmapped.
+**Coverage:** 73 total, 73 mapped to tasks, 0 unmapped.
 
 ---
 
