@@ -143,12 +143,12 @@ T22
 
 **Done when**:
 
-- [ ] PAP-06: quando a chamada de `ready` volta, o arquivo `<SQUAD_DB da sessão>.<nome>.id` existe e o conteúdo dele é exatamente o `id` que uma rota aceita (`POST /state` com ele responde 200); fora do Windows o modo é `0600`, com o literal, e no Windows a asserção de modo é um skip registrado
-- [ ] PAP-07: fechada a sessão, o arquivo não existe mais
-- [ ] PAP-08: com um diretório no lugar do arquivo de credencial, `ready` registra do mesmo jeito (o `peer_joined` está no log e a resposta é a de sucesso); com o arquivo trocado por um diretório não vazio depois do registro, a sessão encerra e o `peer_left` é gravado
-- [ ] PAP-09: registro recusado (nome de outro papel, e nome já em uso) não deixa arquivo
-- [ ] Testes em `test/integration/server-credential.test.ts`
-- [ ] Gate full passa
+- [x] PAP-06: quando a chamada de `ready` volta, o arquivo `<SQUAD_DB da sessão>.<nome>.id` existe e o conteúdo dele é exatamente o `id` que uma rota aceita (`POST /state` com ele responde 200); fora do Windows o modo é `0600`, com o literal, e no Windows a asserção de modo é um skip registrado
+- [x] PAP-07: fechada a sessão, o arquivo não existe mais
+- [x] PAP-08: com um diretório no lugar do arquivo de credencial, `ready` registra do mesmo jeito (o `peer_joined` está no log e a resposta é a de sucesso); com o arquivo trocado por um diretório não vazio depois do registro, a sessão encerra e o `peer_left` é gravado
+- [x] PAP-09: registro recusado (nome de outro papel, e nome já em uso) não deixa arquivo
+- [x] Testes em `test/integration/server-credential.test.ts`
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

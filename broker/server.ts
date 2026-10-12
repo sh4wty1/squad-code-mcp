@@ -26,6 +26,7 @@
 
 import { spawn } from "node:child_process";
 import { randomInt } from "node:crypto";
+import { rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -35,7 +36,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { createDelivery } from "./delivery.ts";
 import type { ListedPeer, Refusal, RegisterResponse } from "./peers.ts";
-import { brokerUrl, heartbeatIntervalMs, pingIntervalMs, pollIntervalMs } from "./shared/config.ts";
+import { brokerUrl, heartbeatIntervalMs, idPath, pingIntervalMs, pollIntervalMs } from "./shared/config.ts";
 import type { SquadEvent } from "./shared/contract.ts";
 import { getGitRoot } from "./shared/git.ts";
 import { ROUTE_OF, toolsFor } from "./tools.ts";
@@ -50,6 +51,8 @@ const POLL_INTERVAL_MS = pollIntervalMs();
 const BROKER_SCRIPT = fileURLToPath(new URL("./broker.ts", import.meta.url));
 const NAME = process.env.SQUAD_NAME ?? "";
 const ROLE = process.env.SQUAD_ROLE ?? "";
+// Where the hooks of the session, which are other processes, read its credential (AD-016)
+const ID_FILE = idPath(NAME);
 
 // --- Broker communication ---
 
@@ -284,6 +287,13 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         return text(`Error registering: ${e instanceof Error ? e.message : String(e)}`, true);
       }
       log(`Registered as ${NAME} (${ROLE})`);
+      try {
+        // Only the user reads it, where the system has such a thing
+        writeFileSync(ID_FILE, myId, { mode: 0o600 });
+      } catch (e) {
+        // The session is registered all the same: only its hooks go without the credential
+        log(`Credential file error: ${e instanceof Error ? e.message : String(e)}`);
+      }
 
       heartbeatTimer = setInterval(async () => {
         try {
@@ -372,6 +382,11 @@ async function main() {
       try {
         await brokerFetch("/unregister", { id: myId });
         log("Unregistered from broker");
+      } catch {
+        // Best effort
+      }
+      try {
+        rmSync(ID_FILE, { force: true });
       } catch {
         // Best effort
       }
