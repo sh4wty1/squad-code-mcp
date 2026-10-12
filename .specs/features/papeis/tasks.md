@@ -579,10 +579,10 @@ T22
 
 **Done when**:
 
-- [ ] `launch.ts` e `roles.ts` têm a sua linha na seção Architecture; a de `server.ts` diz o arquivo de credencial; a de `cli.ts` diz `start` e `tui`; a de `shared/config.ts` diz os caminhos novos
-- [ ] Uma linha para `../plugin/`: manifesto, `.mcp.json`, os dois hooks e o que cada arquivo de `hooks/` faz, `roles.json` e as quatro skills
-- [ ] Running mostra `squad start <papel>` e deixa o comando com `server:squad` como a forma sem plugin
-- [ ] Gate build passa
+- [x] `launch.ts` e `roles.ts` têm a sua linha na seção Architecture; a de `server.ts` diz o arquivo de credencial; a de `cli.ts` diz `start` e `tui`; a de `shared/config.ts` diz os caminhos novos
+- [x] Uma linha para `../plugin/`: manifesto, `.mcp.json`, os dois hooks e o que cada arquivo de `hooks/` faz, `roles.json` e as quatro skills
+- [x] Running mostra `squad start <papel>` e deixa o comando com `server:squad` como a forma sem plugin
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build
