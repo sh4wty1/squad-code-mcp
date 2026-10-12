@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 71,
+  "next_id": 78,
   "lessons": [
     {
       "id": "L-001",
@@ -445,16 +445,18 @@
       "status": "confirmed",
       "features": [
         "event",
-        "question"
+        "question",
+        "papeis"
       ],
-      "recurrence": 2,
+      "recurrence": 3,
       "harmful": 0,
       "evidence": [
         "EVT-51 vs EVT-04; broker/session.ts:24 (spec routes)",
-        "QST-05 (null in an optional field of /ask); broker/question.ts:119 (spec routes)"
+        "QST-05 (null in an optional field of /ask); broker/question.ts:119 (spec routes)",
+        "validation.md PAP-33, broker/test/unit/roles.test.ts:103 (spec routes)"
       ],
       "created": "2026-10-08T04:22:31Z",
-      "last_seen": "2026-10-10T11:07:42Z"
+      "last_seen": "2026-10-12T08:33:56Z"
     },
     {
       "id": "L-025",
@@ -663,16 +665,18 @@
       "status": "confirmed",
       "features": [
         "event",
-        "question"
+        "question",
+        "papeis"
       ],
-      "recurrence": 2,
+      "recurrence": 3,
       "harmful": 0,
       "evidence": [
         "EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)",
-        "QST-05, QST-43 (empty default on a blocking question); broker/question.ts:121 (spec routes)"
+        "QST-05, QST-43 (empty default on a blocking question); broker/question.ts:121 (spec routes)",
+        "validation.md PAP-15, broker/test/unit/hook-usage.test.ts:105 (spec routes)"
       ],
       "created": "2026-10-08T04:58:15Z",
-      "last_seen": "2026-10-10T11:07:43Z"
+      "last_seen": "2026-10-12T08:33:56Z"
     },
     {
       "id": "L-037",
@@ -919,18 +923,20 @@
       "text": "Test through the real process each callback the composition root injects into a module, not only through the wiring of the test helper",
       "signal": "surviving_mutant",
       "scope": "broker tests",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "question"
+        "question",
+        "papeis"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
         "B08 broker/broker.ts:57 (QST-36: /send not wired to delivered, whole suite green) (broker tests)",
-        "T07 broker/tui.ts:233 (QST-83: token of the terminal entry) (tui)"
+        "T07 broker/tui.ts:233 (QST-83: token of the terminal entry) (tui)",
+        "validation.md C1 C2 C6, PAP-37, broker/cli.ts:59 (broker tests)"
       ],
       "created": "2026-10-10T11:07:41Z",
-      "last_seen": "2026-10-10T11:07:41Z"
+      "last_seen": "2026-10-12T08:33:55Z"
     },
     {
       "id": "L-051",
@@ -1303,6 +1309,132 @@
       ],
       "created": "2026-10-11T09:38:31Z",
       "last_seen": "2026-10-11T09:38:31Z"
+    },
+    {
+      "id": "L-071",
+      "key": "surviving_mutant::to test that a step may fail without stopping what follows assert something that happens after the step not what was done before it",
+      "text": "To test that a step may fail without stopping what follows, assert something that happens after the step, not what was done before it",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md V6, PAP-08, broker/test/integration/server-credential.test.ts:94 (broker tests)"
+      ],
+      "created": "2026-10-12T08:33:56Z",
+      "last_seen": "2026-10-12T08:33:56Z"
+    },
+    {
+      "id": "L-072",
+      "key": "spec_precision_gap::state what a status other than 200 means for every http read a client makes not only for its writes",
+      "text": "State what a status other than 200 means for every HTTP read a client makes, not only for its writes",
+      "signal": "spec_precision_gap",
+      "scope": "spec routes",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md S10, PAP-31, plugin/hooks/stop.ts:27 (spec routes)"
+      ],
+      "created": "2026-10-12T08:33:56Z",
+      "last_seen": "2026-10-12T08:33:56Z"
+    },
+    {
+      "id": "L-073",
+      "key": "spec_precision_gap::when two acs give different outcomes for the same case state in both which one wins",
+      "text": "When two ACs give different outcomes for the same case, state in both which one wins",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-66 and PAP-68, plugin/skills/worker/SKILL.md:79 (spec)"
+      ],
+      "created": "2026-10-12T08:33:57Z",
+      "last_seen": "2026-10-12T08:33:57Z"
+    },
+    {
+      "id": "L-074",
+      "key": "spec_precision_gap::state what a failure of each secondary input does not only of the main one",
+      "text": "State what a failure of each secondary input does, not only of the main one",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-18, broker/test/unit/hook-usage.test.ts:216 (spec)"
+      ],
+      "created": "2026-10-12T08:33:57Z",
+      "last_seen": "2026-10-12T08:33:57Z"
+    },
+    {
+      "id": "L-075",
+      "key": "spec_precision_gap::write a requirement that nothing of a kind is in a place as the list of paths that must not exist",
+      "text": "Write a requirement that nothing of a kind is in a place as the list of paths that must not exist",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-01, broker/test/unit/plugin-manifest.test.ts:18 (spec)"
+      ],
+      "created": "2026-10-12T08:33:57Z",
+      "last_seen": "2026-10-12T08:33:57Z"
+    },
+    {
+      "id": "L-076",
+      "key": "spec_precision_gap::state in the ac of a command what counts as an option and in which positions it may come",
+      "text": "State in the AC of a command what counts as an option and in which positions it may come",
+      "signal": "spec_precision_gap",
+      "scope": "spec cli",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-42, broker/test/unit/launch-args.test.ts:61 (spec cli)"
+      ],
+      "created": "2026-10-12T08:33:58Z",
+      "last_seen": "2026-10-12T08:33:58Z"
+    },
+    {
+      "id": "L-077",
+      "key": "spec_precision_gap::when an ac says a flow concludes the same way after a failed step name the observable that proves it",
+      "text": "When an AC says a flow concludes the same way after a failed step, name the observable that proves it",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-08, broker/server.ts:389 (spec)"
+      ],
+      "created": "2026-10-12T08:33:58Z",
+      "last_seen": "2026-10-12T08:33:58Z"
     }
   ]
 }

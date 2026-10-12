@@ -108,6 +108,14 @@ T22
 T23
 ```
 
+### Phase 7: Correções da verificação, volta 1
+
+O que o Verifier pediu em 2026-10-12: três testes que não distinguiam o código certo de um mutante. Nenhum defeito de produção.
+
+```
+T24 → T25 → T26
+```
+
 ---
 
 ## Task Breakdown
@@ -633,10 +641,71 @@ T23
 
 ---
 
+### T24: `squad start` rodado até o fim com um comando que existe
+
+**What**: Testes que rodam `bun cli.ts start <papel>` de verdade, com `SQUAD_CLAUDE` num comando que existe e sai com um código que não é 0 nem 1 (`git`, que responde `unknown option` na saída de erro e sai com 129).
+**Where**: `broker/test/integration/cli.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: `runCli` do mesmo arquivo; o repositório temporário dos testes de `launch`
+**Requirement**: PAP-37
+
+**Done when**:
+
+- [ ] `start mother`, de um subdiretório de um repositório temporário: a saída de erro do CLI traz o que o comando escreveu (`unknown option`) e o CLI sai com 129
+- [ ] `start worker`, do mesmo jeito: o worktree nasce no repositório temporário, sob o `SQUAD_WORKTREES` do teste, e `git worktree list` do repositório do squad continua com uma árvore só
+- [ ] Os três mutantes do Verifier morrem, conferidos um a um e desfeitos: `stdio` `ignore` em `cli.ts`, o código 0 fixo, e o `cwd` trocado pelo diretório do broker
+- [ ] Nenhum código de produção muda
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T25: O servidor encerra com código 0 quando o arquivo de credencial não pode ser apagado
+
+**What**: O teste de PAP-08 passa a afirmar o código de saída do processo do servidor.
+**Where**: `broker/test/integration/server-credential.test.ts`
+**Depends on**: T24
+**Reuses**: `startSession`; o cenário do diretório não vazio no lugar do arquivo
+**Requirement**: PAP-08
+
+**Done when**:
+
+- [ ] Com o arquivo de credencial trocado por um diretório não vazio depois do registro, o processo do servidor sai sozinho com código 0, afirmado com o literal, e o `peer_left` é gravado
+- [ ] O mutante do Verifier morre, conferido e desfeito: sem o `try` em volta do `rmSync` de `server.ts`, o teste falha
+- [ ] Nenhum código de produção muda; se `startSession` precisa expor o código de saída, só `test/integration/helpers.ts` muda
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T26: `/events` com outro status não bloqueia a parada
+
+**What**: Um caso do hook de parada em que `GET /events` responde 500 com a lista de eventos de um worker que deve.
+**Where**: `broker/test/integration/hook-stop.test.ts`
+**Depends on**: T25
+**Reuses**: `startRecorder` e `runHook` dos helpers; o log do caso de PAP-28
+**Requirement**: PAP-31
+
+**Done when**:
+
+- [ ] Com `/events` respondendo 500 e um corpo `{ events: [...] }` em que o worker deve o `result`, a saída padrão do hook é vazia, o `usage` é enviado e o código é 0
+- [ ] O mutante do Verifier morre, conferido e desfeito: sem a conferência do status em `plugin/hooks/stop.ts`, o teste falha
+- [ ] Nenhum código de produção muda
+- [ ] Gate build passa
+
+**Tests**: integration
+**Gate**: build
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -644,6 +713,7 @@ Phase 3:  T10 → T11 → T12 → T13 → T14 → T15
 Phase 4:  T16 → T17 → T18 → T19
 Phase 5:  T20 → T21
 Phase 6:  T22, T23 (sem ordem entre as duas no diagrama: a T23 nasce da T22 e é commitada antes de ela fechar)
+Phase 7:  T24 → T25 → T26
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
@@ -701,6 +771,9 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
 | T21: Documentação do broker | 1 arquivo: `CLAUDE.md` | ✅ Granular |
 | T22: Sessões reais e o registro delas | 1 arquivo: `real-sessions.md` | ✅ Granular |
 | T23: As skills dizem onde é o projeto e chamam `state` no turno de `ready` | 2 regras, as mesmas nos quatro `SKILL.md` | ⚠️ Coeso |
+| T24: `squad start` rodado até o fim com um comando que existe | 1 arquivo: `cli.test.ts` | ✅ Granular |
+| T25: O servidor encerra com código 0 quando o arquivo de credencial não pode ser apagado | 1 arquivo: `server-credential.test.ts` | ✅ Granular |
+| T26: `/events` com outro status não bloqueia a parada | 1 arquivo: `hook-stop.test.ts` | ✅ Granular |
 
 Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.json`, T12 no `export` de `namesOf` em `peers.ts`, T15 em `broker/package.json` e T16 no conferidor de `skills.test.ts`. É a ligação do que a própria tarefa cria. T4 e T12 ficam inteiras: os três JSON só valem juntos como um plugin, e as cinco funções de T12 são uma linha cada sobre a mesma entrada.
 
@@ -733,6 +806,9 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T21 | T20 | T20 → T21 | ✅ Match |
 | T22 | None (a fase anterior inteira) | fase 6, sem seta | ✅ Match |
 | T23 | None (a fase anterior inteira) | fase 6, sem seta | ✅ Match |
+| T24 | None (a fase anterior inteira) | início da fase 7 | ✅ Match |
+| T25 | T24 | T24 → T25 | ✅ Match |
+| T26 | T25 | T25 → T26 | ✅ Match |
 
 ---
 
@@ -763,3 +839,6 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T21: Documentação do broker | Documentação | none | none | ✅ OK |
 | T22: Sessões reais e o registro delas | Sessões reais | none | none | ✅ OK |
 | T23: As skills dizem onde é o projeto e chamam `state` no turno de `ready` | Skills | unit | unit | ✅ OK |
+| T24: `squad start` rodado até o fim com um comando que existe | CLI | integration | integration | ✅ OK |
+| T25: O servidor encerra com código 0 quando o arquivo de credencial não pode ser apagado | Servidor MCP | integration | integration | ✅ OK |
+| T26: `/events` com outro status não bloqueia a parada | Hook, processo | integration | integration | ✅ OK |
