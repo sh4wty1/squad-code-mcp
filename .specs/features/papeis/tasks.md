@@ -349,10 +349,10 @@ T22
 
 **Done when**:
 
-- [ ] `readRoles(rolesPath({}))` aceita o arquivo
-- [ ] `skills` e `workflows` de cada papel são comparados por inteiro com as listas de PAP-34, escritas à mão no teste, na ordem da spec; o `judge` não tem a chave `workflows`
-- [ ] Testes em `test/unit/roles.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `readRoles(rolesPath({}))` aceita o arquivo
+- [x] `skills` e `workflows` de cada papel são comparados por inteiro com as listas de PAP-34, escritas à mão no teste, na ordem da spec; o `judge` não tem a chave `workflows`
+- [x] Testes em `test/unit/roles.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

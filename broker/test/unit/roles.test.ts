@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readRoles, type RoleEntry } from "../../roles.ts";
+import { rolesPath } from "../../shared/config.ts";
 
 const dir = mkdtempSync(join(tmpdir(), "squad-roles-"));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -115,4 +116,46 @@ test("PAP-33: an item of roles that is not an object is refused, with the path i
 test("PAP-33: a name that repeats is refused, with the path in the message", () => {
   const path = file({ roles: [WORKER, { name: "judge", when_to_use: "To judge.", skills: [] }, WORKER] });
   expect(() => readRoles(path)).toThrow(path);
+});
+
+// The file of the plugin, without the text of when_to_use, which readRoles already checks
+function pluginRoles() {
+  return readRoles(rolesPath({})).map(({ name, skills, workflows }) => ({ name, skills, workflows }));
+}
+
+test("PAP-34: the roles file of the plugin is accepted by the reader and has the four roles", () => {
+  expect(readRoles(rolesPath({})).map((entry) => entry.name)).toEqual(["mother", "leader", "worker", "judge"]);
+});
+
+test("PAP-34: the mother has its base skills and those of each workflow", () => {
+  expect(pluginRoles()[0]).toEqual({
+    name: "mother",
+    skills: ["the-fool", "create-adr"],
+    workflows: { tlc: ["tlc-discover"], "matt-pocock": ["grill-with-docs", "to-spec"] },
+  });
+});
+
+test("PAP-34: the leader has its base skills and those of each workflow", () => {
+  expect(pluginRoles()[1]).toEqual({
+    name: "leader",
+    skills: ["help-me", "the-jury"],
+    workflows: { tlc: ["tlc-plan"], "matt-pocock": ["to-tickets"] },
+  });
+});
+
+test("PAP-34: the worker has its base skills and those of each workflow", () => {
+  expect(pluginRoles()[2]).toEqual({
+    name: "worker",
+    skills: ["coding-guidelines", "ponytail", "write-commit", "codenavi"],
+    workflows: { tlc: ["tlc-implement"], "matt-pocock": ["implement"] },
+  });
+});
+
+test("PAP-34: the judge has its base skills and no workflows", () => {
+  const judge = readRoles(rolesPath({}))[3]!;
+  expect({ name: judge.name, skills: judge.skills }).toEqual({
+    name: "judge",
+    skills: ["spec-driven-eval", "ponytail-review", "security-best-practices", "break-ui", "web-quality-audit", "review-animations"],
+  });
+  expect(Object.hasOwn(judge, "workflows")).toBe(false);
 });
