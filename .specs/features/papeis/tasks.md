@@ -802,15 +802,49 @@ T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Cada desvio, guarda, valor de retorno e literal de `launch.ts` e do `start` e do `tui` de `cli.ts` recebeu ao menos uma mutação de comportamento fora das já injetadas nas duas voltas, uma por vez, desfeita com `git checkout --` antes da seguinte
-- [ ] Todo mutante vivo que muda um resultado definido num requisito tem um teste novo, com o nome do requisito, que falha com ele; o teste fica no arquivo de teste da camada (os três `launch*.test.ts` ou `cli.test.ts`)
-- [ ] Todo mutante vivo sem teste novo está no relatório do worker com o motivo: equivalente (nenhuma entrada o distingue) ou comportamento que nenhum requisito define
-- [ ] Mais dez mutações, ou mais, espalhadas por `plugin/hooks/*.ts`, `broker/roles.ts` e as linhas do arquivo de credencial em `broker/server.ts`, com a mesma regra
-- [ ] Nenhum código de produção muda; nenhuma asserção existente é afrouxada
-- [ ] Gate build passa
+- [x] Cada desvio, guarda, valor de retorno e literal de `launch.ts` e do `start` e do `tui` de `cli.ts` recebeu ao menos uma mutação de comportamento fora das já injetadas nas duas voltas, uma por vez, desfeita com `git checkout --` antes da seguinte
+- [x] Todo mutante vivo que muda um resultado definido num requisito tem um teste novo, com o nome do requisito, que falha com ele; o teste fica no arquivo de teste da camada (os três `launch*.test.ts` ou `cli.test.ts`)
+- [x] Todo mutante vivo sem teste novo está no relatório do worker com o motivo: equivalente (nenhuma entrada o distingue) ou comportamento que nenhum requisito define
+- [x] Mais dez mutações, ou mais, espalhadas por `plugin/hooks/*.ts`, `broker/roles.ts` e as linhas do arquivo de credencial em `broker/server.ts`, com a mesma regra
+- [x] Nenhum código de produção muda; nenhuma asserção existente é afrouxada
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build
+
+**Resultado da varredura** (2026-10-12, sobre `a3280e3`): 145 mutações, uma por vez, em três clones físicos do repositório fora dele (`git clone --no-hardlinks`, com `node_modules` copiado), cada uma desfeita com `git checkout --` no clone; a árvore real não recebeu mutação. 105 em `launch.ts`, 30 delas nos literais um a um, 14 no `start` e no `tui` de `cli.ts` e 26 em `plugin/hooks/*.ts` (19), `roles.ts` (6) e `server.ts` (1). 122 morrem nos testes que já existiam, 10 só nos testes novos, 13 ficam vivos pelos motivos abaixo.
+
+Testes novos, cada um conferido contra o seu mutante:
+
+| Mutante | Requisito | Teste |
+| ------- | --------- | ----- |
+| Uma tag com o nome do branch da feature conta como o branch (`refs/heads/` tirado) | PAP-53, PAP-54 | `launch-worktree.test.ts`, dois casos `a tag with the name of the branch of the feature is not its branch` |
+| Sem feature aberta o branch é procurado assim mesmo, e existe um branch chamado `null` | PAP-53, PAP-54 | `launch-worktree.test.ts`, dois casos `without an open feature a branch called null is not taken for one` |
+| Qualquer 2xx é leitura que deu certo (`!res.ok`) | PAP-38 | `launch.test.ts`, `when the read of the log answers 201 with the list of events` |
+| `start` dá ao launcher outra plataforma | PAP-45 | `cli.test.ts`, `start gives the launcher the platform it runs on` |
+| `start` nunca lê o log | PAP-38 | `cli.test.ts`, `start worker reads the log of the broker of SQUAD_PORT`, com broker real e `worker-1` registrado |
+| A sessão não recebe o diretório nem o ambiente | PAP-39, PAP-52 | `cli.test.ts`, `start worker opens the session command in its worktree, with its name and its role in the environment` |
+| A TUI não recebe a entrada, ou a saída, do terminal | PAP-59 | `cli.test.ts`, `on a terminal tui draws the TUI on it, takes the q typed on it and exits with the code 0`, num pseudo-terminal do Bun (`terminal` de `Bun.spawn`) |
+| `tui.ts` é procurado no diretório atual | PAP-59 | `cli.test.ts`, `tui runs the TUI of the squad from another directory too` |
+| `workflows` lista vazia é aceito | PAP-33 | `roles.test.ts`, `workflows that is an empty list` |
+
+Vivos sem teste novo:
+
+| Mutante | Motivo |
+| ------- | ------ |
+| `launch.ts:216`, a feature aberta é a última sem `feature_closed` (`findLast`) | Equivalente: o broker não grava duas features abertas |
+| `launch.ts:143` e `:144`, sem `--detach` | Equivalente: o git destaca sozinho num ref que não é nome curto de branch (`refs/heads/<branch>`, `HEAD`) |
+| `launch.ts:124`, só uma das duas metades da guarda de "não é repositório" | Equivalente: fora de um repositório o git falha e não escreve nada |
+| `nudge.ts:36`, sem a guarda do nome fora do squad | Equivalente: esse nome não tem agente na regra de status |
+| `nudge.ts:59`, sem a conferência de `stalled` | Equivalente: só o agente `stalled` tem `owes` |
+| `launch.ts:126`, sem `resolve` | Nenhum requisito define: o separador do diretório da mother no Windows; no Linux é equivalente |
+| `launch.ts:146`, sem `trim` | Nenhum requisito define: um espaço no fim da linha de `squad: ` |
+| `launch.ts:178`, sem `abort` | Nenhum requisito define: a leitura atrasada não é cancelada, e o resultado é o mesmo |
+| `launch.ts:193`, sem `clearTimeout` | Nenhum requisito define: o processo do launcher pode levar até 2 s a mais para sair |
+| `launch.ts:224`, sem o motivo depois do nome do comando | Nenhum requisito define: PAP-50 pede o nome do comando na linha |
+| `cli.ts:75`, a TUI roda com o `bun` do caminho | Nenhum requisito define qual `bun` roda a TUI |
+
+Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no Windows (fica para a suíte do Linux); `env` vazio em `cli.ts:61`, que faria o teste abrir o `claude` de verdade do caminho (o caso novo de PAP-52 afirma que uma variável do launcher chega à sessão). Três mortes da segunda leva vieram do caso de PAP-38 que mede os 2000 ms, com a máquina ocupada pelos três clones: as três mutações foram rodadas de novo sozinhas, e é dessa rodada o resultado acima.
 
 ---
 

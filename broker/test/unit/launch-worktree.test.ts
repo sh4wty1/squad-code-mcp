@@ -143,6 +143,56 @@ test("PAP-54: with a feature whose branch is not in the repository the worktree 
   expect(git(main, "branch", "--list", "feat/missing")).toBe("");
 }, SLOW);
 
+// A tag one commit ahead of the main checkout, with the name the branch of the feature would have
+function tagged(main: string, name: string) {
+  feature(main);
+  git(main, "tag", name, tip(main));
+  expect(git(main, "rev-parse", name)).not.toBe(head(main));
+}
+
+test("PAP-53: a tag with the name of the branch of the feature is not its branch: the worktree of a worker is born detached at the HEAD of the main checkout", () => {
+  const { main } = repo();
+  tagged(main, "feat/tagged");
+
+  const dir = worktree(main, "worker-1", "worker", "feat/tagged", {});
+  expect(head(dir)).toBe(head(main));
+  expect(branch(dir)).toBe("");
+}, SLOW);
+
+test("PAP-54: a tag with the name of the branch of the feature is not its branch: the worktree of the leader is born detached at the HEAD of the main checkout", () => {
+  const { main } = repo();
+  tagged(main, "feat/tagged");
+
+  const dir = worktree(main, "leader", "leader", "feat/tagged", {});
+  expect(head(dir)).toBe(head(main));
+  expect(branch(dir)).toBe("");
+}, SLOW);
+
+// A branch called null, one commit ahead of the main checkout
+function nullBranch(main: string) {
+  feature(main);
+  git(main, "branch", "null", tip(main));
+  expect(git(main, "rev-parse", "refs/heads/null")).not.toBe(head(main));
+}
+
+test("PAP-53: without an open feature a branch called null is not taken for one: the worktree of a worker is born detached at the HEAD of the main checkout", () => {
+  const { main } = repo();
+  nullBranch(main);
+
+  const dir = worktree(main, "worker-1", "worker", null, {});
+  expect(head(dir)).toBe(head(main));
+  expect(branch(dir)).toBe("");
+}, SLOW);
+
+test("PAP-54: without an open feature a branch called null is not taken for one: the worktree of the leader is born detached at the HEAD of the main checkout", () => {
+  const { main } = repo();
+  nullBranch(main);
+
+  const dir = worktree(main, "leader", "leader", null, {});
+  expect(head(dir)).toBe(head(main));
+  expect(branch(dir)).toBe("");
+}, SLOW);
+
 test("PAP-48: with the branch of the feature checked out in the main checkout the worktree of the leader fails with the message of git, and nothing is copied", () => {
   const { main, worktrees } = repo();
   feature(main);

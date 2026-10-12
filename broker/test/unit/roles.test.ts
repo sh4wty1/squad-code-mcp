@@ -96,6 +96,7 @@ for (const [what, changed] of [
   ["skills with an item that is not a text", { skills: ["coding-guidelines", 3] }],
   ["workflows with a key other than tlc and matt-pocock", { workflows: { tlc: ["tlc-implement"], other: ["implement"] } }],
   ["workflows that is a list", { workflows: [["tlc-implement"]] }],
+  ["workflows that is an empty list", { workflows: [] }],
   ["a workflow that is not a list", { workflows: { tlc: "tlc-implement" } }],
   ["a workflow with an empty text", { workflows: { "matt-pocock": ["implement", ""] } }],
   ["a workflow with an item that is not a text", { workflows: { tlc: [3] } }],

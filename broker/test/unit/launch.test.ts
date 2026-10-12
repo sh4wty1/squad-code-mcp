@@ -293,6 +293,7 @@ test("PAP-38: the log is read from GET /events?after=0 of the broker of the envi
 for (const [what, fetch] of [
   ["fails", async () => Promise.reject(new Error("connection refused"))],
   ["answers with another status", async () => Response.json({ events: [joined(1, "worker-1")] }, { status: 500 })],
+  ["answers 201 with the list of events", async () => Response.json({ events: [joined(1, "worker-1")] }, { status: 201 })],
   ["answers something without a list of events", async () => Response.json({ ok: true, events: "none" })],
 ] as [string, Deps["fetch"]][]) {
   test(`PAP-38: without a name a worker is worker-1 when the read of the log ${what}`, async () => {

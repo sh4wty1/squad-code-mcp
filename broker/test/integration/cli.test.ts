@@ -122,8 +122,8 @@ type Started = { res: Awaited<ReturnType<typeof runCli>>; main: string; trees: s
 
 // `squad start <role>` run to the end, from a subdirectory of a repository of the test in a
 // path with a space, with `command` in the place of the session command and `input`, when
-// given, on the standard input of the CLI
-async function startWith(command: string, role: string, check: (started: Started) => void, input?: string) {
+// given, on the standard input of the CLI. `env` are settings of the test over the ones here.
+async function startWith(command: string, role: string, check: (started: Started) => void, input?: string, env: Record<string, string> = {}) {
   // the real path: the temporary directory may come in its short form on Windows
   const dir = realpathSync(tempDir());
   try {
@@ -144,6 +144,7 @@ async function startWith(command: string, role: string, check: (started: Started
         // a launcher that took the directory of the broker for the current one finds no
         // repository there, instead of writing in the one of the squad
         GIT_CEILING_DIRECTORIES: join(BROKER_DIR, ".."),
+        ...env,
       },
       join(main, "a dir"),
       input
@@ -158,26 +159,37 @@ async function startWith(command: string, role: string, check: (started: Started
 // on its standard error and exits 129
 const startWithGit = (role: string, check: (started: Started) => void) => startWith("git", role, check);
 
-// A session command that takes the terminal: it ignores its arguments, copies its standard
-// input to its standard output and exits 42. SQUAD_CLAUDE takes a command alone, with no
-// arguments of its own, so it is a script compiled once into a directory of the tests, by
-// the bun that runs them: the same on Windows and on Linux.
-let echo: { dir: string; command: string } | undefined;
+// SQUAD_CLAUDE takes a command alone, with no arguments of its own, so a session command of
+// the tests is a script compiled once into a directory of its own, by the bun that runs
+// them: the same on Windows and on Linux.
+const compiled = new Map<string, { dir: string; command: string }>();
 
-function echoCommand(): string {
-  if (!echo) {
+function compile(source: string): string {
+  let built = compiled.get(source);
+  if (!built) {
     const dir = realpathSync(tempDir());
-    writeFileSync(join(dir, "session.ts"), "await Bun.write(Bun.stdout, await Bun.stdin.text());\nprocess.exitCode = 42;\n");
-    const built = Bun.spawnSync([process.execPath, "build", "--compile", "session.ts", "--outfile", "session"], { cwd: dir, env: cleanEnv({}) });
-    if (built.exitCode !== 0) throw new Error(`bun build --compile: ${built.stderr.toString()}`);
-    echo = { dir, command: join(dir, process.platform === "win32" ? "session.exe" : "session") };
+    writeFileSync(join(dir, "session.ts"), source);
+    const build = Bun.spawnSync([process.execPath, "build", "--compile", "session.ts", "--outfile", "session"], { cwd: dir, env: cleanEnv({}) });
+    if (build.exitCode !== 0) throw new Error(`bun build --compile: ${build.stderr.toString()}`);
+    built = { dir, command: join(dir, process.platform === "win32" ? "session.exe" : "session") };
+    compiled.set(source, built);
   }
-  return echo.command;
+  return built.command;
 }
 
 afterAll(() => {
-  if (echo) removeDir(echo.dir);
+  for (const { dir } of compiled.values()) removeDir(dir);
 });
+
+// A session command that takes the terminal: it ignores its arguments, copies its standard
+// input to its standard output and exits 42
+const echoCommand = () => compile("await Bun.write(Bun.stdout, await Bun.stdin.text());\nprocess.exitCode = 42;\n");
+
+// A session command that says what it was opened with: its arguments, its directory and its
+// environment, as JSON on its standard output
+const reportCommand = () => compile("console.log(JSON.stringify({ args: process.argv.slice(2), cwd: process.cwd(), env: process.env }));\n");
+
+type Reported = { args: string[]; cwd: string; env: Record<string, string | undefined> };
 
 test("PAP-37: start mother gives the session command the standard error of the launcher and exits with its code", async () => {
   await startWithGit("mother", ({ res }) => {
@@ -210,6 +222,84 @@ test("PAP-37: start gives the session command the standard input and the standar
     typed
   );
 }, 60_000);
+
+test("PAP-45: start gives the launcher the platform it runs on: the session has the PowerShell rules on win32, and only there", async () => {
+  await startWith(reportCommand(), "mother", ({ res }) => {
+    const { args } = JSON.parse(res.out) as Reported;
+    expect(args).toContain("Bash(git status:*)");
+    expect(args.filter((arg) => arg.startsWith("PowerShell(")).length > 0).toBe(process.platform === "win32");
+    expect(args.includes("PowerShell(git status:*)")).toBe(process.platform === "win32");
+    expect(res.code).toBe(0);
+  });
+}, 60_000);
+
+test("PAP-52: start worker opens the session command in its worktree, with its name and its role in the environment and no CLAUDE variable of the launcher", async () => {
+  await startWith(
+    reportCommand(),
+    "worker",
+    ({ res, trees }) => {
+      const { cwd, env } = JSON.parse(res.out) as Reported;
+      expect(realpathSync(cwd)).toBe(join(trees, "worker-1"));
+      // PAP-39
+      expect(env.SQUAD_NAME).toBe("worker-1");
+      expect(env.SQUAD_ROLE).toBe("worker");
+      expect(env.CLAUDECODE).toBeUndefined();
+      expect(env.CLAUDE_CODE_ENTRYPOINT).toBeUndefined();
+      expect(env.PAP_OF_THE_LAUNCHER).toBe("kept");
+      expect(res.code).toBe(0);
+    },
+    undefined,
+    { CLAUDECODE: "1", CLAUDE_CODE_ENTRYPOINT: "cli", PAP_OF_THE_LAUNCHER: "kept" }
+  );
+}, 60_000);
+
+test("PAP-38: start worker reads the log of the broker of SQUAD_PORT: with worker-1 online the session is worker-2", async () => {
+  broker = await startBroker();
+  await post(broker.url, "/register", { pid: process.pid, cwd: "/repo", git_root: null, name: "worker-1", role: "worker" });
+  await startWith(
+    reportCommand(),
+    "worker",
+    ({ res, trees }) => {
+      const { cwd, env } = JSON.parse(res.out) as Reported;
+      expect(env.SQUAD_NAME).toBe("worker-2");
+      expect(realpathSync(cwd)).toBe(join(trees, "worker-2"));
+      expect(res.code).toBe(0);
+    },
+    undefined,
+    { SQUAD_PORT: String(broker.port) }
+  );
+}, 60_000);
+
+test("PAP-59: tui runs the TUI of the squad from another directory too", async () => {
+  const dir = tempDir();
+  try {
+    const res = await runCli(["tui"], { SQUAD_PORT: String(await freePort()) }, dir);
+    expect(res.err).toContain("tui needs a terminal");
+    expect(res.out).toBe("");
+    expect(res.code).toBe(1);
+  } finally {
+    removeDir(dir);
+  }
+});
+
+test("PAP-59: on a terminal tui draws the TUI on it, takes the q typed on it and exits with the code 0 of the TUI", async () => {
+  const decoder = new TextDecoder();
+  let screen = "";
+  // a terminal of 120×40 in the place of the standard input, output and error of the CLI
+  const proc = Bun.spawn([process.execPath, join(BROKER_DIR, "cli.ts"), "tui"], {
+    env: cleanEnv({ SQUAD_PORT: String(await freePort()) }),
+    terminal: { cols: 120, rows: 40, data: (_terminal, data) => void (screen += decoder.decode(data, { stream: true })) },
+  });
+  try {
+    // the key of the footer of every screen: the TUI drew
+    await waitFor(() => screen.includes("sair"), "the TUI to draw on the terminal");
+    proc.terminal!.write("q");
+    expect(await proc.exited).toBe(0);
+    expect(screen).not.toContain("tui needs a terminal");
+  } finally {
+    proc.kill();
+  }
+}, 30_000);
 
 test("PAP-59: tui runs the TUI on the same terminal and exits with its code", async () => {
   const env = { SQUAD_PORT: String(await freePort()) };
