@@ -30,6 +30,41 @@ dev ⇄ Mother ⇄ Leader ⇄ Worker 1..N
 - **Role skills:** the instructions and protocol of each role. They live outside the broker and are referenced by name from the [fassi-skills](https://github.com/sh4wty1/fassi-skills) registry.
 - **TUI:** a separate process that reads the event log. It writes only answers to questions and human-gate decisions, always through the broker. It does not need any Claude session to be alive.
 
+## Running a squad
+
+You need [Bun](https://bun.sh), git and Claude Code with a claude.ai login, which the channel requires. Put the `squad` command on your path once:
+
+```bash
+cd broker
+bun install
+bun link
+```
+
+Then open one terminal for each session, inside the repository the squad will work on, and start one role in each:
+
+```bash
+squad start mother
+squad start leader
+squad start worker    # worker-1; run it again for worker-2 and worker-3
+squad start judge
+```
+
+In one more terminal, of 120×40 or more, open the TUI:
+
+```bash
+squad tui
+```
+
+Each `squad start` opens one Claude Code session with its name and role in the environment, the plugin of [`plugin/`](plugin) loaded from that directory as a channel, and the protocol skill of the role as its first instruction. The plugin is not installed anywhere: the launcher points the session at the directory.
+
+- **Names.** `mother`, `leader` and `judge` are one each. `squad start worker` takes the first of `worker-1`, `worker-2` and `worker-3` that is not online, and `squad start worker worker-2` relaunches that one.
+- **Worktrees.** The mother stays in the main checkout. The leader, each worker and the judge work in a worktree of their own, outside the repository: `<parent of the repository>/<name of the repository>.squad/<name>`, or `<SQUAD_WORKTREES>/<name>` when that variable is set. A new worktree gets the untracked `.env*` files of the main checkout. One that already exists is used as it is.
+- **Two dialogs.** Claude Code shows two dialogs when a session starts, and the launcher does not answer them: you do. The first asks whether you trust the folder, the first time in each directory, and the option it comes with is "No, exit". The second is the warning of the development channel, at every start: choose "I am using this for local development".
+- **Permissions.** By default a session starts with `--permission-mode acceptEdits` and a list of what it runs without asking: it edits files, calls the squad tools of its role and runs the local git of its role (`status`, `diff`, `log`, `show` and `rev-parse` for all; `switch`, `add` and `commit` for the mother, the leader and the workers; `switch` for the judge; `merge` for the leader). Everything else asks for permission in the terminal of the session: a `git push`, the merge of the delivery, and the tests and the build of your project unless its `.claude/settings.json` allows them. `squad start <role> --skip-permissions` replaces the mode and the list with `--dangerously-skip-permissions`: the session asks for nothing.
+- **Base skills.** [`plugin/roles.json`](plugin/roles.json) names the base skills of each role, as the registry calls them. Set `SQUAD_ROLES` to the path of another file to change them.
+
+The broker starts by itself with the first session and keeps running after it: `squad status` shows it and `squad kill-broker` stops it.
+
 ## Roadmap
 
 1. **Broker:** fork, roles, threads, event log.

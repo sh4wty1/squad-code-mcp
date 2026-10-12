@@ -431,7 +431,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-70 | P1: Skills de protocolo | T18 | Implementing |
 | PAP-71 | P1: Skills de protocolo | T19 | Implementing |
 | PAP-72 | P1: Skills de protocolo | T19 | Implementing |
-| PAP-73 | P2: Documentação | T20, T21 | Pending |
+| PAP-73 | P2: Documentação | T20, T21 | Implementing |
 
 **Coverage:** 73 total, 73 mapped to tasks, 0 unmapped.
 

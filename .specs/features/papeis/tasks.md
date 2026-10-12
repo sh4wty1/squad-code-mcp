@@ -559,10 +559,10 @@ T22
 
 **Done when**:
 
-- [ ] A seção tem `bun link`, uma linha `squad start` para cada um de `mother`, `leader`, `worker` e `judge`, `squad tui` e `--skip-permissions`, com o que o modo padrão permite e o que a flag troca
-- [ ] Diz os dois diálogos que aparecem ao subir e que o launcher não os responde, e onde ficam os worktrees
-- [ ] Nenhuma instrução manda instalar o plugin por marketplace
-- [ ] Gate build passa
+- [x] A seção tem `bun link`, uma linha `squad start` para cada um de `mother`, `leader`, `worker` e `judge`, `squad tui` e `--skip-permissions`, com o que o modo padrão permite e o que a flag troca
+- [x] Diz os dois diálogos que aparecem ao subir e que o launcher não os responde, e onde ficam os worktrees
+- [x] Nenhuma instrução manda instalar o plugin por marketplace
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build
