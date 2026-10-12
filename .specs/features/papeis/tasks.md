@@ -232,12 +232,12 @@ T22
 
 **Done when**:
 
-- [ ] `credential` é nulo sem `SQUAD_ROLE`, com `SQUAD_ROLE` vazio, sem o arquivo, com o arquivo vazio e com o arquivo só de espaços, um caso por gatilho (PAP-12)
-- [ ] PAP-20: arquivo com `"  <id>\n"` dá `<id>`
-- [ ] `call`, contra um `Bun.serve` do teste: devolve o corpo num 200; devolve nulo num status diferente de 200, num corpo de recusa (`ok` falso), numa porta sem ninguém e num servidor que não responde, este entre 2000 e 3500 ms com o literal; o `POST` leva o corpo como JSON
-- [ ] `payload` devolve o objeto de um JSON de objeto, e `{}` para texto que não é JSON, lista, número, `null` e texto vazio
-- [ ] Testes em `test/unit/hook-session.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `credential` é nulo sem `SQUAD_ROLE`, com `SQUAD_ROLE` vazio, sem o arquivo, com o arquivo vazio e com o arquivo só de espaços, um caso por gatilho (PAP-12)
+- [x] PAP-20: arquivo com `"  <id>\n"` dá `<id>`
+- [x] `call`, contra um `Bun.serve` do teste: devolve o corpo num 200; devolve nulo num status diferente de 200, num corpo de recusa (`ok` falso), numa porta sem ninguém e num servidor que não responde, este entre 2000 e 3500 ms com o literal; o `POST` leva o corpo como JSON
+- [x] `payload` devolve o objeto de um JSON de objeto, e `{}` para texto que não é JSON, lista, número, `null` e texto vazio
+- [x] Testes em `test/unit/hook-session.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
