@@ -276,13 +276,14 @@ T22
 
 **Done when**:
 
-- [ ] PAP-29: um teste por dívida (`result`, `verdict`, `task`, `plan`, `answer`), com o `reason` comparado por inteiro com o texto da spec, `ticket_ref`, `question_id` e `seq` incluídos
-- [ ] Com duas dívidas, o `reason` fala da mais antiga
-- [ ] PAP-28, fim de turno hipotético: um worker em turno (`turn_started` por último) com um `task` recebe o `reason`, embora `squad` sobre o log sem o `usage` acrescentado o dê como `working`; `events` não é alterado
-- [ ] PAP-32: nulo para o agente sem dívida, para o que só tem entrega pendente, para o que declarou `blocked`, para o que tem `permission_request` aberto e para o `asked_by` de uma pergunta bloqueante aberta, um teste por caso
-- [ ] PAP-22: nulo para um nome que não é do squad
-- [ ] Testes em `test/unit/hook-nudge.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] PAP-29: um teste por dívida (`result`, `verdict`, `task`, `plan`, `answer`), com o `reason` comparado por inteiro com o texto da spec, `ticket_ref`, `question_id` e `seq` incluídos
+- [x] Com duas dívidas, o `reason` fala da mais antiga
+- [x] PAP-28, fim de turno hipotético: um worker em turno (`turn_started` por último) com um `task` recebe o `reason`, embora `squad` sobre o log sem o `usage` acrescentado o dê como `working`; `events` não é alterado
+- [x] PAP-32: nulo para o agente sem dívida, para o que só tem entrega pendente, para o que declarou `blocked` e para o `asked_by` de uma pergunta bloqueante aberta, um teste por caso
+- [x] PAP-28 e PAP-32: um worker que deve o `result` e tem um `permission_request` ainda aberto no log recebe o `reason`: o fim de turno hipotético fecha o pedido (decidido pelo dev em 2026-10-12)
+- [x] PAP-22: nulo para um nome que não é do squad
+- [x] Testes em `test/unit/hook-nudge.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

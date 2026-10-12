@@ -54,6 +54,7 @@ skills de protocolo), o `roles.json` e o launcher que sobe cada sessão no lugar
 | Como os hooks se identificam ao broker | O servidor MCP grava a credencial da sessão num arquivo ao lado do banco, `<SQUAD_DB>.<nome>.id`, e os hooks a leem | Os hooks são processos à parte e as rotas exigem `{ id }`; o ambiente da sessão (`SQUAD_*`) chega aos hooks. Mesmo limite cooperativo da credencial humana (AD-007). Ao lado do banco para que um teste com `SQUAD_DB` temporário nunca escreva no home | y |
 | O que decide a volta ao trabalho | A regra de status do contrato (`squad` de `broker/shared/derive.ts`) sobre `GET /events`, como se o turno tivesse acabado; não o `owed` de `/state` sozinho | O design diz "consulta `/state`", mas o `owed` não sabe de `blocked` nem de pergunta bloqueante aberta: um worker à espera do dev seria empurrado de volta a cada turno. `stalled` fica definido num lugar só (ADR-006). `/state` continua sendo o que a skill consulta ao começar | y |
 | `usage` quando o hook devolve o agente ao trabalho | Não é enviado: o turno não acabou | `usage` é a marca de fim de turno; enviado antes, o agente apareceria `stalled` enquanto paga a dívida | y |
+| `permission_request` aberto no fim do turno | Não livra da volta ao trabalho: o fim de turno hipotético fecha o pedido e vale a regra de status | Decidido pelo dev em 2026-10-12, na T8. PAP-32 listava o caso entre os não bloqueados, contra PAP-28 e contra o contrato, que fecha o pedido com qualquer evento posterior do peer. O turno só chega ao hook de parada depois de o pedido ser resolvido | y |
 | Uso de subagentes | Somado: o hook lê também `<transcript sem .jsonl>/subagents/*.jsonl` | "Soma o uso da sessão inteira". Visto no 2.1.296: o transcript de um subagente fica nesse diretório, com `message.usage` igual. O formato é interno ao Claude Code e pode mudar | y |
 | Linhas repetidas do transcript | Uma mensagem com vários blocos vira várias linhas com o mesmo `message.id` e o mesmo `usage`; conta a última de cada id | Visto no 2.1.296; sem isso o total dobra | y |
 | Fim de turno sem transcript legível | Um `usage` com `model` `unknown` e os quatro números zero | A marca de fim de turno não pode faltar, e zero não muda nenhum total | y |
@@ -223,7 +224,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 2. **PAP-29** WHEN `stop.ts` bloqueia a parada THEN `reason` SHALL ser `You are ending the turn and still owe the squad ` seguido da frase da dívida mais antiga e de ` If you cannot go on, ask a question with ask or call blocked.`, em que a frase é: para `result`, `the result of ticket <ticket_ref>, for the task of seq <seq>. Finish it and send it with send_result.`; para `verdict`, `the verdict of ticket <ticket_ref>, for the result of seq <seq>. Judge it and send it with send_verdict.`; para `task`, `the rework task of ticket <ticket_ref>, after the verdict of seq <seq>. Send it with send_task.`; para `plan`, `the plan of the feature, after the kickoff of seq <seq>. Send it with plan.`; para `answer`, `an answer to question <question_id>, which you hold since seq <seq>. Answer it with answer or pass it on with escalate.`
 3. **PAP-30** WHEN `stop.ts` roda com `stop_hook_active` igual a `true` THEN o hook SHALL não ler `/events`, não bloquear e encerrar o turno como em PAP-23.
 4. **PAP-31** IF `GET /events?after=0` não responde em 2000 ms ou responde algo que não é `{ events: [...] }` THEN `stop.ts` SHALL não bloquear e encerrar o turno como em PAP-23.
-5. **PAP-32** WHEN a regra de status, aplicada ao fim de turno hipotético, dá outro status que não `stalled` para o nome THEN `stop.ts` SHALL não bloquear e encerrar o turno como em PAP-23; isso inclui o agente sem dívida, o que só tem entrega pendente, o que declarou `blocked`, o que tem `permission_request` aberto e o que é `asked_by` de uma pergunta bloqueante aberta.
+5. **PAP-32** WHEN a regra de status, aplicada ao fim de turno hipotético, dá outro status que não `stalled` para o nome THEN `stop.ts` SHALL não bloquear e encerrar o turno como em PAP-23; isso inclui o agente sem dívida, o que só tem entrega pendente, o que declarou `blocked` e o que é `asked_by` de uma pergunta bloqueante aberta. Um `permission_request` do nome ainda aberto no log lido não entra nessa lista: o `usage` do fim de turno o fecha, como qualquer evento posterior do peer, e quem deve um evento sai `stalled` e é bloqueado como em PAP-28.
 
 **Independent Test**: com um `task` para `worker-1` no log, o hook como `worker-1` imprime o bloqueio com o ticket e o `seq`; com `stop_hook_active` verdadeiro, grava o `usage`.
 
@@ -379,17 +380,17 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-19 | P1: Uso no fim do turno | T5 | Implementing |
 | PAP-20 | Edge case | T6 | Implementing |
 | PAP-21 | Edge case | T5, T9 | Implementing |
-| PAP-22 | Edge case | T8, T9 | Pending |
+| PAP-22 | Edge case | T8, T9 | Implementing |
 | PAP-23 | P1: Uso no fim do turno | T9, T22 | Pending |
 | PAP-24 | P1: Uso no fim do turno | T9 | Pending |
 | PAP-25 | P1: Uso no fim do turno | T9 | Pending |
 | PAP-26 | P1: Uso no fim do turno | T9 | Pending |
 | PAP-27 | P1: Uso no fim do turno | T9 | Pending |
-| PAP-28 | P1: Devolver ao trabalho quem para devendo | T8, T9, T22 | Pending |
-| PAP-29 | P1: Devolver ao trabalho quem para devendo | T8 | Pending |
+| PAP-28 | P1: Devolver ao trabalho quem para devendo | T8, T9, T22 | Implementing |
+| PAP-29 | P1: Devolver ao trabalho quem para devendo | T8 | Implementing |
 | PAP-30 | P1: Devolver ao trabalho quem para devendo | T9 | Pending |
 | PAP-31 | P1: Devolver ao trabalho quem para devendo | T9 | Pending |
-| PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Pending |
+| PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Implementing |
 | PAP-33 | P1: `roles.json` | T10 | Pending |
 | PAP-34 | P1: `roles.json` | T11 | Pending |
 | PAP-35 | P1: `roles.json` | T1, T14 | Implementing |
