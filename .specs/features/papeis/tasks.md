@@ -471,13 +471,13 @@ T22
 
 **Done when**:
 
-- [ ] PAP-60: frontmatter com `name` `worker` e `description` não vazia; as sete seções de nível 2, com esses títulos e nessa ordem, e nenhuma outra de nível 2
-- [ ] PAP-61: todo nome de tool do squad entre crases é do `worker` (`ready` mais `toolsFor("worker")`), e estão citadas `ready`, `state`, `ask`, `blocked`, `send_result`, `answer` e `history`; uma skill de teste com `send_verdict` entre crases reprova no mesmo conferidor
-- [ ] PAP-62: `Start` cita `ready`, depois `state`, nessa ordem, e o comando literal `git show <spec_commit>:<spec_ref>`
-- [ ] PAP-68: `Your work` tem os literais `git switch -c`, `ticket_ref`, `task_seq`, `branch`, `commit` e `loadout`, e nenhum comando `git merge` ou `git push` entre crases
-- [ ] PAP-63 a PAP-67 e o resto de PAP-68 estão no texto, cada regra da spec numa frase que a manda ou a proíbe; a conferência disso é a leitura do Verifier
-- [ ] Testes em `test/unit/skills.test.ts`, com o conferidor escrito para receber o papel
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] PAP-60: frontmatter com `name` `worker` e `description` não vazia; as sete seções de nível 2, com esses títulos e nessa ordem, e nenhuma outra de nível 2
+- [x] PAP-61: todo nome de tool do squad entre crases é do `worker` (`ready` mais `toolsFor("worker")`), e estão citadas `ready`, `state`, `ask`, `blocked`, `send_result`, `answer` e `history`; uma skill de teste com `send_verdict` entre crases reprova no mesmo conferidor
+- [x] PAP-62: `Start` cita `ready`, depois `state`, nessa ordem, e o comando literal `git show <spec_commit>:<spec_ref>`
+- [x] PAP-68: `Your work` tem os literais `git switch -c`, `ticket_ref`, `task_seq`, `branch`, `commit` e `loadout`, e nenhum comando `git merge` ou `git push` entre crases
+- [x] PAP-63 a PAP-67 e o resto de PAP-68 estão no texto, cada regra da spec numa frase que a manda ou a proíbe; a conferência disso é a leitura do Verifier
+- [x] Testes em `test/unit/skills.test.ts`, com o conferidor escrito para receber o papel
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
@@ -645,6 +645,8 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
 | Arquivo de `subagents/` que não pode ser lido (PAP-18; PAP-19 só fala do principal) | Não conta nada; o principal e os outros arquivos contam | T5 |
 | O que é uma opção em `squad start` (PAP-42, "uma opção que não é `--skip-permissions`") | Todo argumento que começa com `-`; nunca é lido como papel nem como nome | T12 |
 | Leitura do log pelo launcher que responde outro status, ou algo sem `events` lista ("se a leitura falha", na definição de feature aberta para o launcher) | Leitura que falhou, como em PAP-31: sem feature aberta e ninguém online | T14 |
+| Tool do squad "citada entre crases" e literal de uma seção (PAP-61, PAP-62, PAP-68 a PAP-72) | Proibida: todo identificador de um trecho entre crases, ou de uma linha de bloco cercado, que é nome de tool de outro papel (`kind="answer"` conta na skill do judge). Exigida: um trecho entre crases que é só o nome. Um comando literal vale no trecho que é o literal ou começa por ele | T16 |
+| Merge ou push pedido a um worker com resposta que autoriza (PAP-66 lista os dois, PAP-68 diz nunca) | Continua proibido: a skill do worker diz que nenhuma resposta levanta a regra de `Your work` | T16 |
 
 ---
 

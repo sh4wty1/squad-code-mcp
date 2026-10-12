@@ -418,15 +418,15 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-57 | P1: Worktree por papel | T13 | Implementing |
 | PAP-58 | P1: Worktree por papel | T13, T14 | Implementing |
 | PAP-59 | P1: Comando `squad` | T15 | Implementing |
-| PAP-60 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
-| PAP-61 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
-| PAP-62 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
-| PAP-63 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
-| PAP-64 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
-| PAP-65 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
-| PAP-66 | P1: Skills de protocolo | T16, T17, T18 | Pending |
-| PAP-67 | P1: Skills de protocolo | T16, T17, T18, T19 | Pending |
-| PAP-68 | P1: Skills de protocolo | T16 | Pending |
+| PAP-60 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
+| PAP-61 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
+| PAP-62 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
+| PAP-63 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
+| PAP-64 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
+| PAP-65 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
+| PAP-66 | P1: Skills de protocolo | T16, T17, T18 | Implementing |
+| PAP-67 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
+| PAP-68 | P1: Skills de protocolo | T16 | Implementing |
 | PAP-69 | P1: Skills de protocolo | T17 | Pending |
 | PAP-70 | P1: Skills de protocolo | T18 | Pending |
 | PAP-71 | P1: Skills de protocolo | T19 | Pending |
