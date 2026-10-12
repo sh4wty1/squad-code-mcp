@@ -1,5 +1,9 @@
 # Papéis: handoff para o Codex
 
+**A fatia foi fechada em 2026-10-12 por decisão do dev, com o resíduo da terceira volta de
+verificação registrado. Este documento fica como registro do caminho; o estado atual está no
+Handoff de `.specs/STATE.md`, e nada do que ele manda fazer abaixo está pendente.**
+
 Escrito em 2026-10-12 pela sessão do Claude Code que executou a fatia, e atualizado no mesmo
 dia depois da terceira e última volta de verificação, que deu FAIL. Use este documento se
 aquela sessão não fechou a fatia. Ele se basta: você não precisa da skill

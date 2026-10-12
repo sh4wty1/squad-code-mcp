@@ -15,12 +15,12 @@ skills de protocolo), o `roles.json` e o launcher que sobe cada sessão no lugar
 
 ## Goals
 
-- [ ] `squad start <papel> [nome]` abre uma sessão do Claude Code com nome e papel no ambiente, no worktree do papel, com o plugin carregado como canal, a lista de permitidos e a skill do papel como primeira instrução.
-- [ ] Todo turno de uma sessão registrada deixa um `turn_started` no início e um `usage` com o acumulado da sessão no fim, sem o agente gastar turno com isso.
-- [ ] Uma sessão que encerra o turno devendo um evento é devolvida ao trabalho uma vez, com o que falta dito.
-- [ ] As quatro skills de protocolo dizem a cada papel o que fazer com cada evento que recebe, e proíbem o que a Fase 0 e a fatia Question mandaram proibir.
-- [ ] A spec diz o que os testes automáticos cobrem e o que só uma sessão real mostra; o que foi exercitado com sessão real e o que ficou sem exercitar está em `real-sessions.md`.
-- [ ] A suíte passa no Windows e no Linux.
+- [x] `squad start <papel> [nome]` abre uma sessão do Claude Code com nome e papel no ambiente, no worktree do papel, com o plugin carregado como canal, a lista de permitidos e a skill do papel como primeira instrução.
+- [x] Todo turno de uma sessão registrada deixa um `turn_started` no início e um `usage` com o acumulado da sessão no fim, sem o agente gastar turno com isso.
+- [x] Uma sessão que encerra o turno devendo um evento é devolvida ao trabalho uma vez, com o que falta dito.
+- [x] As quatro skills de protocolo dizem a cada papel o que fazer com cada evento que recebe, e proíbem o que a Fase 0 e a fatia Question mandaram proibir.
+- [x] A spec diz o que os testes automáticos cobrem e o que só uma sessão real mostra; o que foi exercitado com sessão real e o que ficou sem exercitar está em `real-sessions.md`.
+- [x] A suíte passa no Windows e no Linux. Em `ac25e8d`: Windows, `tsc` 0 e 1645 pass, 5 skip, 0 fail; Linux, `tsc` 0 e 3 de 3 execuções com 1649 pass, 1 skip, 0 fail.
 
 ## Out of Scope
 
@@ -71,7 +71,8 @@ skills de protocolo), o `roles.json` e o launcher que sobe cada sessão no lugar
 | Idioma das skills | Inglês | É o das tools e das instruções do servidor MCP | y |
 | Regras das skills que vieram das sessões reais | PAP-74 e PAP-75 | Vistas em 2026-10-12 com quatro sessões reais em `haiku` (RS-10): a mother tomou por projeto o caminho do cabeçalho `Base directory for this skill`, que é o do plugin, e tentou ler e rodar git lá; worker e judge encerraram o turno depois de `ready` sem chamar `state`, porque as tools do papel entram como tools adiadas e pedem nova busca. Correção na T23. Confirmados pelo dev em 2026-10-12 | y |
 | O que a primeira volta do Verifier pediu ao texto | PAP-08 diz o que se observa em "do mesmo jeito"; PAP-31 diz que um status diferente de 200 é leitura que falhou, como PAP-13 e PAP-27 | Volta 1, 2026-10-12: dois mutantes vivos apontavam para um caso que o AC não nomeava. O código já fazia os dois; mudou o texto e entraram os testes (T25, T26). Confirmado pelo dev em 2026-10-12 | y |
-| O que a segunda volta do Verifier pediu ao texto | A definição de "feature aberta, para o launcher" diz o que é uma leitura que falha, com as mesmas três causas de PAP-31 | Volta 2, 2026-10-12: um mutante vivo em `launch.ts` apontava para `events` que não é lista, caso que a definição não nomeava. O código já tratava; mudou o texto e entrou o teste (T30). Falta a confirmação do dev | n |
+| O que a segunda volta do Verifier pediu ao texto | A definição de "feature aberta, para o launcher" diz o que é uma leitura que falha, com as mesmas três causas de PAP-31 | Volta 2, 2026-10-12: um mutante vivo em `launch.ts` apontava para `events` que não é lista, caso que a definição não nomeava. O código já tratava; mudou o texto e entrou o teste (T30). Confirmado pelo dev em 2026-10-12 | y |
+| A fatia fecha com FAIL na terceira volta do Verifier? | Fecha, com o resíduo registrado: sete requisitos com lacuna de teste e um com texto a reforçar, na tabela de rastreabilidade e nos Fix 1 a Fix 9 de `validation.md` | Decidido pelo dev em 2026-10-12, no limite de três voltas da skill. As três voltas falharam do mesmo jeito (os testes usam só a forma mais comum da entrada) e nenhuma achou defeito de produção. `validate_state.py papeis` continua saindo com 1 | y |
 | Eventos acumulados num turno marcam um `turn_started` só? | Não resolvido; a regra de "em turno" funciona com um ou com vários | Pergunta deixada pelo spike B. Fica em `real-sessions.md` como não exercitado se nenhuma sessão real mostrar | y |
 
 **Open questions:** none - all resolved or logged above. As quatro primeiras linhas foram respondidas pelo dev em 2026-10-11.
@@ -364,90 +365,90 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| PAP-01 | P1: Plugin em diretório próprio | T4 | Implementing |
-| PAP-02 | P1: Plugin em diretório próprio | T4, T22 | Implementing |
-| PAP-03 | P1: Plugin em diretório próprio | T4, T22 | Implementing |
-| PAP-04 | P1: Plugin em diretório próprio | T19 | Implementing |
-| PAP-05 | P1: Plugin em diretório próprio | T3 | Implementing |
-| PAP-06 | P1: Credencial da sessão para os hooks | T2 | Implementing |
-| PAP-07 | P1: Credencial da sessão para os hooks | T2 | Implementing |
-| PAP-08 | P1: Credencial da sessão para os hooks | T2 | Implementing |
-| PAP-09 | P1: Credencial da sessão para os hooks | T2 | Implementing |
-| PAP-10 | P1: Início de turno | T7, T22 | Implementing |
-| PAP-11 | P1: Início de turno | T7 | Implementing |
-| PAP-12 | P1: Início de turno | T6, T7, T9 | Implementing |
-| PAP-13 | P1: Início de turno | T7 | Implementing |
-| PAP-14 | P1: Uso no fim do turno | T5 | Implementing |
-| PAP-15 | P1: Uso no fim do turno | T5 | Implementing |
-| PAP-16 | P1: Uso no fim do turno | T5 | Implementing |
-| PAP-17 | P1: Uso no fim do turno | T5 | Implementing |
-| PAP-18 | P1: Uso no fim do turno | T5 | Implementing |
-| PAP-19 | P1: Uso no fim do turno | T5 | Implementing |
-| PAP-20 | Edge case | T6 | Implementing |
-| PAP-21 | Edge case | T5, T9 | Implementing |
-| PAP-22 | Edge case | T8, T9 | Implementing |
-| PAP-23 | P1: Uso no fim do turno | T9, T22 | Implementing |
-| PAP-24 | P1: Uso no fim do turno | T9 | Implementing |
-| PAP-25 | P1: Uso no fim do turno | T9 | Implementing |
-| PAP-26 | P1: Uso no fim do turno | T9 | Implementing |
-| PAP-27 | P1: Uso no fim do turno | T9 | Implementing |
-| PAP-28 | P1: Devolver ao trabalho quem para devendo | T8, T9, T22 | Implementing |
-| PAP-29 | P1: Devolver ao trabalho quem para devendo | T8 | Implementing |
-| PAP-30 | P1: Devolver ao trabalho quem para devendo | T9 | Implementing |
-| PAP-31 | P1: Devolver ao trabalho quem para devendo | T9 | Implementing |
-| PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Implementing |
-| PAP-33 | P1: `roles.json` | T10 | Implementing |
-| PAP-34 | P1: `roles.json` | T11 | Implementing |
-| PAP-35 | P1: `roles.json` | T1, T14 | Implementing |
-| PAP-36 | P1: `roles.json` | T14 | Implementing |
-| PAP-37 | P1: Lançar uma sessão | T1, T14, T22 | Implementing |
-| PAP-38 | P1: Lançar uma sessão | T14 | Implementing |
-| PAP-39 | P1: Lançar uma sessão | T12 | Implementing |
-| PAP-40 | P1: Lançar uma sessão | T12, T22 | Implementing |
-| PAP-41 | P1: Lançar uma sessão | T14 | Implementing |
-| PAP-42 | P1: Lançar uma sessão | T12, T14 | Implementing |
-| PAP-43 | P1: Lançar uma sessão | T12 | Implementing |
-| PAP-44 | P1: Lançar uma sessão | T12 | Implementing |
-| PAP-45 | P1: Lançar uma sessão | T12 | Implementing |
-| PAP-46 | P1: Lançar uma sessão | T12 | Implementing |
-| PAP-47 | P1: Lançar uma sessão | T12 | Implementing |
-| PAP-48 | Edge case | T13 | Implementing |
-| PAP-49 | Edge case | T14 | Implementing |
-| PAP-50 | P1: Lançar uma sessão | T14, T15 | Implementing |
-| PAP-51 | P1: Worktree por papel | T14 | Implementing |
-| PAP-52 | P1: Worktree por papel | T14 | Implementing |
-| PAP-53 | P1: Worktree por papel | T13 | Implementing |
-| PAP-54 | P1: Worktree por papel | T13 | Implementing |
-| PAP-55 | P1: Worktree por papel | T13, T14 | Implementing |
-| PAP-56 | P1: Worktree por papel | T13 | Implementing |
-| PAP-57 | P1: Worktree por papel | T13 | Implementing |
-| PAP-58 | P1: Worktree por papel | T13, T14 | Implementing |
-| PAP-59 | P1: Comando `squad` | T15 | Implementing |
-| PAP-60 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
-| PAP-61 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
-| PAP-62 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
-| PAP-63 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
-| PAP-64 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
-| PAP-65 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
-| PAP-66 | P1: Skills de protocolo | T16, T17, T18 | Implementing |
-| PAP-67 | P1: Skills de protocolo | T16, T17, T18, T19 | Implementing |
-| PAP-68 | P1: Skills de protocolo | T16 | Implementing |
-| PAP-69 | P1: Skills de protocolo | T17 | Implementing |
-| PAP-70 | P1: Skills de protocolo | T18 | Implementing |
-| PAP-71 | P1: Skills de protocolo | T19 | Implementing |
-| PAP-72 | P1: Skills de protocolo | T19 | Implementing |
-| PAP-73 | P2: Documentação | T20, T21 | Implementing |
-| PAP-74 | P1: Skills de protocolo | T23 | Implementing |
-| PAP-75 | P1: Skills de protocolo | T23 | Implementing |
+| PAP-01 | P1: Plugin em diretório próprio | T4 | Verified |
+| PAP-02 | P1: Plugin em diretório próprio | T4, T22 | Verified |
+| PAP-03 | P1: Plugin em diretório próprio | T4, T22 | Verified |
+| PAP-04 | P1: Plugin em diretório próprio | T19 | Verified |
+| PAP-05 | P1: Plugin em diretório próprio | T3 | Verified |
+| PAP-06 | P1: Credencial da sessão para os hooks | T2 | Verified |
+| PAP-07 | P1: Credencial da sessão para os hooks | T2 | Needs Fix (Fix 2 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-08 | P1: Credencial da sessão para os hooks | T2 | Verified |
+| PAP-09 | P1: Credencial da sessão para os hooks | T2 | Verified |
+| PAP-10 | P1: Início de turno | T7, T22 | Verified |
+| PAP-11 | P1: Início de turno | T7 | Verified |
+| PAP-12 | P1: Início de turno | T6, T7, T9 | Verified |
+| PAP-13 | P1: Início de turno | T7 | Verified |
+| PAP-14 | P1: Uso no fim do turno | T5 | Verified |
+| PAP-15 | P1: Uso no fim do turno | T5 | Verified |
+| PAP-16 | P1: Uso no fim do turno | T5 | Verified |
+| PAP-17 | P1: Uso no fim do turno | T5 | Verified |
+| PAP-18 | P1: Uso no fim do turno | T5 | Needs Fix (Fix 4 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-19 | P1: Uso no fim do turno | T5 | Verified |
+| PAP-20 | Edge case | T6 | Verified |
+| PAP-21 | Edge case | T5, T9 | Needs Fix (Fix 7 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-22 | Edge case | T8, T9 | Verified |
+| PAP-23 | P1: Uso no fim do turno | T9, T22 | Verified |
+| PAP-24 | P1: Uso no fim do turno | T9 | Verified |
+| PAP-25 | P1: Uso no fim do turno | T9 | Verified |
+| PAP-26 | P1: Uso no fim do turno | T9 | Verified |
+| PAP-27 | P1: Uso no fim do turno | T9 | Verified |
+| PAP-28 | P1: Devolver ao trabalho quem para devendo | T8, T9, T22 | Verified |
+| PAP-29 | P1: Devolver ao trabalho quem para devendo | T8 | Verified |
+| PAP-30 | P1: Devolver ao trabalho quem para devendo | T9 | Verified |
+| PAP-31 | P1: Devolver ao trabalho quem para devendo | T9 | Needs Fix (Fix 1 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Verified |
+| PAP-33 | P1: `roles.json` | T10 | Verified |
+| PAP-34 | P1: `roles.json` | T11 | Verified |
+| PAP-35 | P1: `roles.json` | T1, T14 | Verified |
+| PAP-36 | P1: `roles.json` | T14 | Verified |
+| PAP-37 | P1: Lançar uma sessão | T1, T14, T22 | Verified, com texto e teste a reforçar (Fix 8 de `validation.md`) |
+| PAP-38 | P1: Lançar uma sessão | T14 | Verified |
+| PAP-39 | P1: Lançar uma sessão | T12 | Needs Fix (Fix 5 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-40 | P1: Lançar uma sessão | T12, T22 | Verified |
+| PAP-41 | P1: Lançar uma sessão | T14 | Verified |
+| PAP-42 | P1: Lançar uma sessão | T12, T14 | Verified |
+| PAP-43 | P1: Lançar uma sessão | T12 | Verified |
+| PAP-44 | P1: Lançar uma sessão | T12 | Verified |
+| PAP-45 | P1: Lançar uma sessão | T12 | Verified |
+| PAP-46 | P1: Lançar uma sessão | T12 | Verified |
+| PAP-47 | P1: Lançar uma sessão | T12 | Verified |
+| PAP-48 | Edge case | T13 | Verified |
+| PAP-49 | Edge case | T14 | Verified |
+| PAP-50 | P1: Lançar uma sessão | T14, T15 | Verified |
+| PAP-51 | P1: Worktree por papel | T14 | Verified |
+| PAP-52 | P1: Worktree por papel | T14 | Verified |
+| PAP-53 | P1: Worktree por papel | T13 | Needs Fix (Fix 6 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-54 | P1: Worktree por papel | T13 | Verified |
+| PAP-55 | P1: Worktree por papel | T13, T14 | Verified |
+| PAP-56 | P1: Worktree por papel | T13 | Needs Fix (Fix 3 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-57 | P1: Worktree por papel | T13 | Verified |
+| PAP-58 | P1: Worktree por papel | T13, T14 | Verified |
+| PAP-59 | P1: Comando `squad` | T15 | Verified |
+| PAP-60 | P1: Skills de protocolo | T16, T17, T18, T19 | Verified |
+| PAP-61 | P1: Skills de protocolo | T16, T17, T18, T19 | Verified |
+| PAP-62 | P1: Skills de protocolo | T16, T17, T18, T19 | Verified |
+| PAP-63 | P1: Skills de protocolo | T16, T17, T18, T19 | Verified |
+| PAP-64 | P1: Skills de protocolo | T16, T17, T18, T19 | Verified |
+| PAP-65 | P1: Skills de protocolo | T16, T17, T18, T19 | Verified |
+| PAP-66 | P1: Skills de protocolo | T16, T17, T18 | Verified |
+| PAP-67 | P1: Skills de protocolo | T16, T17, T18, T19 | Verified |
+| PAP-68 | P1: Skills de protocolo | T16 | Verified |
+| PAP-69 | P1: Skills de protocolo | T17 | Verified |
+| PAP-70 | P1: Skills de protocolo | T18 | Verified |
+| PAP-71 | P1: Skills de protocolo | T19 | Verified |
+| PAP-72 | P1: Skills de protocolo | T19 | Verified |
+| PAP-73 | P2: Documentação | T20, T21 | Verified |
+| PAP-74 | P1: Skills de protocolo | T23 | Verified |
+| PAP-75 | P1: Skills de protocolo | T23 | Verified |
 
-**Coverage:** 75 total, 75 mapped to tasks, 0 unmapped. PAP-74 e PAP-75 vieram das sessões reais (T22) e foram implementados na T23.
+**Coverage:** 75 total, 75 mapped to tasks, 0 unmapped. PAP-74 e PAP-75 vieram das sessões reais (T22) e foram implementados na T23. Depois da terceira volta do Verifier (`validation.md`, FAIL, sem defeito de produção): 68 `Verified` e 7 com lacuna de teste, em que o código faz o que o requisito diz e nenhum teste distingue um mutante do trecho. O dev aceitou a fatia com essas lacunas em 2026-10-12.
 
 ---
 
 ## Success Criteria
 
-- [ ] Num repositório temporário, o launcher monta para cada papel o comando, os argumentos, o ambiente e o worktree desta spec, com git real.
-- [ ] Os dois hooks, rodados como processos contra um broker real, gravam `turn_started` e `usage` e devolvem ao trabalho quem a regra de status dá como `stalled`, e só ele.
-- [ ] As quatro skills passam no teste de conteúdo e foram lidas contra PAP-62 a PAP-72 por quem não as escreveu.
-- [ ] `real-sessions.md` diz, para RS-01 a RS-14, o que foi exercitado com sessão real, com a evidência, e o que ficou sem exercitar.
-- [ ] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Antes da fatia, `main` em `f162184`: Linux, contêiner `oven/bun:1.4.2` sobre clone limpo, `tsc` 0 e 3 de 3 execuções com 1306 pass, 1 skip, 0 fail, 63 arquivos.
+- [x] Num repositório temporário, o launcher monta para cada papel o comando, os argumentos, o ambiente e o worktree desta spec, com git real.
+- [x] Os dois hooks, rodados como processos contra um broker real, gravam `turn_started` e `usage` e devolvem ao trabalho quem a regra de status dá como `stalled`, e só ele.
+- [x] As quatro skills passam no teste de conteúdo e foram lidas contra PAP-62 a PAP-72 por quem não as escreveu.
+- [x] `real-sessions.md` diz, para RS-01 a RS-14, o que foi exercitado com sessão real, com a evidência, e o que ficou sem exercitar.
+- [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Antes da fatia, `main` em `f162184`: Linux, contêiner `oven/bun:1.4.2` sobre clone limpo, `tsc` 0 e 3 de 3 execuções com 1306 pass, 1 skip, 0 fail, 63 arquivos. Depois da fatia, em `ac25e8d`: Windows, `tsc` 0 e 1645 pass, 5 skip, 0 fail, 75 arquivos (antes, 1303 pass e 4 skip); Linux, no mesmo contêiner, `tsc` 0 e 3 de 3 execuções com 1649 pass, 1 skip, 0 fail, 75 arquivos.

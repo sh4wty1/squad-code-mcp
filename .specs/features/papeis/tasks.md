@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/papeis/design.md`
-**Status**: In Progress
+**Status**: Done. T1 a T31 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`)
 
 Regras do repositório que valem para toda tarefa:
 
