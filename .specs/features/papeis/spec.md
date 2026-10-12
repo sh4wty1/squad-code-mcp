@@ -69,6 +69,7 @@ skills de protocolo), o `roles.json` e o launcher que sobe cada sessão no lugar
 | Como o launcher passa as skills base | Em `--append-system-prompt`, com nome, papel e as listas do `roles.json` | Determinístico e testável; a skill de papel manda usar só as do workflow da feature aberta | y |
 | Comando `squad` | `broker/cli.ts`, com `bin.squad` no `package.json` do broker: `start`, `tui`, `status`, `kill-broker` | Default 6. O CLI e a TUI já vivem em `broker/` (AD-001, AD-010); o plugin fica em `plugin/` | y |
 | Idioma das skills | Inglês | É o das tools e das instruções do servidor MCP | y |
+| Regras das skills que vieram das sessões reais | PAP-74 e PAP-75 | Vistas em 2026-10-12 com quatro sessões reais em `haiku` (RS-10): a mother tomou por projeto o caminho do cabeçalho `Base directory for this skill`, que é o do plugin, e tentou ler e rodar git lá; worker e judge encerraram o turno depois de `ready` sem chamar `state`, porque as tools do papel entram como tools adiadas e pedem nova busca. Correção na T23 | y |
 | Eventos acumulados num turno marcam um `turn_started` só? | Não resolvido; a regra de "em turno" funciona com um ou com vários | Pergunta deixada pelo spike B. Fica em `real-sessions.md` como não exercitado se nenhuma sessão real mostrar | y |
 
 **Open questions:** none - all resolved or logged above. As quatro primeiras linhas foram respondidas pelo dev em 2026-10-11.
@@ -328,6 +329,8 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 11. **PAP-70** A seção `Your work` do `leader` SHALL mandar: no kickoff, trocar para o branch da feature com `git switch` e enviar o `plan` antes do primeiro `task`; enviar `send_task` com `ticket_ref`, `loadout` e `criteria`, um ticket por worker e só depois de aprovadas as dependências; num `approve`, integrar o branch do ticket no branch da feature com `git merge`; num `rework`, enviar novo `task` ao mesmo worker; em `rework_limit`, fazer uma pergunta bloqueante à mother e, com a resposta, marcar o ticket `dropped` no `plan`; responder as perguntas dos workers ou escalar; e, com todos os tickets aprovados, enviar um único `send_result` à mother, sem reportar ticket a ticket.
 12. **PAP-71** A seção `Your work` da `mother` SHALL mandar: fazer a descoberta com o dev no terminal, fora do broker; criar o branch da feature a partir do branch base, commitar a spec nele e voltar ao branch base antes de `open_feature`; enviar o kickoff ao leader com `send_task`; responder as perguntas que souber, mesclar as iguais com `merge_question` quando têm o mesmo `blocking`, e escalar as outras ao dev; e mandar ao leader, com `send_task`, o trabalho novo que uma resposta do dev pedir.
 13. **PAP-72** A skill da `mother` SHALL ter, depois de `Irreversible actions`, a seção `Delivery (until the gate exists)`, e as duas SHALL trazer a linha `<!-- Gate slice: rewrite this section to use the gate -->`; a primeira SHALL mandar escalar ao dev a pergunta bloqueante de uma ação irreversível e não respondê-la por conta própria; a segunda SHALL mandar, ao receber o `result` do leader, fazer ao dev uma pergunta bloqueante com o commit do branch da feature e a ação de entrega, executar exatamente essa ação só depois de uma resposta que a autoriza, e então `close_feature` com `delivered`; e a skill SHALL não citar tool de gate.
+14. **PAP-74** Cada skill SHALL dizer, antes da primeira seção de nível 2, que o projeto é o diretório de trabalho da sessão e que o diretório de onde a skill foi carregada é do plugin, e SHALL proibir ler, escrever ou rodar qualquer coisa nele.
+15. **PAP-75** A seção `Start` de cada skill SHALL mandar chamar `state` no mesmo turno de `ready`, procurar as tools do squad pelo nome quando `state` ainda não está entre as tools da sessão, e não encerrar o turno entre `ready` e `state`.
 
 **Independent Test**: um teste lê cada `SKILL.md`, confere o frontmatter, as seções na ordem, as tools citadas contra `toolsFor(papel)` e os comandos literais.
 
@@ -432,8 +435,10 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-71 | P1: Skills de protocolo | T19 | Implementing |
 | PAP-72 | P1: Skills de protocolo | T19 | Implementing |
 | PAP-73 | P2: Documentação | T20, T21 | Implementing |
+| PAP-74 | P1: Skills de protocolo | T23 | Implementing |
+| PAP-75 | P1: Skills de protocolo | T23 | Implementing |
 
-**Coverage:** 73 total, 73 mapped to tasks, 0 unmapped.
+**Coverage:** 75 total, 75 mapped to tasks, 0 unmapped. PAP-74 e PAP-75 vieram das sessões reais (T22) e foram implementados na T23.
 
 ---
 

@@ -43,10 +43,11 @@ const REQUIRED: Record<string, string[]> = {
 
 // What one section has to have in backticks: `cited` in any place, `ordered` with the first
 // citation of each one after that of the one before, and `never` a command it does not have.
-// `lines` are whole lines of the section.
+// `lines` are whole lines of the section, and `says` are sentences of it.
 interface Rule {
   id: string;
   section: string;
+  says?: string[];
   cited?: string[];
   ordered?: string[];
   never?: string[];
@@ -55,6 +56,21 @@ interface Rule {
 
 const OF_EVERY_ROLE: Rule[] = [
   { id: "PAP-62", section: "Start", ordered: ["ready", "state"], cited: ["git show <spec_commit>:<spec_ref>"] },
+  {
+    id: "PAP-75",
+    section: "Start",
+    says: [
+      "Call `state` in the same turn, right after `ready`",
+      "if `state` is not among your tools yet, look the squad tools up by name",
+      "Do not end the turn between `ready` and `state`.",
+    ],
+  },
+];
+
+// PAP-74: what a skill says before its first section about where the project is
+const PROJECT = [
+  "Your project is the working directory of this session.",
+  "The directory this skill was loaded from belongs to the squad plugin, not to your project: never read, write or run anything there.",
 ];
 
 const OF_ROLE: Record<string, Rule[]> = {
@@ -156,6 +172,11 @@ function problems(role: string, text: string): string[] {
   const titles = parts.map((part) => part.title).join(" | ");
   if (titles !== (role === "mother" ? OF_THE_MOTHER : SECTIONS).join(" | ")) found.push(`PAP-60: the sections are ${titles}`);
 
+  const intro = text.split(/^## /m)[0] ?? "";
+  for (const sentence of PROJECT) {
+    if (!intro.includes(sentence)) found.push(`PAP-74: the skill does not say before its sections: ${sentence}`);
+  }
+
   const mine = squadTools(role);
   const all = code(text);
   for (const name of new Set(all.flatMap((span) => span.match(/[A-Za-z_]+/g) ?? []))) {
@@ -169,9 +190,12 @@ function problems(role: string, text: string): string[] {
     if (/gate/i.test(span)) found.push(`PAP-72: ${span} is cited, and has gate in it`);
   }
 
-  for (const { id, section, cited = [], ordered = [], never = [], lines = [] } of [...OF_EVERY_ROLE, ...(OF_ROLE[role] ?? [])]) {
+  for (const { id, section, says = [], cited = [], ordered = [], never = [], lines = [] } of [...OF_EVERY_ROLE, ...(OF_ROLE[role] ?? [])]) {
     const body = parts.find((part) => part.title === section)?.body ?? "";
     const spans = code(body);
+    for (const sentence of says) {
+      if (!body.includes(sentence)) found.push(`${id}: ${section} does not say: ${sentence}`);
+    }
     for (const line of lines) {
       if (!body.split("\n").includes(line)) found.push(`${id}: ${section} does not have the line ${line}`);
     }
@@ -213,6 +237,14 @@ for (const role of ["worker", "judge", "leader", "mother"]) {
 
   test(`PAP-62: Start of the ${role} skill cites ready, then state, and the command that reads the spec`, () => {
     expect(of("PAP-62")).toEqual([]);
+  });
+
+  test(`PAP-74: the ${role} skill says before its sections that the project is the working directory and that nothing is done in the directory of the plugin`, () => {
+    expect(of("PAP-74")).toEqual([]);
+  });
+
+  test(`PAP-75: Start of the ${role} skill orders state in the turn of ready, the lookup of the squad tools that are not listed yet, and no end of turn between the two`, () => {
+    expect(of("PAP-75")).toEqual([]);
   });
 }
 
@@ -315,7 +347,13 @@ test("PAP-61: a skill of the worker that leaves one of its seven tools out of th
 
 test("PAP-62: Start that cites state before ready fails", () => {
   const swapped = changed(changed(changed(read("worker"), "`ready`", "`@`"), "`state`", "`ready`"), "`@`", "`state`");
-  expect(problems("worker", swapped)).toEqual(["PAP-62: Start does not cite ready, then state in this order"]);
+  // the swap also undoes the three orders of PAP-75, which name the two tools
+  expect(problems("worker", swapped)).toEqual([
+    "PAP-62: Start does not cite ready, then state in this order",
+    "PAP-75: Start does not say: Call `state` in the same turn, right after `ready`",
+    "PAP-75: Start does not say: if `state` is not among your tools yet, look the squad tools up by name",
+    "PAP-75: Start does not say: Do not end the turn between `ready` and `state`.",
+  ]);
 });
 
 test("PAP-62: Start without the command that reads the spec fails, also when another section has it", () => {
@@ -477,4 +515,25 @@ test("PAP-71: Your work of the mother that cites open_feature before the branch,
     "`git switch <base_branch>`"
   );
   expect(problems("mother", swapped)).toEqual(order);
+});
+
+test("PAP-74: a skill without one of the two sentences about the project fails, also when a section has it", () => {
+  const worker = read("worker");
+  for (const sentence of PROJECT) {
+    expect(problems("worker", changed(worker, sentence, ""))).toEqual([`PAP-74: the skill does not say before its sections: ${sentence}`]);
+    const moved = changed(changed(worker, sentence, ""), "## Start\n", `## Start\n\n${sentence}\n`);
+    expect(problems("worker", moved)).toEqual([`PAP-74: the skill does not say before its sections: ${sentence}`]);
+  }
+});
+
+test("PAP-75: Start without one of its three orders about state fails, also when another section has it", () => {
+  const judge = read("judge");
+  for (const sentence of [
+    "Call `state` in the same turn, right after `ready`",
+    "if `state` is not among your tools yet, look the squad tools up by name",
+    "Do not end the turn between `ready` and `state`.",
+  ]) {
+    const moved = changed(changed(judge, sentence, ""), "## Asking\n", `## Asking\n\n${sentence}\n`);
+    expect(problems("judge", moved)).toEqual([`PAP-75: Start does not say: ${sentence}`]);
+  }
 });

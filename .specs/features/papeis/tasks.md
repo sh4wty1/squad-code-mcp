@@ -101,10 +101,11 @@ T20 → T21
 
 ### Phase 6: Sessões reais
 
-O que só uma sessão real mostra. Fica com o orquestrador, não com um worker.
+O que só uma sessão real mostra. Fica com o orquestrador, não com um worker. A T23 é a correção de dois defeitos que as sessões da T22 mostraram; a T22 fecha depois dela.
 
 ```
 T22
+T23
 ```
 
 ---
@@ -611,6 +612,27 @@ T22
 
 ---
 
+### T23: As skills dizem onde é o projeto e chamam `state` no turno de `ready`
+
+**What**: Nas quatro skills, um parágrafo antes de `Start` diz que o projeto é o diretório de trabalho da sessão e proíbe mexer no diretório do plugin; os passos 1 e 2 de `Start` mandam chamar `state` no mesmo turno de `ready` e procurar as tools do squad pelo nome quando ainda não estão listadas. O conferidor ganha as duas regras.
+**Where**: `plugin/skills/` (os quatro `SKILL.md`)
+**Depends on**: None (a fase anterior inteira; nasce das sessões da T22)
+**Reuses**: O conferidor de `test/unit/skills.test.ts`
+**Requirement**: PAP-74, PAP-75
+
+**Done when**:
+
+- [x] PAP-74: cada skill tem, antes da primeira seção, as duas frases sobre o projeto; uma skill sem uma delas reprova, também quando a frase está dentro de uma seção
+- [x] PAP-75: `Start` de cada skill tem as três ordens (`state` no turno de `ready`, a busca das tools do squad pelo nome, nenhum fim de turno entre os dois); uma skill sem uma delas reprova, também quando outra seção a tem
+- [x] O teste de PAP-62 que troca `ready` por `state` passa a listar também as três faltas de PAP-75 que a troca causa
+- [x] Testes em `test/unit/skills.test.ts`
+- [x] Gate build passa
+
+**Tests**: unit
+**Gate**: build
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -621,7 +643,7 @@ Phase 2:  T5 → T6 → T7 → T8 → T9
 Phase 3:  T10 → T11 → T12 → T13 → T14 → T15
 Phase 4:  T16 → T17 → T18 → T19
 Phase 5:  T20 → T21
-Phase 6:  T22
+Phase 6:  T22, T23 (sem ordem entre as duas no diagrama: a T23 nasce da T22 e é commitada antes de ela fechar)
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
@@ -678,6 +700,7 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
 | T20: Passo a passo no README da raiz | 1 arquivo: `README.md` | ✅ Granular |
 | T21: Documentação do broker | 1 arquivo: `CLAUDE.md` | ✅ Granular |
 | T22: Sessões reais e o registro delas | 1 arquivo: `real-sessions.md` | ✅ Granular |
+| T23: As skills dizem onde é o projeto e chamam `state` no turno de `ready` | 2 regras, as mesmas nos quatro `SKILL.md` | ⚠️ Coeso |
 
 Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.json`, T12 no `export` de `namesOf` em `peers.ts`, T15 em `broker/package.json` e T16 no conferidor de `skills.test.ts`. É a ligação do que a própria tarefa cria. T4 e T12 ficam inteiras: os três JSON só valem juntos como um plugin, e as cinco funções de T12 são uma linha cada sobre a mesma entrada.
 
@@ -708,7 +731,8 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T19 | T18 | T18 → T19 | ✅ Match |
 | T20 | None (a fase anterior inteira) | início da fase 5 | ✅ Match |
 | T21 | T20 | T20 → T21 | ✅ Match |
-| T22 | None (a fase anterior inteira) | fase 6, sozinha | ✅ Match |
+| T22 | None (a fase anterior inteira) | fase 6, sem seta | ✅ Match |
+| T23 | None (a fase anterior inteira) | fase 6, sem seta | ✅ Match |
 
 ---
 
@@ -738,3 +762,4 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T20: Passo a passo no README da raiz | Documentação | none | none | ✅ OK |
 | T21: Documentação do broker | Documentação | none | none | ✅ OK |
 | T22: Sessões reais e o registro delas | Sessões reais | none | none | ✅ OK |
+| T23: As skills dizem onde é o projeto e chamam `state` no turno de `ready` | Skills | unit | unit | ✅ OK |
