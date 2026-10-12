@@ -565,6 +565,27 @@ test("PAP-57: a worktree git cannot add fails with the message of git in the lin
   expect(existsSync(join(worktrees, "leader"))).toBe(false);
 }, SLOW);
 
+test("PAP-41: a message of git with more than one line is one line on the standard error, with each line of it", async () => {
+  const { main, worktrees } = repo();
+  // git has the worktree of worker-1 registered, and its directory is gone
+  const dir = join(worktrees, "worker-1");
+  git(main, "worktree", "add", "-q", "--detach", dir);
+  rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  // what git says of adding it again, as git says it
+  const raw = Bun.spawnSync(["git", "worktree", "add", "--quiet", "--detach", dir, "HEAD"], { cwd: main }).stderr.toString().trim();
+  expect(raw).toStartWith("fatal: ");
+  expect(raw).toContain("\n");
+
+  const { code, spawned, lines } = await run(["worker"], main);
+  expect(lines).toHaveLength(1);
+  expect(lines[0]).toStartWith("squad: fatal: ");
+  expect(lines[0]).not.toMatch(/[\r\n]/);
+  for (const line of raw.split(/\r?\n/)) expect(lines[0]).toContain(line.trim());
+  expect(spawned).toEqual([]);
+  expect(code).toBe(1);
+  expect(existsSync(dir)).toBe(false);
+}, SLOW);
+
 test("PAP-50: a session command that cannot be run fails with its name in the line", async () => {
   const { main } = repo();
   const spawn: Deps["spawn"] = async () => Promise.reject(new Error("ENOENT: no such file or directory"));

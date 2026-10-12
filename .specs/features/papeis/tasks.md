@@ -761,11 +761,11 @@ T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Com uma falha do git cuja mensagem tem mais de uma linha (o teste afirma que a mensagem crua do git tem quebra de linha), a causa devolvida não tem quebra de linha e traz um trecho de cada linha da mensagem
-- [ ] Pelo `launch`, o mesmo cenário escreve uma única linha `squad: ` em `stderr` (em `test/unit/launch.test.ts` se o cenário couber lá; senão fica só o caso deste arquivo e o relatório diz por quê)
-- [ ] Morre, conferido e desfeito, o mutante do Verifier em `launch.ts`: sem a junção das linhas da mensagem
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Com uma falha do git cuja mensagem tem mais de uma linha (o teste afirma que a mensagem crua do git tem quebra de linha), a causa devolvida não tem quebra de linha e traz um trecho de cada linha da mensagem
+- [x] Pelo `launch`, o mesmo cenário escreve uma única linha `squad: ` em `stderr` (em `test/unit/launch.test.ts` se o cenário couber lá; senão fica só o caso deste arquivo e o relatório diz por quê)
+- [x] Morre, conferido e desfeito, o mutante do Verifier em `launch.ts`: sem a junção das linhas da mensagem
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

@@ -174,6 +174,30 @@ test("PAP-57: a git worktree add that fails gives the message of git in one line
   expect(git(main, "worktree", "list", "--porcelain").match(/^worktree /gm)).toHaveLength(1);
 }, SLOW);
 
+test("PAP-57: a message of git with more than one line comes in one line, with each line of it", () => {
+  const { main, worktrees } = repo();
+  writeFileSync(join(main, ".env"), "KEY=1\n");
+  // git has the worktree of worker-1 registered, and its directory is gone
+  const dir = join(worktrees, "worker-1");
+  git(main, "worktree", "add", "-q", "--detach", dir);
+  rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  // what git says of adding it again, as git says it
+  const raw = Bun.spawnSync(["git", "worktree", "add", "--quiet", "--detach", dir, "HEAD"], { cwd: main }).stderr.toString().trim();
+  expect(raw).toStartWith("fatal: ");
+  expect(raw).toContain("\n");
+
+  let message = "";
+  try {
+    worktree(main, "worker-1", "worker", null, {});
+  } catch (e) {
+    message = (e as Error).message;
+  }
+  expect(message).toStartWith("fatal: ");
+  expect(message).not.toMatch(/[\r\n]/);
+  for (const line of raw.split(/\r?\n/)) expect(message).toContain(line.trim());
+  expect(existsSync(dir)).toBe(false);
+}, SLOW);
+
 // ---- worktree: the .env* files ----
 
 test("PAP-56: the regular files of the root that start with .env and git does not track are copied with their content", () => {
