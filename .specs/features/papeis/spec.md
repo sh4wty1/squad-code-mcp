@@ -71,6 +71,7 @@ skills de protocolo), o `roles.json` e o launcher que sobe cada sessão no lugar
 | Idioma das skills | Inglês | É o das tools e das instruções do servidor MCP | y |
 | Regras das skills que vieram das sessões reais | PAP-74 e PAP-75 | Vistas em 2026-10-12 com quatro sessões reais em `haiku` (RS-10): a mother tomou por projeto o caminho do cabeçalho `Base directory for this skill`, que é o do plugin, e tentou ler e rodar git lá; worker e judge encerraram o turno depois de `ready` sem chamar `state`, porque as tools do papel entram como tools adiadas e pedem nova busca. Correção na T23. Confirmados pelo dev em 2026-10-12 | y |
 | O que a primeira volta do Verifier pediu ao texto | PAP-08 diz o que se observa em "do mesmo jeito"; PAP-31 diz que um status diferente de 200 é leitura que falhou, como PAP-13 e PAP-27 | Volta 1, 2026-10-12: dois mutantes vivos apontavam para um caso que o AC não nomeava. O código já fazia os dois; mudou o texto e entraram os testes (T25, T26). Confirmado pelo dev em 2026-10-12 | y |
+| O que a segunda volta do Verifier pediu ao texto | A definição de "feature aberta, para o launcher" diz o que é uma leitura que falha, com as mesmas três causas de PAP-31 | Volta 2, 2026-10-12: um mutante vivo em `launch.ts` apontava para `events` que não é lista, caso que a definição não nomeava. O código já tratava; mudou o texto e entrou o teste (T30). Falta a confirmação do dev | n |
 | Eventos acumulados num turno marcam um `turn_started` só? | Não resolvido; a regra de "em turno" funciona com um ou com vários | Pergunta deixada pelo spike B. Fica em `real-sessions.md` como não exercitado se nenhuma sessão real mostrar | y |
 
 **Open questions:** none - all resolved or logged above. As quatro primeiras linhas foram respondidas pelo dev em 2026-10-11.
@@ -96,7 +97,7 @@ Valem as das specs anteriores. Mais:
 - **Arquivo de credencial** de um nome: o caminho de `SQUAD_DB` (default `<home>/.squad-code-mcp.db`) seguido de `.<nome>.id`.
 - **Checkout principal**: a primeira árvore de trabalho de `git worktree list --porcelain`, de onde quer que o comando rode.
 - **Diretório de worktrees**: `SQUAD_WORKTREES`, ou `<pai do checkout principal>/<nome do diretório do checkout principal>.squad`.
-- **Feature aberta, para o launcher**: a feature sem `feature_closed` em `GET /events?after=0`, lido com prazo de 2000 ms. Se a leitura falha não há feature aberta e ninguém está online.
+- **Feature aberta, para o launcher**: a feature sem `feature_closed` em `GET /events?after=0`, lido com prazo de 2000 ms. Se a leitura falha não há feature aberta e ninguém está online. A leitura falha quando não responde no prazo, responde com status diferente de 200 ou responde algo que não é um objeto com `events` lista.
 - **Tools do squad de um papel**: `ready` mais as de `toolsFor(papel)` de `broker/tools.ts`, cada uma com o prefixo `mcp__plugin_squad_squad__`.
 - **Linha contada** de um transcript: linha que é um objeto JSON com `type` `assistant`, `message.usage` objeto e `message.model` texto não vazio diferente de `<synthetic>`.
 - **Transcripts da sessão**: o arquivo de `transcript_path` e todo `*.jsonl` de `<transcript_path sem a extensão .jsonl>/subagents/`.

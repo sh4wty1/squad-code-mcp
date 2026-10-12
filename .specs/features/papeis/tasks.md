@@ -116,6 +116,14 @@ O que o Verifier pediu em 2026-10-12: três testes que não distinguiam o códig
 T24 → T25 → T26
 ```
 
+### Phase 8: Correções da verificação, volta 2
+
+O que o Verifier pediu na segunda volta: quatro testes que não matavam um mutante novo, todos do launcher e do comando. Nenhum defeito de produção. A T31 varre os dois arquivos antes da terceira volta, que é a última.
+
+```
+T27 → T28 → T29 → T30 → T31
+```
+
 ---
 
 ## Task Breakdown
@@ -652,7 +660,7 @@ T24 → T25 → T26
 **Done when**:
 
 - [x] `start mother`, de um subdiretório de um repositório temporário: a saída de erro do CLI traz o que o comando escreveu (`unknown option`) e o CLI sai com 129
-- [x] `start worker`, do mesmo jeito: o worktree nasce no repositório temporário, sob o `SQUAD_WORKTREES` do teste, e `git worktree list` do repositório do squad continua com uma árvore só
+- [x] `start worker`, do mesmo jeito: o worktree nasce no repositório temporário, sob o `SQUAD_WORKTREES` do teste, e `git worktree list` do repositório do squad continua igual ao de antes do teste
 - [x] Os três mutantes do Verifier morrem, conferidos um a um e desfeitos: `stdio` `ignore` em `cli.ts`, o código 0 fixo, e o `cwd` trocado pelo diretório do broker
 - [x] Nenhum código de produção muda
 - [x] Gate full passa
@@ -702,10 +710,114 @@ T24 → T25 → T26
 
 ---
 
+### T27: Entrada e saída herdadas em `squad start`
+
+**What**: Um teste que roda `bun cli.ts start <papel>` com um comando de sessão que lê a entrada padrão e escreve na saída padrão.
+**Where**: `broker/test/integration/cli.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: Os testes de PAP-37 da T24 e o repositório temporário deles
+**Requirement**: PAP-37
+
+**Done when**:
+
+- [ ] Com um comando de sessão que existe, ignora os argumentos, copia a entrada padrão para a saída padrão e sai com um código que não é 0 nem 1, um texto dado à entrada do CLI sai na saída do CLI, e o CLI sai com esse código
+- [ ] O comando de sessão do teste roda no Windows e no Linux (a suíte roda nos dois)
+- [ ] Morrem, conferidos um a um e desfeitos, os dois mutantes do Verifier em `cli.ts`: `stdio` `["inherit", "ignore", "inherit"]` e `["ignore", "inherit", "inherit"]`; os três da volta 1 continuam mortos
+- [ ] Nenhum código de produção muda
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T28: A feature aberta depois de uma fechada
+
+**What**: Casos de `launch` com um log em que a feature 1 abriu e fechou e a feature 2 está aberta num branch que existe.
+**Where**: `broker/test/unit/launch.test.ts`
+**Depends on**: T27
+**Reuses**: O log e o repositório temporário dos casos de feature aberta do mesmo arquivo
+**Requirement**: PAP-53, PAP-54
+
+**Done when**:
+
+- [ ] Com a feature 1 fechada e a feature 2 aberta, o worktree do `worker` nasce destacado na ponta do branch da feature 2, e o do `leader` nasce nesse branch; os dois branches têm commits diferentes entre si e do `HEAD` do checkout principal
+- [ ] Morre, conferido e desfeito, o mutante do Verifier em `launch.ts`: a busca da feature aberta só na primeira feature do log
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T29: Mensagem do git com mais de uma linha
+
+**What**: Um caso em que `git worktree add` falha com uma mensagem de várias linhas.
+**Where**: `broker/test/unit/launch-worktree.test.ts`
+**Depends on**: T28
+**Reuses**: O caso de PAP-57 do mesmo arquivo; a sonda do Verifier (um worktree registrado cujo diretório foi apagado dá uma mensagem de duas linhas)
+**Requirement**: PAP-41, PAP-57
+
+**Done when**:
+
+- [ ] Com uma falha do git cuja mensagem tem mais de uma linha (o teste afirma que a mensagem crua do git tem quebra de linha), a causa devolvida não tem quebra de linha e traz um trecho de cada linha da mensagem
+- [ ] Pelo `launch`, o mesmo cenário escreve uma única linha `squad: ` em `stderr` (em `test/unit/launch.test.ts` se o cenário couber lá; senão fica só o caso deste arquivo e o relatório diz por quê)
+- [ ] Morre, conferido e desfeito, o mutante do Verifier em `launch.ts`: sem a junção das linhas da mensagem
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T30: `events` que não é lista na leitura do launcher
+
+**What**: Casos de `launch` em que o broker responde 200 com `events` que não é lista.
+**Where**: `broker/test/unit/launch.test.ts`
+**Depends on**: T29
+**Reuses**: Os casos de leitura que falha do mesmo arquivo (PAP-38)
+**Requirement**: PAP-38
+
+**Done when**:
+
+- [ ] Com `events` igual a `7`, a um objeto e a `true`, um caso por valor, `start worker` abre a sessão como `worker-1`, sem feature aberta, e sai com o código da sessão
+- [ ] Morre, conferido e desfeito, o mutante do Verifier em `launch.ts`: sem o `Array.isArray` da leitura
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T31: Varredura de mutantes do launcher e do comando
+
+**What**: Uma mutação por desvio, guarda e literal de `broker/launch.ts` e do `start` e do `tui` de `broker/cli.ts`, cada uma contra os testes do arquivo; todo mutante vivo que muda um resultado que a spec define ganha um teste.
+**Where**: `broker/test/unit/launch.test.ts`
+**Depends on**: T30
+**Reuses**: Os três arquivos `launch*.test.ts` e `test/integration/cli.test.ts`; as tabelas de sensor de `validation-round-1.md` e `validation-round-2.md`, para não repetir o que já morreu
+**Requirement**: PAP-35, PAP-36, PAP-37, PAP-38, PAP-39, PAP-40, PAP-41, PAP-42, PAP-43, PAP-44, PAP-45, PAP-46, PAP-47, PAP-48, PAP-49, PAP-50, PAP-51, PAP-52, PAP-53, PAP-54, PAP-55, PAP-56, PAP-57, PAP-58, PAP-59
+
+**Done when**:
+
+- [ ] Cada desvio, guarda, valor de retorno e literal de `launch.ts` e do `start` e do `tui` de `cli.ts` recebeu ao menos uma mutação de comportamento fora das já injetadas nas duas voltas, uma por vez, desfeita com `git checkout --` antes da seguinte
+- [ ] Todo mutante vivo que muda um resultado definido num requisito tem um teste novo, com o nome do requisito, que falha com ele; o teste fica no arquivo de teste da camada (os três `launch*.test.ts` ou `cli.test.ts`)
+- [ ] Todo mutante vivo sem teste novo está no relatório do worker com o motivo: equivalente (nenhuma entrada o distingue) ou comportamento que nenhum requisito define
+- [ ] Mais dez mutações, ou mais, espalhadas por `plugin/hooks/*.ts`, `broker/roles.ts` e as linhas do arquivo de credencial em `broker/server.ts`, com a mesma regra
+- [ ] Nenhum código de produção muda; nenhuma asserção existente é afrouxada
+- [ ] Gate build passa
+
+**Tests**: unit
+**Gate**: build
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -714,6 +826,7 @@ Phase 4:  T16 → T17 → T18 → T19
 Phase 5:  T20 → T21
 Phase 6:  T22, T23 (sem ordem entre as duas no diagrama: a T23 nasce da T22 e é commitada antes de ela fechar)
 Phase 7:  T24 → T25 → T26
+Phase 8:  T27 → T28 → T29 → T30 → T31
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
@@ -774,6 +887,11 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
 | T24: `squad start` rodado até o fim com um comando que existe | 1 arquivo: `cli.test.ts` | ✅ Granular |
 | T25: O servidor encerra com código 0 quando o arquivo de credencial não pode ser apagado | 1 arquivo: `server-credential.test.ts` | ✅ Granular |
 | T26: `/events` com outro status não bloqueia a parada | 1 arquivo: `hook-stop.test.ts` | ✅ Granular |
+| T27: Entrada e saída herdadas em `squad start` | 1 arquivo: `cli.test.ts` | ✅ Granular |
+| T28: A feature aberta depois de uma fechada | 1 arquivo: `launch.test.ts` | ✅ Granular |
+| T29: Mensagem do git com mais de uma linha | 1 arquivo: `launch-worktree.test.ts` | ✅ Granular |
+| T30: `events` que não é lista na leitura do launcher | 1 arquivo: `launch.test.ts` | ✅ Granular |
+| T31: Varredura de mutantes do launcher e do comando | testes dos quatro arquivos do launcher e do comando, um método | ⚠️ Coeso |
 
 Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.json`, T12 no `export` de `namesOf` em `peers.ts`, T15 em `broker/package.json` e T16 no conferidor de `skills.test.ts`. É a ligação do que a própria tarefa cria. T4 e T12 ficam inteiras: os três JSON só valem juntos como um plugin, e as cinco funções de T12 são uma linha cada sobre a mesma entrada.
 
@@ -809,6 +927,11 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T24 | None (a fase anterior inteira) | início da fase 7 | ✅ Match |
 | T25 | T24 | T24 → T25 | ✅ Match |
 | T26 | T25 | T25 → T26 | ✅ Match |
+| T27 | None (a fase anterior inteira) | início da fase 8 | ✅ Match |
+| T28 | T27 | T27 → T28 | ✅ Match |
+| T29 | T28 | T28 → T29 | ✅ Match |
+| T30 | T29 | T29 → T30 | ✅ Match |
+| T31 | T30 | T30 → T31 | ✅ Match |
 
 ---
 
@@ -842,3 +965,8 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T24: `squad start` rodado até o fim com um comando que existe | CLI | integration | integration | ✅ OK |
 | T25: O servidor encerra com código 0 quando o arquivo de credencial não pode ser apagado | Servidor MCP | integration | integration | ✅ OK |
 | T26: `/events` com outro status não bloqueia a parada | Hook, processo | integration | integration | ✅ OK |
+| T27: Entrada e saída herdadas em `squad start` | CLI | integration | integration | ✅ OK |
+| T28: A feature aberta depois de uma fechada | Launcher | unit | unit | ✅ OK |
+| T29: Mensagem do git com mais de uma linha | Launcher | unit | unit | ✅ OK |
+| T30: `events` que não é lista na leitura do launcher | Launcher | unit | unit | ✅ OK |
+| T31: Varredura de mutantes do launcher e do comando | Launcher | unit | unit | ✅ OK |

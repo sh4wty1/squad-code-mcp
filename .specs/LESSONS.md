@@ -474,6 +474,36 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md PAP-08, broker/server.ts:389 (spec)
 - last seen: 2026-10-12T08:33:58Z
 
+### L-078 - When an AC says a child process inherits several streams, run a child that uses each stream and assert each one
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `cli tests` · harmful: 0
+- features: papeis
+- evidence: C1b, C1c - PAP-37 - broker/cli.ts:67 - broker/test/integration/cli.test.ts:153 (cli tests)
+- last seen: 2026-10-12T09:24:37Z
+
+### L-079 - When code picks the one item of a log that passes a condition, test a log with an item that fails it before the one that passes
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: papeis
+- evidence: F1 - PAP-53, PAP-54 - broker/launch.ts:216 (broker tests)
+- last seen: 2026-10-12T09:24:37Z
+
+### L-080 - When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: papeis
+- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests)
+- last seen: 2026-10-12T09:24:37Z
+
+### L-081 - Test a field that must be a list with a wrong value that is not iterable, not only with a text
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: papeis
+- evidence: F3 - PAP-38 - broker/launch.ts:186 - broker/test/unit/launch.test.ts:296 (broker tests)
+- last seen: 2026-10-12T09:24:37Z
+
+### L-082 - State what a failed read is for every client that reads the same route, not only for one of them
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec routes` · harmful: 0
+- features: papeis
+- evidence: PAP-38 - .specs/features/papeis/spec.md:99 - F3 (spec routes)
+- last seen: 2026-10-12T09:24:38Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
