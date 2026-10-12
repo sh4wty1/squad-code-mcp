@@ -515,11 +515,11 @@ T22
 
 **Done when**:
 
-- [ ] O conferidor passa para `leader`, com `ready`, `state`, `ask`, `blocked`, `plan`, `send_task`, `send_result`, `answer` e `escalate` citadas
-- [ ] PAP-70: `Your work` tem os literais `git switch`, `git merge`, `ticket_ref`, `loadout`, `criteria`, `rework_limit` e `dropped`, e `plan` é citado antes de `send_task`
-- [ ] PAP-62 a PAP-67 e o resto de PAP-70 estão no texto, cada regra numa frase
-- [ ] Testes em `test/unit/skills.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] O conferidor passa para `leader`, com `ready`, `state`, `ask`, `blocked`, `plan`, `send_task`, `send_result`, `answer` e `escalate` citadas
+- [x] PAP-70: `Your work` tem os literais `git switch`, `git merge`, `ticket_ref`, `loadout`, `criteria`, `rework_limit` e `dropped`, e `plan` é citado antes de `send_task`
+- [x] PAP-62 a PAP-67 e o resto de PAP-70 estão no texto, cada regra numa frase
+- [x] Testes em `test/unit/skills.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

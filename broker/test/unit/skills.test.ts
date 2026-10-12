@@ -20,6 +20,7 @@ const SECTIONS = [
 const REQUIRED: Record<string, string[]> = {
   worker: ["ready", "state", "ask", "blocked", "send_result", "answer", "history"],
   judge: ["ready", "state", "ask", "blocked", "send_verdict", "history"],
+  leader: ["ready", "state", "ask", "blocked", "plan", "send_task", "send_result", "answer", "escalate"],
 };
 
 // What one section has to have in backticks: `cited` in any place, `ordered` with the first
@@ -50,6 +51,14 @@ const OF_ROLE: Record<string, Rule[]> = {
       id: "PAP-69",
       section: "Your work",
       cited: ["git switch --detach", "result_seq", "outcome", "criteria", "stale_reference"],
+    },
+  ],
+  leader: [
+    {
+      id: "PAP-70",
+      section: "Your work",
+      cited: ["git switch", "git merge", "ticket_ref", "loadout", "criteria", "rework_limit", "dropped"],
+      ordered: ["plan", "send_task"],
     },
   ],
 };
@@ -146,7 +155,7 @@ function changed(text: string, from: string | RegExp, to: string): string {
 
 // --- The skills as they are ---
 
-for (const role of ["worker", "judge"]) {
+for (const role of ["worker", "judge", "leader"]) {
   const of = (id: string) => problems(role, read(role)).filter((problem) => problem.startsWith(id));
 
   test(`PAP-60: the ${role} skill starts with the frontmatter of its role and has its sections, in order`, () => {
@@ -168,6 +177,10 @@ test("PAP-68: Your work of the worker skill has the literals of a result and no 
 
 test("PAP-69: Your work of the judge skill has the literals of a verdict", () => {
   expect(problems("judge", read("judge")).filter((problem) => problem.startsWith("PAP-69"))).toEqual([]);
+});
+
+test("PAP-70: Your work of the leader skill has the literals of its git, of a task and of the rework limit, and plan before send_task", () => {
+  expect(problems("leader", read("leader")).filter((problem) => problem.startsWith("PAP-70"))).toEqual([]);
 });
 
 // --- What the checker refuses: the worker skill with one thing changed ---
@@ -285,4 +298,31 @@ test("PAP-69: Your work of the judge without one of its five literals fails", ()
   for (const name of ["result_seq", "outcome", "criteria", "stale_reference"]) {
     expect(problems("judge", changed(judge, `\`${name}\``, name))).toContain(`PAP-69: Your work does not cite ${name}`);
   }
+});
+
+// --- The same for the leader skill ---
+
+test("PAP-61: a skill of the leader that leaves one of its nine tools out of the backticks fails", () => {
+  for (const name of ["ready", "state", "ask", "blocked", "plan", "send_task", "send_result", "answer", "escalate"]) {
+    expect(problems("leader", changed(read("leader"), `\`${name}\``, name))).toContain(`PAP-61: ${name} is not cited`);
+  }
+});
+
+test("PAP-70: Your work of the leader without one of its seven literals fails", () => {
+  const leader = read("leader");
+  // every `git switch` of the skill, with and without what comes after it
+  expect(problems("leader", changed(leader, /`git switch[^`]*`/g, "git switch"))).toContain(
+    "PAP-70: Your work does not cite git switch"
+  );
+  expect(problems("leader", changed(leader, /`git merge[^`]*`/g, "git merge"))).toContain(
+    "PAP-70: Your work does not cite git merge"
+  );
+  for (const name of ["ticket_ref", "loadout", "criteria", "rework_limit", "dropped"]) {
+    expect(problems("leader", changed(leader, `\`${name}\``, name))).toContain(`PAP-70: Your work does not cite ${name}`);
+  }
+});
+
+test("PAP-70: Your work of the leader that cites send_task before plan fails", () => {
+  const swapped = changed(changed(changed(read("leader"), "`plan`", "`@`"), "`send_task`", "`plan`"), "`@`", "`send_task`");
+  expect(problems("leader", swapped)).toEqual(["PAP-70: Your work does not cite plan, then send_task in this order"]);
 });
