@@ -1,4 +1,5 @@
 import { Database } from "bun:sqlite";
+import type { ChildProcess } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -222,6 +223,9 @@ export async function startSession(port: number, env: Record<string, string>, se
   };
   await client.connect(transport);
   sessionCleanups.push(() => client.close());
+  // The exit code of the server process, when it ends: the transport keeps the process to itself
+  const { _process: server } = transport as unknown as { _process: ChildProcess };
+  const exited = new Promise<number | null>((resolve) => server.once("exit", (code) => resolve(code)));
 
   const channel = () => notifications.filter((n) => n.method === "notifications/claude/channel");
   const pings = () => channel().filter((n) => n.params.meta.kind === "ping");
@@ -245,5 +249,5 @@ export async function startSession(port: number, env: Record<string, string>, se
     return { isError: result.isError === true, text: result.content[0]!.text };
   }
 
-  return { client, transport, notifications, pings, pushed, toolNames, ready, pingNumber, register, call };
+  return { client, transport, notifications, pings, pushed, toolNames, ready, pingNumber, register, call, exited };
 }

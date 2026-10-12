@@ -672,10 +672,10 @@ T24 → T25 → T26
 
 **Done when**:
 
-- [ ] Com o arquivo de credencial trocado por um diretório não vazio depois do registro, o processo do servidor sai sozinho com código 0, afirmado com o literal, e o `peer_left` é gravado
-- [ ] O mutante do Verifier morre, conferido e desfeito: sem o `try` em volta do `rmSync` de `server.ts`, o teste falha
-- [ ] Nenhum código de produção muda; se `startSession` precisa expor o código de saída, só `test/integration/helpers.ts` muda
-- [ ] Gate full passa
+- [x] Com o arquivo de credencial trocado por um diretório não vazio depois do registro, o processo do servidor sai sozinho com código 0, afirmado com o literal, e o `peer_left` é gravado
+- [x] O mutante do Verifier morre, conferido e desfeito: sem o `try` em volta do `rmSync` de `server.ts`, o teste falha
+- [x] Nenhum código de produção muda; se `startSession` precisa expor o código de saída, só `test/integration/helpers.ts` muda
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

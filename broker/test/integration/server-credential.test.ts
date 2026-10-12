@@ -91,7 +91,7 @@ test("PAP-08: with a directory where the credential file goes, ready registers t
   expect(statSync(file).isDirectory()).toBe(true);
 });
 
-test("PAP-08: with the credential file swapped for a directory that is not empty, the session closes the same way", async () => {
+test("PAP-08: with the credential file swapped for a directory that is not empty, the server records the peer_left and exits with 0", async () => {
   broker = await startBroker();
   const b = broker;
   const { session, file } = await worker(b);
@@ -107,6 +107,8 @@ test("PAP-08: with the credential file swapped for a directory that is not empty
     ["peer_joined", { peer: "worker-1", role: "worker" }],
     ["peer_left", { peer: "worker-1", reason: "unregistered" }],
   ]);
+  // by itself: close() kills the server 2 s after closing stdin
+  expect(await Promise.race([session.exited, Bun.sleep(1500).then(() => "still running")])).toBe(0);
   await closing;
   expect(() => process.kill(pid, 0)).toThrow();
   expect(readFileSync(join(file, "kept"), "utf8")).toBe("x");
