@@ -1,4 +1,4 @@
-import { afterEach, expect, test } from "bun:test";
+import { afterAll, afterEach, expect, test } from "bun:test";
 import { chmodSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { join } from "node:path";
@@ -31,15 +31,20 @@ async function cli(b: Broker, command: string, extraEnv: Record<string, string> 
   return { out, err, code: await proc.exited };
 }
 
-// `bun cli.ts` with these arguments, outside a terminal, with the settings given
-async function runCli(args: string[], env: Record<string, string> = {}, cwd = BROKER_DIR) {
+// `bun cli.ts` with these arguments, outside a terminal, with the settings given. With an
+// `input`, its standard input is a pipe that gets the text and is closed.
+async function runCli(args: string[], env: Record<string, string> = {}, cwd = BROKER_DIR, input?: string) {
   const proc = Bun.spawn([process.execPath, join(BROKER_DIR, "cli.ts"), ...args], {
     env: cleanEnv(env),
     cwd,
-    stdin: "ignore",
+    stdin: input === undefined ? "ignore" : "pipe",
     stdout: "pipe",
     stderr: "pipe",
   });
+  if (input !== undefined) {
+    proc.stdin!.write(input);
+    await proc.stdin!.end();
+  }
   const [out, err] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text()]);
   return { out, err, code: await proc.exited };
 }
@@ -116,9 +121,9 @@ function worktrees(cwd: string): string[] {
 type Started = { res: Awaited<ReturnType<typeof runCli>>; main: string; trees: string };
 
 // `squad start <role>` run to the end, from a subdirectory of a repository of the test in a
-// path with a space, with git in the place of the session command: it refuses the first
-// argument of a session on its standard error and exits 129.
-async function startWithGit(role: string, check: (started: Started) => void) {
+// path with a space, with `command` in the place of the session command and `input`, when
+// given, on the standard input of the CLI
+async function startWith(command: string, role: string, check: (started: Started) => void, input?: string) {
   // the real path: the temporary directory may come in its short form on Windows
   const dir = realpathSync(tempDir());
   try {
@@ -130,7 +135,7 @@ async function startWithGit(role: string, check: (started: Started) => void) {
     const res = await runCli(
       ["start", role],
       {
-        SQUAD_CLAUDE: "git",
+        SQUAD_CLAUDE: command,
         // a port with nobody listening: no feature is open and nobody is online
         SQUAD_PORT: String(await freePort()),
         SQUAD_WORKTREES: trees,
@@ -140,13 +145,39 @@ async function startWithGit(role: string, check: (started: Started) => void) {
         // repository there, instead of writing in the one of the squad
         GIT_CEILING_DIRECTORIES: join(BROKER_DIR, ".."),
       },
-      join(main, "a dir")
+      join(main, "a dir"),
+      input
     );
     check({ res, main, trees });
   } finally {
     removeDir(dir);
   }
 }
+
+// With git in the place of the session command: it refuses the first argument of a session
+// on its standard error and exits 129
+const startWithGit = (role: string, check: (started: Started) => void) => startWith("git", role, check);
+
+// A session command that takes the terminal: it ignores its arguments, copies its standard
+// input to its standard output and exits 42. SQUAD_CLAUDE takes a command alone, with no
+// arguments of its own, so it is a script compiled once into a directory of the tests, by
+// the bun that runs them: the same on Windows and on Linux.
+let echo: { dir: string; command: string } | undefined;
+
+function echoCommand(): string {
+  if (!echo) {
+    const dir = realpathSync(tempDir());
+    writeFileSync(join(dir, "session.ts"), "await Bun.write(Bun.stdout, await Bun.stdin.text());\nprocess.exitCode = 42;\n");
+    const built = Bun.spawnSync([process.execPath, "build", "--compile", "session.ts", "--outfile", "session"], { cwd: dir, env: cleanEnv({}) });
+    if (built.exitCode !== 0) throw new Error(`bun build --compile: ${built.stderr.toString()}`);
+    echo = { dir, command: join(dir, process.platform === "win32" ? "session.exe" : "session") };
+  }
+  return echo.command;
+}
+
+afterAll(() => {
+  if (echo) removeDir(echo.dir);
+});
 
 test("PAP-37: start mother gives the session command the standard error of the launcher and exits with its code", async () => {
   await startWithGit("mother", ({ res }) => {
@@ -165,6 +196,19 @@ test("PAP-37: start worker opens the session command in a worktree of the reposi
     // and the repository of the squad has the trees it had
     expect(worktrees(BROKER_DIR)).toEqual(squad);
   });
+}, 60_000);
+
+test("PAP-37: start gives the session command the standard input and the standard output of the launcher and exits with its code", async () => {
+  const typed = "the first line typed\nand the second\n";
+  await startWith(
+    echoCommand(),
+    "mother",
+    ({ res }) => {
+      expect(res.out).toBe(typed);
+      expect(res.code).toBe(42);
+    },
+    typed
+  );
 }, 60_000);
 
 test("PAP-59: tui runs the TUI on the same terminal and exits with its code", async () => {

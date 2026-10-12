@@ -720,11 +720,11 @@ T27 → T28 → T29 → T30 → T31
 
 **Done when**:
 
-- [ ] Com um comando de sessão que existe, ignora os argumentos, copia a entrada padrão para a saída padrão e sai com um código que não é 0 nem 1, um texto dado à entrada do CLI sai na saída do CLI, e o CLI sai com esse código
-- [ ] O comando de sessão do teste roda no Windows e no Linux (a suíte roda nos dois)
-- [ ] Morrem, conferidos um a um e desfeitos, os dois mutantes do Verifier em `cli.ts`: `stdio` `["inherit", "ignore", "inherit"]` e `["ignore", "inherit", "inherit"]`; os três da volta 1 continuam mortos
-- [ ] Nenhum código de produção muda
-- [ ] Gate full passa
+- [x] Com um comando de sessão que existe, ignora os argumentos, copia a entrada padrão para a saída padrão e sai com um código que não é 0 nem 1, um texto dado à entrada do CLI sai na saída do CLI, e o CLI sai com esse código
+- [x] O comando de sessão do teste roda no Windows e no Linux (a suíte roda nos dois)
+- [x] Morrem, conferidos um a um e desfeitos, os dois mutantes do Verifier em `cli.ts`: `stdio` `["inherit", "ignore", "inherit"]` e `["ignore", "inherit", "inherit"]`; os três da volta 1 continuam mortos
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full
