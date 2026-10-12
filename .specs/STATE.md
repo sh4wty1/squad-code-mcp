@@ -166,27 +166,32 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-12, a pedido do dev, com a segunda volta do Verifier em andamento.
+Atualizado em 2026-10-12, depois da segunda volta do Verifier, com as correções dela em andamento.
 
 - **Feature**: Papéis, `.specs/features/papeis/`.
-- **Phase / Task**: Execute, no fechamento. As 26 tarefas estão commitadas: T1 a T22, a T23 (correção que as sessões reais pediram) e T24 a T26 (correções da primeira volta do Verifier). Falta o veredito da segunda volta e os documentos de estado.
-- **Completed**: T1 a T26, um commit por tarefa, de `f9ec67e` a `8f4e442`; `real-sessions.md`; a primeira volta do Verifier (`validation-round-1.md`, FAIL); a suíte no Windows e no Linux sobre `8f4e442`.
-- **In-progress** (file:line): a segunda volta do Verifier rodava em segundo plano na sessão que escreveu isto, e o resultado dela não era conhecido. Ela sobrescreve `.specs/features/papeis/validation.md`; enquanto não termina, esse arquivo é a cópia da volta 1, com FAIL.
-- **Next step**: abrir `.specs/features/papeis/validation.md`. Se o relatório é da volta 2 (tem a seção "Voltas" e a faixa `f162184..8f4e442`), ler o veredito e rodar `python .claude/skills/tlc-spec-driven/scripts/validate_state.py papeis --root .`. Se ainda é o da volta 1 (igual a `validation-round-1.md`), a volta 2 não terminou: despachar um Verifier novo como no passo 1 de "Fechamento". Depois, seguir os passos de "Fechamento".
-- **Blockers**: nenhum. O login do Claude Code do dev avisava "expires in 1 day" em 2026-10-12.
-- **Uncommitted files**: nenhum depois do commit desta atualização, a menos que o Verifier da volta 2 tenha escrito `validation.md`, `.specs/lessons.json` ou `.specs/LESSONS.md` depois dela: esses três são dele e entram no commit seguinte.
+- **Phase / Task**: Execute, no fechamento. T1 a T26 estão commitadas. A fase 8 de `tasks.md` (T27 a T31, correções da segunda volta, só de teste) estava com um sub-agente da sessão que escreveu isto. Depois dela vem a terceira volta do Verifier, que é a última.
+- **Completed**: T1 a T26, de `f9ec67e` a `8f4e442`; `real-sessions.md`; duas voltas do Verifier, as duas FAIL sem defeito de produção (`validation-round-1.md`, `validation-round-2.md`); a suíte no Windows e no Linux sobre `8f4e442`.
+- **In-progress** (file:line): T27 a T31. O que já foi feito está marcado em `tasks.md` e tem commit próprio; o resto, não. Um teste pela metade na árvore de trabalho é dessa fase.
+- **Next step**: `git status --porcelain`, `git log --oneline -8` e as caixas de T27 a T31 em `tasks.md`. Terminar as que faltam, um commit por tarefa, provando que cada mutante citado morre. Com as cinco commitadas: gate completo no Windows, a suíte no Linux sobre o HEAD, e a terceira volta do Verifier, com um agente que não escreveu nada e uma cópia física nova. Com FAIL na terceira, parar: o resíduo e a decisão são do dev.
+- **Blockers**: nenhum. Uma confirmação pendente do dev, abaixo. O login do Claude Code do dev avisava "expires in 1 day" em 2026-10-12.
+- **Uncommitted files**: nenhum na hora desta atualização além do que o sub-agente da fase 8 estiver escrevendo em `broker/test/` e em `tasks.md`.
 - **Branch**: `feat/papeis`, saído da `main` em `f162184`. Só local: nada foi enviado ao remoto. O repositório tem um segundo worktree, `squad-code-mcp.worktrees/tui-clicavel` no branch `spec/tui-clicavel`, que é de outro trabalho do dev: não tocar. `handoff-codex.md`, na pasta da fatia, é o mesmo estado escrito para um agente sem a skill.
 
 ### As voltas do Verifier
 
-- **Volta 1**, sobre `f162184..0848c8f`: FAIL. Nenhum defeito de produção. 73 de 75 requisitos com evidência; sensor com 76 mutações, 71 mortas e 5 vivas, em três testes que não distinguiam o código certo de um mutante: `squad start` nunca rodava até o fim com um comando que existe (PAP-37, três mutantes em `cli.ts`); o teste do arquivo de credencial que não pode ser apagado não separava encerrar de cair (PAP-08); `/events` com outro status não tinha teste (PAP-31). Relatório em `validation-round-1.md`, lições L-050 e L-071 a L-077.
-- **Correções**: T24 (`efb6d74`), T25 (`fa75877`) e T26 (`8f4e442`), só de teste. O worker conferiu um a um que os cinco mutantes morrem. Nenhum arquivo de produção mudou depois de `6609630`.
-- **Volta 2**, sobre `f162184..8f4e442`: em andamento na pausa, com outro agente e outra cópia física. É a segunda de três.
+- **Volta 1**, sobre `f162184..0848c8f`: FAIL. Sensor com 76 mutações e 5 vivas, em três testes: `squad start` nunca rodava até o fim (PAP-37), o arquivo de credencial que não pode ser apagado (PAP-08), `/events` com outro status (PAP-31). Corrigido em T24 (`efb6d74`), T25 (`fa75877`) e T26 (`8f4e442`). Relatório em `validation-round-1.md`.
+- **Volta 2**, sobre `f162184..8f4e442`: FAIL. 74 de 75 requisitos com evidência; os cinco mutantes da volta 1 morrem; nenhuma asserção foi afrouxada e nenhum arquivo de produção mudou. De 21 mutações novas, 5 vivas, todas em `broker/cli.ts` e `broker/launch.ts`: entrada e saída herdadas (PAP-37), a feature aberta depois de uma fechada (PAP-53, PAP-54), mensagem do git com mais de uma linha (PAP-41, PAP-57) e `events` que não é lista (PAP-38). Relatório em `validation-round-2.md`; `validation.md` é a cópia dele até a volta 3.
+- **Correções da volta 2**: T27 a T30, uma por lacuna, e a T31, uma varredura de mutantes de `launch.ts` e do `start` e do `tui` de `cli.ts`, para a terceira volta não achar um sexto.
+- **Volta 3**: a última. Não foi despachada.
+
+### Confirmação pendente do dev
+
+A definição de "feature aberta, para o launcher", na spec, ganhou uma frase a pedido da volta 2: a leitura falha quando não responde no prazo, responde com status diferente de 200 ou responde algo que não é um objeto com `events` lista. O código já fazia isso. A linha em "Assumptions" está com `n` até o dev confirmar.
 
 ### Fechamento, na ordem
 
 1. **Verifier.** Um agente que não escreveu código, teste nem relatório, numa cópia física (`git clone --no-hardlinks` para um diretório temporário e `bun install --frozen-lockfile` em `broker/`), sem junction para o `node_modules` real. Checklist: `references/validate.md` da skill. Faixa: `f162184..HEAD`. Sensor com 8 mutações ou mais, só na cópia. Ele lê as quatro skills contra PAP-62 a PAP-72, PAP-74 e PAP-75, frase a frase, e confere `real-sessions.md` contra `real-sessions-log.txt`. Escreve só `validation.md` e as lições.
-2. **Lacunas.** Cada lacuna vira tarefa de correção com teste primeiro e commit próprio, e o Verifier roda de novo, com outro agente. Limite de três voltas, e a segunda está em andamento; depois da terceira o resíduo e a decisão voltam para o dev.
+2. **Lacunas.** Cada lacuna vira tarefa de correção com teste primeiro e commit próprio, e o Verifier roda de novo, com outro agente. Limite de três voltas, e duas já foram; depois da terceira o resíduo e a decisão voltam para o dev.
 3. **Com PASS:** status `Verified` nos 75 requisitos da tabela da spec e a linha "Coverage"; as caixas de "Goals" e "Success Criteria" da spec, com os números das duas plataformas (abaixo); `**Status**: Done` em `tasks.md`; `validate_state.py papeis` com exit 0.
 4. **`ROADMAP.md`:** marcar a fatia Papéis, as duas pendências já resolvidas (formato do `roles.json` conferido contra o manifest; modo de permissão decidido) e reescrever o parágrafo "Agora".
 5. **Este Handoff**, apontando para a fatia Gate.
@@ -196,6 +201,7 @@ Atualizado em 2026-10-12, a pedido do dev, com a segunda volta do Verifier em an
 
 - **PAP-32**: o caso do `permission_request` aberto saiu da lista dos não bloqueados. Decidido pelo dev em 2026-10-12 (linha em "Assumptions").
 - **PAP-08 e PAP-31**: o texto foi completado a pedido da volta 1 (o que se observa em "do mesmo jeito"; status diferente de 200 é leitura que falhou). Confirmado pelo dev em 2026-10-12.
+- **Definição de "feature aberta, para o launcher"**: completada a pedido da volta 2, com a confirmação do dev pendente (acima).
 - **PAP-74 e PAP-75**: acrescentados pelo orquestrador a partir de dois defeitos vistos em sessões reais (a mother tomou o diretório do plugin pelo projeto; worker e judge pararam depois de `ready` sem `state`). Confirmados pelo dev em 2026-10-12.
 - "Leituras da spec", em `tasks.md`: treze pontos em que uma tarefa fixou o que a spec não diz. A volta 1 não discordou de nenhum e apontou oito que a spec deveria dizer ela mesma (PAP-01, PAP-08, PAP-15, PAP-18, PAP-31, PAP-33, PAP-42 e o par PAP-66 e PAP-68). PAP-08 e PAP-31 já foram para o texto; levar os outros é cosmético e fica para o dev decidir.
 

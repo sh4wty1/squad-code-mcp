@@ -1,7 +1,7 @@
 # Papéis: handoff para o Codex
 
 Escrito em 2026-10-12 pela sessão do Claude Code que executou a fatia, e atualizado no mesmo
-dia depois da primeira volta de verificação. Use este documento se aquela sessão não fechou
+dia depois da segunda volta de verificação. Use este documento se aquela sessão não fechou
 a fatia. Ele se basta: você não precisa da skill
 `tlc-spec-driven` nem do histórico do chat.
 
@@ -15,7 +15,8 @@ deixa para os hooks.
 
 - Spec, a fonte da verdade: `.specs/features/papeis/spec.md`, 75 requisitos (PAP-01 a PAP-75).
 - Desenho: `.specs/features/papeis/design.md`. Decisões: `.specs/STATE.md`, AD-015 a AD-020.
-- Tarefas: `.specs/features/papeis/tasks.md`. As 26 estão feitas e commitadas.
+- Tarefas: `.specs/features/papeis/tasks.md`. T1 a T26 estão feitas e commitadas; T27 a T31
+  são as correções da segunda volta de verificação.
 - Estado do projeto: a seção "Handoff" de `.specs/STATE.md`.
 
 ## Onde está
@@ -33,22 +34,32 @@ deixa para os hooks.
 ## A verificação até aqui
 
 - **Volta 1**, sobre `f162184..0848c8f`: FAIL, sem defeito de produção. Cinco mutantes
-  vivos em três testes fracos (PAP-37, PAP-08 e PAP-31). Relatório:
-  `.specs/features/papeis/validation-round-1.md`.
-- **Correções**: T24 (`efb6d74`), T25 (`fa75877`) e T26 (`8f4e442`), só de teste.
-- **Volta 2**, sobre `f162184..8f4e442`: rodava como sub-agente daquela sessão quando isto
-  foi escrito. Ela sobrescreve `.specs/features/papeis/validation.md`. É a segunda de três;
-  depois da terceira, o resíduo e a decisão voltam para o dev.
+  vivos em três testes fracos (PAP-37, PAP-08 e PAP-31), corrigidos em T24 a T26.
+  Relatório: `.specs/features/papeis/validation-round-1.md`.
+- **Volta 2**, sobre `f162184..8f4e442`: FAIL, de novo sem defeito de produção. Os cinco
+  da volta 1 morrem. De 21 mutações novas, 5 vivas em `broker/cli.ts` e `broker/launch.ts`
+  (PAP-37, PAP-53 e PAP-54, PAP-41 e PAP-57, PAP-38). Relatório:
+  `.specs/features/papeis/validation-round-2.md`; `validation.md` é a cópia dele.
+- **Correções da volta 2**: a fase 8 de `tasks.md`, T27 a T31, só de teste. Estava com um
+  sub-agente daquela sessão quando isto foi escrito: veja as caixas em `tasks.md` e o
+  `git log`. A T31 é uma varredura de mutantes do launcher e do comando.
+- **Volta 3**: a última. Depois dela, com FAIL, o resíduo e a decisão voltam para o dev.
 
 ## O que falta
 
 A fatia só fecha com um relatório de verificação independente com PASS. Comece por
-reconciliar: `git status --porcelain`, `git log --oneline -5`, e abra
-`.specs/features/papeis/validation.md`. Se ele é igual a `validation-round-1.md`, a volta 2
-não terminou: siga o caminho A. Se é o relatório da volta 2 (tem a seção "Voltas" e a faixa
-`f162184..8f4e442`), siga o B com FAIL ou o C com PASS.
+reconciliar: `git status --porcelain`, `git log --oneline -8`, as caixas de T27 a T31 em
+`tasks.md`, e `.specs/features/papeis/validation.md`.
 
-### A. Não há relatório da volta 2: você é o Verifier
+- T27 a T31 não estão todas marcadas e commitadas: siga o caminho B, com as definições das
+  tarefas em `tasks.md` (procure `### T27`).
+- Estão todas commitadas e `validation.md` ainda é igual a `validation-round-2.md`: a volta 3
+  não aconteceu. Siga o caminho A, **se você não escreveu nenhum dos testes de T27 a T31**.
+  Se escreveu, pare e diga ao dev que a volta 3 precisa de outra sessão.
+- `validation.md` é o relatório da volta 3 (a seção "Voltas" fala das três): com PASS, o
+  caminho C; com FAIL, pare e leve o resíduo ao dev.
+
+### A. Falta a volta 3: você é o Verifier
 
 Você não escreveu código, teste nem relatório desta fatia, então pode verificar. Nesta
 sessão você **não corrige nada**: só verifica e escreve o relatório.
@@ -77,8 +88,8 @@ sessão você **não corrige nada**: só verifica e escreve o relatório.
 6. Confira `real-sessions.md` contra `real-sessions-log.txt`: cada um de RS-01 a RS-14 diz o
    que foi exercitado, com evidência, ou que não foi e por quê.
 7. Escreva `.specs/features/papeis/validation.md` neste repositório, em português, no
-   formato de `validation-round-1.md`, por cima do arquivo que está lá: faixa `f162184..HEAD`,
-   uma seção "Voltas" com o que a volta 1 achou e o que você fez, uma linha
+   formato de `validation-round-2.md`, por cima do arquivo que está lá: faixa `f162184..HEAD`,
+   uma seção "Voltas" com o que as duas primeiras acharam e o que você fez, uma linha
    por requisito com resultado esperado, `arquivo:linha`, asserção e PASS ou GAP; o gate com
    os números; a tabela do sensor; o julgamento de cada linha de "Leituras da spec" de
    `tasks.md`; e o veredito. PASS só com todo requisito evidenciado, nenhum mutante vivo e
@@ -87,17 +98,20 @@ sessão você **não corrige nada**: só verifica e escreve o relatório.
    diga o código de saída. Com FAIL ele sai diferente de zero: não ajuste o relatório para
    passar.
 
-### B. O relatório da volta 2 diz FAIL: você corrige
+### B. As correções da volta 2 não terminaram: você corrige
 
-1. Cada lacuna vira uma correção: escreva primeiro o teste que a spec pede, veja-o falhar,
-   corrija o mínimo, rode o gate, e faça **um commit por correção**.
+1. Cada tarefa é um teste que faltava: escreva o teste que a spec pede, aplique o mutante
+   que a tarefa cita, veja o teste falhar, desfaça o mutante com `git checkout -- <arquivo>`,
+   rode o gate, e faça **um commit por tarefa**, com as caixas dela marcadas em `tasks.md`.
+   São tarefas só de teste: nenhum arquivo de produção muda. Se a varredura da T31 mostrar
+   comportamento que contradiz um requisito, pare e diga ao dev.
 2. Não enfraqueça, pule nem apague teste para passar. Se um teste está errado em relação à
    spec, pare e pergunte ao dev.
 3. Quem corrigiu não verifica: a nova verificação é de outra sessão ou de outro agente, pelo
-   caminho A. O limite são três voltas de verificação e duas já foram: depois da terceira,
-   o resíduo e a decisão voltam para o dev.
+   caminho A. O limite são três voltas de verificação e duas já foram: a terceira é a
+   última.
 
-### C. O relatório da volta 2 diz PASS: fechamento
+### C. O relatório da volta 3 diz PASS: fechamento
 
 1. Em `spec.md`: status `Verified` nos 75 requisitos e a linha "Coverage"; as caixas de
    "Goals" e de "Success Criteria", com os números de Windows e Linux acima.
@@ -147,6 +161,9 @@ sessão você **não corrige nada**: só verifica e escreve o relatório.
 - **PAP-08 e PAP-31**: texto completado a pedido da volta 1 e confirmado pelo dev em
   2026-10-12. PAP-08 diz o que se observa (sucesso e `peer_joined` no registro; `peer_left`
   e código 0 no encerramento); PAP-31 diz que status diferente de 200 é leitura que falhou.
+- **Definição de "feature aberta, para o launcher"**: ganhou uma frase a pedido da volta 2
+  (o que é uma leitura que falha). A confirmação do dev está pendente: a linha em
+  "Assumptions" da spec está com `n`.
 - **PAP-74 e PAP-75**: novos, de dois defeitos vistos em sessões reais. A mother tomou o
   diretório do plugin pelo projeto; worker e judge pararam depois de `ready` sem chamar
   `state`. Corrigidos em `6609630` e confirmados pelo dev em 2026-10-12.
