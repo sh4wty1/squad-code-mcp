@@ -651,11 +651,11 @@ T24 → T25 → T26
 
 **Done when**:
 
-- [ ] `start mother`, de um subdiretório de um repositório temporário: a saída de erro do CLI traz o que o comando escreveu (`unknown option`) e o CLI sai com 129
-- [ ] `start worker`, do mesmo jeito: o worktree nasce no repositório temporário, sob o `SQUAD_WORKTREES` do teste, e `git worktree list` do repositório do squad continua com uma árvore só
-- [ ] Os três mutantes do Verifier morrem, conferidos um a um e desfeitos: `stdio` `ignore` em `cli.ts`, o código 0 fixo, e o `cwd` trocado pelo diretório do broker
-- [ ] Nenhum código de produção muda
-- [ ] Gate full passa
+- [x] `start mother`, de um subdiretório de um repositório temporário: a saída de erro do CLI traz o que o comando escreveu (`unknown option`) e o CLI sai com 129
+- [x] `start worker`, do mesmo jeito: o worktree nasce no repositório temporário, sob o `SQUAD_WORKTREES` do teste, e `git worktree list` do repositório do squad continua com uma árvore só
+- [x] Os três mutantes do Verifier morrem, conferidos um a um e desfeitos: `stdio` `ignore` em `cli.ts`, o código 0 fixo, e o `cwd` trocado pelo diretório do broker
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

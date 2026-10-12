@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { chmodSync, existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { join } from "node:path";
 import { BROKER_DIR, cleanEnv, freePort, isUp, post, removeDir, startBroker, tempDir, waitFor } from "./helpers.ts";
@@ -100,6 +100,72 @@ test("PAP-50: start with a session command that does not exist exits 1 and names
     removeDir(dir);
   }
 }, 30_000);
+
+function git(cwd: string, ...args: string[]): string {
+  const result = Bun.spawnSync(["git", "-c", "user.name=test", "-c", "user.email=test@example.com", ...args], { cwd });
+  if (result.exitCode !== 0) throw new Error(`git ${args.join(" ")}: ${result.stderr.toString()}`);
+  return result.stdout.toString();
+}
+
+// The working trees git lists for the repository `cwd` is in, as git writes their paths
+function worktrees(cwd: string): string[] {
+  const list = Bun.spawnSync(["git", "worktree", "list", "--porcelain"], { cwd }).stdout.toString();
+  return [...list.matchAll(/^worktree (.+)$/gm)].map((line) => line[1]!);
+}
+
+type Started = { res: Awaited<ReturnType<typeof runCli>>; main: string; trees: string };
+
+// `squad start <role>` run to the end, from a subdirectory of a repository of the test in a
+// path with a space, with git in the place of the session command: it refuses the first
+// argument of a session on its standard error and exits 129.
+async function startWithGit(role: string, check: (started: Started) => void) {
+  // the real path: the temporary directory may come in its short form on Windows
+  const dir = realpathSync(tempDir());
+  try {
+    const main = join(dir, "the repo");
+    const trees = join(dir, "the trees");
+    git(dir, "init", "-q", "the repo");
+    git(main, "commit", "-q", "--allow-empty", "-m", "first");
+    mkdirSync(join(main, "a dir"));
+    const res = await runCli(
+      ["start", role],
+      {
+        SQUAD_CLAUDE: "git",
+        // a port with nobody listening: no feature is open and nobody is online
+        SQUAD_PORT: String(await freePort()),
+        SQUAD_WORKTREES: trees,
+        // git answers in English whatever the language of the machine
+        LC_ALL: "C",
+        // a launcher that took the directory of the broker for the current one finds no
+        // repository there, instead of writing in the one of the squad
+        GIT_CEILING_DIRECTORIES: join(BROKER_DIR, ".."),
+      },
+      join(main, "a dir")
+    );
+    check({ res, main, trees });
+  } finally {
+    removeDir(dir);
+  }
+}
+
+test("PAP-37: start mother gives the session command the standard error of the launcher and exits with its code", async () => {
+  await startWithGit("mother", ({ res }) => {
+    expect(res.err).toContain("unknown option: --plugin-dir");
+    expect(res.code).toBe(129);
+  });
+}, 30_000);
+
+test("PAP-37: start worker opens the session command in a worktree of the repository it runs from and exits with its code", async () => {
+  const squad = worktrees(BROKER_DIR);
+  await startWithGit("worker", ({ res, main, trees }) => {
+    expect(res.err).toContain("unknown option: --plugin-dir");
+    expect(res.code).toBe(129);
+    // of the repository of the test, under its SQUAD_WORKTREES
+    expect(worktrees(main).map((tree) => realpathSync(tree))).toEqual([main, join(trees, "worker-1")]);
+    // and the repository of the squad has the trees it had
+    expect(worktrees(BROKER_DIR)).toEqual(squad);
+  });
+}, 60_000);
 
 test("PAP-59: tui runs the TUI on the same terminal and exits with its code", async () => {
   const env = { SQUAD_PORT: String(await freePort()) };
