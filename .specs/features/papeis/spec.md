@@ -391,7 +391,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-30 | P1: Devolver ao trabalho quem para devendo | T9 | Implementing |
 | PAP-31 | P1: Devolver ao trabalho quem para devendo | T9 | Implementing |
 | PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Implementing |
-| PAP-33 | P1: `roles.json` | T10 | Pending |
+| PAP-33 | P1: `roles.json` | T10 | Implementing |
 | PAP-34 | P1: `roles.json` | T11 | Pending |
 | PAP-35 | P1: `roles.json` | T1, T14 | Implementing |
 | PAP-36 | P1: `roles.json` | T14 | Pending |

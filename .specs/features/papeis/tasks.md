@@ -328,11 +328,11 @@ T22
 
 **Done when**:
 
-- [ ] Um arquivo válido com os quatro papéis, e um válido com um papel só e sem `workflows`, são devolvidos como lidos
-- [ ] Cada recusa tem o seu teste, com o caminho na mensagem: arquivo ausente, texto que não é JSON, raiz que não é objeto, `roles` que não é lista, `name` fora dos quatro, `name` repetido, `when_to_use` ausente e vazio, `skills` que não é lista e com um texto vazio, `workflows` com chave diferente de `tlc` e `matt-pocock`, valor de `workflows` que não é lista de textos não vazios
-- [ ] `workflows: null` é recusado: a chave está presente e o valor não é objeto (leitura de PAP-33, em "Leituras da spec" abaixo)
-- [ ] Testes em `test/unit/roles.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Um arquivo válido com os quatro papéis, e um válido com um papel só e sem `workflows`, são devolvidos como lidos
+- [x] Cada recusa tem o seu teste, com o caminho na mensagem: arquivo ausente, texto que não é JSON, raiz que não é objeto, `roles` que não é lista, `name` fora dos quatro, `name` repetido, `when_to_use` ausente e vazio, `skills` que não é lista e com um texto vazio, `workflows` com chave diferente de `tlc` e `matt-pocock`, valor de `workflows` que não é lista de textos não vazios
+- [x] `workflows: null` é recusado: a chave está presente e o valor não é objeto (leitura de PAP-33, em "Leituras da spec" abaixo)
+- [x] Testes em `test/unit/roles.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
