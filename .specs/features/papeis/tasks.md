@@ -447,14 +447,14 @@ T22
 
 **Done when**:
 
-- [ ] `bun cli.ts` escreve o uso com uma linha para cada um de `start`, `tui`, `status` e `kill-broker`, e sai com 0; `bun cli.ts nada` escreve o mesmo uso e sai com 1
-- [ ] `bun cli.ts start nada` sai com 1 e a saída de erro começa com `squad: `
-- [ ] PAP-50 pelo processo real: `bun cli.ts start mother` num repositório temporário, com `SQUAD_CLAUDE` num comando que não existe, sai com 1 e `squad: ` traz o nome do comando
-- [ ] `bun cli.ts tui`, numa condição em que `bun tui.ts` sai com código diferente de 0, sai com o mesmo código
-- [ ] `bin.squad` de `broker/package.json` é `./cli.ts`, lido pelo teste
-- [ ] `status` e `kill-broker` passam nos testes que já existiam, sem mudança de expectativa
-- [ ] Testes em `test/integration/cli.test.ts`
-- [ ] Gate build passa
+- [x] `bun cli.ts` escreve o uso com uma linha para cada um de `start`, `tui`, `status` e `kill-broker`, e sai com 0; `bun cli.ts nada` escreve o mesmo uso e sai com 1
+- [x] `bun cli.ts start nada` sai com 1 e a saída de erro começa com `squad: `
+- [x] PAP-50 pelo processo real: `bun cli.ts start mother` num repositório temporário, com `SQUAD_CLAUDE` num comando que não existe, sai com 1 e `squad: ` traz o nome do comando
+- [x] `bun cli.ts tui`, numa condição em que `bun tui.ts` sai com código diferente de 0, sai com o mesmo código
+- [x] `bin.squad` de `broker/package.json` é `./cli.ts`, lido pelo teste
+- [x] `status` e `kill-broker` passam nos testes que já existiam, sem mudança de expectativa
+- [x] Testes em `test/integration/cli.test.ts`
+- [x] Gate build passa
 
 **Tests**: integration
 **Gate**: build

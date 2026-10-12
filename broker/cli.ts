@@ -2,13 +2,17 @@
 /**
  * squad CLI
  *
- * Utility commands for managing the broker.
+ * The command `squad`: opens the sessions and the TUI, and manages the broker.
  *
  * Usage:
- *   bun cli.ts status          — Show broker status
- *   bun cli.ts kill-broker     — Stop the broker daemon
+ *   squad start <role> [name] [--skip-permissions]   — Open a Claude Code session as a member of the squad
+ *   squad tui                                        — Open the TUI on this terminal
+ *   squad status                                     — Show broker status
+ *   squad kill-broker                                — Stop the broker daemon
  */
 
+import { join } from "node:path";
+import { launch } from "./launch.ts";
 import { brokerUrl, port } from "./shared/config.ts";
 
 const BROKER_PORT = port();
@@ -49,9 +53,30 @@ function listenerPids(): number[] {
     .map((p) => parseInt(p, 10));
 }
 
-const cmd = process.argv[2];
+const [cmd, ...rest] = process.argv.slice(2);
 
 switch (cmd) {
+  case "start": {
+    process.exitCode = await launch(rest, {
+      env: process.env,
+      cwd: process.cwd(),
+      platform: process.platform,
+      fetch: (url, init) => fetch(url, init),
+      // The session takes the terminal of the launcher
+      spawn: async (command, args, options) =>
+        Bun.spawn([command, ...args], { ...options, stdio: ["inherit", "inherit", "inherit"] }).exited,
+      stderr: (line) => console.error(line),
+    });
+    break;
+  }
+
+  case "tui": {
+    // The same runtime, on this terminal
+    const tui = Bun.spawn([process.execPath, join(import.meta.dir, "tui.ts")], { stdio: ["inherit", "inherit", "inherit"] });
+    process.exitCode = await tui.exited;
+    break;
+  }
+
   case "status": {
     try {
       const health = await brokerFetch<{ status: string; peers: number }>("/health");
@@ -91,6 +116,10 @@ switch (cmd) {
     console.log(`squad CLI
 
 Usage:
-  bun cli.ts status          Show broker status
-  bun cli.ts kill-broker     Stop the broker daemon`);
+  squad start <role> [name] [--skip-permissions]   Open a Claude Code session as a member of the squad
+  squad tui                                        Open the TUI on this terminal
+  squad status                                     Show broker status
+  squad kill-broker                                Stop the broker daemon`);
+    // No command asks for the usage; a command that does not exist is a mistake
+    if (cmd !== undefined) process.exitCode = 1;
 }
