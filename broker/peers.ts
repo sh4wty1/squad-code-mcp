@@ -68,7 +68,8 @@ export function refuse(error: string, hint: string): Refusal {
   return { ok: false, error, hint };
 }
 
-function namesOf(role: string): string[] {
+// The names a session of the role may take, and none for a role that does not exist
+export function namesOf(role: string): string[] {
   return ROSTER.filter((r) => r.role === role).map((r) => r.name);
 }
 

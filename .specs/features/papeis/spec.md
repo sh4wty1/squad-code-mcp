@@ -397,15 +397,15 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-36 | P1: `roles.json` | T14 | Pending |
 | PAP-37 | P1: Lançar uma sessão | T1, T14, T22 | Implementing |
 | PAP-38 | P1: Lançar uma sessão | T14 | Pending |
-| PAP-39 | P1: Lançar uma sessão | T12 | Pending |
-| PAP-40 | P1: Lançar uma sessão | T12, T22 | Pending |
+| PAP-39 | P1: Lançar uma sessão | T12 | Implementing |
+| PAP-40 | P1: Lançar uma sessão | T12, T22 | Implementing |
 | PAP-41 | P1: Lançar uma sessão | T14 | Pending |
-| PAP-42 | P1: Lançar uma sessão | T12, T14 | Pending |
-| PAP-43 | P1: Lançar uma sessão | T12 | Pending |
-| PAP-44 | P1: Lançar uma sessão | T12 | Pending |
-| PAP-45 | P1: Lançar uma sessão | T12 | Pending |
-| PAP-46 | P1: Lançar uma sessão | T12 | Pending |
-| PAP-47 | P1: Lançar uma sessão | T12 | Pending |
+| PAP-42 | P1: Lançar uma sessão | T12, T14 | Implementing |
+| PAP-43 | P1: Lançar uma sessão | T12 | Implementing |
+| PAP-44 | P1: Lançar uma sessão | T12 | Implementing |
+| PAP-45 | P1: Lançar uma sessão | T12 | Implementing |
+| PAP-46 | P1: Lançar uma sessão | T12 | Implementing |
+| PAP-47 | P1: Lançar uma sessão | T12 | Implementing |
 | PAP-48 | Edge case | T13 | Pending |
 | PAP-49 | Edge case | T14 | Pending |
 | PAP-50 | P1: Lançar uma sessão | T14, T15 | Pending |

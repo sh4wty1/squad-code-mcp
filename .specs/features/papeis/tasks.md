@@ -369,15 +369,15 @@ T22
 
 **Done when**:
 
-- [ ] `parseStart` aceita `worker`, `worker worker-2` e `--skip-permissions` antes e depois do papel; devolve erro para papel ausente, papel fora dos quatro, dois posicionais depois do papel, opção desconhecida e nome que não é do papel (`worker leader`, `mother worker-1`, `worker worker-4`), um teste por gatilho (PAP-42)
-- [ ] PAP-43: para cada papel a lista começa por `mcp__plugin_squad_squad__ready` e segue a ordem de `toolsFor(papel)` com o prefixo; a do `worker` é comparada com a lista escrita à mão e não tem `send_verdict`, `plan` nem `open_feature`
-- [ ] PAP-44: as regras `Bash(<comando>:*)` de cada papel, na ordem da spec, comparadas por inteiro: cinco para todos, mais três para `worker`, `leader` e `mother`, só `git switch` para `judge`, e `git merge` por último só no `leader`; nenhuma lista tem `push`, `reset`, `checkout` ou `rm`
-- [ ] PAP-45: em `win32` as mesmas regras vêm de novo depois das `Bash`, na mesma ordem, com `PowerShell(`; em `linux` e em `darwin` nenhuma regra `PowerShell`
-- [ ] PAP-46: o texto por inteiro para um papel com os dois workflows, para o `judge` (duas linhas) e para um papel com um workflow só; uma lista vazia omite a linha dela
-- [ ] PAP-39: sai toda variável que começa com `CLAUDE` (`CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`, `CLAUDE_PLUGIN_ROOT`), entram `SQUAD_NAME` e `SQUAD_ROLE`, o resto fica igual e o objeto de entrada não muda
-- [ ] PAP-40 e PAP-47: o vetor de argumentos comparado por inteiro, sem e com `--skip-permissions`; o último é `/squad:<papel>` e vem logo depois do valor de `--append-system-prompt`
-- [ ] Testes em `test/unit/launch-args.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `parseStart` aceita `worker`, `worker worker-2` e `--skip-permissions` antes e depois do papel; devolve erro para papel ausente, papel fora dos quatro, dois posicionais depois do papel, opção desconhecida e nome que não é do papel (`worker leader`, `mother worker-1`, `worker worker-4`), um teste por gatilho (PAP-42)
+- [x] PAP-43: para cada papel a lista começa por `mcp__plugin_squad_squad__ready` e segue a ordem de `toolsFor(papel)` com o prefixo; a do `worker` é comparada com a lista escrita à mão e não tem `send_verdict`, `plan` nem `open_feature`
+- [x] PAP-44: as regras `Bash(<comando>:*)` de cada papel, na ordem da spec, comparadas por inteiro: cinco para todos, mais três para `worker`, `leader` e `mother`, só `git switch` para `judge`, e `git merge` por último só no `leader`; nenhuma lista tem `push`, `reset`, `checkout` ou `rm`
+- [x] PAP-45: em `win32` as mesmas regras vêm de novo depois das `Bash`, na mesma ordem, com `PowerShell(`; em `linux` e em `darwin` nenhuma regra `PowerShell`
+- [x] PAP-46: o texto por inteiro para um papel com os dois workflows, para o `judge` (duas linhas) e para um papel com um workflow só; uma lista vazia omite a linha dela
+- [x] PAP-39: sai toda variável que começa com `CLAUDE` (`CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`, `CLAUDE_PLUGIN_ROOT`), entram `SQUAD_NAME` e `SQUAD_ROLE`, o resto fica igual e o objeto de entrada não muda
+- [x] PAP-40 e PAP-47: o vetor de argumentos comparado por inteiro, sem e com `--skip-permissions`; o último é `/squad:<papel>` e vem logo depois do valor de `--append-system-prompt`
+- [x] Testes em `test/unit/launch-args.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
