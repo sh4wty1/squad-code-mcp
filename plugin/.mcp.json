@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "squad": {
+      "command": "bun",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/../broker/server.ts"]
+    }
+  }
+}

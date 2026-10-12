@@ -186,12 +186,12 @@ T22
 
 **Done when**:
 
-- [ ] PAP-01: `plugin.json` tem `name` `squad`; em `broker/` não existem `.claude-plugin`, `hooks`, `skills` nem `roles.json`
-- [ ] PAP-02: `mcpServers` de `plugin/.mcp.json` é, por inteiro, `{ squad: { command: "bun", args: ["${CLAUDE_PLUGIN_ROOT}/../broker/server.ts"] } }`
-- [ ] PAP-03: as chaves de `hooks` são exatamente `UserPromptSubmit` e `Stop`; cada uma tem um único hook `command`, com os dois comandos da spec comparados como texto e os `timeout` 10 e 20 com o literal
-- [ ] `tsconfig.json` inclui `../plugin` sem deixar de incluir `broker/`: um erro de tipo posto à mão num `.ts` de `plugin/` faz o `tsc` falhar (conferido e desfeito, não commitado)
-- [ ] Testes em `test/unit/plugin-manifest.test.ts`
-- [ ] Gate build passa
+- [x] PAP-01: `plugin.json` tem `name` `squad`; em `broker/` não existem `.claude-plugin`, `hooks`, `skills` nem `roles.json`
+- [x] PAP-02: `mcpServers` de `plugin/.mcp.json` é, por inteiro, `{ squad: { command: "bun", args: ["${CLAUDE_PLUGIN_ROOT}/../broker/server.ts"] } }`
+- [x] PAP-03: as chaves de `hooks` são exatamente `UserPromptSubmit` e `Stop`; cada uma tem um único hook `command`, com os dois comandos da spec comparados como texto e os `timeout` 10 e 20 com o literal
+- [x] `tsconfig.json` inclui `../plugin` sem deixar de incluir `broker/`: um erro de tipo posto à mão num `.ts` de `plugin/` faz o `tsc` falhar (conferido e desfeito, não commitado)
+- [x] Testes em `test/unit/plugin-manifest.test.ts`
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build

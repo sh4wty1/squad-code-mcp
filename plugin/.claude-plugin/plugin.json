@@ -1,0 +1,5 @@
+{
+  "name": "squad",
+  "version": "0.1.0",
+  "description": "A squad of Claude Code sessions: the MCP channel server, the hooks that mark each turn and the protocol skill of each role"
+}
