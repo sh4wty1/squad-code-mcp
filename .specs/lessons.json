@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 83,
+  "next_id": 90,
   "lessons": [
     {
       "id": "L-001",
@@ -1525,6 +1525,134 @@
       ],
       "created": "2026-10-12T09:24:38Z",
       "last_seen": "2026-10-12T09:24:38Z"
+    },
+    {
+      "id": "L-083",
+      "key": "surviving_mutant::when a rule selects names by a prefix or a pattern test a name that matches it without the separator the usual names have",
+      "text": "When a rule selects names by a prefix or a pattern, test a name that matches it without the separator the usual names have",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "K1 broker/launch.ts:151 (PAP-56) (launcher)",
+        "K2 broker/launch.ts:92 (PAP-39) (launcher)",
+        "K15 plugin/hooks/usage.ts:85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-12T11:29:26Z",
+      "last_seen": "2026-10-12T11:29:26Z"
+    },
+    {
+      "id": "L-084",
+      "key": "surviving_mutant::when a surviving mutant gets a test give the same case to every other place that has the same check",
+      "text": "When a surviving mutant gets a test, give the same case to every other place that has the same check",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-085",
+      "key": "surviving_mutant::test a shutdown with each external dependency already gone and assert every cleanup that must still happen",
+      "text": "Test a shutdown with each external dependency already gone, and assert every cleanup that must still happen",
+      "signal": "surviving_mutant",
+      "scope": "server",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "K13 broker/server.ts:383 (PAP-07) (server)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-086",
+      "key": "surviving_mutant::test a type guard with a wrong value the code after it would take as valid not only with one that fails by itself",
+      "text": "Test a type guard with a wrong value the code after it would take as valid, not only with one that fails by itself",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "K9 plugin/hooks/usage.ts:75 (PAP-21) (hooks)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-087",
+      "key": "surviving_mutant::when code passes a flag to a tool to force one behavior test an input for which the tool without the flag would choose another",
+      "text": "When code passes a flag to a tool to force one behavior, test an input for which the tool without the flag would choose another",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "A2 broker/launch.ts:143 (PAP-53) (launcher)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-088",
+      "key": "surviving_mutant::test a deadline on a request through the real process with a peer that never answers a request left pending keeps the process alive",
+      "text": "Test a deadline on a request through the real process with a peer that never answers: a request left pending keeps the process alive",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "A10 broker/launch.ts:178 (PAP-37) (launcher)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-089",
+      "key": "spec_precision_gap::state what a process does with a request still pending when its deadline passes and how soon the process may exit",
+      "text": "State what a process does with a request still pending when its deadline passes, and how soon the process may exit",
+      "signal": "spec_precision_gap",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PAP-37 with the definition of the open feature for the launcher, spec.md:100 (launcher)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
     }
   ]
 }

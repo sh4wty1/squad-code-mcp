@@ -166,23 +166,30 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-12, depois da segunda volta do Verifier, com as correções dela em andamento.
+Atualizado em 2026-10-12, depois da terceira e última volta do Verifier, que deu FAIL. A fatia está parada à espera da decisão do dev.
 
 - **Feature**: Papéis, `.specs/features/papeis/`.
-- **Phase / Task**: Execute, no fechamento. T1 a T26 estão commitadas. A fase 8 de `tasks.md` (T27 a T31, correções da segunda volta, só de teste) estava com um sub-agente da sessão que escreveu isto. Depois dela vem a terceira volta do Verifier, que é a última.
-- **Completed**: T1 a T26, de `f9ec67e` a `8f4e442`; `real-sessions.md`; duas voltas do Verifier, as duas FAIL sem defeito de produção (`validation-round-1.md`, `validation-round-2.md`); a suíte no Windows e no Linux sobre `8f4e442`.
-- **In-progress** (file:line): T27 a T31. O que já foi feito está marcado em `tasks.md` e tem commit próprio; o resto, não. Um teste pela metade na árvore de trabalho é dessa fase.
-- **Next step**: `git status --porcelain`, `git log --oneline -8` e as caixas de T27 a T31 em `tasks.md`. Terminar as que faltam, um commit por tarefa, provando que cada mutante citado morre. Com as cinco commitadas: gate completo no Windows, a suíte no Linux sobre o HEAD, e a terceira volta do Verifier, com um agente que não escreveu nada e uma cópia física nova. Com FAIL na terceira, parar: o resíduo e a decisão são do dev.
-- **Blockers**: nenhum. Uma confirmação pendente do dev, abaixo. O login do Claude Code do dev avisava "expires in 1 day" em 2026-10-12.
-- **Uncommitted files**: nenhum na hora desta atualização além do que o sub-agente da fase 8 estiver escrevendo em `broker/test/` e em `tasks.md`.
+- **Phase / Task**: Execute, no fechamento, parado no limite de três voltas de verificação. T1 a T31 estão commitadas. A terceira volta do Verifier deu FAIL, sem defeito de produção: oito lacunas de teste e uma de documentos.
+- **Completed**: T1 a T31, de `f9ec67e` a `ac25e8d`; `real-sessions.md`; três voltas do Verifier, as três FAIL sem defeito de produção (`validation-round-1.md`, `validation-round-2.md`, e `validation.md`, que é a terceira); a suíte no Windows e no Linux sobre `ac25e8d`.
+- **In-progress** (file:line): nada.
+- **Next step**: a decisão do dev, abaixo em "A decisão que falta". Nenhum agente escreve teste, código ou relatório desta fatia antes dela.
+- **Blockers**: a decisão do dev sobre o resíduo da volta 3, e uma confirmação pendente dele, abaixo. O login do Claude Code do dev avisava "expires in 1 day" em 2026-10-12.
+- **Uncommitted files**: nenhum.
 - **Branch**: `feat/papeis`, saído da `main` em `f162184`. Só local: nada foi enviado ao remoto. O repositório tem um segundo worktree, `squad-code-mcp.worktrees/tui-clicavel` no branch `spec/tui-clicavel`, que é de outro trabalho do dev: não tocar. `handoff-codex.md`, na pasta da fatia, é o mesmo estado escrito para um agente sem a skill.
 
 ### As voltas do Verifier
 
 - **Volta 1**, sobre `f162184..0848c8f`: FAIL. Sensor com 76 mutações e 5 vivas, em três testes: `squad start` nunca rodava até o fim (PAP-37), o arquivo de credencial que não pode ser apagado (PAP-08), `/events` com outro status (PAP-31). Corrigido em T24 (`efb6d74`), T25 (`fa75877`) e T26 (`8f4e442`). Relatório em `validation-round-1.md`.
 - **Volta 2**, sobre `f162184..8f4e442`: FAIL. 74 de 75 requisitos com evidência; os cinco mutantes da volta 1 morrem; nenhuma asserção foi afrouxada e nenhum arquivo de produção mudou. De 21 mutações novas, 5 vivas, todas em `broker/cli.ts` e `broker/launch.ts`: entrada e saída herdadas (PAP-37), a feature aberta depois de uma fechada (PAP-53, PAP-54), mensagem do git com mais de uma linha (PAP-41, PAP-57) e `events` que não é lista (PAP-38). Relatório em `validation-round-2.md`; `validation.md` é a cópia dele até a volta 3.
-- **Correções da volta 2**: T27 a T30, uma por lacuna, e a T31, uma varredura de mutantes de `launch.ts` e do `start` e do `tui` de `cli.ts`, para a terceira volta não achar um sexto.
-- **Volta 3**: a última. Não foi despachada.
+- **Correções da volta 2**: T27 a T30, uma por lacuna (`8539150`, `3166093`, `117ab87`, `a3280e3`), e a T31 (`ac25e8d`), uma varredura de 145 mutações em clones fora do repositório: 122 morrem nos testes que existiam, 10 ganharam teste, 13 ficaram vivas com o motivo em `tasks.md`.
+- **Volta 3**, sobre `f162184..ac25e8d`: FAIL. 68 de 75 requisitos com evidência que bate com a spec. Os dez mutantes das voltas 1 e 2 morrem; as quatro skills dizem o que PAP-62 a PAP-72, PAP-74 e PAP-75 pedem; nenhum arquivo de produção mudou depois de `6609630` e nenhuma asserção foi afrouxada. De 17 mutações novas, 6 vivas: `.env*` que não é `.env` nem `.env.<algo>` (PAP-56), variável `CLAUDE*` sem `_` nem `CODE` (PAP-39), `transcript_path` `0` (PAP-21), a sessão que fecha com o broker fora (PAP-07), arquivo de subagente que não se chama `agent-*` (PAP-18) e um 201 de `/events` no hook de parada (PAP-31). Das 13 que a T31 deixou vivas, o Verifier discordou de duas: sem `--detach` na ponta do branch não é equivalente (PAP-53), e sem `abort` o launcher sai 360 s depois da sessão com um broker que nunca responde (PAP-37, que a spec não limita). Relatório, com Fix 1 a Fix 9: `validation.md`. Lições L-083 a L-089.
+
+### A decisão que falta
+
+O limite da skill são três voltas de correção e verificação, e as três foram. O dev escolhe:
+
+1. **Mais uma volta.** Fix 1 a Fix 8 de `validation.md` viram tarefas só de teste, uma por lacuna, com commit próprio (o Fix 8 pede antes uma frase na spec sobre quando o launcher sai), e um Verifier novo roda de novo. O padrão das três voltas é o mesmo: os testes usam só a forma mais comum da entrada, e cada volta acha outra forma. Nada indica que a quarta seja a última.
+2. **Aceitar a fatia com o resíduo registrado.** O código faz o que a spec diz em toda sonda das três voltas; o que falta é teste que distinga. `validate_state.py papeis` continua saindo com 1 enquanto `validation.md` disser FAIL: aceitar é uma decisão do dev fora do gate, e os passos 3 a 6 do fechamento seguem com essa ressalva escrita.
 
 ### Confirmação pendente do dev
 
@@ -191,7 +198,7 @@ A definição de "feature aberta, para o launcher", na spec, ganhou uma frase a 
 ### Fechamento, na ordem
 
 1. **Verifier.** Um agente que não escreveu código, teste nem relatório, numa cópia física (`git clone --no-hardlinks` para um diretório temporário e `bun install --frozen-lockfile` em `broker/`), sem junction para o `node_modules` real. Checklist: `references/validate.md` da skill. Faixa: `f162184..HEAD`. Sensor com 8 mutações ou mais, só na cópia. Ele lê as quatro skills contra PAP-62 a PAP-72, PAP-74 e PAP-75, frase a frase, e confere `real-sessions.md` contra `real-sessions-log.txt`. Escreve só `validation.md` e as lições.
-2. **Lacunas.** Cada lacuna vira tarefa de correção com teste primeiro e commit próprio, e o Verifier roda de novo, com outro agente. Limite de três voltas, e duas já foram; depois da terceira o resíduo e a decisão voltam para o dev.
+2. **Lacunas.** Cada lacuna vira tarefa de correção com teste primeiro e commit próprio, e o Verifier roda de novo, com outro agente. Limite de três voltas, e as três já foram: o resíduo e a decisão estão com o dev (acima).
 3. **Com PASS:** status `Verified` nos 75 requisitos da tabela da spec e a linha "Coverage"; as caixas de "Goals" e "Success Criteria" da spec, com os números das duas plataformas (abaixo); `**Status**: Done` em `tasks.md`; `validate_state.py papeis` com exit 0.
 4. **`ROADMAP.md`:** marcar a fatia Papéis, as duas pendências já resolvidas (formato do `roles.json` conferido contra o manifest; modo de permissão decidido) e reescrever o parágrafo "Agora".
 5. **Este Handoff**, apontando para a fatia Gate.
@@ -232,10 +239,10 @@ A definição de "feature aberta, para o launcher", na spec, ganhou uma frase a 
 
 ### Evidência e limites
 
-- Windows, `8f4e442`: `tsc` 0 e 1626 pass, 5 skip, 0 fail, 75 arquivos. Antes da fatia: 1303 pass, 4 skip. O skip novo é a asserção do modo `0600` do arquivo de credencial, que o Windows não tem. O código de produção é o de `6609630`; depois dele só entraram testes e documentos.
-- Linux, `8f4e442`: contêiner `oven/bun:1.4.2` sobre clone limpo, `tsc` 0 e 3 de 3 execuções com 1630 pass, 1 skip, 0 fail, 75 arquivos, entre 148 e 200 s cada. O skip é o de `QST-99`, anterior à fatia. A asserção do modo `0600` de PAP-06, pulada no Windows, passa lá. Antes da fatia: 1306 pass, 1 skip.
+- Windows, `ac25e8d`: `tsc` 0 e 1645 pass, 5 skip, 0 fail, 75 arquivos; o Verifier repetiu no clone dele. Antes da fatia: 1303 pass, 4 skip. O skip novo é a asserção do modo `0600` do arquivo de credencial, que o Windows não tem. O código de produção é o de `6609630`; depois dele só entraram testes e documentos.
+- Linux, `ac25e8d`: contêiner `oven/bun:1.4.2` sobre clone limpo, `tsc` 0 e 3 de 3 execuções com 1649 pass, 1 skip, 0 fail, 75 arquivos, entre 90 e 99 s cada; o Verifier rodou mais duas no contêiner dele, com o mesmo resultado. O skip é o de `QST-99`, anterior à fatia. A asserção do modo `0600` de PAP-06, pulada no Windows, passa lá e mata o mutante `0644`. O caso de `squad tui` num pseudo-terminal (`terminal` de `Bun.spawn`) passa nas duas plataformas. Antes da fatia: 1306 pass, 1 skip.
 - Sessões reais: `real-sessions.md`, com o log em `real-sessions-log.txt` e as ferramentas para repetir em `real-session-driver.py` e `real-session-tools/`. Tudo em `haiku`, no Windows.
-- Rodar de dentro de `broker/`: `bun test` e `bun node_modules/typescript/bin/tsc --noEmit`. Não usar `bun x tsc`. `EVT-43` em `test/integration/routes.test.ts` falha de vez em quando por poucos ms, e `PEER-28` e `PEER-29` em `test/integration/server.test.ts` estouraram o tempo de 5 s uma vez com a suíte inteira e a máquina ocupada: rodar de novo. No Linux a suíte roda num contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` instalados dentro dele, sobre um clone montado só para leitura.
+- Rodar de dentro de `broker/`: `bun test` e `bun node_modules/typescript/bin/tsc --noEmit`. Não usar `bun x tsc`. `EVT-43` em `test/integration/routes.test.ts` falha de vez em quando por poucos ms, e `PEER-28` e `PEER-29` em `test/integration/server.test.ts` estouraram o tempo de 5 s uma vez com a suíte inteira e a máquina ocupada: rodar de novo. O caso de PAP-38 que mede os 2000 ms em `test/unit/launch.test.ts` afirma menos de 5000 ms e falha com a máquina ocupada (três suítes ao mesmo tempo): numa varredura de mutantes, uma morte que vem só dele não vale, e a mutação roda de novo sozinha. `claude` está no caminho desta máquina: um mutante que faça `cli.ts` ou `launch.ts` ignorar `SQUAD_CLAUDE` não roda contra `test/integration/cli.test.ts`. No Linux a suíte roda num contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` instalados dentro dele, sobre um clone montado só para leitura.
 - Docker Desktop: em 2026-10-12 ele não subia por causa de um socket velho em `%LOCALAPPDATA%\Docker\run`, que o Windows não deixa apagar. Renomear a pasta `run` resolve (ficaram `run.stale-20261010` e `run.stale-20261012`). Ele ficou de pé no fim desta sessão.
 - Nunca subir `broker.ts` ou `server.ts` à mão sem `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários. Sessão real de teste: só em repositório descartável, com `SQUAD_PORT`, `SQUAD_DB`, `SQUAD_TOKEN_FILE` e `SQUAD_WORKTREES` temporários e sem as variáveis `CLAUDE*`.
 - As sessões de teste deixaram cinco pastas de transcript em `~/.claude/projects/` com `scratchpad-rs` no nome. São descartáveis; ninguém as apagou.

@@ -1,8 +1,8 @@
 # Papéis: handoff para o Codex
 
 Escrito em 2026-10-12 pela sessão do Claude Code que executou a fatia, e atualizado no mesmo
-dia depois da segunda volta de verificação. Use este documento se aquela sessão não fechou
-a fatia. Ele se basta: você não precisa da skill
+dia depois da terceira e última volta de verificação, que deu FAIL. Use este documento se
+aquela sessão não fechou a fatia. Ele se basta: você não precisa da skill
 `tlc-spec-driven` nem do histórico do chat.
 
 ## O que é
@@ -15,7 +15,7 @@ deixa para os hooks.
 
 - Spec, a fonte da verdade: `.specs/features/papeis/spec.md`, 75 requisitos (PAP-01 a PAP-75).
 - Desenho: `.specs/features/papeis/design.md`. Decisões: `.specs/STATE.md`, AD-015 a AD-020.
-- Tarefas: `.specs/features/papeis/tasks.md`. T1 a T26 estão feitas e commitadas; T27 a T31
+- Tarefas: `.specs/features/papeis/tasks.md`. T1 a T31 estão feitas e commitadas; T27 a T31
   são as correções da segunda volta de verificação.
 - Estado do projeto: a seção "Handoff" de `.specs/STATE.md`.
 
@@ -23,9 +23,9 @@ deixa para os hooks.
 
 - Branch `feat/papeis`, saído da `main` em `f162184`. **Só local, nada no remoto.**
 - O código de produção é o de `6609630`. Depois dele só entraram testes e documentos; o
-  último commit de teste é `8f4e442`.
-- Windows, `8f4e442`: `tsc` 0 e 1626 pass, 5 skip, 0 fail. Linux (contêiner
-  `oven/bun:1.4.2` sobre clone limpo), `8f4e442`: `tsc` 0 e 3 de 3 execuções com 1630 pass,
+  último commit de teste é `ac25e8d`.
+- Windows, `ac25e8d`: `tsc` 0 e 1645 pass, 5 skip, 0 fail. Linux (contêiner
+  `oven/bun:1.4.2` sobre clone limpo), `ac25e8d`: `tsc` 0 e 3 de 3 execuções com 1649 pass,
   1 skip, 0 fail. A asserção do modo `0600` de PAP-06, pulada no Windows, passa no Linux.
 - Sessões reais: `.specs/features/papeis/real-sessions.md`.
 - O repositório tem um segundo worktree, `squad-code-mcp.worktrees/tui-clicavel`, de outro
@@ -39,13 +39,22 @@ deixa para os hooks.
 - **Volta 2**, sobre `f162184..8f4e442`: FAIL, de novo sem defeito de produção. Os cinco
   da volta 1 morrem. De 21 mutações novas, 5 vivas em `broker/cli.ts` e `broker/launch.ts`
   (PAP-37, PAP-53 e PAP-54, PAP-41 e PAP-57, PAP-38). Relatório:
-  `.specs/features/papeis/validation-round-2.md`; `validation.md` é a cópia dele.
-- **Correções da volta 2**: a fase 8 de `tasks.md`, T27 a T31, só de teste. Estava com um
-  sub-agente daquela sessão quando isto foi escrito: veja as caixas em `tasks.md` e o
-  `git log`. A T31 é uma varredura de mutantes do launcher e do comando.
-- **Volta 3**: a última. Depois dela, com FAIL, o resíduo e a decisão voltam para o dev.
+  `.specs/features/papeis/validation-round-2.md`.
+- **Correções da volta 2**: a fase 8 de `tasks.md`, T27 a T31, só de teste, commitadas de
+  `8539150` a `ac25e8d`. A T31 é uma varredura de 145 mutações do launcher, do comando, dos
+  hooks e do leitor de papéis, com o resultado escrito na própria tarefa.
+- **Volta 3**, sobre `f162184..ac25e8d`: FAIL, a última, de novo sem defeito de produção. Os
+  dez mutantes das duas primeiras morrem. De 17 mutações novas, 6 vivas (PAP-56, PAP-39,
+  PAP-21, PAP-07, PAP-18, PAP-31), e o Verifier discordou de dois dos motivos da T31
+  (PAP-53, PAP-37). Relatório, com Fix 1 a Fix 9: `.specs/features/papeis/validation.md`.
+  **O resíduo e a decisão estão com o dev**: mais uma volta, ou aceitar a fatia com as
+  lacunas registradas. Está em "A decisão que falta", no Handoff de `.specs/STATE.md`.
 
 ## O que falta
+
+**Hoje o estado é o terceiro item da lista abaixo, com FAIL: pare e leve o resíduo ao dev.**
+Se ele pedir mais uma volta, as correções são os Fix 1 a Fix 8 de `validation.md`, pelo
+caminho B, e a verificação é de outro agente, pelo caminho A.
 
 A fatia só fecha com um relatório de verificação independente com PASS. Comece por
 reconciliar: `git status --porcelain`, `git log --oneline -8`, as caixas de T27 a T31 em

@@ -504,6 +504,48 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: PAP-38 - .specs/features/papeis/spec.md:99 - F3 (spec routes)
 - last seen: 2026-10-12T09:24:38Z
 
+### L-083 - When a rule selects names by a prefix or a pattern, test a name that matches it without the separator the usual names have
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: K1 broker/launch.ts:151 (PAP-56) (launcher) (+2 more)
+- last seen: 2026-10-12T11:29:26Z
+
+### L-084 - When a surviving mutant gets a test, give the same case to every other place that has the same check
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-085 - Test a shutdown with each external dependency already gone, and assert every cleanup that must still happen
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `server` · harmful: 0
+- features: papeis
+- evidence: K13 broker/server.ts:383 (PAP-07) (server)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-086 - Test a type guard with a wrong value the code after it would take as valid, not only with one that fails by itself
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: K9 plugin/hooks/usage.ts:75 (PAP-21) (hooks)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-087 - When code passes a flag to a tool to force one behavior, test an input for which the tool without the flag would choose another
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: A2 broker/launch.ts:143 (PAP-53) (launcher)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-088 - Test a deadline on a request through the real process with a peer that never answers: a request left pending keeps the process alive
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: A10 broker/launch.ts:178 (PAP-37) (launcher)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-089 - State what a process does with a request still pending when its deadline passes, and how soon the process may exit
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: PAP-37 with the definition of the open feature for the launcher, spec.md:100 (launcher)
+- last seen: 2026-10-12T11:29:27Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

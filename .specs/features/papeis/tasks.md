@@ -833,13 +833,14 @@ Vivos sem teste novo:
 | Mutante | Motivo |
 | ------- | ------ |
 | `launch.ts:216`, a feature aberta é a última sem `feature_closed` (`findLast`) | Equivalente: o broker não grava duas features abertas |
-| `launch.ts:143` e `:144`, sem `--detach` | Equivalente: o git destaca sozinho num ref que não é nome curto de branch (`refs/heads/<branch>`, `HEAD`) |
+| `launch.ts:144`, sem `--detach` no `HEAD` | Equivalente: o git destaca sozinho em `HEAD` |
+| `launch.ts:143`, sem `--detach` na ponta do branch | **Não é equivalente**, como a volta 3 mostrou (A2, PAP-53): com um branch de nome curto `refs/heads/<branch da feature>` no repositório, o worktree do worker nasce nesse branch, em outro commit. Fica sem teste: é o Fix 6 de `validation.md` |
 | `launch.ts:124`, só uma das duas metades da guarda de "não é repositório" | Equivalente: fora de um repositório o git falha e não escreve nada |
 | `nudge.ts:36`, sem a guarda do nome fora do squad | Equivalente: esse nome não tem agente na regra de status |
 | `nudge.ts:59`, sem a conferência de `stalled` | Equivalente: só o agente `stalled` tem `owes` |
 | `launch.ts:126`, sem `resolve` | Nenhum requisito define: o separador do diretório da mother no Windows; no Linux é equivalente |
 | `launch.ts:146`, sem `trim` | Nenhum requisito define: um espaço no fim da linha de `squad: ` |
-| `launch.ts:178`, sem `abort` | Nenhum requisito define: a leitura atrasada não é cancelada, e o resultado é o mesmo |
+| `launch.ts:178`, sem `abort` | O motivo dado aqui antes, "o resultado é o mesmo", era falso, como a volta 3 mediu (A10): com um broker que aceita a conexão e nunca responde, o launcher sai 360 s depois da sessão, e não 2,2 s. O código de saída é o mesmo e a spec não limita o tempo de saída: é a lacuna de precisão de PAP-37 e o Fix 8 de `validation.md` |
 | `launch.ts:193`, sem `clearTimeout` | Nenhum requisito define: o processo do launcher pode levar até 2 s a mais para sair |
 | `launch.ts:224`, sem o motivo depois do nome do comando | Nenhum requisito define: PAP-50 pede o nome do comando na linha |
 | `cli.ts:75`, a TUI roda com o `bun` do caminho | Nenhum requisito define qual `bun` roda a TUI |
