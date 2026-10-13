@@ -198,12 +198,12 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] Cada aba: a primeira e a última célula dela têm a tecla dela (`1`, `2`, `3`, `4`, `?`), na aba ativa e nas outras; o contador da `4 perguntas` tem `4`; a célula entre duas abas não tem marca
-- [ ] ` ? N ` tem `4` nas células dele, com N de um e de dois dígitos; a célula antes e a depois não
-- [ ] Num frame com gate pendente e num com permissão pendente, o selo tem `g` ou `x` em todas as células dele; num frame com outro selo (bloqueado, offline, parado, escalado), ele não tem marca
-- [ ] De `│` até o fim de ` est.` tem `t`, com `feature` e com `sessão`; os tokens à esquerda e o lado direito da linha 38 não
-- [ ] Testes em `test/unit/tui-hits.test.ts`, com as `View` dos frames
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Cada aba: a primeira e a última célula dela têm a tecla dela (`1`, `2`, `3`, `4`, `?`), na aba ativa e nas outras; o contador da `4 perguntas` tem `4`; a célula entre duas abas não tem marca
+- [x] ` ? N ` tem `4` nas células dele, com N de um e de dois dígitos; a célula antes e a depois não
+- [x] Num frame com gate pendente e num com permissão pendente, o selo tem `g` ou `x` em todas as células dele; num frame com outro selo (bloqueado, offline, parado, escalado), ele não tem marca
+- [x] De `│` até o fim de ` est.` tem `t`, com `feature` e com `sessão`; os tokens à esquerda e o lado direito da linha 38 não
+- [x] Testes em `test/unit/tui-hits.test.ts`, com as `View` dos frames
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

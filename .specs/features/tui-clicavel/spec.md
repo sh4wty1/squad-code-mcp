@@ -329,12 +329,12 @@ cada item, e com o que ficou sem conferir.
 | CLK-15 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-16 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
 | CLK-17 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-18 | P1: Navegar com o clique | - | Pending |
+| CLK-18 | P1: Navegar com o clique | T5 | Implementing |
 | CLK-19 | P1: Navegar com o clique | - | Pending |
 | CLK-20 | P1: Navegar com o clique | - | Pending |
 | CLK-21 | P1: Navegar com o clique | - | Pending |
 | CLK-22 | P1: Navegar com o clique | - | Pending |
-| CLK-23 | P1: Navegar com o clique | - | Pending |
+| CLK-23 | P1: Navegar com o clique | T5 | Implementing |
 | CLK-24 | P1: Navegar com o clique | - | Pending |
 | CLK-25 | P1: Navegar com o clique | - | Pending |
 | CLK-26 | P1: Navegar com o clique | - | Pending |
@@ -347,10 +347,10 @@ cada item, e com o que ficou sem conferir.
 | CLK-33 | P1: Atalhos e selos clicáveis | - | Pending |
 | CLK-34 | P1: Atalhos e selos clicáveis | - | Pending |
 | CLK-35 | P1: Atalhos e selos clicáveis | - | Pending |
-| CLK-36 | P1: Atalhos e selos clicáveis | - | Pending |
-| CLK-37 | P1: Atalhos e selos clicáveis | - | Pending |
-| CLK-38 | P1: Atalhos e selos clicáveis | - | Pending |
-| CLK-39 | P1: Atalhos e selos clicáveis | - | Pending |
+| CLK-36 | P1: Atalhos e selos clicáveis | T5 | Implementing |
+| CLK-37 | P1: Atalhos e selos clicáveis | T5 | Implementing |
+| CLK-38 | P1: Atalhos e selos clicáveis | T5 | Implementing |
+| CLK-39 | P1: Atalhos e selos clicáveis | T5 | Implementing |
 | CLK-40 | P1: Modal de resposta com o mouse | - | Pending |
 | CLK-41 | P1: Modal de resposta com o mouse | - | Pending |
 | CLK-42 | P1: Modal de resposta com o mouse | - | Pending |
