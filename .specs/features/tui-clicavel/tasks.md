@@ -267,10 +267,10 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] Os quatro cantos da caixa da esquerda têm `wheel: "thread"`; a caixa da direita não tem `wheel`
-- [ ] Nenhuma célula da tela tem `row`, `ticket` ou `panel`
-- [ ] Testes em `test/unit/tui-hits.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Os quatro cantos da caixa da esquerda têm `wheel: "thread"`; a caixa da direita não tem `wheel`
+- [x] Nenhuma célula da tela tem `row`, `ticket` ou `panel`
+- [x] Testes em `test/unit/tui-hits.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

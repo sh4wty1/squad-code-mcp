@@ -3,6 +3,7 @@ import type { SquadEvent } from "../../shared/contract.ts";
 import { clock, grid, len, type Grid, type Hit } from "../../tui/grid.ts";
 import { chrome, drawKeys, MAIN_KEYS, stats, type Keys } from "../../tui/screens/chrome.ts";
 import { main } from "../../tui/screens/main.ts";
+import { thread } from "../../tui/screens/thread.ts";
 import type { Ui, View } from "../../tui/view.ts";
 import { frameView } from "../frames/view.ts";
 
@@ -268,12 +269,13 @@ const rect = (x1: number, x2: number, y1: number, y2: number): string[] =>
 // The text a line draws from one column to another
 const textOf = (g: Grid, y: number, from: number, to: number): string => g.rows[y]!.slice(from, to + 1).map((cell) => cell.ch).join("");
 
-// The first and the last column of each of the three boxes of the main screen, from left to
-// right: the corners line 2 and line 37 draw
-function boxes(g: Grid): [left: number, right: number][] {
+// The first and the last column of each of the `n` boxes a screen has side by side between the
+// tabs and the tokens, from left to right: the corners line 2 and line 37 draw. The main
+// screen has three.
+function boxes(g: Grid, n = 3): [left: number, right: number][] {
   const [left, right] = [cols(g, 2, "┌"), cols(g, 2, "┐")];
   expect([cols(g, 37, "└"), cols(g, 37, "┘")]).toEqual([left, right]);
-  expect([left.length, right.length]).toEqual([3, 3]);
+  expect([left.length, right.length]).toEqual([n, n]);
   return left.map((x, i) => [x, right[i]!]);
 }
 
@@ -432,3 +434,23 @@ test("CLK-27: a line of an agent and the separator of the tickets have only the 
   for (const name of ["mother", "leader", "worker-1", "worker-2", "worker-3", "judge"]) expect(drawn).toContain(` ${name} `);
   for (const y of above) expect(hits(g, y, 0, 27)).toEqual(all(28, { panel: 0 }));
 });
+
+// The thread of the ticket of the selected line in frames 03 and 15b, of the ticket of the
+// frame in 24d, and the one of a feature with no ticket in 26a
+for (const frame of ["03", "15b", "24d", "26a"]) {
+  test(`CLK-29: in the thread of frame ${frame} every cell of the box of the left has the wheel of the thread, its four corners too, and the box of the right has no wheel`, () => {
+    const g = thread(view(frame, { screen: "thread" }));
+    const [[left, right], [otherLeft, otherRight]] = boxes(g, 2) as [[number, number], [number, number]];
+    expect([hit(g, left, 2), hit(g, right, 2), hit(g, left, 37), hit(g, right, 37)]).toEqual(all(4, { wheel: "thread" }));
+    expect(having(g, "wheel")).toEqual(rect(left, right, 2, 37));
+    expect(g.hits.flat().filter((mark) => mark?.wheel !== undefined && mark.wheel !== "thread")).toEqual([]);
+    // The box of the judge starts in the column after it
+    expect(otherLeft).toBe(right + 1);
+    expect([hit(g, otherLeft, 2), hit(g, otherRight, 2), hit(g, otherLeft, 37), hit(g, otherRight, 37)]).toEqual(all(4, null));
+  });
+
+  test(`CLK-27: in the thread of frame ${frame} no cell has a line of the feed, a ticket or a panel`, () => {
+    const g = thread(view(frame, { screen: "thread" }));
+    expect([having(g, "row"), having(g, "ticket"), having(g, "panel")]).toEqual([[], [], []]);
+  });
+}
