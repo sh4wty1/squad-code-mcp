@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** Papéis fechada no branch `feat/papeis`, com PR aberto contra a `main`. O Verifier deu FAIL nas três voltas sem achar defeito de produção: sobraram sete requisitos com lacuna de teste e um com texto a reforçar, e o dev aceitou a fatia com esse resíduo registrado em `.specs/features/papeis/validation.md`. A próxima fatia é a Gate, que fecha o MVP. A suíte passa no Windows e no Linux. Quatro sessões reais levaram duas features do kickoff à entrega no Windows, em `haiku`; sessão real no Linux e macOS não foram exercitados. O estado está no Handoff de `.specs/STATE.md`.
+**Agora:** Papéis mesclada na `main` pelo PR 12. O Verifier deu FAIL nas três voltas sem achar defeito de produção: sobraram sete requisitos com lacuna de teste e um com texto a reforçar, e o dev aceitou a fatia com esse resíduo registrado em `.specs/features/papeis/validation.md`. A próxima fatia é a TUI clicável, que já tem spec; depois dela, a Gate fecha o MVP. A suíte passa no Windows e no Linux. Quatro sessões reais levaram duas features do kickoff à entrega no Windows, em `haiku`; sessão real no Linux e macOS não foram exercitados. O estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 

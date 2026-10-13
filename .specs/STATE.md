@@ -166,16 +166,16 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-12, no fechamento da fatia Papéis.
+Atualizado em 2026-10-12, no fechamento da fatia Papéis, e em 2026-10-13 na ordem das fatias: a Papéis foi mesclada e a TUI clicável entrou antes da Gate.
 
-- **Feature**: Papéis, `.specs/features/papeis/`, fechada por decisão do dev com o resíduo da terceira volta de verificação registrado. A próxima fatia é a Gate, que ainda não tem spec.
-- **Phase / Task**: Papéis: Execute encerrado, T1 a T31 commitadas, `tasks.md` em `Done`. Gate: nada começado.
+- **Feature**: Papéis, `.specs/features/papeis/`, fechada por decisão do dev com o resíduo da terceira volta de verificação registrado. A próxima fatia é a TUI clicável, com spec em `.specs/features/tui-clicavel/`; depois dela vem a Gate, que ainda não tem spec.
+- **Phase / Task**: Papéis: Execute encerrado, T1 a T31 commitadas, `tasks.md` em `Done`. TUI clicável: spec e `context.md` escritos, sem design nem tarefas. Gate: nada começado.
 - **Completed**: T1 a T31, de `f9ec67e` a `ac25e8d`; `real-sessions.md`; três voltas do Verifier, as três FAIL sem defeito de produção (`validation-round-1.md`, `validation-round-2.md`, e `validation.md`, que é a terceira); a suíte no Windows e no Linux sobre `ac25e8d`; o fechamento na spec, em `tasks.md` e em `ROADMAP.md`.
 - **In-progress** (file:line): nada.
-- **Next step**: o dev revisa com `/the-judge` o PR de `feat/papeis` contra a `main` e faz o merge. Depois, a fatia Gate, numa sessão nova com o prompt de `ROADMAP.md`.
+- **Next step**: a fatia TUI clicável, numa sessão nova com o prompt dela em `ROADMAP.md`. A primeira tarefa é a sonda de mouse, que o dev roda num Windows Terminal. Depois, a fatia Gate.
 - **Blockers**: nenhum.
 - **Uncommitted files**: nenhum.
-- **Branch**: `feat/papeis`, saído da `main` em `f162184`, enviado ao remoto em 2026-10-12 com o PR aberto e sem merge, com o sim do dev. O repositório tem um segundo worktree, `squad-code-mcp.worktrees/tui-clicavel` no branch `spec/tui-clicavel`, que é de outro trabalho do dev: não tocar.
+- **Branch**: `feat/papeis`, saído da `main` em `f162184`, mesclado na `main` pelo PR 12 em 2026-10-13. A spec da TUI clicável foi escrita no branch `spec/tui-clicavel`, num segundo worktree (`squad-code-mcp.worktrees/tui-clicavel`), que pode ser removido depois do merge desse branch.
 
 ### Como a Papéis fechou
 
