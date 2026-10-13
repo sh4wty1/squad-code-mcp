@@ -65,7 +65,7 @@ graph LR
 | `end` | `broker/tui.ts:122` | Único ponto de saída: `q`, `ctrl+c`, `SIGTERM`, erro e clique em `q` passam por ele |
 | `Ui.send`, `post`, `settle` | `broker/tui.ts:148`, AD-014 | O envio pelo clique é o da tecla: `press("\r")` deixa `send`, o laço faz o `POST` |
 | `drawKeys`, `chrome`, `stats` | `broker/tui/screens/chrome.ts` | Marcam atalhos, abas, `? N`, selos e custo no mesmo lugar em que os desenham |
-| `seals` | `broker/tui/activity.ts:97` | Sem mudança: o selo com tecla é o que termina em `· g` ou `· x` |
+| `seals` | `broker/tui/activity.ts:97` | Sem mudança: o selo com tecla é o de gate (`⚠ … pendente · g`, `⚠ N gates pendentes · g`) ou o de permissão (`⚠ permissão … · x`, `⚠ N permissões · x`), reconhecido pelo texto inteiro, porque o motivo de um bloqueio é texto do agente e pode terminar do mesmo jeito |
 | `selected`, `threadTicket`, `waiting` | `broker/tui/screens/questions.ts`, `thread.ts`, `asked.ts` | A pergunta selecionada e o ticket do thread, para contar as teclas até o alvo |
 | `MOUSE_ON`, `MOUSE_OFF` | `broker/tui/ansi.ts` | Já existem, da sonda |
 | `frameView`, `LOGS`, `DEVIATIONS` | `broker/test/frames/` | As `View` dos testes do mouse são as dos frames; o desvio D4 entra na tabela |
@@ -107,7 +107,7 @@ graph LR
 | ---- | ------- | ----- | --------- |
 | `chrome` linha 1 | Cada aba, com os espaços dela e o contador da `4 perguntas` | `key`: `1`, `2`, `3`, `4`, `?` | CLK-18 |
 | `chrome` linha 0 | O contador ` ? N `, com os dois espaços | `key: "4"` | CLK-23 |
-| `chrome` linha 1 | O selo cujo texto termina em `· g` ou `· x` | `key: "g"` ou `"x"` | CLK-36 a CLK-38 |
+| `chrome` linha 1 | O selo de gate e o de permissão, pelo texto inteiro | `key: "g"` ou `"x"` | CLK-36 a CLK-38 |
 | `stats` linha 38 | De `│` até o fim de ` est.` | `key: "t"` | CLK-39 |
 | `drawKeys` | Atalho simples: as células da tecla e as da descrição. Atalho de duas teclas: só a célula de cada caractere `j`, `k`, `[`, `]`, `↑`, `↓`. Atalho de faixa e rótulo desconhecido: nada | `key` | CLK-33 a CLK-35, CLK-45 |
 | `main` | As três caixas, borda incluída | `panel: 0`, `1` ou `2`; a do feed também `wheel: "feed"` | CLK-19, CLK-28 |

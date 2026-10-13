@@ -328,7 +328,7 @@ cada item, e com o que ficou sem conferir.
 | CLK-14 | P1: O terminal conta onde o mouse clicou | T4 | Implementing |
 | CLK-15 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-16 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
-| CLK-17 | P1: O terminal conta onde o mouse clicou | - | Pending |
+| CLK-17 | P1: O terminal conta onde o mouse clicou | T1 | Implementing |
 | CLK-18 | P1: Navegar com o clique | T5 | Implementing |
 | CLK-19 | P1: Navegar com o clique | T7 | Implementing |
 | CLK-20 | P1: Navegar com o clique | T7 | Implementing |
@@ -370,7 +370,7 @@ cada item, e com o que ficou sem conferir.
 | CLK-56 | P1: Nada do que existe muda | T2 | Implementing |
 | CLK-57 | P1: Nada do que existe muda | - | Pending |
 
-**Coverage:** 57 total, 0 mapped to tasks, 57 unmapped: a fatia ainda não tem tarefas.
+**Coverage:** 57 total, 36 com tarefa feita, 21 à espera das fases 3 a 5. `tasks.md` dá a tarefa de cada um.
 
 ---
 

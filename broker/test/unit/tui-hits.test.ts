@@ -146,6 +146,16 @@ for (const [frame, seal] of [["10", "bloqueado"], ["13a", "offline"], ["23a", "p
   });
 }
 
+// The reason of a block is text of the agent: one that ends like the seal of a gate or of a permission
+for (const end of ["· g", "· x"]) {
+  test(`CLK-38: the seal of who is blocked has no mark when the reason of the block ends in "${end}"`, () => {
+    const reason = `espera a decisão ${end}`;
+    const g = bars(view("10", {}, (events) => events.map((e) => (e.kind === "blocked" ? { ...e, reason } : e))));
+    expect(at(g, 1, reason)).toBeGreaterThan(66);
+    expect(afterTabs(g)).toEqual([]);
+  });
+}
+
 const COST = [
   ["feature", "the tokens of the feature", view("01")],
   ["sessão", "the tokens of the session", view("01", { scope: "session" })],

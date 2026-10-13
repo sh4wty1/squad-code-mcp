@@ -137,8 +137,9 @@ export function chrome(g: Grid, view: View, tab: (typeof TABS)[number][2], keys:
     rx -= len(text);
     if (rx <= 66) break;
     g.put(rx, 1, text, color, { bold: true });
-    // The seal of the gates and the one of the permissions end by their key; no other has one
-    const key = /· ([gx])$/.exec(text)?.[1];
+    // The seal of the gates and the one of the permissions end by their key; no other has one,
+    // and the reason of a block is text of the agent, which may end the same way
+    const key = /^⚠ (\d+ gates pendentes|gate \S+ pendente) · g$/.test(text) ? "g" : /^⚠ (\d+ permissões|permissão \S+) · x$/.test(text) ? "x" : null;
     if (key) g.mark(rx, 1, len(text), 1, { key });
     rx -= 3;
   }
