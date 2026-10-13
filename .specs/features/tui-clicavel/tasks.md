@@ -333,11 +333,11 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] `ESC [ < 0 ; 12 ; 5 M` dá botão 0, coluna 12, linha 5, pressão; com `m`, soltura
-- [ ] Dois inteiros, quatro inteiros, inteiro vazio, final que não é `M` nem `m`, sem final, e o formato antigo dão `null`
-- [ ] Um inteiro de 400 dígitos não lança e dá um número que nenhuma grade contém
-- [ ] Testes em `test/unit/tui-mouse.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `ESC [ < 0 ; 12 ; 5 M` dá botão 0, coluna 12, linha 5, pressão; com `m`, soltura
+- [x] Dois inteiros, quatro inteiros, inteiro vazio, final que não é `M` nem `m`, sem final, e o formato antigo dão `null`
+- [x] Um inteiro de 400 dígitos não lança e dá um número que nenhuma grade contém
+- [x] Testes em `test/unit/tui-mouse.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
