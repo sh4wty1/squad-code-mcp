@@ -176,12 +176,12 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] Um grid novo tem toda célula `null`; `mark` marca só o retângulo, e o que cai fora do grid não lança
-- [ ] Uma segunda marca sobre a mesma célula substitui a primeira
-- [ ] `clear` apaga as marcas da região e deixa as vizinhas
-- [ ] `Cell` não ganha campo: `text()` e `paint` dão o mesmo para um grid com e sem marcas
-- [ ] Testes em `test/unit/tui-grid.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Um grid novo tem toda célula `null`; `mark` marca só o retângulo, e o que cai fora do grid não lança
+- [x] Uma segunda marca sobre a mesma célula substitui a primeira
+- [x] `clear` apaga as marcas da região e deixa as vizinhas
+- [x] `Cell` não ganha campo: `text()` e `paint` dão o mesmo para um grid com e sem marcas
+- [x] Testes em `test/unit/tui-grid.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
