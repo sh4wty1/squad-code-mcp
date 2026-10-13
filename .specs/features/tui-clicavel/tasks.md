@@ -287,12 +287,12 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] Cada pergunta desenhada tem o id dela na cabeça, em cada linha do texto, na linha de opções ou de default e na de rota, nas colunas 1 a 58; a linha vazia entre duas perguntas e a legenda da linha 24 não têm `question`
-- [ ] Com mais perguntas do que cabem, só as desenhadas têm marca
-- [ ] Toda célula da caixa da lista tem `wheel: "list"`; toda célula da caixa do histórico tem `history` e `wheel: "history"`; a caixa do detalhe não tem `wheel`
-- [ ] Na linha `enter responder   b próxima bloqueante`, `enter` e `responder` têm `\r`, `b` e `próxima bloqueante` têm `b`, e os espaços entre eles não têm marca; sem pergunta aberta a linha não existe e nada é marcado
-- [ ] Testes em `test/unit/tui-hits.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Cada pergunta desenhada tem o id dela na cabeça, em cada linha do texto, na linha de opções ou de default e na de rota, nas colunas 1 a 58; a linha vazia entre duas perguntas e a legenda da linha 24 não têm `question`
+- [x] Com mais perguntas do que cabem, só as desenhadas têm marca
+- [x] Toda célula da caixa da lista tem `wheel: "list"`; toda célula da caixa do histórico tem `history` e `wheel: "history"`; a caixa do detalhe não tem `wheel`
+- [x] Na linha `enter responder   b próxima bloqueante`, `enter` e `responder` têm `\r`, `b` e `próxima bloqueante` têm `b`, e os espaços entre eles não têm marca; sem pergunta aberta a linha não existe e nada é marcado
+- [x] Testes em `test/unit/tui-hits.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

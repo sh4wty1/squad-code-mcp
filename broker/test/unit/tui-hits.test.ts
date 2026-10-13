@@ -3,6 +3,7 @@ import type { SquadEvent } from "../../shared/contract.ts";
 import { clock, grid, len, type Grid, type Hit } from "../../tui/grid.ts";
 import { chrome, drawKeys, MAIN_KEYS, stats, type Keys } from "../../tui/screens/chrome.ts";
 import { main } from "../../tui/screens/main.ts";
+import { questions } from "../../tui/screens/questions.ts";
 import { thread } from "../../tui/screens/thread.ts";
 import type { Ui, View } from "../../tui/view.ts";
 import { frameView } from "../frames/view.ts";
@@ -452,5 +453,184 @@ for (const frame of ["03", "15b", "24d", "26a"]) {
   test(`CLK-27: in the thread of frame ${frame} no cell has a line of the feed, a ticket or a panel`, () => {
     const g = thread(view(frame, { screen: "thread" }));
     expect([having(g, "row"), having(g, "ticket"), having(g, "panel")]).toEqual([[], [], []]);
+  });
+}
+
+// The boxes a screen draws, by their corners, from the top down and from left to right: from
+// each ┌ to the next ┐ of its line and to the next └ of its column
+interface Box {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+function drawnBoxes(g: Grid): Box[] {
+  return g.rows.flatMap((row, top) =>
+    row.flatMap((cell, left) => {
+      if (cell.ch !== "┌") return [];
+      const right = row.findIndex((other, x) => x > left && other.ch === "┐");
+      const bottom = g.rows.findIndex((line, y) => y > top && line[left]!.ch === "└");
+      return [{ left, right, top, bottom }];
+    })
+  );
+}
+const cellsOf = (box: Box): string[] => rect(box.left, box.right, box.top, box.bottom);
+const cornersOf = (g: Grid, box: Box): (Hit | null)[] => [hit(g, box.left, box.top), hit(g, box.right, box.top), hit(g, box.left, box.bottom), hit(g, box.right, box.bottom)];
+
+// The three boxes of the tab of questions: the list, the detail at its right and the history below
+function tabBoxes(g: Grid): [list: Box, detail: Box, history: Box] {
+  const found = drawnBoxes(g);
+  expect(found.map((box) => /perguntas abertas|detalhe|histórico/.exec(textOf(g, box.top, box.left, box.right))?.[0])).toEqual(["perguntas abertas", "detalhe", "histórico"]);
+  return found as [Box, Box, Box];
+}
+
+// The tab with the focus on the list, with it on the history, and with no question open
+const TABS_OF_QUESTIONS: [what: string, v: View][] = [
+  ["with the focus on the list", view("04")],
+  ["with the focus on the history", view("04", { qfocus: "history" })],
+  ["with no question open", view("23a", { screen: "questions" })],
+];
+
+for (const [what, v] of TABS_OF_QUESTIONS) {
+  test(`CLK-30, CLK-31: ${what}, every cell of the box of the list has the wheel of the list, every cell of the box of the history has its wheel, and the box of the detail has none`, () => {
+    const g = questions(v);
+    const [list, detail, history] = tabBoxes(g);
+    expect(having(g, "wheel")).toEqual([...cellsOf(list), ...cellsOf(history)]);
+    expect(cornersOf(g, list)).toEqual(all(4, { wheel: "list" }));
+    for (let y = list.top; y <= list.bottom; y++) expect(hits(g, y, list.left, list.right).map((mark) => mark?.wheel)).toEqual(Array(list.right - list.left + 1).fill("list"));
+    for (let y = history.top; y <= history.bottom; y++) expect(hits(g, y, history.left, history.right)).toEqual(all(history.right - history.left + 1, { history: true, wheel: "history" }));
+    expect(cornersOf(g, detail)).toEqual(all(4, null));
+  });
+
+  test(`CLK-26: ${what}, every cell of the box of the history is of the history, and no other cell is`, () => {
+    const g = questions(v);
+    const history = tabBoxes(g)[2];
+    expect(cornersOf(g, history)).toEqual(all(4, { history: true, wheel: "history" }));
+    expect(having(g, "history")).toEqual(cellsOf(history));
+  });
+}
+
+// The questions the list draws, from the top down, with the lines of each: from its head,
+// which has its label after the mark of the selected one, to its route
+function drawnQuestions(g: Grid, list: Box): { id: number; lines: number[] }[] {
+  const inner = (y: number) => textOf(g, y, list.left + 1, list.right - 1);
+  const found: { id: number; lines: number[] }[] = [];
+  for (let y = list.top + 1; y < list.bottom; y++) {
+    const head = /^ [▶ ] Q-(\d+) /.exec(inner(y));
+    if (!head) continue;
+    const lines = [y];
+    while (!inner(y).startsWith("   rota ") && y < list.bottom) lines.push(++y);
+    found.push({ id: Number(head[1]), lines });
+  }
+  return found;
+}
+
+// Each line of each drawn question has its question inside the box and only the wheel on the
+// border, and no other cell of the screen has a question
+function expectQuestions(g: Grid, list: Box, drawn: { id: number; lines: number[] }[]) {
+  expect([list.left + 1, list.right - 1]).toEqual([1, 58]);
+  for (const { id, lines } of drawn) {
+    for (const y of lines) {
+      expect(hits(g, y, 1, 58)).toEqual(all(58, { wheel: "list", question: id }));
+      expect([hit(g, 0, y), hit(g, 59, y)]).toEqual(all(2, { wheel: "list" }));
+    }
+  }
+  expect(having(g, "question").length).toBe(drawn.reduce((sum, q) => sum + q.lines.length, 0) * 58);
+}
+
+for (const qfocus of ["list", "history"] as const) {
+  test(`CLK-24, CLK-25: with the focus on the ${qfocus}, each question of the list has its id on its head, its text, its options or its default and its route, and the empty line between two and the caption have none`, () => {
+    const g = questions(view("04", { qfocus }));
+    const list = tabBoxes(g)[0];
+    const drawn = drawnQuestions(g, list);
+    const inner = (y: number) => textOf(g, y, 1, 58);
+    // Q-07 has two lines of text and its options; Q-08 one line and its default
+    expect(drawn.map((q) => [q.id, q.lines.length])).toEqual([[7, 5], [8, 4]]);
+    expect([inner(drawn[0]!.lines[3]!).slice(0, 10), inner(drawn[1]!.lines[2]!).slice(0, 11)]).toEqual(["   opções ", "   default "]);
+    expectQuestions(g, list, drawn);
+    // The line between the two questions is empty
+    const between = drawn[0]!.lines.at(-1)! + 1;
+    expect(between).toBe(drawn[1]!.lines[0]! - 1);
+    expect(inner(between).trim()).toBe("");
+    expect(hits(g, between, 0, 59)).toEqual(all(60, { wheel: "list" }));
+    const caption = Array.from({ length: list.bottom - list.top }, (_, i) => list.top + i).filter((y) => inner(y).includes("bloqueantes primeiro · depois por tempo restante"));
+    expect(caption.length).toBe(1);
+    expect(hits(g, caption[0]!, 0, 59)).toEqual(all(60, { wheel: "list" }));
+  });
+}
+
+// Twelve questions with the dev: the selected one is the first of the list, one of its middle or its last
+for (const question of [null, 24, 29]) {
+  test(`CLK-24, CLK-25: with more questions than fit and Q-${question ?? "07"} selected, only the ones drawn have their id`, () => {
+    const v = view("04", { question }, twelve);
+    const open = v.squad.questions.filter((q) => q.open && q.holder === "human").map((q) => q.id);
+    expect(open.length).toBe(12);
+    const g = questions(v);
+    const list = tabBoxes(g)[0];
+    const drawn = drawnQuestions(g, list);
+    expect(drawn.length).toBeGreaterThan(1);
+    expect(drawn.length).toBeLessThan(12);
+    expect(drawn.map((q) => q.id)).toContain(question ?? 7);
+    expectQuestions(g, list, drawn);
+    // The ones the list has no room for are in no cell
+    const marked = new Set(g.hits.flat().flatMap((mark) => (mark?.question === undefined ? [] : [mark.question])));
+    expect([...marked].sort((a, b) => a - b)).toEqual(drawn.map((q) => q.id).sort((a, b) => a - b));
+  });
+}
+
+test("CLK-24: with no question open no cell has a question", () => {
+  const v = view("23a", { screen: "questions" });
+  expect(v.squad.questions.filter((q) => q.open && q.holder === "human")).toEqual([]);
+  expect(having(questions(v), "question")).toEqual([]);
+});
+
+// The line of the two keys of the detail
+const DETAIL_KEYS = "enter responder   b próxima bloqueante";
+
+for (const question of [7, 8]) {
+  test(`CLK-33: in the detail of Q-0${question}, enter and responder have the key of enter, b and próxima bloqueante the key b, and the spaces between them no mark`, () => {
+    const g = questions(view("04", { question }));
+    const detail = tabBoxes(g)[1];
+    const ys = Array.from({ length: detail.bottom - detail.top }, (_, i) => detail.top + i).filter((y) => textOf(g, y, detail.left, detail.right).includes(DETAIL_KEYS));
+    expect(ys.length).toBe(1);
+    const y = ys[0]!;
+    const x = at(g, y, DETAIL_KEYS);
+    const enter = { key: "\r" };
+    const b = { key: "b" };
+    // enter, a space, responder, three spaces, b, a space, próxima bloqueante
+    expect(hits(g, y, x, x + len(DETAIL_KEYS) - 1)).toEqual([...all(5, enter), null, ...all(9, enter), null, null, null, b, null, ...all(18, b)]);
+    expect([hit(g, x - 1, y), hit(g, x + len(DETAIL_KEYS), y)]).toEqual([null, null]);
+    // No other cell of the box of the detail has a mark
+    const marked = cellsOf(detail).filter((cell) => hit(g, Number(cell.split(",")[0]), Number(cell.split(",")[1])) !== null);
+    expect(marked.length).toBe(5 + 9 + 1 + 18);
+  });
+}
+
+test("CLK-33: without a question open the detail has no line of keys, and no cell of its box has a mark", () => {
+  const g = questions(view("23a", { screen: "questions" }));
+  const detail = tabBoxes(g)[1];
+  const drawn = Array.from({ length: detail.bottom - detail.top }, (_, i) => textOf(g, detail.top + i, detail.left, detail.right));
+  expect(drawn.join("\n")).toContain("nenhuma pergunta aberta");
+  expect(drawn.join("\n")).not.toContain("enter responder");
+  expect(cellsOf(detail).filter((cell) => hit(g, Number(cell.split(",")[0]), Number(cell.split(",")[1])) !== null)).toEqual([]);
+});
+
+// Q-07 with more options than its three: from eight on, their lines take the room of the last
+// lines of the panel, and the line of keys is not drawn. With 21 and with 22 it would come on
+// line 38 and on line 39.
+for (const n of [8, 9, 21, 22]) {
+  test(`CLK-33: with ${n} options the detail has no room for its line of keys, and no cell has the mark of a key that was not drawn`, () => {
+    const options = Array.from({ length: n }, (_, i) => `opção ${i + 1}`);
+    const g = questions(view("04", {}, (events) => events.map((e) => (e.kind === "question" && e.question_id === 7 ? { ...e, options } : e))));
+    const detail = tabBoxes(g)[1];
+    const drawn = Array.from({ length: detail.bottom - detail.top }, (_, i) => textOf(g, detail.top + i, detail.left, detail.right));
+    expect(drawn.join("\n")).toContain("8  opção 8");
+    expect(drawn.join("\n")).not.toContain("enter responder");
+    expect(cellsOf(detail).filter((cell) => hit(g, Number(cell.split(",")[0]), Number(cell.split(",")[1])) !== null)).toEqual([]);
+    // The keys of the screen are the ones of lines 0, 1, 38 and 39, as with the three options
+    const three = questions(view("04"));
+    expect([...new Set(having(g, "key").map((cell) => Number(cell.split(",")[1])))]).toEqual([0, 1, 38, 39]);
+    expect([g.hits[38], g.hits[39]]).toEqual([three.hits[38]!, three.hits[39]!]);
+    expect(having(g, "history")).toEqual(having(three, "history"));
   });
 }

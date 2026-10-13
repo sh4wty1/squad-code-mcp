@@ -79,6 +79,8 @@ function list(g: Grid, view: View, asked: Question[]) {
   const { squad, ui } = view;
   const blocking = asked.filter((q) => q.blocking).length;
   g.box(0, 2, 60, 24, ui.qfocus === "list" ? "bwhite" : "gray", `perguntas abertas · ${asked.length}`, "bwhite");
+  // The wheel moves the selection of the list anywhere in its box
+  g.mark(0, 2, 60, 24, { wheel: "list" });
   if (blocking) {
     const seal = ` ${blocking} bloqueante `;
     g.put(58 - len(seal), 2, seal, "bwhite", { bg: "red", bold: true });
@@ -101,6 +103,7 @@ function list(g: Grid, view: View, asked: Question[]) {
   let y = 3;
   for (const q of asked.slice(from)) {
     if (y > 19) break;
+    const top = y;
     const who = q.asked_by;
     if (q === chosen && ui.qfocus === "list") {
       g.bg(1, y, 58, "black");
@@ -119,12 +122,20 @@ function list(g: Grid, view: View, asked: Question[]) {
       g.segs(4, y++, [["opções ", "gray"], [cut([...q.options.map((option, i) => `${i + 1} ${option}`), `${q.options.length + 1} texto`].join(" · "), 47), "white"]]);
     } else g.segs(4, y++, fit([["default ", "gray"], [q.default ?? "", "byellow", true], [`  · ${who} segue com ele`, "gray"]], 54));
     g.segs(4, y, fit([["rota ", "gray"], ...route(q), ...absorbed(q, squad).map((merged): Seg => [`  · ${merged}`, "white"])], 54));
+    // A click on a line of the question, from its head to its route and inside the box, is on it
+    g.mark(1, top, 58, y - top + 1, { wheel: "list", question: q.id });
     y += 2;
   }
 }
 
 // The columns of the text of the detail
 const W = 55;
+
+// The two keys the detail of a question ends with, and what the terminal sends for each
+const DETAIL_KEYS: [key: string, does: string, sent: string][] = [
+  ["enter", "responder", "\r"],
+  ["b", "próxima bloqueante", "b"],
+];
 
 // The lines of the panel of detail: of the selected question, or of the empty list
 function detail(view: View, q: Question | undefined): Line[] {
@@ -162,7 +173,7 @@ function detail(view: View, q: Question | undefined): Line[] {
     ...answers,
     "SEP",
     ...labeled("efeito  ", does),
-    [["enter ", "bwhite", true], ["responder", "gray"], ["   b ", "bwhite", true], ["próxima bloqueante", "gray"]],
+    DETAIL_KEYS.flatMap(([key, does], i): Seg[] => [[`${i ? "   " : ""}${key} `, "bwhite", true], [does, "gray"]]),
   ];
 }
 
@@ -172,6 +183,8 @@ function history(g: Grid, view: View) {
   const { squad, ui } = view;
   const past = resolved(squad);
   g.box(0, 26, 120, 12, ui.qfocus === "history" ? "bwhite" : "gray", `histórico · ${past.length} resolvidas`, "bwhite");
+  // A click anywhere in the box gives it the focus, and the wheel scrolls it
+  g.mark(0, 26, 120, 12, { history: true, wheel: "history" });
   const max = past.length > 5 ? 4 : 5;
   // The offset never leaves fewer on the screen than fit
   const from = Math.max(0, Math.min(ui.historyOffset, past.length - max));
@@ -195,7 +208,19 @@ export function questions(view: View): Grid {
   list(g, view, waiting(view.squad));
   const chosen = selected(view);
   g.box(60, 2, 60, 24, "gray", chosen ? `${qid(chosen.id)} · detalhe` : "detalhe", "bwhite");
-  drawRows(g, 62, 3, 24, detail(view, chosen), 60, 60, "gray");
+  const lines = detail(view, chosen);
+  drawRows(g, 62, 3, 24, lines, 60, 60, "gray");
+  // The last line of the detail of a question has its two keys, when the panel has room for
+  // it: a click on a key or on what it does is the key
+  const ky = 2 + lines.length;
+  if (chosen && ky <= 24) {
+    let x = 62;
+    for (const [key, does, sent] of DETAIL_KEYS) {
+      g.mark(x, ky, len(key), 1, { key: sent });
+      g.mark(x + len(key) + 1, ky, len(does), 1, { key: sent });
+      x += len(key) + 1 + len(does) + 3;
+    }
+  }
   history(g, view);
   // No line of the feed is on this screen: the footer has no ticket to count the reworks of
   stats(g, { ...view, ui: { ...view.ui, selected: null } });
