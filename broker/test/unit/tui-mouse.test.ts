@@ -2,8 +2,8 @@ import { expect, test } from "bun:test";
 import { qid, type SquadEvent } from "../../shared/contract.ts";
 import { waiting } from "../../tui/asked.ts";
 import { clock, grid, len, type Grid } from "../../tui/grid.ts";
-import { keysOf, press } from "../../tui/keys.ts";
-import { parse, point, type Drawn, type Entry, type Pointer } from "../../tui/mouse.ts";
+import { input, keysOf, press } from "../../tui/keys.ts";
+import { parse, point, take, type Drawn, type Entry, type Pointer } from "../../tui/mouse.ts";
 import { answer } from "../../tui/screens/answer.ts";
 import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
@@ -1522,4 +1522,262 @@ test("CLK-49: with no modal open no click and no wheel leaves an answer to send,
       }
     }
   }
+});
+
+// The state after one read of the input over the screen of the view, as it is drawn
+const taken = (v: View, chunk: string, pointer: Pointer = ON, more = false): Entry | null => take(entry(v, pointer), chunk, v, more, drawing(v));
+
+test("CLK-15: a key and a click of the same read are applied in the order they came: k and then the click is not the click and then k", () => {
+  const v = view("01", { selected: 417 });
+  const g = screen(v);
+  // A click on the line the drawing has as the selected one
+  const hit = click(...feedCell(g, "14:28:03"));
+  // k selects the line above, and the click selects the clicked line again
+  const keyFirst = taken(v, "k" + hit)!;
+  const moved = input(v.ui, "k", v)!;
+  expect(moved.selected).toBe(416);
+  expect(keyFirst).toEqual(point({ ui: moved, pointer: ON }, hit, v, drawing(v, g))!);
+  expect([keyFirst.ui.screen, keyFirst.ui.selected, keyFirst.ui.threadOffset]).toEqual(["main", 417, 0]);
+  // The click opens the thread of the selected line, and k scrolls it
+  const clickFirst = taken(v, hit + "k")!;
+  const shown = point(entry(v), hit, v, drawing(v, g))!;
+  expect(shown.ui.screen).toBe("thread");
+  expect(clickFirst).toEqual({ ui: input(shown.ui, "k", { ...v, ui: shown.ui })!, pointer: shown.pointer });
+  expect([clickFirst.ui.screen, clickFirst.ui.selected, clickFirst.ui.threadOffset]).toEqual(["thread", 417, 1]);
+});
+
+test("CLK-15: a key that changes the screen and a click of the same read: the click after it falls on the drawing of the screen that was, and does nothing", () => {
+  const v = view("01", { selected: 417 });
+  const pause = click(at(screen(v), 39, "p pausa"), 39);
+  expect(taken(v, "2" + pause)!.ui).toEqual({ ...v.ui, screen: "topology" });
+  expect(taken(v, pause + "2")!.ui).toEqual({ ...v.ui, screen: "topology", paused: true });
+  // Three items: the click, the key and the click again
+  expect(taken(v, pause + "2" + pause)!.ui).toEqual({ ...v.ui, screen: "topology", paused: true });
+  expect(taken(v, pause + pause + "2")!.ui).toEqual({ ...v.ui, screen: "topology" });
+});
+
+test("CLK-15: three reports of the wheel in one read are three steps of it", () => {
+  const v = view("01", { selected: 417 });
+  const down = report(65, ...feedCell(screen(v), "14:19:05"));
+  const next = taken(v, down + down + down)!;
+  expect(next.ui).toEqual(keys(v, ...Array<string>(9).fill("j"))!);
+  // Nine lines below the selected one
+  expect(next.ui.selected).toBe(v.rows[v.rows.findIndex((row) => row.seq === 417) + 9]!.seq);
+  expect(next.ui.selected).toBe(426);
+  expect(next.pointer).toEqual(ON);
+  // And up and down again in the same read
+  const up = report(64, ...feedCell(screen(v), "14:19:05"));
+  expect(taken(v, up + down + down)!.ui.selected).toBe(420);
+});
+
+test("CLK-15, CLK-49: enter that opens the modal and a click in the same read: the click falls on the drawing without the modal, does nothing, and nothing is sent", () => {
+  // The tab with Q-07 selected: the shortcut of enter, the key of the detail, the line of the question and a tab
+  const tab = view("04", { question: 7 });
+  const g = screen(tab);
+  const detail = tabBox(g, 1);
+  const cells = [[at(g, 39, "enter responder"), 39], cellOf(g, [detail.left, detail.right], DETAIL_KEYS, 2, detail.bottom), [tabBox(g, 0).left + 1, questionLines(g, 7)[0]!], [at(g, 1, "2 topologia"), 1]] as const;
+  for (const [x, y] of cells) {
+    const next = taken(tab, "\r" + click(x, y))!;
+    expect(next.ui).toEqual({ ...tab.ui, modal: opened(7, 0) });
+    expect(next.ui.send).toBeNull();
+    // Alone in its read each of those clicks does something
+    expect(taken(tab, click(x, y))!.ui).not.toEqual(tab.ui);
+  }
+  // On the feed, over the line of Q-07 where it reached the dev: the screen changed too
+  const home = view("01", { selected: 422 });
+  const next = taken(home, "\r" + click(at(screen(home), 39, "enter abrir"), 39))!;
+  expect(next.ui).toEqual({ ...home.ui, screen: "questions", question: 7, qfocus: "list", modal: opened(7, 0) });
+  expect(next.ui.send).toBeNull();
+});
+
+// Three reports that do nothing with the modal open, over a cell of its box: a click on the
+// line of its context, the release of the button and the wheel
+function inert(v: View): string[] {
+  const box = modalBox(screen(v));
+  return [click(box.left + 1, box.top + 1), report(0, box.left + 1, box.top + 1, "m"), report(64, box.left + 1, box.top + 1)];
+}
+
+for (const [eol, name] of [["\r", "\\r"], ["\n", "\\n"]] as const) {
+  test(`CLK-16: with the modal open, ${name} in the read of a report is a pasted line break, before or after the report: a space in the text mode, nothing in the choice mode, and nothing is sent`, () => {
+    const text = open("06", { text: "logo" });
+    const choice = open("05", { choice: 1 });
+    for (const i of [0, 1, 2]) {
+      for (const order of ["after", "before"] as const) {
+        const read = (v: View): string => (order === "after" ? inert(v)[i]! + eol : eol + inert(v)[i]!);
+        const typed = taken(text, read(text))!;
+        expect(typed.ui).toEqual({ ...text.ui, modal: { ...m(text), text: "logo " } });
+        expect(typed.ui.send).toBeNull();
+        const chosen = taken(choice, read(choice))!;
+        expect(chosen.ui).toEqual(choice.ui);
+        expect(chosen.ui.send).toBeNull();
+      }
+    }
+    // With the mouse off the report is still an item of its read
+    const off: Pointer = { on: false, clickedAt: null };
+    expect(taken(text, inert(text)[0]! + eol, off)!.ui).toEqual({ ...text.ui, modal: { ...m(text), text: "logo " } });
+    expect(taken(choice, eol + inert(choice)[0]!, off)!.ui).toEqual(choice.ui);
+  });
+}
+
+test("CLK-16: enter alone in its read still sends, and a report alone changes nothing", () => {
+  const text = open("06", { text: "logo" });
+  expect(taken(text, "\r")!.ui.send).toEqual({ question_id: 8, answer: "logo" });
+  const choice = open("05", { choice: 1 });
+  expect(taken(choice, "\r")!.ui.send).toEqual({ question_id: 7, answer: "5 tentativas" });
+  for (const v of [text, choice]) {
+    for (const item of inert(v)) expect(taken(v, item)!.ui).toBe(v.ui);
+  }
+});
+
+test("CLK-50: m with the mouse on turns it off and says so for 4 s, and m again turns it on and says so, on every screen", () => {
+  for (const now of ALL_SCREENS) {
+    const v = view("01", { selected: 417, screen: now });
+    const off = taken(v, "m", { on: true, clickedAt: 5 })!;
+    expect(off.pointer).toEqual({ on: false, clickedAt: 5 });
+    expect(off.ui.toast).toMatchObject({ text: "mouse desligado · o terminal seleciona texto", until: v.squad.now + 4000 });
+    // Nothing else of the state changes
+    expect<Ui>({ ...off.ui, toast: null }).toEqual(v.ui);
+    const on = take(off, "m", later({ ...v, ui: off.ui }, 1000), false, drawing(v))!;
+    expect(on.pointer).toEqual({ on: true, clickedAt: 5 });
+    expect(on.ui.toast).toMatchObject({ text: "mouse ligado", until: v.squad.now + 1000 + 4000 });
+    expect<Ui>({ ...on.ui, toast: null }).toEqual(v.ui);
+  }
+});
+
+test("CLK-50, CLK-51: m and a click of the same read are applied in their order: turned off, the mouse does not click, and turned on it does", () => {
+  const v = view("01", { selected: 417 });
+  const tab = click(at(screen(v), 1, "2 topologia"), 1);
+  const off = taken(v, "m" + tab)!;
+  expect([off.ui.screen, off.pointer.on, off.pointer.clickedAt]).toEqual(["main", false, null]);
+  const on = taken(v, "m" + tab, { on: false, clickedAt: null })!;
+  expect([on.ui.screen, on.pointer.on, on.pointer.clickedAt]).toEqual(["topology", true, v.squad.now]);
+  expect(on.ui.toast).toMatchObject({ text: "mouse ligado" });
+  // The click before m counts, and m twice leaves the mouse as it was
+  expect(taken(v, tab + "m")!.ui.screen).toBe("topology");
+  const twice = taken(v, "mm")!;
+  expect(twice.pointer).toEqual(ON);
+  expect(twice.ui.toast).toMatchObject({ text: "mouse ligado", until: v.squad.now + 4000 });
+});
+
+test("CLK-50: m turns the mouse off and on while the broker does not answer the reads too: it is a key", () => {
+  const up = view("01", { selected: 417 });
+  const v: View = { ...up, down: { since: up.squad.now - 3000, attempt: 3 } };
+  // The frozen screen is no drawing of the state
+  const off = take(entry(v), "m", v, false, null)!;
+  expect(off.pointer.on).toBe(false);
+  expect(off.ui.toast).toMatchObject({ text: "mouse desligado · o terminal seleciona texto", until: v.squad.now + 4000 });
+});
+
+test("CLK-54: with the modal open m is text: in the text mode it goes to the text, in the choice mode and with the refused answer it does nothing, and the mouse stays as it was", () => {
+  for (const pointer of [ON, { on: false, clickedAt: 5 }] as const) {
+    const text = open("06", { text: "logo" });
+    const typed = taken(text, "m", pointer)!;
+    expect(typed.ui).toEqual({ ...text.ui, modal: { ...m(text), text: "logom" } });
+    expect(typed.pointer).toEqual(pointer);
+    expect(taken(text, "um", pointer)!.ui).toEqual({ ...text.ui, modal: { ...m(text), text: "logoum" } });
+    for (const v of [open("05", { choice: 1 }), open("20b")]) {
+      const next = taken(v, "m", pointer)!;
+      expect(next.ui).toBe(v.ui);
+      expect(next.pointer).toEqual(pointer);
+    }
+  }
+});
+
+test("CLK-54: m of a read whose enter opened the modal is text of the modal, and the mouse stays on", () => {
+  // Q-08 has no options: enter on the tab opens its modal in the text mode
+  const tab = view("04", { question: 8 });
+  const next = taken(tab, "\rm")!;
+  expect(next.ui).toEqual({ ...tab.ui, modal: { ...opened(8, null), text: "m" } });
+  expect(next.pointer).toEqual(ON);
+  // And esc before it closes the modal: m turns the mouse off
+  const text = open("06", { text: "logo" });
+  const closed = taken(text, "\x1bm")!;
+  expect(closed.pointer.on).toBe(false);
+  expect<Ui>({ ...closed.ui, toast: null }).toEqual({ ...text.ui, modal: null });
+});
+
+// The marks of a delimited paste
+const PASTE = "\x1b[200~";
+const PASTED = "\x1b[201~";
+
+// Reads with no report and, outside the modal, with no m: the ones of the tests of the keys
+const READS: [what: string, v: View, chunk: string, more?: boolean][] = [
+  ["j, enter and an arrow on the tab of questions", view("04", { question: 7 }), "j\r" + DOWN],
+  ["a pasted block with line breaks in the text mode", open("06", { text: "" }), "um\rdois\ntrês\r\n"],
+  ["a pasted block that ends by a line break", open("06", { text: "" }), "logo da 89\r\nna versão quadrada\r"],
+  ["enter on the tab and a text with a line break", view("04", { question: 8 }), "\rtexto\r\n"],
+  ["enter on the feed over a question and a text", view("01", { selected: 428 }), "\rtexto\n"],
+  ["4, enter and a text from the main screen", view("01", { selected: 417 }), "4\rtexto\r"],
+  ["a digit and a line break in the choice mode", open("05"), "2\r\n"],
+  ["enter alone in the choice mode", open("05", { choice: 1 }), "\r"],
+  ["enter alone in the text mode", open("06"), "\r"],
+  ["enter with keys held back in the text mode", open("06", { text: "logo" }), "\r", true],
+  ["a line break with keys held back in the choice mode", open("05", { choice: 1 }), "\n", true],
+  ["enter with keys held back and no modal", view("04", { question: 8 }), "\r", true],
+  ["a delimited paste whole in one read", open("06", { text: "" }), PASTE + "um\rdois" + PASTED],
+  ["the start of a delimited paste and enter with no modal", view("04", { question: 8 }), PASTE + "\r"],
+  ["esc that ends a delimited paste, and a key", view("04", { question: 8, pasting: true }), "\x1b4"],
+  ["a line break after a key with no modal", view("01", { selected: 428 }), "p\n"],
+  ["2 and p", view("01", { selected: 417 }), "2p"],
+  ["tab twice and shift+tab", view("01", { selected: 417 }), "\t\t\x1b[Z"],
+  ["an empty read", view("01", { selected: 417 }), ""],
+];
+
+for (const [what, v, chunk, more] of READS) {
+  test(`CLK-56: ${what} does what it did before the mouse, with the mouse on and off`, () => {
+    const before = input(v.ui, chunk, v, more)!;
+    for (const pointer of [ON, { on: false, clickedAt: 7 }] as const) {
+      const next = take(entry(v, pointer), chunk, v, more ?? false, drawing(v))!;
+      expect(next.ui).toEqual(before);
+      expect(next.pointer).toEqual(pointer);
+    }
+  });
+}
+
+test("CLK-56: what those reads did before the mouse: the selection, the modal and the text they leave", () => {
+  const tab = view("04", { question: 7 });
+  expect(taken(tab, "j\r" + DOWN)!.ui).toEqual({ ...tab.ui, question: 8, modal: opened(8, null) });
+  const text = open("06", { text: "" });
+  expect(taken(text, "um\rdois\ntrês\r\n")!.ui).toEqual({ ...text.ui, modal: { ...m(text), text: "um dois três  " } });
+  const home = view("01", { selected: 417 });
+  expect(taken(home, "4\rtexto\r")!.ui).toEqual({ ...home.ui, screen: "questions", question: 7, qfocus: "list", modal: opened(7, 0) });
+  const held = open("06", { text: "logo" });
+  expect(taken(held, "\r", ON, true)!.ui).toEqual({ ...held.ui, modal: { ...m(held), text: "logo " } });
+});
+
+test("CLK-56: a delimited paste that comes in several reads is pasted as before the mouse: a line break alone in its read is a space, and sends nothing", () => {
+  const v = open("06", { text: "" });
+  const reads = [PASTE + "logo", "\r", "da 89", "\n", PASTED];
+  const before = reads.reduce((ui, chunk) => input(ui, chunk, { ...v, ui })!, v.ui);
+  const after = reads.reduce((at, chunk) => take(at, chunk, { ...v, ui: at.ui }, false, drawing(v))!, entry(v));
+  expect(after.ui).toEqual(before);
+  expect(after.ui).toEqual({ ...v.ui, modal: { ...m(v), text: "logo da 89 " } });
+  expect(after.ui.send).toBeNull();
+});
+
+test("CLK-56: every key of every screen does what it did before the mouse, alone in its read", () => {
+  const KEYS = ["1", "2", "3", "4", "?", "\x1b", "j", "k", UP, DOWN, "[", "]", "\t", "\x1b[Z", "p", "t", "b", "g", "x", "h", "\r", "\n", "z", " "];
+  const views = [...ALL_SCREENS.map((now) => view("01", { selected: 422, screen: now, threadTicket: "TKT-13", threadOffset: 2 })), view("04", { question: 8, qfocus: "history", historyOffset: 1 }), open("05", { choice: 1 }), open("06"), open("20b")];
+  for (const v of views) {
+    for (const key of [...KEYS, "\x7f", "\x15", "\x05", "a"]) {
+      for (const pointer of [ON, { on: false, clickedAt: 7 }] as const) {
+        const next = take(entry(v, pointer), key, v, false, drawing(v))!;
+        expect(next.ui).toEqual(press(v.ui, key, v)!);
+        expect(next.pointer).toEqual(pointer);
+      }
+    }
+  }
+});
+
+test("CLK-56: q and ctrl+c quit, alone, among other keys and after a report, with the mouse on and off", () => {
+  const v = view("01", { selected: 417 });
+  const tab = click(at(screen(v), 1, "2 topologia"), 1);
+  for (const pointer of [ON, { on: false, clickedAt: null }] as const) {
+    for (const chunk of ["q", "\x03", "jq", "j\x03k", tab + "q", "m\x03", tab + "\x03" + tab]) expect(taken(v, chunk, pointer)).toBeNull();
+    // In the text of the modal q is a character, and ctrl+c still quits
+    expect(taken(open("06"), "q\x03", pointer)).toBeNull();
+    expect(taken(open("06"), "q", pointer)!.ui.modal!.text).toBe("logo da 89, com o nome do programa no ar" + "q");
+  }
+  // A click on the shortcut that quits ends the read: the key after it is not pressed
+  expect(taken(v, click(at(screen(v), 39, "q sair"), 39) + "2")).toBeNull();
 });

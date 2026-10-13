@@ -481,15 +481,15 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] CLK-15: tecla e depois clique, e clique e depois tecla, no mesmo chunk, dão resultados diferentes, cada um igual ao das duas coisas aplicadas nessa ordem (L-001)
-- [ ] Três relatórios da roda num chunk valem os três
-- [ ] `enter` que abre o modal e um clique no mesmo chunk: o clique não faz nada e `send` continua nulo
-- [ ] CLK-16: relatório e `\r`, relatório e `\n`, nas duas ordens, com o modal aberto: espaço no modo texto, nada no modo escolha, `send` nulo
-- [ ] CLK-50: `m` com o mouse ligado dá `on` falso e o aviso `mouse desligado · o terminal seleciona texto` com `until` 4000 ms depois; de novo, `on` verdadeiro e `mouse ligado`
-- [ ] CLK-54: com o modal no modo texto, `m` entra no texto e `on` não muda; no modo escolha, nada muda
-- [ ] CLK-56: para cada chunk sem relatório e sem `m` dos casos de `tui-keys.test.ts` que esta tarefa reusa, `take` dá o mesmo `ui` que `input`; `q` e `ctrl+c` devolvem `null`
-- [ ] Testes em `test/unit/tui-mouse.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] CLK-15: tecla e depois clique, e clique e depois tecla, no mesmo chunk, dão resultados diferentes, cada um igual ao das duas coisas aplicadas nessa ordem (L-001)
+- [x] Três relatórios da roda num chunk valem os três
+- [x] `enter` que abre o modal e um clique no mesmo chunk: o clique não faz nada e `send` continua nulo
+- [x] CLK-16: relatório e `\r`, relatório e `\n`, nas duas ordens, com o modal aberto: espaço no modo texto, nada no modo escolha, `send` nulo
+- [x] CLK-50: `m` com o mouse ligado dá `on` falso e o aviso `mouse desligado · o terminal seleciona texto` com `until` 4000 ms depois; de novo, `on` verdadeiro e `mouse ligado`
+- [x] CLK-54: com o modal no modo texto, `m` entra no texto e `on` não muda; no modo escolha, nada muda
+- [x] CLK-56: para cada chunk sem relatório e sem `m` dos casos de `tui-keys.test.ts` que esta tarefa reusa, `take` dá o mesmo `ui` que `input`; `q` e `ctrl+c` devolvem `null`
+- [x] Testes em `test/unit/tui-mouse.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

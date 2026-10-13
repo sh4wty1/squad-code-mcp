@@ -1,10 +1,11 @@
-// What a mouse report does to the state of the screen. Every effect of the mouse is the one
-// of a key, or of a sequence of keys, that already exists in that state (STATE AD-021). Pure:
-// the clock is the one of the view, and a report is the item `keysOf` reads from the input.
+// What a mouse report does to the state of the screen, and what a chunk of the input does
+// with its reports and its keys. Every effect of the mouse is the one of a key, or of a
+// sequence of keys, that already exists in that state (STATE AD-021). Pure: the clock is the
+// one of the view, and a report is the item `keysOf` reads from the input.
 
 import { waiting } from "./asked.ts";
 import type { Hit } from "./grid.ts";
-import { press } from "./keys.ts";
+import { input, isReport, keysOf, notice, press } from "./keys.ts";
 import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
 import type { Modal, Ui, View } from "./view.ts";
@@ -163,4 +164,25 @@ export function point(at: Entry, item: string, view: View, drawn: Drawn | null):
   if (ui.modal && (wheel || quick)) return still;
   const next = ui.modal ? tap(ui, view, answered(hit, ui.modal, view)) : wheel ? tap(ui, view, rolled(hit, wheel, ui)) : clicked(hit, ui, view);
   return next && { ...still, ui: next };
+}
+
+// The state after the items of one chunk of the input, one by one in the order they came, or
+// null when one of them quits. A report goes to `point`, over the same drawing as the others
+// of its chunk: the last one written. `m` with no modal open turns the mouse off and on, and
+// says so; with the modal open it is text, like any other key, which goes to `input` as one
+// of the keys of its chunk: a line break that comes with a report is pasted, and sends nothing.
+// `more` says the chunk had keys after these, which the loop holds back.
+export function take(at: Entry, chunk: string, view: View, more: boolean, drawn: Drawn | null): Entry | null {
+  const items = keysOf(chunk);
+  return items.reduce<Entry | null>((next, item) => {
+    if (!next) return null;
+    if (isReport(item)) return point(next, item, view, drawn);
+    const { ui, pointer } = next;
+    if (item === "m" && !ui.modal) {
+      const on = !pointer.on;
+      return { ui: { ...ui, toast: notice(view, on ? "mouse ligado" : "mouse desligado · o terminal seleciona texto") }, pointer: { ...pointer, on } };
+    }
+    const typed = input(ui, item, view, more || items.length > 1);
+    return typed && { ui: typed, pointer };
+  }, at);
 }

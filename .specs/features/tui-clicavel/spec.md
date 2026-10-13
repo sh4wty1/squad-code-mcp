@@ -326,8 +326,8 @@ cada item, e com o que ficou sem conferir.
 | CLK-12 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-13 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
 | CLK-14 | P1: O terminal conta onde o mouse clicou | T4, T12 | Implementing |
-| CLK-15 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-16 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
+| CLK-15 | P1: O terminal conta onde o mouse clicou | T17 | Implementing |
+| CLK-16 | P1: O terminal conta onde o mouse clicou | T2, T17 | Implementing |
 | CLK-17 | P1: O terminal conta onde o mouse clicou | T1 | Implementing |
 | CLK-18 | P1: Navegar com o clique | T5, T12 | Implementing |
 | CLK-19 | P1: Navegar com o clique | T7, T13 | Implementing |
@@ -361,13 +361,13 @@ cada item, e com o que ficou sem conferir.
 | CLK-47 | P1: Modal de resposta com o mouse | T16 | Implementing |
 | CLK-48 | P1: Modal de resposta com o mouse | T16 | Implementing |
 | CLK-49 | P1: Modal de resposta com o mouse | T16 | Implementing |
-| CLK-50 | P2: Ligar e desligar o mouse | - | Pending |
+| CLK-50 | P2: Ligar e desligar o mouse | T17 | Implementing |
 | CLK-51 | P2: Ligar e desligar o mouse | T12 | Implementing |
 | CLK-52 | P2: Ligar e desligar o mouse | T3 | Implementing |
 | CLK-53 | P2: Ligar e desligar o mouse | T3 | Implementing |
-| CLK-54 | P2: Ligar e desligar o mouse | - | Pending |
+| CLK-54 | P2: Ligar e desligar o mouse | T17 | Implementing |
 | CLK-55 | P2: Ligar e desligar o mouse | - | Pending |
-| CLK-56 | P1: Nada do que existe muda | T2 | Implementing |
+| CLK-56 | P1: Nada do que existe muda | T2, T17 | Implementing |
 | CLK-57 | P1: Nada do que existe muda | - | Pending |
 
 **Coverage:** 57 total, 36 com tarefa feita, 21 à espera das fases 3 a 5. `tasks.md` dá a tarefa de cada um.
