@@ -318,10 +318,10 @@ cada item, e com o que ficou sem conferir.
 | CLK-04 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
 | CLK-05 | P1: O terminal conta onde o mouse clicou | T12, T20 | Implementing |
 | CLK-06 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
-| CLK-07 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-08 | P1: O terminal conta onde o mouse clicou | - | Pending |
+| CLK-07 | P1: O terminal conta onde o mouse clicou | T21 | Implementing |
+| CLK-08 | P1: O terminal conta onde o mouse clicou | T21 | Implementing |
 | CLK-09 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
-| CLK-10 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
+| CLK-10 | P1: O terminal conta onde o mouse clicou | T2, T11, T21 | Implementing |
 | CLK-11 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
 | CLK-12 | P1: O terminal conta onde o mouse clicou | T20 | Implementing |
 | CLK-13 | P1: O terminal conta onde o mouse clicou | T12, T20 | Implementing |
@@ -370,7 +370,7 @@ cada item, e com o que ficou sem conferir.
 | CLK-56 | P1: Nada do que existe muda | T2, T17, T18 | Implementing |
 | CLK-57 | P1: Nada do que existe muda | - | Pending |
 
-**Coverage:** 57 total, 53 com tarefa feita, 4 à espera das tarefas que faltam. `tasks.md` dá a tarefa de cada um.
+**Coverage:** 57 total, 55 com tarefa feita, 2 à espera das tarefas que faltam. `tasks.md` dá a tarefa de cada um.
 
 ---
 

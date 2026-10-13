@@ -576,12 +576,12 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] CLK-07: o relatório do clique numa aba, cortado em cada posição entre dois caracteres (duas chamadas de `key`) e em três pedaços, troca de tela uma vez e nada mais
-- [ ] CLK-08: `ESC [ < 0 ; 1` sem o resto: 40 ms depois a tela é a mesma, sem modal o estado não mudou, e com o modal no modo texto o campo continua vazio; o literal é 40
-- [ ] CLK-10: `ESC [ M` e os três caracteres em duas leituras não viram tecla, também com `q` entre eles
-- [ ] Um `esc` sozinho ainda volta à tela principal depois de 40 ms, e uma seta partida ainda move a seleção (TUI-61 e os testes de `tui-loop.test.ts` passam sem alteração)
-- [ ] Testes em `test/unit/tui-mouse-loop.test.ts`
-- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] CLK-07: o relatório do clique numa aba, cortado em cada posição entre dois caracteres (duas chamadas de `key`) e em três pedaços, troca de tela uma vez e nada mais
+- [x] CLK-08: `ESC [ < 0 ; 1` sem o resto: 40 ms depois a tela é a mesma, sem modal o estado não mudou, e com o modal no modo texto o campo continua vazio; o literal é 40
+- [x] CLK-10: `ESC [ M` e os três caracteres em duas leituras não viram tecla, também com `q` entre eles
+- [x] Um `esc` sozinho ainda volta à tela principal depois de 40 ms, e uma seta partida ainda move a seleção (TUI-61 e os testes de `tui-loop.test.ts` passam sem alteração)
+- [x] Testes em `test/unit/tui-mouse-loop.test.ts`
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: unit
 **Gate**: build

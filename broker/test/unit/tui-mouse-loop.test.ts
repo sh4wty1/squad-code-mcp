@@ -7,6 +7,7 @@ import { feed } from "../../tui/feed.ts";
 import { press, START } from "../../tui/keys.ts";
 import type { Fetch } from "../../tui/reader.ts";
 import { answer } from "../../tui/screens/answer.ts";
+import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
 import { questions } from "../../tui/screens/questions.ts";
 import { topology } from "../../tui/screens/topology.ts";
@@ -374,6 +375,154 @@ test("CLK-49: a double click on enter abrir over a question opens its modal and 
     key(click(twice));
     await until(() => t.posts.length > 0, "the answer to reach the broker");
     expect(t.posts).toEqual([{ url: "http://127.0.0.1:7900/answer", body: { human_token: TOKEN, question_id: 7, answer: "infinito com backoff" } }]);
+  } finally {
+    stop();
+  }
+});
+
+// The report of a click on the tab of help: no digit of it is the key of that tab, so a report
+// read as keys ends on another screen
+function helpClick(t: ReturnType<typeof launch>["t"]): string {
+  // Line 39 has a shortcut with the same text: the tab is on line 1
+  const sent = click(cellOf(t.lines().slice(0, 2), "? ajuda"));
+  expect(sent).toMatch(/^\x1b\[<0;\d\d;2M$/);
+  return sent;
+}
+
+// Every way of cutting a report of ten characters in two reads, and two ways of cutting it in three
+const CUTS: number[][] = [...Array.from({ length: 9 }, (_, i) => [i + 1]), [3, 6], [1, 9]];
+
+for (const cuts of CUTS) {
+  test(`CLK-07: the report of a click on a tab cut after ${cuts.join(" and ")} of its characters changes the screen once, and nothing else`, async () => {
+    const { t, key, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      const sent = helpClick(t);
+      expect(sent).toHaveLength(10);
+      const pieces = [0, ...cuts].map((from, i) => sent.slice(from, [...cuts, sent.length][i]));
+      expect(pieces.join("")).toBe(sent);
+      for (const piece of pieces.slice(0, -1)) {
+        key(piece);
+        expect(t.lines()).toEqual(main(t.view()).text());
+      }
+      key(pieces.at(-1)!);
+      expect(t.lines()).toEqual(help(t.view(after(t, ["?"]))).text());
+      expect(after(t, ["?"]).screen).toBe("help");
+      // Nothing of it is left to be a key after the wait
+      await Bun.sleep(60);
+      expect(t.lines()).toEqual(help(t.view({ screen: "help" })).text());
+      expect(t.raw).toEqual([true]);
+    } finally {
+      stop();
+    }
+  });
+}
+
+// The delays of the timers set while `run` runs
+function delays(run: () => void): number[] {
+  const real = globalThis.setTimeout;
+  const seen: number[] = [];
+  globalThis.setTimeout = ((fn: () => void, ms?: number) => (seen.push(ms ?? 0), real(fn, ms))) as typeof setTimeout;
+  try {
+    run();
+  } finally {
+    globalThis.setTimeout = real;
+  }
+  return seen;
+}
+
+test("CLK-08: the start of a report whose rest does not come is dropped 40 ms later: the screen and the state are the same, and no character of it is a key", async () => {
+  // A long interval: the only timer set by the key is the one of the wait
+  const { t, key, stop } = launch("01", { intervalMs: 60000 });
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    const before = t.out.length;
+    expect(delays(() => key("\x1b[<0;1"))).toEqual([40]);
+    await Bun.sleep(80);
+    // `1` would stay on the main screen, but `0`, `;` and `<` are no keys either: nothing was drawn anew
+    expect(t.lines()).toEqual(main(t.view()).text());
+    expect(t.out.slice(before).replace(/\x1b\[[0-9;?]*[A-Za-z]/g, "")).toBe("");
+    // The state is the one of the start: the next key acts on it
+    key("j");
+    expect(t.lines()).toEqual(main(t.view(after(t, ["j"]))).text());
+  } finally {
+    stop();
+  }
+});
+
+test("CLK-08: the rest of a report that comes within the 40 ms makes it whole, and one that comes after them is not put together with its start", async () => {
+  const { t, key, stop } = launch("01", { intervalMs: 60000 });
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    const sent = helpClick(t);
+    key(sent.slice(0, 6));
+    await Bun.sleep(10);
+    key(sent.slice(6));
+    expect(t.lines()).toEqual(help(t.view({ screen: "help" })).text());
+
+    // Back on the main screen: after the wait the start is gone, and the rest alone is keys
+    key("1");
+    expect(t.lines()).toEqual(main(t.view()).text());
+    key(sent.slice(0, 6));
+    await Bun.sleep(80);
+    key(sent.slice(6));
+    await Bun.sleep(60);
+    expect(t.lines()).not.toEqual(help(t.view({ screen: "help" })).text());
+  } finally {
+    stop();
+  }
+});
+
+test("CLK-08: with the modal in the text mode, the start of a report whose rest does not come leaves the field empty", async () => {
+  const { t, key, stop } = launch("01", { intervalMs: 60000 });
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    const text = ["4", "\r", "j", "j", "j", "\r"];
+    for (const k of text) key(k);
+    const typing = after(t, text);
+    expect(typing.modal).toMatchObject({ question: 7, choice: null, text: "" });
+    key("\x1b[<0;1");
+    await Bun.sleep(80);
+    expect(t.lines()).toEqual(tab(t.view(typing)));
+    // The modal is still open and takes the text typed after it
+    key("a");
+    expect(t.lines()).toEqual(tab(t.view(after(t, [...text, "a"]))));
+    expect(after(t, [...text, "a"]).modal).toMatchObject({ text: "a" });
+  } finally {
+    stop();
+  }
+});
+
+// The old format: `ESC [ M` and three characters, here with a q among them
+for (const [first, rest] of [["\x1b[M", " q!"], ["\x1b[M ", "q!"], ["\x1b[M q", "!"], ["\x1b[", "M q!"]] as const) {
+  test(`CLK-10: the old report that comes as ${JSON.stringify(first)} and then ${JSON.stringify(rest)} is no key, also its q`, async () => {
+    const { t, key, stop } = launch("01", { intervalMs: 60000 });
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      const before = t.out.length;
+      key(first);
+      key(rest);
+      await Bun.sleep(60);
+      expect(t.raw).toEqual([true]);
+      expect(t.lines()).toEqual(main(t.view()).text());
+      expect(t.out.slice(before).replace(/\x1b\[[0-9;?]*[A-Za-z]/g, "")).toBe("");
+      // The key after it is a key
+      key("2");
+      expect(t.lines()).toEqual(topology(t.view({ screen: "topology" })).text());
+    } finally {
+      stop();
+    }
+  });
+}
+
+test("CLK-10: the start of an old report whose characters do not come is dropped after the wait, and quits nothing", async () => {
+  const { t, key, stop } = launch("01", { intervalMs: 60000 });
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    expect(delays(() => key("\x1b[M q"))).toEqual([40]);
+    await Bun.sleep(80);
+    expect(t.raw).toEqual([true]);
+    expect(t.lines()).toEqual(main(t.view()).text());
   } finally {
     stop();
   }

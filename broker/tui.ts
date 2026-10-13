@@ -200,8 +200,10 @@ export function start(io: Io, settings: Settings) {
     clearTimeout(escapeTimer);
     const input = pending + chunk;
     // stdin chunks can end inside a CSI sequence. Wait briefly for its remaining bytes;
-    // a lone Escape must still navigate back when no more input arrives.
-    pending = /\x1b(?:\[[0-9;]*)?$/u.exec(input)?.[0] ?? "";
+    // a lone Escape must still navigate back when no more input arrives. A report of the
+    // mouse is held the same way: the SGR one up to its letter, and the old one, `ESC [ M`,
+    // up to its three characters. What is left of one after the wait is no key and no text.
+    pending = /\x1b(?:\[(?:<[0-9;]*|M[^]{0,2}|[0-9;]*))?$/u.exec(input)?.[0] ?? "";
     const complete = input.slice(0, input.length - pending.length);
     // The escape held back is a key of this chunk: a line break before it was not typed alone
     if (complete) dispatch(complete, pending !== "");
