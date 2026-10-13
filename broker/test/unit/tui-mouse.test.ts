@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
-import type { SquadEvent } from "../../shared/contract.ts";
+import { qid, type SquadEvent } from "../../shared/contract.ts";
+import { waiting } from "../../tui/asked.ts";
 import { clock, grid, len, type Grid } from "../../tui/grid.ts";
 import { keysOf, press } from "../../tui/keys.ts";
 import { parse, point, type Drawn, type Entry, type Pointer } from "../../tui/mouse.ts";
@@ -300,9 +301,9 @@ function boxes(g: Grid): [left: number, right: number][] {
   return find(g, 2, "┌").map((left, i) => [left, right[i]!]);
 }
 
-// The cell where a box draws `text`, which it has once from line `top` down
-function cellOf(g: Grid, [left, right]: [number, number], text: string, top = 2): [x: number, y: number] {
-  const found = g.rows.flatMap((_, y) => (y < top || y > 37 ? [] : find(g, y, text, left, right).map((x): [number, number] => [x, y])));
+// The cell where a box draws `text`, which it has once from line `top` to line `bottom`
+function cellOf(g: Grid, [left, right]: [number, number], text: string, top = 2, bottom = 37): [x: number, y: number] {
+  const found = g.rows.flatMap((_, y) => (y < top || y > bottom ? [] : find(g, y, text, left, right).map((x): [number, number] => [x, y])));
   if (found.length !== 1) throw new Error(`the box has "${text}" ${found.length} times`);
   return found[0]!;
 }
@@ -771,3 +772,187 @@ for (const now of ["topology", "thread", "help"] as const) {
     }
   });
 }
+
+// The modal of answer as it opens: on the first option, or on an empty text
+const opened = (question: number, choice: number | null) => ({ question, choice, text: "", expanded: false, sending: false, refused: false });
+
+// Ten more questions with the dev, as the mother forwarded Q-08 in 428: twelve with Q-07 and Q-08
+const twelve = (events: SquadEvent[]): SquadEvent[] => [
+  ...events,
+  ...Array.from({ length: 10 }, (_, i) => ({ ...events.find((e) => e.seq === 428)!, seq: 900 + i, question_id: 20 + i }) as SquadEvent),
+];
+
+// The bottom line of the box whose top left corner is at (left, top)
+const bottomOf = (g: Grid, left: number, top: number): number => g.rows.findIndex((row, y) => y > top && row[left]!.ch === "└");
+
+// The box of the list of the tab of questions and the one of its detail: their columns and their last line
+function tabBox(g: Grid, i: 0 | 1): { left: number; right: number; bottom: number } {
+  const [left, right] = boxes(g)[i]!;
+  return { left, right, bottom: bottomOf(g, left, 2) };
+}
+
+// The box of the history of the tab: the one whose top has its title
+function historyBox(g: Grid): { left: number; right: number; top: number; bottom: number } {
+  const top = g.rows.findIndex((_, y) => find(g, y, "─ histórico · ").length === 1);
+  const left = find(g, top, "┌")[0]!;
+  return { left, right: find(g, top, "┐")[0]!, top, bottom: bottomOf(g, left, top) };
+}
+
+// The lines of the list of the tab that draw a question: from its head, which has its label, to its route
+function questionLines(g: Grid, id: number): number[] {
+  const { left, right, bottom } = tabBox(g, 0);
+  const lines = [cellOf(g, [left, right], ` ${qid(id)} `, 3, bottom)[1]];
+  while (find(g, lines.at(-1)!, "   rota ", left, right).length === 0 && lines.at(-1)! < bottom) lines.push(lines.at(-1)! + 1);
+  return lines;
+}
+
+// The list of frame 04 is Q-07, with two lines of text and its options, then Q-08, with one line and its default
+for (const [question, id, choice, lines] of [[7, 7, 0, 5], [null, 7, 0, 5], [8, 8, null, 4]] as const) {
+  test(`CLK-24: with the focus on the list and ${question === null ? "no question" : qid(question)} selected, a click on any line of ${qid(id)} does what enter does: its modal opens and nothing is sent`, () => {
+    const v = view("04", { question });
+    const g = screen(v);
+    const { left, right } = tabBox(g, 0);
+    const ys = questionLines(g, id);
+    expect(ys.length).toBe(lines);
+    for (const y of ys) {
+      for (const x of [left + 1, right - 1]) {
+        const next = clicked(v, x, y)!;
+        expect(next.ui).toEqual(press(v.ui, "\r", v)!);
+        expect(next.ui).toEqual({ ...v.ui, question: id, modal: opened(id, choice) });
+        expect(next.ui.send).toBeNull();
+      }
+    }
+  });
+}
+
+for (const [question, to, key] of [[7, 8, "j"], [null, 8, "j"], [8, 7, "k"]] as const) {
+  test(`CLK-25: with ${question === null ? "no question" : qid(question)} selected, a click on any line of ${qid(to)} selects it, as ${key} does, and opens no modal`, () => {
+    const v = view("04", { question });
+    const g = screen(v);
+    const { left, right } = tabBox(g, 0);
+    for (const y of questionLines(g, to)) {
+      for (const x of [left + 1, right - 1]) {
+        const next = clicked(v, x, y)!;
+        expect(next.ui).toEqual(keys(v, key)!);
+        expect(next.ui).toEqual({ ...v.ui, question: to });
+        expect([next.ui.qfocus, next.ui.modal]).toEqual(["list", null]);
+      }
+    }
+  });
+}
+
+test("CLK-25: with more questions than fit, a click on a question some places from the selected one selects it, as k or j until it", () => {
+  const first = view("04", { question: 7 }, twelve);
+  const order = waiting(first.squad).map((q) => q.id);
+  expect(order).toEqual([7, 8, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]);
+  const line = (v: View, id: number): [x: number, y: number] => [tabBox(screen(v), 0).left + 1, questionLines(screen(v), id)[0]!];
+  // The third of the list, two places below the selected one
+  const down = clicked(first, ...line(first, 20))!;
+  expect(down.ui).toEqual(keys(first, "j", "j")!);
+  expect(down.ui).toEqual({ ...first.ui, question: 20 });
+  // And back from it to the first
+  const third = view("04", { question: 20 }, twelve);
+  const up = clicked(third, ...line(third, 7))!;
+  expect(up.ui).toEqual(keys(third, "k", "k")!);
+  expect(up.ui).toEqual({ ...third.ui, question: 7 });
+  // With the fourth selected the list starts at the second: the first is not drawn
+  const fourth = view("04", { question: 21 }, twelve);
+  expect(find(screen(fourth), 3, "Q-07")).toEqual([]);
+  const near = clicked(fourth, ...line(fourth, 20))!;
+  expect(near.ui).toEqual(keys(fourth, "k")!);
+  expect(near.ui).toEqual({ ...fourth.ui, question: 20 });
+});
+
+test("CLK-25: with the focus on the history, a click on a question gives the focus to the list and selects it, and on the selected one it opens no modal", () => {
+  const v = view("04", { question: 7, qfocus: "history", historyOffset: 1 });
+  const g = screen(v);
+  const { left, right } = tabBox(g, 0);
+  for (const y of questionLines(g, 7)) {
+    for (const x of [left + 1, right - 1]) {
+      const next = clicked(v, x, y)!;
+      expect(next.ui).toEqual(keys(v, "h")!);
+      expect(next.ui).toEqual({ ...v.ui, qfocus: "list" });
+      expect(next.ui.modal).toBeNull();
+    }
+  }
+  const other = clicked(v, left + 1, questionLines(g, 8)[0]!)!;
+  expect(other.ui).toEqual(keys(v, "h", "j")!);
+  expect(other.ui).toEqual({ ...v.ui, qfocus: "list", question: 8 });
+  const second = view("04", { question: 8, qfocus: "history" });
+  const up = clicked(second, left + 1, questionLines(screen(second), 7)[0]!)!;
+  expect(up.ui).toEqual(keys(second, "h", "k")!);
+  expect(up.ui).toEqual({ ...second.ui, qfocus: "list", question: 7 });
+});
+
+test("CLK-26: a click on the box of the history gives it the focus, as h does from the list, on its border too, and with the focus already on it changes nothing", () => {
+  const v = view("04", { question: 8, historyOffset: 1 });
+  const g = screen(v);
+  const { left, right, top, bottom } = historyBox(g);
+  expect(bottom).toBeGreaterThan(top);
+  // The four corners of the box, and the label of a resolved question inside it
+  const cells = [[left, top], [right, top], [left, bottom], [right, bottom], cellOf(g, [left, right], "Q-10", top, bottom)] as const;
+  for (const [x, y] of cells) {
+    const next = clicked(v, x, y)!;
+    expect(next.ui).toEqual(press(v.ui, "h", v)!);
+    expect(next.ui).toEqual({ ...v.ui, qfocus: "history" });
+  }
+  const there = view("04", { question: 8, qfocus: "history", historyOffset: 1 });
+  for (const [x, y] of cells) expect(clicked(there, x, y)!.ui).toBe(there.ui);
+});
+
+// The line of the two keys the detail of a question ends with
+const DETAIL_KEYS = "enter responder   b próxima bloqueante";
+
+for (const qfocus of ["list", "history"] as const) {
+  test(`CLK-27: with the focus on the ${qfocus}, a click on the detail of the tab outside its two keys, on the caption of the list, on its border or on the empty line between two questions changes nothing`, () => {
+    const v = view("04", { question: 7, qfocus });
+    const g = screen(v);
+    const drawn = drawing(v, g);
+    const same = (x: number, y: number) => expect(point(entry(v), click(x, y), v, drawn)!.ui).toBe(v.ui);
+    const detail = tabBox(g, 1);
+    const [kx, ky] = cellOf(g, [detail.left, detail.right], DETAIL_KEYS, 2, detail.bottom);
+    for (let y = 2; y <= detail.bottom; y++) {
+      for (let x = detail.left; x <= detail.right; x++) {
+        if (y !== ky || x < kx || x >= kx + len(DETAIL_KEYS)) same(x, y);
+      }
+    }
+    const list = tabBox(g, 0);
+    const caption = "bloqueantes primeiro · depois por tempo restante";
+    const [cx, cy] = cellOf(g, [list.left, list.right], caption, 2, list.bottom);
+    for (let x = cx; x < cx + len(caption); x++) same(x, cy);
+    // The line after the route of Q-07 is empty, and the one after it is the head of Q-08
+    const between = questionLines(g, 7).at(-1)! + 1;
+    expect(questionLines(g, 8)[0]).toBe(between + 1);
+    for (let x = list.left; x <= list.right; x++) same(x, between);
+    for (const y of [2, ...questionLines(g, 8), list.bottom]) {
+      same(list.left, y);
+      same(list.right, y);
+    }
+  });
+}
+
+test("CLK-33: a click on enter responder of the detail does what enter does, and one on b próxima bloqueante what b does", () => {
+  const v = view("04", { question: 8 });
+  const g = screen(v);
+  const detail = tabBox(g, 1);
+  const [x, y] = cellOf(g, [detail.left, detail.right], DETAIL_KEYS, 2, detail.bottom);
+  // The first and the last cell of `enter` and of `responder`
+  for (const cell of [x, x + 4, x + 6, x + 14]) {
+    const next = clicked(v, cell, y)!;
+    expect(next.ui).toEqual(press(v.ui, "\r", v)!);
+    expect(next.ui).toEqual({ ...v.ui, modal: opened(8, null) });
+    expect(next.ui.send).toBeNull();
+  }
+  // And of `b` and of `próxima bloqueante`: Q-07 is the only blocking one
+  const b = x + len("enter responder   ");
+  for (const cell of [b, b + 2, b + len("b próxima bloqueante") - 1]) {
+    const next = clicked(v, cell, y)!;
+    expect(next.ui).toEqual(press(v.ui, "b", v)!);
+    expect(next.ui).toEqual({ ...v.ui, question: 7 });
+  }
+  // The spaces between them are of no key
+  for (const cell of [x + 5, x + 15, x + 16, x + 17, b + 1]) expect(clicked(v, cell, y)!.ui).toBe(v.ui);
+  // With the focus on the history enter takes it to the list with the modal
+  const far = view("04", { question: 8, qfocus: "history" });
+  expect(clicked(far, x, y)!.ui).toEqual({ ...far.ui, qfocus: "list", modal: opened(8, null) });
+});

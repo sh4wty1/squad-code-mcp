@@ -406,12 +406,12 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] CLK-24: na pergunta selecionada com o foco na lista, o de `enter`: o modal dela, `send` nulo
-- [ ] CLK-25: noutra pergunta, acima e abaixo: ela fica selecionada e o foco é a lista; na selecionada com o foco no histórico, o foco vai à lista e o modal não abre
-- [ ] CLK-26: na caixa do histórico com o foco na lista, o foco vai ao histórico; já com o foco nele, nada muda
-- [ ] O detalhe e a legenda da lista não mudam nada; o atalho `enter responder` do detalhe dá o de `enter`, e `b próxima bloqueante` o de `b`
-- [ ] Testes em `test/unit/tui-mouse.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] CLK-24: na pergunta selecionada com o foco na lista, o de `enter`: o modal dela, `send` nulo
+- [x] CLK-25: noutra pergunta, acima e abaixo: ela fica selecionada e o foco é a lista; na selecionada com o foco no histórico, o foco vai à lista e o modal não abre
+- [x] CLK-26: na caixa do histórico com o foco na lista, o foco vai ao histórico; já com o foco nele, nada muda
+- [x] O detalhe e a legenda da lista não mudam nada; o atalho `enter responder` do detalhe dá o de `enter`, e `b próxima bloqueante` o de `b`
+- [x] Testes em `test/unit/tui-mouse.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

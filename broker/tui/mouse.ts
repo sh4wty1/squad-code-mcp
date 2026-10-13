@@ -2,8 +2,10 @@
 // of a key, or of a sequence of keys, that already exists in that state (STATE AD-021). Pure:
 // the clock is the one of the view, and a report is the item `keysOf` reads from the input.
 
+import { waiting } from "./asked.ts";
 import type { Hit } from "./grid.ts";
 import { press } from "./keys.ts";
+import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
 import type { Ui, View } from "./view.ts";
 
@@ -77,6 +79,16 @@ function clicked(hit: Hit, ui: Ui, view: View): Ui | null {
     const index = (ref: string | null) => squad.tickets.findIndex((t) => t.ticket_ref === ref);
     return shown && tap(shown, view, walk(index(threadTicket({ ...view, ui: shown })), index(hit.ticket), "[", "]"));
   }
+  if (hit.question !== undefined) {
+    // The selected question is opened, with the focus on the list. Otherwise the focus goes
+    // to the list, and the selection to the question.
+    const asked = waiting(squad);
+    const chosen = selected({ ...view, ui })?.id;
+    if (hit.question === chosen && ui.qfocus === "list") return tap(focused, view, ["\r"]);
+    const index = (id: number | undefined) => asked.findIndex((q) => q.id === id);
+    return tap(focused, view, [...(ui.qfocus === "history" ? ["h"] : []), ...walk(index(chosen), index(hit.question))]);
+  }
+  if (hit.history && ui.qfocus === "list") return tap(focused, view, ["h"]);
   return focused;
 }
 
