@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
 import { grid, len, type Grid, type Hit } from "../../tui/grid.ts";
-import { chrome, MAIN_KEYS, stats } from "../../tui/screens/chrome.ts";
+import { chrome, drawKeys, MAIN_KEYS, stats, type Keys } from "../../tui/screens/chrome.ts";
 import type { Ui, View } from "../../tui/view.ts";
 import { frameView } from "../frames/view.ts";
 
@@ -162,3 +162,94 @@ for (const [scope, what, v] of COST) {
     expect([hit(g, at(g, 38, "mot"), 38), hit(g, first - 1, 38), hit(g, last + 1, 38), hit(g, end, 38)]).toEqual([null, null, null, null]);
   });
 }
+
+const UP = "\x1b[A";
+const DOWN = "\x1b[B";
+
+// A line of keys alone on line 39
+function keyLine(keys: Keys, modal?: boolean): Grid {
+  const g = grid();
+  drawKeys(g, 39, keys, modal);
+  return g;
+}
+
+// Each simple shortcut the screens draw, and the key the terminal sends for it
+const SIMPLE: [label: string, does: string, key: string][] = [
+  ["tab", "painel", "\t"],
+  ["enter", "abrir", "\r"],
+  ["esc", "voltar", "\x1b"],
+  ["b", "bloqueante", "b"],
+  ["g", "gate", "g"],
+  ["x", "permissão", "x"],
+  ["p", "pausa", "p"],
+  ["h", "histórico", "h"],
+  ["?", "ajuda", "?"],
+  ["q", "sair", "q"],
+  ["ctrl+e", "expandir", "\x05"],
+  ["ctrl+u", "limpar", "\x15"],
+];
+
+for (const [label, does, key] of SIMPLE) {
+  test(`CLK-33: the shortcut "${label} ${does}" has the key ${JSON.stringify(key)} in the cells of its key and of its description, and not in the spaces around them`, () => {
+    const g = keyLine([["1-4", "telas"], [label, does], ["j/k", "mover"]]);
+    const first = at(g, 39, `${label} ${does}`);
+    const space = first + len(label);
+    const last = space + len(does);
+    expect(hits(g, 39, first, space - 1)).toEqual(all(len(label), { key }));
+    expect(hit(g, space, 39)).toBeNull();
+    expect(hits(g, 39, space + 1, last)).toEqual(all(len(does), { key }));
+    // The three spaces before the shortcut and the three after it
+    expect(hits(g, 39, first - 3, first - 1)).toEqual([null, null, null]);
+    expect(hits(g, 39, last + 1, last + 3)).toEqual([null, null, null]);
+  });
+}
+
+for (const [label, does, keys] of [["j/k", "mover", ["j", null, "k"]], ["[ ]", "ticket ant/próx", ["[", null, "]"]], ["↑↓", "mover", [UP, DOWN]]] as const) {
+  test(`CLK-34: in the shortcut "${label} ${does}" each character of a key has its key, and the separator and the description have no mark`, () => {
+    const g = keyLine([["1-4", "telas"], [label, does], ["q", "sair"]]);
+    const first = at(g, 39, `${label} ${does}`);
+    expect(hits(g, 39, first, first + len(label) - 1)).toEqual(keys.map((key) => (key === null ? null : { key })));
+    // The space after the keys, the description and the three spaces after it
+    expect(hits(g, 39, first + len(label), first + len(label) + len(does) + 3)).toEqual(all(len(does) + 4, null));
+    expect(hit(g, first - 1, 39)).toBeNull();
+  });
+}
+
+test("CLK-35: a shortcut of a range has no mark in any cell, and neither has a label the screens do not have", () => {
+  expect(marked(keyLine([["1-4", "telas"], ["1-3", "escolher"], ["1-9", "escolher"]]), 39)).toEqual([]);
+  expect(marked(keyLine([["a", "aprovar"], ["shift+tab", "voltar"], ["k/j", "mover"], ["toString", "nada"]]), 39)).toEqual([]);
+  // And it takes no mark from the shortcuts next to it
+  const g = keyLine([["1-4", "telas"], ["q", "sair"]]);
+  expect(marked(g, 39)).toEqual([at(g, 39, "q sair"), ...Array.from({ length: 4 }, (_, i) => at(g, 39, "sair") + i)]);
+});
+
+test("CLK-45: with the modal open every mark of the line of keys says so, and without it none does", () => {
+  // The keys of the three modes of the modal of answer: choice, text and refused
+  const choice = keyLine([["1-4", "escolher"], ["↑↓", "mover"], ["enter", "confirmar"], ["esc", "cancelar"]], true);
+  expect(hits(choice, 39, at(choice, 39, "↑↓"), at(choice, 39, "↑↓") + 1)).toEqual([{ modal: true, key: UP }, { modal: true, key: DOWN }]);
+  expect(hits(choice, 39, at(choice, 39, "enter"), at(choice, 39, "enter") + 4)).toEqual(all(5, { modal: true, key: "\r" }));
+  expect(hits(choice, 39, at(choice, 39, "confirmar"), at(choice, 39, "confirmar") + 8)).toEqual(all(9, { modal: true, key: "\r" }));
+  expect(hits(choice, 39, at(choice, 39, "cancelar"), at(choice, 39, "cancelar") + 7)).toEqual(all(8, { modal: true, key: "\x1b" }));
+  const text = keyLine([["enter", "enviar"], ["ctrl+e", "expandir"], ["ctrl+u", "limpar"], ["esc", "cancelar"]], true);
+  expect(hit(text, at(text, 39, "enviar"), 39)).toEqual({ modal: true, key: "\r" });
+  expect(hit(text, at(text, 39, "ctrl+e"), 39)).toEqual({ modal: true, key: "\x05" });
+  expect(hit(text, at(text, 39, "limpar") + 5, 39)).toEqual({ modal: true, key: "\x15" });
+  const refused = keyLine([["esc", "fechar"]], true);
+  expect(marked(refused, 39)).toEqual([1, 2, 3, 5, 6, 7, 8, 9, 10].map((i) => at(refused, 39, "esc fechar") - 1 + i));
+  for (const g of [choice, text, refused]) expect(marked(g, 39).every((x) => hit(g, x, 39)!.modal === true)).toBe(true);
+  // The same keys with no modal
+  const plain = keyLine([["enter", "enviar"], ["esc", "cancelar"]]);
+  expect(marked(plain, 39).map((x) => hit(plain, x, 39))).toEqual([...all(11, { key: "\r" }), ...all(11, { key: "\x1b" })]);
+});
+
+test("CLK-33: a line of keys drawn over another leaves no mark of the one before", () => {
+  const g = bars(view("01"));
+  const pause = at(g, 39, "p pausa");
+  expect(hit(g, pause, 39)).toEqual({ key: "p" });
+  expect(hit(g, at(g, 39, "pausa") + 4, 39)).toEqual({ key: "p" });
+  drawKeys(g, 39, [["esc", "fechar"]], true);
+  expect(marked(g, 39).map((x) => hit(g, x, 39))).toEqual(all(9, { modal: true, key: "\x1b" }));
+  expect(hit(g, pause, 39)).toBeNull();
+  // Only its own line
+  expect(hit(g, at(g, 38, "│"), 38)).toEqual({ key: "t" });
+});

@@ -41,13 +41,36 @@ export function tone(name: string): Color {
 
 export const segLen = (segs: Seg[]): number => segs.reduce((n, seg) => n + (seg && seg.length ? len(seg[0]) : 0), 0);
 
-// The line of keys; returns the column after the last one
-export function drawKeys(g: Grid, y: number, keys: Keys): number {
+// What the terminal sends for the key a shortcut names
+const SENT = new Map([
+  ["tab", "\t"],
+  ["enter", "\r"],
+  ["esc", "\x1b"],
+  ["ctrl+e", "\x05"],
+  ["ctrl+u", "\x15"],
+  ...["b", "g", "x", "p", "h", "?", "q"].map((key): [string, string] => [key, key]),
+]);
+
+// The shortcuts of two keys, and what the terminal sends for each of their characters
+const PAIRS = ["j/k", "[ ]", "↑↓"];
+const EACH = new Map([["j", "j"], ["k", "k"], ["[", "["], ["]", "]"], ["↑", "\x1b[A"], ["↓", "\x1b[B"]]);
+
+// The line of keys; returns the column after the last one. A click on a shortcut is its key,
+// on the key or on what it does; one of two keys is clicked on the character of each key, and
+// one of a range (`1-4`) is not clicked. `modal` says the modal of answer drew the line.
+export function drawKeys(g: Grid, y: number, keys: Keys, modal = false): number {
   g.clear(0, y, g.w, 1);
   g.bg(0, y, g.w, "black");
+  const mark = (x: number, w: number, key: string | undefined) => {
+    if (key !== undefined) g.mark(x, y, w, 1, modal ? { modal: true, key } : { key });
+  };
   let x = 1;
   for (const [key, does] of keys) {
+    const kx = x;
     x = g.put(x, y, key, "bwhite", { bold: true });
+    mark(kx, len(key), SENT.get(key));
+    mark(x + 1, len(does), SENT.get(key));
+    if (PAIRS.includes(key)) [...key].forEach((ch, i) => mark(kx + i, 1, EACH.get(ch)));
     x = g.put(x + 1, y, does, "gray");
     x += 3;
   }

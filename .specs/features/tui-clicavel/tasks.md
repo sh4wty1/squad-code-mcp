@@ -220,14 +220,14 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] Cada atalho simples da spec, um caso por rótulo: `tab`, `enter`, `esc`, `b`, `g`, `x`, `p`, `h`, `?`, `q`, `ctrl+e`, `ctrl+u`, com a tecla que o terminal manda (`\t`, `\r`, `\x1b`, `\x05`, `\x15` e a própria letra)
-- [ ] A primeira e a última célula da tecla e da descrição têm a marca; o espaço entre as duas e os três espaços depois não
-- [ ] `j/k`, `[ ]` e `↑↓`: cada caractere de tecla tem a tecla dele; o separador e a descrição não têm marca
-- [ ] `1-4` e `1-3` não têm marca em célula alguma; um rótulo que a tabela não conhece também não
-- [ ] Com `modal` verdadeiro toda marca tem `modal: true`
-- [ ] A linha inteira é apagada antes: um atalho mais curto desenhado por cima não deixa a marca do anterior
-- [ ] Testes em `test/unit/tui-hits.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Cada atalho simples da spec, um caso por rótulo: `tab`, `enter`, `esc`, `b`, `g`, `x`, `p`, `h`, `?`, `q`, `ctrl+e`, `ctrl+u`, com a tecla que o terminal manda (`\t`, `\r`, `\x1b`, `\x05`, `\x15` e a própria letra)
+- [x] A primeira e a última célula da tecla e da descrição têm a marca; o espaço entre as duas e os três espaços depois não
+- [x] `j/k`, `[ ]` e `↑↓`: cada caractere de tecla tem a tecla dele; o separador e a descrição não têm marca
+- [x] `1-4` e `1-3` não têm marca em célula alguma; um rótulo que a tabela não conhece também não
+- [x] Com `modal` verdadeiro toda marca tem `modal: true`
+- [x] A linha inteira é apagada antes: um atalho mais curto desenhado por cima não deixa a marca do anterior
+- [x] Testes em `test/unit/tui-hits.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
