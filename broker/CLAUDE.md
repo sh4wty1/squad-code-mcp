@@ -15,13 +15,15 @@ Broker and MCP channel server of squad-code-mcp. A fork of claude-peers-mcp at `
 - `session.ts` — `/blocked`, `/unblocked`, `/usage` and `/turn-started`.
 - `permission.ts` — `/permission-request`, `/permission-decision` and the file of the human credential.
 - `state.ts` — `/state`: the open feature, the ticket of a worker and what the peer owes.
-- `server.ts` — MCP stdio server, one per Claude Code session. Pings through the channel and registers only when the model calls `ready`. Then lists the tools of the role, runs the delivery loop and relays permission prompts.
+- `server.ts` — MCP stdio server, one per Claude Code session. Pings through the channel and registers only when the model calls `ready`. Then lists the tools of the role, runs the delivery loop and relays permission prompts. When it registers it writes the credential of the session in its credential file, `<SQUAD_DB>.<name>.id`, with mode `0600`, which the hooks of the session read, and it removes the file when it ends (STATE AD-016).
 - `delivery.ts` — The loop of a session: poll, push in order, ack after the push. No MCP and no HTTP: the calls are injected.
 - `tools.ts` — The MCP tools of each role and the route each one calls. Of a question: `ask` for the four roles, `answer` and `escalate` for worker, leader and mother, `merge_question` for the mother.
+- `roles.ts` — `readRoles(path)`: the roles file as a list of entries, each with `name`, `when_to_use`, `skills` and the `workflows` `tlc` and `matt-pocock`. A file that is not there or is out of the format is refused whole, with its path in the message.
+- `launch.ts` — The launcher, `squad start <role> [name] [--skip-permissions]`: validates the call, finds the main checkout, reads the roles file and the log (the open feature and who is online), picks the name, creates the worktree of the role with the untracked `.env*` files copied, and opens one Claude Code session there. The session gets its name and role in the environment, without any `CLAUDE*` variable but the three the dev sets (`CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_OAUTH_TOKEN`, `CLAUDE_CODE_GIT_BASH_PATH`), the plugin loaded as a channel, `acceptEdits` with the allowed list of the role (its squad tools and its local git) or `--dangerously-skip-permissions`, the base skills in the system prompt and `/squad:<role>` as its first instruction. The mother stays in the main checkout. git runs for real; `fetch`, `spawn` and the environment are injected. Whatever fails before the session opens is one line `squad: <cause>` and the exit code 1 (STATE AD-019, AD-020).
 - `shared/contract.ts` — The event envelope, the twenty kinds, the edges, the read format, the label `Q-NN` of a question and the seconds a non-blocking one waits for the dev without `timeout_s`.
 - `shared/derive.ts` — The state of the tickets, what each peer owes and the features, from the events alone. Pure functions. `squad(events, now)` is the status rule of the contract (ADR-006): from the whole log it gives the open feature, the status of each agent and of each ticket by precedence, the questions, the gates, the open permission requests and the tokens. `presence`, `blocks`, `openPermissions`, `questions`, `gates` and `usageTotals` are its parts. `questions(events)` gives each question its text, its route, the status the `questions` table has for it and how it closed, reading the `feature_closed` too; a test compares the two after generated sequences of calls. `owed` includes the answer the holder of an open question owes.
-- `shared/config.ts`, `shared/git.ts` — Settings (`SQUAD_*`) and the git common directory.
-- `cli.ts` — CLI utility for the broker.
+- `shared/config.ts`, `shared/git.ts` — Settings (`SQUAD_*`) and the git common directory. The paths of the launcher and of the hooks are there: `idPath` (the credential file of a session, next to the database), `pluginDir` (`../plugin`), `rolesPath` (`SQUAD_ROLES`, or `roles.json` of the plugin), `worktreesDir` (`SQUAD_WORKTREES`, or `<main checkout>.squad` next to the main checkout) and `claudeCommand` (`SQUAD_CLAUDE`, or `claude`), with the 2000 ms a hook or the launcher waits for the broker.
+- `cli.ts` — The command `squad`, the `bin` of `package.json`: `start` runs the launcher on the terminal, `tui` runs the TUI on it and exits with its code, `status` and `kill-broker` show and stop the broker.
 - `tui.ts` — The TUI, a process of its own that reads the log and writes one thing, the answer of the dev to a question: `config` validates the settings, `credential` reads the human credential from its file, `start` is the loop of read, keys, send and drawing with `fetch`, clock, size, input, output and credential injected, and the bottom of the file wires it to the terminal. After each read the loop applies `sync`; after the keys it sends the answer they left in `Ui.send`, with the credential read at that moment, and applies `settle` (STATE AD-014). In a terminal smaller than 120×40 the loop takes no key but `q` and ctrl+c, and still reads the marks of a delimited paste, with `marks`. Imported by neither `broker.ts` nor `server.ts`.
 - `tui/reader.ts` — `GET /events?after=<cursor>`, the only read of the TUI: the log by cursor, kept on a failed read and emptied when the broker comes back on a new database.
 - `tui/writer.ts` — `POST /answer` with the human credential, the only write of the TUI: it gives the error of a refusal, and `broker não respondeu` for anything else or after 2 s.
@@ -37,20 +39,26 @@ Broker and MCP channel server of squad-code-mcp. A fork of claude-peers-mcp at `
 - `tui/config.ts`, `tui/prices.json` — The price table and the interval of read.
 - `tui/glyphs.ts`, `tui/probe.ts` — The glyphs outside ASCII the screens draw, and the probe that measures them in the terminal.
 - `test/frames/` — The frames of the prototype as text, the tool that extracts them and the logs that reproduce them, with the state of the screen of each frame of the tab of questions and of its modal; `deviations.ts` declares where a drawn frame leaves the prototype, and none is left for the slice Question. `test/unit/tui-frames.test.ts` draws each one.
+- `../plugin/` — The plugin `squad`, which the launcher loads in place with `--plugin-dir`: it is not installed, because it reaches this directory by a relative path (STATE AD-015). `.claude-plugin/plugin.json` is its manifest, `.mcp.json` declares `server.ts` of this directory as its MCP server, and `hooks/hooks.json` declares its two hooks, `UserPromptSubmit` and `Stop`. In `hooks/`: `turn-started.ts` marks the start of a turn with a `turn_started`; `stop.ts` ends a turn, sending back to work once the session that would come out of it `stalled` and otherwise recording its `usage` by model; `session.ts` gives a hook the credential of the session from its file, a call to the broker with a deadline and the payload of the hook; `usage.ts` sums the tokens of the transcripts of the session, subagents included, by model; `nudge.ts` is the rule of the return to work, the status rule over the log as if the turn had ended. `roles.json` names the base skills of each role and those of each workflow. `skills/<role>/SKILL.md` are the four protocol skills, of the mother, the leader, the worker and the judge: what each role does with each event and what it never does. Its tests are in `test/` here, and `tsconfig.json` includes it.
 
 The design is in `../.design/squad-mvp.md`, the decisions in `../docs/adr/` and `../.specs/STATE.md`.
 
 ## Running
 
 ```bash
-# Start Claude Code as a squad member, with the channel:
+# Start Claude Code as a squad member, from inside the repository the squad works on. The
+# launcher sets the name and the role, prepares the worktree and loads the plugin.
+# `squad` is on the path after `bun link` here; without it, `bun cli.ts start <role>`.
+squad start <role>
+
+# The form without the plugin: the server alone as a channel, with no hooks and no skills.
 SQUAD_NAME=leader SQUAD_ROLE=leader claude --dangerously-load-development-channels server:squad
 
 # CLI:
 bun cli.ts status
 bun cli.ts kill-broker
 
-# The TUI, in a terminal of 120×40 or more, and the probe of its glyphs:
+# The TUI, in a terminal of 120×40 or more (also `squad tui`), and the probe of its glyphs:
 bun tui.ts
 bun tui/probe.ts
 

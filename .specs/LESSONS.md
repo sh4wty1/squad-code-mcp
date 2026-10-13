@@ -33,22 +33,28 @@ Corroborated across multiple features. Safe to apply as guidance.
 - last seen: 2026-10-09T17:54:51Z
 
 ### L-024 - State for every optional field whether null counts as absent or as a present value of the wrong type
-- signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec routes` · harmful: 0
-- features: event, question
-- evidence: EVT-51 vs EVT-04; broker/session.ts:24 (spec routes) (+1 more)
-- last seen: 2026-10-10T11:07:42Z
+- signal: `spec_precision_gap` · recurrence: 3 feature(s) · scope: `spec routes` · harmful: 0
+- features: event, question, papeis
+- evidence: EVT-51 vs EVT-04; broker/session.ts:24 (spec routes) (+2 more)
+- last seen: 2026-10-12T08:33:56Z
 
 ### L-036 - State for every optional text field what the empty string means: refused, absent or stored as sent
-- signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec routes` · harmful: 0
-- features: event, question
-- evidence: EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes) (+1 more)
-- last seen: 2026-10-10T11:07:43Z
+- signal: `spec_precision_gap` · recurrence: 3 feature(s) · scope: `spec routes` · harmful: 0
+- features: event, question, papeis
+- evidence: EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes) (+2 more)
+- last seen: 2026-10-12T08:33:56Z
 
 ### L-048 - When an AC lists alternatives that can hold together, state which one wins
 - signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec` · harmful: 0
 - features: tui-leitura, question
 - evidence: TUI-37 (spec) (+3 more)
 - last seen: 2026-10-10T11:07:42Z
+
+### L-050 - Test through the real process each callback the composition root injects into a module, not only through the wiring of the test helper
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker tests` · harmful: 0
+- features: question, papeis
+- evidence: B08 broker/broker.ts:57 (QST-36: /send not wired to delivered, whole suite green) (broker tests) (+2 more)
+- last seen: 2026-10-12T08:33:55Z
 
 ## Candidates (under observation - do NOT load as guidance yet)
 
@@ -306,12 +312,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: R07-F3; test/unit/tui-loop.test.ts:324 (tui)
 - last seen: 2026-10-09T22:42:40Z
 
-### L-050 - Test through the real process each callback the composition root injects into a module, not only through the wiring of the test helper
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
-- features: question
-- evidence: B08 broker/broker.ts:57 (QST-36: /send not wired to delivered, whole suite green) (broker tests) (+1 more)
-- last seen: 2026-10-10T11:07:41Z
-
 ### L-051 - Test the filter of a recursive walk on a member reached through another member, not only on one reached directly
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker-rules` · harmful: 0
 - features: question
@@ -431,6 +431,120 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: question
 - evidence: I4; broker/tui.ts:191; QST-78/QST-99; .specs/features/question/validation.md round 7 (broker/tui)
 - last seen: 2026-10-11T09:38:31Z
+
+### L-071 - To test that a step may fail without stopping what follows, assert something that happens after the step, not what was done before it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: papeis
+- evidence: validation.md V6, PAP-08, broker/test/integration/server-credential.test.ts:94 (broker tests)
+- last seen: 2026-10-12T08:33:56Z
+
+### L-072 - State what a status other than 200 means for every HTTP read a client makes, not only for its writes
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec routes` · harmful: 0
+- features: papeis
+- evidence: validation.md S10, PAP-31, plugin/hooks/stop.ts:27 (spec routes)
+- last seen: 2026-10-12T08:33:56Z
+
+### L-073 - When two ACs give different outcomes for the same case, state in both which one wins
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: papeis
+- evidence: validation.md PAP-66 and PAP-68, plugin/skills/worker/SKILL.md:79 (spec)
+- last seen: 2026-10-12T08:33:57Z
+
+### L-074 - State what a failure of each secondary input does, not only of the main one
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: papeis
+- evidence: validation.md PAP-18, broker/test/unit/hook-usage.test.ts:216 (spec)
+- last seen: 2026-10-12T08:33:57Z
+
+### L-075 - Write a requirement that nothing of a kind is in a place as the list of paths that must not exist
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: papeis
+- evidence: validation.md PAP-01, broker/test/unit/plugin-manifest.test.ts:18 (spec)
+- last seen: 2026-10-12T08:33:57Z
+
+### L-076 - State in the AC of a command what counts as an option and in which positions it may come
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec cli` · harmful: 0
+- features: papeis
+- evidence: validation.md PAP-42, broker/test/unit/launch-args.test.ts:61 (spec cli)
+- last seen: 2026-10-12T08:33:58Z
+
+### L-077 - When an AC says a flow concludes the same way after a failed step, name the observable that proves it
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: papeis
+- evidence: validation.md PAP-08, broker/server.ts:389 (spec)
+- last seen: 2026-10-12T08:33:58Z
+
+### L-078 - When an AC says a child process inherits several streams, run a child that uses each stream and assert each one
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `cli tests` · harmful: 0
+- features: papeis
+- evidence: C1b, C1c - PAP-37 - broker/cli.ts:67 - broker/test/integration/cli.test.ts:153 (cli tests)
+- last seen: 2026-10-12T09:24:37Z
+
+### L-079 - When code picks the one item of a log that passes a condition, test a log with an item that fails it before the one that passes
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: papeis
+- evidence: F1 - PAP-53, PAP-54 - broker/launch.ts:216 (broker tests)
+- last seen: 2026-10-12T09:24:37Z
+
+### L-080 - When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: papeis
+- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests)
+- last seen: 2026-10-12T09:24:37Z
+
+### L-081 - Test a field that must be a list with a wrong value that is not iterable, not only with a text
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
+- features: papeis
+- evidence: F3 - PAP-38 - broker/launch.ts:186 - broker/test/unit/launch.test.ts:296 (broker tests)
+- last seen: 2026-10-12T09:24:37Z
+
+### L-082 - State what a failed read is for every client that reads the same route, not only for one of them
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec routes` · harmful: 0
+- features: papeis
+- evidence: PAP-38 - .specs/features/papeis/spec.md:99 - F3 (spec routes)
+- last seen: 2026-10-12T09:24:38Z
+
+### L-083 - When a rule selects names by a prefix or a pattern, test a name that matches it without the separator the usual names have
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: K1 broker/launch.ts:151 (PAP-56) (launcher) (+2 more)
+- last seen: 2026-10-12T11:29:26Z
+
+### L-084 - When a surviving mutant gets a test, give the same case to every other place that has the same check
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-085 - Test a shutdown with each external dependency already gone, and assert every cleanup that must still happen
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `server` · harmful: 0
+- features: papeis
+- evidence: K13 broker/server.ts:383 (PAP-07) (server)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-086 - Test a type guard with a wrong value the code after it would take as valid, not only with one that fails by itself
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: K9 plugin/hooks/usage.ts:75 (PAP-21) (hooks)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-087 - When code passes a flag to a tool to force one behavior, test an input for which the tool without the flag would choose another
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: A2 broker/launch.ts:143 (PAP-53) (launcher)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-088 - Test a deadline on a request through the real process with a peer that never answers: a request left pending keeps the process alive
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: A10 broker/launch.ts:178 (PAP-37) (launcher)
+- last seen: 2026-10-12T11:29:27Z
+
+### L-089 - State what a process does with a request still pending when its deadline passes, and how soon the process may exit
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: PAP-37 with the definition of the open feature for the launcher, spec.md:100 (launcher)
+- last seen: 2026-10-12T11:29:27Z
 
 ## Quarantined (failed when applied - ignore)
 

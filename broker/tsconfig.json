@@ -25,5 +25,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  // Everything here, as without `include`, and the hooks of the plugin
+  "include": ["**/*", "../plugin/**/*"]
 }

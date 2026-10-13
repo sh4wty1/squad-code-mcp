@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** Question mesclada na `main` pelo PR 9, com PASS do Verifier na oitava rodada. A próxima fatia é Papéis; depois dela, Gate fecha o MVP. A suíte passa no Windows. No Linux as rodadas de correção 3 em diante da Question não rodaram, e a suíte tinha lá uma instabilidade de tempo em testes de integração que a `main` também tem. O dev conferiu a aba e o modal num terminal real; macOS não foi exercitado. O estado está no Handoff de `.specs/STATE.md`.
+**Agora:** Papéis fechada no branch `feat/papeis`, com PR aberto contra a `main`. O Verifier deu FAIL nas três voltas sem achar defeito de produção: sobraram sete requisitos com lacuna de teste e um com texto a reforçar, e o dev aceitou a fatia com esse resíduo registrado em `.specs/features/papeis/validation.md`. A próxima fatia é a Gate, que fecha o MVP. A suíte passa no Windows e no Linux. Quatro sessões reais levaram duas features do kickoff à entrega no Windows, em `haiku`; sessão real no Linux e macOS não foram exercitados. O estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 
@@ -34,7 +34,7 @@ tarefas, implementação e verificação independente, com PR revisado por `/the
 | [x] | Feature | 1 | Abertura e encerramento de feature com workflow travado | Event |
 | [x] | TUI leitura | 2 | Feed, agentes, tickets, topologia e detalhe de ticket | Feature, frames |
 | [x] | Question | 3 | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas | TUI leitura |
-| [ ] | Papéis | 4 | `roles.json`, quatro skills de papel, launcher, plugin com hooks | Question |
+| [x] | Papéis | 4 | `roles.json`, quatro skills de papel, launcher, plugin com hooks | Question |
 | [ ] | Gate | 5 | Pedido e decisão de gate; modal com texto e confirmação | Papéis |
 
 **Marco do broker:** com Peer, Event e Feature prontas, duas sessões trocam mensagens pelo
@@ -54,9 +54,12 @@ gate aprovado usando só o terminal da mother e a TUI.
       `docs/claude-design-handoff/DECISOES-rodada-3.md`.
 - [ ] Guardar em `docs/claude-design-handoff/` a lista do que o Claude Design decidiu por
       conta própria na primeira rodada.
-- [ ] Conferir o formato do `roles.json` contra o `manifest.json` do registry, antes da
-      fatia Papéis.
-- [ ] Decidir o modo de permissão das sessões (default 3 da fatia Papéis).
+- [x] Conferir o formato do `roles.json` contra o `manifest.json` do registry, antes da
+      fatia Papéis. Conferido contra o registry em `8a33ffd`; o formato está no AD-019.
+- [x] Decidir o modo de permissão das sessões (default 3 da fatia Papéis). Decidido em
+      2026-10-11: `acceptEdits` com lista de permitidos por papel (AD-019).
+- [ ] Lacunas de teste que a fatia Papéis deixou: Fix 1 a Fix 9 de
+      `.specs/features/papeis/validation.md`.
 
 ## Depois do MVP
 

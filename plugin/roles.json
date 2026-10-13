@@ -1,0 +1,43 @@
+{
+  "roles": [
+    {
+      "name": "mother",
+      "when_to_use": "Talks to the dev: runs the discovery, opens the feature, answers or escalates the questions of the squad and delivers the feature.",
+      "skills": ["the-fool", "create-adr"],
+      "workflows": {
+        "tlc": ["tlc-discover"],
+        "matt-pocock": ["grill-with-docs", "to-spec"]
+      }
+    },
+    {
+      "name": "leader",
+      "when_to_use": "Breaks the feature into tickets, hands each one to a worker and integrates the approved ones in the branch of the feature.",
+      "skills": ["help-me", "the-jury"],
+      "workflows": {
+        "tlc": ["tlc-plan"],
+        "matt-pocock": ["to-tickets"]
+      }
+    },
+    {
+      "name": "worker",
+      "when_to_use": "Implements one ticket at a time in a branch of its own and sends the result to the judge.",
+      "skills": ["coding-guidelines", "ponytail", "write-commit", "codenavi"],
+      "workflows": {
+        "tlc": ["tlc-implement"],
+        "matt-pocock": ["implement"]
+      }
+    },
+    {
+      "name": "judge",
+      "when_to_use": "Evaluates the commit of each result against the criteria of its ticket and sends the verdict to the leader.",
+      "skills": [
+        "spec-driven-eval",
+        "ponytail-review",
+        "security-best-practices",
+        "break-ui",
+        "web-quality-audit",
+        "review-animations"
+      ]
+    }
+  ]
+}

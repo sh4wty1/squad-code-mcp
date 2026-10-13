@@ -301,3 +301,37 @@ test("PEER-46: a registered session sends a heartbeat on the interval", async ()
   const first = readDb(b.dbFile).peers[0]!.last_seen;
   await waitFor(() => readDb(b.dbFile).peers[0]!.last_seen > first, "last_seen to move again");
 });
+
+test("PAP-05: the instructions tell the ping by its kind and name no source of the channel", async () => {
+  broker = await startBroker();
+  const session = await startSession(broker.port, { SQUAD_NAME: "leader", SQUAD_ROLE: "leader" });
+  const instructions = session.client.getInstructions()!;
+  expect(instructions).toContain('kind="ping"');
+  expect(instructions).not.toContain("source=");
+});
+
+test("PAP-05: the sentence of the instructions about task, result and verdict names no source of the channel", async () => {
+  broker = await startBroker();
+  const session = await startSession(broker.port, { SQUAD_NAME: "leader", SQUAD_ROLE: "leader" });
+  const sentences = session.client.getInstructions()!.split("\n").filter((line) => line.includes('kind="task|result|verdict"'));
+  expect(sentences).toHaveLength(1);
+  expect(sentences[0]).toContain("<channel ");
+  expect(sentences[0]).not.toContain("source=");
+});
+
+test("PAP-05: the description of ready tells the ping by its kind and names no source of the channel", async () => {
+  broker = await startBroker();
+  const session = await startSession(broker.port, { SQUAD_NAME: "leader", SQUAD_ROLE: "leader" });
+  const ready = (await session.client.listTools()).tools.find((t) => t.name === "ready")!;
+  expect(ready.description).toContain('kind="ping"');
+  expect(ready.description).not.toContain("source=");
+});
+
+test("PAP-05: the answer of ready to a wrong number tells the ping by its kind and names no source of the channel", async () => {
+  broker = await startBroker();
+  const session = await startSession(broker.port, { SQUAD_NAME: "leader", SQUAD_ROLE: "leader" });
+  const result = await session.ready((await session.pingNumber()) + 1);
+  expect(result.isError).toBe(true);
+  expect(result.content[0]!.text).toContain('kind="ping"');
+  expect(result.content[0]!.text).not.toContain("source=");
+});

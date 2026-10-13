@@ -26,6 +26,7 @@
 
 import { spawn } from "node:child_process";
 import { randomInt } from "node:crypto";
+import { rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -35,7 +36,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { createDelivery } from "./delivery.ts";
 import type { ListedPeer, Refusal, RegisterResponse } from "./peers.ts";
-import { brokerUrl, heartbeatIntervalMs, pingIntervalMs, pollIntervalMs } from "./shared/config.ts";
+import { brokerUrl, heartbeatIntervalMs, idPath, pingIntervalMs, pollIntervalMs } from "./shared/config.ts";
 import type { SquadEvent } from "./shared/contract.ts";
 import { getGitRoot } from "./shared/git.ts";
 import { ROUTE_OF, toolsFor } from "./tools.ts";
@@ -50,6 +51,8 @@ const POLL_INTERVAL_MS = pollIntervalMs();
 const BROKER_SCRIPT = fileURLToPath(new URL("./broker.ts", import.meta.url));
 const NAME = process.env.SQUAD_NAME ?? "";
 const ROLE = process.env.SQUAD_ROLE ?? "";
+// Where the hooks of the session, which are other processes, read its credential (AD-016)
+const ID_FILE = idPath(NAME);
 
 // --- Broker communication ---
 
@@ -142,9 +145,9 @@ const mcp = new Server(
     instructions: ROLE
       ? `You are a member of a squad of Claude Code sessions. Your name is ${NAME} and your role is ${ROLE}.
 
-IMPORTANT: When a <channel source="squad" kind="ping" ...> message arrives, call the ready tool with the number it carries, right away. That registers this session in the squad. Until then the squad cannot reach you and ready is the only squad tool.
+IMPORTANT: When a <channel kind="ping" ...> message arrives, call the ready tool with the number it carries, right away. That registers this session in the squad. Until then the squad cannot reach you and ready is the only squad tool.
 
-After ready, what the squad sends you arrives as <channel source="squad" kind="task|result|verdict" seq="..." from="..." ticket_ref="..."> messages. The seq is what you cite when you answer: task_seq in a result, result_seq in a verdict.
+After ready, what the squad sends you arrives as <channel kind="task|result|verdict" seq="..." from="..." ticket_ref="..."> messages. The seq is what you cite when you answer: task_seq in a result, result_seq in a verdict.
 
 A question and its answer arrive the same way: kind="question" is a question for you to answer or to escalate, and kind="answer" is the answer to a question. Both carry the question_id in their text. The question_id, not the seq, is what you cite about a question.
 
@@ -163,7 +166,7 @@ ${toolsFor(ROLE)
 const READY_TOOL = {
   name: "ready",
   description:
-    'Answer the squad ping. Call it with the number from the <channel source="squad" kind="ping"> message to register this session in the squad.',
+    'Answer the squad ping. Call it with the number from the <channel kind="ping"> message to register this session in the squad.',
   inputSchema: {
     type: "object" as const,
     properties: {
@@ -260,7 +263,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
     case "ready": {
       if (String((args as { number?: unknown } | undefined)?.number) !== String(pingNumber)) {
         return text(
-          'That is not the number of the ping. Wait for the <channel source="squad" kind="ping"> message and call ready with the number it carries.',
+          'That is not the number of the ping. Wait for the <channel kind="ping"> message and call ready with the number it carries.',
           true
         );
       }
@@ -284,6 +287,13 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         return text(`Error registering: ${e instanceof Error ? e.message : String(e)}`, true);
       }
       log(`Registered as ${NAME} (${ROLE})`);
+      try {
+        // Only the user reads it, where the system has such a thing
+        writeFileSync(ID_FILE, myId, { mode: 0o600 });
+      } catch (e) {
+        // The session is registered all the same: only its hooks go without the credential
+        log(`Credential file error: ${e instanceof Error ? e.message : String(e)}`);
+      }
 
       heartbeatTimer = setInterval(async () => {
         try {
@@ -372,6 +382,11 @@ async function main() {
       try {
         await brokerFetch("/unregister", { id: myId });
         log("Unregistered from broker");
+      } catch {
+        // Best effort
+      }
+      try {
+        rmSync(ID_FILE, { force: true });
       } catch {
         // Best effort
       }

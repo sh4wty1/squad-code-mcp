@@ -1,4 +1,5 @@
 import { Database } from "bun:sqlite";
+import type { ChildProcess } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -141,6 +142,49 @@ export async function startBroker(extraEnv: Record<string, string> = {}, dir = t
   return { url, port, dbFile, tokenFile, dir, proc, stop };
 }
 
+// A hook of the plugin run the way Claude Code runs it: a process of its own, with the payload
+// on its standard input. Gives what it wrote to the standard output, its exit code and how
+// long it took.
+export async function runHook(file: string, env: Record<string, string>, input: string) {
+  const started = performance.now();
+  const proc = Bun.spawn([process.execPath, join(BROKER_DIR, "..", "plugin", "hooks", file)], {
+    env: cleanEnv(env),
+    stdin: Buffer.from(input),
+    stdout: "pipe",
+    stderr: "ignore",
+  });
+  const stdout = await new Response(proc.stdout).text();
+  const code = await proc.exited;
+  return { stdout, code, ms: performance.now() - started };
+}
+
+export type Recorded = { method: string; path: string; body: unknown };
+
+// A server in the place of the broker that keeps every request it receives, for what a test
+// says about which calls are made. `answer` is what it answers to each: a 200 that accepts,
+// unless the test gives another.
+export function startRecorder(answer: (request: Recorded) => Response | Promise<Response> = () => Response.json({ ok: true, seq: 1 })) {
+  const requests: Recorded[] = [];
+  const server = Bun.serve({
+    port: 0,
+    hostname: "127.0.0.1",
+    async fetch(req) {
+      const url = new URL(req.url);
+      const text = await req.text();
+      let body: unknown = null;
+      try {
+        body = JSON.parse(text);
+      } catch {
+        // a GET, or a body that is not JSON
+      }
+      const request = { method: req.method, path: url.pathname + url.search, body };
+      requests.push(request);
+      return answer(request);
+    },
+  });
+  return { requests, port: server.port as number, stop: () => server.stop(true) };
+}
+
 type Notification = { method: string; params?: any };
 type ToolResult = { isError?: boolean; content: { text: string }[] };
 
@@ -179,6 +223,9 @@ export async function startSession(port: number, env: Record<string, string>, se
   };
   await client.connect(transport);
   sessionCleanups.push(() => client.close());
+  // The exit code of the server process, when it ends: the transport keeps the process to itself
+  const { _process: server } = transport as unknown as { _process: ChildProcess };
+  const exited = new Promise<number | null>((resolve) => server.once("exit", (code) => resolve(code)));
 
   const channel = () => notifications.filter((n) => n.method === "notifications/claude/channel");
   const pings = () => channel().filter((n) => n.params.meta.kind === "ping");
@@ -202,5 +249,5 @@ export async function startSession(port: number, env: Record<string, string>, se
     return { isError: result.isError === true, text: result.content[0]!.text };
   }
 
-  return { client, transport, notifications, pings, pushed, toolNames, ready, pingNumber, register, call };
+  return { client, transport, notifications, pings, pushed, toolNames, ready, pingNumber, register, call, exited };
 }

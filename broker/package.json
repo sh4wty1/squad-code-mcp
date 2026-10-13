@@ -6,6 +6,9 @@
   "type": "module",
   "private": true,
   "license": "MIT",
+  "bin": {
+    "squad": "./cli.ts"
+  },
   "scripts": {
     "broker": "bun broker.ts",
     "server": "bun server.ts",

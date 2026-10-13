@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 71,
+  "next_id": 90,
   "lessons": [
     {
       "id": "L-001",
@@ -445,16 +445,18 @@
       "status": "confirmed",
       "features": [
         "event",
-        "question"
+        "question",
+        "papeis"
       ],
-      "recurrence": 2,
+      "recurrence": 3,
       "harmful": 0,
       "evidence": [
         "EVT-51 vs EVT-04; broker/session.ts:24 (spec routes)",
-        "QST-05 (null in an optional field of /ask); broker/question.ts:119 (spec routes)"
+        "QST-05 (null in an optional field of /ask); broker/question.ts:119 (spec routes)",
+        "validation.md PAP-33, broker/test/unit/roles.test.ts:103 (spec routes)"
       ],
       "created": "2026-10-08T04:22:31Z",
-      "last_seen": "2026-10-10T11:07:42Z"
+      "last_seen": "2026-10-12T08:33:56Z"
     },
     {
       "id": "L-025",
@@ -663,16 +665,18 @@
       "status": "confirmed",
       "features": [
         "event",
-        "question"
+        "question",
+        "papeis"
       ],
-      "recurrence": 2,
+      "recurrence": 3,
       "harmful": 0,
       "evidence": [
         "EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes)",
-        "QST-05, QST-43 (empty default on a blocking question); broker/question.ts:121 (spec routes)"
+        "QST-05, QST-43 (empty default on a blocking question); broker/question.ts:121 (spec routes)",
+        "validation.md PAP-15, broker/test/unit/hook-usage.test.ts:105 (spec routes)"
       ],
       "created": "2026-10-08T04:58:15Z",
-      "last_seen": "2026-10-10T11:07:43Z"
+      "last_seen": "2026-10-12T08:33:56Z"
     },
     {
       "id": "L-037",
@@ -919,18 +923,20 @@
       "text": "Test through the real process each callback the composition root injects into a module, not only through the wiring of the test helper",
       "signal": "surviving_mutant",
       "scope": "broker tests",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "question"
+        "question",
+        "papeis"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
         "B08 broker/broker.ts:57 (QST-36: /send not wired to delivered, whole suite green) (broker tests)",
-        "T07 broker/tui.ts:233 (QST-83: token of the terminal entry) (tui)"
+        "T07 broker/tui.ts:233 (QST-83: token of the terminal entry) (tui)",
+        "validation.md C1 C2 C6, PAP-37, broker/cli.ts:59 (broker tests)"
       ],
       "created": "2026-10-10T11:07:41Z",
-      "last_seen": "2026-10-10T11:07:41Z"
+      "last_seen": "2026-10-12T08:33:55Z"
     },
     {
       "id": "L-051",
@@ -1303,6 +1309,350 @@
       ],
       "created": "2026-10-11T09:38:31Z",
       "last_seen": "2026-10-11T09:38:31Z"
+    },
+    {
+      "id": "L-071",
+      "key": "surviving_mutant::to test that a step may fail without stopping what follows assert something that happens after the step not what was done before it",
+      "text": "To test that a step may fail without stopping what follows, assert something that happens after the step, not what was done before it",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md V6, PAP-08, broker/test/integration/server-credential.test.ts:94 (broker tests)"
+      ],
+      "created": "2026-10-12T08:33:56Z",
+      "last_seen": "2026-10-12T08:33:56Z"
+    },
+    {
+      "id": "L-072",
+      "key": "spec_precision_gap::state what a status other than 200 means for every http read a client makes not only for its writes",
+      "text": "State what a status other than 200 means for every HTTP read a client makes, not only for its writes",
+      "signal": "spec_precision_gap",
+      "scope": "spec routes",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md S10, PAP-31, plugin/hooks/stop.ts:27 (spec routes)"
+      ],
+      "created": "2026-10-12T08:33:56Z",
+      "last_seen": "2026-10-12T08:33:56Z"
+    },
+    {
+      "id": "L-073",
+      "key": "spec_precision_gap::when two acs give different outcomes for the same case state in both which one wins",
+      "text": "When two ACs give different outcomes for the same case, state in both which one wins",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-66 and PAP-68, plugin/skills/worker/SKILL.md:79 (spec)"
+      ],
+      "created": "2026-10-12T08:33:57Z",
+      "last_seen": "2026-10-12T08:33:57Z"
+    },
+    {
+      "id": "L-074",
+      "key": "spec_precision_gap::state what a failure of each secondary input does not only of the main one",
+      "text": "State what a failure of each secondary input does, not only of the main one",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-18, broker/test/unit/hook-usage.test.ts:216 (spec)"
+      ],
+      "created": "2026-10-12T08:33:57Z",
+      "last_seen": "2026-10-12T08:33:57Z"
+    },
+    {
+      "id": "L-075",
+      "key": "spec_precision_gap::write a requirement that nothing of a kind is in a place as the list of paths that must not exist",
+      "text": "Write a requirement that nothing of a kind is in a place as the list of paths that must not exist",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-01, broker/test/unit/plugin-manifest.test.ts:18 (spec)"
+      ],
+      "created": "2026-10-12T08:33:57Z",
+      "last_seen": "2026-10-12T08:33:57Z"
+    },
+    {
+      "id": "L-076",
+      "key": "spec_precision_gap::state in the ac of a command what counts as an option and in which positions it may come",
+      "text": "State in the AC of a command what counts as an option and in which positions it may come",
+      "signal": "spec_precision_gap",
+      "scope": "spec cli",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-42, broker/test/unit/launch-args.test.ts:61 (spec cli)"
+      ],
+      "created": "2026-10-12T08:33:58Z",
+      "last_seen": "2026-10-12T08:33:58Z"
+    },
+    {
+      "id": "L-077",
+      "key": "spec_precision_gap::when an ac says a flow concludes the same way after a failed step name the observable that proves it",
+      "text": "When an AC says a flow concludes the same way after a failed step, name the observable that proves it",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md PAP-08, broker/server.ts:389 (spec)"
+      ],
+      "created": "2026-10-12T08:33:58Z",
+      "last_seen": "2026-10-12T08:33:58Z"
+    },
+    {
+      "id": "L-078",
+      "key": "surviving_mutant::when an ac says a child process inherits several streams run a child that uses each stream and assert each one",
+      "text": "When an AC says a child process inherits several streams, run a child that uses each stream and assert each one",
+      "signal": "surviving_mutant",
+      "scope": "cli tests",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C1b, C1c - PAP-37 - broker/cli.ts:67 - broker/test/integration/cli.test.ts:153 (cli tests)"
+      ],
+      "created": "2026-10-12T09:24:37Z",
+      "last_seen": "2026-10-12T09:24:37Z"
+    },
+    {
+      "id": "L-079",
+      "key": "surviving_mutant::when code picks the one item of a log that passes a condition test a log with an item that fails it before the one that passes",
+      "text": "When code picks the one item of a log that passes a condition, test a log with an item that fails it before the one that passes",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F1 - PAP-53, PAP-54 - broker/launch.ts:216 (broker tests)"
+      ],
+      "created": "2026-10-12T09:24:37Z",
+      "last_seen": "2026-10-12T09:24:37Z"
+    },
+    {
+      "id": "L-080",
+      "key": "surviving_mutant::when a layer reshapes its input before a rule about that input applies test the rule at the entry of the layer with an input the reshaping changes",
+      "text": "When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests)"
+      ],
+      "created": "2026-10-12T09:24:37Z",
+      "last_seen": "2026-10-12T09:24:37Z"
+    },
+    {
+      "id": "L-081",
+      "key": "surviving_mutant::test a field that must be a list with a wrong value that is not iterable not only with a text",
+      "text": "Test a field that must be a list with a wrong value that is not iterable, not only with a text",
+      "signal": "surviving_mutant",
+      "scope": "broker tests",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F3 - PAP-38 - broker/launch.ts:186 - broker/test/unit/launch.test.ts:296 (broker tests)"
+      ],
+      "created": "2026-10-12T09:24:37Z",
+      "last_seen": "2026-10-12T09:24:37Z"
+    },
+    {
+      "id": "L-082",
+      "key": "spec_precision_gap::state what a failed read is for every client that reads the same route not only for one of them",
+      "text": "State what a failed read is for every client that reads the same route, not only for one of them",
+      "signal": "spec_precision_gap",
+      "scope": "spec routes",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PAP-38 - .specs/features/papeis/spec.md:99 - F3 (spec routes)"
+      ],
+      "created": "2026-10-12T09:24:38Z",
+      "last_seen": "2026-10-12T09:24:38Z"
+    },
+    {
+      "id": "L-083",
+      "key": "surviving_mutant::when a rule selects names by a prefix or a pattern test a name that matches it without the separator the usual names have",
+      "text": "When a rule selects names by a prefix or a pattern, test a name that matches it without the separator the usual names have",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "K1 broker/launch.ts:151 (PAP-56) (launcher)",
+        "K2 broker/launch.ts:92 (PAP-39) (launcher)",
+        "K15 plugin/hooks/usage.ts:85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-12T11:29:26Z",
+      "last_seen": "2026-10-12T11:29:26Z"
+    },
+    {
+      "id": "L-084",
+      "key": "surviving_mutant::when a surviving mutant gets a test give the same case to every other place that has the same check",
+      "text": "When a surviving mutant gets a test, give the same case to every other place that has the same check",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-085",
+      "key": "surviving_mutant::test a shutdown with each external dependency already gone and assert every cleanup that must still happen",
+      "text": "Test a shutdown with each external dependency already gone, and assert every cleanup that must still happen",
+      "signal": "surviving_mutant",
+      "scope": "server",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "K13 broker/server.ts:383 (PAP-07) (server)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-086",
+      "key": "surviving_mutant::test a type guard with a wrong value the code after it would take as valid not only with one that fails by itself",
+      "text": "Test a type guard with a wrong value the code after it would take as valid, not only with one that fails by itself",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "K9 plugin/hooks/usage.ts:75 (PAP-21) (hooks)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-087",
+      "key": "surviving_mutant::when code passes a flag to a tool to force one behavior test an input for which the tool without the flag would choose another",
+      "text": "When code passes a flag to a tool to force one behavior, test an input for which the tool without the flag would choose another",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "A2 broker/launch.ts:143 (PAP-53) (launcher)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-088",
+      "key": "surviving_mutant::test a deadline on a request through the real process with a peer that never answers a request left pending keeps the process alive",
+      "text": "Test a deadline on a request through the real process with a peer that never answers: a request left pending keeps the process alive",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "A10 broker/launch.ts:178 (PAP-37) (launcher)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-089",
+      "key": "spec_precision_gap::state what a process does with a request still pending when its deadline passes and how soon the process may exit",
+      "text": "State what a process does with a request still pending when its deadline passes, and how soon the process may exit",
+      "signal": "spec_precision_gap",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "PAP-37 with the definition of the open feature for the launcher, spec.md:100 (launcher)"
+      ],
+      "created": "2026-10-12T11:29:27Z",
+      "last_seen": "2026-10-12T11:29:27Z"
     }
   ]
 }
