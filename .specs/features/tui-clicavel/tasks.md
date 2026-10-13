@@ -156,10 +156,10 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] Cinco casos, um por valor: ausente, `""`, `"1"`, `"0"`, `"sim"`; o erro de `"sim"` cita `SQUAD_TUI_MOUSE` e `sim`
-- [ ] ` 0`, `00`, `true` e `off` também lançam
-- [ ] Testes em `test/unit/tui-config.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Cinco casos, um por valor: ausente, `""`, `"1"`, `"0"`, `"sim"`; o erro de `"sim"` cita `SQUAD_TUI_MOUSE` e `sim`
+- [x] ` 0`, `00`, `true` e `off` também lançam
+- [x] Testes em `test/unit/tui-config.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

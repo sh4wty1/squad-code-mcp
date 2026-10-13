@@ -363,8 +363,8 @@ cada item, e com o que ficou sem conferir.
 | CLK-49 | P1: Modal de resposta com o mouse | - | Pending |
 | CLK-50 | P2: Ligar e desligar o mouse | - | Pending |
 | CLK-51 | P2: Ligar e desligar o mouse | - | Pending |
-| CLK-52 | P2: Ligar e desligar o mouse | - | Pending |
-| CLK-53 | P2: Ligar e desligar o mouse | - | Pending |
+| CLK-52 | P2: Ligar e desligar o mouse | T3 | Implementing |
+| CLK-53 | P2: Ligar e desligar o mouse | T3 | Implementing |
 | CLK-54 | P2: Ligar e desligar o mouse | - | Pending |
 | CLK-55 | P2: Ligar e desligar o mouse | - | Pending |
 | CLK-56 | P1: Nada do que existe muda | T2 | Implementing |
