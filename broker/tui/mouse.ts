@@ -48,6 +48,14 @@ export function parse(item: string): Report | null {
 // The bits of the button that say shift, alt and ctrl were held
 const MODIFIERS = 4 | 8 | 16;
 
+// The key of each way of the wheel, up and down, and the lines of the feed one report of it
+// moves the selection by
+const WHEEL = new Map([
+  [64, "k"],
+  [65, "j"],
+]);
+const FEED_LINES = 3;
+
 // The state after the keys, pressed one after the other; null when one of them quits
 function tap(ui: Ui | null, view: View, keys: string[]): Ui | null {
   return keys.reduce((next, key) => next && press(next, key, { ...view, ui: next }), ui);
@@ -58,12 +66,32 @@ const times = (n: number, key: string): string[] => Array<string>(n).fill(key);
 // The keys that take a selection from one place of its list to another, one step each
 const walk = (from: number, to: number, back = "k", on = "j"): string[] => times(Math.abs(to - from), to < from ? back : on);
 
+// The tabs that take the focus of the main screen to a panel, and the `h` that takes the one
+// of the tab of questions to its list or to its history
+const toPanel = (panel: number, ui: Ui): string[] => times((panel - ui.focus + 3) % 3, "\t");
+const toSide = (side: Ui["qfocus"], ui: Ui): string[] => (ui.qfocus === side ? [] : ["h"]);
+
+// The keys of the wheel over a marked cell with no modal open: the focus on what it rolls,
+// then `k` or `j`, three times on the feed
+function rolled(hit: Hit, key: string, ui: Ui): string[] {
+  switch (hit.wheel) {
+    case "feed":
+      return [...toPanel(1, ui), ...times(FEED_LINES, key)];
+    case "thread":
+      return [key];
+    case "list":
+    case "history":
+      return [...toSide(hit.wheel, ui), key];
+  }
+  return [];
+}
+
 // The state after a click on a marked cell with no modal open: the key of the cell, or the
 // focus on its panel and then what the cell has of it
 function clicked(hit: Hit, ui: Ui, view: View): Ui | null {
   const { squad, rows } = view;
   if (hit.key !== undefined) return tap(ui, view, [hit.key]);
-  const focused = hit.panel === undefined ? ui : tap(ui, view, times((hit.panel - ui.focus + 3) % 3, "\t"));
+  const focused = hit.panel === undefined ? ui : tap(ui, view, toPanel(hit.panel, ui));
   if (hit.row !== undefined) {
     // The selected line is opened. Any other is selected: with none selected, the first `k`
     // selects the last line.
@@ -86,9 +114,9 @@ function clicked(hit: Hit, ui: Ui, view: View): Ui | null {
     const chosen = selected({ ...view, ui })?.id;
     if (hit.question === chosen && ui.qfocus === "list") return tap(focused, view, ["\r"]);
     const index = (id: number | undefined) => asked.findIndex((q) => q.id === id);
-    return tap(focused, view, [...(ui.qfocus === "history" ? ["h"] : []), ...walk(index(chosen), index(hit.question))]);
+    return tap(focused, view, [...toSide("list", ui), ...walk(index(chosen), index(hit.question))]);
   }
-  if (hit.history && ui.qfocus === "list") return tap(focused, view, ["h"]);
+  if (hit.history) return tap(focused, view, toSide("history", ui));
   return focused;
 }
 
@@ -98,11 +126,13 @@ function clicked(hit: Hit, ui: Ui, view: View): Ui | null {
 export function point(at: Entry, item: string, view: View, drawn: Drawn | null): Entry | null {
   const report = parse(item);
   if (!report || !at.pointer.on) return at;
-  // A click is the press of the left button, with or without shift, alt and ctrl. With the
-  // bit of a movement the button is another one.
-  if (!report.pressed || report.button - (report.button & MODIFIERS) !== 0) return at;
-  // Every click is the one before the next, also the one that does nothing
-  const still: Entry = { ui: at.ui, pointer: { ...at.pointer, clickedAt: view.squad.now } };
+  // A click is the press of the left button, and the wheel the one of the button 64 or 65,
+  // with or without shift, alt and ctrl. With the bit of a movement the button is another one.
+  const button = report.button - (report.button & MODIFIERS);
+  const wheel = report.pressed ? WHEEL.get(button) : undefined;
+  if (!wheel && !(report.pressed && button === 0)) return at;
+  // Every click is the one before the next, also the one that does nothing. The wheel is no click.
+  const still: Entry = wheel ? at : { ui: at.ui, pointer: { ...at.pointer, clickedAt: view.squad.now } };
   // Nothing of the screen of the state is drawn on the small screen and on the frozen one,
   // nor after a key of the chunk of the report changed the screen
   if (!drawn || drawn.screen !== at.ui.screen) return still;
@@ -110,6 +140,6 @@ export function point(at: Entry, item: string, view: View, drawn: Drawn | null):
   const hit = drawn.hits[report.y - 1]?.[report.x - 1];
   // With the modal of answer open only what it drew is clicked, and without it nothing of it
   if (!hit || (hit.modal === true) !== (at.ui.modal !== null)) return still;
-  const ui = clicked(hit, at.ui, view);
+  const ui = wheel ? tap(at.ui, view, rolled(hit, wheel, at.ui)) : clicked(hit, at.ui, view);
   return ui && { ...still, ui };
 }

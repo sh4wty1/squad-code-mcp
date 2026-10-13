@@ -339,11 +339,11 @@ cada item, e com o que ficou sem conferir.
 | CLK-25 | P1: Navegar com o clique | T9, T14 | Implementing |
 | CLK-26 | P1: Navegar com o clique | T9, T14 | Implementing |
 | CLK-27 | P1: Navegar com o clique | T7, T13 | Implementing |
-| CLK-28 | P1: Rolar com a roda | T7 | Implementing |
-| CLK-29 | P1: Rolar com a roda | T8 | Implementing |
-| CLK-30 | P1: Rolar com a roda | T9 | Implementing |
-| CLK-31 | P1: Rolar com a roda | T9 | Implementing |
-| CLK-32 | P1: Rolar com a roda | - | Pending |
+| CLK-28 | P1: Rolar com a roda | T7, T15 | Implementing |
+| CLK-29 | P1: Rolar com a roda | T8, T15 | Implementing |
+| CLK-30 | P1: Rolar com a roda | T9, T15 | Implementing |
+| CLK-31 | P1: Rolar com a roda | T9, T15 | Implementing |
+| CLK-32 | P1: Rolar com a roda | T15 | Implementing |
 | CLK-33 | P1: Atalhos e selos clicáveis | T6, T9, T12 | Implementing |
 | CLK-34 | P1: Atalhos e selos clicáveis | T6, T12 | Implementing |
 | CLK-35 | P1: Atalhos e selos clicáveis | T6, T12 | Implementing |

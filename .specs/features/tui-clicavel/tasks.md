@@ -428,14 +428,14 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] CLK-28: sobre o feed, o de `press` com `k` três vezes (cima) e `j` três vezes (baixo), com o foco 1; o literal é 3. Sem linha selecionada, a primeira das três seleciona a última (edge case). Com o foco em 0 e em 2, o foco vai a 1
-- [ ] CLK-29: sobre o thread, um `k` ou um `j`: `threadOffset` muda de 1
-- [ ] CLK-30: sobre a lista, um `k` ou um `j` com o foco na lista; partindo do foco no histórico, o foco vai à lista e a seleção anda
-- [ ] CLK-31: sobre o histórico, um `k` ou um `j` com o foco nele; partindo do foco na lista, o foco vai ao histórico e `historyOffset` anda
-- [ ] CLK-32: sobre agentes, detalhe, topologia, ajuda, a caixa da direita do thread, o detalhe da aba e as linhas 0, 1, 38 e 39, nada muda
-- [ ] A roda não põe nada em `clickedAt`
-- [ ] Testes em `test/unit/tui-mouse.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] CLK-28: sobre o feed, o de `press` com `k` três vezes (cima) e `j` três vezes (baixo), com o foco 1; o literal é 3. Sem linha selecionada, a primeira das três seleciona a última (edge case). Com o foco em 0 e em 2, o foco vai a 1
+- [x] CLK-29: sobre o thread, um `k` ou um `j`: `threadOffset` muda de 1
+- [x] CLK-30: sobre a lista, um `k` ou um `j` com o foco na lista; partindo do foco no histórico, o foco vai à lista e a seleção anda
+- [x] CLK-31: sobre o histórico, um `k` ou um `j` com o foco nele; partindo do foco na lista, o foco vai ao histórico e `historyOffset` anda
+- [x] CLK-32: sobre agentes, detalhe, topologia, ajuda, a caixa da direita do thread, o detalhe da aba e as linhas 0, 1, 38 e 39, nada muda
+- [x] A roda não põe nada em `clickedAt`
+- [x] Testes em `test/unit/tui-mouse.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

@@ -956,3 +956,159 @@ test("CLK-33: a click on enter responder of the detail does what enter does, and
   const far = view("04", { question: 8, qfocus: "history" });
   expect(clicked(far, x, y)!.ui).toEqual({ ...far.ui, qfocus: "list", modal: opened(8, null) });
 });
+
+// The wheel up and the wheel down, with the key each one is
+const WHEEL = [
+  [64, "k", "up"],
+  [65, "j", "down"],
+] as const;
+
+// The state after a report of a button on the cell (x, y) of the screen of the view, as it is drawn
+const sent = (v: View, button: number, x: number, y: number, pointer: Pointer = ON): Entry | null => point(entry(v, pointer), report(button, x, y), v, drawing(v));
+
+for (const [button, key, way] of WHEEL) {
+  test(`CLK-28: the wheel ${way} over the feed does what three ${key} do, anywhere in its box`, () => {
+    // 417 has three lines above it and three below it: 414 and 420 are the third ones
+    const v = view("01", { selected: 417 });
+    const to = key === "k" ? 414 : 420;
+    expect(v.rows[v.rows.findIndex((row) => row.seq === 417) + (key === "k" ? -3 : 3)]!.seq).toBe(to);
+    const g = screen(v);
+    const [left, right] = boxes(g)[1]!;
+    // The four corners of the box, its header, the selected line and another one
+    for (const [x, y] of [[left, 2], [right, 2], [left, 37], [right, 37], cellOf(g, [left, right], "hora"), feedCell(g, "14:28:03"), feedCell(g, "14:19:05")] as const) {
+      const next = sent(v, button, x, y)!;
+      expect(next.ui).toEqual(keys(v, key, key, key)!);
+      expect(next.ui).toEqual({ ...v.ui, selected: to });
+    }
+    // Two keys, or four, would stop on another line
+    expect([keys(v, key, key)!.selected, keys(v, key, key, key, key)!.selected]).not.toContain(to);
+  });
+
+  test(`CLK-28: the wheel ${way} over the feed gives the focus to the feed from another panel, and shift, alt and ctrl do not change what it does`, () => {
+    for (const focus of [0, 2] as const) {
+      const v = view("01", { selected: 417, focus });
+      const next = sent(v, button, ...feedCell(screen(v), "14:19:05"))!;
+      expect(next.ui).toEqual(keys(v, ...tabs(focus, 1), key, key, key)!);
+      expect(next.ui).toEqual({ ...v.ui, focus: 1, selected: key === "k" ? 414 : 420 });
+    }
+    const v = view("01", { selected: 417 });
+    for (const held of [4, 8, 16, 28]) expect(sent(v, button + held, ...feedCell(screen(v), "14:19:05"))!.ui).toEqual(keys(v, key, key, key)!);
+  });
+}
+
+test("edge case: the wheel up over the feed with no line selected does what three k do there: the first selects the last line", () => {
+  const v = view("01", { selected: null });
+  const cell = feedCell(screen(v), "14:19:05");
+  const up = sent(v, 64, ...cell)!;
+  expect(up.ui).toEqual(keys(v, "k", "k", "k")!);
+  // The last line and two above it
+  expect(up.ui.selected).toBe(v.rows.at(-3)!.seq);
+  expect(up.ui.selected).toBe(430);
+  // And down, the three j: the first selects the last line, where the others stay
+  const down = sent(v, 65, ...cell)!;
+  expect(down.ui).toEqual(keys(v, "j", "j", "j")!);
+  expect(down.ui.selected).toBe(432);
+});
+
+for (const [button, key, way] of WHEEL) {
+  test(`CLK-29: the wheel ${way} over the box of the thread does what one ${key} does: the entries scroll by one`, () => {
+    const v = view("01", { screen: "thread", selected: 417, threadOffset: 2 });
+    const g = screen(v);
+    const [left, right] = boxes(g)[0]!;
+    for (const [x, y] of [[left, 2], [right, 2], [left, 37], [right, 37], cellOf(g, [left, right], "[verdict]")] as const) {
+      const next = sent(v, button, x, y)!;
+      expect(next.ui).toEqual(press(v.ui, key, v)!);
+      expect(next.ui).toEqual({ ...v.ui, threadOffset: key === "k" ? 3 : 1 });
+    }
+  });
+
+  test(`CLK-30: the wheel ${way} over the box of the list does what one ${key} does with the focus on the list, and from the history the focus goes to the list first`, () => {
+    // The list of frame 04 is Q-07, then Q-08
+    const [from, to] = key === "j" ? [7, 8] : [8, 7];
+    for (const qfocus of ["list", "history"] as const) {
+      const v = view("04", { question: from, qfocus, historyOffset: 1 });
+      const g = screen(v);
+      const { left, right, bottom } = tabBox(g, 0);
+      const cells = [[left, 2], [right, 2], [left, bottom], [right, bottom], [left + 1, questionLines(g, 7)[0]!], cellOf(g, [left, right], "bloqueantes primeiro", 2, bottom)] as const;
+      for (const [x, y] of cells) {
+        const next = sent(v, button, x, y)!;
+        expect(next.ui).toEqual(keys(v, ...(qfocus === "history" ? ["h"] : []), key)!);
+        expect(next.ui).toEqual({ ...v.ui, qfocus: "list", question: to });
+      }
+    }
+  });
+
+  test(`CLK-31: the wheel ${way} over the box of the history does what one ${key} does with the focus on it, and from the list the focus goes to the history first`, () => {
+    // Frame 04 has six resolved questions: the history scrolls from 0 to 2
+    for (const qfocus of ["history", "list"] as const) {
+      const v = view("04", { question: 8, qfocus, historyOffset: 1 });
+      const g = screen(v);
+      const { left, right, top, bottom } = historyBox(g);
+      for (const [x, y] of [[left, top], [right, top], [left, bottom], [right, bottom], cellOf(g, [left, right], "Q-10", top, bottom)] as const) {
+        const next = sent(v, button, x, y)!;
+        expect(next.ui).toEqual(keys(v, ...(qfocus === "list" ? ["h"] : []), key)!);
+        expect(next.ui).toEqual({ ...v.ui, qfocus: "history", historyOffset: key === "k" ? 0 : 2 });
+      }
+    }
+  });
+}
+
+// The cells of the 40 lines outside the boxes the wheel rolls on a screen
+function outside(g: Grid, rolled: { left: number; right: number; top: number; bottom: number }[]): [x: number, y: number][] {
+  const cells: [number, number][] = [];
+  for (let y = 0; y < 40; y++) {
+    for (let x = 0; x < 120; x++) {
+      if (!rolled.some((box) => x >= box.left && x <= box.right && y >= box.top && y <= box.bottom)) cells.push([x, y]);
+    }
+  }
+  return cells;
+}
+
+// What the wheel rolls on each screen: the feed, the thread, the list and the history
+const ROLLED: [what: string, v: View, boxes: (g: Grid) => { left: number; right: number; top: number; bottom: number }[]][] = [
+  ["the agents, the tickets, the detail and lines 0, 1, 38 and 39 of the main screen", view("01", { selected: 417, focus: 0 }), (g) => [{ left: boxes(g)[1]![0], right: boxes(g)[1]![1], top: 2, bottom: 37 }]],
+  ["the topology", view("01", { selected: 417, screen: "topology" }), () => []],
+  ["the help", view("01", { selected: 417, screen: "help" }), () => []],
+  ["the box of the judge and lines 0, 1, 38 and 39 of the thread", view("01", { selected: 417, screen: "thread", threadOffset: 2 }), (g) => [{ left: boxes(g)[0]![0], right: boxes(g)[0]![1], top: 2, bottom: 37 }]],
+  ["the detail of the tab of questions and its lines 0, 1, 38 and 39", view("04", { question: 7, historyOffset: 1 }), (g) => [{ ...tabBox(g, 0), top: 2 }, historyBox(g)]],
+];
+
+for (const [what, v, rolled] of ROLLED) {
+  test(`CLK-32: the wheel over ${what} changes nothing`, () => {
+    const g = screen(v);
+    const cells = outside(g, rolled(g));
+    // Every cell outside what the wheel rolls, which is not the whole screen
+    expect(cells.length).toBeGreaterThan(4 * 120);
+    for (const [x, y] of cells) {
+      for (const [button] of WHEEL) expect(point(entry(v), report(button, x, y), v, drawing(v, g))!.ui).toBe(v.ui);
+    }
+  });
+}
+
+test("CLK-46: the wheel is no click: it leaves the time of the last click as it was", () => {
+  const v = view("01", { selected: 417 });
+  const g = screen(v);
+  // Over the feed, where it moves the selection, and over the agents, where it does nothing
+  for (const [x, y] of [feedCell(g, "14:19:05"), cellOf(g, boxes(g)[0]!, "mother")] as const) {
+    for (const [button] of WHEEL) {
+      expect(sent(v, button, x, y)!.pointer).toEqual({ on: true, clickedAt: null });
+      expect(sent(v, button, x, y, { on: true, clickedAt: 5 })!.pointer).toEqual({ on: true, clickedAt: 5 });
+    }
+  }
+});
+
+test("CLK-11, CLK-13, CLK-14: the wheel changes nothing outside the grid, with nothing drawn and over the drawing of another screen", () => {
+  const v = view("01", { selected: 417 });
+  const g = screen(v);
+  const [x, y] = feedCell(g, "14:19:05");
+  for (const [button] of WHEEL) {
+    expect(point(entry(v), report(button, x, y), v, null)!.ui).toBe(v.ui);
+    const other = view("01", { selected: 417, screen: "thread", threadOffset: 2 });
+    expect(point(entry(other), report(button, x, y), other, drawing(v, g))!.ui).toBe(other.ui);
+    for (const [column, line] of [[0, y + 1], [121, y + 1], [x + 1, 0], [x + 1, 41], [HUGE, y + 1], [x + 1, HUGE]] as const) {
+      expect(point(entry(v), `\x1b[<${button};${column};${line}M`, v, drawing(v, g))!.ui).toBe(v.ui);
+    }
+    // Over its own drawing it moves the selection
+    expect(point(entry(v), report(button, x, y), v, drawing(v, g))!.ui.selected).not.toBe(417);
+  }
+});
