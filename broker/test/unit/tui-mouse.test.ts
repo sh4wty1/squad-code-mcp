@@ -151,7 +151,7 @@ test("CLK-18: a click on the count of the tab of questions does what the key 4 d
   expect(press(v.ui, "4", v)).toEqual({ ...v.ui, screen: "questions" });
 });
 
-test("edge case: a click on the tab the TUI is on does what its key does there: 3 on the thread goes back to the ticket of the selected line, on its latest entry", () => {
+test("CLK-18: edge case: a click on the tab the TUI is on does what its key does there: 3 on the thread goes back to the ticket of the selected line, on its latest entry", () => {
   // 417 is of TKT-12, and the thread shows TKT-14, scrolled
   const v = view("01", { screen: "thread", selected: 417, threadTicket: "TKT-14", threadOffset: 5 });
   expect(threadTicket(v)).toBe("TKT-14");
@@ -365,9 +365,11 @@ test("CLK-06: shift, alt and ctrl held with the click do not change what it does
 
 test("CLK-11: column 120 and line 40 are cells of the grid, and column 0, line 0, column 121, line 41 and an integer of 400 digits are not", () => {
   const v = view("01", { selected: 417 });
-  // A drawing with the key of the pause in every cell: only where the cell is decides
-  const g = grid();
-  g.mark(0, 0, 120, 40, { key: "p" });
+  // Marks no screen makes: the key of the pause in every cell, also past the 120 columns and
+  // the 40 lines. Only where the cell is decides.
+  const g = grid(130, 45);
+  g.mark(0, 0, 130, 45, { key: "p" });
+  expect([g.hits[40]![120], g.hits[0]![120], g.hits[40]![0]]).toEqual([{ key: "p" }, { key: "p" }, { key: "p" }]);
   const sent = (column: number | string, line: number | string) => point(entry(v), `\x1b[<0;${column};${line}M`, v, drawing(v, g))!;
   for (const [column, line] of [[1, 1], [120, 1], [1, 40], [120, 40]] as const) {
     expect(sent(column, line).ui).toEqual(press(v.ui, "p", v)!);
@@ -605,7 +607,7 @@ test("CLK-21: a click on the selected line of the feed does what enter does: the
   expect([next.ui.screen, next.ui.focus]).toEqual(["thread", 1]);
 });
 
-test("edge case: a click on the selected line of the feed, the one of a question that waits for the dev, opens the modal of its answer and sends nothing", () => {
+test("CLK-21: edge case: a click on the selected line of the feed, the one of a question that waits for the dev, opens the modal of its answer and sends nothing", () => {
   // 422 is Q-07 where it reached the dev, with its three options; 428 is Q-08, which has none
   for (const [selected, hour, question, choice] of [[422, "14:29:40", 7, 0], [428, "14:31:15", 8, null]] as const) {
     const v = view("01", { selected });
@@ -996,7 +998,7 @@ for (const [button, key, way] of WHEEL) {
   });
 }
 
-test("edge case: the wheel up over the feed with no line selected does what three k do there: the first selects the last line", () => {
+test("CLK-28: edge case: the wheel up over the feed with no line selected does what three k do there: the first selects the last line", () => {
   const v = view("01", { selected: null });
   const cell = feedCell(screen(v), "14:19:05");
   const up = sent(v, 64, ...cell)!;
@@ -1368,7 +1370,7 @@ test("CLK-46: with the modal open a click that comes 499 ms after the one before
   }
 });
 
-test("edge case: with the modal open a click that comes 500 ms or more after the one before is treated by the rules of the modal", () => {
+test("CLK-46: edge case: with the modal open a click that comes 500 ms or more after the one before is treated by the rules of the modal", () => {
   const v = open("05");
   const g = screen(v);
   const { option, enter, corner, margin } = targets(g);

@@ -46,6 +46,10 @@ export function parse(item: string): Report | null {
   return found && { button: Number(found[1]), x: Number(found[2]), y: Number(found[3]), pressed: found[4] === "M" };
 }
 
+// The grid of the screens, the only cells a report hits
+const COLS = 120;
+const LINES = 40;
+
 // The bits of the button that say shift, alt and ctrl were held
 const MODIFIERS = 4 | 8 | 16;
 
@@ -155,8 +159,10 @@ export function point(at: Entry, item: string, view: View, drawn: Drawn | null):
   // Nothing of the screen of the state is drawn on the small screen and on the frozen one,
   // nor after a key of the chunk of the report changed the screen
   if (!drawn || drawn.screen !== ui.screen) return still;
-  // A cell outside the grid has no mark
-  const hit = drawn.hits[report.y - 1]?.[report.x - 1];
+  // The cell of the report, from 0: one outside the grid is of no screen
+  const [x, y] = [report.x - 1, report.y - 1];
+  if (x < 0 || x >= COLS || y < 0 || y >= LINES) return still;
+  const hit = drawn.hits[y]?.[x];
   // With the modal of answer open only what it drew is clicked, and without it nothing of it
   if (!hit || (hit.modal === true) !== (ui.modal !== null)) return still;
   // In the modal the wheel rolls nothing, and the second click of a double one does nothing:
