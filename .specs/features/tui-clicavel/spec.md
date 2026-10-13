@@ -316,25 +316,25 @@ cada item, e com o que ficou sem conferir.
 | CLK-02 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-03 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
 | CLK-04 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
-| CLK-05 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-06 | P1: O terminal conta onde o mouse clicou | - | Pending |
+| CLK-05 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
+| CLK-06 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
 | CLK-07 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-08 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-09 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
 | CLK-10 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
-| CLK-11 | P1: O terminal conta onde o mouse clicou | - | Pending |
+| CLK-11 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
 | CLK-12 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-13 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-14 | P1: O terminal conta onde o mouse clicou | T4 | Implementing |
+| CLK-13 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
+| CLK-14 | P1: O terminal conta onde o mouse clicou | T4, T12 | Implementing |
 | CLK-15 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-16 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
 | CLK-17 | P1: O terminal conta onde o mouse clicou | T1 | Implementing |
-| CLK-18 | P1: Navegar com o clique | T5 | Implementing |
+| CLK-18 | P1: Navegar com o clique | T5, T12 | Implementing |
 | CLK-19 | P1: Navegar com o clique | T7 | Implementing |
 | CLK-20 | P1: Navegar com o clique | T7 | Implementing |
 | CLK-21 | P1: Navegar com o clique | - | Pending |
 | CLK-22 | P1: Navegar com o clique | T7 | Implementing |
-| CLK-23 | P1: Navegar com o clique | T5 | Implementing |
+| CLK-23 | P1: Navegar com o clique | T5, T12 | Implementing |
 | CLK-24 | P1: Navegar com o clique | T9 | Implementing |
 | CLK-25 | P1: Navegar com o clique | T9 | Implementing |
 | CLK-26 | P1: Navegar com o clique | T9 | Implementing |
@@ -344,13 +344,13 @@ cada item, e com o que ficou sem conferir.
 | CLK-30 | P1: Rolar com a roda | T9 | Implementing |
 | CLK-31 | P1: Rolar com a roda | T9 | Implementing |
 | CLK-32 | P1: Rolar com a roda | - | Pending |
-| CLK-33 | P1: Atalhos e selos clicáveis | T6, T9 | Implementing |
-| CLK-34 | P1: Atalhos e selos clicáveis | T6 | Implementing |
-| CLK-35 | P1: Atalhos e selos clicáveis | T6 | Implementing |
-| CLK-36 | P1: Atalhos e selos clicáveis | T5 | Implementing |
-| CLK-37 | P1: Atalhos e selos clicáveis | T5 | Implementing |
-| CLK-38 | P1: Atalhos e selos clicáveis | T5 | Implementing |
-| CLK-39 | P1: Atalhos e selos clicáveis | T5 | Implementing |
+| CLK-33 | P1: Atalhos e selos clicáveis | T6, T9, T12 | Implementing |
+| CLK-34 | P1: Atalhos e selos clicáveis | T6, T12 | Implementing |
+| CLK-35 | P1: Atalhos e selos clicáveis | T6, T12 | Implementing |
+| CLK-36 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
+| CLK-37 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
+| CLK-38 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
+| CLK-39 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
 | CLK-40 | P1: Modal de resposta com o mouse | T10 | Implementing |
 | CLK-41 | P1: Modal de resposta com o mouse | T10 | Implementing |
 | CLK-42 | P1: Modal de resposta com o mouse | T10 | Implementing |
@@ -362,7 +362,7 @@ cada item, e com o que ficou sem conferir.
 | CLK-48 | P1: Modal de resposta com o mouse | - | Pending |
 | CLK-49 | P1: Modal de resposta com o mouse | - | Pending |
 | CLK-50 | P2: Ligar e desligar o mouse | - | Pending |
-| CLK-51 | P2: Ligar e desligar o mouse | - | Pending |
+| CLK-51 | P2: Ligar e desligar o mouse | T12 | Implementing |
 | CLK-52 | P2: Ligar e desligar o mouse | T3 | Implementing |
 | CLK-53 | P2: Ligar e desligar o mouse | T3 | Implementing |
 | CLK-54 | P2: Ligar e desligar o mouse | - | Pending |

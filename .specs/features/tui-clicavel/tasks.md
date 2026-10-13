@@ -354,19 +354,19 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] CLK-18: o clique em cada aba dá o estado de `press` com a tecla dela, um caso por aba; na aba em que a TUI já está também (o edge case do `3` no thread)
-- [ ] CLK-23, CLK-36, CLK-37, CLK-39: o clique em ` ? N `, no selo de gate, no de permissão e no custo dá o de `4`, `g`, `x` e `t`; CLK-38: num selo sem tecla, o estado é o mesmo objeto
-- [ ] CLK-33: um caso por atalho simples que as telas sem modal desenham (`tab`, `enter`, `esc`, `b`, `g`, `x`, `p`, `h`, `?`, `q`); o clique em `q` devolve `null`
-- [ ] CLK-34: `j`, `k`, `[` e `]`, um caso cada; o separador e a descrição não mudam nada. CLK-35: `1-4` não muda nada
-- [ ] CLK-06, um caso por gatilho: soltura do botão 0, botão do meio (1), direito (2), roda horizontal (66 e 67), e o bit 32 sobre o botão 0
-- [ ] Os bits 4, 8 e 16 no botão não mudam o que o clique faz
-- [ ] CLK-11: coluna 0, linha 0, coluna 121, linha 41 e o inteiro de 400 dígitos não mudam nada; coluna 120 e linha 40 valem
-- [ ] CLK-51: com o mouse desligado, clique e roda não mudam `ui` nem `clickedAt`
-- [ ] CLK-13 e a guarda de tela: com `drawn` nulo, e com o desenho de outra tela, nada muda
-- [ ] CLK-14: a mesma célula dá efeitos diferentes com dois desenhos diferentes
-- [ ] Todo clique lido com o mouse ligado põe o relógio da `View` em `clickedAt`
-- [ ] Testes em `test/unit/tui-mouse.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] CLK-18: o clique em cada aba dá o estado de `press` com a tecla dela, um caso por aba; na aba em que a TUI já está também (o edge case do `3` no thread)
+- [x] CLK-23, CLK-36, CLK-37, CLK-39: o clique em ` ? N `, no selo de gate, no de permissão e no custo dá o de `4`, `g`, `x` e `t`; CLK-38: num selo sem tecla, o estado é o mesmo objeto
+- [x] CLK-33: um caso por atalho simples que as telas sem modal desenham (`tab`, `enter`, `esc`, `b`, `g`, `x`, `p`, `h`, `?`, `q`); o clique em `q` devolve `null`
+- [x] CLK-34: `j`, `k`, `[` e `]`, um caso cada; o separador e a descrição não mudam nada. CLK-35: `1-4` não muda nada
+- [x] CLK-06, um caso por gatilho: soltura do botão 0, botão do meio (1), direito (2), roda horizontal (66 e 67), e o bit 32 sobre o botão 0
+- [x] Os bits 4, 8 e 16 no botão não mudam o que o clique faz
+- [x] CLK-11: coluna 0, linha 0, coluna 121, linha 41 e o inteiro de 400 dígitos não mudam nada; coluna 120 e linha 40 valem
+- [x] CLK-51: com o mouse desligado, clique e roda não mudam `ui` nem `clickedAt`
+- [x] CLK-13 e a guarda de tela: com `drawn` nulo, e com o desenho de outra tela, nada muda
+- [x] CLK-14: a mesma célula dá efeitos diferentes com dois desenhos diferentes
+- [x] Todo clique lido com o mouse ligado põe o relógio da `View` em `clickedAt`
+- [x] Testes em `test/unit/tui-mouse.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
