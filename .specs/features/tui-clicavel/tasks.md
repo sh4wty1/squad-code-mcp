@@ -524,15 +524,15 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] CLK-01: com o mouse ligado, o que `start` escreve começa por `ENTER` seguido de `ESC [ ? 1000 h` e `ESC [ ? 1006 h`, nessa ordem
-- [ ] CLK-52: com `mouse` falso, a saída inicial é só `ENTER`
-- [ ] CLK-02, um caso por saída: `q`, `ctrl+c`, `stop` (o que o `SIGTERM` chama) e um erro no laço: a saída termina em `ESC [ ? 1006 l`, `ESC [ ? 1000 l` e `LEAVE`, nessa ordem, com o mouse ligado e desligado
-- [ ] `config` com `SQUAD_TUI_MOUSE` `0` dá `mouse` falso, ausente e vazia dão verdadeiro, e `sim` lança
-- [ ] Pelo processo, fora da tela alternativa: `SQUAD_TUI_MOUSE=sim bun tui.ts` sai com 1, o stderr cita a variável e `sim`, e o stdout é vazio
-- [ ] Pelo processo, num pseudo-terminal: com `SQUAD_TUI_MOUSE=0` a saída não tem `ESC [ ? 1000 h`; sem a variável tem, depois de `ESC [ ? 1049 h`
-- [ ] `test/unit/tui-loop.test.ts` só muda no ajudante `launch`, que passa `mouse: false`
-- [ ] Testes em `test/unit/tui-mouse-loop.test.ts` e `test/integration/tui-mouse.test.ts`
-- [ ] Gate full passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] CLK-01: com o mouse ligado, o que `start` escreve começa por `ENTER` seguido de `ESC [ ? 1000 h` e `ESC [ ? 1006 h`, nessa ordem
+- [x] CLK-52: com `mouse` falso, a saída inicial é só `ENTER`
+- [x] CLK-02, um caso por saída: `q`, `ctrl+c`, `stop` (o que o `SIGTERM` chama) e um erro no laço: a saída termina em `ESC [ ? 1006 l`, `ESC [ ? 1000 l` e `LEAVE`, nessa ordem, com o mouse ligado e desligado
+- [x] `config` com `SQUAD_TUI_MOUSE` `0` dá `mouse` falso, ausente e vazia dão verdadeiro, e `sim` lança
+- [x] Pelo processo, fora da tela alternativa: `SQUAD_TUI_MOUSE=sim bun tui.ts` sai com 1, o stderr cita a variável e `sim`, e o stdout é vazio
+- [x] Pelo processo, num pseudo-terminal: com `SQUAD_TUI_MOUSE=0` a saída não tem `ESC [ ? 1000 h`; sem a variável tem, depois de `ESC [ ? 1049 h`
+- [x] `test/unit/tui-loop.test.ts` só muda no ajudante `launch`, que passa `mouse: false`
+- [x] Testes em `test/unit/tui-mouse-loop.test.ts` e `test/integration/tui-mouse.test.ts`
+- [x] Gate full passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: integration
 **Gate**: full

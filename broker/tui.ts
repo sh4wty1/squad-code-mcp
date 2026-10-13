@@ -15,8 +15,8 @@ import { brokerUrl, tokenPath } from "./shared/config.ts";
 import type { SquadEvent } from "./shared/contract.ts";
 import { squad } from "./shared/derive.ts";
 import { getGitRoot } from "./shared/git.ts";
-import { CLEAR, ENTER, LEAVE, paint, parseGlyphs } from "./tui/ansi.ts";
-import { prices, readIntervalMs, type PriceTable } from "./tui/config.ts";
+import { CLEAR, ENTER, LEAVE, MOUSE_OFF, MOUSE_ON, paint, parseGlyphs } from "./tui/ansi.ts";
+import { mouseOn, prices, readIntervalMs, type PriceTable } from "./tui/config.ts";
 import { feed, type FeedRow } from "./tui/feed.ts";
 import type { Grid } from "./tui/grid.ts";
 import { input, keysOf, marks, settle, START, sync, visible } from "./tui/keys.ts";
@@ -42,11 +42,13 @@ export interface Settings {
   intervalMs: number;
   glyphs: Map<string, string>;
   prices: PriceTable;
+  // whether the terminal is asked for the reports of the mouse when the TUI starts
+  mouse: boolean;
 }
 
 // Throws with the message of the setting that is not valid
 export function config(env: Record<string, string | undefined> = process.env): Settings {
-  return { url: brokerUrl(env), intervalMs: readIntervalMs(env), glyphs: parseGlyphs(env.SQUAD_TUI_GLYPHS), prices: prices(env) };
+  return { url: brokerUrl(env), intervalMs: readIntervalMs(env), glyphs: parseGlyphs(env.SQUAD_TUI_GLYPHS), prices: prices(env), mouse: mouseOn(env) };
 }
 
 // The name of the repository of the directory, by the rule of the broker; null outside one
@@ -124,7 +126,9 @@ export function start(io: Io, settings: Settings) {
     stopped = true;
     clearTimeout(timer);
     clearTimeout(escapeTimer);
-    io.write(LEAVE);
+    // The request for the reports is taken back on every way out, also when it was never
+    // made: a terminal left with them on writes in the shell at each click
+    io.write(MOUSE_OFF + LEAVE);
     io.raw(false);
     settle();
   }
@@ -209,7 +213,7 @@ export function start(io: Io, settings: Settings) {
   }
 
   io.raw(true);
-  io.write(ENTER);
+  io.write(ENTER + (settings.mouse ? MOUSE_ON : ""));
   tick().catch(fail);
   return { key, resize, stop, done };
 }

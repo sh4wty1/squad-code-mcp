@@ -312,8 +312,8 @@ cada item, e com o que ficou sem conferir.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| CLK-01 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-02 | P1: O terminal conta onde o mouse clicou | - | Pending |
+| CLK-01 | P1: O terminal conta onde o mouse clicou | T19 | Implementing |
+| CLK-02 | P1: O terminal conta onde o mouse clicou | T19 | Implementing |
 | CLK-03 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
 | CLK-04 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
 | CLK-05 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
@@ -363,14 +363,14 @@ cada item, e com o que ficou sem conferir.
 | CLK-49 | P1: Modal de resposta com o mouse | T16 | Implementing |
 | CLK-50 | P2: Ligar e desligar o mouse | T17 | Implementing |
 | CLK-51 | P2: Ligar e desligar o mouse | T12 | Implementing |
-| CLK-52 | P2: Ligar e desligar o mouse | T3 | Implementing |
-| CLK-53 | P2: Ligar e desligar o mouse | T3 | Implementing |
+| CLK-52 | P2: Ligar e desligar o mouse | T3, T19 | Implementing |
+| CLK-53 | P2: Ligar e desligar o mouse | T3, T19 | Implementing |
 | CLK-54 | P2: Ligar e desligar o mouse | T17 | Implementing |
 | CLK-55 | P2: Ligar e desligar o mouse | - | Pending |
 | CLK-56 | P1: Nada do que existe muda | T2, T17, T18 | Implementing |
 | CLK-57 | P1: Nada do que existe muda | - | Pending |
 
-**Coverage:** 57 total, 50 com tarefa feita, 7 à espera das fases 4 e 5. `tasks.md` dá a tarefa de cada um.
+**Coverage:** 57 total, 52 com tarefa feita, 5 à espera das tarefas que faltam. `tasks.md` dá a tarefa de cada um.
 
 ---
 
