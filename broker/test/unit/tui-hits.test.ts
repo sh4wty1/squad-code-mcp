@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
 import { clock, grid, len, type Grid, type Hit } from "../../tui/grid.ts";
+import { answer } from "../../tui/screens/answer.ts";
 import { chrome, drawKeys, MAIN_KEYS, stats, type Keys } from "../../tui/screens/chrome.ts";
 import { main } from "../../tui/screens/main.ts";
 import { questions } from "../../tui/screens/questions.ts";
@@ -634,3 +635,145 @@ for (const n of [8, 9, 21, 22]) {
     expect(having(g, "history")).toEqual(having(three, "history"));
   });
 }
+
+// The modal of answer over the tab of a frame: 05 is Q-07 on the first of its three options,
+// 20a is Q-09 on the first of its two, 06 and 07 are Q-08 with a text, 20b is Q-08 refused
+const modalOf = (v: View): Grid => answer(questions(v), v);
+
+// The box of the modal: the one whose top has its title
+function modalBox(g: Grid): Box {
+  const found = drawnBoxes(g).filter((box) => textOf(g, box.top, box.left, box.right).includes("? responder Q-"));
+  expect(found.length).toBe(1);
+  return found[0]!;
+}
+
+const inside = (box: Box, x: number, y: number): boolean => x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
+
+// What a click outside the box of the modal is
+const ESC: Hit = { modal: true, key: "\x1b" };
+
+for (const frame of ["05", "06", "07", "20a", "20b"]) {
+  test(`CLK-40: with the modal of frame ${frame} no cell of the 40 lines has a mark that is not of the modal, and the marks of the tab under it are gone`, () => {
+    const v = view(frame);
+    const under = questions(v);
+    const g = modalOf(v);
+    expect(g.hits.flat().filter((mark) => mark !== null && mark.modal !== true)).toEqual([]);
+    expect([having(g, "question"), having(g, "history"), having(g, "wheel")]).toEqual([[], [], []]);
+    // The tabs, the counter of line 0, the cost, the list and the history had their marks
+    expect(hit(under, at(under, 1, "2 topologia"), 1)).toEqual({ key: "2" });
+    expect(hit(g, at(g, 1, "2 topologia"), 1)).toEqual(ESC);
+    expect(hit(under, at(under, 38, "│"), 38)).toEqual({ key: "t" });
+    expect(hit(g, at(g, 38, "│"), 38)).toEqual(ESC);
+    expect(under.hits[0]!.filter((mark) => mark?.key === "4").length).toBeGreaterThan(0);
+    expect(g.hits[0]).toEqual(all(120, ESC));
+    expect([having(under, "wheel").length, having(under, "history").length]).toEqual([60 * 24 + 120 * 12, 120 * 12]);
+  });
+
+  test(`CLK-43: with the modal of frame ${frame} every cell of lines 0 to 38 outside its box is esc, the empty margin around the box too`, () => {
+    const g = modalOf(view(frame));
+    const box = modalBox(g);
+    expect([hit(g, 0, 0), hit(g, 119, 38)]).toEqual([ESC, ESC]);
+    // The margin: the cells next to the box, at its four sides and at its corners
+    const boxed = new Set(cellsOf(box));
+    const margin = rect(box.left - 1, box.right + 1, box.top - 1, box.bottom + 1).filter((cell) => !boxed.has(cell));
+    expect(margin.length).toBe(2 * (box.right - box.left + 3) + 2 * (box.bottom - box.top + 1));
+    for (const cell of margin) {
+      const [x, y] = cell.split(",").map(Number) as [number, number];
+      expect(g.rows[y]![x]!.ch).toBe(" ");
+      expect(hit(g, x, y)).toEqual(ESC);
+    }
+    for (let y = 0; y <= 38; y++) {
+      for (let x = 0; x < 120; x++) {
+        if (!inside(box, x, y)) expect(hit(g, x, y)).toEqual(ESC);
+      }
+    }
+  });
+
+  test(`CLK-44: in the modal of frame ${frame} the four corners of the box have no key, and neither has any cell of the box`, () => {
+    const g = modalOf(view(frame));
+    const box = modalBox(g);
+    expect(cornersOf(g, box)).toEqual(all(4, { modal: true }));
+    for (let y = box.top; y <= box.bottom; y++) {
+      expect(hits(g, y, box.left, box.right).map((mark) => [mark?.modal, mark?.key])).toEqual(Array(box.right - box.left + 1).fill([true, undefined]));
+    }
+  });
+}
+
+for (const [frame, labels] of [["05", ["infinito com backoff", "5 tentativas", "configurável", "outra resposta…"]], ["20a", ["pronto", "não vou fornecer", "outra resposta…"]]] as const) {
+  test(`CLK-41, CLK-42: in the choice mode of frame ${frame} each option has its index in the 80 columns inside the box, the other answer the index after them, and the border of their lines has none`, () => {
+    const g = modalOf(view(frame));
+    const box = modalBox(g);
+    expect(box.right - box.left - 1).toBe(80);
+    const lines = Array.from({ length: box.bottom - box.top - 1 }, (_, i) => box.top + 1 + i);
+    const ys = labels.map((label, i) => {
+      const found = lines.filter((y) => textOf(g, y, box.left + 1, box.right - 1).includes(` ${i + 1}  ${label}`));
+      expect(found.length).toBe(1);
+      return found[0]!;
+    });
+    ys.forEach((y, option) => {
+      expect(hits(g, y, box.left + 1, box.right - 1)).toEqual(all(80, { modal: true, option }));
+      expect([hit(g, box.left, y), hit(g, box.right, y)]).toEqual(all(2, { modal: true }));
+    });
+    // The context, the text of the question, the effect and the border: no option
+    expect(having(g, "option").length).toBe(labels.length * 80);
+    for (const y of [box.top, ...lines.filter((line) => !ys.includes(line)), box.bottom]) expect(hits(g, y, box.left, box.right)).toEqual(all(82, { modal: true }));
+  });
+}
+
+for (const [frame, mode] of [["06", "the text mode"], ["07", "the text mode with the field expanded"], ["20b", "the refused answer"]] as const) {
+  test(`CLK-44: in ${mode} of frame ${frame} no cell has an option, and every cell of the box has only the modal`, () => {
+    const g = modalOf(view(frame));
+    const box = modalBox(g);
+    expect(having(g, "option")).toEqual([]);
+    for (let y = box.top; y <= box.bottom; y++) expect(hits(g, y, box.left, box.right)).toEqual(all(box.right - box.left + 1, { modal: true }));
+  });
+}
+
+// The marks of the cells of a text of line 39, and the mark of a key the modal drew
+const keyOf = (g: Grid, text: string): (Hit | null)[] => hits(g, 39, at(g, 39, text), at(g, 39, text) + len(text) - 1);
+const of = (key: string): Hit => ({ modal: true, key });
+
+for (const [frame, range] of [["05", "1-4"], ["20a", "1-3"]] as const) {
+  test(`CLK-45: in the choice mode of frame ${frame} the shortcuts of line 39 have their keys and the modal, ${range} has no mark, and neither has the rest of the line`, () => {
+    const g = modalOf(view(frame));
+    expect(g.text()[39]).toBe(` ${range} escolher   ↑↓ mover   enter confirmar   esc cancelar`);
+    expect(keyOf(g, `${range} escolher`)).toEqual(all(12, null));
+    expect(keyOf(g, "↑↓")).toEqual([of("\x1b[A"), of("\x1b[B")]);
+    expect(keyOf(g, " mover")).toEqual(all(6, null));
+    expect([keyOf(g, "enter"), keyOf(g, "confirmar")]).toEqual([all(5, of("\r")), all(9, of("\r"))]);
+    expect(keyOf(g, "esc cancelar")).toEqual([...all(3, of("\x1b")), null, ...all(8, of("\x1b"))]);
+    expect(marked(g, 39).length).toBe(2 + 5 + 9 + 3 + 8);
+  });
+}
+
+for (const [frame, size] of [["06", "expandir"], ["07", "recolher"]] as const) {
+  test(`CLK-45: in the text mode of frame ${frame} the shortcuts of line 39 have their keys and the modal, and the rest of the line no mark`, () => {
+    const g = modalOf(view(frame));
+    expect(g.text()[39]).toBe(` enter enviar   ctrl+e ${size}   ctrl+u limpar   esc cancelar`);
+    expect([keyOf(g, "enter"), keyOf(g, "enviar")]).toEqual([all(5, of("\r")), all(6, of("\r"))]);
+    expect([keyOf(g, "ctrl+e"), keyOf(g, size)]).toEqual([all(6, of("\x05")), all(8, of("\x05"))]);
+    expect([keyOf(g, "ctrl+u"), keyOf(g, "limpar")]).toEqual([all(6, of("\x15")), all(6, of("\x15"))]);
+    expect(keyOf(g, "esc cancelar")).toEqual([...all(3, of("\x1b")), null, ...all(8, of("\x1b"))]);
+    expect(marked(g, 39).length).toBe(5 + 6 + 6 + 8 + 6 + 6 + 3 + 8);
+  });
+}
+
+test("CLK-45: with the refused answer of frame 20b line 39 has esc on its only shortcut, with the modal", () => {
+  const g = modalOf(view("20b"));
+  expect(g.text()[39]).toBe(" esc fechar");
+  expect([keyOf(g, "esc"), keyOf(g, "fechar")]).toEqual([all(3, of("\x1b")), all(6, of("\x1b"))]);
+  expect(marked(g, 39).length).toBe(3 + 6);
+});
+
+test("CLK-40: without a modal, and with the modal of a question that is not of the feature, the marks are the ones of the tab", () => {
+  const closed = view("04");
+  const lost = view("04", { modal: { question: 99, choice: 0, text: "", expanded: false, sending: false, refused: false } });
+  for (const v of [closed, lost]) {
+    const g = questions(v);
+    expect(answer(g, v)).toBe(g);
+    expect(g.hits).toEqual(questions(v).hits);
+    expect(having(g, "modal")).toEqual([]);
+    expect(having(g, "question").length).toBe(9 * 58);
+    expect(hit(g, at(g, 1, "2 topologia"), 1)).toEqual({ key: "2" });
+  }
+});

@@ -309,14 +309,14 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] Nenhuma célula das 40 linhas fica com marca sem `modal`: as abas, as perguntas da lista e o histórico por baixo do modal deixam de ter as marcas da aba
-- [ ] As células (0, 0), (119, 38) e a margem vazia de uma célula em volta da caixa têm `key: "\x1b"`; os quatro cantos da caixa não têm `key`
-- [ ] No modo escolha, cada opção tem o índice dela nas 80 colunas de dentro, e `outra resposta…` o índice seguinte; a borda dessas linhas não tem `option`
-- [ ] No modo texto e no recusado, nenhuma célula tem `option`
-- [ ] Linha 39: os atalhos de cada modo (escolha, texto, recusado) têm a tecla e `modal: true`; `1-3` não tem marca; o resto da linha não tem marca
-- [ ] Sem modal, ou com o modal de uma pergunta que não está na feature, `answer` devolve o grid com as marcas da aba
-- [ ] Testes em `test/unit/tui-hits.test.ts`, com os frames 05, 06, 20a e 20b
-- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] Nenhuma célula das 40 linhas fica com marca sem `modal`: as abas, as perguntas da lista e o histórico por baixo do modal deixam de ter as marcas da aba
+- [x] As células (0, 0), (119, 38) e a margem vazia de uma célula em volta da caixa têm `key: "\x1b"`; os quatro cantos da caixa não têm `key`
+- [x] No modo escolha, cada opção tem o índice dela nas 80 colunas de dentro, e `outra resposta…` o índice seguinte; a borda dessas linhas não tem `option`
+- [x] No modo texto e no recusado, nenhuma célula tem `option`
+- [x] Linha 39: os atalhos de cada modo (escolha, texto, recusado) têm a tecla e `modal: true`; `1-3` não tem marca; o resto da linha não tem marca
+- [x] Sem modal, ou com o modal de uma pergunta que não está na feature, `answer` devolve o grid com as marcas da aba
+- [x] Testes em `test/unit/tui-hits.test.ts`, com os frames 05, 06, 20a e 20b
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: unit
 **Gate**: build
