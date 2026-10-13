@@ -73,7 +73,20 @@ It needs a terminal of 120×40 or more, and shows only the size it has while the
 | `p` | Pause and resume the feed |
 | `b` | Go to the oldest blocking question that waits for you |
 | `t` | Tokens of the feature or of the session, in the footer |
+| `m` | Turn the mouse off and on |
 | `q` `ctrl+c` | Quit |
+
+The mouse does what the keys do, and nothing else. A click on a tab, on a shortcut of the last line, on the counter of questions of the first line or on the cost of the footer is the key it shows. A click on a line of the feed selects it, and a click on the selected line opens it; a click on a ticket opens its thread. On the tab of questions a click selects a question, and a click on the selected one opens the modal of answer. The wheel moves the selection of the feed three lines at a time, and scrolls the thread, the list of questions and their history. In the modal of answer a click on an option only marks it: the answer is sent by `enter` or by a click on the shortcut of `enter` in the last line, and a click outside the box closes the modal like `esc`.
+
+While the TUI asks for the mouse, dragging no longer selects text in the terminal. `m` turns the mouse off and on, and `SQUAD_TUI_MOUSE=0` starts the TUI with it off. Most terminals also select with `shift` + drag while a program asks for the mouse. If the TUI is killed without warning, the terminal keeps sending reports to the shell until `reset` or until the tab is closed.
+
+The mouse probe shows what the terminal sends:
+
+```bash
+bun tui/mouse-probe.ts
+```
+
+It writes one line for each report of a button or of the wheel that reaches it, with the button, the column and the line, and exits 1 outside a terminal; `q` or ctrl+c leaves. A terminal where a click writes no line does not send reports, and the TUI works there by the keys alone.
 
 To see it without a squad, the demo opens it over the log of one of the test frames, served by a broker of its own on a free port:
 
@@ -106,6 +119,7 @@ It prints the width of each glyph and exits 0 if all are one cell, 2 if some is 
 | `SQUAD_EXPIRE_INTERVAL_MS` | `1000` | Interval at which the broker checks the deadlines of the questions |
 | `SQUAD_POLL_INTERVAL_MS` | `1000` | Interval at which a registered session asks for what was sent to it, and at which the TUI reads the log. The TUI uses 1000 when it is not a positive integer |
 | `SQUAD_TUI_GLYPHS` | none | Glyphs the TUI writes as another character: pairs `glyph=substitute` separated by commas, as in `⚠=!,⟳=~`. A pair without one character on each side stops the TUI with exit code 1 |
+| `SQUAD_TUI_MOUSE` | `1` | `0` starts the TUI without asking the terminal for the reports of the mouse; `m` turns them on. Absent, empty or `1`, it asks for them. Any other value stops the TUI with exit code 1 |
 | `SQUAD_PRICES` | `tui/prices.json` | JSON file of the price table of the TUI: `{ "<model>": { "input", "output", "cache_write", "cache_read" } }`, in dollars per million tokens. A model outside the table costs zero. A file that is missing or has another format stops the TUI with exit code 1 |
 
 Port and database differ from claude-peers (`7899`, `~/.claude-peers.db`), so both can run on the same machine.

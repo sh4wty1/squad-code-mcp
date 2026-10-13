@@ -361,10 +361,10 @@ cada item, e com o que ficou sem conferir.
 | CLK-47 | P1: Modal de resposta com o mouse | T16 | Implementing |
 | CLK-48 | P1: Modal de resposta com o mouse | T16 | Implementing |
 | CLK-49 | P1: Modal de resposta com o mouse | T16, T20 | Implementing |
-| CLK-50 | P2: Ligar e desligar o mouse | T17, T20, T23 | Implementing |
+| CLK-50 | P2: Ligar e desligar o mouse | T17, T20, T23, T24 | Implementing |
 | CLK-51 | P2: Ligar e desligar o mouse | T12, T20 | Implementing |
-| CLK-52 | P2: Ligar e desligar o mouse | T3, T19, T23 | Implementing |
-| CLK-53 | P2: Ligar e desligar o mouse | T3, T19 | Implementing |
+| CLK-52 | P2: Ligar e desligar o mouse | T3, T19, T23, T24 | Implementing |
+| CLK-53 | P2: Ligar e desligar o mouse | T3, T19, T24 | Implementing |
 | CLK-54 | P2: Ligar e desligar o mouse | T17, T20 | Implementing |
 | CLK-55 | P2: Ligar e desligar o mouse | T22 | Implementing |
 | CLK-56 | P1: Nada do que existe muda | T2, T17, T18 | Implementing |

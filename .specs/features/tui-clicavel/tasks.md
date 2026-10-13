@@ -638,9 +638,9 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] A tabela tem `SQUAD_TUI_MOUSE` com o default, o `0` e o que um valor inválido faz
-- [ ] A seção da TUI diz que o clique vale pela tecla do elemento, como desligar o mouse para selecionar texto, e como rodar a sonda
-- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] A tabela tem `SQUAD_TUI_MOUSE` com o default, o `0` e o que um valor inválido faz
+- [x] A seção da TUI diz que o clique vale pela tecla do elemento, como desligar o mouse para selecionar texto, e como rodar a sonda
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build
