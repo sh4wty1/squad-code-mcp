@@ -383,13 +383,13 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] CLK-19: de cada foco para cada painel (nove casos), o estado é o de `press` com `tab` o número de vezes da tabela; a borda da caixa vale
-- [ ] CLK-20: linha acima e abaixo da selecionada, sem seleção, e com o feed pausado: `selected` é o `seq` clicado e o foco é 1
-- [ ] CLK-21: na linha selecionada, o de `enter`: a tela de thread; na linha de um `question` que espera o dev, o modal aberto com `send` nulo (edge case)
-- [ ] CLK-22: o ticket da linha selecionada, um antes e um depois dele: tela de thread, `threadTicket(view)` é o clicado, `threadOffset` 0; vale nas duas linhas da forma de duas linhas
-- [ ] CLK-27: agente, painel de detalhe, régua, faixa, cabeçalho do feed e `+N tickets` mudam só o foco; a linha 0 fora do contador e o lado direito da linha 38 não mudam nada; topologia, thread e ajuda fora das abas e dos atalhos não mudam nada
-- [ ] Testes em `test/unit/tui-mouse.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] CLK-19: de cada foco para cada painel (nove casos), o estado é o de `press` com `tab` o número de vezes da tabela; a borda da caixa vale
+- [x] CLK-20: linha acima e abaixo da selecionada, sem seleção, e com o feed pausado: `selected` é o `seq` clicado e o foco é 1
+- [x] CLK-21: na linha selecionada, o de `enter`: a tela de thread; na linha de um `question` que espera o dev, o modal aberto com `send` nulo (edge case)
+- [x] CLK-22: o ticket da linha selecionada, um antes e um depois dele: tela de thread, `threadTicket(view)` é o clicado, `threadOffset` 0; vale nas duas linhas da forma de duas linhas
+- [x] CLK-27: agente, painel de detalhe, régua, faixa, cabeçalho do feed e `+N tickets` mudam só o foco; a linha 0 fora do contador e o lado direito da linha 38 não mudam nada; topologia, thread e ajuda fora das abas e dos atalhos não mudam nada
+- [x] Testes em `test/unit/tui-mouse.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

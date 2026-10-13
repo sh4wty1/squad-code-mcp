@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
-import { grid, len, type Grid } from "../../tui/grid.ts";
+import { clock, grid, len, type Grid } from "../../tui/grid.ts";
 import { keysOf, press } from "../../tui/keys.ts";
 import { parse, point, type Drawn, type Entry, type Pointer } from "../../tui/mouse.ts";
 import { answer } from "../../tui/screens/answer.ts";
@@ -59,6 +59,9 @@ const entry = (v: View, pointer: Pointer = ON): Entry => ({ ui: v.ui, pointer })
 
 // The state after a click on the cell (x, y) of the screen of the view, as it is drawn
 const clicked = (v: View, x: number, y: number): Entry | null => point(entry(v), click(x, y), v, drawing(v));
+
+// The state after the keys, one after the other, as `press` gives it
+const keys = (v: View, ...list: string[]): Ui | null => list.reduce<Ui | null>((ui, key) => ui && press(ui, key, { ...v, ui }), v.ui);
 
 test("CLK-03: a report gives its button, its column, its line and whether the button was pressed or released", () => {
   expect(parse("\x1b[<0;12;5M")).toEqual({ button: 0, x: 12, y: 5, pressed: true });
@@ -297,12 +300,17 @@ function boxes(g: Grid): [left: number, right: number][] {
   return find(g, 2, "┌").map((left, i) => [left, right[i]!]);
 }
 
+// The cell where a box draws `text`, which it has once from line `top` down
+function cellOf(g: Grid, [left, right]: [number, number], text: string, top = 2): [x: number, y: number] {
+  const found = g.rows.flatMap((_, y) => (y < top || y > 37 ? [] : find(g, y, text, left, right).map((x): [number, number] => [x, y])));
+  if (found.length !== 1) throw new Error(`the box has "${text}" ${found.length} times`);
+  return found[0]!;
+}
+
 // The cell where the feed of the main screen draws the hour of an event, which it has once
 function feedCell(g: Grid, hour: string): [x: number, y: number] {
-  const [left, right] = boxes(g)[1]!;
-  const found = g.rows.flatMap((_, y) => find(g, y, ` ${hour} `, left, right).map((x): [number, number] => [x + 1, y]));
-  if (found.length !== 1) throw new Error(`the feed has ${hour} ${found.length} times`);
-  return found[0]!;
+  const [x, y] = cellOf(g, boxes(g)[1]!, ` ${hour} `);
+  return [x + 1, y];
 }
 
 // Three cells of the main screen of frame 01 where a click or the wheel does something: a tab,
@@ -462,3 +470,304 @@ test("CLK-46: every click read with the mouse on is the click before the next on
   const other = view("01", { screen: "help" });
   expect(point(entry(other), click(at(g, 39, "p pausa"), 39), other, drawing(v, g))!.pointer).toEqual({ on: true, clickedAt: now });
 });
+
+// The tabs that take the focus from one panel of the main screen to another, around the
+// three: from the panel of the line to the one of the column
+const TABS_TO = [
+  [0, 1, 2],
+  [2, 0, 1],
+  [1, 2, 0],
+] as const;
+const tabs = (focus: 0 | 1 | 2, panel: 0 | 1 | 2): string[] => Array<string>(TABS_TO[focus][panel]).fill("\t");
+
+// A text each panel draws in frame 01 with the line 417 selected, on a line with nothing to click
+const PANELS = ["mother", "hora", "msg #0417"] as const;
+
+for (const focus of [0, 1, 2] as const) {
+  for (const panel of [0, 1, 2] as const) {
+    test(`CLK-19: with the focus on panel ${focus}, a click on panel ${panel} gives it the focus, as ${TABS_TO[focus][panel]} tab does, on the border of its box too`, () => {
+      const v = view("01", { selected: 417, focus });
+      const g = screen(v);
+      const [left, right] = boxes(g)[panel]!;
+      // The four corners of the box, and a cell inside it
+      for (const [x, y] of [[left, 2], [right, 2], [left, 37], [right, 37], cellOf(g, [left, right], PANELS[panel])] as const) {
+        expect(g.rows[y]![x]!.ch).not.toBe(" ");
+        const next = clicked(v, x, y)!;
+        expect(next.ui).toEqual(keys(v, ...tabs(focus, panel))!);
+        expect(next.ui).toEqual({ ...v.ui, focus: panel });
+      }
+    });
+  }
+}
+
+test("CLK-11, CLK-19: column 120 of the screen is clicked, the border of the detail, and column 121 is not", () => {
+  const v = view("01", { selected: 417 });
+  const g = screen(v);
+  expect([boxes(g)[2]![1], g.rows[2]![119]!.ch, g.rows[37]![119]!.ch]).toEqual([119, "┐", "┘"]);
+  for (const line of [3, 20, 38]) {
+    expect(point(entry(v), `\x1b[<0;120;${line}M`, v, drawing(v, g))!.ui).toEqual({ ...v.ui, focus: 2 });
+    expect(point(entry(v), `\x1b[<0;121;${line}M`, v, drawing(v, g))!.ui).toBe(v.ui);
+  }
+});
+
+// The line of the feed of an hour, which the log has once
+function rowAt(v: View, hour: string) {
+  const found = v.rows.filter((row) => clock(row.ts) === hour);
+  if (found.length !== 1) throw new Error(`the log has ${found.length} lines of ${hour}`);
+  return found[0]!;
+}
+
+// In frame 01, 14:26:47 is two lines above the selected one, 14:27:30 the line before it,
+// 14:28:30 the line after it and 14:29:40 five lines below
+const AROUND = [
+  ["14:26:47", 415, ["k", "k"]],
+  ["14:27:30", 416, ["k"]],
+  ["14:28:30", 418, ["j"]],
+  ["14:29:40", 422, ["j", "j", "j", "j", "j"]],
+] as const;
+
+for (const [what, paused] of [["live", false], ["paused", true]] as const) {
+  test(`CLK-20: with the feed ${what}, a click on a line above or below the selected one selects it, as k or j until it, on the first and on the last cell of the line`, () => {
+    const v = view("01", { selected: 417, paused });
+    const g = screen(v);
+    const [left, right] = boxes(g)[1]!;
+    for (const [hour, seq, moves] of AROUND) {
+      expect(rowAt(v, hour).seq).toBe(seq);
+      const [x, y] = feedCell(g, hour);
+      for (const cell of [left + 1, x, right - 1]) {
+        const next = clicked(v, cell, y)!;
+        expect(next.ui).toEqual(keys(v, ...moves)!);
+        expect(next.ui).toEqual({ ...v.ui, selected: seq });
+        expect([next.ui.selected, next.ui.focus, next.ui.paused]).toEqual([seq, 1, paused]);
+      }
+    }
+  });
+}
+
+test("CLK-20: with no line selected, a click on a line of the feed selects it: the first k selects the last line, and the others go up to the clicked one", () => {
+  const v = view("01", { selected: null });
+  const g = screen(v);
+  // 14:31:48 is the last line of the log, and 14:31:15 four lines above it
+  expect(v.rows.at(-1)!.seq).toBe(rowAt(v, "14:31:48").seq);
+  expect(v.rows.at(-5)!.seq).toBe(rowAt(v, "14:31:15").seq);
+  const last = clicked(v, ...feedCell(g, "14:31:48"))!;
+  expect(last.ui).toEqual(keys(v, "k")!);
+  expect([last.ui.selected, last.ui.focus]).toEqual([432, 1]);
+  const above = clicked(v, ...feedCell(g, "14:31:15"))!;
+  expect(above.ui).toEqual(keys(v, "k", "k", "k", "k", "k")!);
+  expect([above.ui.selected, above.ui.focus]).toEqual([428, 1]);
+  // The first line drawn, the one that opened the feature
+  const first = clicked(v, ...feedCell(g, "14:17:48"))!;
+  expect(first.ui).toEqual({ ...v.ui, selected: 401 });
+});
+
+for (const focus of [0, 2] as const) {
+  test(`CLK-19, CLK-20: with the focus on panel ${focus}, a click on a line of the feed gives the focus to the feed and selects the line`, () => {
+    const v = view("01", { selected: 417, focus });
+    const g = screen(v);
+    for (const [hour, seq, moves] of AROUND) {
+      const next = clicked(v, ...feedCell(g, hour))!;
+      expect(next.ui).toEqual(keys(v, ...tabs(focus, 1), ...moves)!);
+      expect(next.ui).toEqual({ ...v.ui, focus: 1, selected: seq });
+    }
+  });
+}
+
+test("CLK-20: a click on the border of the line of an event selects no line: it only gives the focus to the feed", () => {
+  const v = view("01", { selected: 417, focus: 0 });
+  const g = screen(v);
+  const [left, right] = boxes(g)[1]!;
+  const [, y] = feedCell(g, "14:29:40");
+  for (const x of [left, right]) {
+    expect(g.rows[y]![x]!.ch).toBe("│");
+    expect(clicked(v, x, y)!.ui).toEqual({ ...v.ui, focus: 1 });
+  }
+});
+
+test("CLK-21: a click on the selected line of the feed does what enter does: the thread of its ticket, on its latest entry", () => {
+  // 417 is the verdict of TKT-12; the thread of another ticket was open before, scrolled
+  const v = view("01", { selected: 417, threadTicket: "TKT-14", threadOffset: 5 });
+  const g = screen(v);
+  const [left, right] = boxes(g)[1]!;
+  const [x, y] = feedCell(g, "14:28:03");
+  expect(rowAt(v, "14:28:03").seq).toBe(417);
+  expect(g.rows[y]![left + 1]!.ch).toBe("▶");
+  for (const cell of [left + 1, x, right - 1]) {
+    const next = clicked(v, cell, y)!;
+    expect(next.ui).toEqual(press(v.ui, "\r", v)!);
+    expect([next.ui.screen, next.ui.threadOffset, threadTicket({ ...v, ui: next.ui })]).toEqual(["thread", 0, "TKT-12"]);
+  }
+  // From another panel the focus goes to the feed first
+  const far = view("01", { selected: 417, focus: 2 });
+  const next = clicked(far, x, y)!;
+  expect(next.ui).toEqual(keys(far, ...tabs(2, 1), "\r")!);
+  expect([next.ui.screen, next.ui.focus]).toEqual(["thread", 1]);
+});
+
+test("edge case: a click on the selected line of the feed, the one of a question that waits for the dev, opens the modal of its answer and sends nothing", () => {
+  // 422 is Q-07 where it reached the dev, with its three options; 428 is Q-08, which has none
+  for (const [selected, hour, question, choice] of [[422, "14:29:40", 7, 0], [428, "14:31:15", 8, null]] as const) {
+    const v = view("01", { selected });
+    expect(rowAt(v, hour).seq).toBe(selected);
+    const next = clicked(v, ...feedCell(screen(v), hour))!;
+    expect(next.ui).toEqual(press(v.ui, "\r", v)!);
+    expect(next.ui).toEqual({ ...v.ui, screen: "questions", question, qfocus: "list", modal: { question, choice, text: "", expanded: false, sending: false, refused: false } });
+    expect(next.ui.send).toBeNull();
+  }
+});
+
+// The same view at a later clock
+const later = (v: View, ms: number): View => ({ ...v, squad: { ...v.squad, now: v.squad.now + ms } });
+
+test("CLK-20, CLK-21: outside the modal a double click is two clicks: the first selects the line of the feed and the second opens it", () => {
+  const v = view("01", { selected: 417 });
+  const cell = feedCell(screen(v), "14:26:47");
+  const first = clicked(v, ...cell)!;
+  expect(first.ui.selected).toBe(415);
+  // The screen is drawn again with the line selected, and the second click comes 100 ms after the first
+  const then = later({ ...v, ui: first.ui }, 100);
+  expect(feedCell(screen(then), "14:26:47")).toEqual(cell);
+  const second = point(first, click(...cell), then, drawing(then))!;
+  expect(second.ui).toEqual(press(first.ui, "\r", then)!);
+  expect([second.ui.screen, threadTicket({ ...then, ui: second.ui })]).toEqual(["thread", "TKT-12"]);
+});
+
+test("CLK-14: a click on a line of the feed selects the event the last drawing has on that line", () => {
+  // The feed has more lines than fit: with no line selected the last ones are drawn, and with
+  // the first line selected the ones from it down
+  const v = view("01", { selected: null });
+  const end = screen(v);
+  const start = screen(view("01", { selected: v.rows[0]!.seq }));
+  const [left, right] = boxes(end)[1]!;
+  const [x, y] = feedCell(end, "14:29:40");
+  const drawnAt = (g: Grid): number => rowAt(v, /\d\d:\d\d:\d\d/.exec(g.rows[y]!.slice(left, right).map((cell) => cell.ch).join(""))![0]).seq;
+  expect(drawnAt(end)).toBe(422);
+  expect(drawnAt(start)).not.toBe(422);
+  expect(point(entry(v), click(x, y), v, drawing(v, end))!.ui.selected).toBe(422);
+  expect(point(entry(v), click(x, y), v, drawing(v, start))!.ui.selected).toBe(drawnAt(start));
+});
+
+// The cell where the panel of the tickets draws a text: below the separator of the tickets
+function ticketCell(g: Grid, text: string): [x: number, y: number] {
+  const [left, right] = boxes(g)[0]!;
+  const sep = g.rows.findIndex((row) => row[left]!.ch === "├");
+  return cellOf(g, [left, right], text, sep + 1);
+}
+
+// A plan with `n` tickets after the one of frame 24a
+const planned = (n: number) => (events: SquadEvent[]): SquadEvent[] => {
+  const plan = events.find((e) => e.kind === "plan")!;
+  return [...events, { ...plan, seq: 900, tickets: Array.from({ length: n }, (_, i) => ({ ticket_ref: `TKT-${31 + i}`, title: `ticket ${i + 1}` })) } as SquadEvent];
+};
+
+test("CLK-22: a click on a ticket shows its thread on its latest entry, as 3 and then [ or ] until it: the ticket of the selected line, the one before it and the one after, on either of its two lines", () => {
+  // 407 is the task of TKT-13, the second of the plan; the thread of another ticket was open before, scrolled
+  const v = view("01", { selected: 407, threadTicket: "TKT-14", threadOffset: 5 });
+  expect(rowAt(v, "14:20:12").event.ticket_ref).toBe("TKT-13");
+  expect(v.squad.tickets.map((t) => t.ticket_ref)).toEqual(["TKT-12", "TKT-13", "TKT-14"]);
+  const g = screen(v);
+  const [left, right] = boxes(g)[0]!;
+  for (const [ref, moves] of [["TKT-13", []], ["TKT-12", ["["]], ["TKT-14", ["]"]]] as const) {
+    const [x, y] = ticketCell(g, ref);
+    // The first and the last cell inside the box, on the line of the title and on the one of the status
+    for (const [cx, cy] of [[x, y], [left + 1, y], [right - 1, y], [left + 1, y + 1], [right - 1, y + 1]] as const) {
+      const next = clicked(v, cx, cy)!;
+      expect(next.ui).toEqual(keys(v, ...tabs(1, 0), "3", ...moves)!);
+      expect([next.ui.screen, threadTicket({ ...v, ui: next.ui }), next.ui.threadOffset, next.ui.focus]).toEqual(["thread", ref, 0, 0]);
+    }
+  }
+});
+
+test("CLK-22: the thread of the clicked ticket is the one shown from wherever 3 starts: the first of the plan with no line selected, and the last with a line of it", () => {
+  // With no line selected 3 shows the first ticket of the plan
+  const none = view("01", { selected: null, focus: 0 });
+  const down = clicked(none, ...ticketCell(screen(none), "TKT-14"))!;
+  expect(down.ui).toEqual(keys(none, "3", "]", "]")!);
+  expect([down.ui.screen, threadTicket({ ...none, ui: down.ui }), down.ui.threadOffset]).toEqual(["thread", "TKT-14", 0]);
+  // 408 is the task of TKT-14, the last one
+  const last = view("01", { selected: 408, focus: 0 });
+  const up = clicked(last, ...ticketCell(screen(last), "TKT-12"))!;
+  expect(up.ui).toEqual(keys(last, "3", "[", "[")!);
+  expect([up.ui.screen, threadTicket({ ...last, ui: up.ui }), up.ui.threadOffset]).toEqual(["thread", "TKT-12", 0]);
+});
+
+test("CLK-22: with one line for each ticket, a click on the line of a ticket shows its thread", () => {
+  const v = view("24a", { focus: 0 }, planned(5));
+  const refs = v.squad.tickets.map((t) => t.ticket_ref);
+  expect(refs.length).toBe(5);
+  // The selected line is of no ticket: 3 shows the first of the plan
+  expect(threadTicket({ ...v, ui: keys(v, "3")! })).toBe(refs[0]!);
+  const g = screen(v);
+  refs.forEach((ref, i) => {
+    const next = clicked(v, ...ticketCell(g, ref))!;
+    expect(next.ui).toEqual(keys(v, "3", ...Array<string>(i).fill("]"))!);
+    expect([next.ui.screen, threadTicket({ ...v, ui: next.ui }), next.ui.threadOffset]).toEqual(["thread", ref, 0]);
+  });
+});
+
+test("CLK-22: a click on the border of the line of a ticket shows no thread: it only gives the focus to the panel", () => {
+  const v = view("01", { selected: 417 });
+  const g = screen(v);
+  const [left, right] = boxes(g)[0]!;
+  const [, y] = ticketCell(g, "TKT-13");
+  for (const x of [left, right]) expect(clicked(v, x, y)!.ui).toEqual({ ...v.ui, focus: 0 });
+});
+
+test("CLK-27: a click on an agent, on the separator of the tickets or on the line that counts the tickets not drawn only gives the focus to their panel", () => {
+  const v = view("01", { selected: 417 });
+  const g = screen(v);
+  for (const text of ["mother", "objetivo", "worker-2", " tickets "]) {
+    const next = clicked(v, ...cellOf(g, boxes(g)[0]!, text))!;
+    expect(next.ui).toEqual(keys(v, ...tabs(1, 0))!);
+    expect(next.ui).toEqual({ ...v.ui, focus: 0 });
+  }
+  const many = view("24a", {}, planned(9));
+  expect(clicked(many, ...ticketCell(screen(many), "+3 tickets"))!.ui).toEqual({ ...many.ui, focus: 0 });
+});
+
+test("CLK-27: a click on the panel of detail only gives it the focus", () => {
+  const v = view("01", { selected: 417 });
+  const g = screen(v);
+  for (const text of ["msg #0417", "critérios da spec", "thread TKT-12"]) {
+    const next = clicked(v, ...cellOf(g, boxes(g)[2]!, text))!;
+    expect(next.ui).toEqual(keys(v, ...tabs(1, 2))!);
+    expect(next.ui).toEqual({ ...v.ui, focus: 2 });
+  }
+});
+
+test("CLK-27: a click on the header of the feed, on its ruler or on its band selects no line: it only gives the focus to the feed", () => {
+  // Frame 01 has the ruler of what came before the feature, and frame 09a the band of the idle squad
+  for (const [frame, text] of [["01", "hora"], ["01", "▲ antes da feature"], ["01", "● ao vivo"], ["09a", "hora"], ["09a", "squad ocioso desde"]] as const) {
+    const v = view(frame, { focus: 2 });
+    const g = screen(v);
+    const next = clicked(v, ...cellOf(g, boxes(g)[1]!, text))!;
+    expect(next.ui).toEqual(keys(v, ...tabs(2, 1))!);
+    expect(next.ui).toEqual({ ...v.ui, focus: 1 });
+  }
+});
+
+test("CLK-27: a click on line 0 outside the counter, on the tokens of line 38 or on its right side changes nothing", () => {
+  const v = view("01", { selected: 417 });
+  const g = screen(v);
+  const counter = at(g, 0, "? 2");
+  for (let x = 0; x < 120; x++) {
+    if (x < counter - 1 || x > counter + 3) expect(clicked(v, x, 0)!.ui).toBe(v.ui);
+  }
+  const cost = at(g, 38, "│");
+  const end = at(g, 38, "est.") + len("est.") - 1;
+  // The right side of the line has the reworks of the ticket of the selected line
+  expect(at(g, 38, "rework TKT-12")).toBeGreaterThan(end);
+  for (let x = 0; x < 120; x++) {
+    if (x < cost || x > end) expect(clicked(v, x, 38)!.ui).toBe(v.ui);
+  }
+});
+
+for (const now of ["topology", "thread", "help"] as const) {
+  test(`CLK-27: on the screen ${now} a click outside the tabs and the shortcuts changes nothing, in any cell of lines 2 to 37`, () => {
+    const v = view("01", { selected: 417, screen: now, focus: 0 });
+    const drawn = drawing(v);
+    for (let y = 2; y <= 37; y++) {
+      for (let x = 0; x < 120; x++) expect(point(entry(v), click(x, y), v, drawn)!.ui).toBe(v.ui);
+    }
+  });
+}

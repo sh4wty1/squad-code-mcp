@@ -4,6 +4,7 @@
 
 import type { Hit } from "./grid.ts";
 import { press } from "./keys.ts";
+import { threadTicket } from "./screens/thread.ts";
 import type { Ui, View } from "./view.ts";
 
 // The three integers of a report as the terminal sent them: the column and the line count from 1
@@ -45,6 +46,40 @@ export function parse(item: string): Report | null {
 // The bits of the button that say shift, alt and ctrl were held
 const MODIFIERS = 4 | 8 | 16;
 
+// The state after the keys, pressed one after the other; null when one of them quits
+function tap(ui: Ui | null, view: View, keys: string[]): Ui | null {
+  return keys.reduce((next, key) => next && press(next, key, { ...view, ui: next }), ui);
+}
+
+const times = (n: number, key: string): string[] => Array<string>(n).fill(key);
+
+// The keys that take a selection from one place of its list to another, one step each
+const walk = (from: number, to: number, back = "k", on = "j"): string[] => times(Math.abs(to - from), to < from ? back : on);
+
+// The state after a click on a marked cell with no modal open: the key of the cell, or the
+// focus on its panel and then what the cell has of it
+function clicked(hit: Hit, ui: Ui, view: View): Ui | null {
+  const { squad, rows } = view;
+  if (hit.key !== undefined) return tap(ui, view, [hit.key]);
+  const focused = hit.panel === undefined ? ui : tap(ui, view, times((hit.panel - ui.focus + 3) % 3, "\t"));
+  if (hit.row !== undefined) {
+    // The selected line is opened. Any other is selected: with none selected, the first `k`
+    // selects the last line.
+    if (hit.row === ui.selected) return tap(focused, view, ["\r"]);
+    const from = rows.findIndex((row) => row.seq === ui.selected);
+    const to = rows.findIndex((row) => row.seq === hit.row);
+    return tap(focused, view, from < 0 ? ["k", ...walk(rows.length - 1, to)] : walk(from, to));
+  }
+  if (hit.ticket !== undefined) {
+    // `3` shows the thread of the ticket of the selected line, on its latest entry, and `[`
+    // and `]` go from that ticket to the clicked one
+    const shown = tap(focused, view, ["3"]);
+    const index = (ref: string | null) => squad.tickets.findIndex((t) => t.ticket_ref === ref);
+    return shown && tap(shown, view, walk(index(threadTicket({ ...view, ui: shown })), index(hit.ticket), "[", "]"));
+  }
+  return focused;
+}
+
 // The state after a report, or null when it quits: a click on the shortcut of `q`. The mouse
 // changes the state of the screen only by pressing keys, and what it hits is what the last
 // drawing has in the cell of the report.
@@ -63,7 +98,6 @@ export function point(at: Entry, item: string, view: View, drawn: Drawn | null):
   const hit = drawn.hits[report.y - 1]?.[report.x - 1];
   // With the modal of answer open only what it drew is clicked, and without it nothing of it
   if (!hit || (hit.modal === true) !== (at.ui.modal !== null)) return still;
-  if (hit.key === undefined) return still;
-  const ui = press(at.ui, hit.key, { ...view, ui: at.ui });
+  const ui = clicked(hit, at.ui, view);
   return ui && { ...still, ui };
 }
