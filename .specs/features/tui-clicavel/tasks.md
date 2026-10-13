@@ -244,13 +244,13 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] Os quatro cantos de cada caixa têm o painel dela (0, 1, 2); as linhas 0, 1, 38 e 39 não têm `panel`
-- [ ] Toda célula da caixa do feed tem `wheel: "feed"`; as outras duas caixas não têm `wheel`
-- [ ] Cada linha de evento desenhada tem o `seq` dela nas colunas 29 a 84, com a seleção fora da janela e dentro dela; a régua, a faixa e o cabeçalho não têm `row`
-- [ ] Com três tickets, as duas linhas de cada um têm o `ticket_ref`; com quatro a sete, a linha única; com mais de sete, a linha `+N tickets` não tem `ticket`; sem ticket, nenhuma célula tem
-- [ ] Uma linha de agente tem só `panel: 0`
-- [ ] Testes em `test/unit/tui-hits.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Os quatro cantos de cada caixa têm o painel dela (0, 1, 2); as linhas 0, 1, 38 e 39 não têm `panel`
+- [x] Toda célula da caixa do feed tem `wheel: "feed"`; as outras duas caixas não têm `wheel`
+- [x] Cada linha de evento desenhada tem o `seq` dela nas colunas 29 a 84, com a seleção fora da janela e dentro dela; a régua, a faixa e o cabeçalho não têm `row`
+- [x] Com três tickets, as duas linhas de cada um têm o `ticket_ref`; com quatro a sete, a linha única; com mais de sete, a linha `+N tickets` não tem `ticket`; sem ticket, nenhuma célula tem
+- [x] Uma linha de agente tem só `panel: 0`
+- [x] Testes em `test/unit/tui-hits.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

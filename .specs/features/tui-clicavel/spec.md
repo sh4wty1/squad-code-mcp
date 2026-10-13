@@ -330,16 +330,16 @@ cada item, e com o que ficou sem conferir.
 | CLK-16 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
 | CLK-17 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-18 | P1: Navegar com o clique | T5 | Implementing |
-| CLK-19 | P1: Navegar com o clique | - | Pending |
-| CLK-20 | P1: Navegar com o clique | - | Pending |
+| CLK-19 | P1: Navegar com o clique | T7 | Implementing |
+| CLK-20 | P1: Navegar com o clique | T7 | Implementing |
 | CLK-21 | P1: Navegar com o clique | - | Pending |
-| CLK-22 | P1: Navegar com o clique | - | Pending |
+| CLK-22 | P1: Navegar com o clique | T7 | Implementing |
 | CLK-23 | P1: Navegar com o clique | T5 | Implementing |
 | CLK-24 | P1: Navegar com o clique | - | Pending |
 | CLK-25 | P1: Navegar com o clique | - | Pending |
 | CLK-26 | P1: Navegar com o clique | - | Pending |
-| CLK-27 | P1: Navegar com o clique | - | Pending |
-| CLK-28 | P1: Rolar com a roda | - | Pending |
+| CLK-27 | P1: Navegar com o clique | T7 | Implementing |
+| CLK-28 | P1: Rolar com a roda | T7 | Implementing |
 | CLK-29 | P1: Rolar com a roda | - | Pending |
 | CLK-30 | P1: Rolar com a roda | - | Pending |
 | CLK-31 | P1: Rolar com a roda | - | Pending |

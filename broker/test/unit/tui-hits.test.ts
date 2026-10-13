@@ -1,7 +1,8 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
-import { grid, len, type Grid, type Hit } from "../../tui/grid.ts";
+import { clock, grid, len, type Grid, type Hit } from "../../tui/grid.ts";
 import { chrome, drawKeys, MAIN_KEYS, stats, type Keys } from "../../tui/screens/chrome.ts";
+import { main } from "../../tui/screens/main.ts";
 import type { Ui, View } from "../../tui/view.ts";
 import { frameView } from "../frames/view.ts";
 
@@ -252,4 +253,182 @@ test("CLK-33: a line of keys drawn over another leaves no mark of the one before
   expect(hit(g, pause, 39)).toBeNull();
   // Only its own line
   expect(hit(g, at(g, 38, "│"), 38)).toEqual({ key: "t" });
+});
+
+// The columns of line y that draw a character
+const cols = (g: Grid, y: number, ch: string): number[] => g.rows[y]!.flatMap((cell, x) => (cell.ch === ch ? [x] : []));
+
+// The cells of a drawing whose mark has a field, as `x,y`
+const having = (g: Grid, field: keyof Hit): string[] => g.hits.flatMap((row, y) => row.flatMap((mark, x) => (mark?.[field] !== undefined ? [`${x},${y}`] : [])));
+
+// The cells of a rectangle, as `x,y`
+const rect = (x1: number, x2: number, y1: number, y2: number): string[] =>
+  Array.from({ length: y2 - y1 + 1 }, (_, j) => Array.from({ length: x2 - x1 + 1 }, (_, i) => `${x1 + i},${y1 + j}`)).flat();
+
+// The text a line draws from one column to another
+const textOf = (g: Grid, y: number, from: number, to: number): string => g.rows[y]!.slice(from, to + 1).map((cell) => cell.ch).join("");
+
+// The first and the last column of each of the three boxes of the main screen, from left to
+// right: the corners line 2 and line 37 draw
+function boxes(g: Grid): [left: number, right: number][] {
+  const [left, right] = [cols(g, 2, "┌"), cols(g, 2, "┐")];
+  expect([cols(g, 37, "└"), cols(g, 37, "┘")]).toEqual([left, right]);
+  expect([left.length, right.length]).toEqual([3, 3]);
+  return left.map((x, i) => [x, right[i]!]);
+}
+
+for (const frame of ["01", "09a", "28a"]) {
+  test(`CLK-19: in frame ${frame} every cell of each box of the main screen has its panel, its four corners too, and lines 0, 1, 38 and 39 have none`, () => {
+    const g = main(view(frame));
+    const [agents, feed, detail] = boxes(g);
+    const corners = ([left, right]: [number, number]) => [hit(g, left, 2), hit(g, right, 2), hit(g, left, 37), hit(g, right, 37)];
+    expect(corners(agents!)).toEqual(all(4, { panel: 0 }));
+    expect(corners(feed!)).toEqual(all(4, { panel: 1, wheel: "feed" }));
+    expect(corners(detail!)).toEqual(all(4, { panel: 2 }));
+    boxes(g).forEach(([left, right], panel) => {
+      for (let y = 2; y <= 37; y++) expect(hits(g, y, left, right).map((mark) => mark?.panel)).toEqual(Array(right - left + 1).fill(panel));
+    });
+    expect(having(g, "panel").length).toBe(120 * 36);
+    for (const y of [0, 1, 38, 39]) expect(g.hits[y]!.filter((mark) => mark?.panel !== undefined)).toEqual([]);
+  });
+
+  test(`CLK-28: in frame ${frame} every cell of the box of the feed has the wheel of the feed, and no cell of the other two boxes has a wheel`, () => {
+    const g = main(view(frame));
+    const [left, right] = boxes(g)[1]!;
+    expect(having(g, "wheel")).toEqual(rect(left, right, 2, 37));
+    expect(g.hits.flat().filter((mark) => mark?.wheel !== undefined && mark.wheel !== "feed")).toEqual([]);
+  });
+}
+
+// The lines of the feed that have an event, from the top down: inside the box they start by
+// the mark of the selected line and the hour of the event
+function eventLines(g: Grid): { y: number; hour: string; chosen: boolean }[] {
+  const [left, right] = boxes(g)[1]!;
+  return Array.from({ length: 34 }, (_, i) => i + 3).flatMap((y) => {
+    const line = /^([▶ ]) (\d\d:\d\d:\d\d) /.exec(textOf(g, y, left + 1, right - 1));
+    return line ? [{ y, hour: line[2]!, chosen: line[1] === "▶" }] : [];
+  });
+}
+
+// Frame 01 has more lines of the feed than fit: with the selection in the window the last
+// ones are drawn, and with it above the window the ones from it down
+for (const [what, selected, from] of [["inside the window", 417, "end"], ["above the window", 1, "start"], ["of no line", null, "end"]] as const) {
+  test(`CLK-20: with the selection ${what}, each line of an event has its seq in columns 29 to 84 and the border at its sides has not`, () => {
+    const v = view("01", { selected });
+    const g = main(v);
+    const [left, right] = boxes(g)[1]!;
+    expect([left + 1, right - 1]).toEqual([29, 84]);
+    const lines = eventLines(g);
+    expect(lines.length).toBeGreaterThan(20);
+    expect(v.rows.length).toBeGreaterThan(lines.length);
+    const rows = from === "end" ? v.rows.slice(-lines.length) : v.rows.slice(0, lines.length);
+    // The lines drawn are those rows: each has the hour of its row, and the selected one its mark
+    expect(lines.map((line) => line.hour)).toEqual(rows.map((row) => clock(row.ts)));
+    expect(lines.flatMap((line, i) => (line.chosen ? [rows[i]!.seq] : []))).toEqual(selected === null ? [] : [selected]);
+    lines.forEach(({ y }, i) => {
+      expect(hits(g, y, 29, 84)).toEqual(all(56, { panel: 1, wheel: "feed", row: rows[i]!.seq }));
+      expect([hit(g, 28, y), hit(g, 85, y)]).toEqual(all(2, { panel: 1, wheel: "feed" }));
+    });
+    // And no other cell of the screen has a line of the feed
+    expect(having(g, "row").length).toBe(lines.length * 56);
+  });
+}
+
+test("CLK-20: the header of the feed, its ruler and its band have no line of the feed in any cell", () => {
+  // Frame 01 has the ruler of what came before the feature, and frame 09a the band of the idle squad
+  for (const [frame, text] of [["01", "hora"], ["01", "▲ antes da feature"], ["09a", "hora"], ["09a", "squad ocioso desde"]] as const) {
+    const g = main(view(frame));
+    const [left, right] = boxes(g)[1]!;
+    const ys = Array.from({ length: 36 }, (_, i) => i + 2).filter((y) => textOf(g, y, left, right).includes(text));
+    expect(ys.length).toBe(1);
+    expect(hits(g, ys[0]!, left, right)).toEqual(all(right - left + 1, { panel: 1, wheel: "feed" }));
+  }
+  // An empty log has no line to click
+  expect(having(main(view("28a")), "row")).toEqual([]);
+});
+
+// The line of a ticket: the one that draws `text` in the panel of the left, below the
+// separator of the tickets
+function ticketLine(g: Grid, text: string): number {
+  const [left, right] = boxes(g)[0]!;
+  const lines = Array.from({ length: 36 }, (_, i) => i + 2);
+  const sep = lines.filter((y) => g.rows[y]![left]!.ch === "├");
+  expect(sep.length).toBe(1);
+  const ys = lines.filter((y) => y > sep[0]! && textOf(g, y, left + 1, right - 1).includes(text));
+  if (ys.length !== 1) throw new Error(`"${text}" is on ${ys.length} lines of the tickets`);
+  return ys[0]!;
+}
+
+// A plan with `n` tickets after the one of frame 24a
+const planned = (n: number) => (events: SquadEvent[]): SquadEvent[] => {
+  const plan = events.find((e) => e.kind === "plan")!;
+  return [...events, { ...plan, seq: 900, tickets: Array.from({ length: n }, (_, i) => ({ ticket_ref: `TKT-${31 + i}`, title: `ticket ${i + 1}` })) } as SquadEvent];
+};
+
+test("CLK-22: with three tickets, the two lines of each one have its ticket inside the box, and the border and the line after them have not", () => {
+  const v = view("01");
+  const g = main(v);
+  const [left, right] = boxes(g)[0]!;
+  expect([left + 1, right - 1]).toEqual([1, 26]);
+  expect(v.squad.tickets.map((t) => t.ticket_ref)).toEqual(["TKT-12", "TKT-13", "TKT-14"]);
+  for (const ref of ["TKT-12", "TKT-13", "TKT-14"]) {
+    const y = ticketLine(g, ref);
+    // The second line of the ticket has its reworks and its status
+    expect(textOf(g, y + 1, 1, 26)).toMatch(/^ ⟳\d\/2 \[/);
+    for (const line of [y, y + 1]) {
+      expect(hits(g, line, 1, 26)).toEqual(all(26, { panel: 0, ticket: ref }));
+      expect([hit(g, 0, line), hit(g, 27, line)]).toEqual(all(2, { panel: 0 }));
+    }
+  }
+  expect(hits(g, ticketLine(g, "TKT-14") + 2, 0, 27)).toEqual(all(28, { panel: 0 }));
+  expect(having(g, "ticket").length).toBe(3 * 2 * 26);
+});
+
+for (const n of [4, 7]) {
+  test(`CLK-22: with ${n} tickets, the one line of each has its ticket`, () => {
+    const v = view("24a", {}, planned(n));
+    const g = main(v);
+    const refs = v.squad.tickets.map((t) => t.ticket_ref);
+    expect(refs.length).toBe(n);
+    const ys = refs.map((ref) => ticketLine(g, ref));
+    // One line each, one after the other
+    expect(ys).toEqual(refs.map((_, i) => ys[0]! + i));
+    refs.forEach((ref, i) => {
+      expect(hits(g, ys[i]!, 1, 26)).toEqual(all(26, { panel: 0, ticket: ref }));
+      expect([hit(g, 0, ys[i]!), hit(g, 27, ys[i]!)]).toEqual(all(2, { panel: 0 }));
+    });
+    expect(having(g, "ticket").length).toBe(n * 26);
+  });
+}
+
+test("CLK-22, CLK-27: with more than seven tickets, the line that counts the ones not drawn has no ticket", () => {
+  const v = view("24a", {}, planned(9));
+  const g = main(v);
+  const refs = v.squad.tickets.map((t) => t.ticket_ref);
+  expect(refs.length).toBe(9);
+  expect(hits(g, ticketLine(g, "+3 tickets"), 0, 27)).toEqual(all(28, { panel: 0 }));
+  // The six drawn have theirs
+  for (const ref of refs.slice(0, 6)) expect(hits(g, ticketLine(g, ref), 1, 26)).toEqual(all(26, { panel: 0, ticket: ref }));
+  expect(having(g, "ticket").length).toBe(6 * 26);
+});
+
+test("CLK-22: without a ticket no cell has one", () => {
+  // A feature with no plan yet, no feature open, and an empty log
+  for (const frame of ["26a", "09a", "28a"]) {
+    const v = view(frame);
+    expect(v.squad.tickets).toEqual([]);
+    expect(having(main(v), "ticket")).toEqual([]);
+  }
+});
+
+test("CLK-27: a line of an agent and the separator of the tickets have only the panel", () => {
+  const g = main(view("01"));
+  const sep = Array.from({ length: 36 }, (_, i) => i + 2).filter((y) => g.rows[y]![0]!.ch === "├");
+  expect(sep.length).toBe(1);
+  expect(textOf(g, sep[0]!, 0, 27)).toContain(" tickets ");
+  // From the top of the box to the separator: the lines of the six agents
+  const above = Array.from({ length: sep[0]! - 1 }, (_, i) => i + 2);
+  const drawn = above.map((y) => textOf(g, y, 0, 27)).join("\n");
+  for (const name of ["mother", "leader", "worker-1", "worker-2", "worker-3", "judge"]) expect(drawn).toContain(` ${name} `);
+  for (const y of above) expect(hits(g, y, 0, 27)).toEqual(all(28, { panel: 0 }));
 });
