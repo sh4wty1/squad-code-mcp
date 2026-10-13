@@ -10,7 +10,7 @@ import { main } from "../../tui/screens/main.ts";
 import { questions } from "../../tui/screens/questions.ts";
 import { thread, threadTicket } from "../../tui/screens/thread.ts";
 import { topology } from "../../tui/screens/topology.ts";
-import type { Ui, View } from "../../tui/view.ts";
+import type { Modal, Ui, View } from "../../tui/view.ts";
 import { frameView } from "../frames/view.ts";
 
 // What a mouse report does to the state of the screen. A report has its column and its line
@@ -1110,5 +1110,416 @@ test("CLK-11, CLK-13, CLK-14: the wheel changes nothing outside the grid, with n
     }
     // Over its own drawing it moves the selection
     expect(point(entry(v), report(button, x, y), v, drawing(v, g))!.ui.selected).not.toBe(417);
+  }
+});
+
+// The view of a frame of the modal with its modal changed: 05 is Q-07 on the first of its three
+// options, 20a is Q-09 on the first of its two, 06 and 07 are Q-08 with a text, 20b is Q-08 refused
+function open(frame: string, modal: Partial<Modal> = {}): View {
+  return view(frame, { modal: { ...frameView(frame).ui.modal!, ...modal } });
+}
+const m = (v: View): Modal => v.ui.modal!;
+
+interface Box {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+const inside = (box: Box, x: number, y: number): boolean => x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
+
+// The box of the modal of answer: the one whose top has its title
+function modalBox(g: Grid): Box {
+  const top = g.rows.findIndex((_, y) => find(g, y, "┌─ ? responder Q-").length === 1);
+  const left = find(g, top, "┌─ ? responder Q-")[0]!;
+  return { left, right: find(g, top, "┐").find((x) => x > left)!, top, bottom: bottomOf(g, left, top) };
+}
+
+// The lines of the choice mode of each frame that has it, the last one being the other answer
+const CHOICES = [
+  ["05", 7, ["infinito com backoff", "5 tentativas", "configurável", "outra resposta…"]],
+  ["20a", 9, ["pronto", "não vou fornecer", "outra resposta…"]],
+] as const;
+
+// The line of the modal that draws the option of an index, with its number before it
+const optionLine = (g: Grid, box: Box, option: number, label: string): number => cellOf(g, [box.left, box.right], ` ${option + 1}  ${label}`, box.top, box.bottom)[1];
+
+for (const [frame, question, labels] of CHOICES) {
+  const other = labels.length - 1;
+
+  test(`CLK-41: in the choice mode of frame ${frame} a click on the line of an option marks it and sends nothing, from any marked line and on the marked one too`, () => {
+    for (let from = 0; from <= other; from++) {
+      const v = open(frame, { choice: from });
+      const g = screen(v);
+      const box = modalBox(g);
+      for (let option = 0; option < other; option++) {
+        const y = optionLine(g, box, option, labels[option]!);
+        // The first and the last of the 80 columns inside the box
+        for (const x of [box.left + 1, box.right - 1]) {
+          const next = clicked(v, x, y)!;
+          expect(next.ui).toEqual(keys(v, ...Array<string>(Math.abs(option - from)).fill(option < from ? "k" : "j"))!);
+          expect(next.ui).toEqual({ ...v.ui, modal: { ...m(v), choice: option } });
+          expect(next.ui.send).toBeNull();
+        }
+        // The border of the line is of no option
+        for (const x of [box.left, box.right]) expect(clicked(v, x, y)!.ui).toBe(v.ui);
+      }
+    }
+  });
+
+  test(`CLK-42: in the choice mode of frame ${frame} a click on outra resposta… goes to the text mode with the field empty, from any marked line, and sends nothing`, () => {
+    for (let from = 0; from <= other; from++) {
+      // A text left from before does not come back
+      const v = open(frame, { choice: from, text: "antes" });
+      const g = screen(v);
+      const box = modalBox(g);
+      const y = optionLine(g, box, other, labels[other]!);
+      for (const x of [box.left + 1, box.right - 1]) {
+        const next = clicked(v, x, y)!;
+        expect(next.ui).toEqual(keys(v, ...Array<string>(other - from).fill("j"), "\r")!);
+        expect(next.ui).toEqual({ ...v.ui, modal: { question, choice: null, text: "", expanded: false, sending: false, refused: false } });
+        expect(next.ui.send).toBeNull();
+      }
+    }
+  });
+}
+
+test("CLK-41: a click over the line an option had, after the modal went to the text mode, adds nothing to the text", () => {
+  // The choice mode is the one drawn, and the state is on the text
+  const drawn = open("05");
+  const g = screen(drawn);
+  const box = modalBox(g);
+  const v = open("05", { choice: null, text: "abc" });
+  CHOICES[0][2].forEach((label, option) => {
+    expect(point(entry(v), click(box.left + 1, optionLine(g, box, option, label)), v, drawing(drawn, g))!.ui).toBe(v.ui);
+  });
+});
+
+for (const frame of ["05", "06", "07", "20a"]) {
+  test(`CLK-43: with the modal of frame ${frame} a click on any cell of lines 0 to 38 outside its box does what esc does: the modal closes and nothing is sent, also with a text typed`, () => {
+    const v = open(frame);
+    const g = screen(v);
+    const box = modalBox(g);
+    const closed = press(v.ui, "\x1b", v)!;
+    expect(closed).toEqual({ ...v.ui, modal: null });
+    expect(closed.send).toBeNull();
+    // The margin around the box is empty, and is not of the box
+    expect([g.rows[box.top - 1]![box.left - 1]!.ch, g.rows[box.bottom + 1]![box.right + 1]!.ch]).toEqual([" ", " "]);
+    for (let y = 0; y <= 38; y++) {
+      for (let x = 0; x < 120; x++) {
+        if (!inside(box, x, y)) expect(point(entry(v), click(x, y), v, drawing(v, g))!.ui).toEqual(closed);
+      }
+    }
+  });
+}
+
+// What the box of the modal has in each frame, and the lines of the choice mode it has
+const BOXES = [
+  ["05", ["contexto", "por quê ", "worker-1 pergunta", "Reconexão do stream", "efeito  "], CHOICES[0][2]],
+  ["20a", ["contexto", "efeito  "], CHOICES[1][2]],
+  ["06", ["contexto", "Setlist sem capa", "resposta  (uma linha", "█", "40 chars", "⚠ a resposta fica gravada no log", "efeito  "], []],
+  ["07", ["contexto", "resposta  (expandido", "█", "⚠ a resposta fica gravada no log"], []],
+] as const;
+
+for (const [frame, parts, labels] of BOXES) {
+  test(`CLK-44: in the modal of frame ${frame} a click on a cell of its box that is not inside a line of the choice mode changes nothing: the context, the text of the question, the field, the warning and the border`, () => {
+    const v = open(frame);
+    const g = screen(v);
+    const box = modalBox(g);
+    for (const text of parts) cellOf(g, [box.left, box.right], text, box.top, box.bottom);
+    const lines = labels.map((label, option) => optionLine(g, box, option, label));
+    for (let y = box.top; y <= box.bottom; y++) {
+      for (let x = box.left; x <= box.right; x++) {
+        if (!lines.includes(y) || x === box.left || x === box.right) expect(point(entry(v), click(x, y), v, drawing(v, g))!.ui).toBe(v.ui);
+      }
+    }
+  });
+}
+
+// The first and the last cell of the key of a shortcut of line 39, and of what it does
+function shortcut(g: Grid, label: string, does: string): number[] {
+  const x = at(g, 39, `${label} ${does}`);
+  return [x, x + len(label) - 1, x + len(label) + 1, x + len(label) + len(does)];
+}
+
+const DOWN = "\x1b[B";
+
+test("CLK-45: in the choice mode a click on enter confirmar leaves the marked option to send, as enter does, and on the line of the other answer it goes to the text", () => {
+  for (const [frame, choice, question_id, answer] of [["05", 0, 7, "infinito com backoff"], ["05", 1, 7, "5 tentativas"], ["20a", 1, 9, "não vou fornecer"]] as const) {
+    const v = open(frame, { choice });
+    for (const x of shortcut(screen(v), "enter", "confirmar")) {
+      const next = clicked(v, x, 39)!;
+      expect(next.ui).toEqual(press(v.ui, "\r", v)!);
+      expect(next.ui).toEqual({ ...v.ui, modal: { ...m(v), sending: true }, send: { question_id, answer } });
+    }
+  }
+  const other = open("05", { choice: 3 });
+  for (const x of shortcut(screen(other), "enter", "confirmar")) {
+    expect(clicked(other, x, 39)!.ui).toEqual({ ...other.ui, modal: { ...m(other), choice: null, text: "" } });
+  }
+});
+
+test("CLK-45: in the text mode a click on enter enviar leaves the text to send, as enter does, and sends neither an empty text nor one of only spaces", () => {
+  const v = open("06");
+  for (const x of shortcut(screen(v), "enter", "enviar")) {
+    const next = clicked(v, x, 39)!;
+    expect(next.ui).toEqual(press(v.ui, "\r", v)!);
+    expect(next.ui).toEqual({ ...v.ui, modal: { ...m(v), sending: true }, send: { question_id: 8, answer: "logo da 89, com o nome do programa no ar" } });
+  }
+  // The text goes without the spaces of its ends
+  const padded = open("06", { text: "  logo da 89  " });
+  expect(clicked(padded, at(screen(padded), 39, "enter enviar"), 39)!.ui.send).toEqual({ question_id: 8, answer: "logo da 89" });
+  for (const text of ["", " ", "    "]) {
+    const empty = open("06", { text });
+    for (const x of shortcut(screen(empty), "enter", "enviar")) {
+      const next = clicked(empty, x, 39)!;
+      expect(next.ui).toBe(empty.ui);
+      expect(next.ui.send).toBeNull();
+    }
+  }
+});
+
+test("CLK-45: a click on esc cancelar closes the modal with nothing sent, in the two modes", () => {
+  for (const v of [open("05", { choice: 2 }), open("20a"), open("06"), open("07")]) {
+    for (const x of shortcut(screen(v), "esc", "cancelar")) {
+      const next = clicked(v, x, 39)!;
+      expect(next.ui).toEqual(press(v.ui, "\x1b", v)!);
+      expect(next.ui).toEqual({ ...v.ui, modal: null });
+      expect(next.ui.send).toBeNull();
+    }
+  }
+});
+
+test("CLK-45: a click on ctrl+e changes the size of the field, and one on ctrl+u empties it", () => {
+  const small = open("06");
+  for (const x of shortcut(screen(small), "ctrl+e", "expandir")) {
+    const next = clicked(small, x, 39)!;
+    expect(next.ui).toEqual(press(small.ui, "\x05", small)!);
+    expect(next.ui).toEqual({ ...small.ui, modal: { ...m(small), expanded: true } });
+  }
+  const large = open("07");
+  for (const x of shortcut(screen(large), "ctrl+e", "recolher")) expect(clicked(large, x, 39)!.ui).toEqual({ ...large.ui, modal: { ...m(large), expanded: false } });
+  for (const v of [small, large]) {
+    expect(m(v).text).not.toBe("");
+    for (const x of shortcut(screen(v), "ctrl+u", "limpar")) {
+      const next = clicked(v, x, 39)!;
+      expect(next.ui).toEqual(press(v.ui, "\x15", v)!);
+      expect(next.ui).toEqual({ ...v.ui, modal: { ...m(v), text: "" } });
+    }
+  }
+});
+
+test("CLK-45: a click on ↑ or on ↓ moves the mark of the choice mode by one line, and one on what they do, on the range of the digits or on the rest of the line changes nothing", () => {
+  const v = open("05", { choice: 1 });
+  const g = screen(v);
+  const x = at(g, 39, "↑↓ mover");
+  const up = clicked(v, x, 39)!;
+  expect(up.ui).toEqual(press(v.ui, UP, v)!);
+  expect(up.ui).toEqual({ ...v.ui, modal: { ...m(v), choice: 0 } });
+  const down = clicked(v, x + 1, 39)!;
+  expect(down.ui).toEqual(press(v.ui, DOWN, v)!);
+  expect(down.ui).toEqual({ ...v.ui, modal: { ...m(v), choice: 2 } });
+  for (let cell = x + 2; cell < x + len("↑↓ mover"); cell++) expect(clicked(v, cell, 39)!.ui).toBe(v.ui);
+  const range = at(g, 39, "1-4 escolher");
+  for (let cell = range; cell < range + len("1-4 escolher"); cell++) expect(clicked(v, cell, 39)!.ui).toBe(v.ui);
+  // Before the first shortcut, between two of them and after the last one
+  const end = at(g, 39, "esc cancelar") + len("esc cancelar");
+  for (const cell of [0, x - 1, end, end + 1, 119]) expect(clicked(v, cell, 39)!.ui).toBe(v.ui);
+});
+
+test("CLK-40: with the modal open a click hits nothing the tab drew before it, a question or the history, and without it nothing the modal drew, an option or its box", () => {
+  // A key of the chunk opened the modal after the tab was drawn
+  const tab = view("04", { question: 7 });
+  const under = screen(tab);
+  const state = open("05", { choice: 1 });
+  const list = tabBox(under, 0);
+  const history = historyBox(under);
+  for (const [x, y] of [[list.left + 1, questionLines(under, 7)[0]!], [list.left + 1, questionLines(under, 8)[0]!], [history.left, history.top], [history.right, history.bottom]] as const) {
+    expect(point(entry(state), click(x, y), state, drawing(tab, under))!.ui).toBe(state.ui);
+  }
+  // And one closed it after it was drawn
+  const drawn = open("05");
+  const over = screen(drawn);
+  const box = modalBox(over);
+  CHOICES[0][2].forEach((label, option) => {
+    expect(point(entry(tab), click(box.left + 1, optionLine(over, box, option, label)), tab, drawing(drawn, over))!.ui).toBe(tab.ui);
+  });
+  for (const [x, y] of [[box.left, box.top], [box.left - 1, box.top - 1], [119, 38]] as const) expect(point(entry(tab), click(x, y), tab, drawing(drawn, over))!.ui).toBe(tab.ui);
+});
+
+// A cell of each thing a click does in the choice mode of frame 05: the line of its second
+// option, the shortcut that confirms, the first cell of the screen and the margin of the box
+function targets(g: Grid): { option: [number, number]; enter: [number, number]; corner: [number, number]; margin: [number, number] } {
+  const box = modalBox(g);
+  return { option: [box.left + 1, optionLine(g, box, 1, "5 tentativas")], enter: [at(g, 39, "enter confirmar"), 39], corner: [0, 0], margin: [box.left - 1, box.top - 1] };
+}
+
+test("CLK-46: with the modal open a click that comes 499 ms after the one before changes nothing and sends nothing, on an option, on enter confirmar and outside the box", () => {
+  const v = open("05");
+  const g = screen(v);
+  for (const ms of [499, 250, 1, 0]) {
+    for (const [x, y] of Object.values(targets(g))) {
+      const next = point(entry(v, { on: true, clickedAt: v.squad.now - ms }), click(x, y), v, drawing(v, g))!;
+      expect(next.ui).toBe(v.ui);
+      expect(next.ui.send).toBeNull();
+      // And it is the click before the next one
+      expect(next.pointer).toEqual({ on: true, clickedAt: v.squad.now });
+    }
+  }
+});
+
+test("edge case: with the modal open a click that comes 500 ms or more after the one before is treated by the rules of the modal", () => {
+  const v = open("05");
+  const g = screen(v);
+  const { option, enter, corner, margin } = targets(g);
+  for (const ms of [500, 501, 60_000]) {
+    const after = (cell: [number, number]) => point(entry(v, { on: true, clickedAt: v.squad.now - ms }), click(...cell), v, drawing(v, g))!.ui;
+    expect(after(option)).toEqual({ ...v.ui, modal: { ...m(v), choice: 1 } });
+    expect(after(enter)).toEqual({ ...v.ui, modal: { ...m(v), sending: true }, send: { question_id: 7, answer: "infinito com backoff" } });
+    expect(after(corner)).toEqual({ ...v.ui, modal: null });
+    expect(after(margin)).toEqual({ ...v.ui, modal: null });
+  }
+});
+
+test("CLK-46: the third click of a triple one is ignored too: each click is measured from the one before it, also from one that did nothing", () => {
+  const v = open("05");
+  const { option, enter } = targets(screen(v));
+  // The first click marks the second option
+  const first = point(entry(v), click(...option), v, drawing(v))!;
+  expect(first.ui.modal!.choice).toBe(1);
+  // The second comes 300 ms after it and the third 300 ms after the second, on the shortcut that confirms
+  const second = point(first, click(...enter), later({ ...v, ui: first.ui }, 300), drawing({ ...v, ui: first.ui }))!;
+  expect(second.ui).toBe(first.ui);
+  const third = point(second, click(...enter), later({ ...v, ui: first.ui }, 600), drawing({ ...v, ui: first.ui }))!;
+  expect(third.ui).toBe(first.ui);
+  expect(third.ui.send).toBeNull();
+  expect(third.pointer.clickedAt).toBe(v.squad.now + 600);
+  // One that comes 500 ms after the third confirms the option
+  const fourth = point(third, click(...enter), later({ ...v, ui: first.ui }, 1100), drawing({ ...v, ui: first.ui }))!;
+  expect(fourth.ui.send).toEqual({ question_id: 7, answer: "5 tentativas" });
+});
+
+test("CLK-46: the click that opens the modal counts when it comes 100 ms after another one", () => {
+  // On the feed, the selected line of Q-07 where it reached the dev; on the tab, the selected question
+  const home = view("01", { selected: 422 });
+  const fast: Pointer = { on: true, clickedAt: home.squad.now - 100 };
+  const feed = point(entry(home, fast), click(...feedCell(screen(home), "14:29:40")), home, drawing(home))!;
+  expect(feed.ui).toEqual({ ...home.ui, screen: "questions", question: 7, qfocus: "list", modal: opened(7, 0) });
+  const tab = view("04", { question: 8 });
+  const g = screen(tab);
+  const asked = point(entry(tab, fast), click(tabBox(g, 0).left + 1, questionLines(g, 8)[0]!), tab, drawing(tab, g))!;
+  expect(asked.ui).toEqual({ ...tab.ui, modal: opened(8, null) });
+});
+
+// The cells of line 39 of the key of a shortcut and of what it does
+function cellsOf(g: Grid, label: string, does: string): number[] {
+  const x = at(g, 39, `${label} ${does}`);
+  return Array.from({ length: len(label) + 1 + len(does) }, (_, i) => x + i).filter((cell) => cell !== x + len(label));
+}
+
+test("CLK-46: a double click on enter abrir over a question opens its modal and sends nothing: the second click, on enter confirmar, is ignored", () => {
+  // 422 is Q-07 where it reached the dev: enter opens its modal on the first of its options
+  const v = view("01", { selected: 422 });
+  const opens = press(v.ui, "\r", v)!;
+  expect(opens.modal).toEqual(opened(7, 0));
+  // The cells where the main screen has enter abrir and the modal has enter confirmar
+  const confirm = cellsOf(screen({ ...v, ui: opens }), "enter", "confirmar");
+  const both = cellsOf(screen(v), "enter", "abrir").filter((x) => confirm.includes(x));
+  expect(both.length).toBeGreaterThan(0);
+  for (const x of both) {
+    const first = clicked(v, x, 39)!;
+    expect(first.ui).toEqual(opens);
+    // The screen is drawn again with the modal before the second click
+    for (const ms of [0, 100, 499]) {
+      const then = later({ ...v, ui: first.ui }, ms);
+      const second = point(first, click(x, 39), then, drawing(then))!;
+      expect(second.ui).toBe(first.ui);
+      expect(second.ui.send).toBeNull();
+    }
+    // What the rule holds back: the same click 500 ms later confirms the first option
+    const slow = later({ ...v, ui: first.ui }, 500);
+    expect(point(first, click(x, 39), slow, drawing(slow))!.ui.send).toEqual({ question_id: 7, answer: "infinito com backoff" });
+  }
+});
+
+test("CLK-47: while the answer waits for the broker no click and no wheel changes the modal, in any cell of the screen", () => {
+  for (const frame of ["05", "06"]) {
+    const sending = open(frame, { sending: true });
+    const v: View = { ...sending, ui: { ...sending.ui, send: { question_id: m(sending).question, answer: "x" } } };
+    const drawn = drawing(v);
+    for (let y = 0; y < 40; y++) {
+      for (let x = 0; x < 120; x++) {
+        for (const button of [0, 64, 65]) expect(point(entry(v), report(button, x, y), v, drawn)!.ui).toBe(v.ui);
+      }
+    }
+  }
+});
+
+test("CLK-47: with the refused answer a click only closes the modal, outside its box or on the shortcut of esc, and no other cell does anything", () => {
+  const v = open("20b");
+  expect(m(v).refused).toBe(true);
+  const g = screen(v);
+  const box = modalBox(g);
+  const esc = cellsOf(g, "esc", "fechar");
+  expect(esc.length).toBe(9);
+  for (let y = 0; y < 40; y++) {
+    for (let x = 0; x < 120; x++) {
+      const next = point(entry(v), click(x, y), v, drawing(v, g))!;
+      if (y === 39 ? esc.includes(x) : !inside(box, x, y)) expect(next.ui).toEqual({ ...v.ui, modal: null });
+      else expect(next.ui).toBe(v.ui);
+    }
+  }
+});
+
+for (const frame of ["05", "06", "07", "20a", "20b"]) {
+  test(`CLK-48: with the modal of frame ${frame} the wheel changes nothing in any cell of the screen`, () => {
+    const v = open(frame);
+    const drawn = drawing(v);
+    for (let y = 0; y < 40; y++) {
+      for (let x = 0; x < 120; x++) {
+        for (const [button] of WHEEL) expect(point(entry(v), report(button, x, y), v, drawn)!.ui).toBe(v.ui);
+      }
+    }
+  });
+}
+
+test("CLK-48: with the modal open the wheel changes nothing whatever the cell has", () => {
+  // A drawing no screen makes: the wheel of the list and the key of enter in every cell, marked as of the modal
+  const v = open("05", { choice: 1 });
+  for (const wheel of ["feed", "thread", "list", "history"] as const) {
+    const g = grid();
+    g.mark(0, 0, 120, 40, { modal: true, wheel, key: "\r" });
+    for (const [button] of WHEEL) expect(point(entry(v), report(button, 10, 10), v, drawing(v, g))!.ui).toBe(v.ui);
+  }
+});
+
+test("CLK-49: with the modal open, of the clicks on every cell of the screen only the ones on the shortcut of enter leave an answer to send", () => {
+  for (const [frame, does] of [["05", "confirmar"], ["20a", "confirmar"], ["06", "enviar"], ["07", "enviar"]] as const) {
+    const v = open(frame);
+    const g = screen(v);
+    const enter = cellsOf(g, "enter", does);
+    for (let y = 0; y < 40; y++) {
+      for (let x = 0; x < 120; x++) {
+        const next = point(entry(v), click(x, y), v, drawing(v, g))!;
+        expect(next.ui.send !== null).toBe(y === 39 && enter.includes(x));
+      }
+    }
+  }
+});
+
+test("CLK-49: with no modal open no click and no wheel leaves an answer to send, in any cell of any screen", () => {
+  // The selected line of the feed is the one of a question that waits for the dev, and the tab has its question selected
+  const views = [...ALL_SCREENS.map((now) => view("01", { selected: 422, screen: now })), view("04", { question: 7 }), view("04", { question: 8, qfocus: "history" })];
+  for (const v of views) {
+    const drawn = drawing(v);
+    for (let y = 0; y < 40; y++) {
+      for (let x = 0; x < 120; x++) {
+        for (const button of [0, 64, 65]) {
+          // Null is the click on the shortcut that quits
+          const next = point(entry(v), report(button, x, y), v, drawn);
+          if (next) expect(next.ui.send).toBeNull();
+        }
+      }
+    }
   }
 });

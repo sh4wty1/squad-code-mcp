@@ -452,19 +452,19 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] CLK-41: clique em cada opção marca essa opção e deixa `send` nulo, também na já marcada
-- [ ] CLK-42: clique em `outra resposta…` leva ao modo texto com o campo vazio, de qualquer marca de partida
-- [ ] CLK-43: clique na linha 0, na linha 38 e na margem em volta da caixa fecha o modal, também com texto digitado
-- [ ] CLK-44: contexto, texto da pergunta, campo de texto, aviso e borda não mudam nada
-- [ ] CLK-45, um caso por tecla: `enter` no modo escolha deixa em `send` a opção marcada; `enter` no modo texto envia o texto, e não envia o vazio nem o só de espaços; `esc` fecha; `ctrl+e` alterna; `ctrl+u` esvazia; `↑` e `↓` movem a marca; `1-N` não muda nada
-- [ ] CLK-40: uma marca sem `modal` com o modal aberto, e uma com `modal` sem modal aberto, não mudam nada
-- [ ] CLK-46: o clique 499 ms depois do anterior não muda nada, em opção, em `enter confirmar` e fora da caixa; o de 500 ms vale (edge case); o terceiro clique de um triplo também é ignorado; o clique que abre o modal 100 ms depois de outro vale
-- [ ] O clique duplo em `enter abrir` sobre uma pergunta: o modal abre e `send` continua nulo
-- [ ] CLK-47: com `sending`, nenhum clique muda o modal; com `refused`, só o de fora da caixa e o do atalho `esc`
-- [ ] CLK-48: a roda sobre qualquer célula não muda nada
-- [ ] CLK-49: de todos os cliques desta lista, só o do atalho `enter` deixa `send` diferente de nulo
-- [ ] Testes em `test/unit/tui-mouse.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] CLK-41: clique em cada opção marca essa opção e deixa `send` nulo, também na já marcada
+- [x] CLK-42: clique em `outra resposta…` leva ao modo texto com o campo vazio, de qualquer marca de partida
+- [x] CLK-43: clique na linha 0, na linha 38 e na margem em volta da caixa fecha o modal, também com texto digitado
+- [x] CLK-44: contexto, texto da pergunta, campo de texto, aviso e borda não mudam nada
+- [x] CLK-45, um caso por tecla: `enter` no modo escolha deixa em `send` a opção marcada; `enter` no modo texto envia o texto, e não envia o vazio nem o só de espaços; `esc` fecha; `ctrl+e` alterna; `ctrl+u` esvazia; `↑` e `↓` movem a marca; `1-N` não muda nada
+- [x] CLK-40: uma marca sem `modal` com o modal aberto, e uma com `modal` sem modal aberto, não mudam nada
+- [x] CLK-46: o clique 499 ms depois do anterior não muda nada, em opção, em `enter confirmar` e fora da caixa; o de 500 ms vale (edge case); o terceiro clique de um triplo também é ignorado; o clique que abre o modal 100 ms depois de outro vale
+- [x] O clique duplo em `enter abrir` sobre uma pergunta: o modal abre e `send` continua nulo
+- [x] CLK-47: com `sending`, nenhum clique muda o modal; com `refused`, só o de fora da caixa e o do atalho `esc`
+- [x] CLK-48: a roda sobre qualquer célula não muda nada
+- [x] CLK-49: de todos os cliques desta lista, só o do atalho `enter` deixa `send` diferente de nulo
+- [x] Testes em `test/unit/tui-mouse.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

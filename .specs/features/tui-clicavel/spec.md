@@ -351,16 +351,16 @@ cada item, e com o que ficou sem conferir.
 | CLK-37 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
 | CLK-38 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
 | CLK-39 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
-| CLK-40 | P1: Modal de resposta com o mouse | T10 | Implementing |
-| CLK-41 | P1: Modal de resposta com o mouse | T10 | Implementing |
-| CLK-42 | P1: Modal de resposta com o mouse | T10 | Implementing |
-| CLK-43 | P1: Modal de resposta com o mouse | T10 | Implementing |
-| CLK-44 | P1: Modal de resposta com o mouse | T10 | Implementing |
-| CLK-45 | P1: Modal de resposta com o mouse | T10 | Implementing |
-| CLK-46 | P1: Modal de resposta com o mouse | - | Pending |
-| CLK-47 | P1: Modal de resposta com o mouse | - | Pending |
-| CLK-48 | P1: Modal de resposta com o mouse | - | Pending |
-| CLK-49 | P1: Modal de resposta com o mouse | - | Pending |
+| CLK-40 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
+| CLK-41 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
+| CLK-42 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
+| CLK-43 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
+| CLK-44 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
+| CLK-45 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
+| CLK-46 | P1: Modal de resposta com o mouse | T16 | Implementing |
+| CLK-47 | P1: Modal de resposta com o mouse | T16 | Implementing |
+| CLK-48 | P1: Modal de resposta com o mouse | T16 | Implementing |
+| CLK-49 | P1: Modal de resposta com o mouse | T16 | Implementing |
 | CLK-50 | P2: Ligar e desligar o mouse | - | Pending |
 | CLK-51 | P2: Ligar e desligar o mouse | T12 | Implementing |
 | CLK-52 | P2: Ligar e desligar o mouse | T3 | Implementing |

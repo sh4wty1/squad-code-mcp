@@ -7,7 +7,7 @@ import type { Hit } from "./grid.ts";
 import { press } from "./keys.ts";
 import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
-import type { Ui, View } from "./view.ts";
+import type { Modal, Ui, View } from "./view.ts";
 
 // The three integers of a report as the terminal sent them: the column and the line count from 1
 export interface Report {
@@ -55,6 +55,10 @@ const WHEEL = new Map([
   [65, "j"],
 ]);
 const FEED_LINES = 3;
+
+// With the modal of answer open, a click that comes less than this after the one before it
+// is the second of a double click
+const DOUBLE_MS = 500;
 
 // The state after the keys, pressed one after the other; null when one of them quits
 function tap(ui: Ui | null, view: View, keys: string[]): Ui | null {
@@ -120,6 +124,17 @@ function clicked(hit: Hit, ui: Ui, view: View): Ui | null {
   return focused;
 }
 
+// The keys of a click on a cell the modal of answer drew: the key of the cell, or `k` or `j`
+// from the marked line of the choice mode to the clicked one, and enter on the line after
+// the options, the other answer, which leads to the text. A click marks an option and never
+// confirms it.
+function answered(hit: Hit, modal: Modal, view: View): string[] {
+  if (hit.key !== undefined) return [hit.key];
+  if (hit.option === undefined || modal.choice === null) return [];
+  const other = view.squad.questions.find((q) => q.id === modal.question)?.options.length;
+  return [...walk(modal.choice, hit.option), ...(hit.option === other ? ["\r"] : [])];
+}
+
 // The state after a report, or null when it quits: a click on the shortcut of `q`. The mouse
 // changes the state of the screen only by pressing keys, and what it hits is what the last
 // drawing has in the cell of the report.
@@ -131,15 +146,21 @@ export function point(at: Entry, item: string, view: View, drawn: Drawn | null):
   const button = report.button - (report.button & MODIFIERS);
   const wheel = report.pressed ? WHEEL.get(button) : undefined;
   if (!wheel && !(report.pressed && button === 0)) return at;
+  const { ui, pointer } = at;
+  const now = view.squad.now;
+  const quick = pointer.clickedAt !== null && now - pointer.clickedAt < DOUBLE_MS;
   // Every click is the one before the next, also the one that does nothing. The wheel is no click.
-  const still: Entry = wheel ? at : { ui: at.ui, pointer: { ...at.pointer, clickedAt: view.squad.now } };
+  const still: Entry = wheel ? at : { ui, pointer: { ...pointer, clickedAt: now } };
   // Nothing of the screen of the state is drawn on the small screen and on the frozen one,
   // nor after a key of the chunk of the report changed the screen
-  if (!drawn || drawn.screen !== at.ui.screen) return still;
+  if (!drawn || drawn.screen !== ui.screen) return still;
   // A cell outside the grid has no mark
   const hit = drawn.hits[report.y - 1]?.[report.x - 1];
   // With the modal of answer open only what it drew is clicked, and without it nothing of it
-  if (!hit || (hit.modal === true) !== (at.ui.modal !== null)) return still;
-  const ui = wheel ? tap(at.ui, view, rolled(hit, wheel, at.ui)) : clicked(hit, at.ui, view);
-  return ui && { ...still, ui };
+  if (!hit || (hit.modal === true) !== (ui.modal !== null)) return still;
+  // In the modal the wheel rolls nothing, and the second click of a double one does nothing:
+  // the click that opened the modal would confirm an option with it, or close the modal
+  if (ui.modal && (wheel || quick)) return still;
+  const next = ui.modal ? tap(ui, view, answered(hit, ui.modal, view)) : wheel ? tap(ui, view, rolled(hit, wheel, ui)) : clicked(hit, ui, view);
+  return next && { ...still, ui: next };
 }
