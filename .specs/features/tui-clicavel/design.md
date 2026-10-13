@@ -1,7 +1,7 @@
 # TUI clicável Design
 
 **Spec**: `.specs/features/tui-clicavel/spec.md`
-**Status**: Draft
+**Status**: Approved
 
 A spec já diz o que cada clique faz. Este documento diz como a TUI sabe o que está sob o
 ponteiro, onde o relatório vira tecla e o que muda no laço. Nada muda no broker.

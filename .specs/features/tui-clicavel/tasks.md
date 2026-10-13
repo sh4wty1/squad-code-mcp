@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/tui-clicavel/design.md`
-**Status**: Draft
+**Status**: Approved
 
 Regras do repositório que valem para toda tarefa:
 
@@ -119,7 +119,7 @@ T22 → T23 → T24 → T25 → T26 → T27
 **Tests**: integration
 **Gate**: full
 
-Commit: `313d433`.
+Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e disse que funcionou; a versão do terminal e o que ele viu entram em `real-terminal.md` na T25, e o item RT-01 fecha lá.
 
 ---
 
