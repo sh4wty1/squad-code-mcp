@@ -174,16 +174,26 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-12, no fechamento da fatia Papéis, e em 2026-10-13 na ordem das fatias: a Papéis foi mesclada e a TUI clicável entrou antes da Gate.
+Atualizado em 2026-10-13, na pausa da fatia TUI clicável depois da T24. As seções da Papéis, abaixo, são do fechamento dela em 2026-10-12 e continuam valendo.
 
-- **Feature**: Papéis, `.specs/features/papeis/`, fechada por decisão do dev com o resíduo da terceira volta de verificação registrado. A próxima fatia é a TUI clicável, com spec em `.specs/features/tui-clicavel/`; depois dela vem a Gate, que ainda não tem spec.
-- **Phase / Task**: Papéis: Execute encerrado, T1 a T31 commitadas, `tasks.md` em `Done`. TUI clicável: spec e `context.md` escritos, sem design nem tarefas. Gate: nada começado.
-- **Completed**: T1 a T31, de `f9ec67e` a `ac25e8d`; `real-sessions.md`; três voltas do Verifier, as três FAIL sem defeito de produção (`validation-round-1.md`, `validation-round-2.md`, e `validation.md`, que é a terceira); a suíte no Windows e no Linux sobre `ac25e8d`; o fechamento na spec, em `tasks.md` e em `ROADMAP.md`.
+- **Feature**: TUI clicável, `.specs/features/tui-clicavel/`. Depois dela vem a Gate, que ainda não tem spec. A Papéis está fechada e mesclada na `main` pelo PR 12, com o resíduo registrado abaixo.
+- **Phase / Task**: Execute, fase 5. T1 a T24 commitadas. Faltam a T25 (conferência em terminal real, com o dev), a T26 (a suíte no Linux e no Windows sobre o mesmo commit), a T27 (fechamento) e, depois da última, o Verifier.
+- **Completed**: T1 `313d433`; a aprovação do design e das tarefas, `db54d04`; T2 a T10, de `e0cc06e` a `726f1e6`, por um worker; a correção do selo de bloqueio, `2622949`; T11 a T18, de `0fd0088` a `9d5f345`, por outro worker, com um ajuste fora da lista em `0ae5896`; T19 `b958711`, T20 `8b68837`, T21 `87739b1`, T22 `ba3eb25`, T23 `18eed8d` e T24 `5744614`, pelo orquestrador.
 - **In-progress** (file:line): nada.
-- **Next step**: a fatia TUI clicável, numa sessão nova com o prompt dela em `ROADMAP.md`. A primeira tarefa é a sonda de mouse, que o dev roda num Windows Terminal. Depois, a fatia Gate.
-- **Blockers**: nenhum.
+- **Next step**: a T25. O dev roda `bun run demo` de dentro de `broker/`, num Windows Terminal de 120×40 ou mais, e confere RT-02 a RT-07 da spec; o resultado, com a versão do terminal e a data, vai para `.specs/features/tui-clicavel/real-terminal.md`. A RT-01 já foi: o dev rodou a sonda em 2026-10-13 e disse que funcionou, sem dizer a versão do terminal nem o que viu nos quatro cantos.
+- **Blockers**: a T25 depende do dev. O resto não tem bloqueio: o Docker está de pé (28.0.4) e tem a imagem `oven/bun:1.4.2`.
 - **Uncommitted files**: nenhum.
-- **Branch**: `feat/papeis`, saído da `main` em `f162184`, mesclado na `main` pelo PR 12 em 2026-10-13. A spec da TUI clicável foi escrita no branch `spec/tui-clicavel`, num segundo worktree (`squad-code-mcp.worktrees/tui-clicavel`), que pode ser removido depois do merge desse branch.
+- **Branch**: `feat/tui-clicavel`, saído da `main` em `36440a6`, só local: nada foi enviado. `git push` e o PR pedem o sim do dev na hora. O commit de cada tarefa não pede (decisão do dev de 2026-10-13, nas regras de `tasks.md`).
+
+### Onde a TUI clicável está
+
+- Windows, `5744614`: `tsc` 0 e 2073 pass, 5 skip, 0 fail, 83 arquivos. Antes da fatia: 1646 pass, 5 skip.
+- `EVT-90/92` de `test/integration/server-tools.test.ts`, anterior à fatia, falhou uma vez em cinco execuções da suíte inteira (3335 ms) e passou sozinho na seguinte: entra na lista dos instáveis de "Evidência e limites". Das três execuções extras pedidas para achar o nome, só a primeira terminou antes de a sessão acabar.
+- Depois da correção `2622949` a suíte inteira só rodou no gate da T18 em diante; ela passou em todos.
+- O que os workers apontaram como lacuna de precisão da spec, sem correção, para o Verifier e para o dev: CLK-39 (o custo continua valendo `t` se o lado direito da linha 38 for desenhado por cima dele); CLK-09 (`ESC [ <` seguido de um caractere que não é letra nem dígito deixa esse caractere como tecla); CLK-50 (a cor do aviso de `m` não está na spec, e `m` dentro de uma colagem delimitada sem modal liga e desliga o mouse); CLK-15 com CLK-20 e CLK-24 (o clique numa linha que uma tecla anterior do mesmo chunk selecionou abre em vez de selecionar); o botão de `Report` sai de `parse` com os bits de modificador, que `point` tira.
+- Notado e não tocado: o detalhe de uma pergunta com 8 ou mais opções desenha `undefined …` (`broker/tui/screens/questions.ts:164`, anterior à fatia); a seção da TUI de `broker/README.md` ainda diz que ela não escreve nada no broker e não lista a tecla `4`, de antes da fatia Question; `test/unit/tui-mouse.test.ts` repete ajudantes que `tui-hits.test.ts` tem (os testes do laço usam `test/terminal.ts`).
+- Num heredoc do Bash desta máquina, um escape com barra invertida (`\r`, `\t`) não chega ao arquivo como foi escrito: vira o caractere de verdade ou perde uma barra. Código com esses escapes se escreve com Write ou Edit.
+- Depois da T27: o Verifier numa cópia física do branch com `bun install` próprio, até três voltas de correção; `python .claude/skills/tlc-spec-driven/scripts/validate_state.py tui-clicavel`; as lições com `lessons.py`.
 
 ### Como a Papéis fechou
 
