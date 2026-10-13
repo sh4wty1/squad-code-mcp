@@ -20,7 +20,7 @@ const TOAST_MS = 4000;
 const UP = "\x1b[A";
 const DOWN = "\x1b[B";
 
-const notice = (view: View, text: string, color: Color = "gray"): Ui["toast"] => ({ text, color, until: view.squad.now + TOAST_MS });
+export const notice = (view: View, text: string, color: Color = "gray"): Ui["toast"] => ({ text, color, until: view.squad.now + TOAST_MS });
 
 // The last offset of the history: five fit, and with more the screen shows four from the offset, never fewer
 function historyEnd(view: View): number {
@@ -33,12 +33,20 @@ export function visible(ui: Ui, fresh: FeedRow[], shown: FeedRow[]): FeedRow[] {
   return ui.paused ? shown : fresh;
 }
 
-// One complete key: a CSI escape sequence, or a character
-const KEY = /\x1b\[[0-9;]*[A-Za-z~]|[\s\S]/gu;
+// One complete item of the input: a mouse report, a CSI escape sequence, or a character. A
+// report is `ESC [ <` with its digits and `;` up to the letter that ends it, also when the
+// letter comes before the three integers or does not come; in the old format, `ESC [ M` and
+// up to three characters.
+const KEY = /\x1b\[<[0-9;]*[A-Za-z]?|\x1b\[M[\s\S]{0,3}|\x1b\[[0-9;]*[A-Za-z~]|[\s\S]/gu;
 
-// The keys of one chunk of the input
+// The keys of one chunk of the input, and its mouse reports, one item each
 export function keysOf(chunk: string): string[] {
   return chunk.match(KEY) ?? [];
+}
+
+// A mouse report, whole or not: an item of the input that is neither a key nor text
+export function isReport(item: string): boolean {
+  return item.startsWith("\x1b[<") || item.startsWith("\x1b[M");
 }
 
 // The marks a terminal puts around what is pasted, once `ENTER` asked it to
@@ -193,7 +201,8 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
 // in the choice mode it does nothing, where enter would confirm an option. `more` says the
 // chunk had keys after these, which the loop holds back. Between the two marks of a delimited
 // paste every chunk is of the paste, a line break alone in its read too; the marks are no key
-// of a screen, and esc ends a paste whose mark of the end did not come.
+// of a screen, and esc ends a paste whose mark of the end did not come. A mouse report
+// presses no key, and still counts as one of the keys of its chunk.
 export function input(ui: Ui, chunk: string, view: View, more = false): Ui | null {
   const keys = keysOf(chunk);
   let next: Ui | null = ui;
@@ -202,6 +211,7 @@ export function input(ui: Ui, chunk: string, view: View, more = false): Ui | nul
       next = paste(next, k === PASTE_START);
       continue;
     }
+    if (isReport(k)) continue;
     if (k === "\x1b") next = paste(next, false);
     const pasted = (next.pasting || more || keys.length > 1) && next.modal !== null && (k === "\r" || k === "\n");
     next = press(next, pasted ? " " : k, { ...view, ui: next });

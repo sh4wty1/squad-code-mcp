@@ -314,20 +314,20 @@ cada item, e com o que ficou sem conferir.
 | -------------- | ----- | ----- | ------ |
 | CLK-01 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-02 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-03 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-04 | P1: O terminal conta onde o mouse clicou | - | Pending |
+| CLK-03 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
+| CLK-04 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
 | CLK-05 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-06 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-07 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-08 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-09 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-10 | P1: O terminal conta onde o mouse clicou | - | Pending |
+| CLK-09 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
+| CLK-10 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
 | CLK-11 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-12 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-13 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-14 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-15 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-16 | P1: O terminal conta onde o mouse clicou | - | Pending |
+| CLK-16 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
 | CLK-17 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-18 | P1: Navegar com o clique | - | Pending |
 | CLK-19 | P1: Navegar com o clique | - | Pending |
@@ -367,7 +367,7 @@ cada item, e com o que ficou sem conferir.
 | CLK-53 | P2: Ligar e desligar o mouse | - | Pending |
 | CLK-54 | P2: Ligar e desligar o mouse | - | Pending |
 | CLK-55 | P2: Ligar e desligar o mouse | - | Pending |
-| CLK-56 | P1: Nada do que existe muda | - | Pending |
+| CLK-56 | P1: Nada do que existe muda | T2 | Implementing |
 | CLK-57 | P1: Nada do que existe muda | - | Pending |
 
 **Coverage:** 57 total, 0 mapped to tasks, 57 unmapped: a fatia ainda não tem tarefas.

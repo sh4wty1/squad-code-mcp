@@ -133,13 +133,13 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] `keysOf` devolve um item para `ESC [ < 0 ; 12 ; 5 M`, para o mesmo com `m`, para `ESC [ < 0 ; 12 M` (letra sem os três inteiros), para `ESC [ < 0 ; 1` no fim da entrada e para `ESC [ M` com três caracteres; as teclas antes e depois de cada um continuam sendo os itens que eram
-- [ ] CLK-04: `input` com o modal no modo texto e cada uma dessas formas não acrescenta caractere ao texto; sem modal, não troca de tela (o `1` e o `2` de dentro do relatório não são teclas)
-- [ ] CLK-10: os três caracteres depois de `ESC [ M` não são teclas, também quando um deles é `q`
-- [ ] CLK-16: `input` com um relatório e um `\r` no mesmo chunk, modal aberto: um espaço no modo texto, nada no modo escolha, `send` continua `null`
-- [ ] CLK-56: `test/unit/tui-keys.test.ts` passa sem alteração
-- [ ] Testes em `test/unit/tui-mouse-input.test.ts`
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `keysOf` devolve um item para `ESC [ < 0 ; 12 ; 5 M`, para o mesmo com `m`, para `ESC [ < 0 ; 12 M` (letra sem os três inteiros), para `ESC [ < 0 ; 1` no fim da entrada e para `ESC [ M` com três caracteres; as teclas antes e depois de cada um continuam sendo os itens que eram
+- [x] CLK-04: `input` com o modal no modo texto e cada uma dessas formas não acrescenta caractere ao texto; sem modal, não troca de tela (o `1` e o `2` de dentro do relatório não são teclas)
+- [x] CLK-10: os três caracteres depois de `ESC [ M` não são teclas, também quando um deles é `q`
+- [x] CLK-16: `input` com um relatório e um `\r` no mesmo chunk, modal aberto: um espaço no modo texto, nada no modo escolha, `send` continua `null`
+- [x] CLK-56: `test/unit/tui-keys.test.ts` passa sem alteração
+- [x] Testes em `test/unit/tui-mouse-input.test.ts`
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
