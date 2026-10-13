@@ -598,12 +598,12 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] A linha 10 da ajuda, colunas 62 a 117, é `m           mouse liga / desliga · clique = tecla`
-- [ ] `Deviation.class` aceita `D4`; o frame 11 tem um desvio D4 na linha 10, com o porquê citando CLK-55; nenhum outro frame tem D4
-- [ ] As linhas 25 a 28 e 30 a 33 da ajuda continuam vazias
-- [ ] `tui-frames.test.ts` muda em duas afirmações e em nenhuma outra: a lista de classes de TUI-43 ganha `D4`, e a lista de desvios do frame 11 em TUI-49 ganha a linha D4
-- [ ] CLK-57: todo outro frame desenha as 40 linhas de antes
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] A linha 10 da ajuda, colunas 62 a 117, é `m           mouse liga / desliga · clique = tecla`
+- [x] `Deviation.class` aceita `D4`; o frame 11 tem um desvio D4 na linha 10, com o porquê citando CLK-55; nenhum outro frame tem D4
+- [x] As linhas 25 a 28 e 30 a 33 da ajuda continuam vazias
+- [x] `tui-frames.test.ts` muda em duas afirmações e em nenhuma outra: a lista de classes de TUI-43 ganha `D4`, e a lista de desvios do frame 11 em TUI-49 ganha a linha D4
+- [x] CLK-57: todo outro frame desenha as 40 linhas de antes
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

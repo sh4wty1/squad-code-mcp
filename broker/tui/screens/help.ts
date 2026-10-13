@@ -51,7 +51,8 @@ const LEGEND: Line[] = [
   [["≈", "bwhite", true], [" custo estimado   ", "white"], ["━━", "bcyan", true], [" aresta ativa   ", "white"], ["broker ", "gray"], ["○", "bred", true], [" congela", "white"]],
 ];
 
-// Each key where the frame has it: the lines of the modals of the slice Gate stay empty
+// Each key where the frame has it: the lines of the modals of the slice Gate stay empty.
+// The line of `m` is the one the frame leaves empty after the global keys.
 const SHORTCUTS: Line[] = [
   [["global", "gray"]],
   key("1 2 3 4", "principal · topologia · thread · perguntas"),
@@ -60,7 +61,7 @@ const SHORTCUTS: Line[] = [
   key("p", "pausar / retomar o feed"),
   key("t", "rodapé: tokens da feature ↔ da sessão"),
   key("? · q", "ajuda · sair (o broker segue rodando)"),
-  [],
+  key("m", "mouse liga / desliga · clique = tecla"),
   [["navegação", "gray"]],
   key("tab ⇧tab", "painel seguinte / anterior"),
   key("j k ↑ ↓", "mover seleção"),

@@ -46,7 +46,7 @@ test("TUI-43: every deviation is of a declared frame, has a class and says why",
   expect(Object.keys(DEVIATIONS).every((id) => frame(id).length === 40)).toBe(true);
   const all = Object.values(DEVIATIONS).flat();
   expect(all.length).toBeGreaterThan(0);
-  expect(all.filter((dev) => !["D1", "D2", "D3"].includes(dev.class) || dev.why.trim().length < 20)).toEqual([]);
+  expect(all.filter((dev) => !["D1", "D2", "D3", "D4"].includes(dev.class) || dev.why.trim().length < 20)).toEqual([]);
 });
 
 test("TUI-43: a deviation of the status of an agent cites the line of the design that contradicts the prototype", () => {
@@ -128,8 +128,9 @@ test("QST-58: the default of the detail behind the modal of frames 06 and 07 is 
 test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen of another slice", () => {
   const lines = frame("11").map((line) => [...line.padEnd(120)]);
   const cut = DEVIATIONS["11"]!.map((dev) => [dev.class, dev.text, lines[dev.line]!.slice(dev.col, dev.col + dev.width).join("").trim()]);
-  expect(cut).toEqual(
-    [
+  expect(cut).toEqual([
+    ["D4", "m           mouse liga / desliga · clique = tecla", ""],
+    ...[
       "gate (modal)",
       "a           aprovar → pede confirmação (y)",
       "r · c       rejeitar · comentar, texto obrigatório",
@@ -139,8 +140,8 @@ test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen o
       "j k · G     rolar a prévia · ir ao fim",
       "] [ · esc   fila · fechar, o pedido segue",
       "✓ P-01 fechado no terminal",
-    ].map((text) => ["D3", "", text])
-  );
+    ].map((text) => ["D3", "", text]),
+  ]);
 });
 
 test("QST-88: the legend has the four lines of Question where frame 11 has them, and the lines of gate and of permission empty", () => {
