@@ -620,8 +620,8 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] As entradas de `tui.ts`, `tui/keys.ts`, `tui/grid.ts` e `tui/screens/` dizem o que mudou; `tui/mouse.ts` tem a sua
-- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] As entradas de `tui.ts`, `tui/keys.ts`, `tui/grid.ts` e `tui/screens/` dizem o que mudou; `tui/mouse.ts` tem a sua
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build
