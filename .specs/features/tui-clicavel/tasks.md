@@ -549,17 +549,17 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] CLK-05: um relatório de clique na aba `2 topologia` desenha a topologia; um na linha do feed muda o detalhe; a roda sobre o feed move a seleção
-- [ ] CLK-14: depois de uma leitura que acrescenta uma linha ao feed, o clique na mesma célula seleciona a linha que o desenho novo tem ali
-- [ ] CLK-12: com o terminal de 119×40 e de 120×39, clique, roda, clique na célula de `q sair` e `m` não mudam a tela que volta com 120×40, não saem e não fazem `POST`; de volta a 120×40 o clique vale sem `MOUSE_ON` novo (edge case)
-- [ ] CLK-13: com o broker sem responder, clique e roda não mudam a tela que volta, e o clique na célula de `q sair` não sai
-- [ ] CLK-50: `m` escreve `ESC [ ? 1006 l` e `ESC [ ? 1000 l` e o aviso aparece; de novo, `ESC [ ? 1000 h` e `ESC [ ? 1006 h`; CLK-51: entre os dois, um clique não muda a tela
-- [ ] Saindo depois de `m`, a saída ainda termina com as sequências de CLK-02 (edge case)
-- [ ] CLK-49: clique numa pergunta, numa opção e em `enter confirmar` faz um `POST /answer`, com a credencial lida na hora; um clique duplo em `enter abrir` não faz nenhum; nenhum outro clique do teste faz pedido além das leituras
-- [ ] CLK-54: com o modal no modo texto, `m` aparece no campo e nenhuma sequência de mouse é escrita
-- [ ] Pelo processo, num pseudo-terminal sobre um broker real com uma feature aberta: o clique na aba `2 topologia` desenha `topologia · estrela`, e o clique em `q sair` sai com 0 com `ESC [ ? 1000 l` antes de `ESC [ ? 1049 l` (L-050)
-- [ ] Testes em `test/unit/tui-mouse-loop.test.ts` e `test/integration/tui-mouse.test.ts`
-- [ ] Gate full passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] CLK-05: um relatório de clique na aba `2 topologia` desenha a topologia; um na linha do feed muda o detalhe; a roda sobre o feed move a seleção
+- [x] CLK-14: depois de uma leitura que acrescenta uma linha ao feed, o clique na mesma célula seleciona a linha que o desenho novo tem ali
+- [x] CLK-12: com o terminal de 119×40 e de 120×39, clique, roda, clique na célula de `q sair` e `m` não mudam a tela que volta com 120×40, não saem e não fazem `POST`; de volta a 120×40 o clique vale sem `MOUSE_ON` novo (edge case)
+- [x] CLK-13: com o broker sem responder, clique e roda não mudam a tela que volta, e o clique na célula de `q sair` não sai
+- [x] CLK-50: `m` escreve `ESC [ ? 1006 l` e `ESC [ ? 1000 l` e o aviso aparece; de novo, `ESC [ ? 1000 h` e `ESC [ ? 1006 h`; CLK-51: entre os dois, um clique não muda a tela
+- [x] Saindo depois de `m`, a saída ainda termina com as sequências de CLK-02 (edge case)
+- [x] CLK-49: clique numa pergunta, numa opção e em `enter confirmar` faz um `POST /answer`, com a credencial lida na hora; um clique duplo em `enter abrir` não faz nenhum; nenhum outro clique do teste faz pedido além das leituras
+- [x] CLK-54: com o modal no modo texto, `m` aparece no campo e nenhuma sequência de mouse é escrita
+- [x] Pelo processo, num pseudo-terminal sobre um broker real com uma feature aberta: o clique na aba `2 topologia` desenha `topologia · estrela`, e o clique em `q sair` sai com 0 com `ESC [ ? 1000 l` antes de `ESC [ ? 1049 l` (L-050)
+- [x] Testes em `test/unit/tui-mouse-loop.test.ts` e `test/integration/tui-mouse.test.ts`
+- [x] Gate full passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: integration
 **Gate**: full

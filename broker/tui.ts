@@ -19,7 +19,8 @@ import { CLEAR, ENTER, LEAVE, MOUSE_OFF, MOUSE_ON, paint, parseGlyphs } from "./
 import { mouseOn, prices, readIntervalMs, type PriceTable } from "./tui/config.ts";
 import { feed, type FeedRow } from "./tui/feed.ts";
 import type { Grid } from "./tui/grid.ts";
-import { input, keysOf, marks, settle, START, sync, visible } from "./tui/keys.ts";
+import { keysOf, marks, settle, START, sync, visible } from "./tui/keys.ts";
+import { take, type Drawn, type Pointer } from "./tui/mouse.ts";
 import { createReader, type Fetch } from "./tui/reader.ts";
 import { answer } from "./tui/screens/answer.ts";
 import { down as frozen } from "./tui/screens/down.ts";
@@ -86,6 +87,7 @@ export function start(io: Io, settings: Settings) {
   const reader = createReader({ fetch: io.fetch, url: settings.url });
   const writer = createWriter({ fetch: io.fetch, url: settings.url });
   let ui: Ui = START;
+  let pointer: Pointer = { on: settings.mouse, clickedAt: null };
   let log: SquadEvent[] = [];
   // The lines of `fed`, and the ones on the screen: they differ while the feed is paused
   let fed: SquadEvent[] | null = null;
@@ -93,6 +95,8 @@ export function start(io: Io, settings: Settings) {
   let rows: FeedRow[] = [];
   let down: View["down"] = null;
   let prev: Grid | null = null;
+  // What a report of the mouse hits: the marks of the last drawing written
+  let drawn: Drawn | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let stopped = false;
   let pending = "";
@@ -116,9 +120,12 @@ export function start(io: Io, settings: Settings) {
 
   function draw(whole = false) {
     const size = io.size();
+    // The small screen and the frozen one cover the screen of the state
+    const covered = cramped(size) || down !== null;
     const next = cramped(size) ? small(size.cols, size.rows) : down ? frozen(view()) : screen();
     io.write((whole ? CLEAR : "") + paint(next, whole ? null : prev, settings.glyphs));
     prev = next;
+    drawn = covered ? null : { hits: next.hits, screen: ui.screen };
   }
 
   function end(settle: () => void) {
@@ -175,9 +182,11 @@ export function start(io: Io, settings: Settings) {
         return keysOf(chunk).some((k) => k === "q" || k === "\x03") ? stop() : undefined;
       }
       const sending = ui.send;
-      const next = input(ui, chunk, view(), more);
+      const next = take({ ui, pointer }, chunk, view(), more, drawn);
       if (!next) return stop();
-      ui = next;
+      // `m` turned the mouse off or on: the terminal is told
+      if (next.pointer.on !== pointer.on) io.write(next.pointer.on ? MOUSE_ON : MOUSE_OFF);
+      ({ ui, pointer } = next);
       // One POST for each answer: the one on its way stays in `send` until it is settled
       if (ui.send && ui.send !== sending) post();
       draw();

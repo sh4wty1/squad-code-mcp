@@ -316,16 +316,16 @@ cada item, e com o que ficou sem conferir.
 | CLK-02 | P1: O terminal conta onde o mouse clicou | T19 | Implementing |
 | CLK-03 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
 | CLK-04 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
-| CLK-05 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
+| CLK-05 | P1: O terminal conta onde o mouse clicou | T12, T20 | Implementing |
 | CLK-06 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
 | CLK-07 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-08 | P1: O terminal conta onde o mouse clicou | - | Pending |
 | CLK-09 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
 | CLK-10 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
 | CLK-11 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
-| CLK-12 | P1: O terminal conta onde o mouse clicou | - | Pending |
-| CLK-13 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
-| CLK-14 | P1: O terminal conta onde o mouse clicou | T4, T12 | Implementing |
+| CLK-12 | P1: O terminal conta onde o mouse clicou | T20 | Implementing |
+| CLK-13 | P1: O terminal conta onde o mouse clicou | T12, T20 | Implementing |
+| CLK-14 | P1: O terminal conta onde o mouse clicou | T4, T12, T20 | Implementing |
 | CLK-15 | P1: O terminal conta onde o mouse clicou | T17 | Implementing |
 | CLK-16 | P1: O terminal conta onde o mouse clicou | T2, T17 | Implementing |
 | CLK-17 | P1: O terminal conta onde o mouse clicou | T1 | Implementing |
@@ -360,17 +360,17 @@ cada item, e com o que ficou sem conferir.
 | CLK-46 | P1: Modal de resposta com o mouse | T16 | Implementing |
 | CLK-47 | P1: Modal de resposta com o mouse | T16 | Implementing |
 | CLK-48 | P1: Modal de resposta com o mouse | T16 | Implementing |
-| CLK-49 | P1: Modal de resposta com o mouse | T16 | Implementing |
-| CLK-50 | P2: Ligar e desligar o mouse | T17 | Implementing |
-| CLK-51 | P2: Ligar e desligar o mouse | T12 | Implementing |
+| CLK-49 | P1: Modal de resposta com o mouse | T16, T20 | Implementing |
+| CLK-50 | P2: Ligar e desligar o mouse | T17, T20 | Implementing |
+| CLK-51 | P2: Ligar e desligar o mouse | T12, T20 | Implementing |
 | CLK-52 | P2: Ligar e desligar o mouse | T3, T19 | Implementing |
 | CLK-53 | P2: Ligar e desligar o mouse | T3, T19 | Implementing |
-| CLK-54 | P2: Ligar e desligar o mouse | T17 | Implementing |
+| CLK-54 | P2: Ligar e desligar o mouse | T17, T20 | Implementing |
 | CLK-55 | P2: Ligar e desligar o mouse | - | Pending |
 | CLK-56 | P1: Nada do que existe muda | T2, T17, T18 | Implementing |
 | CLK-57 | P1: Nada do que existe muda | - | Pending |
 
-**Coverage:** 57 total, 52 com tarefa feita, 5 à espera das tarefas que faltam. `tasks.md` dá a tarefa de cada um.
+**Coverage:** 57 total, 53 com tarefa feita, 4 à espera das tarefas que faltam. `tasks.md` dá a tarefa de cada um.
 
 ---
 
