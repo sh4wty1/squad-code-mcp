@@ -367,10 +367,10 @@ cada item, e com o que ficou sem conferir.
 | CLK-53 | P2: Ligar e desligar o mouse | T3 | Implementing |
 | CLK-54 | P2: Ligar e desligar o mouse | T17 | Implementing |
 | CLK-55 | P2: Ligar e desligar o mouse | - | Pending |
-| CLK-56 | P1: Nada do que existe muda | T2, T17 | Implementing |
+| CLK-56 | P1: Nada do que existe muda | T2, T17, T18 | Implementing |
 | CLK-57 | P1: Nada do que existe muda | - | Pending |
 
-**Coverage:** 57 total, 36 com tarefa feita, 21 à espera das fases 3 a 5. `tasks.md` dá a tarefa de cada um.
+**Coverage:** 57 total, 50 com tarefa feita, 7 à espera das fases 4 e 5. `tasks.md` dá a tarefa de cada um.
 
 ---
 

@@ -506,8 +506,8 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] AD-021 em `## Decisions` com decisão, razão, trade-off, escopo (a fatia Gate incluída), data e status
-- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] AD-021 em `## Decisions` com decisão, razão, trade-off, escopo (a fatia Gate incluída), data e status
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build

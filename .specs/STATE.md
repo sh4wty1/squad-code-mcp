@@ -164,6 +164,14 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 - **Date**: 2026-10-11
 - **Status**: active
 
+### AD-021
+- **Decision**: Todo efeito do mouse na TUI é o de uma tecla, ou de uma sequência de teclas, que já existe naquele estado. Cada tela marca, ao desenhar, o que há em cada célula (a camada `hits` do `Grid`); `tui/mouse.ts` lê a marca do último desenho escrito e muda o estado da tela só por `press`, tecla a tecla. O que é do mouse, ligado ou não e a hora do último clique, fica em `Pointer`, fora de `Ui`. `m` é tecla, não relatório: `take` a trata, porque ela muda `Pointer`, e só põe o aviso de 4 s.
+- **Reason**: O design manda tudo navegável por teclado e os frames são os casos de teste (AD-010). Com o clique reduzido a teclas, nenhuma tela ganha comportamento que o teclado não tem, e o teste de cada clique compara com `press` aplicado ao mesmo estado. O envio de uma resposta pelo mouse é o da tecla `enter` (AD-014): um `POST` por resposta, com a credencial lida na hora. `Ui` é escrito campo a campo em testes de teclas e de frames que a fatia não altera.
+- **Trade-off**: O mouse não faz nada que uma tecla não faça: não há hover, arrasto, rolagem do feed separada da seleção, nem clique num agente ou num nó da topologia. Um elemento só é clicável se a tela o marca ao desenhar, e uma tecla só é alcançada pelo mouse se aparece num atalho ou num elemento marcado. Com um modal aberto, o clique que chega menos de 500 ms depois do anterior não faz nada, também quando o dev quis clicar duas vezes.
+- **Scope**: `broker/tui/mouse.ts`, `broker/tui/grid.ts`, `broker/tui/screens/`, `broker/tui.ts`, e os modais de gate e de permissão da fatia Gate, que ficam clicáveis pela mesma regra: o clique marca e não decide, a decisão sai de um atalho da linha 39 que a nomeia, e clicar fora fecha. Detalha o AD-010 e o AD-014.
+- **Date**: 2026-10-13
+- **Status**: active
+
 ## Handoff
 
 Atualizado em 2026-10-12, no fechamento da fatia Papéis, e em 2026-10-13 na ordem das fatias: a Papéis foi mesclada e a TUI clicável entrou antes da Gate.
