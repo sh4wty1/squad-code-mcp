@@ -38,6 +38,7 @@ Broker and MCP channel server of squad-code-mcp. A fork of claude-peers-mcp at `
 - `tui/screens/answer.ts` — The modal of answer, drawn over the tab in gray: the context of the question, its options or the field of the text, and the refusal of an answer that came after the question closed.
 - `tui/config.ts`, `tui/prices.json` — The price table and the interval of read.
 - `tui/glyphs.ts`, `tui/probe.ts` — The glyphs outside ASCII the screens draw, and the probe that measures them in the terminal.
+- `tui/mouse-probe.ts` — The probe of the mouse: asks the terminal for the reports of button and wheel (modes 1000 and 1006, `MOUSE_ON` and `MOUSE_OFF` of `tui/ansi.ts`) and writes one line for each one that reaches the standard input. The dev runs it on a real terminal: no test clicks.
 - `test/frames/` — The frames of the prototype as text, the tool that extracts them and the logs that reproduce them, with the state of the screen of each frame of the tab of questions and of its modal; `deviations.ts` declares where a drawn frame leaves the prototype, and none is left for the slice Question. `test/unit/tui-frames.test.ts` draws each one.
 - `../plugin/` — The plugin `squad`, which the launcher loads in place with `--plugin-dir`: it is not installed, because it reaches this directory by a relative path (STATE AD-015). `.claude-plugin/plugin.json` is its manifest, `.mcp.json` declares `server.ts` of this directory as its MCP server, and `hooks/hooks.json` declares its two hooks, `UserPromptSubmit` and `Stop`. In `hooks/`: `turn-started.ts` marks the start of a turn with a `turn_started`; `stop.ts` ends a turn, sending back to work once the session that would come out of it `stalled` and otherwise recording its `usage` by model; `session.ts` gives a hook the credential of the session from its file, a call to the broker with a deadline and the payload of the hook; `usage.ts` sums the tokens of the transcripts of the session, subagents included, by model; `nudge.ts` is the rule of the return to work, the status rule over the log as if the turn had ended. `roles.json` names the base skills of each role and those of each workflow. `skills/<role>/SKILL.md` are the four protocol skills, of the mother, the leader, the worker and the judge: what each role does with each event and what it never does. Its tests are in `test/` here, and `tsconfig.json` includes it.
 
@@ -61,6 +62,9 @@ bun cli.ts kill-broker
 # The TUI, in a terminal of 120×40 or more (also `squad tui`), and the probe of its glyphs:
 bun tui.ts
 bun tui/probe.ts
+
+# The probe of the mouse reports the terminal sends; q or ctrl+c leaves:
+bun tui/mouse-probe.ts
 
 # Tests and types. Not `bun x tsc`: it downloads another tsc instead of the installed one.
 bun test
