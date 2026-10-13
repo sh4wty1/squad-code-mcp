@@ -233,7 +233,7 @@ test("PAP-45: start gives the launcher the platform it runs on: the session has 
   });
 }, 60_000);
 
-test("PAP-52: start worker opens the session command in its worktree, with its name and its role in the environment and no CLAUDE variable of the launcher", async () => {
+test("PAP-52: start worker opens the session command in its worktree, with its name and its role in the environment and, of the CLAUDE variables of the launcher, only the ones of the dev", async () => {
   await startWith(
     reportCommand(),
     "worker",
@@ -245,11 +245,12 @@ test("PAP-52: start worker opens the session command in its worktree, with its n
       expect(env.SQUAD_ROLE).toBe("worker");
       expect(env.CLAUDECODE).toBeUndefined();
       expect(env.CLAUDE_CODE_ENTRYPOINT).toBeUndefined();
+      expect(env.CLAUDE_CONFIG_DIR).toBe("the config of the dev");
       expect(env.PAP_OF_THE_LAUNCHER).toBe("kept");
       expect(res.code).toBe(0);
     },
     undefined,
-    { CLAUDECODE: "1", CLAUDE_CODE_ENTRYPOINT: "cli", PAP_OF_THE_LAUNCHER: "kept" }
+    { CLAUDECODE: "1", CLAUDE_CODE_ENTRYPOINT: "cli", CLAUDE_CONFIG_DIR: "the config of the dev", PAP_OF_THE_LAUNCHER: "kept" }
   );
 }, 60_000);
 

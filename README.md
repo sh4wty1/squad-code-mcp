@@ -45,7 +45,7 @@ Then open one terminal for each session, inside the repository the squad will wo
 ```bash
 squad start mother
 squad start leader
-squad start worker    # worker-1; run it again for worker-2 and worker-3
+squad start worker    # worker-1; once it is online, run it again for worker-2 and worker-3
 squad start judge
 ```
 
@@ -57,7 +57,8 @@ squad tui
 
 Each `squad start` opens one Claude Code session with its name and role in the environment, the plugin of [`plugin/`](plugin) loaded from that directory as a channel, and the protocol skill of the role as its first instruction. The plugin is not installed anywhere: the launcher points the session at the directory.
 
-- **Names.** `mother`, `leader` and `judge` are one each. `squad start worker` takes the first of `worker-1`, `worker-2` and `worker-3` that is not online, and `squad start worker worker-2` relaunches that one.
+- **Names.** `mother`, `leader` and `judge` are one each. `squad start worker` takes the first of `worker-1`, `worker-2` and `worker-3` that is not online, and `squad start worker worker-2` relaunches that one. A session is online only after you answer its two dialogs and it registers, which the TUI shows: a second `squad start worker` before that takes `worker-1` too, with the same worktree, and is refused when it registers. Wait until the previous worker is online, or give each one its name.
+- **Environment.** The session gets the environment of your terminal with `SQUAD_NAME` and `SQUAD_ROLE` set. The `CLAUDE*` variables are left out, because a `squad start` run from inside another Claude Code session would inherit that session's own, except the three you set for Claude Code yourself: `CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_OAUTH_TOKEN` and `CLAUDE_CODE_GIT_BASH_PATH`.
 - **Worktrees.** The mother stays in the main checkout. The leader, each worker and the judge work in a worktree of their own, outside the repository: `<parent of the repository>/<name of the repository>.squad/<name>`, or `<SQUAD_WORKTREES>/<name>` when that variable is set. A new worktree gets the untracked `.env*` files of the main checkout. One that already exists is used as it is.
 - **Two dialogs.** Claude Code shows two dialogs when a session starts, and the launcher does not answer them: you do. The first asks whether you trust the folder, the first time in each directory, and the option it comes with is "No, exit". The second is the warning of the development channel, at every start: choose "I am using this for local development".
 - **Permissions.** By default a session starts with `--permission-mode acceptEdits` and a list of what it runs without asking: it edits files, calls the squad tools of its role and runs the local git of its role (`status`, `diff`, `log`, `show` and `rev-parse` for all; `switch`, `add` and `commit` for the mother, the leader and the workers; `switch` for the judge; `merge` for the leader). Everything else asks for permission in the terminal of the session: a `git push`, the merge of the delivery, and the tests and the build of your project unless its `.claude/settings.json` allows them. `squad start <role> --skip-permissions` replaces the mode and the list with `--dangerously-skip-permissions`: the session asks for nothing.

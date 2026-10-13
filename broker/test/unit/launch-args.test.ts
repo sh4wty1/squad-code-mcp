@@ -256,7 +256,7 @@ test("PAP-46: an empty list of a workflow leaves its line out, and the last one 
 
 // ---- sessionEnv ----
 
-test("PAP-39: the session has the environment of the launcher without the CLAUDE variables, with its name and role", () => {
+test("PAP-39: the session has the environment of the launcher without the CLAUDE variables of a session around it, with its name and role", () => {
   const env = {
     PATH: "/usr/bin",
     HOME: "/home/dev",
@@ -280,6 +280,28 @@ test("PAP-39: the session has the environment of the launcher without the CLAUDE
     MY_CLAUDE: "kept",
   });
   expect(env).toEqual(before);
+});
+
+test("PAP-39: the three CLAUDE variables the dev sets for Claude Code stay, and every other one leaves", () => {
+  const env = {
+    PATH: "/usr/bin",
+    CLAUDE_CONFIG_DIR: "/home/dev/.claude-work",
+    CLAUDE_CODE_OAUTH_TOKEN: "token",
+    CLAUDE_CODE_GIT_BASH_PATH: "C:\\Program Files\\Git\\bin\\bash.exe",
+    CLAUDE: "1",
+    CLAUDEX: "1",
+    CLAUDE_CONFIG_DIR_OLD: "/home/dev/.claude",
+    CLAUDE_CODE_OAUTH_SCOPES: "user:inference",
+    CLAUDE_CODE_CHILD_SESSION: "1",
+  };
+  expect(sessionEnv(env, "mother", "mother")).toEqual({
+    PATH: "/usr/bin",
+    CLAUDE_CONFIG_DIR: "/home/dev/.claude-work",
+    CLAUDE_CODE_OAUTH_TOKEN: "token",
+    CLAUDE_CODE_GIT_BASH_PATH: "C:\\Program Files\\Git\\bin\\bash.exe",
+    SQUAD_NAME: "mother",
+    SQUAD_ROLE: "mother",
+  });
 });
 
 test("PAP-39: SQUAD_NAME and SQUAD_ROLE enter an environment that did not have them", () => {

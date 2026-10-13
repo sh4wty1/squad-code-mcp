@@ -191,12 +191,12 @@ São os Fix 1 a Fix 9 de `.specs/features/papeis/validation.md`, todos só de te
 
 - **PAP-31**, `plugin/hooks/stop.ts:27`: `/events` respondido com outro 2xx. O único status diferente de 200 dos testes é 500.
 - **PAP-07**, `broker/server.ts:383`: a sessão que fecha com o broker já fora. O arquivo de credencial tem de sumir do mesmo jeito.
-- **PAP-56**, `broker/launch.ts:151`: um `.env*` que não é `.env` nem `.env.<algo>`, como `.envrc`.
+- **PAP-56**, `broker/launch.ts:157`: um `.env*` que não é `.env` nem `.env.<algo>`, como `.envrc`.
 - **PAP-18**, `plugin/hooks/usage.ts:85`: um arquivo de subagente `*.jsonl` que não se chama `agent-*`.
-- **PAP-39**, `broker/launch.ts:92`: uma variável `CLAUDE*` sem `_` nem `CODE` depois, como `CLAUDEX`.
-- **PAP-53**, `broker/launch.ts:143`: um branch de nome curto `refs/heads/<branch da feature>`. Sem o `--detach` o worktree do worker nasce nele.
+- **PAP-39**, `broker/launch.ts:97`: uma variável `CLAUDE*` sem `_` nem `CODE` depois, como `CLAUDEX`. Respondido na revisão do PR 12: o teste entrou em `test/unit/launch-args.test.ts` junto com a mudança do texto de PAP-39 (ficam `CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_OAUTH_TOKEN` e `CLAUDE_CODE_GIT_BASH_PATH`), sem volta do Verifier depois.
+- **PAP-53**, `broker/launch.ts:149`: um branch de nome curto `refs/heads/<branch da feature>`. Sem o `--detach` o worktree do worker nasce nele.
 - **PAP-21**, `plugin/hooks/usage.ts:75`: `transcript_path` `0`, `1` ou `2`. Sem a guarda o hook lê um descritor: sai com 1 ou trava.
-- **PAP-37**, `broker/launch.ts:178`: com um broker que aceita a conexão e nunca responde, o launcher sem o `abort` sai 360 s depois da sessão. A spec não diz quando o launcher sai: falta a frase e um teste pelo processo.
+- **PAP-37**, `broker/launch.ts:184`: com um broker que aceita a conexão e nunca responde, o launcher sem o `abort` sai 360 s depois da sessão. A spec não diz quando o launcher sai: falta a frase e um teste pelo processo.
 - **Documentos**: seis "Leituras da spec" de `tasks.md` que a spec deveria dizer ela mesma (PAP-01, PAP-15, PAP-18, PAP-33, PAP-42 e o par PAP-66 e PAP-68).
 
 As lições das três voltas estão em `.specs/LESSONS.md`; as da terceira são L-083 a L-089.

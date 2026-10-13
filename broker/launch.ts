@@ -86,10 +86,16 @@ export function systemPrompt(name: string, entry: RoleEntry): string {
     .join("\n");
 }
 
+// The CLAUDE variables the dev sets for Claude Code itself: where its configuration and its
+// login are, the token of the login and, on Windows, where its bash is
+const OF_THE_DEV = ["CLAUDE_CONFIG_DIR", "CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_GIT_BASH_PATH"];
+
 // The environment of the session: that of the launcher without what a Claude Code session
 // around it left there, with the name and the role
 export function sessionEnv(env: Env, name: string, role: string): Env {
-  const kept = Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith("CLAUDE")));
+  const kept = Object.fromEntries(
+    Object.entries(env).filter(([key]) => !key.startsWith("CLAUDE") || OF_THE_DEV.includes(key))
+  );
   return { ...kept, SQUAD_NAME: name, SQUAD_ROLE: role };
 }
 
@@ -208,7 +214,9 @@ export async function launch(argv: string[], deps: Deps): Promise<number> {
     if (!entry) throw new Error(`${path}: the roles file does not have the role ${role}`);
 
     const events = await readLog(deps);
-    // A name that is given goes as it is: the one that refuses a name in use is the broker
+    // A name that is given goes as it is: the one that refuses a name in use is the broker.
+    // It also refuses the second of two workers started before the first called `ready`:
+    // the first is not online in the log yet, and both are picked worker-1 (README, Names).
     const name = start.name ?? (role === "worker" ? namesOf(role).find((n) => !presence(events).get(n)?.online) : role);
     if (name === undefined) {
       throw new Error("worker-1, worker-2 and worker-3 are online. Close one of them, or give the name of the one to relaunch.");
