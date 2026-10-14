@@ -139,6 +139,11 @@ export function createLog(db: Database, now: () => number = Date.now) {
   // open one, its deliveries and the row, together or not at all. Returns the seq.
   const close = db.transaction((by: Caller, outcome: string, body: string): number => {
     const seq = write({ kind: "feature_closed", from: by.name, role_from: by.role, to: "*", body, data: { outcome } });
+    // Its gates still pending close with it, rejected with no decision (GAT-28)
+    db.run(
+      `UPDATE gates SET status = 'rejected'
+       WHERE status = 'pending' AND feature_id = (SELECT id FROM features WHERE closed_seq IS NULL)`
+    );
     // Its questions still waiting close with it, with no answer: by their default, or discarded
     db.run(
       `UPDATE questions SET status = CASE WHEN default_answer IS NOT NULL THEN 'defaulted' ELSE 'discarded' END

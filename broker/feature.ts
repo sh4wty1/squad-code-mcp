@@ -24,7 +24,8 @@ export function projectOf(git_root: string | null, cwd: string): string {
 const WORKFLOWS: readonly string[] = ["tlc", "matt-pocock"];
 const OUTCOMES: readonly string[] = ["delivered", "abandoned"];
 
-export function createFeature(log: Log) {
+// `approved` says whether the open feature has an approved delivery gate
+export function createFeature(log: Log, approved: () => boolean) {
   // `peer` is who the id of the request belongs to and `body` the JSON object received
   function open(
     peer: Caller & Where,
@@ -68,7 +69,7 @@ export function createFeature(log: Log) {
     return { ok: true, ...opened };
   }
 
-  // No gate is read here: the rule of the delivery gate comes with the Gate slice
+  // A feature is delivered only after the dev approved its delivery (ADR-008)
   function close(peer: Caller, body: Record<string, unknown>): Answer {
     const no = (error: string, hint: string) => log.refused(peer.name, "feature_closed", error, hint);
 
@@ -84,6 +85,12 @@ export function createFeature(log: Log) {
     }
     if (!OUTCOMES.includes(outcome)) {
       return no("invalid_field", "outcome must be delivered or abandoned.");
+    }
+    if (outcome === "delivered" && !approved()) {
+      return no(
+        "gate_required",
+        "A feature is delivered only after the dev approves its delivery. Ask a gate with scope delivery and the commit of the branch, and close after the approve."
+      );
     }
     return { ok: true, seq: log.close(peer, outcome, body.body ?? "") };
   }

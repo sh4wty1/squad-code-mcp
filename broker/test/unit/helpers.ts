@@ -137,7 +137,7 @@ export function setup() {
   const permission = createPermission(log, HUMAN_TOKEN);
   const { state } = createState(log);
   const gate = createGate(db, log, HUMAN_TOKEN);
-  const feature = createFeature(log);
+  const feature = createFeature(log, gate.approved);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
@@ -167,9 +167,10 @@ export function setup() {
     return answer.feature_id;
   }
 
-  // Closes the open feature by the rule, as delivered. Returns the seq of the feature_closed.
+  // Closes the open feature by the rule, as abandoned: a delivered one needs an approved
+  // delivery gate (GAT-26). Returns the seq of the feature_closed.
   function closeFeature(): number {
-    const answer = feature.close(MOTHER, { outcome: "delivered" });
+    const answer = feature.close(MOTHER, { outcome: "abandoned" });
     if (!answer.ok) throw new Error(`the feature was not closed: ${answer.error}`);
     return answer.seq;
   }

@@ -366,10 +366,10 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-23 | P1: Decidir um gate | T4 | Implementing |
 | GAT-24 | P1: Decidir um gate | T4, T7 | Implementing |
 | GAT-25 | P1: Decidir um gate | T4 | Implementing |
-| GAT-26 | P1: Encerrar a feature com o gate | T5, T6, T26 | In Tasks |
-| GAT-27 | P1: Encerrar a feature com o gate | T5, T26 | In Tasks |
-| GAT-28 | P1: Encerrar a feature com o gate | T5 | In Tasks |
-| GAT-29 | P1: Encerrar a feature com o gate | T5 | In Tasks |
+| GAT-26 | P1: Encerrar a feature com o gate | T5, T6, T26 | Implementing |
+| GAT-27 | P1: Encerrar a feature com o gate | T5, T26 | Implementing |
+| GAT-28 | P1: Encerrar a feature com o gate | T5 | Implementing |
+| GAT-29 | P1: Encerrar a feature com o gate | T5 | Implementing |
 | GAT-30 | P1: Paridade com o log | T2, T7 | Implementing |
 | GAT-31 | P1: Paridade com o log | T2 | Implementing |
 | GAT-32 | P1: Paridade com o log | T2 | Implementing |

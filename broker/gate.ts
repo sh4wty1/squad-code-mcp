@@ -173,5 +173,17 @@ export function createGate(db: Database, log: Log, token: string) {
     return { ok: true, seq };
   }
 
-  return { request, decide };
+  // The open feature has an approved delivery gate: what /close-feature asks to deliver
+  function approved(): boolean {
+    return (
+      db
+        .query(
+          `SELECT 1 FROM gates WHERE scope = 'delivery' AND status = 'approved'
+           AND feature_id = (SELECT id FROM features WHERE closed_seq IS NULL)`
+        )
+        .get() !== null
+    );
+  }
+
+  return { request, decide, approved };
 }

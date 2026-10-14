@@ -13,6 +13,7 @@
 import { cleanupIntervalMs, dbPath, expireIntervalMs, port, tokenPath } from "./shared/config.ts";
 import { openDatabase } from "./db.ts";
 import { createFeature, type Where } from "./feature.ts";
+import { createGate } from "./gate.ts";
 import { createLog, type HistoryFilter } from "./log.ts";
 import { createPeers, refuse, type RegisterRequest } from "./peers.ts";
 import { createPermission, loadHumanToken } from "./permission.ts";
@@ -59,7 +60,8 @@ const { plan } = createPlan(log);
 const session = createSession(log);
 const permission = createPermission(log, humanToken);
 const { state } = createState(log);
-const feature = createFeature(log);
+const gate = createGate(db, log, humanToken);
+const feature = createFeature(log, gate.approved);
 
 // Clean up stale peers (PIDs that no longer exist) on startup, then periodically
 peers.cleanStale();

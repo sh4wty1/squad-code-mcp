@@ -29,7 +29,7 @@ function readClosed(seq: number, feature_id: number) {
     summary: "",
     body: "",
     ticket_ref: null,
-    outcome: "delivered",
+    outcome: "abandoned",
   };
 }
 

@@ -35,7 +35,7 @@ const mother = { ...MOTHER, ...AT };
 
 function start() {
   const b = setup();
-  return { ...b, feature: createFeature(b.log) };
+  return { ...b, feature: createFeature(b.log, b.gate.approved) };
 }
 
 function featureRows(b: ReturnType<typeof setup>) {

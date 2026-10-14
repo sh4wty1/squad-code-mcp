@@ -191,9 +191,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `delivered` sem gate, com gate `delivery` pendente, rejeitado, e só com `action` aprovado: `gate_required` com `refused`; com `delivery` aprovado fecha
-- [ ] `abandoned` fecha com gate pendente; nos dois `outcome` os pendentes viram `rejected` com `decision_seq` nulo e os decididos não mudam
-- [ ] A ordem de GAT-29 por pares; `test/unit/feature-close.test.ts` e os testes que fecham feature `delivered` sem gate passam a pedir o gate; gate quick passa
+- [x] `delivered` sem gate, com gate `delivery` pendente, rejeitado, e só com `action` aprovado: `gate_required` com `refused`; com `delivery` aprovado fecha
+- [x] `abandoned` fecha com gate pendente; nos dois `outcome` os pendentes viram `rejected` com `decision_seq` nulo e os decididos não mudam
+- [x] A ordem de GAT-29 por pares; `test/unit/feature-close.test.ts` e os testes que fecham feature `delivered` sem gate passam a pedir o gate; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

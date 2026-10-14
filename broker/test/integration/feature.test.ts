@@ -225,14 +225,15 @@ test("FEAT-07/21: a leader that was offline gets the feature_opened at its first
     },
   ]);
 
-  const closed = await post(broker.url, "/close-feature", { id: mother, outcome: "delivered" });
+  // abandoned: a delivered one needs an approved delivery gate (GAT-26)
+  const closed = await post(broker.url, "/close-feature", { id: mother, outcome: "abandoned" });
   expect((await post(broker.url, "/poll-messages", { id: mother })).json).toEqual({ events: [] });
   const again = (await post(broker.url, "/poll-messages", { id: leader })).json.events;
   expect(again.map((e: any) => [e.seq, e.kind])).toEqual([
     [opened.json.seq, "feature_opened"],
     [closed.json.seq, "feature_closed"],
   ]);
-  expect(again[1].outcome).toBe("delivered");
+  expect(again[1].outcome).toBe("abandoned");
 });
 
 test("FEAT-27: the features derived from GET /events are the rows of the table without project", async () => {
@@ -268,7 +269,7 @@ test("FEAT-28: a broker that comes up again over the same database has the same 
   const second = await restart(first);
   expectRefusal(await post(second.url, "/open-feature", { id, ...FIELDS, title: "the second" }), "feature_already_open");
   expect((await post(second.url, "/state", { id })).json.feature).toEqual({ id: 1, ...FIELDS });
-  expect((await post(second.url, "/close-feature", { id, outcome: "delivered" })).json.ok).toBe(true);
+  expect((await post(second.url, "/close-feature", { id, outcome: "abandoned" })).json.ok).toBe(true);
 
   const third = await restart(second);
   expectRefusal(await post(third.url, "/close-feature", { id, outcome: "delivered" }), "no_open_feature");
