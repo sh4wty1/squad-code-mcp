@@ -959,6 +959,17 @@ test("CLK-33: a click on enter responder of the detail does what enter does, and
   expect(clicked(far, x, y)!.ui).toEqual({ ...far.ui, qfocus: "list", modal: opened(8, null) });
 });
 
+test("CLK-33: edge case: with Q-07 of 4 options the line of keys is the last inside the detail, and a click on enter and on b does what the key does", () => {
+  const options = ["opção 1", "opção 2", "opção 3", "opção 4"];
+  const v = view("04", {}, (events) => events.map((e) => (e.kind === "question" && e.question_id === 7 ? { ...e, options } : e)));
+  const g = screen(v);
+  const detail = tabBox(g, 1);
+  const [x, y] = cellOf(g, [detail.left, detail.right], DETAIL_KEYS, 2, detail.bottom);
+  expect(y).toBe(detail.bottom - 1);
+  expect(clicked(v, x, y)!.ui).toEqual(press(v.ui, "\r", v)!);
+  expect(clicked(v, x + len("enter responder   "), y)!.ui).toEqual(press(v.ui, "b", v)!);
+});
+
 // The wheel up and the wheel down, with the key each one is
 const WHEEL = [
   [64, "k", "up"],

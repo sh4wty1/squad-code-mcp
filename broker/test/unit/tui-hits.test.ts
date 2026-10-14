@@ -626,6 +626,19 @@ test("CLK-33: without a question open the detail has no line of keys, and no cel
   expect(cellsOf(detail).filter((cell) => hit(g, Number(cell.split(",")[0]), Number(cell.split(",")[1])) !== null)).toEqual([]);
 });
 
+// Q-07 with four options: the line of keys is the last line inside the box of the detail
+test("CLK-33: edge case: with 4 options the line of keys is drawn on the last line inside the detail, with the marks of enter and of b", () => {
+  const options = ["opção 1", "opção 2", "opção 3", "opção 4"];
+  const g = questions(view("04", {}, (events) => events.map((e) => (e.kind === "question" && e.question_id === 7 ? { ...e, options } : e))));
+  const detail = tabBoxes(g)[1];
+  const y = detail.bottom - 1;
+  expect(textOf(g, y, detail.left, detail.right)).toContain(DETAIL_KEYS);
+  const x = at(g, y, DETAIL_KEYS);
+  const enter = { key: "\r" };
+  const b = { key: "b" };
+  expect(hits(g, y, x, x + len(DETAIL_KEYS) - 1)).toEqual([...all(5, enter), null, ...all(9, enter), null, null, null, b, null, ...all(18, b)]);
+});
+
 // Q-07 with more options than its three: from eight on, their lines take the room of the last
 // lines of the panel, and the line of keys is not drawn. With 21 and with 22 it would come on
 // line 38 and on line 39.

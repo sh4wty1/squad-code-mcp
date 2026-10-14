@@ -743,10 +743,10 @@ Da volta 2 do Verifier (`validation.md`, Fix 1): o mutante N30, que troca `ky <=
 
 **Done when**:
 
-- [ ] A linha está na última linha dentro da caixa do detalhe, com as marcas de `enter` e de `b` como com três opções
-- [ ] O clique em `enter` e em `b`, achados no texto desenhado, dá o mesmo `Ui` que `press` com `\r` e com `b`
-- [ ] Os dois testes matam o N30
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] A linha está na última linha dentro da caixa do detalhe, com as marcas de `enter` e de `b` como com três opções
+- [x] O clique em `enter` e em `b`, achados no texto desenhado, dá o mesmo `Ui` que `press` com `\r` e com `b`
+- [x] Os dois testes matam o N30
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

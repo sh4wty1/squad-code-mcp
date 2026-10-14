@@ -344,7 +344,7 @@ cada item, e com o que ficou sem conferir.
 | CLK-30 | P1: Rolar com a roda | T9, T15 | Implementing |
 | CLK-31 | P1: Rolar com a roda | T9, T15 | Implementing |
 | CLK-32 | P1: Rolar com a roda | T15 | Implementing |
-| CLK-33 | P1: Atalhos e selos clicáveis | T6, T9, T12 | Implementing |
+| CLK-33 | P1: Atalhos e selos clicáveis | T6, T9, T12, T29 | Implementing |
 | CLK-34 | P1: Atalhos e selos clicáveis | T6, T12 | Implementing |
 | CLK-35 | P1: Atalhos e selos clicáveis | T6, T12 | Implementing |
 | CLK-36 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
