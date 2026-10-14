@@ -72,6 +72,16 @@ permissão na TUI, com teclado e mouse. É a última fatia do MVP.
 | Conteúdo do modal de gate que o log não tem | Sem fonte, fica de fora com desvio D2: nenhum. O que o protótipo escreve à mão sai do log: `feature` e `perguntas` são agregados da derivação, `resumo` e `o que a mother mudou` são o `body`, `diff stat` é o `diffstat` linha a linha, `~ mudou` compara com o `diffstat` da versão anterior, `judge` sai dos `verdict` | Design: "os agregados do modal são derivados do log" e "o resumo vai no `body`" | n |
 | Log do frame 08 e seguintes | O `body` do `gate` G-01 dos logs dos frames passa a ser o resumo do modal; a prosa do protótipo que o detalhe da tela principal mostra atrás do modal vira desvio D2 | O design põe o resumo no `body`; manter a prosa desalinharia a caixa inteira do modal em seis frames | n |
 | Marco do MVP | Conferido com sessões reais do Claude Code, como a RS-10 da Papéis: quatro sessões em `haiku` pelo launcher num repositório descartável, o dev simulado digitando só no terminal da mother e decidindo pela TUI num pseudo-terminal. O que não for exercitado fica registrado em `marco-mvp.md` | É a frase do design ("só com o terminal da mother e a TUI") e o que a Papéis fez para RS-10 | n |
+| `decision` vazia em `/gate-decision` | `invalid_field`, não `missing_field`: é texto, presente e fora dos três valores | GAT-21 e GAT-22 não diziam qual; é a leitura de AD-005. Escolhido pelo worker da T4 | n |
+| `text` de um `approve` sem texto, na derivação | `null` | GAT-31 não dizia; o evento não tem o campo. Escolhido pelo worker da T2 | n |
+| Resposta da tool `gate` | `Gate <id> requested with seq <seq>.`, como `ask` responde `Question <id> asked with seq <seq>.` | A mother reemite pelo `gate_id` depois de um comentário (GAT-38); sem ele na resposta ela só o leria no `gate_decision` | n |
+| Contagem `entre agentes` dos frames de gate | A derivação conta 2 (Q-11 e a Q-04, que a mother respondeu ao leader); o protótipo escreve 1 à mão. Um D1 numa célula dentro da caixa, nos sete frames de gate, o único dentro dela | GAT-44 conta toda pergunta resolvida por `agent`; trocar o log mudaria o feed e o detalhe de outros frames | n |
+| Ordem do corte de GAT-93 | Uma linha por vez, do fim, de quem tiver mais linhas entre o `body` e o `diffstat`, sem marca de `…` | GAT-93 não dizia quem cede primeiro. Escolhido pelo worker da T18 | n |
+| Versão 2 ou mais sem `comment` ou sem `body` | Cada parte só aparece quando existe, e o separador só com ao menos uma | GAT-45 não cobria. Escolhido pelo worker da T18 | n |
+| `permission_closed` ao enviar | O modal fica aberto, sem aviso, e passa ao estado de GAT-71 pela leitura seguinte, que traz o evento que fechou o pedido | O estado sai de `squad.requests` (design) | n |
+| `m` com o modal de gate ou de permissão aberto | Não liga nem desliga o mouse: num modo de texto entra no texto, nos outros não faz nada | GAT-54 e GAT-50. Era um defeito achado na T24: só o modal de resposta prendia o `m` | y |
+| Clique num item da fila que já saiu dela | Não faz nada | A fila é a da leitura; o item do último desenho pode ter sido decidido | n |
+| Aviso sem cor na spec | Cinza, como `nenhuma bloqueante`; verde `bgreen` e vermelho `bred` como o modal de resposta | GAT-40, GAT-59, GAT-60 e GAT-70 não diziam a cor | n |
 
 **Open questions:** none - all resolved or logged above.
 
@@ -451,4 +461,4 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 - [ ] A TUI, sobre um broker de teste, decide um pedido de permissão pelo modal, e o servidor MCP do peer recebe o veredito.
 - [ ] Os 60 frames passam no teste de frames; os 47 anteriores não mudam.
 - [ ] O marco do MVP conferido com sessões reais, ou o que ficou sem conferir registrado em `marco-mvp.md`.
-- [ ] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar.
+- [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Antes da fatia, `main` em `3922651`: Windows, 2080 pass, 5 skip. Em `eb39b01`, 2026-10-14: Windows 11, Bun 1.3.14, `tsc` 0 e 2431 pass, 5 skip, 0 fail, 96 arquivos, em 130 s; Linux, contêiner `oven/bun:1.4.2` (kernel 6.18 do WSL2) com `git`, `lsof` e `procps`, sobre um clone com `core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2435 pass, 1 skip, 0 fail, 96 arquivos, em 82 s cada.

@@ -609,7 +609,7 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Windows: `tsc` 0 e a contagem; Linux: clone com `core.autocrlf=false`, `git`, `lsof` e `procps`, 3 execuções; ou o que ficou sem rodar
+- [x] Windows: `tsc` 0 e a contagem; Linux: clone com `core.autocrlf=false`, `git`, `lsof` e `procps`, 3 execuções; ou o que ficou sem rodar
 
 **Tests**: none
 **Gate**: build
