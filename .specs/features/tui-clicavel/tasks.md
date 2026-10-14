@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/tui-clicavel/design.md`
-**Status**: Execute. T1 a T30 commitadas. A terceira e última volta do Verifier deu FAIL por duas lacunas de teste (Fix 1 e Fix 2 de `validation.md`), sem defeito de produção: o dev decidiu em 2026-10-14 aplicá-las como T30 e T31 e fechar a fatia sem uma quarta volta
+**Status**: Execute. T1 a T31 commitadas. A terceira e última volta do Verifier deu FAIL por duas lacunas de teste (Fix 1 e Fix 2 de `validation.md`), sem defeito de produção: o dev decidiu em 2026-10-14 aplicá-las como T30 e T31 e fechar a fatia sem uma quarta volta
 
 Regras do repositório que valem para toda tarefa:
 
@@ -99,7 +99,7 @@ T22 → T23 → T24 → T25 → T26 → T27
 ### Phase 6: Correções do Verifier
 
 ```
-T28 → T29 → T30
+T28 → T29 → T30 → T31
 ```
 
 ---
@@ -774,6 +774,26 @@ Da volta 3 do Verifier (`validation.md`, Fix 1): o mutante R20, que troca `[0-9;
 
 ---
 
+### T31: CLK-20 com a primeira linha do log selecionada
+
+Da volta 3 do Verifier (`validation.md`, Fix 2): o mutante R32, que troca `from < 0` por `from <= 0` em `broker/tui/mouse.ts:110`, sobreviveu. Os testes de CLK-20 partiam da linha 417 ou de nenhuma seleção, nunca do índice 0 de `rows`.
+
+**What**: um teste de CLK-20 com a linha de `seq` 1, a primeira do log do frame 01, selecionada: um clique numa linha abaixo dela, achada no texto desenhado, dá o mesmo `Ui` que `j` até ela, com o foco no feed.
+**Where**: `broker/test/unit/tui-mouse.test.ts`
+**Depends on**: T30
+**Requirement**: CLK-20
+
+**Done when**:
+
+- [x] O clique em 14:03:01 e em 14:17:48 dá o `Ui` de `j` duas e seis vezes, com a seleção em 3 e em 401 e o foco 1
+- [x] O teste mata o R32, numa cópia física do branch
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -784,7 +804,7 @@ Phase 2:  T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10
 Phase 3:  T11 → T12 → T13 → T14 → T15 → T16 → T17 → T18
 Phase 4:  T19 → T20 → T21
 Phase 5:  T22 → T23 → T24 → T25 → T26 → T27
-Phase 6:  T28 → T29 → T30
+Phase 6:  T28 → T29 → T30 → T31
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fase 2 (9 tarefas); fase 3 (8); fases 4 e 5 até a T24 ficam com o orquestrador, porque a fase 5 precisa do dev no terminal (T25) e do Docker (T26).
@@ -827,6 +847,7 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T28: CLK-10 no terminal pequeno | 1 teste | ✅ Granular |
 | T29: CLK-33 na última linha do detalhe | 2 testes do mesmo caso | ✅ Granular |
 | T30: CLK-04 com um relatório longo | 1 teste | ✅ Granular |
+| T31: CLK-20 com a primeira linha selecionada | 1 teste | ✅ Granular |
 
 ---
 
@@ -864,6 +885,7 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T28 | None (a fase anterior inteira) | início da fase 6 | ✅ Match |
 | T29 | T28 | T28 → T29 | ✅ Match |
 | T30 | T29 | T29 → T30 | ✅ Match |
+| T31 | T30 | T30 → T31 | ✅ Match |
 
 ---
 
@@ -887,3 +909,4 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T28 | Laço | unit | unit | ✅ OK |
 | T29 | Marcas das telas e redutor do mouse | unit | unit | ✅ OK |
 | T30 | Leitura da entrada e redutor do mouse | unit | unit | ✅ OK |
+| T31 | Redutor do mouse | unit | unit | ✅ OK |

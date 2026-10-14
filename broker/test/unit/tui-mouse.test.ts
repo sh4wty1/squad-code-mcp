@@ -547,6 +547,23 @@ for (const [what, paused] of [["live", false], ["paused", true]] as const) {
   });
 }
 
+test("CLK-20: with the first line of the log selected, a click on a line below it selects that line, as j until it", () => {
+  const v = view("01", { selected: 1 });
+  const g = screen(v);
+  // 14:02:10 is the first line of the log, 14:03:01 two lines below it and 14:17:48 six
+  expect(v.rows[0]!.seq).toBe(rowAt(v, "14:02:10").seq);
+  expect(v.rows[0]!.seq).toBe(1);
+  const BELOW = [
+    ["14:03:01", 3, ["j", "j"]],
+    ["14:17:48", 401, ["j", "j", "j", "j", "j", "j"]],
+  ] as const;
+  for (const [hour, seq, moves] of BELOW) {
+    const next = clicked(v, ...feedCell(g, hour))!;
+    expect(next.ui).toEqual(keys(v, ...moves)!);
+    expect([next.ui.selected, next.ui.focus]).toEqual([seq, 1]);
+  }
+});
+
 test("CLK-20: with no line selected, a click on a line of the feed selects it: the first k selects the last line, and the others go up to the clicked one", () => {
   const v = view("01", { selected: null });
   const g = screen(v);

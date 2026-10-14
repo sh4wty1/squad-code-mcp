@@ -331,7 +331,7 @@ cada item, e com o que ficou sem conferir.
 | CLK-17 | P1: O terminal conta onde o mouse clicou | T1 | Verified |
 | CLK-18 | P1: Navegar com o clique | T5, T12 | Verified |
 | CLK-19 | P1: Navegar com o clique | T7, T13 | Verified |
-| CLK-20 | P1: Navegar com o clique | T7, T13 | Needs Fix |
+| CLK-20 | P1: Navegar com o clique | T7, T13, T31 | Implementing |
 | CLK-21 | P1: Navegar com o clique | T13 | Verified |
 | CLK-22 | P1: Navegar com o clique | T7, T13 | Verified |
 | CLK-23 | P1: Navegar com o clique | T5, T12 | Verified |
