@@ -771,8 +771,8 @@ T38 → T30
 
 **Done when**:
 
-- [ ] Três gates, G-01 aprovado e G-02 e G-03 pendentes, modal em G-02: a borda de cima com ` gate 1 de 2 ` e a linha `fila` só com G-02 e G-03
-- [ ] Falha com `gate.ts:169` `queue.length` trocado por `squad.gates.length` numa cópia; gate quick passa
+- [x] Três gates, G-01 aprovado e G-02 e G-03 pendentes, modal em G-02: a borda de cima com ` gate 1 de 2 ` e a linha `fila` só com G-02 e G-03
+- [x] Falha com `gate.ts:169` `queue.length` trocado por `squad.gates.length` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

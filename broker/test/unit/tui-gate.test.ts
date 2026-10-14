@@ -164,6 +164,14 @@ test("GAT-41, GAT-42, GAT-49: with two pending gates the tag says which, the que
   expect(second.box[2]).toBe(row("fila        G-01 entrega final   ▶ G-02 excluir branch antiga   antigo ant…"));
 });
 
+test("GAT-41, GAT-42: with G-01 approved and G-02 and G-03 pending, the tag counts the queue of the pending, not every gate", () => {
+  const G03 = { ...G02, seq: 458.5, ts: G02.ts + 2000, gate_id: 3, summary: "G-03 chave" } as SquadEvent;
+  const approved = { ...G02, seq: 458.6, ts: G02.ts + 3000, from: "human", role_from: "human", to: "mother", kind: "gate_decision", gate_id: 1, decision: "approve", summary: "G-01 aprovado", body: "" } as SquadEvent;
+  const { box } = draw(modal(2), (events) => [...events, G03, approved]);
+  expect(box[0]).toBe(top("⚠ gate G-02", " gate 1 de 2 "));
+  expect(box[2]).toBe(row("fila      ▶ G-02 excluir branch antiga     G-03 chave   antigo antes"));
+});
+
 test("GAT-45, GAT-46, GAT-47: an action gate without diffstat has no diff and no judge, and one without body no summary", () => {
   const { box } = draw(modal(2));
   expect(box.slice(3)).toEqual([
