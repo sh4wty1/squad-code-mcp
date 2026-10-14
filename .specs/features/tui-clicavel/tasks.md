@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/tui-clicavel/design.md`
-**Status**: Approved
+**Status**: Execute. T1 a T29 commitadas. A terceira e última volta do Verifier deu FAIL por duas lacunas de teste (Fix 1 e Fix 2 de `validation.md`), sem defeito de produção: o dev decide se elas viram tarefas e uma quarta volta, ou se a fatia fecha com elas registradas
 
 Regras do repositório que valem para toda tarefa:
 
