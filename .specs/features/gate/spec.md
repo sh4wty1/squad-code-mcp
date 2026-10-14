@@ -380,7 +380,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-37 | P1: O que a mother vê | T10, T29 | Implementing |
 | GAT-38 | P1: O que a mother vê | T10, T29 | Implementing |
 | GAT-39 | P1: O que a mother vê | T10, T29 | Implementing |
-| GAT-40 | P1: Modal de gate | T13, T20, T26 | In Tasks |
+| GAT-40 | P1: Modal de gate | T13, T20, T26 | Implementing |
 | GAT-41 | P1: Modal de gate | T17, T18 | In Tasks |
 | GAT-42 | P1: Modal de gate | T18 | In Tasks |
 | GAT-43 | P1: Modal de gate | T18 | In Tasks |
@@ -390,13 +390,13 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-47 | P1: Modal de gate | T18 | In Tasks |
 | GAT-48 | P1: Modal de gate | T18 | In Tasks |
 | GAT-49 | P1: Modal de gate | T18 | In Tasks |
-| GAT-50 | P1: Modal de gate | T13 | In Tasks |
+| GAT-50 | P1: Modal de gate | T13 | Implementing |
 | GAT-51 | P1: Modal de gate | T18 | In Tasks |
-| GAT-52 | P1: Modal de gate | T13, T26 | In Tasks |
+| GAT-52 | P1: Modal de gate | T13, T26 | Implementing |
 | GAT-53 | P1: Modal de gate | T18 | In Tasks |
-| GAT-54 | P1: Modal de gate | T13 | In Tasks |
-| GAT-55 | P1: Modal de gate | T13 | In Tasks |
-| GAT-56 | P1: Modal de gate | T13, T18 | In Tasks |
+| GAT-54 | P1: Modal de gate | T13 | Implementing |
+| GAT-55 | P1: Modal de gate | T13 | Implementing |
+| GAT-56 | P1: Modal de gate | T13, T18 | Implementing |
 | GAT-57 | P1: Modal de gate | T15 | In Tasks |
 | GAT-58 | P1: Modal de gate | T11, T15 | Implementing |
 | GAT-59 | P1: Modal de gate | T15 | In Tasks |
@@ -416,7 +416,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-73 | P1: Teclado e escrita comuns aos modais | T15, T25 | In Tasks |
 | GAT-74 | P1: Teclado e escrita comuns aos modais | T15, T25 | In Tasks |
 | GAT-75 | P1: Teclado e escrita comuns aos modais | T16 | In Tasks |
-| GAT-76 | P1: Teclado e escrita comuns aos modais | T13 | In Tasks |
+| GAT-76 | P1: Teclado e escrita comuns aos modais | T13 | Implementing |
 | GAT-77 | P1: Teclado e escrita comuns aos modais | T16 | In Tasks |
 | GAT-78 | P1: Teclado e escrita comuns aos modais | T25 | In Tasks |
 | GAT-79 | P1: Mouse nos modais | T23, T24 | In Tasks |
@@ -430,9 +430,9 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-87 | P1: Frames e legenda | T20 | In Tasks |
 | GAT-88 | P1: Frames e legenda | T20, T21, T22 | In Tasks |
 | GAT-89 | P1: Frames e legenda | T21, T22, T28, T30 | In Tasks |
-| GAT-90 | P1: Frames e legenda | T13 | In Tasks |
-| GAT-91 | Edge cases | T13 | In Tasks |
-| GAT-92 | Edge cases | T13 | In Tasks |
+| GAT-90 | P1: Frames e legenda | T13 | Implementing |
+| GAT-91 | Edge cases | T13 | Implementing |
+| GAT-92 | Edge cases | T13 | Implementing |
 | GAT-93 | Edge cases | T18 | In Tasks |
 | GAT-94 | Edge cases | T14, T19 | In Tasks |
 | GAT-95 | Edge cases | T14, T19 | In Tasks |

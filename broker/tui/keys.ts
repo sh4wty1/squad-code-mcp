@@ -1,15 +1,15 @@
 // What a key does to the state of the screen. Pure: the clock is the one of the view, and a
 // key is the string the terminal sends in raw mode. Ported from `onKey` and `textKeys` of
-// the prototype, without the modals of gate and of permission.
+// the prototype.
 
 import { qid } from "../shared/contract.ts";
-import type { Question } from "../shared/derive.ts";
+import type { Gate, Question } from "../shared/derive.ts";
 import { resolved, waiting } from "./asked.ts";
 import type { FeedRow } from "./feed.ts";
 import type { Color } from "./grid.ts";
 import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
-import type { Modal, Ui, View } from "./view.ts";
+import type { GateModal, Modal, Ui, View } from "./view.ts";
 import type { Sent } from "./writer.ts";
 
 export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null, pasting: false };
@@ -101,10 +101,73 @@ function answering(ui: Ui, m: Modal, key: string, view: View): Ui | null {
   return [...key].length === 1 && !/[\x00-\x1f\x7f-\x9f]/u.test(key) ? set({ text: m.text + key }) : ui;
 }
 
+// The text after a key that edits it: a character that is not a control one goes to the end,
+// backspace takes the last one, ctrl+u empties it. null for a key that does not edit it; an
+// arrow is not one character.
+function typed(text: string, key: string): string | null {
+  if (key === "\x7f" || key === "\x08") return [...text].slice(0, -1).join("");
+  if (key === "\x15") return "";
+  return [...key].length === 1 && !/[\x00-\x1f\x7f-\x9f]/u.test(key) ? text + key : null;
+}
+
+// The modal of a gate, in the view mode
+const gateModal = (g: Gate): GateModal => ({ id: g.id, mode: "view", text: "", expanded: false, empty: false, sending: false, version: g.version });
+
+// What a key does with the modal of gate open. The decision is not sent here: it is left in
+// `send`, for the loop. Only y of the confirm mode and enter of a text mode decide.
+function gating(ui: Ui, m: GateModal, key: string, view: View): Ui | null {
+  if (key === "\x03") return null;
+  // No key changes the modal while the broker did not say what it did with the decision, nor
+  // while it does not answer the reads
+  if (m.sending || view.down) return ui;
+  const set = (gate: Partial<GateModal>): Ui => ({ ...ui, gate: { ...m, ...gate } });
+  // The pending gates, the oldest first: the queue of the modal
+  const queue = view.squad.gates.filter((g) => g.pending);
+
+  if (m.mode === "view") {
+    switch (key) {
+      case "\x1b":
+        return { ...ui, gate: null };
+      case "a":
+        // What is confirmed is the version on the screen now
+        return set({ mode: "confirm", version: queue.find((g) => g.id === m.id)?.version ?? m.version });
+      case "r":
+      case "c":
+        return set({ mode: key === "r" ? "reject" : "comment", text: "", expanded: false, empty: false });
+      case "]":
+      case "[": {
+        const at = queue.findIndex((g) => g.id === m.id);
+        const next = queue[Math.max(0, Math.min(queue.length - 1, at + (key === "]" ? 1 : -1)))];
+        return at < 0 || next!.id === m.id ? ui : { ...ui, gate: gateModal(next!) };
+      }
+    }
+    return ui;
+  }
+  if (m.mode === "confirm") {
+    if (key === "y") return { ...ui, gate: { ...m, sending: true }, send: { gate_id: m.id, decision: "approve" } };
+    return key === "\x1b" ? set({ mode: "view" }) : ui;
+  }
+  // The text of a reject or of a comment: every key but these is text, q and the digits too
+  switch (key) {
+    case "\x1b":
+      return set({ mode: "view", text: "", empty: false });
+    case "\r": {
+      const text = m.text.trim();
+      return text ? { ...ui, gate: { ...m, sending: true }, send: { gate_id: m.id, decision: m.mode, text } } : set({ empty: true });
+    }
+    case "\x05":
+      return set({ expanded: !m.expanded });
+  }
+  const text = typed(m.text, key);
+  // The mark of an empty text stays until a key changes the text
+  return text === null || text === m.text ? ui : set({ text, empty: false });
+}
+
 // The state after the key, or null when the key quits
 export function press(ui: Ui, key: string, view: View): Ui | null {
   // With the modal open every key is its own: q, the digits and the letters are text
   if (ui.modal) return answering(ui, ui.modal, key, view);
+  if (ui.gate) return gating(ui, ui.gate, key, view);
   const { squad, rows } = view;
   const toast = (text: string, color?: Color): Ui => ({ ...ui, toast: notice(view, text, color) });
   const thread = (): Ui => ({ ...ui, screen: "thread", threadTicket: null, threadOffset: 0 });
@@ -140,7 +203,13 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
       return { ...ui, screen: "main" };
     case "4":
       return { ...ui, screen: "questions" };
-    case "g":
+    case "g": {
+      // The oldest pending gate, over the main screen. A broker that does not answer the reads
+      // would not take the decision.
+      if (view.down) return toast("broker desconectado · gate desabilitado");
+      const g = squad.gates.find((g) => g.pending);
+      return g ? { ...ui, screen: "main", gate: gateModal(g) } : toast("nenhum gate pendente");
+    }
     case "x":
       return toast("chega com a fatia Gate");
     case "h":

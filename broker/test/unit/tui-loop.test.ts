@@ -193,13 +193,14 @@ test("TUI-63: the notice of a key stays 4 s in the footer", async () => {
   const { t, key, stop } = launch();
   await t.shows(main(t.view()).text(), "the main screen");
 
+  // frame 01 has no pending gate
   key("g");
-  expect(t.lines()[38]).toContain("chega com a fatia Gate");
+  expect(t.lines()[38]).toContain("nenhum gate pendente");
   t.now += 3999;
   await t.reads(t.calls.length + 2);
-  expect(t.lines()[38]).toContain("chega com a fatia Gate");
+  expect(t.lines()[38]).toContain("nenhum gate pendente");
   t.now += 1;
-  await until(() => !t.lines()[38]!.includes("chega com a fatia Gate"), "the notice to leave");
+  await until(() => !t.lines()[38]!.includes("nenhum gate pendente"), "the notice to leave");
   stop();
 });
 

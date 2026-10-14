@@ -337,9 +337,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Cada tecla de cada modo em `test/unit/tui-gate-keys.test.ts`, com `q`, dígitos, `g`, `x`, `4` e `enter` onde a spec os nomeia; `]` e `[` no primeiro, no meio e no último da fila
-- [ ] `g` sem gate, com o broker fora e com outro modal aberto; `y` e `enter` deixam o `send` de GAT-52 e GAT-55; vazio e só espaços não deixam e marcam o erro, que some na tecla seguinte que muda o texto
-- [ ] Gate quick passa
+- [x] Cada tecla de cada modo em `test/unit/tui-gate-keys.test.ts`, com `q`, dígitos, `g`, `x`, `4` e `enter` onde a spec os nomeia; `]` e `[` no primeiro, no meio e no último da fila
+- [x] `g` sem gate, com o broker fora e com outro modal aberto; `y` e `enter` deixam o `send` de GAT-52 e GAT-55; vazio e só espaços não deixam e marcam o erro, que some na tecla seguinte que muda o texto
+- [x] Gate quick passa
 
 **Tests**: unit
 **Gate**: quick
