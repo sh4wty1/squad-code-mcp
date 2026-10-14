@@ -574,8 +574,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `close_feature` `delivered` recebe `gate_required` antes do `approve` e fecha depois; o pedido de permissão chega ao servidor MCP como veredito
-- [ ] Gate full passa
+- [x] `close_feature` `delivered` recebe `gate_required` antes do `approve` e fecha depois; o pedido de permissão chega ao servidor MCP como veredito
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full
