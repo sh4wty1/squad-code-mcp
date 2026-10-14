@@ -377,9 +377,9 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-34 | P1: O que a mother vê | T8 | Implementing |
 | GAT-35 | P1: O que a mother vê | T8 | Implementing |
 | GAT-36 | P1: O que a mother vê | T9 | Implementing |
-| GAT-37 | P1: O que a mother vê | T10, T29 | In Tasks |
-| GAT-38 | P1: O que a mother vê | T10, T29 | In Tasks |
-| GAT-39 | P1: O que a mother vê | T10, T29 | In Tasks |
+| GAT-37 | P1: O que a mother vê | T10, T29 | Implementing |
+| GAT-38 | P1: O que a mother vê | T10, T29 | Implementing |
+| GAT-39 | P1: O que a mother vê | T10, T29 | Implementing |
 | GAT-40 | P1: Modal de gate | T13, T20, T26 | In Tasks |
 | GAT-41 | P1: Modal de gate | T17, T18 | In Tasks |
 | GAT-42 | P1: Modal de gate | T18 | In Tasks |

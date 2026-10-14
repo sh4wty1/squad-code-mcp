@@ -283,8 +283,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Sem a linha do AD-020; cada mandamento de GAT-38 e GAT-39 numa frase que o teste procura; nenhuma outra skill cita `gate`
-- [ ] `test/unit/skills.test.ts` atualizado; gate build passa
+- [x] Sem a linha do AD-020; cada mandamento de GAT-38 e GAT-39 numa frase que o teste procura; nenhuma outra skill cita `gate`
+- [x] `test/unit/skills.test.ts` atualizado; gate build passa
 
 **Tests**: unit
 **Gate**: build

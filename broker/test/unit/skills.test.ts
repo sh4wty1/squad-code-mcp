@@ -24,11 +24,11 @@ const OF_THE_MOTHER = [
   "Asking",
   "Credentials",
   "Irreversible actions",
-  "Delivery (until the gate exists)",
+  "Delivery",
   "When the feature closes",
 ];
 
-// PAP-72: the line that marks what the Gate slice rewrites
+// GAT-37: the line that marked what the Gate slice rewrites, which no skill has any longer
 const GATE_LINE = "<!-- Gate slice: rewrite this section to use the gate -->";
 
 // PAP-61: the squad tools the skill of each role has to cite
@@ -52,6 +52,7 @@ interface Rule {
   ordered?: string[];
   never?: string[];
   lines?: string[];
+  uncited?: string[];
 }
 
 const OF_EVERY_ROLE: Rule[] = [
@@ -72,6 +73,25 @@ const PROJECT = [
   "Your project is the working directory of this session.",
   "The directory this skill was loaded from belongs to the squad plugin, not to your project: never read, write or run anything there.",
 ];
+
+// GAT-37 to GAT-39: the sentences of the mother about the gate, by requirement and section
+const GAT_SAYS: Record<string, string[]> = {
+  "GAT-37: Irreversible actions": [
+    "When you need one of them yourself, call `gate` with `scope` set to `action`, the exact `action` you will take and its `effect`",
+    "When a blocking question asks whether one of them may be done, call `gate` with `scope` set to `action`, the exact `action` the agent will take and its `effect`.",
+  ],
+  "GAT-37: Delivery": ["Call `gate` with `scope` set to `delivery` and `commit` set to that commit."],
+  "GAT-38: Irreversible actions": [
+    "After `approve`, take exactly the `action` of the gate, nothing more and nothing different, and, when the gate has a `commit`, only if the branch of the feature is still at it.",
+    "If it is not, do not take it: ask a new gate, without `gate_id`, with the new commit.",
+    "After `reject`, do not take the action.",
+    "After `comment`, the gate is still pending: do what the comment asks, then call `gate` again with the same `gate_id`",
+    "When an agent asked for the action, the agent is the one who takes it, by the same rules: answer its blocking question with the decision, with `answer`, so that it takes the action or does not.",
+  ],
+  "GAT-39: Delivery": [
+    "Call `close_feature` with `outcome` set to `delivered` only after you took the approved delivery, saying in `body` what was done.",
+  ],
+};
 
 const OF_ROLE: Record<string, Rule[]> = {
   worker: [
@@ -105,13 +125,23 @@ const OF_ROLE: Record<string, Rule[]> = {
       // the branch of the feature, the spec in it and the way back, before the feature opens
       ordered: ["git switch -c", "git commit", "git switch <base_branch>", "open_feature"],
     },
-    { id: "PAP-72", section: "Irreversible actions", lines: [GATE_LINE] },
+    { id: "PAP-72", section: "Delivery", cited: ["close_feature", "delivered"] },
     {
-      id: "PAP-72",
-      section: "Delivery (until the gate exists)",
-      lines: [GATE_LINE],
-      cited: ["close_feature", "delivered"],
+      id: "GAT-37",
+      section: "Irreversible actions",
+      cited: ["gate"],
+      says: GAT_SAYS["GAT-37: Irreversible actions"],
+      uncited: ["ask", "escalate"],
     },
+    {
+      id: "GAT-37",
+      section: "Delivery",
+      says: GAT_SAYS["GAT-37: Delivery"],
+      ordered: ["git rev-parse <branch>", "gate"],
+      uncited: ["ask", "escalate"],
+    },
+    { id: "GAT-38", section: "Irreversible actions", says: GAT_SAYS["GAT-38: Irreversible actions"] },
+    { id: "GAT-39", section: "Delivery", says: GAT_SAYS["GAT-39: Delivery"], ordered: ["gate", "close_feature"] },
   ],
 };
 
@@ -185,12 +215,15 @@ function problems(role: string, text: string): string[] {
   for (const name of REQUIRED[role] ?? []) {
     if (!all.includes(name)) found.push(`PAP-61: ${name} is not cited`);
   }
-  // No tool of the gate exists yet, and no skill cites one
-  for (const span of all) {
-    if (/gate/i.test(span)) found.push(`PAP-72: ${span} is cited, and has gate in it`);
+  // The gate is the mother's alone: no other skill cites a code with gate in it
+  if (role !== "mother") {
+    for (const span of all) {
+      if (/gate/i.test(span)) found.push(`GAT-39: ${span} is cited, and has gate in it`);
+    }
   }
+  if (text.split("\n").includes(GATE_LINE)) found.push(`GAT-37: the skill has the line ${GATE_LINE}`);
 
-  for (const { id, section, says = [], cited = [], ordered = [], never = [], lines = [] } of [...OF_EVERY_ROLE, ...(OF_ROLE[role] ?? [])]) {
+  for (const { id, section, says = [], cited = [], ordered = [], never = [], lines = [], uncited = [] } of [...OF_EVERY_ROLE, ...(OF_ROLE[role] ?? [])]) {
     const body = parts.find((part) => part.title === section)?.body ?? "";
     const spans = code(body);
     for (const sentence of says) {
@@ -206,6 +239,9 @@ function problems(role: string, text: string): string[] {
     const places = ordered.map(first);
     if (places.every((place) => place >= 0) && places.some((place, i) => i > 0 && place <= places[i - 1]!)) {
       found.push(`${id}: ${section} does not cite ${ordered.join(", then ")} in this order`);
+    }
+    for (const literal of uncited) {
+      if (first(literal) >= 0) found.push(`${id}: ${section} cites ${literal}`);
     }
     for (const command of never) {
       if (spans.some((span) => span.includes(command))) found.push(`${id}: ${section} has the command ${command}`);
@@ -264,13 +300,21 @@ test("PAP-71: Your work of the mother skill cites merge_question, and the branch
   expect(problems("mother", read("mother")).filter((problem) => problem.startsWith("PAP-71"))).toEqual([]);
 });
 
-test("PAP-72: the mother skill has the line of the Gate slice in Irreversible actions and in Delivery, close_feature and delivered in Delivery, and no gate tool", () => {
-  expect(problems("mother", read("mother")).filter((problem) => problem.startsWith("PAP-72"))).toEqual([]);
+test("GAT-37: the mother skill has no line of the Gate slice, and Irreversible actions and Delivery ask for a gate with the tool gate, of scope action and of scope delivery with the commit", () => {
+  expect(problems("mother", read("mother")).filter((problem) => problem.startsWith("GAT-37"))).toEqual([]);
 });
 
-test("PAP-72: no skill of another role cites a gate tool", () => {
+test("GAT-38: Irreversible actions of the mother says what to do after approve, reject and comment, and with the action an agent asked for", () => {
+  expect(problems("mother", read("mother")).filter((problem) => problem.startsWith("GAT-38"))).toEqual([]);
+});
+
+test("GAT-39/PAP-72: Delivery of the mother calls close_feature with delivered only after the approved delivery, saying in body what was done", () => {
+  expect(problems("mother", read("mother")).filter((problem) => /^(GAT-39|PAP-72)/.test(problem))).toEqual([]);
+});
+
+test("GAT-39: no skill of another role cites the gate tool, nor any code with gate in it", () => {
   for (const role of ["worker", "judge", "leader"]) {
-    expect(problems(role, read(role)).filter((problem) => problem.startsWith("PAP-72"))).toEqual([]);
+    expect(problems(role, read(role)).filter((problem) => /^GAT-3[79]/.test(problem))).toEqual([]);
   }
 });
 
@@ -443,51 +487,70 @@ test("PAP-61: a skill of the mother that leaves one of its ten tools out of the 
 });
 
 test("PAP-72: a skill of the mother without Delivery, or with it after When the feature closes, fails", () => {
-  const without = changed(read("mother"), "## Delivery (until the gate exists)", "### Delivery (until the gate exists)");
+  const without = changed(read("mother"), "## Delivery", "### Delivery");
   expect(problems("mother", without)).toContain(
     "PAP-60: the sections are Start | No acknowledgements | Your work | Asking | Credentials | Irreversible actions | When the feature closes"
   );
   const after = changed(
-    changed(changed(read("mother"), "## Delivery (until the gate exists)", "## @"), "## When the feature closes", "## Delivery (until the gate exists)"),
+    changed(changed(read("mother"), "## Delivery", "## @"), "## When the feature closes", "## Delivery"),
     "## @",
     "## When the feature closes"
   );
   expect(problems("mother", after)).toContain(
-    "PAP-60: the sections are Start | No acknowledgements | Your work | Asking | Credentials | Irreversible actions | When the feature closes | Delivery (until the gate exists)"
+    "PAP-60: the sections are Start | No acknowledgements | Your work | Asking | Credentials | Irreversible actions | When the feature closes | Delivery"
   );
 });
 
-test("PAP-72: a skill of the mother without the whole line of the Gate slice in one of its two sections fails", () => {
-  const line = "<!-- Gate slice: rewrite this section to use the gate -->";
-  const mother = read("mother");
-  const missing = (section: string) => `PAP-72: ${section} does not have the line ${line}`;
-  expect(problems("mother", changed(mother, `## Irreversible actions\n\n${line}\n`, "## Irreversible actions\n"))).toEqual([
-    missing("Irreversible actions"),
+test("GAT-37: a skill with the line of the Gate slice fails, in the mother and in another role", () => {
+  expect(problems("mother", changed(read("mother"), "## Delivery\n", `## Delivery\n\n${GATE_LINE}\n`))).toEqual([
+    `GAT-37: the skill has the line ${GATE_LINE}`,
   ]);
-  expect(
-    problems("mother", changed(mother, `## Delivery (until the gate exists)\n\n${line}\n`, "## Delivery (until the gate exists)\n"))
-  ).toEqual([missing("Delivery (until the gate exists)")]);
-  // the line with something else in it is not the line
-  expect(problems("mother", changed(mother, line, `${line} later`))).toEqual([
-    missing("Irreversible actions"),
-    missing("Delivery (until the gate exists)"),
-  ]);
+  expect(problems("judge", `${read("judge")}\n${GATE_LINE}\n`)).toEqual([`GAT-37: the skill has the line ${GATE_LINE}`]);
 });
 
-test("PAP-72: a skill with a gate tool in backticks fails", () => {
-  expect(problems("mother", `${read("mother")}\nThen call \`request_gate\`.\n`)).toEqual([
-    "PAP-72: request_gate is cited, and has gate in it",
+test("GAT-37/38/39: the mother skill without one of the sentences of the gate fails, also when another section has it", () => {
+  for (const [where, sentences] of Object.entries(GAT_SAYS)) {
+    for (const sentence of sentences) {
+      const moved = changed(
+        changed(read("mother"), sentence, "Then wait."),
+        "## When the feature closes\n",
+        `## When the feature closes\n\n${sentence}\n`
+      );
+      expect(problems("mother", moved)).toContain(`${where} does not say: ${sentence}`);
+    }
+  }
+});
+
+test("GAT-37: Irreversible actions or Delivery of the mother that asks or escalates instead of the gate fails", () => {
+  const added = (next: string, code: string) =>
+    changed(read("mother"), `\n## ${next}\n`, `\nOr call \`${code}\` with \`to\` set to \`human\`.\n\n## ${next}\n`);
+  expect(problems("mother", added("Delivery", "ask"))).toEqual(["GAT-37: Irreversible actions cites ask"]);
+  expect(problems("mother", added("Delivery", "escalate"))).toEqual(["GAT-37: Irreversible actions cites escalate"]);
+  expect(problems("mother", added("When the feature closes", "ask"))).toEqual(["GAT-37: Delivery cites ask"]);
+});
+
+test("GAT-37/39: Delivery of the mother that calls close_feature before the gate, or the gate before the commit, fails", () => {
+  const first = (code: string) => changed(read("mother"), "1. Take the commit of the branch", `1. Call \`${code}\`. Take the commit of the branch`);
+  expect(problems("mother", first("close_feature"))).toContain("GAT-39: Delivery does not cite gate, then close_feature in this order");
+  expect(problems("mother", first("gate"))).toContain("GAT-37: Delivery does not cite git rev-parse <branch>, then gate in this order");
+});
+
+test("GAT-39: a skill of another role with the gate tool, or with any code with gate in it, fails, and the mother skill does not", () => {
+  expect(problems("worker", `${read("worker")}\nThen call \`gate\`.\n`)).toEqual([
+    "PAP-61: gate is cited and is not a tool of the worker",
+    "GAT-39: gate is cited, and has gate in it",
   ]);
-  expect(problems("worker", `${read("worker")}\nThen wait for the \`gate_decision\`.\n`)).toEqual([
-    "PAP-72: gate_decision is cited, and has gate in it",
+  expect(problems("leader", `${read("leader")}\nThen wait for the \`gate_decision\`.\n`)).toEqual([
+    "GAT-39: gate_decision is cited, and has gate in it",
   ]);
+  expect(problems("mother", `${read("mother")}\nThen wait for the \`gate_decision\`.\n`)).toEqual([]);
 });
 
 test("PAP-72: Delivery of the mother without close_feature or without delivered fails", () => {
   const mother = read("mother");
   for (const name of ["close_feature", "delivered"]) {
     expect(problems("mother", changed(mother, `\`${name}\``, name))).toContain(
-      `PAP-72: Delivery (until the gate exists) does not cite ${name}`
+      `PAP-72: Delivery does not cite ${name}`
     );
   }
 });
