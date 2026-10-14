@@ -339,3 +339,17 @@ Esta foi a terceira volta: pelo limite de `validate.md`, as duas tarefas vão ao
 **Issues found**: Fix 1 (um teste de CLK-04 com um relatório de 400 dígitos por `keysOf`/`take`) e Fix 2 (um teste de CLK-20 com a primeira linha do log selecionada). Os dois são testes; o código está correto.
 
 **Next steps**: levar as duas tarefas ao dev, já que esta foi a terceira e última volta. A conferência em terminal real (RT-02 a RT-08) continua aberta por decisão do dev e não bloqueia esta verificação.
+
+---
+
+## Nota de fechamento (2026-10-14, depois da volta 3)
+
+Escrita pelo orquestrador, não pelo Verifier. O veredito da volta 3 acima continua **FAIL** e não foi mudado.
+
+- O dev decidiu em 2026-10-14 aplicar o Fix 1 e o Fix 2 como T30 e T31 e fechar a fatia **sem uma quarta volta do Verifier**, como fez com a Papéis.
+- **T30** (`85f3860`) fecha o Fix 1: dois casos de CLK-04 em `broker/test/unit/tui-mouse-input.test.ts`, um relatório com um inteiro de 400 dígitos `2` na coluna e outro na linha. Cada um é um item só de `keysOf`, e `input` e `take` dele deixam a tela `main` e o texto do modal vazio. Numa cópia física do branch (`git clone` + `bun install --frozen-lockfile`), com o R20 (`broker/tui/keys.ts:40`, `[0-9;]*` → `[0-9;]{0,24}`) os dois falham e o resto do arquivo passa; sem ele passam.
+- **T31** (`dafa7f1`) fecha o Fix 2: um caso de CLK-20 em `broker/test/unit/tui-mouse.test.ts` com a linha de `seq` 1, a primeira do log do frame 01, selecionada; o clique em 14:03:01 e em 14:17:48 dá o `Ui` de `j` duas e seis vezes. Na mesma cópia, com o R32 (`broker/tui/mouse.ts:110`, `from < 0` → `from <= 0`) ele falha e os outros 196 casos do arquivo passam.
+- A cópia foi descartada sem tocar a árvore real; nenhum código de produção mudou.
+- A suíte em `dafa7f1`: Windows, Bun 1.3.14, `tsc` 0 e 2080 pass, 5 skip, 0 fail, 83 arquivos; Linux, contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` sobre um clone `core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2084 pass, 1 skip, 0 fail.
+- Na spec, CLK-03, CLK-04 e CLK-20 passam a `Verified` por essa evidência, e as nove lacunas de precisão da tabela "Spec-precision gaps" acima estão em "Assumptions" como decisão do dev de 2026-10-14: ficam como o código faz.
+- **O que ficou sem cobrir**, por não haver quarta volta: nenhuma varredura de mutantes nova sobre `b0468be..dafa7f1`, nem uma releitura independente dos dois testes novos. Eles só acrescentam casos de teste. `validate_state.py tui-clicavel` continua saindo com 1, porque o veredito acima é FAIL: é o estado aceito.

@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** TUI clicável com as 29 tarefas feitas no branch `feat/tui-clicavel`, só local, à espera de uma decisão do dev. As três voltas do Verifier deram FAIL, cada uma por lacuna de teste num limite da entrada, sem defeito de produção: depois de duas correções sobraram duas lacunas (Fix 1 e Fix 2 de `.specs/features/tui-clicavel/validation.md`) e nove lacunas de precisão da spec. O dev decide se elas viram tarefas e uma quarta volta ou se a fatia fecha com elas registradas; depois vem o PR contra a `main`. A suíte passa no Windows e no Linux em `b63acf8`. A conferência em terminal real ficou quase toda por fazer, por decisão do dev em 2026-10-14. A Papéis está na `main` pelo PR 12, com o resíduo de teste aceito. A próxima fatia é a Gate, que fecha o MVP e ainda não tem spec. O estado está no Handoff de `.specs/STATE.md`.
+**Agora:** a TUI clicável está pronta no branch `feat/tui-clicavel`, só local, com 31 tarefas, à espera do sim do dev para o `git push` e o PR contra a `main`. As três voltas do Verifier deram FAIL por lacunas de teste, sem defeito de produção; o dev decidiu em 2026-10-14 aplicar as duas últimas como T30 e T31 e fechar sem uma quarta volta, com as lacunas de precisão da spec registradas como o código faz (`.specs/features/tui-clicavel/spec.md`, "Assumptions"). A conferência em terminal real ficou quase toda por fazer, por decisão do dev. A próxima fatia é a Gate, que fecha o MVP e ainda não tem spec. O estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 
@@ -35,7 +35,7 @@ tarefas, implementação e verificação independente, com PR revisado por `/the
 | [x] | TUI leitura | 2 | Feed, agentes, tickets, topologia e detalhe de ticket | Feature, frames |
 | [x] | Question | 3 | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas | TUI leitura |
 | [x] | Papéis | 4 | `roles.json`, quatro skills de papel, launcher, plugin com hooks | Question |
-| [ ] | TUI clicável | — | Clique em abas, linhas, tickets, perguntas, atalhos e no modal de resposta; roda do mouse; `m` liga e desliga | Question |
+| [x] | TUI clicável | — | Clique em abas, linhas, tickets, perguntas, atalhos e no modal de resposta; roda do mouse; `m` liga e desliga | Question |
 | [ ] | Gate | 5 | Pedido e decisão de gate; modal com texto e confirmação | Papéis, TUI clicável |
 
 **Marco do broker:** com Peer, Event e Feature prontas, duas sessões trocam mensagens pelo

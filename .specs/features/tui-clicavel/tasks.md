@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/tui-clicavel/design.md`
-**Status**: Execute. T1 a T31 commitadas. A terceira e última volta do Verifier deu FAIL por duas lacunas de teste (Fix 1 e Fix 2 de `validation.md`), sem defeito de produção: o dev decidiu em 2026-10-14 aplicá-las como T30 e T31 e fechar a fatia sem uma quarta volta
+**Status**: Fechada em 2026-10-14. T1 a T31 commitadas. A terceira e última volta do Verifier deu FAIL por duas lacunas de teste (Fix 1 e Fix 2 de `validation.md`), sem defeito de produção: o dev decidiu aplicá-las como T30 e T31 e fechar a fatia sem uma quarta volta. O `git push` e o PR pedem o sim do dev
 
 Regras do repositório que valem para toda tarefa:
 
