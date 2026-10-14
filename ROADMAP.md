@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** a TUI clicável está pronta no branch `feat/tui-clicavel`, só local, com 31 tarefas, à espera do sim do dev para o `git push` e o PR contra a `main`. As três voltas do Verifier deram FAIL por lacunas de teste, sem defeito de produção; o dev decidiu em 2026-10-14 aplicar as duas últimas como T30 e T31 e fechar sem uma quarta volta, com as lacunas de precisão da spec registradas como o código faz (`.specs/features/tui-clicavel/spec.md`, "Assumptions"). A conferência em terminal real ficou quase toda por fazer, por decisão do dev. A próxima fatia é a Gate, que fecha o MVP e ainda não tem spec. O estado está no Handoff de `.specs/STATE.md`.
+**Agora:** a TUI clicável foi mesclada na `main` pelo PR 13 (`3922651`) em 2026-10-14. A Gate, última fatia do MVP, está em andamento no branch `feat/gate`. A conferência em terminal real da TUI clicável ficou quase toda por fazer, por decisão do dev. O estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 

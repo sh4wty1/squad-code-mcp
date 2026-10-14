@@ -174,17 +174,18 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-14, no fechamento da fatia TUI clicável, à espera do sim do dev para o `git push` e o PR. As seções da Papéis, abaixo, são do fechamento dela em 2026-10-12 e continuam valendo.
+Atualizado em 2026-10-14, no começo da fatia Gate. A TUI clicável foi mesclada na `main` pelo PR 13 (`3922651`) em 2026-10-14. As seções abaixo são do fechamento da TUI clicável e da Papéis e continuam valendo.
 
-- **Feature**: a próxima é a Gate, que ainda não tem spec e fecha o MVP. A TUI clicável, `.specs/features/tui-clicavel/`, está fechada no branch `feat/tui-clicavel`, ainda não enviado. A Papéis está fechada e mesclada na `main` pelo PR 12, com o resíduo registrado abaixo.
-- **Phase / Task**: TUI clicável fechada. T1 a T31 commitadas. As três voltas do Verifier deram FAIL, cada uma por lacuna de teste, sem defeito de produção. O dev decidiu em 2026-10-14 aplicar o Fix 1 e o Fix 2 da volta 3 como T30 e T31 e fechar sem uma quarta volta, e deixar as lacunas de precisão da spec como o código faz.
-- **Completed**: T1 `313d433`; a aprovação do design e das tarefas, `db54d04`; T2 a T10, de `e0cc06e` a `726f1e6`, por um worker; a correção do selo de bloqueio, `2622949`; T11 a T18, de `0fd0088` a `9d5f345`, por outro worker, com um ajuste fora da lista em `0ae5896`; T19 `b958711`, T20 `8b68837`, T21 `87739b1`, T22 `ba3eb25`, T23 `18eed8d`, T24 `5744614`, T25 `08f3c88`, T26 `4b9b0eb` e T27 `5441e1c`, pelo orquestrador. Verifier: volta 1 `9928924`, T28 `6b2f6cf` (com `923a71d`, que a nomeia), volta 2 `23d399f`, T29 `b0468be`, volta 3 `82dc531`; as lições, `40c766d`; o Handoff da espera, `8a97d4a`. T30 `85f3860` e T31 `dafa7f1`, pelo orquestrador, e o fechamento no commit seguinte.
+- **Feature**: a Gate, `.specs/features/gate/`, no branch `feat/gate`, saído da `main` em `3922651`. É a última fatia do MVP. A TUI clicável, `.specs/features/tui-clicavel/`, está fechada e mesclada pelo PR 13. A Papéis está fechada e mesclada na `main` pelo PR 12, com o resíduo registrado abaixo.
+- **Phase / Task**: Gate em Specify.
+- **Phase / Task da TUI clicável**: fechada. T1 a T31 commitadas. As três voltas do Verifier deram FAIL, cada uma por lacuna de teste, sem defeito de produção. O dev decidiu em 2026-10-14 aplicar o Fix 1 e o Fix 2 da volta 3 como T30 e T31 e fechar sem uma quarta volta, e deixar as lacunas de precisão da spec como o código faz.
+- **Completed da TUI clicável**: T1 `313d433`; a aprovação do design e das tarefas, `db54d04`; T2 a T10, de `e0cc06e` a `726f1e6`, por um worker; a correção do selo de bloqueio, `2622949`; T11 a T18, de `0fd0088` a `9d5f345`, por outro worker, com um ajuste fora da lista em `0ae5896`; T19 `b958711`, T20 `8b68837`, T21 `87739b1`, T22 `ba3eb25`, T23 `18eed8d`, T24 `5744614`, T25 `08f3c88`, T26 `4b9b0eb` e T27 `5441e1c`, pelo orquestrador. Verifier: volta 1 `9928924`, T28 `6b2f6cf` (com `923a71d`, que a nomeia), volta 2 `23d399f`, T29 `b0468be`, volta 3 `82dc531`; as lições, `40c766d`; o Handoff da espera, `8a97d4a`. T30 `85f3860` e T31 `dafa7f1`, pelo orquestrador, e o fechamento no commit seguinte. Mesclada pelo PR 13 (`3922651`).
 - **In-progress** (file:line): nada.
-- **Next step**: com o sim do dev, o `git push` de `feat/tui-clicavel` e o PR contra a `main`, revisado por `/the-judge`. Depois do merge, a spec da Gate: o que a TUI clicável deixa para ela está abaixo.
-- **Blockers**: o sim do dev para o push e o PR.
+- **Next step**: a spec da Gate, a partir da fatia Gate do design e do que a TUI clicável, a Question e a Papéis deixam para ela (abaixo).
+- **Blockers**: nenhum.
 - **A conferência em terminal real**: o dev decidiu em 2026-10-14 fechar a fatia sem ela. `real-terminal.md` tem a RT-01 como "funcionou, segundo o dev", sem a versão do terminal e sem os quatro cantos, RT-02 a RT-07 "não conferido" e RT-08 "não exercitado". Na spec ficaram sem marcar, com a razão, a meta do percurso com o mouse, a da volta do terminal, e os critérios de sucesso do percurso só com o mouse e da RT-07. Ela está em "Pendências fora da ordem" de `ROADMAP.md`.
 - **Uncommitted files**: nenhum.
-- **Branch**: `feat/tui-clicavel`, saído da `main` em `36440a6`, só local: nada foi enviado. `git push` e o PR pedem o sim do dev na hora. O commit de cada tarefa não pede (decisão do dev de 2026-10-13, nas regras de `tasks.md`).
+- **Branch**: `feat/gate`, saído da `main` em `3922651`. `git push` e o PR pedem o sim do dev na hora; o commit de cada tarefa não pede.
 
 ### Como o Verifier da TUI clicável terminou
 
