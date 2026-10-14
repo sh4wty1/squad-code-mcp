@@ -447,8 +447,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `test/unit/tui-permission.test.ts`: título e etiquetas; `[blocked x]` e outro status; os três textos de ticket; a borda da prévia com 8, 9 e 13 linhas no começo, no meio e no fim; os dois rodapés; o estado respondido
-- [ ] Gate quick passa
+- [x] `test/unit/tui-permission.test.ts`: título e etiquetas; `[blocked x]` e outro status; os três textos de ticket; a borda da prévia com 8, 9 e 13 linhas no começo, no meio e no fim; os dois rodapés; o estado respondido
+- [x] Gate quick passa
 
 **Tests**: unit
 **Gate**: quick

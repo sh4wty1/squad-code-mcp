@@ -404,7 +404,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-61 | P1: Modal de permissão | T12, T17, T19 | Implementing |
 | GAT-62 | P1: Modal de permissão | T12, T19 | Implementing |
 | GAT-63 | P1: Modal de permissão | T17, T19 | Implementing |
-| GAT-64 | P1: Modal de permissão | T19 | In Tasks |
+| GAT-64 | P1: Modal de permissão | T19 | Implementing |
 | GAT-65 | P1: Modal de permissão | T14 | Implementing |
 | GAT-66 | P1: Modal de permissão | T14, T26 | Implementing |
 | GAT-67 | P1: Modal de permissão | T14 | Implementing |
