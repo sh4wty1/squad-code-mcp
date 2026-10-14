@@ -175,9 +175,9 @@ test("CLK-23: a click on the counter of line 0 does what the key 4 does, on its 
   }
 });
 
-// The notice of the key the slice Gate brings, and that of g with no pending gate
-const gate = (v: View) => ({ text: "chega com a fatia Gate", color: "gray" as const, until: v.squad.now + 4000 });
+// The notices of g with no pending gate and of x with no open permission request
 const noGate = (v: View) => ({ text: "nenhum gate pendente", color: "gray" as const, until: v.squad.now + 4000 });
+const noRequest = (v: View) => ({ text: "nenhum pedido de permissão", color: "gray" as const, until: v.squad.now + 4000 });
 
 const SEALS = [
   ["CLK-36", "19a", "⚠ 2 gates pendentes · g", "g"],
@@ -193,9 +193,9 @@ for (const [requirement, frame, seal, key] of SEALS) {
     for (const cell of [x, x + len(seal) - 1]) {
       const next = clicked(v, cell, 1)!;
       expect(next.ui).toEqual(press(v.ui, key, v)!);
-      // GAT-40: g opens the oldest pending gate over the main screen
+      // GAT-40, GAT-60: g opens the oldest pending gate and x the oldest open request, over the main screen
       if (key === "g") expect(next.ui).toEqual({ ...v.ui, screen: "main", gate: expect.objectContaining({ id: 1, mode: "view" }) });
-      else expect(next.ui).toEqual({ ...v.ui, toast: gate(v) });
+      else expect(next.ui).toEqual({ ...v.ui, screen: "main", permission: { seq: 459, offset: 0, sending: false } });
     }
   });
 }
@@ -232,7 +232,7 @@ const SIMPLE: [label: string, does: string, key: string, v: View, check: (ui: Ui
   ["esc", "voltar", "\x1b", view("01", { screen: "thread" }), (ui) => expect(ui!.screen).toBe("main")],
   ["b", "bloqueante", "b", view("01", { question: 8 }), (ui) => expect([ui!.screen, ui!.question]).toEqual(["questions", 7])],
   ["g", "gate", "g", view("01"), (ui, v) => expect(ui!.toast).toEqual(noGate(v))],
-  ["x", "permissão", "x", view("01"), (ui, v) => expect(ui!.toast).toEqual(gate(v))],
+  ["x", "permissão", "x", view("01"), (ui, v) => expect(ui!.toast).toEqual(noRequest(v))],
   ["p", "pausa", "p", view("01"), (ui) => expect(ui!.paused).toBe(true)],
   ["h", "histórico", "h", view("04"), (ui) => expect(ui!.qfocus).toBe("history")],
   ["?", "ajuda", "?", view("01"), (ui) => expect(ui!.screen).toBe("help")],

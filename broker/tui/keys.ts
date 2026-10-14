@@ -9,7 +9,8 @@ import type { FeedRow } from "./feed.ts";
 import type { Color } from "./grid.ts";
 import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
-import type { GateModal, Modal, Ui, View } from "./view.ts";
+import { preview, PREVIEW_ROWS } from "./screens/permission.ts";
+import type { GateModal, Modal, PermissionModal, Ui, View } from "./view.ts";
 import type { Sent } from "./writer.ts";
 
 export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null, pasting: false };
@@ -163,11 +164,54 @@ function gating(ui: Ui, m: GateModal, key: string, view: View): Ui | null {
   return text === null || text === m.text ? ui : set({ text, empty: false });
 }
 
+// The modal of a permission request, with its preview on the first line
+const permissionModal = (seq: number): PermissionModal => ({ seq, offset: 0, sending: false });
+
+// What a key does with the modal of permission open. The decision is not sent here: it is
+// left in `send`, for the loop. a allows only with the end of the preview in view.
+function permitting(ui: Ui, m: PermissionModal, key: string, view: View): Ui | null {
+  if (key === "\x03") return null;
+  if (m.sending || view.down) return ui;
+  if (key === "\x1b") return { ...ui, permission: null };
+  const request = view.squad.requests.find((r) => r.request.seq === m.seq);
+  // A request answered in the terminal takes no key but esc
+  if (!request?.open) return ui;
+  // The offset that has the end of the preview in view
+  const end = Math.max(0, preview(request.request.input_preview).length - PREVIEW_ROWS);
+  const scroll = (offset: number): Ui => (offset === m.offset ? ui : { ...ui, permission: { ...m, offset } });
+  const send = (behavior: "allow" | "deny"): Ui => ({ ...ui, permission: { ...m, sending: true }, send: { request_seq: m.seq, behavior } });
+
+  switch (key) {
+    case "j":
+    case DOWN:
+      return scroll(Math.min(end, m.offset + 1));
+    case "k":
+    case UP:
+      return scroll(Math.max(0, m.offset - 1));
+    case "G":
+      return scroll(end);
+    case "a":
+      return m.offset >= end ? send("allow") : ui;
+    case "d":
+      return send("deny");
+    case "]":
+    case "[": {
+      // The open requests, the oldest first: the queue of the modal
+      const queue = view.squad.permissions;
+      const at = queue.findIndex((p) => p.seq === m.seq);
+      const next = queue[Math.max(0, Math.min(queue.length - 1, at + (key === "]" ? 1 : -1)))];
+      return at < 0 || next!.seq === m.seq ? ui : { ...ui, permission: permissionModal(next!.seq) };
+    }
+  }
+  return ui;
+}
+
 // The state after the key, or null when the key quits
 export function press(ui: Ui, key: string, view: View): Ui | null {
   // With the modal open every key is its own: q, the digits and the letters are text
   if (ui.modal) return answering(ui, ui.modal, key, view);
   if (ui.gate) return gating(ui, ui.gate, key, view);
+  if (ui.permission) return permitting(ui, ui.permission, key, view);
   const { squad, rows } = view;
   const toast = (text: string, color?: Color): Ui => ({ ...ui, toast: notice(view, text, color) });
   const thread = (): Ui => ({ ...ui, screen: "thread", threadTicket: null, threadOffset: 0 });
@@ -210,8 +254,12 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
       const g = squad.gates.find((g) => g.pending);
       return g ? { ...ui, screen: "main", gate: gateModal(g) } : toast("nenhum gate pendente");
     }
-    case "x":
-      return toast("chega com a fatia Gate");
+    case "x": {
+      // The oldest open request, over the main screen
+      if (view.down) return toast("broker desconectado · permissão desabilitada");
+      const r = squad.permissions[0];
+      return r ? { ...ui, screen: "main", permission: permissionModal(r.seq) } : toast("nenhum pedido de permissão");
+    }
     case "h":
       return ui.screen === "questions" ? { ...ui, qfocus: ui.qfocus === "list" ? "history" : "list" } : ui;
     case "\r": {

@@ -112,12 +112,12 @@ test("TUI-62: a key with no meaning leaves the state as it is", () => {
   for (const k of ["z", "G", " ", "\x1b[C", "\x1b[D"]) expect(key(k, v)).toBe(v.ui);
 });
 
-test("TUI-63, QST-91, GAT-90: with no gate pending g says so for 4 s, and x says for 4 s that the Gate slice brings it, and neither changes the screen", () => {
+test("TUI-63, QST-91, GAT-90: with no gate pending g says so for 4 s, with no open permission request x says so for 4 s, and neither changes the screen", () => {
   for (const screen of ["main", "topology", "thread", "questions", "help"] as const) {
     const v = view("01", { screen });
     const until = v.squad.now + 4000;
     expect(key("g", v)).toEqual({ ...v.ui, toast: { text: "nenhum gate pendente", color: "gray", until } });
-    expect(key("x", v)).toEqual({ ...v.ui, toast: { text: "chega com a fatia Gate", color: "gray", until } });
+    expect(key("x", v)).toEqual({ ...v.ui, toast: { text: "nenhum pedido de permissão", color: "gray", until } });
   }
 });
 

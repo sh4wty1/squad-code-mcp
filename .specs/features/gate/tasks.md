@@ -356,8 +356,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Cada tecla em `test/unit/tui-permission-keys.test.ts`, com prévia de 1, 8, 9 e 13 linhas e vazia; `a` na penúltima posição não envia e na última envia; `G` vai ao fim
-- [ ] No estado respondido só `esc` muda o estado; `x` sem pedido e com o broker fora; gate quick passa
+- [x] Cada tecla em `test/unit/tui-permission-keys.test.ts`, com prévia de 1, 8, 9 e 13 linhas e vazia; `a` na penúltima posição não envia e na última envia; `G` vai ao fim
+- [x] No estado respondido só `esc` muda o estado; `x` sem pedido e com o broker fora; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

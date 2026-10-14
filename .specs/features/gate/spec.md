@@ -400,14 +400,14 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-57 | P1: Modal de gate | T15 | In Tasks |
 | GAT-58 | P1: Modal de gate | T11, T15 | Implementing |
 | GAT-59 | P1: Modal de gate | T15 | In Tasks |
-| GAT-60 | P1: Modal de permissão | T14, T20, T26 | In Tasks |
+| GAT-60 | P1: Modal de permissão | T14, T20, T26 | Implementing |
 | GAT-61 | P1: Modal de permissão | T12, T17, T19 | Implementing |
 | GAT-62 | P1: Modal de permissão | T12, T19 | Implementing |
 | GAT-63 | P1: Modal de permissão | T17, T19 | In Tasks |
 | GAT-64 | P1: Modal de permissão | T19 | In Tasks |
-| GAT-65 | P1: Modal de permissão | T14 | In Tasks |
-| GAT-66 | P1: Modal de permissão | T14, T26 | In Tasks |
-| GAT-67 | P1: Modal de permissão | T14 | In Tasks |
+| GAT-65 | P1: Modal de permissão | T14 | Implementing |
+| GAT-66 | P1: Modal de permissão | T14, T26 | Implementing |
+| GAT-67 | P1: Modal de permissão | T14 | Implementing |
 | GAT-68 | P1: Modal de permissão | T15 | In Tasks |
 | GAT-69 | P1: Modal de permissão | T11, T15 | Implementing |
 | GAT-70 | P1: Modal de permissão | T12, T15 | Implementing |
@@ -434,8 +434,8 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-91 | Edge cases | T13 | Implementing |
 | GAT-92 | Edge cases | T13 | Implementing |
 | GAT-93 | Edge cases | T18 | In Tasks |
-| GAT-94 | Edge cases | T14, T19 | In Tasks |
-| GAT-95 | Edge cases | T14, T19 | In Tasks |
+| GAT-94 | Edge cases | T14, T19 | Implementing |
+| GAT-95 | Edge cases | T14, T19 | Implementing |
 | GAT-96 | Edge cases | T12 | Implementing |
 | GAT-97 | Edge cases | T15 | In Tasks |
 
