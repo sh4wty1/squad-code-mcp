@@ -53,8 +53,8 @@ Corroborated across multiple features. Safe to apply as guidance.
 ### L-039 - When code picks or filters by a condition an AC names, test with an item that fails the condition, not only with items that pass it
 - signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `tui` · harmful: 0
 - features: tui-leitura, gate
-- evidence: X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui) (+3 more)
-- last seen: 2026-10-14T21:37:53Z
+- evidence: X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui) (+5 more)
+- last seen: 2026-10-14T22:28:19Z
 
 ### L-040 - Test a count limit or a rounding rule at its boundary value, not only well past it
 - signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `tui` · harmful: 0

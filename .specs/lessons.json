@@ -733,10 +733,12 @@
         "X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui)",
         "N21 tui/feed.ts:98 (tui)",
         "S05 broker/tui/screens/gate.ts:27 (GAT-43) (tui)",
-        "S07 broker/tui/screens/gate.ts:42 (GAT-44) (tui)"
+        "S07 broker/tui/screens/gate.ts:42 (GAT-44) (tui)",
+        "N02 broker/tui/screens/gate.ts:169 (GAT-41) (tui)",
+        "N09 broker/tui/screens/gate.ts:82 (GAT-47) (tui)"
       ],
       "created": "2026-10-09T17:54:51Z",
-      "last_seen": "2026-10-14T21:37:53Z"
+      "last_seen": "2026-10-14T22:28:19Z"
     },
     {
       "id": "L-040",

@@ -1,14 +1,14 @@
 # Gate Validation
 
 **Date**: 2026-10-14
-**Round**: Volta 1
+**Round**: Volta 1 (abaixo) e Volta 2 (no fim do arquivo)
 **Spec**: `.specs/features/gate/spec.md`
 **Diff range**: `3922651..fed6607` (branch `feat/gate`). O código (`broker/`, `plugin/`) foi verificado em `a6a96a8`; `fed6607` só acrescenta `.specs/` (o marco do MVP, T29), e `git diff --stat a6a96a8..fed6607` não toca `broker/` nem `plugin/`
 **Verifier**: independent sub-agent (author ≠ verifier), em duas cópias físicas (`git clone` + `bun install --frozen-lockfile`) em `a6a96a8`, Bun 1.3.14, Windows 11
 
-**Overall**: ❌ FAIL
+**Overall**: ❌ FAIL (volta 2, em `1078607`: os seis mutantes da volta 1 morreram, mas dois mutantes novos sobrevivem, N02 em GAT-41 e N09 em GAT-47; ver "Volta 2")
 
-Cinco mutantes sobrevivem à suíte inteira (`bun test`, 96 arquivos), todos de desenho ou de clique da TUI, nenhum do broker. Cada um é um caso que a spec decide e nenhum teste monta:
+Volta 1 — cinco mutantes sobrevivem à suíte inteira (`bun test`, 96 arquivos), todos de desenho ou de clique da TUI, nenhum do broker. Cada um é um caso que a spec decide e nenhum teste monta:
 
 1. `broker/tui/screens/permission.ts:47`, `answered ? [] : squad.permissions` → `squad.permissions`. Um pedido respondido no terminal com outros dois pedidos abertos ganha a linha `fila` (sem `▶`) e a etiqueta ` pedido 0 de 2 ` em vez de ` resolvido no terminal `. Contra GAT-71 ("sem fila") e GAT-61. Os testes de GAT-71 (`TP:61`, `PK:177`, `PK:229`) usam o frame 14, com um pedido só.
 2. `broker/tui/screens/gate.ts:27`, `t.planned && !t.dropped` → `t.planned`. A linha `feature` conta os tickets descartados. Contra GAT-43. Nenhum teste do modal de gate tem ticket descartado no `plan` (`TG:198` só muda para 1 ticket e o número de reworks).
@@ -385,3 +385,164 @@ Achado sem mutante: `decide` (`broker/gate.ts:147`) também recusa com `gate_clo
 **Issues found**: cinco casos de desenho e de clique sem teste (Fix 1 a 5), todos de teste, nenhum de produção.
 
 **Next steps**: Fix 1 a 5 como tarefas de teste (cada uma deve falhar com o mutante indicado e passar no código atual), Fix 6 na spec, e uma volta 2 desta validação.
+
+---
+
+# Volta 2
+
+**Date**: 2026-10-14
+**Diff range**: fatia `3922651..1078607`; volta de correção `d351ae8..1078607` (T31 a T36: só testes em `broker/test/unit/` e a linha "Empate no corte de GAT-93" nas Assumptions da spec; `git diff --stat d351ae8..HEAD -- broker/` não toca código de produção)
+**Verifier**: sub-agente independente (author ≠ verifier), em duas cópias físicas novas (`git clone` + `bun install --frozen-lockfile`) em `C:\tmp\gatev2`, em `1078607`, Bun 1.3.14, Windows 11
+
+**Overall**: ❌ FAIL
+
+Os seis mutantes da volta 1 (P05, S05, S07, M06, G19 e o desempate S04) morrem agora, cada um pelo teste novo da sua tarefa, e as cinco lacunas da volta 1 estão cobertas com o valor da spec. A varredura nova, de 55 mutações, achou dois mutantes vivos, ambos de desenho do modal de gate e ambos de teste, nenhum de produção:
+
+1. **N02**, `broker/tui/screens/gate.ts:169`, ` gate ${pos + 1} de ${queue.length} ` → `${squad.gates.length}`. Com um gate já decidido e dois pendentes a etiqueta diz ` gate 1 de 3 ` em vez de ` gate 1 de 2 `. Contra GAT-41: o `<n>` é a posição na fila de pendentes de GAT-42, então o `<total>` é o tamanho dela. Todos os testes da etiqueta (`TG:147`, frames 19a e 19b) só têm gates pendentes. Na suíte inteira só "morre" por EVT-43, flaky conhecido: conta como vivo.
+2. **N09**, `broker/tui/screens/gate.ts:82`, sem `&& row.event.feature_id === squad.feature?.id`. O `judge` passa a mostrar o `verdict` de uma feature anterior para um ticket de mesmo `ticket_ref` (o `plan` só exige `ticket_ref` único dentro dele, `broker/plan.ts:59`, e `rows` é o feed do log inteiro). Alcançável: com um gate `delivery` pendente, um `plan` novo traz um ticket ainda sem `verdict` nesta feature cujo ref já teve `verdict` numa anterior; o modal mostra um `✓ <ref> a/c` falso. Contra GAT-47 ("cada ticket do `plan` mais recente ... que tem `verdict`": sem `verdict` dele, nada). Nenhum teste tem duas features com o mesmo ref. Vivo também na suíte inteira (2437 pass).
+
+## Mutantes da volta 1
+
+Cada um rodado sozinho na cópia `b`, contra os arquivos `tui-*` e `derive-gate` (os de TUI, 1091 testes) ou contra `GR`, `GD`, `GP` e `integration/gate` (o G19); o teste que mata é o novo, e nenhum flaky entra.
+
+| # | Mutação | Killed? | Teste que mata |
+| - | ------- | ------- | -------------- |
+| P05 | `permission.ts:47` `answered ? [] : squad.permissions` → `squad.permissions` | ✅ | `TP:88` (T31), 1 fail |
+| S05 | `gate.ts:27` `t.planned && !t.dropped` → `t.planned` | ✅ | `TG:208` (T32), 1 fail |
+| S07 | `gate.ts:42` sem `&& q.answered_by === null` | ✅ | `TG:214` (T33), 1 fail |
+| M06 | `mouse.ts:139` `a < 0 \|\| b < 0` → `a < 0` | ✅ | `MG:278` e `MG:288` (T34), 2 fail |
+| G19 | `broker/gate.ts:71` hint sem `Ask a new gate, without gate_id.` | ✅ | `GR:358` nos dois casos, `approved` e `rejected` (T35) |
+| S04 | `gate.ts:163` `>=` → `>` | ✅ | `TG:286` (T36), 1 fail |
+
+## Spec-anchored: os testes novos
+
+| Req | Spec-defined outcome | `file:line` + assertion | Result |
+| --- | -------------------- | ----------------------- | ------ |
+| GAT-13 | `gate_closed` com hint que manda pedir um gate novo | `GR:358` `refusedGate(…, "gate_closed")`; `GR:360` `toMatch(/ask a new gate/i)`; `GR:361` `toContain("without gate_id")` (gate novo = sem `gate_id`, GAT-01); `GR:362` linha igual | ✅ PASS |
+| GAT-43 | Só os tickets do `plan` mais recente não descartados | `TG:211`, com um quarto ticket `dropped: true`: `box[5]` `toBe(row("feature   3 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)"))` | ✅ PASS |
+| GAT-44 | Mesclada com resposta própria conta pelo `resolved_by`, não em `<s>` | `TG:218`, Q-12 mesclada e respondida pela mother ao leader: `toBe(row("perguntas ✓ 2 pelo dev · 3 entre agentes  ⟳ 3 default aplicado  ▶ 0 mescla…"))` (`<a>` 2→3, `<s>` 1→0 contra `TG:45`) | ✅ PASS |
+| GAT-71, GAT-61 | Sem fila, etiqueta ` resolvido no terminal `, rodapé `esc fechar`, com outros dois pedidos abertos | `TP:96` `top(…, " resolvido no terminal ")`; `TP:97` primeira linha; `TP:98` nenhuma linha `fila`, `toEqual([])`; `TP:99` `" esc fechar"` | ✅ PASS |
+| Assumption "Clique num item da fila que já saiu dela" (GAT-83) | Não faz nada | `MG:284` fila nova `[2, 3]` com o marcado (G-03) no índice 1; `MG:285` `point(…)!.ui` `toBe(after.ui)`; pedidos: `MG:294` `[460, 500]`, `MG:295` | ✅ PASS |
+| GAT-93, desempate | Assumption nova: com `body` e `diffstat` do mesmo tamanho o `body` cede primeiro | `TG:291` `[y, end]` `[2, 37]`; `TG:293` 9 linhas de `corpo` e 10 de `f*.ts` (41 a cortar, ímpar) | ✅ PASS |
+
+As afirmações vêm da spec, não do código: os valores esperados são os da linha da spec (contagens, etiqueta, rodapé, "nada muda"), e o M06 só é discriminado porque o marcado está no índice 1 da fila nova, como a volta 1 pediu.
+
+### Lacunas de precisão da volta 1
+
+1. **GAT-93, desempate**: decidido na spec (linha "Empate no corte de GAT-93", `spec.md:80`, `n`: escolha do orquestrador, não confirmada pelo dev) e testado com total ímpar (`TG:286`). Fechada.
+2. **GAT-24**: continua sem teste concorrente, e a spec como está escrita não precisa de um. `decide` (`broker/gate.ts:122`) é síncrona do começo ao fim, sem `await` entre ler a linha e gravar (`broker/gate.ts:145`-`169`), e a rota a chama de forma síncrona depois de ler o corpo (`broker/broker.ts:187`-`188`). Num processo só, dois `POST` simultâneos se serializam no laço de eventos: "a primeira a gravar" é a primeira a entrar em `decide`, e o resto é o caso sequencial que `GD:225` e `GP:162` cobrem. Um teste com `Promise.all` não exercitaria nada a mais.
+
+### Requisitos com mutante vivo nesta volta
+
+| Req | Spec-defined outcome | Evidência | Result |
+| --- | -------------------- | --------- | ------ |
+| GAT-41 | ` gate <n> de <total> ` com o total da fila de pendentes | `TG:147` e frames 19a e 19b só com gates pendentes; nenhum desenho com gate decidido e dois pendentes: N02 vivo | ❌ GAP |
+| GAT-47 | `judge` só com o `verdict` do ticket desta feature | `TG:193`, `TG:195` com uma feature só: N09 vivo | ❌ GAP |
+
+**Status**: ❌ 95 de 97 com o valor da spec e testes que os discriminam; as cinco lacunas da volta 1 fechadas; GAT-41 e GAT-47 abertos por mutante novo.
+
+## Gate Check (volta 2)
+
+- **Gate command**: `bun node_modules/typescript/bin/tsc --noEmit` e `bun test`, de `broker/`, na cópia `a` em `1078607`
+- **Result**: `tsc` 0; 2437 pass, 5 skip, 0 fail, 2442 testes, 96 arquivos, 659638 `expect()`, 140,00 s
+- **Delta**: 2431 pass na volta 1 → 2437 (+6, os seis testes de T31 a T36); nenhum teste removido, nenhum skip novo
+
+## Discrimination Sensor (volta 2)
+
+55 mutações novas, nenhuma repetida da tabela da volta 1, uma por vez na cópia `b` (as de TUI contra os arquivos `tui-*` e `derive-gate`, 1091 testes; as de `broker/gate.ts` contra `GR`, `GD`, `GP`, `FC`, `DG` e `integration/gate`, 181 testes). Os sobreviventes rodaram de novo contra a suíte inteira. Peso onde a volta 1 achou vivos: 17 nos dois modais, 5 em `modal.ts`, 6 em `mouse.ts`, 16 em `keys.ts`, 5 em `derive.ts`, 6 em `broker/gate.ts`.
+
+| # | File:line | Description | Killed? (primeiro teste que falha) |
+| - | --------- | ----------- | ---------------------------------- |
+| N01 | `broker/tui/screens/gate.ts:111` | `▶` no mais antigo da fila, não no deste modal | ✅ GAT-41/42/49 (dois gates) |
+| N02 | `broker/tui/screens/gate.ts:169` | ` gate n de ` com o total de todos os gates, não da fila | ❌ **Survived** (suíte inteira: só EVT-43) |
+| N03 | `broker/tui/screens/gate.ts:105` | cabeça de versão 2 só a partir da 3 | ✅ GAT-85 frame 18b, GAT-45/48 |
+| N04 | `broker/tui/screens/gate.ts:106` | versão 2 com o `ts` do primeiro `gate` | ✅ GAT-85 frame 18b |
+| N05 | `broker/tui/screens/gate.ts:125` | comentário sem aspas | ✅ GAT-85 frame 18b, GAT-45 |
+| N06 | `broker/tui/screens/gate.ts:139` | `diff` com a primeira linha do diffstat | ✅ GAT-85 frames 16a, 16b, 16c, 17 |
+| N07 | `broker/tui/screens/gate.ts:139` | `diff` sem aparar as pontas | ✅ GAT-85 frames 16a a 17 |
+| N08 | `broker/tui/screens/gate.ts:85` | `judge` `c/c` em vez de `a/c` | ✅ GAT-47 |
+| N09 | `broker/tui/screens/gate.ts:82` | `verdict` de qualquer feature | ❌ **Survived** (2437 pass na suíte inteira) |
+| N10 | `broker/tui/screens/gate.ts:30` | minutos até a versão atual, não até o primeiro `gate` | ✅ GAT-85 frame 18b, GAT-43 |
+| N11 | `broker/tui/screens/gate.ts:176` | marca de clique da fila deslocada | ✅ GAT-83 (`MG`), GAT-41 |
+| N12 | `broker/tui/screens/gate.ts:184` | `] próximo gate` no rodapé com um gate só | ✅ GAT-85 frame 08, GAT-49 |
+| N13 | `broker/tui/screens/permission.ts:69` | `▶` no mais antigo da fila de pedidos | ✅ GAT-86 frames 22e e 22f, GAT-62 |
+| N14 | `broker/tui/screens/permission.ts:84` | prévia não fica cinza no estado de GAT-71 | ✅ GAT-71 (`TP:61`) |
+| N15 | `broker/tui/screens/permission.ts:128` | `j/k rolar   G fim` só com 10 linhas ou mais | ✅ GAT-63/64 (9 linhas) |
+| N16 | `broker/tui/screens/permission.ts:120` | marca de clique da fila de pedidos deslocada | ✅ GAT-83, GAT-61/62 |
+| N17 | `broker/tui/screens/permission.ts:60` | `há <idade>` não conta do `ts` do pedido | ✅ GAT-86 frames 22a, 22d, 22e, 22f |
+| N18 | `broker/tui/screens/modal.ts:65` | caixa pode começar na linha 1 | ✅ GAT-41 (`MO`) |
+| N19 | `broker/tui/screens/modal.ts:53` | borda da prévia `a–b` a partir de 0 | ✅ GAT-63, GAT-86 frames 22e e 22f |
+| N20 | `broker/tui/screens/modal.ts:52` | `▼ mais abaixo` também com o fim à vista | ✅ GAT-63/64, GAT-86 frame 22f |
+| N21 | `broker/tui/screens/modal.ts:27` | campo expandido com as últimas 4 linhas | ✅ GAT-53, QST-75 |
+| N22 | `broker/tui/screens/modal.ts:67` | linha 0 fora da marca de `esc` | ✅ GAT-81, CLK-40/43 (27 testes) |
+| N23 | `broker/tui/mouse.ts:186` | a roda num modal clica | ✅ GAT-80 (14 testes) |
+| N24 | `broker/tui/mouse.ts:150` | fila do clique com os gates decididos | ✅ GAT-83 (`MG:278`, novo) |
+| N25 | `broker/tui/mouse.ts:151` | fila do clique com todos os pedidos | ✅ GAT-83 (`MG:288`, novo) |
+| N26 | `broker/tui/mouse.ts:171` | clique a exatamente 500 ms ignorado | ✅ GAT-84, CLK-46/49 |
+| N27 | `broker/tui/mouse.ts:173` | a roda conta como clique para os 500 ms | ✅ GAT-80 |
+| N28 | `broker/tui/mouse.ts:133` | modal de gate não conta como aberto | ✅ GAT-81, GAT-75 |
+| N29 | `broker/tui/keys.ts:134` | `a` não guarda a versão da tela | ✅ GAT-50 |
+| N30 | `broker/tui/keys.ts:141` | `]` e `[` do gate dão a volta na fila | ✅ GAT-50 |
+| N31 | `broker/tui/keys.ts:202` | `]` e `[` do pedido dão a volta na fila | ✅ GAT-65 |
+| N32 | `broker/tui/keys.ts:154` | `esc` do texto guarda o texto | ✅ GAT-54, GAT-81 |
+| N33 | `broker/tui/keys.ts:164` | tecla que não muda o texto tira a marca de vazio | ✅ GAT-56 |
+| N34 | `broker/tui/keys.ts:160` | `ctrl+e` não recolhe | ✅ GAT-54, GAT-82 |
+| N35 | `broker/tui/keys.ts:187` | `j` passa do fim da prévia | ✅ GAT-65 |
+| N36 | `broker/tui/keys.ts:361` | aviso de decisão aceita sem verde | ✅ GAT-57 |
+| N37 | `broker/tui/keys.ts:371` | `permitido` e `negado` trocados | ✅ GAT-68, GAT-66/67/72 |
+| N38 | `broker/tui/keys.ts:374` | outra recusa fecha o modal de permissão | ✅ GAT-69 |
+| N39 | `broker/tui/keys.ts:359` | recusa deixa o gate em envio | ✅ GAT-58, GAT-74 |
+| N40 | `broker/tui/keys.ts:409` | leitura fecha o modal do pedido fechado pelo peer | ✅ GAT-71/96 |
+| N41 | `broker/tui/keys.ts:410` | sem `P-NN decidido` | ✅ GAT-70 |
+| N42 | `broker/tui/keys.ts:399` | sem `G-NN fechado` | ✅ GAT-59, GAT-97 |
+| N43 | `broker/tui/keys.ts:255` | `g` não vai à tela principal | ✅ GAT-40 |
+| N44 | `broker/tui/keys.ts:261` | `x` não vai à tela principal | ✅ GAT-60 |
+| N45 | `broker/shared/derive.ts:257` | o próprio pedido conta como o evento que o fecha | ✅ GAT-70/71/96, GAT-86 frame 22b |
+| N46 | `broker/shared/derive.ts:257` | `peer_left` não fecha o pedido em `requests` | ✅ GAT-96 (`DG:226`) |
+| N47 | `broker/shared/derive.ts:468` | `commit` da primeira versão | ✅ GAT-31, GAT-30 |
+| N48 | `broker/shared/derive.ts:467` | `scope` da primeira versão | ✅ GAT-31 |
+| N49 | `broker/shared/derive.ts:506` | `text` da decisão sempre nulo | ✅ GAT-30/31 |
+| N50 | `broker/gate.ts:74` | `tickets_open` sem exigir `planned` | ⚪ Equivalente: só um ticket com evento fica fora do `plan`, e `task` exige ticket planejado (`broker/send.ts:101`) e o `plan` não tira ticket começado (`broker/plan.ts:76`) |
+| N51 | `broker/gate.ts:108` | reemissão guarda o `commit` antigo | ✅ GAT-12, GAT-30 (`GP`) |
+| N52 | `broker/gate.ts:85` | reemissão ganha id novo | ✅ GAT-12, GAT-10, GAT-30 |
+| N53 | `broker/gate.ts:70` | gate `rejected` aceita versão nova | ✅ GAT-13, GAT-07 |
+| N54 | `broker/gate.ts:67` | `gate_id` de outra feature aceito | ✅ GAT-09, GAT-07 |
+| N55 | `broker/gate.ts:148` | `summary` sem `: <text>` quando `text` falta | ⚪ Equivalente: `reject` e `comment` sem texto já são `missing_field` (`broker/gate.ts:131`) |
+
+**Sensor depth**: expandido (P0)
+**Result**: 55 injetadas, 51 mortas, 2 vivas (N02, N09), 2 equivalentes (N50, N55) — ❌ FAIL
+
+Isolamento: `git status --porcelain` da árvore real vazio antes; depois, só este arquivo e os de lições. As cópias em `C:\tmp\gatev2` foram apagadas no fim.
+
+## Fix Plans (volta 2)
+
+### Fix 7: etiqueta ` gate n de N ` com um gate decidido (N02) — Major
+
+- **Root cause**: nenhum desenho do modal de gate tem um gate decidido ao lado de dois pendentes.
+- **Fix task**: em `broker/test/unit/tui-gate.test.ts`, o log de três gates (como `threeGates` de `tui-mouse-gate.test.ts`) com um `gate_decision` `approve` de G-01; desenhar o modal de G-02 e afirmar `box[0]` com a etiqueta ` gate 1 de 2 ` e a linha `fila` com só G-02 e G-03. Deve falhar com `gate.ts:169` `queue.length` → `squad.gates.length`.
+- **Priority**: Major
+
+### Fix 8: `judge` com `verdict` de outra feature (N09) — Minor
+
+- **Root cause**: nenhum teste do modal tem duas features com o mesmo `ticket_ref`.
+- **Fix task**: em `broker/test/unit/tui-gate.test.ts`, um log com uma feature fechada em que `TKT-12` teve `verdict` `approve`, e a feature aberta com um gate `delivery` pendente e, depois dele, um `plan` com um `TKT-12` ainda sem `verdict` nela; afirmar que a linha `judge` não traz `TKT-12` (ou não existe, se nenhum ticket desta feature tem `verdict`). Deve falhar com `gate.ts:82` sem `&& row.event.feature_id === squad.feature?.id`.
+- **Priority**: Minor
+
+## Requirement Traceability Update (volta 2)
+
+| Requirement | Volta 1 | Volta 2 |
+| ----------- | ------- | ------- |
+| GAT-13, GAT-43, GAT-44, GAT-71, GAT-83 | ❌ Needs Fix | ✅ Verified |
+| GAT-41 | ✅ Verified | ❌ Needs Fix (Fix 7) |
+| GAT-47 | ✅ Verified | ❌ Needs Fix (Fix 8) |
+| os outros 90 | ✅ Verified | ✅ Verified |
+
+## Summary (volta 2)
+
+**Overall**: ❌ Not Ready
+
+**Spec-anchored check**: os seis testes novos afirmam o valor da spec; 95/97 sem mutante vivo; lacuna de GAT-93 fechada na spec; GAT-24 não precisa de teste concorrente
+**Sensor**: mutantes da volta 1, 6/6 mortos; varredura nova, 51/55 mortas, 2 vivas, 2 equivalentes
+**Gate**: `tsc` 0; 2437 pass, 5 skip, 0 fail
+
+**Next steps**: Fix 7 e Fix 8 como tarefas de teste (cada uma deve falhar com o mutante indicado e passar no código atual) e uma volta 3, a última antes de escalar ao dev.
