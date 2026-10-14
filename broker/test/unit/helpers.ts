@@ -136,7 +136,7 @@ export function setup() {
   const session = createSession(log);
   const permission = createPermission(log, HUMAN_TOKEN);
   const { state } = createState(log);
-  const gate = createGate(db, log);
+  const gate = createGate(db, log, HUMAN_TOKEN);
   const feature = createFeature(log);
 
   // Registers a live session and returns what the broker answered

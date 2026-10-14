@@ -11,14 +11,19 @@
 import type { Database } from "bun:sqlite";
 import type { GateRow } from "./db.ts";
 import type { Log } from "./log.ts";
-import type { Refusal } from "./peers.ts";
-import { isText, SUMMARY_MAX, type Caller } from "./send.ts";
+import { refuse, type Refusal } from "./peers.ts";
+import { isText, SUMMARY_MAX, type Answer, type Caller } from "./send.ts";
 import { gid } from "./shared/contract.ts";
 import { tickets } from "./shared/derive.ts";
 
 const SCOPES: readonly string[] = ["delivery", "action"];
 
-export function createGate(db: Database, log: Log) {
+const DECISIONS: readonly string[] = ["approve", "reject", "comment"];
+
+// What the broker writes in the summary of each decision
+const SAID: Record<string, string> = { approve: "aprovado", reject: "rejeitado", comment: "comentado" };
+
+export function createGate(db: Database, log: Log, token: string) {
   function find(id: number): GateRow | null {
     return db.query("SELECT * FROM gates WHERE id = ?").get(id) as GateRow | null;
   }
@@ -112,5 +117,61 @@ export function createGate(db: Database, log: Log) {
     });
   }
 
-  return { request };
+  // The human is not a peer: the credential comes first, and no refusal here leaves a trace
+  // in the log
+  function decide(body: Record<string, unknown>): Answer {
+    if (body.human_token !== token) {
+      return refuse("invalid_token", "human_token is not the human credential. Only the dev decides a gate.");
+    }
+    const { gate_id, decision, text } = body;
+    if (
+      !Number.isInteger(gate_id) ||
+      typeof decision !== "string" ||
+      (text !== undefined && typeof text !== "string") ||
+      ((decision === "reject" || decision === "comment") && (typeof text !== "string" || text.trim() === ""))
+    ) {
+      return refuse(
+        "missing_field",
+        "Send gate_id as the integer id of the gate, decision as a string and text, if any, as a string. reject and comment take a text with the reason in it."
+      );
+    }
+    if (!DECISIONS.includes(decision) || !find(gate_id as number)) {
+      return refuse("invalid_field", "decision must be approve, reject or comment, and gate_id the id of a gate.");
+    }
+
+    // The row is read and the decision written in one transaction, so a gate has one final
+    // decision, the first to come (GAT-24). A pending gate of a feature that is not open has
+    // no one to decide it.
+    const seq = log.transaction(() => {
+      const row = find(gate_id as number)!;
+      if (row.status !== "pending" || row.feature_id !== log.openFeature()?.id) return null;
+      const said = decision === "approve" ? "" : `: ${text}`;
+      const seq = log.record({
+        kind: "gate_decision",
+        from: "human",
+        role_from: "human",
+        to: row.requested_by,
+        summary: `${gid(row.id)} ${SAID[decision]}${said}`.slice(0, SUMMARY_MAX),
+        body: (text as string | undefined) ?? "",
+        gate_id: row.id,
+        recipients: [row.requested_by],
+        data: { gate_id: row.id, decision, ...(text !== undefined && { text }) },
+      });
+      // A comment decides nothing: the gate waits for the mother to ask again
+      if (decision !== "comment") {
+        db.run("UPDATE gates SET status = ?, decision_seq = ? WHERE id = ?", [
+          decision === "approve" ? "approved" : "rejected",
+          seq,
+          row.id,
+        ]);
+      }
+      return seq;
+    });
+    if (seq === null) {
+      return refuse("gate_closed", `${gid(gate_id as number)} is already decided, or its feature closed. Nothing was recorded.`);
+    }
+    return { ok: true, seq };
+  }
+
+  return { request, decide };
 }

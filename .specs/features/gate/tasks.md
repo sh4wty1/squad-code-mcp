@@ -170,11 +170,11 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Cada AC com o seu caso em `test/unit/gate-decision.test.ts`; o `summary` de 80 e o cortado; `body` vazio sem `text`
-- [ ] `reject` e `comment` com `text` ausente, `null`, vazio e só espaços dão `missing_field`; `approve` com `text` vazio é aceito e guardado
-- [ ] Nenhuma recusa grava `refused`; a ordem de GAT-25 por pares
-- [ ] `comment` deixa a linha igual; `approve` depois de `comment` decide; segundo `approve` e `reject` depois de `approve` dão `gate_closed`; gate de feature fechada dá `gate_closed`
-- [ ] Gate quick passa
+- [x] Cada AC com o seu caso em `test/unit/gate-decision.test.ts`; o `summary` de 80 e o cortado; `body` vazio sem `text`
+- [x] `reject` e `comment` com `text` ausente, `null`, vazio e só espaços dão `missing_field`; `approve` com `text` vazio é aceito e guardado
+- [x] Nenhuma recusa grava `refused`; a ordem de GAT-25 por pares
+- [x] `comment` deixa a linha igual; `approve` depois de `comment` decide; segundo `approve` e `reject` depois de `approve` dão `gate_closed`; gate de feature fechada dá `gate_closed`
+- [x] Gate quick passa
 
 **Tests**: unit
 **Gate**: quick

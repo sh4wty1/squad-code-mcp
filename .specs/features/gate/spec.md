@@ -355,17 +355,17 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-12 | P1: Reemitir depois do comentário | T3 | Implementing |
 | GAT-13 | P1: Reemitir depois do comentário | T3 | Implementing |
 | GAT-14 | P1: Reemitir depois do comentário | T3 | Implementing |
-| GAT-15 | P1: Decidir um gate | T4 | In Tasks |
-| GAT-16 | P1: Decidir um gate | T4 | In Tasks |
-| GAT-17 | P1: Decidir um gate | T4 | In Tasks |
-| GAT-18 | P1: Decidir um gate | T4, T9 | In Tasks |
-| GAT-19 | P1: Decidir um gate | T4 | In Tasks |
-| GAT-20 | P1: Decidir um gate | T4, T6 | In Tasks |
-| GAT-21 | P1: Decidir um gate | T4 | In Tasks |
-| GAT-22 | P1: Decidir um gate | T4 | In Tasks |
-| GAT-23 | P1: Decidir um gate | T4 | In Tasks |
-| GAT-24 | P1: Decidir um gate | T4, T7 | In Tasks |
-| GAT-25 | P1: Decidir um gate | T4 | In Tasks |
+| GAT-15 | P1: Decidir um gate | T4 | Implementing |
+| GAT-16 | P1: Decidir um gate | T4 | Implementing |
+| GAT-17 | P1: Decidir um gate | T4 | Implementing |
+| GAT-18 | P1: Decidir um gate | T4, T9 | Implementing |
+| GAT-19 | P1: Decidir um gate | T4 | Implementing |
+| GAT-20 | P1: Decidir um gate | T4, T6 | Implementing |
+| GAT-21 | P1: Decidir um gate | T4 | Implementing |
+| GAT-22 | P1: Decidir um gate | T4 | Implementing |
+| GAT-23 | P1: Decidir um gate | T4 | Implementing |
+| GAT-24 | P1: Decidir um gate | T4, T7 | Implementing |
+| GAT-25 | P1: Decidir um gate | T4 | Implementing |
 | GAT-26 | P1: Encerrar a feature com o gate | T5, T6, T26 | In Tasks |
 | GAT-27 | P1: Encerrar a feature com o gate | T5, T26 | In Tasks |
 | GAT-28 | P1: Encerrar a feature com o gate | T5 | In Tasks |
