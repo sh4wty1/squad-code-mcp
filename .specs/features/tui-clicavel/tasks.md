@@ -658,7 +658,7 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 **Done when**:
 
 - [x] RT-01 tem o resultado da sonda no Windows Terminal, com a versão. Sem a versão nem os quatro cantos: o dev disse que funcionou e não disse o que viu
-- [x] RT-02 a RT-07 têm o resultado do dev, ou a linha "não conferido" com o motivo. Os seis estão "não conferido", por decisão do dev em 2026-10-13
+- [x] RT-02 a RT-07 têm o resultado do dev, ou a linha "não conferido" com o motivo. Os seis estão "não conferido", por decisão do dev em 2026-10-14
 - [x] RT-08 tem o resultado num terminal Linux, ou "não exercitado"
 - [x] Um defeito que a conferência achar vira tarefa nova antes do fechamento. Nenhum: a conferência não rodou
 - [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`

@@ -1,7 +1,7 @@
 # TUI clicável: conferência em terminal real
 
 Registro da conferência da seção "Conferência em terminal real" da spec. A fatia fecha com ela
-quase toda por fazer: em 2026-10-13 o dev decidiu registrar RT-02 a RT-07 como não conferidos e
+quase toda por fazer: em 2026-10-14 o dev decidiu registrar RT-02 a RT-07 como não conferidos e
 fechar o resto da fatia sem eles.
 
 Os comandos, de dentro de `broker/`, num Windows Terminal de 120×40 ou mais:
@@ -13,13 +13,13 @@ Os comandos, de dentro de `broker/`, num Windows Terminal de 120×40 ou mais:
 | Item | Resultado | Terminal | Data |
 | ---- | --------- | -------- | ---- |
 | RT-01 | Funcionou, segundo o dev: os relatórios chegaram à sonda. Não registrado: a versão do terminal e a coluna e a linha nos quatro cantos | Windows Terminal, versão não registrada | 2026-10-13 |
-| RT-02 | Não conferido: o dev decidiu fechar a fatia sem a conferência | - | 2026-10-13 |
-| RT-03 | Não conferido: o dev decidiu fechar a fatia sem a conferência | - | 2026-10-13 |
-| RT-04 | Não conferido: o dev decidiu fechar a fatia sem a conferência. Quantos relatórios o terminal manda por passo da roda continua sem medida | - | 2026-10-13 |
-| RT-05 | Não conferido: o dev decidiu fechar a fatia sem a conferência | - | 2026-10-13 |
-| RT-06 | Não conferido: o dev decidiu fechar a fatia sem a conferência. O comportamento do `shift` + arrasto é do terminal e não tem teste automático | - | 2026-10-13 |
-| RT-07 | Não conferido: o dev decidiu fechar a fatia sem a conferência | - | 2026-10-13 |
-| RT-08 | Não exercitado: nenhum terminal Linux interativo nesta fatia | - | 2026-10-13 |
+| RT-02 | Não conferido: o dev decidiu fechar a fatia sem a conferência | - | 2026-10-14 |
+| RT-03 | Não conferido: o dev decidiu fechar a fatia sem a conferência | - | 2026-10-14 |
+| RT-04 | Não conferido: o dev decidiu fechar a fatia sem a conferência. Quantos relatórios o terminal manda por passo da roda continua sem medida | - | 2026-10-14 |
+| RT-05 | Não conferido: o dev decidiu fechar a fatia sem a conferência | - | 2026-10-14 |
+| RT-06 | Não conferido: o dev decidiu fechar a fatia sem a conferência. O comportamento do `shift` + arrasto é do terminal e não tem teste automático | - | 2026-10-14 |
+| RT-07 | Não conferido: o dev decidiu fechar a fatia sem a conferência | - | 2026-10-14 |
+| RT-08 | Não exercitado: nenhum terminal Linux interativo nesta fatia | - | 2026-10-14 |
 
 ## O que cobre o que não foi conferido
 

@@ -174,14 +174,15 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
-Atualizado em 2026-10-13, na pausa da fatia TUI clicável depois da T24. As seções da Papéis, abaixo, são do fechamento dela em 2026-10-12 e continuam valendo.
+Atualizado em 2026-10-14, na pausa da fatia TUI clicável depois da T25. As seções da Papéis, abaixo, são do fechamento dela em 2026-10-12 e continuam valendo.
 
 - **Feature**: TUI clicável, `.specs/features/tui-clicavel/`. Depois dela vem a Gate, que ainda não tem spec. A Papéis está fechada e mesclada na `main` pelo PR 12, com o resíduo registrado abaixo.
-- **Phase / Task**: Execute, fase 5. T1 a T24 commitadas. Faltam a T25 (conferência em terminal real, com o dev), a T26 (a suíte no Linux e no Windows sobre o mesmo commit), a T27 (fechamento) e, depois da última, o Verifier.
-- **Completed**: T1 `313d433`; a aprovação do design e das tarefas, `db54d04`; T2 a T10, de `e0cc06e` a `726f1e6`, por um worker; a correção do selo de bloqueio, `2622949`; T11 a T18, de `0fd0088` a `9d5f345`, por outro worker, com um ajuste fora da lista em `0ae5896`; T19 `b958711`, T20 `8b68837`, T21 `87739b1`, T22 `ba3eb25`, T23 `18eed8d` e T24 `5744614`, pelo orquestrador.
+- **Phase / Task**: Execute, fase 5. T1 a T25 commitadas. Faltam a T26 (a suíte no Linux e no Windows sobre o mesmo commit), a T27 (fechamento) e, depois da última, o Verifier.
+- **Completed**: T1 `313d433`; a aprovação do design e das tarefas, `db54d04`; T2 a T10, de `e0cc06e` a `726f1e6`, por um worker; a correção do selo de bloqueio, `2622949`; T11 a T18, de `0fd0088` a `9d5f345`, por outro worker, com um ajuste fora da lista em `0ae5896`; T19 `b958711`, T20 `8b68837`, T21 `87739b1`, T22 `ba3eb25`, T23 `18eed8d`, T24 `5744614` e T25 `08f3c88`, pelo orquestrador.
 - **In-progress** (file:line): nada.
-- **Next step**: a T25. O dev roda `bun run demo` de dentro de `broker/`, num Windows Terminal de 120×40 ou mais, e confere RT-02 a RT-07 da spec; o resultado, com a versão do terminal e a data, vai para `.specs/features/tui-clicavel/real-terminal.md`. A RT-01 já foi: o dev rodou a sonda em 2026-10-13 e disse que funcionou, sem dizer a versão do terminal nem o que viu nos quatro cantos.
-- **Blockers**: a T25 depende do dev. O resto não tem bloqueio: o Docker está de pé (28.0.4) e tem a imagem `oven/bun:1.4.2`.
+- **Next step**: a T26, sobre o commit que estiver no topo do branch quando ela começar (o deste Handoff, que só muda `.specs/STATE.md`). Depois a T27 e o Verifier, sem pergunta ao dev.
+- **Blockers**: nenhum. O Docker está de pé (28.0.4) e tem a imagem `oven/bun:1.4.2`.
+- **A conferência em terminal real**: o dev decidiu em 2026-10-14 fechar a fatia sem ela. `real-terminal.md` tem a RT-01 como "funcionou, segundo o dev", sem a versão do terminal e sem os quatro cantos, RT-02 a RT-07 "não conferido" e RT-08 "não exercitado". Os critérios de sucesso da spec que dependem dela (o percurso só com o mouse e RT-07) ficam sem marcar na T27, com a razão.
 - **Uncommitted files**: nenhum.
 - **Branch**: `feat/tui-clicavel`, saído da `main` em `36440a6`, só local: nada foi enviado. `git push` e o PR pedem o sim do dev na hora. O commit de cada tarefa não pede (decisão do dev de 2026-10-13, nas regras de `tasks.md`).
 
@@ -190,10 +191,12 @@ Atualizado em 2026-10-13, na pausa da fatia TUI clicável depois da T24. As seç
 - Windows, `5744614`: `tsc` 0 e 2073 pass, 5 skip, 0 fail, 83 arquivos. Antes da fatia: 1646 pass, 5 skip.
 - `EVT-90/92` de `test/integration/server-tools.test.ts`, anterior à fatia, falhou uma vez em cinco execuções da suíte inteira (3335 ms) e passou sozinho na seguinte: entra na lista dos instáveis de "Evidência e limites". Das três execuções extras pedidas para achar o nome, só a primeira terminou antes de a sessão acabar.
 - Depois da correção `2622949` a suíte inteira só rodou no gate da T18 em diante; ela passou em todos.
+- Prévia da T26 sobre `c4205ad`, num clone limpo: Windows com `tsc` 0 e 2073 pass, 5 skip, 0 fail, 83 arquivos, e de novo no gate da T25 em `08f3c88`. Linux em `oven/bun:1.4.2` com `git`, `lsof` e `procps`: `tsc` 0 e quatro de cinco execuções com 2077 pass, 1 skip, 0 fail, entre 131 e 160 s. A primeira teve 21 falhas em 1422 s: `PEER-38/13` estourou 5 s, e vinte casos de `test/unit/launch.test.ts` e `test/unit/launch-worktree.test.ts` (PAP-37, 38, 42, 51 a 55, 57, 58) estouraram 60 s com um `git` de `Bun.spawnSync` que não voltou, stderr vazio. Nenhum teste do mouse falhou. Os dois arquivos sozinhos passaram duas vezes, e a mesma forma de subir o contêiner passou depois: a causa não foi achada. Entra na lista dos instáveis; uma falha assim no Linux pede outra execução antes de concluir que algo quebrou.
+- Na prévia do Linux o clone foi feito com `git clone -c core.autocrlf=false`: nesta máquina `core.autocrlf` é `true` e o repositório não tem `.gitattributes`, então um clone sem a opção leva CRLF para o contêiner.
 - O que os workers apontaram como lacuna de precisão da spec, sem correção, para o Verifier e para o dev: CLK-39 (o custo continua valendo `t` se o lado direito da linha 38 for desenhado por cima dele); CLK-09 (`ESC [ <` seguido de um caractere que não é letra nem dígito deixa esse caractere como tecla); CLK-50 (a cor do aviso de `m` não está na spec, e `m` dentro de uma colagem delimitada sem modal liga e desliga o mouse); CLK-15 com CLK-20 e CLK-24 (o clique numa linha que uma tecla anterior do mesmo chunk selecionou abre em vez de selecionar); o botão de `Report` sai de `parse` com os bits de modificador, que `point` tira.
 - Notado e não tocado: o detalhe de uma pergunta com 8 ou mais opções desenha `undefined …` (`broker/tui/screens/questions.ts:164`, anterior à fatia); a seção da TUI de `broker/README.md` ainda diz que ela não escreve nada no broker e não lista a tecla `4`, de antes da fatia Question; `test/unit/tui-mouse.test.ts` repete ajudantes que `tui-hits.test.ts` tem (os testes do laço usam `test/terminal.ts`).
 - Num heredoc do Bash desta máquina, um escape com barra invertida (`\r`, `\t`) não chega ao arquivo como foi escrito: vira o caractere de verdade ou perde uma barra. Código com esses escapes se escreve com Write ou Edit.
-- Depois da T27: o Verifier numa cópia física do branch com `bun install` próprio, até três voltas de correção; `python .claude/skills/tlc-spec-driven/scripts/validate_state.py tui-clicavel`; as lições com `lessons.py`.
+- Depois da T27: o Verifier numa cópia física do branch com `bun install` próprio, até três voltas de correção; `python .claude/skills/tlc-spec-driven/scripts/validate_state.py tui-clicavel`; as lições com `lessons.py`. As lacunas de precisão da linha acima que o Verifier também acusar vão ao dev para ele decidir; o orquestrador não as fecha sozinho.
 
 ### Como a Papéis fechou
 
