@@ -746,9 +746,9 @@ T36 → T30
 
 **Done when**:
 
-- [ ] Linha nova nas Assumptions da spec com o desempate
-- [ ] Um teste com `body` e `diffstat` do mesmo tamanho e um número ímpar de linhas a cortar afirma que o `body` fica com uma linha a menos
-- [ ] Falha com `gate.ts:163` trocado por `>` numa cópia; gate quick passa e, por ser a última da fase, o full também
+- [x] Linha nova nas Assumptions da spec com o desempate
+- [x] Um teste com `body` e `diffstat` do mesmo tamanho e um número ímpar de linhas a cortar afirma que o `body` fica com uma linha a menos
+- [x] Falha com `gate.ts:163` trocado por `>` numa cópia; gate quick passa e, por ser a última da fase, o full também
 
 **Tests**: unit
 **Gate**: quick

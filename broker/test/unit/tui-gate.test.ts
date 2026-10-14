@@ -282,3 +282,13 @@ test("GAT-93: a body and a diffstat that do not fit in the lines 2 to 37 lose li
   const shown = box.filter((line) => /corpo|\.ts/.test(line));
   expect(shown).toEqual([...Array.from({ length: 10 }, (_, i) => row(`corpo ${i + 1}`)), ...Array.from({ length: 10 }, (_, i) => row(` f${i + 1}.ts | 1 +`))]);
 });
+
+test("GAT-93: with a body and a diffstat of as many lines, the body gives up a line first, so an odd number of lines to cut leaves it one line shorter", () => {
+  const body = Array.from({ length: 30 }, (_, i) => `corpo ${i + 1}`).join("\n");
+  const diff = Array.from({ length: 30 }, (_, i) => ` f${i + 1}.ts | 1 +`).join("\n");
+  // G-02 stays pending: the line of the queue leaves 19 lines to the body and the diffstat, 41 to cut
+  const { box, y, end } = draw(modal(1), (events) => events.map((e) => (e.kind === "gate" && e.gate_id === 1 ? ({ ...e, body, diffstat: diff } as SquadEvent) : e)));
+  expect([y, end]).toEqual([2, 37]);
+  const shown = box.filter((line) => /corpo|\.ts \|/.test(line));
+  expect(shown).toEqual([...Array.from({ length: 9 }, (_, i) => row(`corpo ${i + 1}`)), ...Array.from({ length: 10 }, (_, i) => row(` f${i + 1}.ts | 1 +`))]);
+});
