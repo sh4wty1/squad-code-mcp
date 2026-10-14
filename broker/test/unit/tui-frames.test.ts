@@ -125,32 +125,34 @@ test("QST-58: the default of the detail behind the modal of frames 06 and 07 is 
   }
 });
 
-test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen of another slice", () => {
+test("TUI-49, GAT-87, GAT-88: the legend leaves frame 11 only for the key of the mouse and the line of a request closed in the terminal", () => {
   const lines = frame("11").map((line) => [...line.padEnd(120)]);
   const cut = DEVIATIONS["11"]!.map((dev) => [dev.class, dev.text, lines[dev.line]!.slice(dev.col, dev.col + dev.width).join("").trim()]);
   expect(cut).toEqual([
     ["D4", "m           mouse liga / desliga · clique = tecla", ""],
-    ...[
-      "gate (modal)",
-      "a           aprovar → pede confirmação (y)",
-      "r · c       rejeitar · comentar, texto obrigatório",
-      "] [ · esc   fila de gates · fechar sem decidir",
-      "permissão (modal)",
-      "a · d       permitir (após ver o fim) · negar",
-      "j k · G     rolar a prévia · ir ao fim",
-      "] [ · esc   fila · fechar, o pedido segue",
-      "✓ P-01 fechado no terminal",
-    ].map((text) => ["D3", "", text]),
+    ["D3", "", "✓ P-01 fechado no terminal"],
   ]);
+  expect(DEVIATIONS["11"]![1]!.why).toContain("`✓ P-NN fechado no terminal`");
 });
 
-test("QST-88: the legend has the four lines of Question where frame 11 has them, and the lines of gate and of permission empty", () => {
+test("QST-88, GAT-87: the legend has the four lines of Question and the eight of the modals of gate and of permission where frame 11 has them", () => {
   const drawn = help(frameView("11")).text();
   // The text of the panel of the keys, inside its box
   const keys = drawn.map((line) => [...line.padEnd(120)].slice(62, 118).join("").trimEnd());
   expect(keys.slice(19, 25)).toEqual(["h           foco no histórico", "", "modal de resposta", "1–4 enter   escolher · enviar · esc cancela", "ctrl+e · u  expandir o texto · limpar", ""]);
-  for (const y of [19, 21, 22, 23]) expect(drawn[y]).toBe(frame("11")[y]!);
-  expect([25, 26, 27, 28, 30, 31, 32, 33].map((y) => keys[y])).toEqual(["", "", "", "", "", "", "", ""]);
+  expect(keys.slice(25, 34)).toEqual([
+    "gate (modal)",
+    "a           aprovar → pede confirmação (y)",
+    "r · c       rejeitar · comentar, texto obrigatório",
+    "] [ · esc   fila de gates · fechar sem decidir",
+    "",
+    "permissão (modal)",
+    "a · d       permitir (após ver o fim) · negar",
+    "j k · G     rolar a prévia · ir ao fim",
+    "] [ · esc   fila · fechar, o pedido segue",
+  ]);
+  // Line 30 has at its left the line of system the slice leaves out
+  for (const y of [19, 21, 22, 23, 25, 26, 27, 28, 31, 32, 33]) expect(drawn[y]).toBe(frame("11")[y]!);
 });
 
 test("QST-89: no frame of Question has a D3 deviation, and no deviation is there for a screen or a key of the slice Question", () => {

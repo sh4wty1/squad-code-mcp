@@ -1,6 +1,5 @@
 // The legend of colors, statuses and glyphs, and the keys. Ported from `rHelp` of the
-// prototype, without what is of the slice Gate: the keys of the modals of gate and of
-// permission and the line of a permission closed in the terminal.
+// prototype, without the line of a permission closed in the terminal, which no event has.
 
 import type { AgentStatus, TicketStatus } from "../../shared/derive.ts";
 import { grid, pad, type Grid, type Seg } from "../grid.ts";
@@ -51,8 +50,8 @@ const LEGEND: Line[] = [
   [["≈", "bwhite", true], [" custo estimado   ", "white"], ["━━", "bcyan", true], [" aresta ativa   ", "white"], ["broker ", "gray"], ["○", "bred", true], [" congela", "white"]],
 ];
 
-// Each key where the frame has it: the lines of the modals of the slice Gate stay empty.
-// The line of `m` is the one the frame leaves empty after the global keys.
+// Each key where the frame has it. The line of `m` is the one the frame leaves empty after
+// the global keys.
 const SHORTCUTS: Line[] = [
   [["global", "gray"]],
   key("1 2 3 4", "principal · topologia · thread · perguntas"),
@@ -75,7 +74,16 @@ const SHORTCUTS: Line[] = [
   [["modal de resposta", "gray"]],
   key("1–4 enter", "escolher · enviar · esc cancela"),
   key("ctrl+e · u", "expandir o texto · limpar"),
-  ...Array.from({ length: 10 }, (): Seg[] => []),
+  [],
+  [["gate (modal)", "gray"]],
+  key("a", "aprovar → pede confirmação (y)"),
+  key("r · c", "rejeitar · comentar, texto obrigatório"),
+  key("] [ · esc", "fila de gates · fechar sem decidir"),
+  [],
+  [["permissão (modal)", "gray"]],
+  key("a · d", "permitir (após ver o fim) · negar"),
+  key("j k · G", "rolar a prévia · ir ao fim"),
+  key("] [ · esc", "fila · fechar, o pedido segue"),
   [["a TUI escreve três coisas: respostas a", "gray"]],
   [["perguntas, decisões de gate e decisões de", "gray"]],
   [["pedido de permissão. O resto é leitura do broker.", "gray"]],

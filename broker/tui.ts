@@ -24,8 +24,10 @@ import { take, type Drawn, type Pointer } from "./tui/mouse.ts";
 import { createReader, type Fetch } from "./tui/reader.ts";
 import { answer } from "./tui/screens/answer.ts";
 import { down as frozen } from "./tui/screens/down.ts";
+import { gate } from "./tui/screens/gate.ts";
 import { help } from "./tui/screens/help.ts";
 import { main } from "./tui/screens/main.ts";
+import { permission } from "./tui/screens/permission.ts";
 import { questions } from "./tui/screens/questions.ts";
 import { small } from "./tui/screens/small.ts";
 import { thread } from "./tui/screens/thread.ts";
@@ -112,9 +114,12 @@ export function start(io: Io, settings: Settings) {
     return { squad: squad(log, io.now()), rows, ui, project: io.project, down, prices: settings.prices };
   }
 
-  // The screen of the state, under the modal of answer when one is open
+  // The screen of the state, under the modal of answer when one is open; the modals of gate
+  // and of permission are drawn over the main screen
   function screen(): Grid {
     const seen = view();
+    if (ui.gate) return gate(main(seen), seen);
+    if (ui.permission) return permission(main(seen), seen);
     return answer(SCREENS[ui.screen](seen), seen);
   }
 

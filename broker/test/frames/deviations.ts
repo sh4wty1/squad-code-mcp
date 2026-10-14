@@ -150,6 +150,9 @@ const Q08_HOPS = (line: number) => hops(line, 30, "w2 → ldr → você", 21);
 const modalOf = (id: string, from: number, to: number) => frame(id).slice(from, to + 1).map((line) => [...line.padEnd(120)].slice(18, 102).join(""));
 const EFFECT = 'Assumptions, `Linha "efeito"`: the TUI writes the effect from who asked and the ticket (QST-59), and the one the prototype writes by hand for Q-09 is in no event';
 
+// The one line of system the slice Gate leaves out
+const SYSTEM_LINE = "Out of Scope of the slice Gate: the line of system `✓ P-NN fechado no terminal` has no event, since a request closes with any later event of its peer, which has its own line; the modal of permission says it instead (GAT-71)";
+
 export const DEVIATIONS: Record<string, Deviation[]> = {
   "01": [...skills(MOT, LDR, W2, JDG), ...doing(8, "tech lead · escalou TK…", ESCALATED), ...entered("01"), ...plan(9), ...loadout(33, 2)],
   "09a": [...skills(MOT, LDR, W1, W2, JDG), ...counts(15)],
@@ -231,7 +234,7 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ...d("D1", SUMMARY, [32, 72, 13, "allow: Bash"]),
     ...panel(
       "D2",
-      "the broker writes a permission_decision without body: the text of the frame is prose of the scenario, with the id P-01 of the modal (out of scope), so the thread and the loadout come four lines up",
+      "the broker writes a permission_decision without body: the text of the frame is prose of the scenario, with the id P-01 the modal of permission gives the request, so the thread and the loadout come four lines up",
       10,
       "", "---", "thread TKT-12 · 6 msgs", " 14:26 w1→jdg [result]", " 14:28 jdg→ldr [verdict]", " 14:28 ldr→w1  [task]", " 14:30 w1→hum [permission_reques", "▶14:31 hum→w1  [permission_decis",
       "---", "loadout worker-1", "sem loadout", "", "", "", "", ""
@@ -368,12 +371,7 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
   ],
   "11": [
     ...d("D4", "CLK-55: the key that turns the mouse off and on is in the panel of the keys, on the line the frame leaves empty after the global ones", [10, 62, 56, "m           mouse liga / desliga · clique = tecla"]),
-    ...d(
-      "D3",
-      "TUI-49, QST-88, Out of Scope: the modals of gate and of permission are screens of the slice Gate; their keys do nothing here",
-      ...[25, 26, 27, 28, 30, 31, 32, 33].map((line): At => [line, 62, 56, ""])
-    ),
-    ...d("D3", "Out of Scope: the ids `P-nn` and the line of a request answered in the terminal only exist in the modal of permission (slice Gate); the feed of this slice never draws it", [30, 29, 29, ""]),
+    ...d("D3", SYSTEM_LINE, [30, 29, 29, ""]),
   ],
   // The main screen of 01, frozen
   "12": [

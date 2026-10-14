@@ -465,8 +465,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Com `Ui.gate` em outra aba, o desenho é o da tela principal com o modal (teste do laço)
-- [ ] O frame 11 passa só com o D4 de CLK-55 e o D3 da linha de sistema fora de escopo; gate quick passa
+- [x] Com `Ui.gate` em outra aba, o desenho é o da tela principal com o modal (teste do laço)
+- [x] O frame 11 passa só com o D4 de CLK-55 e o D3 da linha de sistema fora de escopo; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

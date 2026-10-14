@@ -427,8 +427,8 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-84 | P1: Mouse nos modais | T24 | In Tasks |
 | GAT-85 | P1: Frames e legenda | T21 | In Tasks |
 | GAT-86 | P1: Frames e legenda | T22 | In Tasks |
-| GAT-87 | P1: Frames e legenda | T20 | In Tasks |
-| GAT-88 | P1: Frames e legenda | T20, T21, T22 | In Tasks |
+| GAT-87 | P1: Frames e legenda | T20 | Implementing |
+| GAT-88 | P1: Frames e legenda | T20, T21, T22 | Implementing |
 | GAT-89 | P1: Frames e legenda | T21, T22, T28, T30 | In Tasks |
 | GAT-90 | P1: Frames e legenda | T13 | Implementing |
 | GAT-91 | Edge cases | T13 | Implementing |

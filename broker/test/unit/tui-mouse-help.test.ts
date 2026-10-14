@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { help } from "../../tui/screens/help.ts";
 import { DEVIATIONS } from "../frames/deviations.ts";
-import { frameView } from "../frames/view.ts";
+import { frame, frameView } from "../frames/view.ts";
 
 // The line of the key of the mouse on the help screen, and its place in the table of deviations.
 
@@ -15,8 +15,12 @@ test("CLK-55: line 10 of the help screen has the key m and what it does, in the 
   expect(keys()[11]).toBe("navegação");
 });
 
-test("CLK-55: the lines frame 11 gives to the modals of gate and of permission are still empty", () => {
-  for (const line of [25, 26, 27, 28, 30, 31, 32, 33]) expect(`${line} ${keys()[line]}`).toBe(`${line} `);
+test("CLK-55, GAT-87: the line of m takes none of the lines frame 11 gives to the modals of gate and of permission, which have their keys", () => {
+  const framed = frame("11").map((line) => [...line.padEnd(120)].slice(62, 118).join("").trimEnd());
+  for (const line of [25, 26, 27, 28, 30, 31, 32, 33]) {
+    expect(`${line} ${keys()[line]}`).toBe(`${line} ${framed[line]}`);
+    expect(framed[line]).not.toBe("");
+  }
 });
 
 test("CLK-55: the line of m is the only deviation of class D4, declared on line 10 of frame 11 with its requirement", () => {
