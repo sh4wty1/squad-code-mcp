@@ -93,7 +93,19 @@ T24 → T25 → T26
 ### Phase 6: Fechamento
 
 ```
-T27 → T28 → T29 → T30
+T27 → T28 → T29
+```
+
+### Phase 7: Volta 1 do Verifier
+
+```
+T31 → T32 → T33 → T34 → T35 → T36
+```
+
+### Phase 8: Fechamento depois da volta 1
+
+```
+T36 → T30
 ```
 
 ---
@@ -633,11 +645,121 @@ T27 → T28 → T29 → T30
 
 ---
 
+### T31: Sem fila no pedido respondido no terminal, com outros abertos
+
+**What**: o estado de GAT-71 desenhado com outros dois pedidos abertos: etiqueta ` resolvido no terminal `, nenhuma linha `fila`, rodapé `esc fechar` (Fix 1 da volta 1, mutante P05).
+**Where**: `broker/test/unit/tui-permission.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: o log do frame 22c e o `third` de `tui-permission-keys.test.ts`
+**Requirement**: GAT-61, GAT-71
+
+**Done when**:
+
+- [ ] Um teste com o pedido do modal respondido no terminal e outros dois abertos afirma a borda de cima com ` resolvido no terminal `, nenhuma linha da caixa começando com `fila` e a linha 39 ` esc fechar`
+- [ ] Falha com `permission.ts:47` trocado por `squad.permissions` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T32: Ticket descartado fora da linha `feature`
+
+**What**: um `plan` com um quarto ticket `dropped: true` ainda dá `3 tickets` (Fix 2, mutante S05).
+**Where**: `broker/test/unit/tui-gate.test.ts`
+**Depends on**: T31
+**Reuses**: o log do frame 19a
+**Requirement**: GAT-43
+
+**Done when**:
+
+- [ ] A linha `feature` com o quarto ticket descartado no `plan` é `feature   3 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)`
+- [ ] Falha com `gate.ts:27` trocado por `t.planned` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T33: Mesclada com resposta própria conta uma vez
+
+**What**: uma pergunta mesclada que teve resposta de agente conta só em `entre agentes`, não em `mesclada` (Fix 3, mutante S07).
+**Where**: `broker/test/unit/tui-gate.test.ts`
+**Depends on**: T32
+**Reuses**: o log do frame 19a
+**Requirement**: GAT-44
+
+**Done when**:
+
+- [ ] A linha `perguntas` tem `<a>` um a mais e `<s>` um a menos que a do frame 19a
+- [ ] Falha com `gate.ts:42` trocado por `q.merged_into !== null` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T34: Clique num item que saiu da fila
+
+**What**: um clique na célula de um gate ou pedido que saiu da fila depois do último desenho não muda a tela (linha "Clique num item da fila que já saiu dela" das Assumptions; Fix 4, mutante M06).
+**Where**: `broker/test/unit/tui-mouse-gate.test.ts`
+**Depends on**: T33
+**Reuses**: o `third` de `tui-gate-keys.test.ts` e de `tui-permission-keys.test.ts`
+**Requirement**: GAT-83
+
+**Done when**:
+
+- [ ] Três gates pendentes, modal em G-03, uma leitura com G-01 aprovado: o clique na célula de G-01 do desenho antigo deixa `Ui` igual, com o marcado no índice 1 da fila nova
+- [ ] O mesmo para a fila de pedidos, com três abertos, o terceiro marcado e o primeiro decidido
+- [ ] Falha com `mouse.ts:139` trocado por `a < 0 ? []` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T35: Hint do `gate_closed` na reemissão
+
+**What**: o `hint` de `gate_closed` manda pedir um gate novo, sem `gate_id` (Fix 5, mutante G19).
+**Where**: `broker/test/unit/gate-request.test.ts`
+**Depends on**: T34
+**Reuses**: `refusedGate`
+**Requirement**: GAT-13
+
+**Done when**:
+
+- [ ] O `hint` da reemissão de um gate decidido afirmado pelas palavras que mandam pedir um gate novo e chamar sem `gate_id`
+- [ ] Falha com o `hint` de `gate.ts:71` trocado por `G-01 is approved.` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T36: Desempate do corte de GAT-93
+
+**What**: a spec (Assumptions) decide que, com `body` e `diffstat` do mesmo tamanho, o `body` cede uma linha primeiro (como o código faz); um teste com um total ímpar a cortar (Fix 6, mutante S04).
+**Where**: `broker/test/unit/tui-gate.test.ts`
+**Depends on**: T35
+**Reuses**: o teste de corte de GAT-93
+**Requirement**: GAT-93
+
+**Done when**:
+
+- [ ] Linha nova nas Assumptions da spec com o desempate
+- [ ] Um teste com `body` e `diffstat` do mesmo tamanho e um número ímpar de linhas a cortar afirma que o `body` fica com uma linha a menos
+- [ ] Falha com `gate.ts:163` trocado por `>` numa cópia; gate quick passa e, por ser a última da fase, o full também
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ### T30: Fechamento
 
 **What**: roadmap, Handoff e traceability.
 **Where**: `ROADMAP.md`
-**Depends on**: T29
+**Depends on**: T36
 **Reuses**: -
 **Requirement**: GAT-89
 
@@ -665,7 +787,10 @@ T27 → T28 → T29 → T30
 | T24 | a fase anterior | início da fase 5 | ✅ |
 | T25, T26 | a anterior | a seta da anterior | ✅ |
 | T27 | a fase anterior | início da fase 6 | ✅ |
-| T28 a T30 | a anterior | a seta da anterior | ✅ |
+| T28, T29 | a anterior | a seta da anterior | ✅ |
+| T31 | a fase anterior | início da fase 7 | ✅ |
+| T32 a T36 | a anterior | a seta da anterior | ✅ |
+| T30 | T36 | única da fase 8 | ✅ |
 
 ## Test Co-location Validation
 
@@ -684,3 +809,4 @@ T27 → T28 → T29 → T30
 | T25 | Laço | unit | unit | ✅ |
 | T26 | Ponta a ponta | integration | integration | ✅ |
 | T27 a T30 | Documentação e `.specs/` | none | none | ✅ |
+| T31 a T36 | Telas, mouse e regras do broker (só testes) | unit | unit | ✅ |
