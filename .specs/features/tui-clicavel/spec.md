@@ -18,10 +18,10 @@ não faz nada que uma tecla não faça.
 
 ## Goals
 
-- [ ] Num terminal de 120×40 ou maior, o dev troca de tela, seleciona e abre uma linha do feed, um ticket e uma pergunta, rola com a roda e opera o modal de resposta com o mouse.
-- [ ] Toda tecla das fatias TUI leitura e Question continua fazendo o que faz, e todo efeito de um clique é o de uma tecla que já existe.
-- [ ] Nenhum clique grava uma resposta por engano: pelo mouse, o envio só sai de um clique no atalho `enter` do modal, e nunca do segundo clique de um clique duplo.
-- [ ] O terminal volta ao que era por qualquer saída da TUI: nenhum relatório de mouse chega ao shell depois.
+- [ ] Num terminal de 120×40 ou maior, o dev troca de tela, seleciona e abre uma linha do feed, um ticket e uma pergunta, rola com a roda e opera o modal de resposta com o mouse. Sem marcar: depende da conferência em terminal real, que o dev decidiu em 2026-10-14 fechar sem fazer (RT-02 a RT-05 "não conferido" em `real-terminal.md`).
+- [x] Toda tecla das fatias TUI leitura e Question continua fazendo o que faz, e todo efeito de um clique é o de uma tecla que já existe.
+- [x] Nenhum clique grava uma resposta por engano: pelo mouse, o envio só sai de um clique no atalho `enter` do modal, e nunca do segundo clique de um clique duplo.
+- [ ] O terminal volta ao que era por qualquer saída da TUI: nenhum relatório de mouse chega ao shell depois. Sem marcar: os testes provam que `q`, `ctrl+c` e o erro escrevem `ESC [ ? 1006 l` e `ESC [ ? 1000 l` antes de sair da tela alternativa, mas que o shell não recebe relatório é a RT-07, que o dev decidiu em 2026-10-14 fechar sem conferir.
 - [x] A suíte passa no Windows e no Linux. Em `b63acf8`: Windows, `tsc` 0 e 2073 pass, 5 skip, 0 fail; Linux, `tsc` 0 e 3 de 3 execuções com 2077 pass, 1 skip, 0 fail.
 
 ## Out of Scope
@@ -370,15 +370,15 @@ cada item, e com o que ficou sem conferir.
 | CLK-56 | P1: Nada do que existe muda | T2, T17, T18 | Implementing |
 | CLK-57 | P1: Nada do que existe muda | T22 | Implementing |
 
-**Coverage:** 57 total, 57 com tarefa feita, 0 à espera das tarefas que faltam. `tasks.md` dá a tarefa de cada um.
+**Coverage:** 57 total, 57 com tarefa feita. Os 57 seguem `Implementing` até o Verifier, que os passa a `Verified` ou `Needs Fix`. `tasks.md` dá a tarefa de cada um.
 
 ---
 
 ## Success Criteria
 
-- [ ] Com um broker de teste e o log de uma feature de dois tickets, o dev vai da tela principal ao thread de um ticket, à aba Perguntas e ao envio de uma resposta sem tocar no teclado, a não ser para digitar o texto.
-- [ ] Os testes de teclas e de frames das fatias TUI leitura e Question passam sem alteração, fora a linha de CLK-55.
-- [ ] Um clique duplo em qualquer ponto da tela, com um broker de teste, não grava nenhum `answer`.
-- [ ] Depois de sair da TUI por `q`, por `ctrl+c` e por erro, clicar no shell não escreve nada (RT-07).
-- [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Antes da fatia, `main` em `36440a6`: Windows, 1646 pass, 5 skip. Depois da fatia, em `b63acf8`, 2026-10-14: Windows, Bun 1.3.14 (o que está instalado na máquina), `tsc` 0 e 2073 pass, 5 skip, 0 fail, 83 arquivos, em 149 s; Linux, contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` sobre um clone feito com `git clone -c core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2077 pass, 1 skip, 0 fail, 83 arquivos, entre 79 e 81 s cada. O skip do Linux é o de `QST-99`, anterior à fatia. A falha instável do `git` de `Bun.spawnSync` em `launch*.test.ts` e o estouro de `PEER-38`, vistos uma vez em cinco na prévia, não voltaram.
-- [ ] `real-terminal.md` tem o resultado de RT-01 a RT-08, ou o que ficou sem conferir.
+- [ ] Com um broker de teste e o log de uma feature de dois tickets, o dev vai da tela principal ao thread de um ticket, à aba Perguntas e ao envio de uma resposta sem tocar no teclado, a não ser para digitar o texto. Sem marcar: é o percurso da conferência em terminal real, que o dev decidiu em 2026-10-14 fechar sem fazer.
+- [x] Os testes de teclas e de frames das fatias TUI leitura e Question passam sem alteração, fora a linha de CLK-55. De `36440a6` a `4b9b0eb`, `test/unit/tui-keys.test.ts` e os `.txt` de `test/frames/` não mudaram; `test/unit/tui-frames.test.ts` e `test/frames/deviations.ts` mudaram só no desvio D4 da linha `m` do frame 11.
+- [x] Um clique duplo em qualquer ponto da tela, com um broker de teste, não grava nenhum `answer`. Pelos testes, não por terminal real: o segundo clique, menos de 500 ms depois, não faz nada no modal, sobre uma opção, sobre `enter confirmar` e fora da caixa (`test/unit/tui-mouse.test.ts`, CLK-46); sem modal nenhum clique em nenhuma célula deixa resposta a enviar (CLK-49); e o laço, com um broker falso, abre o modal com um clique duplo em `enter abrir` sem nenhum `POST /answer` (`test/unit/tui-mouse-loop.test.ts`, CLK-49). Com o modal já aberto, o primeiro clique de um duplo sobre `enter confirmar` envia, como a tecla `enter`.
+- [ ] Depois de sair da TUI por `q`, por `ctrl+c` e por erro, clicar no shell não escreve nada (RT-07). Sem marcar: o dev decidiu em 2026-10-14 fechar a fatia sem a conferência em terminal real.
+- [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Antes da fatia, `main` em `36440a6`: Windows, 1646 pass, 5 skip. Depois da fatia, em `b63acf8`, 2026-10-14: Windows, Bun 1.3.14 (o que está instalado na máquina), `tsc` 0 e 2073 pass, 5 skip, 0 fail, 83 arquivos, em 149 s; Linux, contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` sobre um clone feito com `git clone -c core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2077 pass, 1 skip, 0 fail, 83 arquivos, entre 79 e 81 s cada. O skip do Linux é o de `QST-99`, anterior à fatia. A falha instável do `git` de `Bun.spawnSync` em `launch*.test.ts` e o estouro de `PEER-38`, vistos uma vez em cinco na prévia, não voltaram. Depois da T26, no gate da T27, `EVT-43` de `test/integration/routes.test.ts`, anterior à fatia, falhou no Windows em todas as execuções (2 da suíte inteira, com 2072 pass, 5 skip, 1 fail, e 8 do arquivo sozinho): o `acked_at` gravado pelo processo do broker sai de 1 a 4 ms antes do `Date.now()` do teste. Ele falha do mesmo jeito na `main` em `36440a6`, num clone com `bun install` próprio, 3 de 3: é o Bun 1.3.14 desta máquina, não a fatia.
+- [x] `real-terminal.md` tem o resultado de RT-01 a RT-08, ou o que ficou sem conferir.

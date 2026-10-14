@@ -696,10 +696,10 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] A tabela de rastreabilidade da spec tem a tarefa e o status de cada requisito
-- [ ] `ROADMAP.md` marca a fatia e atualiza o "Agora"
-- [ ] O Handoff diz o que a fatia deixa para a Gate e o que ficou sem conferir
-- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] A tabela de rastreabilidade da spec tem a tarefa e o status de cada requisito. Os 57 seguem `Implementing` até o Verifier
+- [x] `ROADMAP.md` marca a fatia e atualiza o "Agora"
+- [x] O Handoff diz o que a fatia deixa para a Gate e o que ficou sem conferir
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. `tsc` 0; `bun test` com 2072 pass, 5 skip e 1 fail, `EVT-43`, que falha igual na `main` em `36440a6` com o Bun 1.3.14 desta máquina (spec, "Success Criteria"). Nenhum teste da fatia falhou
 
 **Tests**: none
 **Gate**: build
