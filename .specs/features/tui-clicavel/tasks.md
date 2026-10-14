@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/tui-clicavel/design.md`
-**Status**: Execute. T1 a T29 commitadas. A terceira e última volta do Verifier deu FAIL por duas lacunas de teste (Fix 1 e Fix 2 de `validation.md`), sem defeito de produção: o dev decide se elas viram tarefas e uma quarta volta, ou se a fatia fecha com elas registradas
+**Status**: Execute. T1 a T30 commitadas. A terceira e última volta do Verifier deu FAIL por duas lacunas de teste (Fix 1 e Fix 2 de `validation.md`), sem defeito de produção: o dev decidiu em 2026-10-14 aplicá-las como T30 e T31 e fechar a fatia sem uma quarta volta
 
 Regras do repositório que valem para toda tarefa:
 
@@ -99,7 +99,7 @@ T22 → T23 → T24 → T25 → T26 → T27
 ### Phase 6: Correções do Verifier
 
 ```
-T28 → T29
+T28 → T29 → T30
 ```
 
 ---
@@ -753,6 +753,27 @@ Da volta 2 do Verifier (`validation.md`, Fix 1): o mutante N30, que troca `ky <=
 
 ---
 
+### T30: CLK-04 com um relatório longo pela entrada
+
+Da volta 3 do Verifier (`validation.md`, Fix 1): o mutante R20, que troca `[0-9;]*` por `[0-9;]{0,24}` em `broker/tui/keys.ts:40`, sobreviveu. Os testes do relatório com um inteiro de 400 dígitos chamavam `parse` e `point` direto, nunca `keysOf`, `input` ou `take`. O dev decidiu em 2026-10-14 aplicar o Fix 1 e o Fix 2 e fechar a fatia sem uma quarta volta do Verifier.
+
+**What**: um teste de CLK-04 com um relatório cujo inteiro tem 400 dígitos `2`, na coluna e, à parte, na linha: ele é um item só de `keysOf`, e `input` e `take` dele não trocam a tela principal nem acrescentam nada ao texto do modal.
+**Where**: `broker/test/unit/tui-mouse-input.test.ts`
+**Depends on**: T29
+**Requirement**: CLK-03, CLK-04
+
+**Done when**:
+
+- [x] O relatório é um item só, também entre duas teclas, e as teclas em volta dele valem
+- [x] `input` e `take` dele deixam a tela `main` e o texto do modal vazio
+- [x] O teste mata o R20, numa cópia física do branch
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -763,7 +784,7 @@ Phase 2:  T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10
 Phase 3:  T11 → T12 → T13 → T14 → T15 → T16 → T17 → T18
 Phase 4:  T19 → T20 → T21
 Phase 5:  T22 → T23 → T24 → T25 → T26 → T27
-Phase 6:  T28 → T29
+Phase 6:  T28 → T29 → T30
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fase 2 (9 tarefas); fase 3 (8); fases 4 e 5 até a T24 ficam com o orquestrador, porque a fase 5 precisa do dev no terminal (T25) e do Docker (T26).
@@ -805,6 +826,7 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T27: Fechamento | 3 documentos do fechamento, coesos | ⚠️ OK |
 | T28: CLK-10 no terminal pequeno | 1 teste | ✅ Granular |
 | T29: CLK-33 na última linha do detalhe | 2 testes do mesmo caso | ✅ Granular |
+| T30: CLK-04 com um relatório longo | 1 teste | ✅ Granular |
 
 ---
 
@@ -841,6 +863,7 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T27 | T26 | T26 → T27 | ✅ Match |
 | T28 | None (a fase anterior inteira) | início da fase 6 | ✅ Match |
 | T29 | T28 | T28 → T29 | ✅ Match |
+| T30 | T29 | T29 → T30 | ✅ Match |
 
 ---
 
@@ -863,3 +886,4 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T25 a T27 | `.specs/` e documentação | none | none | ✅ OK |
 | T28 | Laço | unit | unit | ✅ OK |
 | T29 | Marcas das telas e redutor do mouse | unit | unit | ✅ OK |
+| T30 | Leitura da entrada e redutor do mouse | unit | unit | ✅ OK |

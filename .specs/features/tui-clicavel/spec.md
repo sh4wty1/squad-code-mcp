@@ -314,8 +314,8 @@ cada item, e com o que ficou sem conferir.
 | -------------- | ----- | ----- | ------ |
 | CLK-01 | P1: O terminal conta onde o mouse clicou | T19 | Verified |
 | CLK-02 | P1: O terminal conta onde o mouse clicou | T19 | Verified |
-| CLK-03 | P1: O terminal conta onde o mouse clicou | T2, T11 | Needs Fix |
-| CLK-04 | P1: O terminal conta onde o mouse clicou | T2 | Needs Fix |
+| CLK-03 | P1: O terminal conta onde o mouse clicou | T2, T11, T30 | Implementing |
+| CLK-04 | P1: O terminal conta onde o mouse clicou | T2, T30 | Implementing |
 | CLK-05 | P1: O terminal conta onde o mouse clicou | T12, T20 | Verified |
 | CLK-06 | P1: O terminal conta onde o mouse clicou | T12 | Verified |
 | CLK-07 | P1: O terminal conta onde o mouse clicou | T21 | Verified |

@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { input, isReport, keysOf } from "../../tui/keys.ts";
+import { take, type Entry } from "../../tui/mouse.ts";
 import type { Modal, Ui, View } from "../../tui/view.ts";
 import { frameView } from "../frames/view.ts";
 
@@ -81,6 +82,33 @@ for (const [what, report] of WHOLE) {
     // 2 shows the topology and p pauses the feed
     const main = view("01", { selected: 417 });
     expect(input(main.ui, "2" + report + "p", main)).toEqual({ ...main.ui, screen: "topology", paused: true });
+  });
+}
+
+// A report whose column, and then whose line, has 400 digits, more than a safe integer holds.
+// The digits are 2s, the key of the topology.
+const LONG = "2".repeat(400);
+const LONGS: [what: string, report: string][] = [
+  ["column", `\x1b[<0;${LONG};5M`],
+  ["line", `\x1b[<0;12;${LONG}M`],
+];
+
+for (const [what, report] of LONGS) {
+  test(`CLK-04: a report whose ${what} has 400 digits is one item of the input: its digits change no screen and add no character to the text of the modal`, () => {
+    expect(keysOf(report)).toEqual([report]);
+    expect(keysOf("j" + report + "k")).toEqual(["j", report, "k"]);
+    const main = view("01", { selected: 417 });
+    const text = open("06", { text: "" });
+    expect(input(main.ui, report, main)).toBe(main.ui);
+    expect(input(main.ui, report + "p", main)).toEqual({ ...main.ui, paused: true });
+    expect(input(text.ui, report, text)).toBe(text.ui);
+    expect(input(text.ui, "a" + report + "b", text)).toEqual({ ...text.ui, modal: { ...text.ui.modal!, text: "ab" } });
+    // Through `take`, with the mouse on and nothing drawn: the report is no click and no key
+    const taken = (v: View): Entry => take({ ui: v.ui, pointer: { on: true, clickedAt: null } }, report, v, false, null)!;
+    expect(taken(main).ui).toBe(main.ui);
+    expect(taken(main).ui.screen).toBe("main");
+    expect(taken(text).ui).toBe(text.ui);
+    expect(taken(text).ui.modal!.text).toBe("");
   });
 }
 
