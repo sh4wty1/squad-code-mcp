@@ -318,22 +318,25 @@ test("the questions come in the order they were asked", () => {
   expect(all.map((q) => q.id)).toEqual([9, 2]);
 });
 
+// What the TUI reads of a gate to count the pending ones; every field is in derive-gate.test.ts
+const seen = (all: ReturnType<typeof gates>) => all.map(({ id, pending, request_seq, decision }) => ({ id, pending, request_seq, decision }));
+
 test("TUI-06: a gate without a decision is pending", () => {
-  expect(gates([gate(4, 1)])).toEqual([{ id: 1, pending: true, request_seq: 4, decision: null }]);
+  expect(seen(gates([gate(4, 1)]))).toEqual([{ id: 1, pending: true, request_seq: 4, decision: null }]);
   expect(gates([question(3, 9, "mother", "human")])).toEqual([]);
 });
 
 test("TUI-06: a gate with a decision of comment is still pending", () => {
-  expect(gates([gate(4, 1), gateDecision(6, 1, "comment")])).toEqual([{ id: 1, pending: true, request_seq: 4, decision: null }]);
+  expect(seen(gates([gate(4, 1), gateDecision(6, 1, "comment")]))).toEqual([{ id: 1, pending: true, request_seq: 4, decision: null }]);
 });
 
 test("TUI-06: a decision of approve or of reject closes the gate, and only the one of its gate_id", () => {
   const log = [gate(4, 1), gate(5, 2), gateDecision(6, 1, "comment")];
-  expect(gates([...log, gateDecision(7, 1, "approve")])).toEqual([
+  expect(seen(gates([...log, gateDecision(7, 1, "approve")]))).toEqual([
     { id: 1, pending: false, request_seq: 4, decision: "approve" },
     { id: 2, pending: true, request_seq: 5, decision: null },
   ]);
-  expect(gates([...log, gateDecision(7, 2, "reject")])).toEqual([
+  expect(seen(gates([...log, gateDecision(7, 2, "reject")]))).toEqual([
     { id: 1, pending: true, request_seq: 4, decision: null },
     { id: 2, pending: false, request_seq: 5, decision: "reject" },
   ]);
@@ -1143,7 +1146,7 @@ test("TUI-18: the squad has the open feature, the one closed last, the version o
     ["B", "planned", ["A"]],
   ]);
   expect(s.questions.map((q) => [q.id, q.holder, q.open])).toEqual([[9, "human", true]]);
-  expect(s.gates).toEqual([{ id: 1, pending: true, request_seq: 19, decision: null }]);
+  expect(seen(s.gates)).toEqual([{ id: 1, pending: true, request_seq: 19, decision: null }]);
   expect(s.permissions.map((p) => [p.seq, p.from])).toEqual([[20, "worker-1"]]);
 });
 

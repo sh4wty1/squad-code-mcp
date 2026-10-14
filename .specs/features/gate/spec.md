@@ -370,10 +370,10 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-27 | P1: Encerrar a feature com o gate | T5, T26 | In Tasks |
 | GAT-28 | P1: Encerrar a feature com o gate | T5 | In Tasks |
 | GAT-29 | P1: Encerrar a feature com o gate | T5 | In Tasks |
-| GAT-30 | P1: Paridade com o log | T2, T7 | In Tasks |
-| GAT-31 | P1: Paridade com o log | T2 | In Tasks |
-| GAT-32 | P1: Paridade com o log | T2 | In Tasks |
-| GAT-33 | P1: Paridade com o log | T2 | In Tasks |
+| GAT-30 | P1: Paridade com o log | T2, T7 | Implementing |
+| GAT-31 | P1: Paridade com o log | T2 | Implementing |
+| GAT-32 | P1: Paridade com o log | T2 | Implementing |
+| GAT-33 | P1: Paridade com o log | T2 | Implementing |
 | GAT-34 | P1: O que a mother vê | T8 | In Tasks |
 | GAT-35 | P1: O que a mother vê | T8 | In Tasks |
 | GAT-36 | P1: O que a mother vê | T9 | In Tasks |

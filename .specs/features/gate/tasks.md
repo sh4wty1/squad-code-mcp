@@ -129,9 +129,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Cada campo de GAT-31 afirmado em `test/unit/derive-gate.test.ts`, com 1, 2 e 3 versões, sem e com dois `comment` (vale o mais recente), `approve` depois de `comment`, e um `reject` depois de um `approve` que não conta
-- [ ] Gate pendente com `feature_closed` é `rejected` sem `decision_seq`; gate decidido antes do `feature_closed` não muda
-- [ ] Os testes de `derive*.test.ts` e de frames que já passavam continuam; gate quick passa
+- [x] Cada campo de GAT-31 afirmado em `test/unit/derive-gate.test.ts`, com 1, 2 e 3 versões, sem e com dois `comment` (vale o mais recente), `approve` depois de `comment`, e um `reject` depois de um `approve` que não conta
+- [x] Gate pendente com `feature_closed` é `rejected` sem `decision_seq`; gate decidido antes do `feature_closed` não muda
+- [x] Os testes de `derive*.test.ts` e de frames que já passavam continuam; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
