@@ -4,7 +4,8 @@
  *
  * Reads the log of the broker every second and draws the squad in the terminal: the feed,
  * the agents, the tickets, the topology, the thread of a ticket and the questions that wait
- * for the dev. It writes one thing: the answer of the dev to a question.
+ * for the dev. It writes three things, with the human credential: the answer of the dev to a
+ * question, the decision of a gate and the decision of a permission request.
  *
  *   bun tui.ts
  */

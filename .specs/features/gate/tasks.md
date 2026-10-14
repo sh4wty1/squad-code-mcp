@@ -592,7 +592,7 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `gate.ts`, as duas rotas, a tabela, os dois modais e as três escritas da TUI descritos; gate build passa
+- [x] `gate.ts`, as duas rotas, a tabela, os dois modais e as três escritas da TUI descritos; gate build passa
 
 **Tests**: none
 **Gate**: build
