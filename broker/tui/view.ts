@@ -20,6 +20,39 @@ export interface Modal {
   refused: boolean;
 }
 
+// The modal of a pending gate
+export interface GateModal {
+  // the id of the gate
+  id: number;
+  // reading the gate, confirming the approve, or writing the text of a reject or a comment
+  mode: "view" | "confirm" | "reject" | "comment";
+  text: string;
+  expanded: boolean;
+  // enter with an empty text: the field is red until a key changes the text (GAT-56)
+  empty: boolean;
+  // the decision was sent and the broker did not say yet
+  sending: boolean;
+  // the version on the screen when the confirm mode opened (GAT-59)
+  version: number;
+}
+
+// The modal of a permission request
+export interface PermissionModal {
+  // the seq of the permission_request
+  seq: number;
+  // the first line of the preview drawn
+  offset: number;
+  // the decision was sent and the broker did not say yet
+  sending: boolean;
+}
+
+// What the loop has to send to the broker: an answer, the decision of a gate or that of a
+// permission request, told apart by their fields
+export type Send =
+  | { question_id: number; answer: string }
+  | { gate_id: number; decision: "approve" | "reject" | "comment"; text?: string }
+  | { request_seq: number; behavior: "allow" | "deny" };
+
 export interface Ui {
   screen: "main" | "topology" | "thread" | "questions" | "help";
   // the seq of the selected line of the feed; null for none
@@ -40,8 +73,10 @@ export interface Ui {
   // how many of the latest resolved questions the history leaves above
   historyOffset: number;
   modal: Modal | null;
-  // the answer the loop has to send to the broker
-  send: { question_id: number; answer: string } | null;
+  // the modals of gate and of permission; absent is closed, as null
+  gate?: GateModal | null;
+  permission?: PermissionModal | null;
+  send: Send | null;
   // the terminal sent the mark of the start of a paste, and not yet the one of its end
   pasting: boolean;
 }

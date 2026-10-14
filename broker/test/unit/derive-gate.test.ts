@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
-import { gates, type Gate } from "../../shared/derive.ts";
+import { gates, requests, squad, type Gate } from "../../shared/derive.ts";
 
 const T0 = 1791331200000;
 
@@ -178,4 +178,68 @@ test("GAT-33: pending is true only for the gate whose status is pending", () => 
     [2, "rejected", false],
     [3, "rejected", false],
   ]);
+});
+
+// ---- the permission requests of the log ----
+
+// An event of a peer outside a feature, `seq` seconds after T0
+function of(seq: number, kind: string, from: string, fields: Record<string, unknown> = {}): SquadEvent {
+  return event(seq, { kind, from, role_from: from === "broker" ? "broker" : "worker", feature_id: null, ...fields });
+}
+
+function ask(seq: number, from: string): SquadEvent {
+  return of(seq, "permission_request", from, { request_id: `r${seq}`, tool_name: "Bash", description: "run it", input_preview: "ls" });
+}
+
+const allow = (seq: number, request_seq: number) => of(seq, "permission_decision", "human", { role_from: "human", to: "worker-1", request_seq, behavior: "allow" });
+const left = (seq: number, peer: string) => of(seq, "peer_left", "broker", { peer, reason: "died" });
+const refusedOf = (seq: number, peer: string) => of(seq, "refused", "broker", { peer, attempted_kind: "result", error: "edge_not_allowed" });
+
+const row = (r: ReturnType<typeof requests>[number]) => [r.request.seq, r.label, r.open, r.closedBy, r.closedTs];
+
+test("GAT-61, GAT-62: each permission request is labeled P-NN by its place among all the requests of the log, from 1, in order", () => {
+  // the second one of worker-1 closes the first; the one of the judge is outside any feature too
+  const log = [ask(3, "worker-1"), ask(5, "judge"), ask(8, "worker-1"), ask(9, "worker-2")];
+  expect(requests(log).map((r) => [r.request.seq, r.label])).toEqual([
+    [3, "P-01"],
+    [5, "P-02"],
+    [8, "P-03"],
+    [9, "P-04"],
+  ]);
+  // the order of the log, not of the array
+  expect(requests([...log].reverse()).map((r) => r.label)).toEqual(["P-01", "P-02", "P-03", "P-04"]);
+});
+
+test("GAT-70: a request closed by the permission_decision that cites it is closed by decision, at the ts of the decision", () => {
+  const log = [ask(3, "worker-1"), ask(4, "worker-2"), allow(6, 3), of(7, "turn_started", "worker-1")];
+  expect(requests(log).map(row)).toEqual([
+    [3, "P-01", false, "decision", T0 + 6000],
+    [4, "P-02", true, null, null],
+  ]);
+});
+
+test("GAT-71: a request closed by a later event of its peer is closed by the peer, at the ts of that event", () => {
+  const log = [ask(3, "worker-1"), of(5, "turn_started", "worker-2"), of(7, "turn_started", "worker-1"), allow(9, 3)];
+  expect(requests(log).map(row)).toEqual([[3, "P-01", false, "peer", T0 + 7000]]);
+});
+
+test("GAT-96: a request whose peer left is closed by the peer, at the ts of the peer_left", () => {
+  const log = [ask(3, "worker-1"), left(4, "worker-2"), left(6, "worker-1")];
+  expect(requests(log).map(row)).toEqual([[3, "P-01", false, "peer", T0 + 6000]]);
+});
+
+test("GAT-71: a refused about the peer, which the broker writes, does not close its request", () => {
+  const log = [ask(3, "worker-1"), refusedOf(4, "worker-1")];
+  expect(requests(log).map(row)).toEqual([[3, "P-01", true, null, null]]);
+});
+
+test("GAT-61: squad gives every request of the log, open and closed, and permissions keeps only the open ones", () => {
+  const log = [ask(3, "worker-1"), allow(4, 3), ask(5, "worker-2")];
+  const derived = squad(log, T0 + 10_000);
+  expect(derived.requests).toEqual(requests(log));
+  expect(derived.requests.map((r) => [r.label, r.open])).toEqual([
+    ["P-01", false],
+    ["P-02", true],
+  ]);
+  expect(derived.permissions.map((p) => p.seq)).toEqual([5]);
 });

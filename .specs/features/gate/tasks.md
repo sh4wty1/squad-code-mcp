@@ -319,8 +319,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `P-01`, `P-02` em ordem do log inteiro; fechado por decisão, por evento do peer e por `peer_left`, com o `ts` de quem fechou; um `refused` sobre o peer não fecha
-- [ ] `tsc` passa com os campos novos; testes em `test/unit/derive-gate.test.ts`; gate quick passa
+- [x] `P-01`, `P-02` em ordem do log inteiro; fechado por decisão, por evento do peer e por `peer_left`, com o `ts` de quem fechou; um `refused` sobre o peer não fecha
+- [x] `tsc` passa com os campos novos; testes em `test/unit/derive-gate.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

@@ -229,6 +229,43 @@ export function openPermissions(events: SquadEvent[]): EventOf<"permission_reque
   );
 }
 
+// A permission request of the log, with how it closed
+export interface PermissionRequest {
+  request: EventOf<"permission_request">;
+  // `P-01` for the first permission_request of the whole log
+  label: string;
+  // as openPermissions says
+  open: boolean;
+  // the permission_decision that cites it, or a later event of its peer or its peer_left
+  closedBy: "decision" | "peer" | null;
+  // of the event that closed it
+  closedTs: number | null;
+}
+
+// Every permission request of the log, in ascending seq
+export function requests(events: SquadEvent[]): PermissionRequest[] {
+  const ordered = bySeq(events);
+  const open = new Set(openPermissions(events).map((e) => e.seq));
+  return ordered
+    .filter((e): e is EventOf<"permission_request"> => e.kind === "permission_request")
+    .map((request, i) => {
+      const decides = (e: SquadEvent) => e.kind === "permission_decision" && e.request_seq === request.seq;
+      // ponytail: a scan of the log per request, an index by peer if the log grows long
+      const closer = open.has(request.seq)
+        ? undefined
+        : ordered.find(
+            (e) => e.seq > request.seq && (decides(e) || e.from === request.from || (e.kind === "peer_left" && e.peer === request.from))
+          );
+      return {
+        request,
+        label: "P-" + String(i + 1).padStart(2, "0"),
+        open: open.has(request.seq),
+        closedBy: closer === undefined ? null : decides(closer) ? "decision" : "peer",
+        closedTs: closer?.ts ?? null,
+      };
+    });
+}
+
 // The block each name declared: its latest `blocked` with no `unblocked` of the name after it
 export function blocks(events: SquadEvent[]): Map<string, EventOf<"blocked">> {
   const all = new Map<string, EventOf<"blocked">>();
@@ -570,6 +607,8 @@ export interface Squad {
   gates: Gate[];
   // the open requests
   permissions: EventOf<"permission_request">[];
+  // every request of the log, open or closed
+  requests: PermissionRequest[];
   // by name; `feature` is empty without an open feature
   usage: { session: Map<string, Totals>; feature: Map<string, Totals> };
 }
@@ -705,6 +744,7 @@ export function squad(log: SquadEvent[], now: number): Squad {
     questions: asked,
     gates: requested,
     permissions,
+    requests: requests(events),
     usage,
   };
 }

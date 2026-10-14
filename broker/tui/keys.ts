@@ -225,7 +225,7 @@ export function input(ui: Ui, chunk: string, view: View, more = false): Ui | nul
 export function settle(ui: Ui, result: Sent | null, view: View): Ui {
   const { modal: m, send } = ui;
   const idle: Ui = { ...ui, send: null };
-  if (!m || !send) return idle;
+  if (!m || !send || !("question_id" in send)) return idle;
   // The modal as it was before the send, to send again
   const back = (text: string): Ui => ({ ...idle, modal: { ...m, sending: false }, toast: notice(view, text, "bred") });
   if (!result) return back("✗ credencial humana não encontrada");

@@ -158,6 +158,8 @@ export function start(io: Io, settings: Settings) {
   // the broker may have written it after the TUI started. The token goes nowhere else.
   function post() {
     const sent = ui.send!;
+    // The decisions of a gate and of a permission request are not sent yet (Gate T25)
+    if (!("question_id" in sent)) return;
     const token = io.token();
     if (token === null) return void (ui = settle(ui, null, view()));
     writer
