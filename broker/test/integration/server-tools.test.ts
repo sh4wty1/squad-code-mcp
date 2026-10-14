@@ -262,6 +262,8 @@ test("GAT-36/18: the gate tool of the mother records the gate, and the approve o
     id: "not-an-id",
   });
   expect(seqOf(asked)).toBe(3);
+  // GAT-38: the mother asks the gate again after a comment by this id
+  expect(asked.text).toBe("Gate 1 requested with seq 3.");
   const gate = readDb(b.dbFile).events.at(-1)!;
   expect(gate).toMatchObject({ seq: 3, kind: "gate", from_name: "mother", to_name: "human", gate_id: 1 });
 
