@@ -1,0 +1,10 @@
+17:51:28 ALLOWED by TUI 25 worker-1 { "command": "git branch --list \"feat/slugs*\" && git status --short && ls && (ls src test 2>/dev/null; cat package.json 2>/dev/null; bun --version)", "descrip
+17:51:44 ALLOWED by TUI 27 worker-1 { "command": "bun test", "description": "Run the test suite" }
+17:52:01 ALLOWED by TUI 32 judge { "command": "git switch --detach dd88bd1898bbb596b010b17d87f524f2e132ba01 && cat src/slugify.js && cat test/slugify.test.js && bun test 2>&1 | tail -n 20", "de
+17:52:33 ALLOWED by TUI 41 worker-1 { "command": "bun test", "description": "Run the full test suite" }
+18:03:01 ALLOWED by TUI 46 judge { "command": "git switch --detach cd06d1d8e439519011a7b81dbcfce0c82c34cd0f && cat src/slugPath.js && cat test/slugPath.test.js && bun test 2>&1 | tail -n 8", "d
+18:03:17 ALLOWED by TUI 51 leader { "command": "git merge-base --is-ancestor dd88bd1 cd06d1d && echo \"dd88bd1 is ancestor\" && git merge --no-edit feat/slugs-slugPath && git log --oneline -4 &&
+18:03:41 ALLOWED by TUI 56 mother { "command": "cd \"C:\\Users\\Dev\\AppData\\Local\\Temp\\claude\\c--Fassi-squad-code-mcp\\636fe4c3-5824-40c6-a307-c61a9f1831b8\\scratchpad\\mvp\\repo\" && git w
+18:03:53 ALLOWED by TUI 58 mother { "command": "cd \"C:/Users/Dev/AppData/Local/Temp/claude/c--Fassi-squad-code-mcp/636fe4c3-5824-40c6-a307-c61a9f1831b8/scratchpad/mvp/worktrees/leader\" && git 
+18:05:03 ALLOWED by TUI 68 mother { "command": "cd \"C:\\Users\\Dev\\AppData\\Local\\Temp\\claude\\c--Fassi-squad-code-mcp\\636fe4c3-5824-40c6-a307-c61a9f1831b8\\scratchpad\\mvp\\repo\" && test 
+18:05:21 ALLOWED by TUI 70 mother { "command": "cd \"C:\\Users\\Dev\\AppData\\Local\\Temp\\claude\\c--Fassi-squad-code-mcp\\636fe4c3-5824-40c6-a307-c61a9f1831b8\\scratchpad\\mvp\\repo\" && bun t

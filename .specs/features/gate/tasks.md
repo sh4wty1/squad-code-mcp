@@ -626,7 +626,7 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] O log da feature, as entradas em terminais que não o da mother contadas, e o que ficou sem exercitar
+- [x] O log da feature, as entradas em terminais que não o da mother contadas, e o que ficou sem exercitar
 
 **Tests**: none
 **Gate**: build

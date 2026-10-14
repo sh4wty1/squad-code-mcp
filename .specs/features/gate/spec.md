@@ -25,7 +25,7 @@ permissão na TUI, com teclado e mouse. É a última fatia do MVP.
 - [ ] O dev decide um pedido de permissão pela TUI, sem ir ao terminal do agente.
 - [ ] A tabela `gates` e `gates()` de `broker/shared/derive.ts`, aplicada aos eventos, dizem a mesma coisa depois de qualquer sequência de chamadas.
 - [ ] Os frames 08, 16a, 16b, 16c, 17, 18b, 19b, 22a, 22b, 22d, 22e, 22f e 29d são casos do teste de frames, sem edição dos arquivos extraídos; os 47 que já existem continuam passando, e a legenda do frame 11 perde os desvios D3 dos modais.
-- [ ] O marco do MVP: uma feature de dois tickets vai do kickoff ao gate aprovado com o dev usando só o terminal da mother e a TUI.
+- [x] O marco do MVP: uma feature de dois tickets vai do kickoff ao gate aprovado com o dev usando só o terminal da mother e a TUI.
 - [ ] A suíte passa no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar.
 
 ## Out of Scope
@@ -460,5 +460,5 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 - [ ] Nenhum caminho deixa um gate com duas decisões finais.
 - [ ] A TUI, sobre um broker de teste, decide um pedido de permissão pelo modal, e o servidor MCP do peer recebe o veredito.
 - [ ] Os 60 frames passam no teste de frames; os 47 anteriores não mudam.
-- [ ] O marco do MVP conferido com sessões reais, ou o que ficou sem conferir registrado em `marco-mvp.md`.
+- [x] O marco do MVP conferido com sessões reais, ou o que ficou sem conferir registrado em `marco-mvp.md`. Conferido em 2026-10-14 sobre `a6a96a8`: a feature `slugs`, de dois tickets, do kickoff ao `feature_closed` `delivered`, com o dev só no terminal da mother (uma mensagem) e na TUI (11 pedidos de permissão, um comentário e a aprovação do gate).
 - [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Antes da fatia, `main` em `3922651`: Windows, 2080 pass, 5 skip. Em `eb39b01`, 2026-10-14: Windows 11, Bun 1.3.14, `tsc` 0 e 2431 pass, 5 skip, 0 fail, 96 arquivos, em 130 s; Linux, contêiner `oven/bun:1.4.2` (kernel 6.18 do WSL2) com `git`, `lsof` e `procps`, sobre um clone com `core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2435 pass, 1 skip, 0 fail, 96 arquivos, em 82 s cada.
