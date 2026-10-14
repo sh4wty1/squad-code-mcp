@@ -355,7 +355,10 @@ for (const status of ["approved", "rejected"]) {
     const b = opened();
     b.gate.request(MOTHER, ASKED);
     b.db.run("UPDATE gates SET status = ?, decision_seq = 2 WHERE id = 1", [status]);
-    refusedGate(b, { ...ASKED, gate_id: 1 }, "gate_closed");
+    const { hint } = refusedGate(b, { ...ASKED, gate_id: 1 }, "gate_closed");
+    // The hint has the mother ask a new gate, with no gate_id
+    expect(hint).toMatch(/ask a new gate/i);
+    expect(hint).toContain("without gate_id");
     expect(b.gateRows()).toEqual([gateRow(1, b.feature_id, { status, decision_seq: 2 })]);
   });
 }

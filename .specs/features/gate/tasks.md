@@ -728,8 +728,8 @@ T36 → T30
 
 **Done when**:
 
-- [ ] O `hint` da reemissão de um gate decidido afirmado pelas palavras que mandam pedir um gate novo e chamar sem `gate_id`
-- [ ] Falha com o `hint` de `gate.ts:71` trocado por `G-01 is approved.` numa cópia; gate quick passa
+- [x] O `hint` da reemissão de um gate decidido afirmado pelas palavras que mandam pedir um gate novo e chamar sem `gate_id`
+- [x] Falha com o `hint` de `gate.ts:71` trocado por `G-01 is approved.` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
