@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
 import type { Color } from "../../tui/grid.ts";
-import { press, settle, sync } from "../../tui/keys.ts";
+import { input, press, settle, sync } from "../../tui/keys.ts";
 import type { GateModal, Ui, View } from "../../tui/view.ts";
 import { LOGS } from "../frames/logs.ts";
 import { frameView } from "../frames/view.ts";
@@ -284,4 +284,67 @@ test("GAT-59: a read changes nothing in a modal whose decision is on its way, no
   expect(sync(decidedOnTheWay.ui, decidedOnTheWay)).toBe(decidedOnTheWay.ui);
   const pending = opened("18a", modal(1, { mode: "comment", text: "e o iOS?" }));
   expect(sync(pending.ui, pending)).toBe(pending.ui);
+});
+
+// ---- a paste, and the broker not answering ----
+
+const START_PASTE = "\x1b[200~";
+const END_PASTE = "\x1b[201~";
+// The state after each chunk, read one after the other
+const chunks = (v: View, ...read: string[]) => read.reduce<Ui | null>((ui, chunk) => (ui ? input(ui, chunk, { ...v, ui }) : ui), v.ui);
+
+test("GAT-75: a paste never decides the gate: y, a, d and a line break are no key with the modal reading or confirming, first, in the middle and last in the chunk", () => {
+  for (const mode of ["view", "confirm"] as const) {
+    const v = opened("18a", modal(1, { mode }));
+    for (const chunk of ["ay", "ya", "yy", "\ry", "y\r", "a\n", "zyz", "zaz", "z\rz", "dz", "zd"]) {
+      expect([mode, chunk, input(v.ui, chunk, v)]).toEqual([mode, chunk, v.ui]);
+    }
+  }
+  // the keys around them still count: ] and [ walk the queue, and y does not confirm
+  const queue = opened("19a", modal(1));
+  expect(input(queue.ui, "]a", queue)!.gate).toEqual(modal(2));
+  expect(input(queue.ui, "a]", queue)!.gate).toEqual(modal(2));
+  expect(input(queue.ui, "]a[", queue)!.gate).toEqual(modal(1));
+});
+
+test("GAT-75: the g that opens the modal in a paste does not let the rest of the paste decide", () => {
+  const v = view("18a");
+  for (const chunk of ["ga", "gay", "g\r", "ga\ry"]) {
+    const next = input(v.ui, chunk, v)!;
+    expect([chunk, next.gate, next.send]).toEqual([chunk, modal(1), null]);
+  }
+});
+
+test("GAT-75: between the marks of a delimited paste, split in two reads, y and a decide nothing, and y typed after the paste confirms", () => {
+  const confirm = opened("18a", modal(1, { mode: "confirm" }));
+  expect(chunks(confirm, `${START_PASTE}a`, `y\r${END_PASTE}`)).toEqual(confirm.ui);
+  expect(chunks(confirm, START_PASTE, "y", END_PASTE)).toEqual(confirm.ui);
+  expect(chunks(confirm, START_PASTE, "\r", END_PASTE)).toEqual(confirm.ui);
+  expect(chunks(confirm, START_PASTE, "y", END_PASTE, "y")!.send).toEqual({ gate_id: 1, decision: "approve" });
+  const reading = opened("18a", modal(1));
+  expect(chunks(reading, START_PASTE, "a", END_PASTE)).toEqual(reading.ui);
+});
+
+for (const mode of ["reject", "comment"] as const) {
+  test(`GAT-75: in the text of a ${mode} a pasted line break is a space and the letters go in, first, in the middle and last in the chunk, and nothing is sent`, () => {
+    const v = opened("18a", modal(1, { mode, text: "x" }));
+    for (const [chunk, text] of [["\rya", "x ya"], ["y\ra", "xy a"], ["ya\n", "xya "], ["a\r\nd", "xa  d"]] as const) {
+      const next = input(v.ui, chunk, v)!;
+      expect([chunk, next.gate, next.send]).toEqual([chunk, modal(1, { mode, text }), null]);
+    }
+    const split = chunks(v, `${START_PASTE}ad`, `\ry${END_PASTE}`)!;
+    expect([split.gate, split.send]).toEqual([modal(1, { mode, text: "xad y" }), null]);
+    const alone = chunks(v, START_PASTE, "\r", END_PASTE)!;
+    expect([alone.gate, alone.send]).toEqual([modal(1, { mode, text: "x " }), null]);
+  });
+}
+
+test("GAT-77: with the broker not answering the reads no key changes the modal of gate, in any mode, but ctrl+c quits", () => {
+  for (const mode of ["view", "confirm", "reject", "comment"] as const) {
+    const v = { ...opened("18a", modal(1, { mode, text: mode === "reject" || mode === "comment" ? "falta" : "" })), down: { since: 0, attempt: 2 } };
+    for (const k of ["\x1b", "y", "a", "r", "c", "\r", "]", "[", "q", "z", "\x7f", "\x15", "\x05", "g", "x", "4"]) expect([mode, k, key(k, v)]).toEqual([mode, k, v.ui]);
+    expect(input(v.ui, "y", v)).toBe(v.ui);
+    expect(key("\x03", v)).toBeNull();
+    expect(input(v.ui, "\x03", v)).toBeNull();
+  }
 });

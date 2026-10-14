@@ -319,7 +319,10 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
 // chunk had keys after these, which the loop holds back. Between the two marks of a delimited
 // paste every chunk is of the paste, a line break alone in its read too; the marks are no key
 // of a screen, and esc ends a paste whose mark of the end did not come. A mouse report
-// presses no key, and still counts as one of the keys of its chunk.
+// presses no key, and still counts as one of the keys of its chunk. Nor does a paste decide a
+// gate or a permission request: y, a, d and a line break whose turn comes with the modal of
+// gate reading or confirming, or with the modal of permission open, are no key; in the text
+// of a gate the line break is a space, as in the modal of answer.
 export function input(ui: Ui, chunk: string, view: View, more = false): Ui | null {
   const keys = keysOf(chunk);
   let next: Ui | null = ui;
@@ -330,7 +333,10 @@ export function input(ui: Ui, chunk: string, view: View, more = false): Ui | nul
     }
     if (isReport(k)) continue;
     if (k === "\x1b") next = paste(next, false);
-    const pasted = (next.pasting || more || keys.length > 1) && next.modal !== null && (k === "\r" || k === "\n");
+    const pasting = next.pasting || more || keys.length > 1;
+    const deciding = next.permission || (next.gate && (next.gate.mode === "view" || next.gate.mode === "confirm"));
+    if (pasting && deciding && ["y", "a", "d", "\r", "\n"].includes(k)) continue;
+    const pasted = pasting && (next.modal || next.gate) && (k === "\r" || k === "\n");
     next = press(next, pasted ? " " : k, { ...view, ui: next });
     if (!next) return null;
   }

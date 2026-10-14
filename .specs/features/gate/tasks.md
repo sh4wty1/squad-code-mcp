@@ -393,8 +393,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `y`, `a`, `d`, `\r` e `\n` primeiro, no meio e por último num bloco, e entre marcadores de colagem delimitada partidos em duas leituras; nos modos de texto o salto vira espaço e as letras entram
-- [ ] Com `view.down` nenhuma tecla muda os modais a não ser `ctrl+c`; gate build passa
+- [x] `y`, `a`, `d`, `\r` e `\n` primeiro, no meio e por último num bloco, e entre marcadores de colagem delimitada partidos em duas leituras; nos modos de texto o salto vira espaço e as letras entram
+- [x] Com `view.down` nenhuma tecla muda os modais a não ser `ctrl+c`; gate build passa
 
 **Tests**: unit
 **Gate**: build

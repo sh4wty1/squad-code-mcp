@@ -415,9 +415,9 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-72 | P1: Teclado e escrita comuns aos modais | T11, T25, T27 | Implementing |
 | GAT-73 | P1: Teclado e escrita comuns aos modais | T15, T25 | Implementing |
 | GAT-74 | P1: Teclado e escrita comuns aos modais | T15, T25 | Implementing |
-| GAT-75 | P1: Teclado e escrita comuns aos modais | T16 | In Tasks |
+| GAT-75 | P1: Teclado e escrita comuns aos modais | T16 | Implementing |
 | GAT-76 | P1: Teclado e escrita comuns aos modais | T13 | Implementing |
-| GAT-77 | P1: Teclado e escrita comuns aos modais | T16 | In Tasks |
+| GAT-77 | P1: Teclado e escrita comuns aos modais | T16 | Implementing |
 | GAT-78 | P1: Teclado e escrita comuns aos modais | T25 | In Tasks |
 | GAT-79 | P1: Mouse nos modais | T23, T24 | In Tasks |
 | GAT-80 | P1: Mouse nos modais | T24 | In Tasks |

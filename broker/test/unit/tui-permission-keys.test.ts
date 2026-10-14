@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
 import type { Color } from "../../tui/grid.ts";
-import { press, settle, sync } from "../../tui/keys.ts";
+import { input, press, settle, sync } from "../../tui/keys.ts";
 import { preview } from "../../tui/screens/permission.ts";
 import type { PermissionModal, Ui, View } from "../../tui/view.ts";
 import { LOGS } from "../frames/logs.ts";
@@ -238,4 +238,51 @@ test("GAT-70: a read changes nothing in a modal whose decision is on its way, no
   expect(sync(onTheWay.ui, onTheWay)).toBe(onTheWay.ui);
   const open = view("22c", { permission: modal(460, { offset: 3 }) });
   expect(sync(open.ui, open)).toBe(open.ui);
+});
+
+// ---- a paste, and the broker not answering ----
+
+const START_PASTE = "\x1b[200~";
+const END_PASTE = "\x1b[201~";
+// The state after each chunk, read one after the other
+const chunks = (v: View, ...read: string[]) => read.reduce<Ui | null>((ui, chunk) => (ui ? input(ui, chunk, { ...v, ui }) : ui), v.ui);
+
+test("GAT-75: a paste never decides a permission request: y, a, d and a line break are no key with the modal open, first, in the middle and last in the chunk", () => {
+  // one line: the end of the preview is in view, and a typed alone would allow
+  const v = at(lines(1), 0);
+  for (const chunk of ["ad", "da", "a\r", "\ra", "d\n", "zaz", "zdz", "\ryd", "yy"]) {
+    expect([chunk, input(v.ui, chunk, v)]).toEqual([chunk, v.ui]);
+  }
+  // the keys around them still count: j and k scroll
+  const long = at(LONG, 4);
+  expect(input(long.ui, "ja", long)!.permission).toEqual(modal(459, { offset: 5 }));
+  expect(input(long.ui, "aj", long)!.permission).toEqual(modal(459, { offset: 5 }));
+  expect(input(long.ui, "jak", long)!.permission).toEqual(modal(459, { offset: 4 }));
+  expect(input(long.ui, "Gd", long)).toEqual({ ...long.ui, permission: modal(459, { offset: 5 }) });
+});
+
+test("GAT-75: the x that opens the modal in a paste does not let the rest of the paste decide", () => {
+  const v = view("14");
+  for (const chunk of ["xa", "xd", "x\r", "xGa"]) {
+    const next = input(v.ui, chunk, v)!;
+    expect([chunk, next.permission, next.send]).toEqual([chunk, modal(459), null]);
+  }
+});
+
+test("GAT-75: between the marks of a delimited paste, split in two reads, a and d decide nothing, and a typed after the paste allows", () => {
+  const v = at(lines(1), 0);
+  expect(chunks(v, `${START_PASTE}a`, `d\r${END_PASTE}`)).toEqual(v.ui);
+  expect(chunks(v, START_PASTE, "a", END_PASTE)).toEqual(v.ui);
+  expect(chunks(v, START_PASTE, "d", END_PASTE)).toEqual(v.ui);
+  expect(chunks(v, START_PASTE, "a", END_PASTE, "a")!.send).toEqual({ request_seq: 459, behavior: "allow" });
+});
+
+test("GAT-77: with the broker not answering the reads no key changes the modal of permission, but ctrl+c quits", () => {
+  for (const change of [undefined, later("turn_started")]) {
+    const v = { ...view("22c", { permission: modal(460, { offset: 5 }) }, change), down: { since: 0, attempt: 2 } };
+    for (const k of [...INERT, "\x1b", "a", "d", "j", "k", "G", "]", "[", UP, DOWN]) expect([k, key(k, v)]).toEqual([k, v.ui]);
+    expect(input(v.ui, "a", v)).toBe(v.ui);
+    expect(key("\x03", v)).toBeNull();
+    expect(input(v.ui, "\x03", v)).toBeNull();
+  }
 });
