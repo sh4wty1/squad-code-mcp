@@ -21,10 +21,10 @@ Corroborated across multiple features. Safe to apply as guidance.
 - last seen: 2026-10-10T11:07:42Z
 
 ### L-010 - When an AC lists several triggers, give each trigger its own assertion or a recorded platform skip
-- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `mcp-server` · harmful: 0
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `mcp-server` · harmful: 1
 - features: peer, question
 - evidence: mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server) (+3 more)
-- last seen: 2026-10-10T11:07:42Z
+- last seen: 2026-10-14T16:16:04Z
 
 ### L-020 - Assert a spec-defined limit with the literal value from the spec, not with the constant imported from the code under test
 - signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker tests` · harmful: 0
@@ -44,6 +44,12 @@ Corroborated across multiple features. Safe to apply as guidance.
 - evidence: EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes) (+2 more)
 - last seen: 2026-10-12T08:33:56Z
 
+### L-040 - Test a count limit or a rounding rule at its boundary value, not only well past it
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `tui` · harmful: 0
+- features: tui-leitura, tui-clicavel
+- evidence: L08 broker/tui/screens/main.ts:77, S23 broker/tui/screens/chrome.ts:127 (tui) (+1 more)
+- last seen: 2026-10-14T16:15:56Z
+
 ### L-048 - When an AC lists alternatives that can hold together, state which one wins
 - signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec` · harmful: 0
 - features: tui-leitura, question
@@ -55,6 +61,48 @@ Corroborated across multiple features. Safe to apply as guidance.
 - features: question, papeis
 - evidence: B08 broker/broker.ts:57 (QST-36: /send not wired to delivered, whole suite green) (broker tests) (+2 more)
 - last seen: 2026-10-12T08:33:55Z
+
+### L-055 - State at which moment of a multi-key input a rule that depends on the mode reads the mode
+- signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec` · harmful: 0
+- features: question, tui-clicavel
+- evidence: QST-78 (mode read at the start of the chunk); broker/tui/keys.ts:44 (spec) (+1 more)
+- last seen: 2026-10-14T16:15:57Z
+
+### L-057 - When an AC states a rule for each mode of a component, state what the same input does when the component is in none of them
+- signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec` · harmful: 0
+- features: question, tui-clicavel
+- evidence: QST-78 vs Assumptions row 'Colagem com quebra de linha'; mutant K4 broker/tui/keys.ts:187 (validation.md round 3, P3) (spec) (+1 more)
+- last seen: 2026-10-14T16:15:57Z
+
+### L-067 - Assert a rule an AC states for an input loop through the loop, not only on the pure function the loop calls
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `tui input` · harmful: 0
+- features: question, tui-clicavel
+- evidence: V13 tui.ts:170; test/unit/tui-keys.test.ts:591 (QST-99, round 6 gap 4) (tui input) (+1 more)
+- last seen: 2026-10-14T16:15:56Z
+
+### L-068 - Test a rule that holds for any item of a list with the item first, last and between two others
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `tui input` · harmful: 0
+- features: question, tui-clicavel
+- evidence: V2 tui.ts:171; test/unit/tui-loop.test.ts:628 (QST-99, round 6 gap 6) (tui input) (+1 more)
+- last seen: 2026-10-14T16:15:56Z
+
+### L-069 - When an AC names an input of several bytes, state what happens when it arrives split across two reads
+- signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec` · harmful: 0
+- features: question, tui-clicavel
+- evidence: SP4, QST-78 with QST-99; V8 tui.ts:191 (round 6) (spec) (+1 more)
+- last seen: 2026-10-14T16:15:57Z
+
+### L-073 - When two ACs give different outcomes for the same case, state in both which one wins
+- signal: `spec_precision_gap` · recurrence: 2 feature(s) · scope: `spec` · harmful: 0
+- features: papeis, tui-clicavel
+- evidence: validation.md PAP-66 and PAP-68, plugin/skills/worker/SKILL.md:79 (spec) (+1 more)
+- last seen: 2026-10-14T16:15:56Z
+
+### L-080 - When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker tests` · harmful: 0
+- features: papeis, tui-clicavel
+- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests) (+1 more)
+- last seen: 2026-10-14T16:15:56Z
 
 ## Candidates (under observation - do NOT load as guidance yet)
 
@@ -258,12 +306,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui) (+1 more)
 - last seen: 2026-10-09T18:48:24Z
 
-### L-040 - Test a count limit or a rounding rule at its boundary value, not only well past it
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
-- features: tui-leitura
-- evidence: L08 broker/tui/screens/main.ts:77, S23 broker/tui/screens/chrome.ts:127 (tui)
-- last seen: 2026-10-09T17:54:51Z
-
 ### L-041 - Test a validated collection with one valid and one invalid entry, not only with a single invalid entry
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `config` · harmful: 0
 - features: tui-leitura
@@ -336,23 +378,11 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: QST-56 (mark of the selected question); Q01 broker/tui/screens/questions.ts:105 (spec) (+1 more)
 - last seen: 2026-10-10T11:07:43Z
 
-### L-055 - State at which moment of a multi-key input a rule that depends on the mode reads the mode
-- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
-- features: question
-- evidence: QST-78 (mode read at the start of the chunk); broker/tui/keys.ts:44 (spec)
-- last seen: 2026-10-10T11:07:43Z
-
 ### L-056 - When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes
 - signal: `ac_gap` · recurrence: 1 feature(s) · scope: `tui input` · harmful: 0
 - features: question
 - evidence: QST-78 broker/tui.ts:182 (validation.md round 2, gap 1) (tui input)
 - last seen: 2026-10-10T11:55:55Z
-
-### L-057 - When an AC states a rule for each mode of a component, state what the same input does when the component is in none of them
-- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
-- features: question
-- evidence: QST-78 vs Assumptions row 'Colagem com quebra de linha'; mutant K4 broker/tui/keys.ts:187 (validation.md round 3, P3) (spec)
-- last seen: 2026-10-10T12:21:06Z
 
 ### L-058 - In a test that loops over alternative triggers, send after each trigger no other input that alone produces the asserted outcome
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui tests` · harmful: 0
@@ -408,24 +438,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: QST-36 with QST-31 and QST-39; mutants Q6, Q6a broker/question.ts:74, :71 (a question of the same worker about another ticket merged into one the result closes; validation.md round 5, SP2) (spec)
 - last seen: 2026-10-11T07:20:51Z
 
-### L-067 - Assert a rule an AC states for an input loop through the loop, not only on the pure function the loop calls
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui input` · harmful: 0
-- features: question
-- evidence: V13 tui.ts:170; test/unit/tui-keys.test.ts:591 (QST-99, round 6 gap 4) (tui input)
-- last seen: 2026-10-11T08:09:51Z
-
-### L-068 - Test a rule that holds for any item of a list with the item first, last and between two others
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui input` · harmful: 0
-- features: question
-- evidence: V2 tui.ts:171; test/unit/tui-loop.test.ts:628 (QST-99, round 6 gap 6) (tui input)
-- last seen: 2026-10-11T08:09:52Z
-
-### L-069 - When an AC names an input of several bytes, state what happens when it arrives split across two reads
-- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
-- features: question
-- evidence: SP4, QST-78 with QST-99; V8 tui.ts:191 (round 6) (spec)
-- last seen: 2026-10-11T08:09:52Z
-
 ### L-070 - Test fragmented terminal control sequences through successive incomplete reads before the terminator, for both paste markers and every terminal size class.
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker/tui` · harmful: 0
 - features: question
@@ -443,12 +455,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: papeis
 - evidence: validation.md S10, PAP-31, plugin/hooks/stop.ts:27 (spec routes)
 - last seen: 2026-10-12T08:33:56Z
-
-### L-073 - When two ACs give different outcomes for the same case, state in both which one wins
-- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
-- features: papeis
-- evidence: validation.md PAP-66 and PAP-68, plugin/skills/worker/SKILL.md:79 (spec)
-- last seen: 2026-10-12T08:33:57Z
 
 ### L-074 - State what a failure of each secondary input does, not only of the main one
 - signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
@@ -484,12 +490,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
 - features: papeis
 - evidence: F1 - PAP-53, PAP-54 - broker/launch.ts:216 (broker tests)
-- last seen: 2026-10-12T09:24:37Z
-
-### L-080 - When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
-- features: papeis
-- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests)
 - last seen: 2026-10-12T09:24:37Z
 
 ### L-081 - Test a field that must be a list with a wrong value that is not iterable, not only with a text
@@ -545,6 +545,36 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: papeis
 - evidence: PAP-37 with the definition of the open feature for the launcher, spec.md:100 (launcher)
 - last seen: 2026-10-12T11:29:27Z
+
+### L-090 - When an AC emits more than one sequence for one step, state their order
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: tui-clicavel
+- evidence: CLK-01, CLK-02, CLK-50 (validation.md volta 3) (spec)
+- last seen: 2026-10-14T16:15:57Z
+
+### L-091 - When a rule measures the time since the previous event, state which events count as previous and which clock measures it
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: tui-clicavel
+- evidence: CLK-46 (validation.md volta 3) (spec)
+- last seen: 2026-10-14T16:15:57Z
+
+### L-092 - When an AC parses a sequence of the input, state what happens when a character outside its grammar ends it
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: tui-clicavel
+- evidence: CLK-09 (validation.md volta 3) (spec)
+- last seen: 2026-10-14T16:15:57Z
+
+### L-093 - State what a tool that reads one kind of input does with every other input
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: tui-clicavel
+- evidence: CLK-17 (validation.md volta 3) (spec)
+- last seen: 2026-10-14T16:15:57Z
+
+### L-094 - When a toggle turns a feature off and on, state which state of the feature survives the toggle
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: tui-clicavel
+- evidence: CLK-46, CLK-50 (validation.md volta 3) (spec)
+- last seen: 2026-10-14T16:15:57Z
 
 ## Quarantined (failed when applied - ignore)
 
