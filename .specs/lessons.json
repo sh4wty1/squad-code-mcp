@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 98,
+  "next_id": 99,
   "lessons": [
     {
       "id": "L-001",
@@ -735,10 +735,15 @@
         "S05 broker/tui/screens/gate.ts:27 (GAT-43) (tui)",
         "S07 broker/tui/screens/gate.ts:42 (GAT-44) (tui)",
         "N02 broker/tui/screens/gate.ts:169 (GAT-41) (tui)",
-        "N09 broker/tui/screens/gate.ts:82 (GAT-47) (tui)"
+        "N09 broker/tui/screens/gate.ts:82 (GAT-47) (tui)",
+        "V15 broker/tui/keys.ts:126 (GAT-50) (tui)",
+        "V18 broker/tui/keys.ts:200 (GAT-65) (tui)",
+        "V10 broker/shared/derive.ts:252 (GAT-70, GAT-71) (tui)",
+        "V23 broker/tui/screens/permission.ts:112 (GAT-61) (tui)",
+        "V28 broker/tui/screens/gate.ts:80 (GAT-47) (tui)"
       ],
       "created": "2026-10-09T17:54:51Z",
-      "last_seen": "2026-10-14T22:28:19Z"
+      "last_seen": "2026-10-14T23:08:57Z"
     },
     {
       "id": "L-040",
@@ -1820,6 +1825,24 @@
       ],
       "created": "2026-10-14T21:37:53Z",
       "last_seen": "2026-10-14T21:37:53Z"
+    },
+    {
+      "id": "L-098",
+      "key": "surviving_mutant::when an ac counts over a whole set next to a count over a filtered part of it test with an item only the whole set has",
+      "text": "When an AC counts over a whole set next to a count over a filtered part of it, test with an item only the whole set has",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "gate"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "V27 broker/tui/screens/gate.ts:28 (GAT-43) (tui)"
+      ],
+      "created": "2026-10-14T23:08:57Z",
+      "last_seen": "2026-10-14T23:08:57Z"
     }
   ]
 }

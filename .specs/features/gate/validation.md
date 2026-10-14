@@ -1,12 +1,12 @@
 # Gate Validation
 
 **Date**: 2026-10-14
-**Round**: Volta 1 (abaixo) e Volta 2 (no fim do arquivo)
+**Round**: Volta 1 (abaixo), Volta 2 e Volta 3 (no fim do arquivo)
 **Spec**: `.specs/features/gate/spec.md`
 **Diff range**: `3922651..fed6607` (branch `feat/gate`). O código (`broker/`, `plugin/`) foi verificado em `a6a96a8`; `fed6607` só acrescenta `.specs/` (o marco do MVP, T29), e `git diff --stat a6a96a8..fed6607` não toca `broker/` nem `plugin/`
 **Verifier**: independent sub-agent (author ≠ verifier), em duas cópias físicas (`git clone` + `bun install --frozen-lockfile`) em `a6a96a8`, Bun 1.3.14, Windows 11
 
-**Overall**: ❌ FAIL (volta 2, em `1078607`: os seis mutantes da volta 1 morreram, mas dois mutantes novos sobrevivem, N02 em GAT-41 e N09 em GAT-47; ver "Volta 2")
+**Overall**: ❌ FAIL (volta 3, em `be4118d`, a última antes de escalar ao dev: N02 e N09 da volta 2 morreram, mas seis mutantes novos sobrevivem à suíte inteira, V15 em GAT-50, V18 em GAT-65, V10 em GAT-70/71, V23 em GAT-61, V28 em GAT-47 e V27 em GAT-43; ver "Volta 3")
 
 Volta 1 — cinco mutantes sobrevivem à suíte inteira (`bun test`, 96 arquivos), todos de desenho ou de clique da TUI, nenhum do broker. Cada um é um caso que a spec decide e nenhum teste monta:
 
@@ -546,3 +546,153 @@ Isolamento: `git status --porcelain` da árvore real vazio antes; depois, só es
 **Gate**: `tsc` 0; 2437 pass, 5 skip, 0 fail
 
 **Next steps**: Fix 7 e Fix 8 como tarefas de teste (cada uma deve falhar com o mutante indicado e passar no código atual) e uma volta 3, a última antes de escalar ao dev.
+
+---
+
+# Volta 3
+
+**Date**: 2026-10-14
+**Diff range**: fatia `3922651..be4118d`; volta de correção `798b999..be4118d` (T37 `393d3b1` e T38 `be4118d`: só `broker/test/unit/tui-gate.test.ts` e `tasks.md`; `git diff --stat 798b999..HEAD -- broker/` não toca código de produção)
+**Verifier**: sub-agente independente (author ≠ verifier), em duas cópias físicas novas (`git clone` + `bun install --frozen-lockfile`) em `C:\tmp\gatev3`, em `be4118d`, Bun 1.3.14, Windows 11
+
+**Overall**: ❌ FAIL — a última volta antes de escalar ao dev
+
+Os dois mutantes da volta 2 morrem, cada um pelo teste novo da sua tarefa, que afirma o valor da spec. A varredura nova, de 31 mutações, todas do tipo "filtro com um item que falha a condição" ou "valor de fronteira" onde cabia, achou seis mutantes vivos na suíte inteira (2439 pass, 0 fail em cada um, nenhum flaky no meio). Todos são de teste, nenhum de produção: o código faz o que a spec diz, e nenhum teste monta o caso em que um item fora do filtro está presente. Cada um foi confirmado alcançável com um teste de sondagem descartável na cópia `b` (a saída do código atual contra a do mutante, citada abaixo):
+
+1. **V15**, `broker/tui/keys.ts:126`, `view.squad.gates.filter((g) => g.pending)` → `view.squad.gates`. Com G-01 aprovado e G-02 e G-03 pendentes, `[` no modal de G-02 abre o modal de G-01, já decidido (sondagem: `gate.id` 2 → 1). Contra GAT-50 ("`]` e `[` SHALL mudar para o gate pendente seguinte ou anterior da fila, sem passar ... do primeiro"). `TK:115` só tem três pendentes.
+2. **V18**, `broker/tui/keys.ts:200`, `view.squad.permissions` → `view.squad.requests.map((r) => r.request)`. Com 459 fechado no terminal (evento posterior de worker-1) e 460 e 500 abertos, `[` no modal de 460 vai a 459 (sondagem: `seq` 460 → 459). Contra GAT-65 ("o pedido aberto seguinte ou anterior"). `PK:161` só tem três abertos.
+3. **V10**, `broker/shared/derive.ts:252`, `decides` sem `&& e.request_seq === request.seq`. Com P-01 (worker-1) e P-02 (worker-2) abertos, o dev decide P-02 e depois worker-1 volta a agir: P-01 passa a `closedBy` `decision` com o `ts` da decisão de P-02, e a leitura fecha o modal de P-01 com o aviso `P-01 decidido` (sondagem: `peer` e modal aberto → `decision` e `"P-01 decidido"`). Contra GAT-71 (fechado por evento do peer: o estado "respondido no terminal", com o `ts` do evento que o fechou) e GAT-70 (só a `permission_decision` que o cita). `DG:213`, `DG:221`, `DG:226` e `PK:224` não têm decisão de outro pedido no log.
+4. **V23**, `broker/tui/screens/permission.ts:112`, ` pedido ${pos + 1} de ${queue.length} ` → `${squad.requests.length}`. Com um pedido fechado e dois abertos a etiqueta diz ` pedido 1 de 3 ` em vez de ` pedido 1 de 2 ` (sondagem). Contra GAT-61: o `<total>` é o da fila de pedidos abertos de GAT-62. É o N02 da volta 2 no outro modal; os testes da etiqueta (`TP:36`, frames 22e e 22f) só têm pedidos abertos.
+5. **V28**, `broker/tui/screens/gate.ts:80`, `judge` sem `&& !t.dropped`. Com um `plan` posterior que descarta TKT-12 depois do `verdict` dele, a linha `judge` ainda traz `✓ TKT-12 5/5` (sondagem: `✓ TKT-13 1/1  ✓ TKT-14 1/1` → `✓ TKT-12 5/5  ✓ TKT-13 1/1  ✓ TKT-14 1/1`). Contra GAT-47 ("cada ticket do `plan` mais recente não descartado que tem `verdict`"). O ticket descartado de `TG:236` (T32) não tem `verdict`. O `plan` leva a isso: um ticket começado fica no `plan` com `dropped: true` (`broker/plan.ts:76`).
+6. **V27**, `broker/tui/screens/gate.ts:28`, `squad.tickets.reduce` → `live.reduce`. Com o mesmo `plan` (TKT-12, o do rework, descartado), a linha `feature` diz `0 reworks` em vez de `1 rework` (sondagem). Contra GAT-43, que conta "os `verdict` de `rework` da feature", não só os dos tickets vivos. Nenhum teste tem um ticket com rework descartado.
+
+## Mutantes da volta 2
+
+Cada um rodado sozinho na cópia `b` contra os arquivos `tui-*` e `derive-gate` (1088 testes); o teste que mata é o novo, e nenhum flaky entra.
+
+| # | Mutação | Killed? | Teste que mata |
+| - | ------- | ------- | -------------- |
+| N02 | `broker/tui/screens/gate.ts:169` `queue.length` → `squad.gates.length` | ✅ | `TG:167` (T37), 1 fail |
+| N09 | `broker/tui/screens/gate.ts:82` sem `&& row.event.feature_id === squad.feature?.id` | ✅ | `TG:206` (T38), 1 fail |
+
+## Spec-anchored: os testes novos
+
+| Req | Spec-defined outcome | `file:line` + assertion | Result |
+| --- | -------------------- | ----------------------- | ------ |
+| GAT-41, GAT-42 | ` gate <n> de <total> ` com o total da fila de pendentes; `fila` só com os pendentes | `TG:171` `box[0]` `toBe(top("⚠ gate G-02", " gate 1 de 2 "))` com G-01 aprovado e três gates; `TG:172` `box[2]` `toBe(row("fila      ▶ G-02 excluir branch antiga     G-03 chave   antigo antes"))` | ✅ PASS |
+| GAT-47 | `judge` só com tickets que têm `verdict` nesta feature; o mesmo ref com `verdict` numa feature fechada não conta | `TG:222` a feature aberta é a 2 e TKT-15 está no `plan` (o caso existe); `TG:223` a linha `judge` `toEqual([row("judge     ✓ TKT-12 5/5  ✓ TKT-13 1/1  ✓ TKT-14 1/1")])`: sem TKT-15, com os outros três | ✅ PASS |
+
+As afirmações vêm da spec: a etiqueta e a fila são as de GAT-41/42 sobre os pendentes, e a linha `judge` é a de GAT-47 com os `verdict` desta feature. `TG:222` confirma que o caso montado é o que a tarefa pede antes de afirmar o desenho.
+
+### Requisitos com mutante vivo nesta volta
+
+| Req | Spec-defined outcome | Evidência | Result |
+| --- | -------------------- | --------- | ------ |
+| GAT-50 | `]`/`[` só entre os gates pendentes | `TK:115` só com pendentes: V15 vivo | ❌ GAP |
+| GAT-65 | `]`/`[` só entre os pedidos abertos | `PK:161` só com abertos: V18 vivo | ❌ GAP |
+| GAT-70, GAT-71 | Pedido fechado pelo peer fica no estado de GAT-71, mesmo com a decisão de outro pedido no meio | `DG:213`, `DG:221`, `PK:224` sem decisão de outro pedido: V10 vivo | ❌ GAP |
+| GAT-61 | ` pedido <n> de <total> ` com o total dos abertos | `TP:36`, frames 22e/22f só com abertos: V23 vivo | ❌ GAP |
+| GAT-47 | `judge` sem ticket descartado | `TG:236` com descartado sem `verdict`: V28 vivo | ❌ GAP |
+| GAT-43 | `rework` conta os `verdict` de `rework` da feature inteira | nenhum ticket com rework descartado: V27 vivo | ❌ GAP |
+
+**Status**: ❌ 90 de 97 sem mutante vivo; GAT-41 fechado; GAT-43, GAT-47, GAT-50, GAT-61, GAT-65, GAT-70 e GAT-71 abertos por mutante novo.
+
+## Gate Check (volta 3)
+
+- **Gate command**: `bun node_modules/typescript/bin/tsc --noEmit` e `bun test`, de `broker/`, na cópia `a` em `be4118d`
+- **Result**: `tsc` 0; 2439 pass, 5 skip, 0 fail, 2444 testes, 96 arquivos, 659642 `expect()`, 129,77 s
+- **Delta**: 2437 pass na volta 2 → 2439 (+2, os testes de T37 e T38); nenhum teste removido, nenhum skip novo
+
+## Discrimination Sensor (volta 3)
+
+31 mutações novas, nenhuma repetida das tabelas das voltas 1 e 2, uma por vez na cópia `b`: as de TUI contra os arquivos `tui-*` e `derive-gate` (1088 testes); as de `broker/gate.ts`, `derive.ts` e `log.ts` contra `GR`, `GD`, `GP`, `FC`, `DG`, `DB` e `integration/gate` (mais `integration/gate-e2e` e `integration/feature` para as da regra de fechamento); as de `tools.ts`, `server.ts` e `broker.ts` contra `TO`, `ST`, `LA` e as rotas; a da skill contra `SK`. Os seis sobreviventes rodaram de novo, um por vez, contra a suíte inteira (`bun test`, 96 arquivos): 2439 pass e 0 fail em todos. Uma primeira tentativa de V13 caiu no `gate_id` da tool `history` (de antes da fatia) e foi refeita no da tool `gate`; conta uma vez.
+
+| # | File:line | Description | Killed? (primeiro teste que falha) |
+| - | --------- | ----------- | ---------------------------------- |
+| V01 | `broker/gate.ts:47` | `body` que não é texto aceito | ✅ GAT-03 (`body` null, número, objeto) |
+| V02 | `broker/gate.ts:131` | `comment` sem texto aceito (só `reject` exige) | ✅ GAT-21 (3 casos de `comment`) |
+| V03 | `broker/gate.ts:130` | `text` que não é texto aceito | ✅ GAT-21 (`text` null e número no `approve`) |
+| V04 | `broker/gate.ts:158` | `text` vazio do `approve` fora do `data` | ✅ GAT-15 (approve com texto vazio guardado vazio) |
+| V05 | `broker/gate.ts:182` | `approved()` aceita o `delivery` aprovado de qualquer feature | ✅ GAT-26 (o aprovado de uma feature fechada não entrega a seguinte) |
+| V06 | `broker/gate.ts:59` | `scope` fora de `delivery`/`action` aceito | ✅ GAT-04, GAT-14 |
+| V07 | `broker/gate.ts:94` | `ticket_ref` não gravado | ✅ GAT-02 |
+| V08 | `broker/log.ts:145` | `feature_closed` rejeita também os gates decididos | ✅ GAT-28 (os dois `outcome`), GAT-30 (`GP`) |
+| V09 | `broker/shared/derive.ts:490` | `feature_closed` rejeita na derivação também os decididos | ✅ GAT-32, GAT-33, GAT-30 |
+| V10 | `broker/shared/derive.ts:252` | decisão de outro pedido fecha o pedido como `decision` | ❌ **Survived** (2439 pass na suíte inteira) |
+| V11 | `broker/shared/derive.ts:498` | `ts` do `comment` = `ts` da versão do gate | ✅ GAT-31, GAT-30/31, GAT-32 (6 testes) |
+| V12 | `broker/server.ts:345` | resposta da tool com o `seq` no lugar do `gate_id` | ✅ GAT-36/18 (`ST`) |
+| V13 | `broker/tools.ts:305` | `gate_id` da tool `gate` como texto | ✅ GAT-34 (`TO`) |
+| V14 | `broker/broker.ts:47` | `/gate` fora das rotas | ✅ GAT-26/27/40/52/60/66 (`E2E`), GAT-05/07/08 (`IG`) |
+| V15 | `broker/tui/keys.ts:126` | `]`/`[` do gate com os gates decididos na fila | ❌ **Survived** (2439 pass na suíte inteira) |
+| V16 | `broker/tui/keys.ts:254` | `g` abre o primeiro gate, pendente ou não | ✅ GAT-92 (`TK:72`) |
+| V17 | `broker/tui/keys.ts:260` | `x` abre o primeiro pedido, aberto ou não | ✅ GAT-60, GAT-90 |
+| V18 | `broker/tui/keys.ts:200` | `]`/`[` do pedido com os pedidos fechados na fila | ❌ **Survived** (2439 pass na suíte inteira) |
+| V19 | `broker/tui/keys.ts:338` | `d` colado não é ignorado | ✅ GAT-75 (4 testes, inclusive pelo laço) |
+| V20 | `broker/tui/keys.ts:400` | toda leitura tira da confirmação, mesmo sem versão nova | ✅ GAT-59, GAT-78 |
+| V21 | `broker/tui/writer.ts:44` | `approve` envia `text: ""` | ✅ GAT-52/72 (`TL`), `E2E` |
+| V22 | `broker/tui.ts:173` | rota escolhida por `"text" in sent`: o `approve` vai a `/permission-decision` | ✅ GAT-52/72/75/78 (`TL`), `E2E` |
+| V23 | `broker/tui/screens/permission.ts:112` | ` pedido n de ` com o total de todos os pedidos | ❌ **Survived** (2439 pass na suíte inteira) |
+| V24 | `broker/tui/screens/permission.ts:59` | `pediu permissão às` com o `ts` de quem fechou | ✅ GAT-86 frame 22b, GAT-71 |
+| V25 | `broker/tui/screens/modal.ts:50` | borda `a–b de N` também com exatamente 8 linhas | ✅ GAT-86 frames 22a, 22b, 22d, 29d |
+| V26 | `broker/tui/screens/modal.ts:65` | caixa centrada para baixo (`ceil`) | ✅ QST-70/73/75 (17 testes) |
+| V27 | `broker/tui/screens/gate.ts:28` | reworks só dos tickets vivos | ❌ **Survived** (2439 pass na suíte inteira) |
+| V28 | `broker/tui/screens/gate.ts:80` | `judge` com ticket descartado | ❌ **Survived** (2439 pass na suíte inteira) |
+| V29 | `broker/tui/screens/gate.ts:127` | separador da versão 2 sem `comment` e sem `body` | ✅ GAT-45 |
+| V30 | `broker/tui/screens/help.ts:81` | legenda `fila · fechar sem decidir` | ✅ GAT-87, TUI-43 frame 11 |
+| V31 | `plugin/skills/worker/SKILL.md` | a skill do worker cita a tool `gate` | ✅ GAT-39 (`SK:315`), PAP-61 |
+
+**Sensor depth**: expandido (P0)
+**Result**: 31 injetadas, 25 mortas, 6 vivas (V10, V15, V18, V23, V27, V28), 0 equivalentes — ❌ FAIL
+
+Isolamento: `git status --porcelain` da árvore real vazio antes; depois, só este arquivo e os de lições. A cópia `b` voltou limpa depois de cada mutação e da sondagem; as cópias em `C:\tmp\gatev3` foram apagadas no fim.
+
+## Fix Plans (volta 3)
+
+Todas de teste: cada uma deve falhar com o mutante indicado e passar no código atual.
+
+### Fix 9: `]`/`[` do gate com um gate decidido (V15) — Major
+
+- **Fix task**: em `broker/test/unit/tui-gate-keys.test.ts`, o 19a com `third` e `decided(…, 1, "approve")`; modal de G-02: `[` devolve `toBe(v.ui)` e `]` dá `modal(3)`. Deve falhar com `keys.ts:126` sem o `.filter((g) => g.pending)`.
+
+### Fix 10: `]`/`[` do pedido com um pedido fechado (V18) — Major
+
+- **Fix task**: em `broker/test/unit/tui-permission-keys.test.ts`, o 22c com `third` e um `turn_started` de worker-1 depois de 459; modal de 460: `[` devolve `toBe(v.ui)` e `]` dá `modal(500)`. Deve falhar com `keys.ts:200` trocado por `view.squad.requests.map((r) => r.request)`.
+
+### Fix 11: pedido fechado pelo peer com a decisão de outro no meio (V10) — Major
+
+- **Fix task**: em `broker/test/unit/derive-gate.test.ts`, 459 (worker-1) e 460 (worker-2), um `permission_decision` de 460 e depois um evento de worker-1: o pedido 459 de `requests()` com `closedBy` `"peer"` e `closedTs` do evento de worker-1; e em `tui-permission-keys.test.ts`, `sync` com o modal de 459 aberto o deixa aberto, sem aviso. Deve falhar com `derive.ts:252` sem `&& e.request_seq === request.seq`.
+
+### Fix 12: etiqueta ` pedido n de N ` com um pedido fechado (V23) — Major
+
+- **Fix task**: em `broker/test/unit/tui-permission.test.ts`, o log de Fix 10, modal de 460: `box[0]` `toBe(top("⚠ permissão P-02 · w2 · Bash", " pedido 1 de 2 "))` e a linha `fila` só com P-02 e o pedido de worker-3. Deve falhar com `permission.ts:112` `queue.length` → `squad.requests.length`.
+
+### Fix 13: `judge` e `feature` com ticket descartado depois do `verdict` (V28, V27) — Minor
+
+- **Fix task**: em `broker/test/unit/tui-gate.test.ts`, o 19a com um `plan` posterior que traz TKT-12 com `dropped: true`: a linha `judge` `toBe(row("judge     ✓ TKT-13 1/1  ✓ TKT-14 1/1"))` (V28, `gate.ts:80` sem `&& !t.dropped`) e a linha `feature` `toBe(row("feature   2 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)"))` (V27, `gate.ts:28` `squad.tickets.reduce` → `live.reduce`).
+
+## Requirement Traceability Update (volta 3)
+
+| Requirement | Volta 2 | Volta 3 |
+| ----------- | ------- | ------- |
+| GAT-41 | ❌ Needs Fix | ✅ Verified |
+| GAT-47 | ❌ Needs Fix | ❌ Needs Fix (Fix 13: N09 fechado, V28 aberto) |
+| GAT-43 | ✅ Verified | ❌ Needs Fix (Fix 13) |
+| GAT-50 | ✅ Verified | ❌ Needs Fix (Fix 9) |
+| GAT-61 | ✅ Verified | ❌ Needs Fix (Fix 12) |
+| GAT-65 | ✅ Verified | ❌ Needs Fix (Fix 10) |
+| GAT-70, GAT-71 | ✅ Verified | ❌ Needs Fix (Fix 11) |
+| os outros 89 | ✅ Verified | ✅ Verified |
+
+## Summary (volta 3)
+
+**Overall**: ❌ Not Ready — escalar ao dev (terceira volta de correção esgotada)
+
+**Spec-anchored check**: os dois testes novos afirmam o valor da spec; 90/97 sem mutante vivo
+**Sensor**: mutantes da volta 2, 2/2 mortos; varredura nova, 25/31 mortas, 6 vivas, 0 equivalentes
+**Gate**: `tsc` 0; 2439 pass, 5 skip, 0 fail
+
+**What works**: o broker inteiro (as 14 mutações de `gate.ts`, `log.ts`, `gates()`, `tools.ts`, `server.ts` e `broker.ts` morreram), o caminho que escreve como o humano (rota, corpo, colagem) e a skill.
+
+**Issues found**: os seis vivos são o mesmo padrão das voltas 1 e 2 (L-039): uma fila, uma contagem ou um fechamento que filtra por uma condição, testado só com itens que passam nela. Cada volta achou alguns casos; esta mostra que o padrão continua nos dois modais e em `requests()`.
+
+**Next steps**: escalar ao dev com Fix 9 a 13. Recomendação: em vez de mais uma volta de poucos casos, uma tarefa que varra cada `filter`/`find` de `tui/keys.ts`, `tui/screens/gate.ts`, `tui/screens/permission.ts` e `requests()` com um item que falha a condição.
