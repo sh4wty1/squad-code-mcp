@@ -159,16 +159,20 @@ export function start(io: Io, settings: Settings) {
     timer = setTimeout(() => tick().catch(fail), settings.intervalMs);
   }
 
-  // Sends the answer the keys left in `send`, with the credential as its file has it now:
-  // the broker may have written it after the TUI started. The token goes nowhere else.
+  // Sends what the keys left in `send`, to the route of its fields: an answer, the decision of
+  // a gate or that of a permission request. The credential is the one its file has now: the
+  // broker may have written it after the TUI started. The token goes nowhere else.
   function post() {
     const sent = ui.send!;
-    // The decisions of a gate and of a permission request are not sent yet (Gate T25)
-    if (!("question_id" in sent)) return;
     const token = io.token();
     if (token === null) return void (ui = settle(ui, null, view()));
-    writer
-      .answer(token, sent.question_id, sent.answer)
+    const posted =
+      "question_id" in sent
+        ? writer.answer(token, sent.question_id, sent.answer)
+        : "gate_id" in sent
+          ? writer.gate(token, sent.gate_id, sent.decision, sent.text)
+          : writer.permission(token, sent.request_seq, sent.behavior);
+    posted
       .then((result) => {
         if (stopped) return;
         ui = settle(ui, result, view());
@@ -194,7 +198,7 @@ export function start(io: Io, settings: Settings) {
       // `m` turned the mouse off or on: the terminal is told
       if (next.pointer.on !== pointer.on) io.write(next.pointer.on ? MOUSE_ON : MOUSE_OFF);
       ({ ui, pointer } = next);
-      // One POST for each answer: the one on its way stays in `send` until it is settled
+      // One POST for each decision: the one on its way stays in `send` until it is settled
       if (ui.send && ui.send !== sending) post();
       draw();
     } catch (error) {

@@ -556,8 +556,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `test/unit/tui-gate-loop.test.ts`: `g a y` e `g r <texto> enter` fazem um `POST /gate-decision` cada; `x a` um `POST /permission-decision`; a credencial lida na hora; uma tecla durante o envio não faz outro `POST`; a colagem pelo laço; a tela pequena com o modal aberto
-- [ ] Gate quick passa
+- [x] `test/unit/tui-gate-loop.test.ts`: `g a y` e `g r <texto> enter` fazem um `POST /gate-decision` cada; `x a` um `POST /permission-decision`; a credencial lida na hora; uma tecla durante o envio não faz outro `POST`; a colagem pelo laço; a tela pequena com o modal aberto
+- [x] Gate quick passa
 
 **Tests**: unit
 **Gate**: quick
