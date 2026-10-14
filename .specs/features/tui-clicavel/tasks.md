@@ -99,7 +99,7 @@ T22 → T23 → T24 → T25 → T26 → T27
 ### Phase 6: Correções do Verifier
 
 ```
-T28
+T28 → T29
 ```
 
 ---
@@ -732,6 +732,27 @@ Da volta 1 do Verifier (`validation.md`, Fix 1): o mutante M31, que na tela pequ
 
 ---
 
+### T29: CLK-33 com a linha das teclas na última linha do detalhe
+
+Da volta 2 do Verifier (`validation.md`, Fix 1): o mutante N30, que troca `ky <= 24` por `ky < 24` em `broker/tui/screens/questions.ts:216`, sobreviveu. Com Q-07 de 4 opções a linha `enter responder   b próxima bloqueante` cai na última linha dentro da caixa do detalhe, e nenhum teste a usava.
+
+**What**: um teste das marcas e um do clique com Q-07 de 4 opções: a linha das teclas é desenhada na última linha dentro do detalhe, com as marcas de `enter` e de `b`, e o clique em cada uma faz o que a tecla faz.
+**Where**: `broker/test/unit/tui-hits.test.ts`, `broker/test/unit/tui-mouse.test.ts`
+**Depends on**: T28
+**Requirement**: CLK-33
+
+**Done when**:
+
+- [ ] A linha está na última linha dentro da caixa do detalhe, com as marcas de `enter` e de `b` como com três opções
+- [ ] O clique em `enter` e em `b`, achados no texto desenhado, dá o mesmo `Ui` que `press` com `\r` e com `b`
+- [ ] Os dois testes matam o N30
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -742,7 +763,7 @@ Phase 2:  T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10
 Phase 3:  T11 → T12 → T13 → T14 → T15 → T16 → T17 → T18
 Phase 4:  T19 → T20 → T21
 Phase 5:  T22 → T23 → T24 → T25 → T26 → T27
-Phase 6:  T28
+Phase 6:  T28 → T29
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fase 2 (9 tarefas); fase 3 (8); fases 4 e 5 até a T24 ficam com o orquestrador, porque a fase 5 precisa do dev no terminal (T25) e do Docker (T26).
@@ -783,6 +804,7 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T26: Suíte no Linux | 1 registro | ✅ Granular |
 | T27: Fechamento | 3 documentos do fechamento, coesos | ⚠️ OK |
 | T28: CLK-10 no terminal pequeno | 1 teste | ✅ Granular |
+| T29: CLK-33 na última linha do detalhe | 2 testes do mesmo caso | ✅ Granular |
 
 ---
 
@@ -818,6 +840,7 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T26 | T25 | T25 → T26 | ✅ Match |
 | T27 | T26 | T26 → T27 | ✅ Match |
 | T28 | None (a fase anterior inteira) | início da fase 6 | ✅ Match |
+| T29 | T28 | T28 → T29 | ✅ Match |
 
 ---
 
@@ -839,3 +862,4 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T23, T24 | Documentação | none | none | ✅ OK |
 | T25 a T27 | `.specs/` e documentação | none | none | ✅ OK |
 | T28 | Laço | unit | unit | ✅ OK |
+| T29 | Marcas das telas e redutor do mouse | unit | unit | ✅ OK |
