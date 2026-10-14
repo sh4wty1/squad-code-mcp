@@ -114,7 +114,7 @@ T22 → T23 → T24 → T25 → T26 → T27
 - [x] `q` e `ctrl+c` escrevem `ESC [ ? 1006 l` e `ESC [ ? 1000 l` e saem com 0; fora de um terminal sai com 1
 - [x] Num pseudo-terminal, relatórios escritos na entrada chegam ao processo (`test/integration/mouse-probe.test.ts`)
 - [x] Gate full passa: 1662 pass, 5 skip, 0 fail no Windows
-- [ ] RT-01: o dev roda a sonda num Windows Terminal e o resultado entra em `real-terminal.md` (T25)
+- [x] RT-01: o dev roda a sonda num Windows Terminal e o resultado entra em `real-terminal.md` (T25). Entrou sem a versão e sem os quatro cantos
 
 **Tests**: integration
 **Gate**: full
@@ -657,11 +657,11 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] RT-01 tem o resultado da sonda no Windows Terminal, com a versão
-- [ ] RT-02 a RT-07 têm o resultado do dev, ou a linha "não conferido" com o motivo
-- [ ] RT-08 tem o resultado num terminal Linux, ou "não exercitado"
-- [ ] Um defeito que a conferência achar vira tarefa nova antes do fechamento
-- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] RT-01 tem o resultado da sonda no Windows Terminal, com a versão. Sem a versão nem os quatro cantos: o dev disse que funcionou e não disse o que viu
+- [x] RT-02 a RT-07 têm o resultado do dev, ou a linha "não conferido" com o motivo. Os seis estão "não conferido", por decisão do dev em 2026-10-13
+- [x] RT-08 tem o resultado num terminal Linux, ou "não exercitado"
+- [x] Um defeito que a conferência achar vira tarefa nova antes do fechamento. Nenhum: a conferência não rodou
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build
