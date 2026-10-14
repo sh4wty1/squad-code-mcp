@@ -397,9 +397,9 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-54 | P1: Modal de gate | T13 | Implementing |
 | GAT-55 | P1: Modal de gate | T13 | Implementing |
 | GAT-56 | P1: Modal de gate | T13, T18 | Implementing |
-| GAT-57 | P1: Modal de gate | T15 | In Tasks |
+| GAT-57 | P1: Modal de gate | T15 | Implementing |
 | GAT-58 | P1: Modal de gate | T11, T15 | Implementing |
-| GAT-59 | P1: Modal de gate | T15 | In Tasks |
+| GAT-59 | P1: Modal de gate | T15 | Implementing |
 | GAT-60 | P1: Modal de permissão | T14, T20, T26 | Implementing |
 | GAT-61 | P1: Modal de permissão | T12, T17, T19 | Implementing |
 | GAT-62 | P1: Modal de permissão | T12, T19 | Implementing |
@@ -408,13 +408,13 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-65 | P1: Modal de permissão | T14 | Implementing |
 | GAT-66 | P1: Modal de permissão | T14, T26 | Implementing |
 | GAT-67 | P1: Modal de permissão | T14 | Implementing |
-| GAT-68 | P1: Modal de permissão | T15 | In Tasks |
+| GAT-68 | P1: Modal de permissão | T15 | Implementing |
 | GAT-69 | P1: Modal de permissão | T11, T15 | Implementing |
 | GAT-70 | P1: Modal de permissão | T12, T15 | Implementing |
 | GAT-71 | P1: Modal de permissão | T12, T14, T19 | Implementing |
 | GAT-72 | P1: Teclado e escrita comuns aos modais | T11, T25, T27 | Implementing |
-| GAT-73 | P1: Teclado e escrita comuns aos modais | T15, T25 | In Tasks |
-| GAT-74 | P1: Teclado e escrita comuns aos modais | T15, T25 | In Tasks |
+| GAT-73 | P1: Teclado e escrita comuns aos modais | T15, T25 | Implementing |
+| GAT-74 | P1: Teclado e escrita comuns aos modais | T15, T25 | Implementing |
 | GAT-75 | P1: Teclado e escrita comuns aos modais | T16 | In Tasks |
 | GAT-76 | P1: Teclado e escrita comuns aos modais | T13 | Implementing |
 | GAT-77 | P1: Teclado e escrita comuns aos modais | T16 | In Tasks |
@@ -437,7 +437,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-94 | Edge cases | T14, T19 | Implementing |
 | GAT-95 | Edge cases | T14, T19 | Implementing |
 | GAT-96 | Edge cases | T12 | Implementing |
-| GAT-97 | Edge cases | T15 | In Tasks |
+| GAT-97 | Edge cases | T15 | Implementing |
 
 **Coverage:** 97 total, 97 mapped to tasks, 0 unmapped.
 

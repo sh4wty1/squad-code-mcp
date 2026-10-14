@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
-import { press } from "../../tui/keys.ts";
+import type { Color } from "../../tui/grid.ts";
+import { press, settle, sync } from "../../tui/keys.ts";
 import { preview } from "../../tui/screens/permission.ts";
 import type { PermissionModal, Ui, View } from "../../tui/view.ts";
 import { LOGS } from "../frames/logs.ts";
@@ -180,3 +181,61 @@ for (const [what, change] of [
     expect(key("\x03", v)).toBeNull();
   });
 }
+
+// ---- what the broker says of a decision, and what a read does to the modal ----
+
+// The view of a frame with the decision of the modal on its way
+const sending = (frame: string, m: PermissionModal, send: Ui["send"], change?: Change): View => view(frame, { permission: { ...m, sending: true }, send }, change);
+const toast = (v: View, text: string, color: Color) => ({ text, color, until: v.squad.now + 4000 });
+// The decision of another TUI on the request 459
+const DECIDED = later("permission_decision", { from: "human", role_from: "human", to: "worker-1", request_seq: 459, behavior: "deny" });
+
+test("GAT-68: when the broker takes the decision the modal closes and says in green for 4 s P-NN permitido or P-NN negado", () => {
+  const allow = sending("22c", modal(459, { offset: 0 }), { request_seq: 459, behavior: "allow" });
+  expect(settle(allow.ui, { ok: true }, allow)).toEqual({ ...allow.ui, permission: null, send: null, toast: toast(allow, "✓ P-01 permitido", "bgreen") });
+  // 460 is the second request of the log
+  const deny = sending("22c", modal(460, { offset: 2 }), { request_seq: 460, behavior: "deny" });
+  expect(settle(deny.ui, { ok: true }, deny)).toEqual({ ...deny.ui, permission: null, send: null, toast: toast(deny, "✓ P-02 negado", "bgreen") });
+});
+
+test("GAT-69: permission_closed leaves the modal open, waiting for no answer, with no notice", () => {
+  const v = sending("14", modal(459, { offset: 0 }), { request_seq: 459, behavior: "allow" }, later("turn_started"));
+  expect(settle(v.ui, { ok: false, error: "permission_closed" }, v)).toEqual({ ...v.ui, permission: modal(459), send: null });
+});
+
+test("GAT-69: another refusal, or the broker not answering, leaves the modal as it was and says in red for 4 s why", () => {
+  for (const error of ["invalid_token", "missing_field", "invalid_field", "broker não respondeu"]) {
+    const v = sending("22c", modal(460, { offset: 5 }), { request_seq: 460, behavior: "allow" });
+    expect(settle(v.ui, { ok: false, error }, v)).toEqual({ ...v.ui, permission: modal(460, { offset: 5 }), send: null, toast: toast(v, `✗ decisão não enviada · ${error}`, "bred") });
+  }
+});
+
+test("GAT-74: with no human credential nothing is sent, the modal stays as it was and says so", () => {
+  const v = sending("14", modal(459), { request_seq: 459, behavior: "deny" });
+  expect(settle(v.ui, null, v)).toEqual({ ...v.ui, permission: modal(459), send: null, toast: toast(v, "✗ credencial humana não encontrada", "bred") });
+});
+
+test("GAT-73: while a decision waits for the broker no key changes the modal, but ctrl+c quits", () => {
+  const v = view("22c", { permission: modal(460, { offset: 2, sending: true }) });
+  for (const k of [...INERT, "\x1b", "a", "d", "j", "k", "G", "]", "[", UP, DOWN]) expect([k, key(k, v)]).toEqual([k, v.ui]);
+  expect(key("\x03", v)).toBeNull();
+});
+
+test("GAT-70: a read that shows the request of the modal decided by another decision closes the modal and says P-NN decidido for 4 s", () => {
+  const v = view("14", { permission: modal(459, { offset: 0 }) }, DECIDED);
+  expect(sync(v.ui, v)).toEqual({ ...v.ui, permission: null, toast: toast(v, "P-01 decidido", "gray") });
+});
+
+test("GAT-71, GAT-96: a read that shows the request closed by its peer or by its peer_left leaves the modal open, to say it was answered in the terminal", () => {
+  for (const change of [later("turn_started"), LEFT]) {
+    const v = view("14", { permission: modal(459) }, change);
+    expect(sync(v.ui, v)).toBe(v.ui);
+  }
+});
+
+test("GAT-70: a read changes nothing in a modal whose decision is on its way, nor in that of a request still open", () => {
+  const onTheWay = view("14", { permission: modal(459, { sending: true }) }, DECIDED);
+  expect(sync(onTheWay.ui, onTheWay)).toBe(onTheWay.ui);
+  const open = view("22c", { permission: modal(460, { offset: 3 }) });
+  expect(sync(open.ui, open)).toBe(open.ui);
+});

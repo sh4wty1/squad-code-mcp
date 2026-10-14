@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import type { SquadEvent } from "../../shared/contract.ts";
-import { press } from "../../tui/keys.ts";
+import type { Color } from "../../tui/grid.ts";
+import { press, settle, sync } from "../../tui/keys.ts";
 import type { GateModal, Ui, View } from "../../tui/view.ts";
 import { LOGS } from "../frames/logs.ts";
 import { frameView } from "../frames/view.ts";
@@ -197,3 +198,90 @@ for (const mode of ["reject", "comment"] as const) {
     expect(key("\x15", spaces)!.gate).toEqual(modal(1, { mode }));
   });
 }
+
+// ---- what the broker says of a decision, and what a read does to the modal ----
+
+// The view of 18a with the decision of the modal on its way
+const sending = (m: GateModal, send: Ui["send"]): View => {
+  const v = opened("18a", { ...m, sending: true });
+  return { ...v, ui: { ...v.ui, send } };
+};
+const toast = (v: View, text: string, color: Color) => ({ text, color, until: v.squad.now + 4000 });
+
+test("GAT-57: when the broker takes the decision the modal closes and says in green for 4 s what was decided", () => {
+  for (const [decision, mode, text] of [
+    ["approve", "confirm", "✓ G-01 aprovado"],
+    ["reject", "reject", "✓ G-01 rejeitado"],
+    ["comment", "comment", "✓ G-01 comentado · continua pendente"],
+  ] as const) {
+    const v = sending(modal(1, { mode, text: decision === "approve" ? "" : "falta" }), { gate_id: 1, decision, ...(decision !== "approve" && { text: "falta" }) });
+    expect(settle(v.ui, { ok: true }, v)).toEqual({ ...v.ui, gate: null, send: null, toast: toast(v, text, "bgreen") });
+  }
+});
+
+test("GAT-58: gate_closed closes the modal and says in red for 4 s that the gate was already decided", () => {
+  const v = sending(modal(1, { mode: "reject", text: "falta" }), { gate_id: 1, decision: "reject", text: "falta" });
+  expect(settle(v.ui, { ok: false, error: "gate_closed" }, v)).toEqual({ ...v.ui, gate: null, send: null, toast: toast(v, "✗ G-01 já decidido", "bred") });
+});
+
+test("GAT-58: another refusal, or the broker not answering, takes the modal back to the mode it sent from, with its text, and says in red for 4 s why", () => {
+  for (const error of ["invalid_token", "missing_field", "invalid_field", "broker não respondeu"]) {
+    for (const [m, send] of [
+      [modal(1, { mode: "confirm" }), { gate_id: 1, decision: "approve" }],
+      [modal(1, { mode: "reject", text: "  falta o teste  " }), { gate_id: 1, decision: "reject", text: "falta o teste" }],
+      [modal(1, { mode: "comment", text: "e o iOS?", expanded: true }), { gate_id: 1, decision: "comment", text: "e o iOS?" }],
+    ] as const) {
+      const v = sending(m, send);
+      expect(settle(v.ui, { ok: false, error }, v)).toEqual({ ...v.ui, gate: m, send: null, toast: toast(v, `✗ decisão não enviada · ${error}`, "bred") });
+    }
+  }
+});
+
+test("GAT-74: with no human credential nothing is sent, the modal goes back to the mode it sent from and says so", () => {
+  const m = modal(1, { mode: "reject", text: "falta" });
+  const v = sending(m, { gate_id: 1, decision: "reject", text: "falta" });
+  expect(settle(v.ui, null, v)).toEqual({ ...v.ui, gate: m, send: null, toast: toast(v, "✗ credencial humana não encontrada", "bred") });
+});
+
+test("GAT-73: while a decision waits for the broker no key changes the modal, in any mode, but ctrl+c quits", () => {
+  for (const mode of ["view", "confirm", "reject", "comment"] as const) {
+    const v = opened("18a", modal(1, { mode, text: "falta", sending: true }));
+    for (const k of ["\x1b", "y", "a", "r", "c", "\r", "]", "[", "q", "z", "\x7f", "\x15", "\x05", "g", "x"]) expect([mode, k, key(k, v)]).toEqual([mode, k, v.ui]);
+    expect(key("\x03", v)).toBeNull();
+  }
+});
+
+test("GAT-59: a read that shows the gate of the modal decided closes the modal, loses its text and says G-NN fechado for 4 s", () => {
+  for (const decision of ["approve", "reject"]) {
+    const v = opened("18a", modal(1, { mode: "reject", text: "falta" }), (events) => [...events, decided(500, 1, decision)]);
+    expect(sync(v.ui, v)).toEqual({ ...v.ui, gate: null, toast: toast(v, "G-01 fechado", "gray") });
+  }
+});
+
+test("GAT-97: a read that shows the feature closed with the modal open closes it as GAT-59", () => {
+  const close = { ...COMMENT, seq: 500, kind: "feature_closed", to: "*", outcome: "abandoned" } as unknown as SquadEvent;
+  for (const mode of ["view", "confirm", "comment"] as const) {
+    const v = opened("18a", modal(1, { mode }), (events) => [...events, close]);
+    expect(sync(v.ui, v)).toEqual({ ...v.ui, gate: null, toast: toast(v, "G-01 fechado", "gray") });
+  }
+});
+
+test("GAT-59: a read that shows a new version of the gate takes the confirm mode back to the view mode, and leaves the other modes as they are", () => {
+  const reissued: Change = (events) => [...events, { ...G02, seq: 501, gate_id: 1 } as SquadEvent];
+  const confirm = opened("19a", modal(1, { mode: "confirm" }), reissued);
+  expect(sync(confirm.ui, confirm)).toEqual({ ...confirm.ui, gate: modal(1) });
+  for (const m of [modal(1), modal(1, { mode: "reject", text: "falta" }), modal(1, { mode: "comment", text: "e o iOS?" })]) {
+    const v = opened("19a", m, reissued);
+    expect(sync(v.ui, v)).toBe(v.ui);
+  }
+  // the version that was confirmed is the one on the screen
+  const same = opened("19a", modal(1, { mode: "confirm", version: 2 }), reissued);
+  expect(sync(same.ui, same)).toBe(same.ui);
+});
+
+test("GAT-59: a read changes nothing in a modal whose decision is on its way, nor in that of a gate still pending", () => {
+  const decidedOnTheWay = opened("18a", modal(1, { mode: "confirm", sending: true }), (events) => [...events, decided(500, 1, "approve")]);
+  expect(sync(decidedOnTheWay.ui, decidedOnTheWay)).toBe(decidedOnTheWay.ui);
+  const pending = opened("18a", modal(1, { mode: "comment", text: "e o iOS?" }));
+  expect(sync(pending.ui, pending)).toBe(pending.ui);
+});

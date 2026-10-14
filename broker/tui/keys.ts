@@ -2,7 +2,7 @@
 // key is the string the terminal sends in raw mode. Ported from `onKey` and `textKeys` of
 // the prototype.
 
-import { qid } from "../shared/contract.ts";
+import { gid, qid } from "../shared/contract.ts";
 import type { Gate, Question } from "../shared/derive.ts";
 import { resolved, waiting } from "./asked.ts";
 import type { FeedRow } from "./feed.ts";
@@ -337,12 +337,37 @@ export function input(ui: Ui, chunk: string, view: View, more = false): Ui | nul
   return next;
 }
 
-// The state after the answer of `send` was sent, which is no longer to send. `result` is what
-// the broker said of it, or null when there was no human credential to send it with.
+// What the summary of a gate the broker took says of each decision
+const DECIDED = { approve: "aprovado", reject: "rejeitado", comment: "comentado · continua pendente" };
+
+// The state after the decision of `send` was sent, which is no longer to send. `result` is
+// what the broker said of it, or null when there was no human credential to send it with.
 export function settle(ui: Ui, result: Sent | null, view: View): Ui {
   const { modal: m, send } = ui;
   const idle: Ui = { ...ui, send: null };
-  if (!m || !send || !("question_id" in send)) return idle;
+  const failed = (text: string) => notice(view, text, "bred");
+  if (send && "gate_id" in send) {
+    const g = ui.gate;
+    if (!g) return idle;
+    // The modal in the mode it sent from, with its text, to send again
+    const back = (text: string): Ui => ({ ...idle, gate: { ...g, sending: false }, toast: failed(text) });
+    if (!result) return back("✗ credencial humana não encontrada");
+    if (result.ok) return { ...idle, gate: null, toast: notice(view, `✓ ${gid(send.gate_id)} ${DECIDED[send.decision]}`, "bgreen") };
+    if (result.error === "gate_closed") return { ...idle, gate: null, toast: failed(`✗ ${gid(send.gate_id)} já decidido`) };
+    return back(`✗ decisão não enviada · ${result.error}`);
+  }
+  if (send && "request_seq" in send) {
+    const p = ui.permission;
+    if (!p) return idle;
+    const stay: Ui = { ...idle, permission: { ...p, sending: false } };
+    if (!result) return { ...stay, toast: failed("✗ credencial humana não encontrada") };
+    const label = view.squad.requests.find((r) => r.request.seq === send.request_seq)?.label ?? "pedido";
+    if (result.ok) return { ...idle, permission: null, toast: notice(view, `✓ ${label} ${send.behavior === "allow" ? "permitido" : "negado"}`, "bgreen") };
+    // The request closed before the decision: the log says it was answered in the terminal
+    if (result.error === "permission_closed") return stay;
+    return { ...stay, toast: failed(`✗ decisão não enviada · ${result.error}`) };
+  }
+  if (!m || !send) return idle;
   // The modal as it was before the send, to send again
   const back = (text: string): Ui => ({ ...idle, modal: { ...m, sending: false }, toast: notice(view, text, "bred") });
   if (!result) return back("✗ credencial humana não encontrada");
@@ -352,11 +377,38 @@ export function settle(ui: Ui, result: Sent | null, view: View): Ui {
   return back(`✗ resposta não enviada · ${result.error}`);
 }
 
-// The state after a read. The selection of the tab follows its question when the order of
-// the list changes, and goes to the first when the question left it. The modal of a question
-// that closed is closed and its text is lost; the one of a refused answer stays, and the one
-// of an answer on its way waits for what the broker says of it.
+// The state after a read, for the tab of questions, its modal and the modals of gate and of
+// permission. A modal whose decision is on its way waits for what the broker says of it.
 export function sync(ui: Ui, view: View): Ui {
+  return requestSync(gateSync(questionSync(ui, view), view), view);
+}
+
+// The modal of a gate no longer pending is closed and its text is lost: decided, or closed
+// with its feature. A new version of the gate takes the confirm mode back to the view mode:
+// what is approved is what was on the screen.
+function gateSync(ui: Ui, view: View): Ui {
+  const m = ui.gate;
+  if (!m || m.sending) return ui;
+  const g = view.squad.gates.find((g) => g.id === m.id);
+  if (!g?.pending) return { ...ui, gate: null, toast: notice(view, `${gid(m.id)} fechado`) };
+  return m.mode === "confirm" && g.version !== m.version ? { ...ui, gate: { ...m, mode: "view" } } : ui;
+}
+
+// The modal of a request decided by another decision is closed. The one of a request
+// answered in the terminal stays, to say so, until esc.
+function requestSync(ui: Ui, view: View): Ui {
+  const m = ui.permission;
+  if (!m || m.sending) return ui;
+  const r = view.squad.requests.find((r) => r.request.seq === m.seq);
+  if (r && r.closedBy !== "decision") return ui;
+  return { ...ui, permission: null, toast: r ? notice(view, `${r.label} decidido`) : ui.toast };
+}
+
+// The selection of the tab follows its question when the order of the list changes, and goes
+// to the first when the question left it. The modal of a question that closed is closed and
+// its text is lost; the one of a refused answer stays, and the one of an answer on its way
+// waits for what the broker says of it.
+function questionSync(ui: Ui, view: View): Ui {
   const { squad } = view;
   const asked = waiting(squad);
   const question = asked.some((q) => q.id === ui.question) ? ui.question : (asked[0]?.id ?? null);

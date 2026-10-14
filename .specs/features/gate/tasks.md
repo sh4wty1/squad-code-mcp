@@ -374,9 +374,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Cada resposta do broker de GAT-57, GAT-58, GAT-68, GAT-69 e a credencial ausente, com o aviso literal e os 4 s
-- [ ] `sync`: gate decidido, feature fechada, versão nova em confirmação e em texto; pedido decidido por outro e fechado pelo peer; com envio em curso nada muda
-- [ ] Os testes de `settle` e `sync` da resposta continuam; gate quick passa
+- [x] Cada resposta do broker de GAT-57, GAT-58, GAT-68, GAT-69 e a credencial ausente, com o aviso literal e os 4 s
+- [x] `sync`: gate decidido, feature fechada, versão nova em confirmação e em texto; pedido decidido por outro e fechado pelo peer; com envio em curso nada muda
+- [x] Os testes de `settle` e `sync` da resposta continuam; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
