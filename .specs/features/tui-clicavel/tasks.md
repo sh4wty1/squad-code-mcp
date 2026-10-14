@@ -704,7 +704,6 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 **Tests**: none
 **Gate**: build
 
-
 ---
 
 ### F1: CLK-10 no terminal pequeno
@@ -718,12 +717,13 @@ Da volta 1 do Verifier (`validation.md`, Fix 1): o mutante M31, que na tela pequ
 
 **Done when**:
 
-- [ ] Em 119×40 e em 120×39, `t.raw` fica `[true]`, só há `GET`, e em 120×40 a tela principal é a de antes
-- [ ] O teste mata o M31 (`broker/tui.ts:182`, `keysOf(chunk)` → `[...chunk]`)
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Em 119×40 e em 120×39, `t.raw` fica `[true]`, só há `GET`, e em 120×40 a tela principal é a de antes
+- [x] O teste mata o M31 (`broker/tui.ts:182`, `keysOf(chunk)` → `[...chunk]`)
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
+
 ---
 
 ## Phase Execution Map

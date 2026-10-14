@@ -247,6 +247,27 @@ for (const size of [{ cols: 119, rows: 40 }, { cols: 120, rows: 39 }]) {
       stop();
     }
   });
+
+  test(`CLK-10: on a terminal of ${size.cols}×${size.rows} an old report whose characters are q and ! quits nothing, whole or split across two reads`, async () => {
+    const { t, key, resize, stop } = launch();
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      t.size = size;
+      resize();
+      key("\x1b[M q!");
+      key("\x1b[M ");
+      key("q!");
+      await Bun.sleep(80);
+      expect(t.raw).toEqual([true]);
+      expect(t.calls.every((call) => call.method === "GET")).toBe(true);
+
+      t.size = { cols: 120, rows: 40 };
+      resize();
+      expect(t.lines()).toEqual(main(t.view()).text());
+    } finally {
+      stop();
+    }
+  });
 }
 
 test("CLK-13: while the broker does not answer, a click and the wheel change nothing and a click on the cell of q sair does not quit", async () => {
