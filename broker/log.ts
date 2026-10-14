@@ -47,6 +47,8 @@ export interface NewRecord {
   ticket_ref?: string | null;
   // the column of `events`. Who records puts the same id in data, which is what is read.
   question_id?: number;
+  // the same, for a gate
+  gate_id?: number;
   // who waits for the event, in place of the rule of its kind
   recipients?: string[];
   // the fields of the kind
@@ -88,6 +90,7 @@ export function createLog(db: Database, now: () => number = Date.now) {
       body: event.body,
       ticket_ref: event.ticket_ref,
       question_id: event.question_id,
+      gate_id: event.gate_id,
       data: event.data,
     });
     const recipients =

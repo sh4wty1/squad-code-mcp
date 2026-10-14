@@ -110,9 +110,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] A tabela tem as oito colunas do design, com `commit` entre aspas; abrir duas vezes o mesmo banco não falha
-- [ ] Um registro com `gate_id` grava a coluna; sem ele, nula
-- [ ] Testes em `test/unit/db.test.ts`; gate quick passa
+- [x] A tabela tem as oito colunas do design, com `commit` entre aspas; abrir duas vezes o mesmo banco não falha
+- [x] Um registro com `gate_id` grava a coluna; sem ele, nula
+- [x] Testes em `test/unit/db.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

@@ -341,8 +341,8 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| GAT-01 | P1: Pedir gate | T1, T3 | In Tasks |
-| GAT-02 | P1: Pedir gate | T1, T3 | In Tasks |
+| GAT-01 | P1: Pedir gate | T1, T3 | Implementing |
+| GAT-02 | P1: Pedir gate | T1, T3 | Implementing |
 | GAT-03 | P1: Pedir gate | T3 | In Tasks |
 | GAT-04 | P1: Pedir gate | T3 | In Tasks |
 | GAT-05 | P1: Pedir gate | T3, T6 | In Tasks |
