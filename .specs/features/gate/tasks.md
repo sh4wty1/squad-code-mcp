@@ -483,9 +483,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Os sete `.txt` são a saída de `extract.ts`; os 47 anteriores idênticos aos da `main`
-- [ ] O `body` do G-01 é o resumo; `diffstat` das duas versões; a reemissão de 18b; o `text` do comentário
-- [ ] Cada desvio com classe D1 ou D2 e motivo; nenhum no conteúdo do modal; gate quick passa
+- [x] Os sete `.txt` são a saída de `extract.ts`; os 47 anteriores idênticos aos da `main`
+- [x] O `body` do G-01 é o resumo; `diffstat` das duas versões; a reemissão de 18b; o `text` do comentário
+- [x] Cada desvio com classe D1 ou D2 e motivo; nenhum no conteúdo do modal; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

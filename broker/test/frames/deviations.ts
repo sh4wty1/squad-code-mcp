@@ -150,6 +150,46 @@ const Q08_HOPS = (line: number) => hops(line, 30, "w2 → ldr → você", 21);
 const modalOf = (id: string, from: number, to: number) => frame(id).slice(from, to + 1).map((line) => [...line.padEnd(120)].slice(18, 102).join(""));
 const EFFECT = 'Assumptions, `Linha "efeito"`: the TUI writes the effect from who asked and the ticket (QST-59), and the one the prototype writes by hand for Q-09 is in no event';
 
+// The modals of gate and of permission, over the main screen. The deviations of the screen
+// behind a modal are cut to the cells it leaves in view: outside columns x0 to x1, its box
+// and its margin, on the lines of the box and its margin. A part that leaves the frame as
+// it is goes away.
+function behind(id: string, x0: number, x1: number, ...devs: Deviation[]): Deviation[] {
+  const lines = frame(id).map((line) => [...line.padEnd(120)]);
+  const top = lines.findIndex((line) => line[x0 + 1] === "┌" && line.join("").includes("⚠"));
+  const bottom = lines.findIndex((line, y) => y > top && line[x0 + 1] === "└");
+  return devs.flatMap((dev) => {
+    const text = [...pad(dev.text, dev.width)];
+    const end = dev.col + dev.width;
+    const parts = dev.line < top - 1 || dev.line > bottom + 1 ? [[dev.col, end]] : [[dev.col, Math.min(end, x0)], [Math.max(dev.col, x1 + 1), end]];
+    return parts
+      .filter(([from, to]) => from! < to!)
+      .map(([from, to]) => ({ ...dev, col: from!, width: to! - from!, text: text.slice(from! - dev.col, to! - dev.col).join("") }))
+      .filter((part) => part.text !== lines[dev.line]!.slice(part.col, part.col + part.width).join(""));
+  });
+}
+const GATE_BOX: [number, number] = [19, 100];
+// The count of the questions answered between agents, in the box of the modal of gate
+const BETWEEN =
+  "GAT-44 counts every question of the feature an agent answered: the one the leader asked the mother at 14:18:40, answered by her at 14:19:05, is one of them, and the count the prototype writes by hand leaves it out, as its history does (QST-60)";
+function between(id: string): Deviation[] {
+  const lines = frame(id).map((line) => [...line]);
+  const y = lines.findIndex((line) => line.join("").includes("perguntas ✓ 2 pelo dev · 1 entre agentes"));
+  const x = lines[y]!.findIndex((_, i) => lines[y]!.slice(i, i + 15).join("") === "1 entre agentes");
+  return d("D1", BETWEEN, [y, x, 1, "2"]);
+}
+// The detail of the gate behind the modal: its body and the thread of the feature, from line 9
+const GATE_BODY =
+  "spec Assumptions, `Log do frame 08 e seguintes`: the body of G-01 is the summary its modal shows, not the prose of the prototype, which no event has; the detail behind the modal takes more lines with it, and the thread and the loadout come down";
+const G01_DETAIL = panel(
+  "D2",
+  GATE_BODY,
+  9,
+  "Player ao vivo com setlist", "pronto. TKT-12 (player HLS)", "aprovado após 1 rework, com", "retry infinito conforme sua", "resposta à Q-07; TKT-13", "(setlist com cache 30s + ETag)", "e TKT-14 aprovados direto.", "Judge: 7/7 critérios.",
+  "---", "thread da feature · 5 msgs", " 14:18 mot→ldr [task]", " 14:18 ldr→mot [question]", " 14:19 mot→ldr [answer]", " 14:45 ldr→mot [result]", "▶14:51 mot→hum [gate]", "---", "loadout mother"
+);
+const gateFrame = (id: string) => [...behind(id, ...GATE_BOX, ...skills(MOT, LDR, W1, W2, JDG), ...G01_DETAIL, ...loadout(26, 1)), ...between(id)];
+
 // The one line of system the slice Gate leaves out
 const SYSTEM_LINE = "Out of Scope of the slice Gate: the line of system `✓ P-NN fechado no terminal` has no event, since a request closes with any later event of its peer, which has its own line; the modal of permission says it instead (GAT-71)";
 
@@ -412,6 +452,31 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ),
   ],
   "20b": [...Q08_HOPS(14), ...d("D1", ASKED_MOTHER + "; it is one more in the count and one more below the four (QST-62)", [26, 15, 1, "8"], [35, 3, 1, "4"])],
+  // The modal of a gate, over the main screen of 14:52:03 with G-01 selected
+  "08": gateFrame("08"),
+  "16a": gateFrame("16a"),
+  "16b": gateFrame("16b"),
+  "16c": gateFrame("16c"),
+  "17": gateFrame("17"),
+  // G-01 asked again, selected
+  "18b": [
+    ...behind(
+      "18b",
+      ...GATE_BOX,
+      ...skills(MOT, LDR, W1, W2, JDG),
+      ...panel(
+        "D2",
+        "spec Assumptions, `Conteúdo do modal de gate que o log não tem`: the body of the gate asked again is what the mother changed, the part of its modal; the prose of the prototype has no event, and the detail behind the modal takes more lines with it, so the thread and the loadout come down",
+        9,
+        "+ judge verificou o autoplay", "no iOS: só toca após gesto", "(critério 6)", "~ src/player/PlayerBar.tsx:", "142 → 151 linhas, guarda de", "autoplay", "+ resumo e diff stat", "atualizados; ação e efeito", "iguais",
+        "---", "thread da feature · 7 msgs", " 14:19 mot→ldr [answer]", " 14:45 ldr→mot [result]", " 14:51 mot→hum [gate]", " 14:53 hum→mot [gate_decision]", "▶14:55 mot→hum [gate]", "---", "loadout mother"
+      ),
+      ...loadout(27, 1)
+    ),
+    ...between("18b"),
+  ],
+  // G-02 selected, as in 19a
+  "19b": [...behind("19b", ...GATE_BOX, ...skills(MOT, LDR, W1, W2, JDG), ...loadout(21, 1)), ...between("19b")],
 };
 
 // The lines the screen has to draw for the frame, and the deviations that change nothing

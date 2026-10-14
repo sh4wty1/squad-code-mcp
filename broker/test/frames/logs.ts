@@ -8,7 +8,7 @@
 import type { Criterion, Envelope, PlannedTicket, SquadEvent } from "../../shared/contract.ts";
 import { SQUAD } from "../../shared/derive.ts";
 import type { PriceTable } from "../../tui/config.ts";
-import type { Modal, Ui } from "../../tui/view.ts";
+import type { GateModal, Modal, Ui } from "../../tui/view.ts";
 
 export interface FrameLog {
   events: SquadEvent[];
@@ -71,21 +71,35 @@ function answer(
   return { ...env(seq, t, from, to, tk, s, b), kind: "answer", question_id, answer: text, resolved_by };
 }
 
-const gate = (seq: number, t: string, s: string, b: string, gate_id: number, scope: "delivery" | "action", action: string, effect: string): SquadEvent => ({
+const gate = (seq: number, t: string, s: string, b: string, gate_id: number, scope: "delivery" | "action", action: string, effect: string, diffstat?: string): SquadEvent => ({
   ...env(seq, t, MOT, HUM, null, s, b),
   kind: "gate",
   gate_id,
   scope,
   action,
   effect,
+  ...(diffstat !== undefined && { diffstat }),
 });
 
-const decided = (seq: number, t: string, s: string, b: string, gate_id: number, decision: "approve" | "reject" | "comment"): SquadEvent => ({
+const decided = (seq: number, t: string, s: string, b: string, gate_id: number, decision: "approve" | "reject" | "comment", text?: string): SquadEvent => ({
   ...env(seq, t, HUM, MOT, null, s, b),
   kind: "gate_decision",
   gate_id,
   decision,
+  ...(text !== undefined && { text }),
 });
+
+// A diffstat as git prints it: each file with the count of its lines and its bar, then the total
+type Diff = [file: string, lines: number, plus: number, minus: number];
+const diffstat = (files: Diff[], total: string) =>
+  [...files.map(([file, n, plus, minus]) => ` ${file.padEnd(32)}| ${String(n).padStart(3)} ${"+".repeat(plus)}${"-".repeat(minus)}`), " " + total].join("\n");
+const UNCHANGED: Diff[] = [
+  ["src/player/useHlsStream.ts", 118, 11, 1],
+  ["src/player/NowPlaying.tsx", 64, 6, 0],
+  ["src/api/setlist.ts", 97, 10, 0],
+  ["src/api/setlist.test.ts", 51, 5, 0],
+  ["src/lib/formatTime.ts", 40, 4, 0],
+];
 
 // As the broker writes it: the summary is the tool and the description, the body the input
 function permission(seq: number, t: string, from: string, tk: string | null, description: string, input_preview: string): SquadEvent {
@@ -230,7 +244,19 @@ const MAIN = [
   answer(432, "14:31:48", W2, JDG, "TKT-13", "Q-11: sim, via ETag", "Sim: o polling usa If-None-Match com o ETag do upstream e invalida o cache ao receber 200.", 11, "sim, via ETag do upstream", "agent"),
 ];
 
-const G01 = gate(439, "14:51:58", "G-01 entrega final", "G-01: peço aprovação para o merge de feat/player-ao-vivo em main. Dispara deploy automático em produção.", 1, "delivery", "merge feat/player-ao-vivo → main", "deploy automático em produção");
+// The summary of the delivery is the body of the gate, as the mother writes it
+const SUM01 =
+  "Player ao vivo com setlist pronto. TKT-12 (player HLS) aprovado após 1 rework, com retry infinito conforme sua resposta à Q-07; TKT-13 (setlist com cache 30s + ETag) e TKT-14 aprovados direto. Judge: 7/7 critérios.";
+const DIFF01 = diffstat([["src/player/PlayerBar.tsx", 142, 12, 2], ...UNCHANGED], "6 files changed, 471 insertions(+), 41 deletions(-)");
+const G01 = gate(439, "14:51:58", "G-01 entrega final", SUM01, 1, "delivery", "merge feat/player-ao-vivo → main", "deploy automático em produção", DIFF01);
+// G-01 asked again after the comment of the dev: what the mother changed is its body
+const CHANGES = [
+  "+ judge verificou o autoplay no iOS: só toca após gesto (critério 6)",
+  "~ src/player/PlayerBar.tsx: 142 → 151 linhas, guarda de autoplay",
+  "+ resumo e diff stat atualizados; ação e efeito iguais",
+].join("\n");
+const DIFF01V2 = diffstat([["src/player/PlayerBar.tsx", 151, 13, 2], ...UNCHANGED], "6 files changed, 480 insertions(+), 41 deletions(-)");
+const REISSUE = gate(457, "14:55:40", "G-01 atualizado (v2)", CHANGES, 1, "delivery", "merge feat/player-ao-vivo → main", "deploy automático em produção", DIFF01V2);
 const FINAL = [
   answer(433, "14:33:02", HUM, W1, "TKT-12", "Q-07: infinito com backoff", "Resposta do dev pela TUI, entregue a quem perguntou: infinito com backoff.", 7, "infinito com backoff", "human"),
   turn(433.1, "14:33:03", W1),
@@ -276,9 +302,9 @@ const DROP_X = [
   refused(473, "14:52:05", LDR, "ticket_dropped"),
 ];
 
-const COMMENT = decided(456, "14:53:02", "comentário: autoplay iOS?", 'Comentário do dev no G-01: "Antes do merge, confirme que o player não faz autoplay no iOS." O gate continua pendente; a mother vai reemitir o G-01.', 1, "comment");
+const COMMENT = decided(456, "14:53:02", "comentário: autoplay iOS?", 'Comentário do dev no G-01: "Antes do merge, confirme que o player não faz autoplay no iOS." O gate continua pendente; a mother vai reemitir o G-01.', 1, "comment", "Antes do merge, confirme que o player não faz autoplay no iOS.");
 const G02 = (seq: number, t: string) =>
-  gate(seq, t, "G-02 excluir branch v0", "G-02: peço aprovação para excluir do remoto a branch abandonada feat/player-v0.", 2, "action", "git push origin --delete feat/player-v0", "a branch abandonada some do remoto, sem volta");
+  gate(seq, t, "G-02 excluir branch antiga", "G-02: peço aprovação para excluir do remoto a branch abandonada feat/player-v0.", 2, "action", "git push origin --delete feat/player-v0", "a branch abandonada some do remoto, sem volta");
 
 const LONGCMD = [
   "curl -sS --retry 3 \\",
@@ -382,6 +408,10 @@ const partial = [joined(483, "15:02:24", MOT), joined(484, "15:02:31", LDR), usa
 // The modal of a frame: in the text mode, unless it has a choice
 const modal = (question: number, more: Partial<Modal>): Modal => ({ question, choice: null, text: "", expanded: false, sending: false, refused: false, ...more });
 const TXT06 = "logo da 89, com o nome do programa no ar";
+// The modal of a gate of a frame: in the view mode, unless it has another
+const gateModal = (id: number, more: Partial<GateModal> = {}): GateModal => ({ id, mode: "view", text: "", expanded: false, empty: false, sending: false, version: 1, ...more });
+const TXT16A = "Sem changelog no PR, e não quero deploy no horário de pico. Refaça para depois das 22h.";
+const TXT16B = "Antes do merge, confirme que o player não faz autoplay no iOS. Se precisar mexer no PlayerBar, reemita o G-01 com o diff novo; o resto está ok.";
 const TXT07 = "Logo da 89 por enquanto, na versão quadrada para caber no card do mobile. Abra um ticket separado para buscar capas no Discogs/MusicBrainz depois da entrega; não bloqueia esta feature.";
 
 export const LOGS: Record<string, FrameLog> = {
@@ -432,4 +462,12 @@ export const LOGS: Record<string, FrameLog> = {
   "20a": { ...log("14:31:05", 442, error), ui: { screen: "questions", question: 9, modal: modal(9, { choice: 0 }) } },
   // The deadline of Q-08 came two seconds before: the answer the dev sent was refused
   "20b": { ...log("14:35:17", 417, main, FINAL.slice(0, 4)), ui: { screen: "questions", modal: modal(8, { text: TXT06, refused: true }) } },
+  // The modal of a gate over the main screen
+  "08": { ...log("14:52:03", 439, gated), ui: { gate: gateModal(1) } },
+  "16a": { ...log("14:52:03", 439, gated), ui: { gate: gateModal(1, { mode: "reject", text: TXT16A }) } },
+  "16b": { ...log("14:52:03", 439, gated), ui: { gate: gateModal(1, { mode: "comment", text: TXT16B, expanded: true }) } },
+  "16c": { ...log("14:52:03", 439, gated), ui: { gate: gateModal(1, { mode: "reject", empty: true }) } },
+  "17": { ...log("14:52:03", 439, gated), ui: { gate: gateModal(1, { mode: "confirm" }) } },
+  "18b": { ...log("14:55:45", 457, gated, COMMENT, REISSUE), ui: { gate: gateModal(1, { version: 2 }) } },
+  "19b": { ...log("14:52:35", 458, gated, G02(458, "14:52:30")), ui: { gate: gateModal(1) } },
 };

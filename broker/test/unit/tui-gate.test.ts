@@ -9,10 +9,12 @@ import { frameView } from "../frames/view.ts";
 type Change = (events: SquadEvent[]) => SquadEvent[];
 
 // The log of frame 19a, at 14:52:35: the feature of the three tickets approved, G-01 asked at
-// 14:51:58 and G-02 at 14:52:30. `only` leaves G-01 alone, with the fields given.
+// 14:51:58 and G-02 at 14:52:30. `only` leaves G-01 alone, without body and diffstat unless
+// the test gives them.
 const G02 = LOGS["19a"]!.events.find((e) => e.kind === "gate" && e.gate_id === 2)!;
+const BARE = { body: "", diffstat: undefined };
 const only = (fields: Record<string, unknown> = {}, more: SquadEvent[] = []): Change => (events) => [
-  ...events.filter((e) => e !== G02).map((e) => (e.kind === "gate" && e.gate_id === 1 ? ({ ...e, ...fields } as SquadEvent) : e)),
+  ...events.filter((e) => e !== G02).map((e) => (e.kind === "gate" && e.gate_id === 1 ? ({ ...e, ...BARE, ...fields } as SquadEvent) : e)),
   ...more,
 ];
 
@@ -143,12 +145,12 @@ test("GAT-56: enter on an empty text paints the field in red and says below the 
 test("GAT-41, GAT-42, GAT-49: with two pending gates the tag says which, the queue marks this one, and the keys go to the next and the previous", () => {
   const first = draw(modal(1));
   expect(first.box[0]).toBe(top("⚠ gate G-01", " gate 1 de 2 "));
-  expect(first.box[2]).toBe(row("fila      ▶ G-01 entrega final     G-02 excluir branch v0   antigo antes"));
+  expect(first.box[2]).toBe(row("fila      ▶ G-01 entrega final     G-02 excluir branch antiga   antigo ant…"));
   expect(first.box.at(-2)).toBe(row("[a]provar      [r]ejeitar      [c]omentar      ] próximo  [ anterior"));
   expect(first.lines[39]).toBe(" a aprovar   r rejeitar   c comentar   ] próximo gate   [ anterior   esc fechar sem decidir");
   // Each gate of the queue is clicked on its mark and its summary
   const queue = first.g.hits[first.y + 2]!;
-  expect([queue[32], queue[33], queue[52], queue[53], queue[56], queue[79], queue[80]]).toEqual([
+  expect([queue[32], queue[33], queue[52], queue[53], queue[56], queue[83], queue[84]]).toEqual([
     { modal: true },
     { modal: true, gate: 1 },
     { modal: true, gate: 1 },
@@ -159,7 +161,7 @@ test("GAT-41, GAT-42, GAT-49: with two pending gates the tag says which, the que
   ]);
   const second = draw(modal(2));
   expect(second.box[0]).toBe(top("⚠ gate G-02", " gate 2 de 2 "));
-  expect(second.box[2]).toBe(row("fila        G-01 entrega final   ▶ G-02 excluir branch v0   antigo antes"));
+  expect(second.box[2]).toBe(row("fila        G-01 entrega final   ▶ G-02 excluir branch antiga   antigo ant…"));
 });
 
 test("GAT-45, GAT-46, GAT-47: an action gate without diffstat has no diff and no judge, and one without body no summary", () => {
@@ -214,7 +216,7 @@ test("GAT-44: an open question counts in none of the four", () => {
 // The comment of 18a, and G-01 asked again at 14:55:40
 const COMMENT = { ...LOGS["18a"]!.events.find((e) => e.kind === "gate_decision")!, text: "Confirme o autoplay." } as SquadEvent;
 const G01 = LOGS["19a"]!.events.find((e) => e.kind === "gate" && e.gate_id === 1)!;
-const again = (fields: Record<string, unknown>) => ({ ...G01, seq: 457, ts: G01.ts + 222_000, ...fields }) as SquadEvent;
+const again = (fields: Record<string, unknown>) => ({ ...G01, ...BARE, seq: 457, ts: G01.ts + 222_000, ...fields }) as SquadEvent;
 const V2 = [" src/a.ts | 12 ++++++++++--", " src/b.ts |  2 +-", " src/c.ts |  1 +", " 3 files changed, 12 insertions(+), 3 deletions(-)"].join("\n");
 
 test("GAT-41, GAT-42, GAT-45, GAT-46, GAT-48: version 2 is updated, with the comment of the dev, what the mother changed, and the line of the diffstat that changed", () => {

@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import type { Grid } from "../../tui/grid.ts";
 import { answer } from "../../tui/screens/answer.ts";
 import { down } from "../../tui/screens/down.ts";
+import { gate } from "../../tui/screens/gate.ts";
 import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
 import { questions } from "../../tui/screens/questions.ts";
@@ -30,6 +31,7 @@ const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid, require
   ["frozen screen", ["12"], (view) => down(frozen(view))],
   ["tab of questions", ["04"], questions, "QST-69"],
   ["modal of answer", ["05", "06", "07", "20a", "20b"], (view) => answer(questions(view), view), "QST-87"],
+  ["modal of gate", ["08", "16a", "16b", "16c", "17", "18b", "19b"], (view) => gate(main(view), view), "GAT-85"],
 ];
 
 for (const [name, ids, draw, requirement = "TUI-43"] of SCREENS) {
@@ -161,6 +163,25 @@ test("QST-89: no frame of Question has a D3 deviation, and no deviation is there
   // What the spec cut is of the slices to come, and Question is not one of them
   expect(all.filter((dev) => dev.class === "D3" && /Question/.test(dev.why)).map((dev) => `${dev.id} line ${dev.line}`)).toEqual([]);
   expect(all.filter((dev) => /of the slices? Question/.test(dev.why)).map((dev) => `${dev.id} line ${dev.line}`)).toEqual([]);
+});
+
+// The cells of the box of the modal of a frame: from the column of its top left corner, `w` wide
+function boxOf(id: string, x: number, w: number) {
+  const lines = frame(id).map((line) => [...line.padEnd(120)]);
+  const top = lines.findIndex((line) => line[x] === "┌" && line.join("").includes("⚠"));
+  const bottom = lines.findIndex((line, y) => y > top && line[x] === "└");
+  return (dev: { line: number; col: number; width: number }) => dev.line >= top && dev.line <= bottom && dev.col < x + w && dev.col + dev.width > x;
+}
+
+test("GAT-85, GAT-88: every deviation of the frames of the modal of gate is D1 or D2, and the only one in the box is the count of the questions an agent answered", () => {
+  for (const id of ["08", "16a", "16b", "16c", "17", "18b", "19b"]) {
+    expect(DEVIATIONS[id]!.length).toBeGreaterThan(0);
+    expect(DEVIATIONS[id]!.filter((dev) => !["D1", "D2"].includes(dev.class)).map((dev) => `${id} line ${dev.line}`)).toEqual([]);
+    const inside = DEVIATIONS[id]!.filter(boxOf(id, 20, 80));
+    expect(inside.map((dev) => [dev.class, dev.width, dev.text])).toEqual([["D1", 1, "2"]]);
+    expect(inside[0]!.why).toContain("GAT-44");
+    expect([...frame(id)[inside[0]!.line]!].slice(inside[0]!.col, inside[0]!.col + 15).join("")).toBe("1 entre agentes");
+  }
 });
 
 test("TUI-54: a terminal of 80 by 24 shows frame 21", () => {
