@@ -1,6 +1,7 @@
 import { expect } from "bun:test";
 import { openDatabase } from "../../db.ts";
 import { createFeature } from "../../feature.ts";
+import { createGate } from "../../gate.ts";
 import { createLog, type FeatureFields } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
 import { createPermission } from "../../permission.ts";
@@ -135,6 +136,7 @@ export function setup() {
   const session = createSession(log);
   const permission = createPermission(log, HUMAN_TOKEN);
   const { state } = createState(log);
+  const gate = createGate(db, log);
   const feature = createFeature(log);
 
   // Registers a live session and returns what the broker answered
@@ -182,6 +184,10 @@ export function setup() {
 
   function questionRows() {
     return db.query("SELECT * FROM questions ORDER BY id").all() as Record<string, unknown>[];
+  }
+
+  function gateRows() {
+    return db.query("SELECT * FROM gates ORDER BY id").all() as Record<string, unknown>[];
   }
 
   // Events of the cycle of a ticket put straight in the log, as the rules would leave
@@ -247,6 +253,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, plan, session, permission, state, feature, question, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, questionRows, refusedWith, given,
+    db, peers, log, send, plan, session, permission, state, feature, question, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, questionRows, gateRows, gate, refusedWith, given,
   };
 }

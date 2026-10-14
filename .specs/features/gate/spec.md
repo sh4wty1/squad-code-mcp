@@ -343,18 +343,18 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | -------------- | ----- | ----- | ------ |
 | GAT-01 | P1: Pedir gate | T1, T3 | Implementing |
 | GAT-02 | P1: Pedir gate | T1, T3 | Implementing |
-| GAT-03 | P1: Pedir gate | T3 | In Tasks |
-| GAT-04 | P1: Pedir gate | T3 | In Tasks |
-| GAT-05 | P1: Pedir gate | T3, T6 | In Tasks |
-| GAT-06 | P1: Pedir gate | T3 | In Tasks |
-| GAT-07 | P1: Pedir gate | T3 | In Tasks |
-| GAT-08 | P1: Pedir gate | T3 | In Tasks |
-| GAT-09 | P1: Pedir gate | T3 | In Tasks |
-| GAT-10 | P1: Pedir gate | T3 | In Tasks |
+| GAT-03 | P1: Pedir gate | T3 | Implementing |
+| GAT-04 | P1: Pedir gate | T3 | Implementing |
+| GAT-05 | P1: Pedir gate | T3, T6 | Implementing |
+| GAT-06 | P1: Pedir gate | T3 | Implementing |
+| GAT-07 | P1: Pedir gate | T3 | Implementing |
+| GAT-08 | P1: Pedir gate | T3 | Implementing |
+| GAT-09 | P1: Pedir gate | T3 | Implementing |
+| GAT-10 | P1: Pedir gate | T3 | Implementing |
 | GAT-11 | P1: Pedir gate | T6 | In Tasks |
-| GAT-12 | P1: Reemitir depois do comentário | T3 | In Tasks |
-| GAT-13 | P1: Reemitir depois do comentário | T3 | In Tasks |
-| GAT-14 | P1: Reemitir depois do comentário | T3 | In Tasks |
+| GAT-12 | P1: Reemitir depois do comentário | T3 | Implementing |
+| GAT-13 | P1: Reemitir depois do comentário | T3 | Implementing |
+| GAT-14 | P1: Reemitir depois do comentário | T3 | Implementing |
 | GAT-15 | P1: Decidir um gate | T4 | In Tasks |
 | GAT-16 | P1: Decidir um gate | T4 | In Tasks |
 | GAT-17 | P1: Decidir um gate | T4 | In Tasks |

@@ -148,12 +148,12 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Cada AC com o seu caso em `test/unit/gate-request.test.ts`: linha e evento, `data` só com os campos enviados, nenhuma entrega
-- [ ] `missing_field` para cada obrigatório ausente, não texto e vazio; para cada opcional `null`, não texto e vazio; `delivery` sem `commit`; `summary` de 80 aceito e de 81 `invalid_field`
-- [ ] Cada par de recusas vizinhas da ordem de GAT-07 num caso que falha nas duas
-- [ ] `tickets_open` com ticket em `working`, `review` e `escalated`; aceito sem `plan`, com aprovados e descartados, e com `scope` `action`; o `hint` nomeia os tickets
-- [ ] Reemissão de pendente atualiza `scope`, `commit` e `request_seq`; de `approved` e de `rejected` dá `gate_closed`; `gate_id` de outra feature e inexistente dá `invalid_field`
-- [ ] Uma falha forçada no meio da transação não deixa linha nem evento (GAT-10); gate quick passa
+- [x] Cada AC com o seu caso em `test/unit/gate-request.test.ts`: linha e evento, `data` só com os campos enviados, nenhuma entrega
+- [x] `missing_field` para cada obrigatório ausente, não texto e vazio; para cada opcional `null`, não texto e vazio; `delivery` sem `commit`; `summary` de 80 aceito e de 81 `invalid_field`
+- [x] Cada par de recusas vizinhas da ordem de GAT-07 num caso que falha nas duas
+- [x] `tickets_open` com ticket em `working`, `review` e `escalated`; aceito sem `plan`, com aprovados e descartados, e com `scope` `action`; o `hint` nomeia os tickets
+- [x] Reemissão de pendente atualiza `scope`, `commit` e `request_seq`; de `approved` e de `rejected` dá `gate_closed`; `gate_id` de outra feature e inexistente dá `invalid_field`
+- [x] Uma falha forçada no meio da transação não deixa linha nem evento (GAT-10); gate quick passa
 
 **Tests**: unit
 **Gate**: quick
