@@ -3,7 +3,9 @@ import type { SquadEvent } from "../../shared/contract.ts";
 import { clock, grid, len, type Grid, type Hit } from "../../tui/grid.ts";
 import { answer } from "../../tui/screens/answer.ts";
 import { chrome, drawKeys, MAIN_KEYS, stats, type Keys } from "../../tui/screens/chrome.ts";
+import { gate } from "../../tui/screens/gate.ts";
 import { main } from "../../tui/screens/main.ts";
+import { permission } from "../../tui/screens/permission.ts";
 import { questions } from "../../tui/screens/questions.ts";
 import { thread } from "../../tui/screens/thread.ts";
 import type { Ui, View } from "../../tui/view.ts";
@@ -231,7 +233,7 @@ for (const [label, does, keys] of [["j/k", "mover", ["j", null, "k"]], ["[ ]", "
 
 test("CLK-35: a shortcut of a range has no mark in any cell, and neither has a label the screens do not have", () => {
   expect(marked(keyLine([["1-4", "telas"], ["1-3", "escolher"], ["1-9", "escolher"]]), 39)).toEqual([]);
-  expect(marked(keyLine([["a", "aprovar"], ["shift+tab", "voltar"], ["k/j", "mover"], ["toString", "nada"]]), 39)).toEqual([]);
+  expect(marked(keyLine([["w", "nada"], ["shift+tab", "voltar"], ["k/j", "mover"], ["toString", "nada"]]), 39)).toEqual([]);
   // And it takes no mark from the shortcuts next to it
   const g = keyLine([["1-4", "telas"], ["q", "sair"]]);
   expect(marked(g, 39)).toEqual([at(g, 39, "q sair"), ...Array.from({ length: 4 }, (_, i) => at(g, 39, "sair") + i)]);
@@ -799,4 +801,48 @@ test("CLK-40: without a modal, and with the modal of a question that is not of t
     expect(having(g, "question").length).toBe(9 * 58);
     expect(hit(g, at(g, 1, "2 topologia"), 1)).toEqual({ key: "2" });
   }
+});
+
+// What the terminal sends for each key of the footers of the modals of gate and of permission
+const SENDS: Record<string, string> = { a: "a", r: "r", c: "c", y: "y", d: "d", G: "G", "]": "]", "[": "[", esc: "\x1b", enter: "\r", "ctrl+e": "\x05", "ctrl+u": "\x15" };
+
+test("GAT-82: each shortcut of the footers of the modals of gate and of permission has its key on the key and on what it does, j/k each letter on its own, and the cells between shortcuts none", () => {
+  const drawn: [string, Grid][] = [
+    ["19b", gate(main(view("19b")), view("19b"))],
+    ["17", gate(main(view("17")), view("17"))],
+    ["16a", gate(main(view("16a")), view("16a"))],
+    ["22e", permission(main(view("22e")), view("22e"))],
+    ["22b", permission(main(view("22b")), view("22b"))],
+  ];
+  const seen = new Set<string>();
+  for (const [id, g] of drawn) {
+    const line = g.rows[39]!.map((cell) => cell.ch).join("").trimEnd();
+    // Each shortcut is its key, a space and what it does; three spaces part two of them
+    let x = 1;
+    for (const shortcut of line.trim().split("   ")) {
+      const [key, ...does] = shortcut.split(" ");
+      const text = does.join(" ");
+      if (key === "j/k") {
+        expect(hits(g, 39, x, x + 2)).toEqual([{ modal: true, key: "j" }, null, { modal: true, key: "k" }]);
+        expect(hits(g, 39, x + 4, x + 3 + len(text))).toEqual(all(len(text), null));
+      } else {
+        expect(`${id} ${key} ${SENDS[key!] === undefined ? "unknown" : "known"}`).toBe(`${id} ${key} known`);
+        const mark: Hit = { modal: true, key: SENDS[key!]! };
+        expect(hits(g, 39, x, x + len(key!) - 1)).toEqual(all(len(key!), mark));
+        expect(hits(g, 39, x + len(key!) + 1, x + len(key!) + len(text))).toEqual(all(len(text), mark));
+      }
+      seen.add(key!);
+      // The space after the key, and the three after what it does
+      expect([hit(g, x + len(key!), 39), ...hits(g, 39, x + len(shortcut), x + len(shortcut) + 2)]).toEqual([null, null, null, null]);
+      x += len(shortcut) + 3;
+    }
+  }
+  expect([...seen].sort()).toEqual(["[", "]", "a", "c", "ctrl+e", "ctrl+u", "d", "enter", "esc", "G", "j/k", "r", "y"].sort());
+});
+
+test("GAT-79: the seal of the gates and the one of the permissions still press g and x", () => {
+  const gates = main(view("19a"));
+  expect(hits(gates, 1, at(gates, 1, "⚠ 2 gates pendentes · g"), at(gates, 1, "⚠ 2 gates pendentes · g") + 22)).toEqual(all(23, { key: "g" }));
+  const requests = main(view("14"));
+  expect(hits(requests, 1, at(requests, 1, "⚠ permissão w1 · x"), at(requests, 1, "⚠ permissão w1 · x") + 17)).toEqual(all(18, { key: "x" }));
 });

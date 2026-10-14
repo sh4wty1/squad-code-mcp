@@ -520,8 +520,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Cada atalho dos rodapés dos dois modais tem a sua tecla na tecla e no texto; `j/k` cada letra; a célula entre dois atalhos não tem marca
-- [ ] Gate build passa
+- [x] Cada atalho dos rodapés dos dois modais tem a sua tecla na tecla e no texto; `j/k` cada letra; a célula entre dois atalhos não tem marca
+- [x] Gate build passa
 
 **Tests**: unit
 **Gate**: build

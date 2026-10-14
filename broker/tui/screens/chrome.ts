@@ -48,7 +48,7 @@ const SENT = new Map([
   ["esc", "\x1b"],
   ["ctrl+e", "\x05"],
   ["ctrl+u", "\x15"],
-  ...["b", "g", "x", "p", "h", "?", "q"].map((key): [string, string] => [key, key]),
+  ...["b", "g", "x", "p", "h", "?", "q", "a", "r", "c", "y", "d", "G", "]", "["].map((key): [string, string] => [key, key]),
 ]);
 
 // The shortcuts of two keys, and what the terminal sends for each of their characters
