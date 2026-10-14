@@ -411,8 +411,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Os frames 05, 06, 07, 20a e 20b passam sem mudar a tabela de desvios
-- [ ] Gate quick passa
+- [x] Os frames 05, 06, 07, 20a e 20b passam sem mudar a tabela de desvios
+- [x] Gate quick passa
 
 **Tests**: unit
 **Gate**: quick

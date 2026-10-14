@@ -381,7 +381,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-38 | P1: O que a mother vê | T10, T29 | Implementing |
 | GAT-39 | P1: O que a mother vê | T10, T29 | Implementing |
 | GAT-40 | P1: Modal de gate | T13, T20, T26 | Implementing |
-| GAT-41 | P1: Modal de gate | T17, T18 | In Tasks |
+| GAT-41 | P1: Modal de gate | T17, T18 | Implementing |
 | GAT-42 | P1: Modal de gate | T18 | In Tasks |
 | GAT-43 | P1: Modal de gate | T18 | In Tasks |
 | GAT-44 | P1: Modal de gate | T18 | In Tasks |
@@ -403,7 +403,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-60 | P1: Modal de permissão | T14, T20, T26 | Implementing |
 | GAT-61 | P1: Modal de permissão | T12, T17, T19 | Implementing |
 | GAT-62 | P1: Modal de permissão | T12, T19 | Implementing |
-| GAT-63 | P1: Modal de permissão | T17, T19 | In Tasks |
+| GAT-63 | P1: Modal de permissão | T17, T19 | Implementing |
 | GAT-64 | P1: Modal de permissão | T19 | In Tasks |
 | GAT-65 | P1: Modal de permissão | T14 | Implementing |
 | GAT-66 | P1: Modal de permissão | T14, T26 | Implementing |
