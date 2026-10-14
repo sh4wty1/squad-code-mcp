@@ -502,8 +502,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Os seis `.txt` são a saída de `extract.ts`; o 22b com o evento de worker-1 às 14:31:02 que fecha o pedido
-- [ ] O D3 da linha de sistema só no 22b e no 11; gate quick passa
+- [x] Os seis `.txt` são a saída de `extract.ts`; o 22b com o evento de worker-1 às 14:31:02 que fecha o pedido
+- [x] O D3 da linha de sistema só no 22b e no 11; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

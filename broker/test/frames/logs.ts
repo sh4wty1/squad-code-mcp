@@ -8,7 +8,7 @@
 import type { Criterion, Envelope, PlannedTicket, SquadEvent } from "../../shared/contract.ts";
 import { SQUAD } from "../../shared/derive.ts";
 import type { PriceTable } from "../../tui/config.ts";
-import type { GateModal, Modal, Ui } from "../../tui/view.ts";
+import type { GateModal, Modal, PermissionModal, Ui } from "../../tui/view.ts";
 
 export interface FrameLog {
   events: SquadEvent[];
@@ -389,6 +389,7 @@ const asked = [JOINS1, until(MAIN, 422), until(TURNS, 422.9)];
 const planned = [JOINS1, until(MAIN, 405), tokens({ mot: 6000, ldr: 11333 })];
 const escalated = [early, W2RES(425), ESC_X, tokens({ mot: 52000, ldr: 117333, w1: 188000, w2: 104000, w3: 22000, jdg: 141333 })];
 const permitted = [early, PREQ, W2RES(460), turn(460.1, "14:30:56", JDG), tokens({ mot: 38000, ldr: 84000, w1: 109333, w2: 92000, w3: 22000, jdg: 48000 })];
+const permittedTwice = [early, PREQ, PREQ2, tokens({ mot: 38000, ldr: 84000, w1: 109333, w2: 71333, w3: 22000, jdg: 44000 })];
 const abandoned = [JOINS1, MAIN, FINAL.slice(0, 4), V13, TURNS, tokens(TOKA), usage(476.1, "14:41:20", MOT, 60000)];
 const offline = [asked, OFF, tokens({ mot: 39333, ldr: 81333, w1: 121333, w2: 61333, w3: 22000, jdg: 52000 })];
 const stalled = [
@@ -410,7 +411,8 @@ const modal = (question: number, more: Partial<Modal>): Modal => ({ question, ch
 const TXT06 = "logo da 89, com o nome do programa no ar";
 // The modal of a gate of a frame: in the view mode, unless it has another
 const gateModal = (id: number, more: Partial<GateModal> = {}): GateModal => ({ id, mode: "view", text: "", expanded: false, empty: false, sending: false, version: 1, ...more });
-const TXT16A = "Sem changelog no PR, e não quero deploy no horário de pico. Refaça para depois das 22h.";
+const permissionModal = (seq: number, offset = 0): PermissionModal => ({ seq, offset, sending: false });
+const TXT16A ="Sem changelog no PR, e não quero deploy no horário de pico. Refaça para depois das 22h.";
 const TXT16B = "Antes do merge, confirme que o player não faz autoplay no iOS. Se precisar mexer no PlayerBar, reemita o G-01 com o diff novo; o resto está ok.";
 const TXT07 = "Logo da 89 por enquanto, na versão quadrada para caber no card do mobile. Abra um ticket separado para buscar capas no Discogs/MusicBrainz depois da entrega; não bloqueia esta feature.";
 
@@ -431,7 +433,7 @@ export const LOGS: Record<string, FrameLog> = {
   "15b": log("14:48:20", 455, escalated),
   "18a": log("14:53:10", 456, gated, COMMENT),
   "19a": log("14:52:35", 458, gated, G02(458, "14:52:30")),
-  "22c": log("14:31:40", 459, early, PREQ, PREQ2, tokens({ mot: 38000, ldr: 84000, w1: 109333, w2: 71333, w3: 22000, jdg: 44000 })),
+  "22c": log("14:31:40", 459, permittedTwice),
   "22g": log("14:32:07", 472, main, PREQ3, G02(472, "14:31:58")),
   "22h": log("14:31:55", 462, permitted, PDEC),
   "23a": log("14:31:13", 414.5, stalled),
@@ -470,4 +472,13 @@ export const LOGS: Record<string, FrameLog> = {
   "17": { ...log("14:52:03", 439, gated), ui: { gate: gateModal(1, { mode: "confirm" }) } },
   "18b": { ...log("14:55:45", 457, gated, COMMENT, REISSUE), ui: { gate: gateModal(1, { version: 2 }) } },
   "19b": { ...log("14:52:35", 458, gated, G02(458, "14:52:30")), ui: { gate: gateModal(1) } },
+  // The modal of a permission request over the main screen: the request of 14, the two of 22c
+  // and the one of 29c, with no open feature
+  "22a": { ...log("14:31:40", 459, permitted), ui: { permission: permissionModal(459) } },
+  // worker-1 acts again at 14:31:02: the dev answered P-01 in its terminal
+  "22b": { ...log("14:31:05", null, permitted, turn(460.2, "14:31:02", W1)), ui: { permission: permissionModal(459) } },
+  "22d": { ...log("14:31:40", 459, permittedTwice), ui: { permission: permissionModal(459) } },
+  "22e": { ...log("14:31:40", 459, permittedTwice), ui: { permission: permissionModal(460) } },
+  "22f": { ...log("14:31:40", 459, permittedTwice), ui: { permission: permissionModal(460, 5) } },
+  "29d": { ...log("14:57:40", 487, idle, PREQX), ui: { permission: permissionModal(487) } },
 };

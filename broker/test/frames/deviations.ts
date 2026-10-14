@@ -152,8 +152,8 @@ const EFFECT = 'Assumptions, `Linha "efeito"`: the TUI writes the effect from wh
 
 // The modals of gate and of permission, over the main screen. The deviations of the screen
 // behind a modal are cut to the cells it leaves in view: outside columns x0 to x1, its box
-// and its margin, on the lines of the box and its margin. A part that leaves the frame as
-// it is goes away.
+// and its margin, on the lines of the box and its margin. A part that leaves the line as the
+// parts before it left it goes away.
 function behind(id: string, x0: number, x1: number, ...devs: Deviation[]): Deviation[] {
   const lines = frame(id).map((line) => [...line.padEnd(120)]);
   const top = lines.findIndex((line) => line[x0 + 1] === "┌" && line.join("").includes("⚠"));
@@ -165,7 +165,11 @@ function behind(id: string, x0: number, x1: number, ...devs: Deviation[]): Devia
     return parts
       .filter(([from, to]) => from! < to!)
       .map(([from, to]) => ({ ...dev, col: from!, width: to! - from!, text: text.slice(from! - dev.col, to! - dev.col).join("") }))
-      .filter((part) => part.text !== lines[dev.line]!.slice(part.col, part.col + part.width).join(""));
+      .filter((part) => {
+        const now = lines[dev.line]!.slice(part.col, part.col + part.width).join("");
+        lines[dev.line]!.splice(part.col, part.width, ...part.text);
+        return part.text !== now;
+      });
   });
 }
 const GATE_BOX: [number, number] = [19, 100];
@@ -478,6 +482,27 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
   // G-02 selected, as in 19a
   "19b": [...behind("19b", ...GATE_BOX, ...skills(MOT, LDR, W1, W2, JDG), ...loadout(21, 1)), ...between("19b")],
 };
+
+// The modal of a permission request, over the main screen of the frame with the same log and
+// the same selected line: 14, 22c and 29c
+const PERM_BOX: [number, number] = [18, 101];
+DEVIATIONS["22a"] = behind("22a", ...PERM_BOX, ...DEVIATIONS["14"]!);
+DEVIATIONS["22d"] = behind("22d", ...PERM_BOX, ...DEVIATIONS["22c"]!);
+DEVIATIONS["22e"] = behind("22e", ...PERM_BOX, ...DEVIATIONS["22c"]!);
+DEVIATIONS["22f"] = behind("22f", ...PERM_BOX, ...DEVIATIONS["22c"]!);
+DEVIATIONS["29d"] = behind("29d", ...PERM_BOX, ...DEVIATIONS["29c"]!);
+// P-01 answered in the terminal of worker-1, who acts again at 14:31:02: the log of 14 with no
+// line selected, since the line the prototype selects is the one of system the slice leaves out
+DEVIATIONS["22b"] = behind(
+  "22b",
+  ...PERM_BOX,
+  ...DEVIATIONS["14"]!.filter((dev) => dev.col < 86),
+  ...skills(W1),
+  ...d("D1", ".design/squad-mvp.md line 364: a ticket is `blocked` while the worker that owns it is; worker-1 acts again and the frame itself draws him `working`", [31, 7, 9, "[working]"]),
+  ...d("D3", SYSTEM_LINE + "; the prototype selects that line, so here no line of the feed is selected", [30, 29, 1, ""]),
+  ...panel("D3", SYSTEM_LINE + "; the prototype selects that line and shows its detail, so here no line is selected", 3, "nenhuma mensagem selecionada", "", "", "", "", "", "", ""),
+  ...footer("D3", SYSTEM_LINE + "; the right side of the footer is the one of no selected line, where the prototype has the rework of the ticket of that line", "rework —")
+);
 
 // The lines the screen has to draw for the frame, and the deviations that change nothing
 export function expected(id: string): { lines: string[]; dead: Deviation[] } {

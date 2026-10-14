@@ -5,6 +5,7 @@ import { down } from "../../tui/screens/down.ts";
 import { gate } from "../../tui/screens/gate.ts";
 import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
+import { permission } from "../../tui/screens/permission.ts";
 import { questions } from "../../tui/screens/questions.ts";
 import { small } from "../../tui/screens/small.ts";
 import { thread } from "../../tui/screens/thread.ts";
@@ -32,6 +33,7 @@ const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid, require
   ["tab of questions", ["04"], questions, "QST-69"],
   ["modal of answer", ["05", "06", "07", "20a", "20b"], (view) => answer(questions(view), view), "QST-87"],
   ["modal of gate", ["08", "16a", "16b", "16c", "17", "18b", "19b"], (view) => gate(main(view), view), "GAT-85"],
+  ["modal of permission", ["22a", "22b", "22d", "22e", "22f", "29d"], (view) => permission(main(view), view), "GAT-86"],
 ];
 
 for (const [name, ids, draw, requirement = "TUI-43"] of SCREENS) {
@@ -182,6 +184,19 @@ test("GAT-85, GAT-88: every deviation of the frames of the modal of gate is D1 o
     expect(inside[0]!.why).toContain("GAT-44");
     expect([...frame(id)[inside[0]!.line]!].slice(inside[0]!.col, inside[0]!.col + 15).join("")).toBe("1 entre agentes");
   }
+});
+
+test("GAT-86, GAT-88: the frames of the modal of permission leave its box as the prototype has it, and the line of a request closed in the terminal is the only D3 of the slice, in frames 11 and 22b", () => {
+  for (const id of ["22a", "22b", "22d", "22e", "22f", "29d"]) {
+    expect(DEVIATIONS[id]!.length).toBeGreaterThan(0);
+    expect(DEVIATIONS[id]!.filter(boxOf(id, 19, 82)).map((dev) => `${id} line ${dev.line}`)).toEqual([]);
+    expect(DEVIATIONS[id]!.filter((dev) => !["D1", "D2", ...(id === "22b" ? ["D3"] : [])].includes(dev.class)).map((dev) => `${id} line ${dev.line}`)).toEqual([]);
+  }
+  const all = Object.entries(DEVIATIONS).flatMap(([id, list]) => list.map((dev) => ({ id, ...dev })));
+  const gate = all.filter((dev) => /slice Gate/.test(dev.why));
+  expect([...new Set(gate.map((dev) => `${dev.id} ${dev.class}`))]).toEqual(["11 D3", "22b D3"]);
+  expect(gate.filter((dev) => !dev.why.includes("`✓ P-NN fechado no terminal`"))).toEqual([]);
+  expect(all.filter((dev) => dev.id === "22b" && dev.class === "D3" && !/slice Gate/.test(dev.why))).toEqual([]);
 });
 
 test("TUI-54: a terminal of 80 by 24 shows frame 21", () => {
