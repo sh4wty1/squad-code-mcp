@@ -229,8 +229,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Pelo menos 200 sequências com semente fixa, com reemissão, comentário, decisões repetidas e encerramento nos dois `outcome`
-- [ ] Nenhum gate com dois `gate_decision` finais; gate build passa
+- [x] Pelo menos 200 sequências com semente fixa, com reemissão, comentário, decisões repetidas e encerramento nos dois `outcome`
+- [x] Nenhum gate com dois `gate_decision` finais; gate build passa
 
 **Tests**: unit
 **Gate**: build
