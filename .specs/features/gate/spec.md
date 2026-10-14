@@ -382,18 +382,18 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-39 | P1: O que a mother vê | T10, T29 | Implementing |
 | GAT-40 | P1: Modal de gate | T13, T20, T26 | Implementing |
 | GAT-41 | P1: Modal de gate | T17, T18 | Implementing |
-| GAT-42 | P1: Modal de gate | T18 | In Tasks |
-| GAT-43 | P1: Modal de gate | T18 | In Tasks |
-| GAT-44 | P1: Modal de gate | T18 | In Tasks |
-| GAT-45 | P1: Modal de gate | T18 | In Tasks |
-| GAT-46 | P1: Modal de gate | T18 | In Tasks |
-| GAT-47 | P1: Modal de gate | T18 | In Tasks |
-| GAT-48 | P1: Modal de gate | T18 | In Tasks |
-| GAT-49 | P1: Modal de gate | T18 | In Tasks |
+| GAT-42 | P1: Modal de gate | T18 | Implementing |
+| GAT-43 | P1: Modal de gate | T18 | Implementing |
+| GAT-44 | P1: Modal de gate | T18 | Implementing |
+| GAT-45 | P1: Modal de gate | T18 | Implementing |
+| GAT-46 | P1: Modal de gate | T18 | Implementing |
+| GAT-47 | P1: Modal de gate | T18 | Implementing |
+| GAT-48 | P1: Modal de gate | T18 | Implementing |
+| GAT-49 | P1: Modal de gate | T18 | Implementing |
 | GAT-50 | P1: Modal de gate | T13 | Implementing |
-| GAT-51 | P1: Modal de gate | T18 | In Tasks |
+| GAT-51 | P1: Modal de gate | T18 | Implementing |
 | GAT-52 | P1: Modal de gate | T13, T26 | Implementing |
-| GAT-53 | P1: Modal de gate | T18 | In Tasks |
+| GAT-53 | P1: Modal de gate | T18 | Implementing |
 | GAT-54 | P1: Modal de gate | T13 | Implementing |
 | GAT-55 | P1: Modal de gate | T13 | Implementing |
 | GAT-56 | P1: Modal de gate | T13, T18 | Implementing |
@@ -433,7 +433,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-90 | P1: Frames e legenda | T13 | Implementing |
 | GAT-91 | Edge cases | T13 | Implementing |
 | GAT-92 | Edge cases | T13 | Implementing |
-| GAT-93 | Edge cases | T18 | In Tasks |
+| GAT-93 | Edge cases | T18 | Implementing |
 | GAT-94 | Edge cases | T14, T19 | Implementing |
 | GAT-95 | Edge cases | T14, T19 | Implementing |
 | GAT-96 | Edge cases | T12 | Implementing |

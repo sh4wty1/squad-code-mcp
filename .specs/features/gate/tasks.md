@@ -429,8 +429,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `test/unit/tui-gate.test.ts`: cada linha nos três modos; plural e singular; sem `body`, sem `diffstat`, sem `verdict`, com `action`; versão 2 sem `comment`; `~ mudou` só na linha que mudou; corte de `body` e `diffstat` longos dentro das linhas 2 a 37
-- [ ] Gate quick passa
+- [x] `test/unit/tui-gate.test.ts`: cada linha nos três modos; plural e singular; sem `body`, sem `diffstat`, sem `verdict`, com `action`; versão 2 sem `comment`; `~ mudou` só na linha que mudou; corte de `body` e `diffstat` longos dentro das linhas 2 a 37
+- [x] Gate quick passa
 
 **Tests**: unit
 **Gate**: quick
