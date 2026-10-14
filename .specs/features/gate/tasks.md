@@ -102,10 +102,16 @@ T27 → T28 → T29
 T31 → T32 → T33 → T34 → T35 → T36
 ```
 
-### Phase 8: Fechamento depois da volta 1
+### Phase 8: Volta 2 do Verifier
 
 ```
-T36 → T30
+T37 → T38
+```
+
+### Phase 9: Fechamento depois da volta 2
+
+```
+T38 → T30
 ```
 
 ---
@@ -755,11 +761,47 @@ T36 → T30
 
 ---
 
+### T37: Etiqueta ` gate n de N ` com um gate decidido
+
+**What**: com G-01 aprovado e G-02 e G-03 pendentes, o modal de G-02 tem a etiqueta ` gate 1 de 2 `: o total é o da fila de pendentes, não o de todos os gates (Fix 7 da volta 2, mutante N02).
+**Where**: `broker/test/unit/tui-gate.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: o log do frame 19a e o `threeGates` de `tui-mouse-gate.test.ts`
+**Requirement**: GAT-41
+
+**Done when**:
+
+- [ ] Três gates, G-01 aprovado e G-02 e G-03 pendentes, modal em G-02: a borda de cima com ` gate 1 de 2 ` e a linha `fila` só com G-02 e G-03
+- [ ] Falha com `gate.ts:169` `queue.length` trocado por `squad.gates.length` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T38: `judge` sem o `verdict` de uma feature anterior
+
+**What**: um ticket do `plan` da feature aberta ainda sem `verdict` nela, cujo `ticket_ref` teve `verdict` numa feature fechada, fica fora da linha `judge` (Fix 8 da volta 2, mutante N09).
+**Where**: `broker/test/unit/tui-gate.test.ts`
+**Depends on**: T37
+**Reuses**: o log do frame 19a
+**Requirement**: GAT-47
+
+**Done when**:
+
+- [ ] Uma feature fechada com `verdict` `approve` de um ticket, e a feature aberta com um gate `delivery` pendente e um `plan` com esse ticket ainda sem `verdict`: a linha `judge` não traz o ticket e traz os outros desta feature que têm `verdict`
+- [ ] Falha com `gate.ts:82` sem `&& row.event.feature_id === squad.feature?.id` numa cópia; gate quick passa e, por ser a última da fase, o full também
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ### T30: Fechamento
 
 **What**: roadmap, Handoff e traceability.
 **Where**: `ROADMAP.md`
-**Depends on**: T36
+**Depends on**: T38
 **Reuses**: -
 **Requirement**: GAT-89
 
@@ -790,7 +832,9 @@ T36 → T30
 | T28, T29 | a anterior | a seta da anterior | ✅ |
 | T31 | a fase anterior | início da fase 7 | ✅ |
 | T32 a T36 | a anterior | a seta da anterior | ✅ |
-| T30 | T36 | única da fase 8 | ✅ |
+| T37 | a fase anterior | início da fase 8 | ✅ |
+| T38 | a anterior | a seta da anterior | ✅ |
+| T30 | T38 | única da fase 9 | ✅ |
 
 ## Test Co-location Validation
 
@@ -810,3 +854,4 @@ T36 → T30
 | T26 | Ponta a ponta | integration | integration | ✅ |
 | T27 a T30 | Documentação e `.specs/` | none | none | ✅ |
 | T31 a T36 | Telas, mouse e regras do broker (só testes) | unit | unit | ✅ |
+| T37, T38 | Telas (só testes) | unit | unit | ✅ |
