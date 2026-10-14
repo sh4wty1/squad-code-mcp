@@ -655,8 +655,8 @@ T36 → T30
 
 **Done when**:
 
-- [ ] Um teste com o pedido do modal respondido no terminal e outros dois abertos afirma a borda de cima com ` resolvido no terminal `, nenhuma linha da caixa começando com `fila` e a linha 39 ` esc fechar`
-- [ ] Falha com `permission.ts:47` trocado por `squad.permissions` numa cópia; gate quick passa
+- [x] Um teste com o pedido do modal respondido no terminal e outros dois abertos afirma a borda de cima com ` resolvido no terminal `, nenhuma linha da caixa começando com `fila` e a linha 39 ` esc fechar`
+- [x] Falha com `permission.ts:47` trocado por `squad.permissions` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

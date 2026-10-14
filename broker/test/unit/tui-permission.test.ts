@@ -85,6 +85,20 @@ test("GAT-71: a request answered in the terminal says when the TUI learned it, w
   expect(draw("14", modal(459)).g.rows[y + 10]![27]!.fg).toBe("bwhite");
 });
 
+test("GAT-71, GAT-61: a request answered in the terminal while two others are open has no queue, the tag of the state and only esc", () => {
+  // Frame 22c with a third request, of worker-3, and worker-1 acting again at 14:31:02
+  const request = LOGS["22c"]!.events.find((e) => e.seq === 459)!;
+  const { box, lines } = draw("22c", modal(459), (events) => [
+    ...events,
+    { ...request, seq: 500, from: "worker-3", request_id: "r500" } as SquadEvent,
+    { ...request, seq: 600, ts: request.ts + 52_000, kind: "turn_started", summary: "", body: "", to: null } as SquadEvent,
+  ]);
+  expect(box[0]).toBe(top("⚠ permissão P-01 · w1 · Bash", " resolvido no terminal "));
+  expect(box[1]).toBe(row("worker-1 pediu permissão às 14:30:10 · o pedido já foi respondido"));
+  expect(box.filter((line) => line.slice(3).startsWith("fila"))).toEqual([]);
+  expect(lines[39]).toBe(" esc fechar");
+});
+
 test("GAT-61, GAT-62, GAT-64: with two open requests the tag says which, the queue marks this one, and the keys go to the next and the previous", () => {
   const first = draw("22c", modal(459));
   expect(first.box[0]).toBe(top("⚠ permissão P-01 · w1 · Bash", " pedido 1 de 2 "));
