@@ -312,65 +312,65 @@ cada item, e com o que ficou sem conferir.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| CLK-01 | P1: O terminal conta onde o mouse clicou | T19 | Implementing |
-| CLK-02 | P1: O terminal conta onde o mouse clicou | T19 | Implementing |
-| CLK-03 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
-| CLK-04 | P1: O terminal conta onde o mouse clicou | T2 | Implementing |
-| CLK-05 | P1: O terminal conta onde o mouse clicou | T12, T20 | Implementing |
-| CLK-06 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
-| CLK-07 | P1: O terminal conta onde o mouse clicou | T21 | Implementing |
-| CLK-08 | P1: O terminal conta onde o mouse clicou | T21 | Implementing |
-| CLK-09 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
-| CLK-10 | P1: O terminal conta onde o mouse clicou | T2, T11, T21, T28 | Implementing |
-| CLK-11 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
-| CLK-12 | P1: O terminal conta onde o mouse clicou | T20 | Implementing |
-| CLK-13 | P1: O terminal conta onde o mouse clicou | T12, T20 | Implementing |
-| CLK-14 | P1: O terminal conta onde o mouse clicou | T4, T12, T20 | Implementing |
-| CLK-15 | P1: O terminal conta onde o mouse clicou | T17 | Implementing |
-| CLK-16 | P1: O terminal conta onde o mouse clicou | T2, T17 | Implementing |
-| CLK-17 | P1: O terminal conta onde o mouse clicou | T1 | Implementing |
-| CLK-18 | P1: Navegar com o clique | T5, T12 | Implementing |
-| CLK-19 | P1: Navegar com o clique | T7, T13 | Implementing |
-| CLK-20 | P1: Navegar com o clique | T7, T13 | Implementing |
-| CLK-21 | P1: Navegar com o clique | T13 | Implementing |
-| CLK-22 | P1: Navegar com o clique | T7, T13 | Implementing |
-| CLK-23 | P1: Navegar com o clique | T5, T12 | Implementing |
-| CLK-24 | P1: Navegar com o clique | T9, T14 | Implementing |
-| CLK-25 | P1: Navegar com o clique | T9, T14 | Implementing |
-| CLK-26 | P1: Navegar com o clique | T9, T14 | Implementing |
-| CLK-27 | P1: Navegar com o clique | T7, T13 | Implementing |
-| CLK-28 | P1: Rolar com a roda | T7, T15 | Implementing |
-| CLK-29 | P1: Rolar com a roda | T8, T15 | Implementing |
-| CLK-30 | P1: Rolar com a roda | T9, T15 | Implementing |
-| CLK-31 | P1: Rolar com a roda | T9, T15 | Implementing |
-| CLK-32 | P1: Rolar com a roda | T15 | Implementing |
-| CLK-33 | P1: Atalhos e selos clicáveis | T6, T9, T12, T29 | Implementing |
-| CLK-34 | P1: Atalhos e selos clicáveis | T6, T12 | Implementing |
-| CLK-35 | P1: Atalhos e selos clicáveis | T6, T12 | Implementing |
-| CLK-36 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
-| CLK-37 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
-| CLK-38 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
-| CLK-39 | P1: Atalhos e selos clicáveis | T5, T12 | Implementing |
-| CLK-40 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
-| CLK-41 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
-| CLK-42 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
-| CLK-43 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
-| CLK-44 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
-| CLK-45 | P1: Modal de resposta com o mouse | T10, T16 | Implementing |
-| CLK-46 | P1: Modal de resposta com o mouse | T16 | Implementing |
-| CLK-47 | P1: Modal de resposta com o mouse | T16 | Implementing |
-| CLK-48 | P1: Modal de resposta com o mouse | T16 | Implementing |
-| CLK-49 | P1: Modal de resposta com o mouse | T16, T20 | Implementing |
-| CLK-50 | P2: Ligar e desligar o mouse | T17, T20, T23, T24 | Implementing |
-| CLK-51 | P2: Ligar e desligar o mouse | T12, T20 | Implementing |
-| CLK-52 | P2: Ligar e desligar o mouse | T3, T19, T23, T24 | Implementing |
-| CLK-53 | P2: Ligar e desligar o mouse | T3, T19, T24 | Implementing |
-| CLK-54 | P2: Ligar e desligar o mouse | T17, T20 | Implementing |
-| CLK-55 | P2: Ligar e desligar o mouse | T22 | Implementing |
-| CLK-56 | P1: Nada do que existe muda | T2, T17, T18 | Implementing |
-| CLK-57 | P1: Nada do que existe muda | T22 | Implementing |
+| CLK-01 | P1: O terminal conta onde o mouse clicou | T19 | Verified |
+| CLK-02 | P1: O terminal conta onde o mouse clicou | T19 | Verified |
+| CLK-03 | P1: O terminal conta onde o mouse clicou | T2, T11 | Needs Fix |
+| CLK-04 | P1: O terminal conta onde o mouse clicou | T2 | Needs Fix |
+| CLK-05 | P1: O terminal conta onde o mouse clicou | T12, T20 | Verified |
+| CLK-06 | P1: O terminal conta onde o mouse clicou | T12 | Verified |
+| CLK-07 | P1: O terminal conta onde o mouse clicou | T21 | Verified |
+| CLK-08 | P1: O terminal conta onde o mouse clicou | T21 | Verified |
+| CLK-09 | P1: O terminal conta onde o mouse clicou | T2, T11 | Verified |
+| CLK-10 | P1: O terminal conta onde o mouse clicou | T2, T11, T21, T28 | Verified |
+| CLK-11 | P1: O terminal conta onde o mouse clicou | T12 | Verified |
+| CLK-12 | P1: O terminal conta onde o mouse clicou | T20 | Verified |
+| CLK-13 | P1: O terminal conta onde o mouse clicou | T12, T20 | Verified |
+| CLK-14 | P1: O terminal conta onde o mouse clicou | T4, T12, T20 | Verified |
+| CLK-15 | P1: O terminal conta onde o mouse clicou | T17 | Verified |
+| CLK-16 | P1: O terminal conta onde o mouse clicou | T2, T17 | Verified |
+| CLK-17 | P1: O terminal conta onde o mouse clicou | T1 | Verified |
+| CLK-18 | P1: Navegar com o clique | T5, T12 | Verified |
+| CLK-19 | P1: Navegar com o clique | T7, T13 | Verified |
+| CLK-20 | P1: Navegar com o clique | T7, T13 | Needs Fix |
+| CLK-21 | P1: Navegar com o clique | T13 | Verified |
+| CLK-22 | P1: Navegar com o clique | T7, T13 | Verified |
+| CLK-23 | P1: Navegar com o clique | T5, T12 | Verified |
+| CLK-24 | P1: Navegar com o clique | T9, T14 | Verified |
+| CLK-25 | P1: Navegar com o clique | T9, T14 | Verified |
+| CLK-26 | P1: Navegar com o clique | T9, T14 | Verified |
+| CLK-27 | P1: Navegar com o clique | T7, T13 | Verified |
+| CLK-28 | P1: Rolar com a roda | T7, T15 | Verified |
+| CLK-29 | P1: Rolar com a roda | T8, T15 | Verified |
+| CLK-30 | P1: Rolar com a roda | T9, T15 | Verified |
+| CLK-31 | P1: Rolar com a roda | T9, T15 | Verified |
+| CLK-32 | P1: Rolar com a roda | T15 | Verified |
+| CLK-33 | P1: Atalhos e selos clicáveis | T6, T9, T12, T29 | Verified |
+| CLK-34 | P1: Atalhos e selos clicáveis | T6, T12 | Verified |
+| CLK-35 | P1: Atalhos e selos clicáveis | T6, T12 | Verified |
+| CLK-36 | P1: Atalhos e selos clicáveis | T5, T12 | Verified |
+| CLK-37 | P1: Atalhos e selos clicáveis | T5, T12 | Verified |
+| CLK-38 | P1: Atalhos e selos clicáveis | T5, T12 | Verified |
+| CLK-39 | P1: Atalhos e selos clicáveis | T5, T12 | Verified |
+| CLK-40 | P1: Modal de resposta com o mouse | T10, T16 | Verified |
+| CLK-41 | P1: Modal de resposta com o mouse | T10, T16 | Verified |
+| CLK-42 | P1: Modal de resposta com o mouse | T10, T16 | Verified |
+| CLK-43 | P1: Modal de resposta com o mouse | T10, T16 | Verified |
+| CLK-44 | P1: Modal de resposta com o mouse | T10, T16 | Verified |
+| CLK-45 | P1: Modal de resposta com o mouse | T10, T16 | Verified |
+| CLK-46 | P1: Modal de resposta com o mouse | T16 | Verified |
+| CLK-47 | P1: Modal de resposta com o mouse | T16 | Verified |
+| CLK-48 | P1: Modal de resposta com o mouse | T16 | Verified |
+| CLK-49 | P1: Modal de resposta com o mouse | T16, T20 | Verified |
+| CLK-50 | P2: Ligar e desligar o mouse | T17, T20, T23, T24 | Verified |
+| CLK-51 | P2: Ligar e desligar o mouse | T12, T20 | Verified |
+| CLK-52 | P2: Ligar e desligar o mouse | T3, T19, T23, T24 | Verified |
+| CLK-53 | P2: Ligar e desligar o mouse | T3, T19, T24 | Verified |
+| CLK-54 | P2: Ligar e desligar o mouse | T17, T20 | Verified |
+| CLK-55 | P2: Ligar e desligar o mouse | T22 | Verified |
+| CLK-56 | P1: Nada do que existe muda | T2, T17, T18 | Verified |
+| CLK-57 | P1: Nada do que existe muda | T22 | Verified |
 
-**Coverage:** 57 total, 57 com tarefa feita. Os 57 seguem `Implementing` até o Verifier, que os passa a `Verified` ou `Needs Fix`. `tasks.md` dá a tarefa de cada um.
+**Coverage:** 57 total, 57 com tarefa feita. Depois da volta 3 do Verifier, 54 `Verified` e 3 `Needs Fix` (CLK-03, CLK-04 e CLK-20), com a lacuna de teste em `validation.md`, Fix 1 e Fix 2. `tasks.md` dá a tarefa de cada um.
 
 ---
 
