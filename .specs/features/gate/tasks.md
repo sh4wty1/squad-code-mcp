@@ -210,9 +210,9 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `test/integration/gate.test.ts` pelo broker real: pedido, `approve`, `close_feature` `delivered`; `unknown_peer` em `/gate`; `invalid_token` em `/gate-decision`; `gate_required` antes do gate
-- [ ] `/send` com `gate` e com `gate_decision` dá `invalid_kind` com o `hint` que nomeia a rota
-- [ ] Gate full passa
+- [x] `test/integration/gate.test.ts` pelo broker real: pedido, `approve`, `close_feature` `delivered`; `unknown_peer` em `/gate`; `invalid_token` em `/gate-decision`; `gate_required` antes do gate
+- [x] `/send` com `gate` e com `gate_decision` dá `invalid_kind` com o `hint` que nomeia a rota
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

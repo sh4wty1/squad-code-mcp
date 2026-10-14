@@ -44,10 +44,12 @@ const CREDENTIAL_ROUTES = [
   "/ask",
   "/escalate",
   "/merge-question",
+  "/gate",
 ];
-// The human is not a peer: the decision of a permission is authorized by its own credential.
-// So is the answer of the dev, on the route the holder of a question answers with its id.
-const ROUTES = [...PEER_ROUTES, ...CREDENTIAL_ROUTES, "/permission-decision", "/answer"];
+// The human is not a peer: the decision of a permission and the one of a gate are authorized
+// by its own credential. So is the answer of the dev, on the route the holder of a question
+// answers with its id.
+const ROUTES = [...PEER_ROUTES, ...CREDENTIAL_ROUTES, "/permission-decision", "/gate-decision", "/answer"];
 
 const db = openDatabase(DB_PATH);
 const peers = createPeers(db);
@@ -141,6 +143,8 @@ function answer(path: string, peer: Caller & Where, body: Record<string, unknown
       return question.merge(peer, body);
     case "/answer":
       return question.answer(peer, body);
+    case "/gate":
+      return gate.request(peer, body);
     default:
       return permission.request(peer, body);
   }
@@ -179,6 +183,9 @@ Bun.serve({
 
       if (path === "/permission-decision") {
         return Response.json(permission.decision(body as Record<string, unknown>));
+      }
+      if (path === "/gate-decision") {
+        return Response.json(gate.decide(body as Record<string, unknown>));
       }
 
       // The key human_token, whatever its value, makes it the answer of the dev: a wrong

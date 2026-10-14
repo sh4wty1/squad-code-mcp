@@ -351,7 +351,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-08 | P1: Pedir gate | T3 | Implementing |
 | GAT-09 | P1: Pedir gate | T3 | Implementing |
 | GAT-10 | P1: Pedir gate | T3 | Implementing |
-| GAT-11 | P1: Pedir gate | T6 | In Tasks |
+| GAT-11 | P1: Pedir gate | T6 | Implementing |
 | GAT-12 | P1: Reemitir depois do comentário | T3 | Implementing |
 | GAT-13 | P1: Reemitir depois do comentário | T3 | Implementing |
 | GAT-14 | P1: Reemitir depois do comentário | T3 | Implementing |
