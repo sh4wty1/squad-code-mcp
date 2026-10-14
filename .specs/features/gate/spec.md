@@ -398,7 +398,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-55 | P1: Modal de gate | T13 | In Tasks |
 | GAT-56 | P1: Modal de gate | T13, T18 | In Tasks |
 | GAT-57 | P1: Modal de gate | T15 | In Tasks |
-| GAT-58 | P1: Modal de gate | T11, T15 | In Tasks |
+| GAT-58 | P1: Modal de gate | T11, T15 | Implementing |
 | GAT-59 | P1: Modal de gate | T15 | In Tasks |
 | GAT-60 | P1: Modal de permissão | T14, T20, T26 | In Tasks |
 | GAT-61 | P1: Modal de permissão | T12, T17, T19 | In Tasks |
@@ -409,10 +409,10 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-66 | P1: Modal de permissão | T14, T26 | In Tasks |
 | GAT-67 | P1: Modal de permissão | T14 | In Tasks |
 | GAT-68 | P1: Modal de permissão | T15 | In Tasks |
-| GAT-69 | P1: Modal de permissão | T11, T15 | In Tasks |
+| GAT-69 | P1: Modal de permissão | T11, T15 | Implementing |
 | GAT-70 | P1: Modal de permissão | T12, T15 | In Tasks |
 | GAT-71 | P1: Modal de permissão | T12, T14, T19 | In Tasks |
-| GAT-72 | P1: Teclado e escrita comuns aos modais | T11, T25, T27 | In Tasks |
+| GAT-72 | P1: Teclado e escrita comuns aos modais | T11, T25, T27 | Implementing |
 | GAT-73 | P1: Teclado e escrita comuns aos modais | T15, T25 | In Tasks |
 | GAT-74 | P1: Teclado e escrita comuns aos modais | T15, T25 | In Tasks |
 | GAT-75 | P1: Teclado e escrita comuns aos modais | T16 | In Tasks |

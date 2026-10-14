@@ -301,8 +301,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Cada rota: o corpo enviado, `ok`, recusa com `error`, status 500, corpo sem `ok`, exceção e 2000 ms sem resposta dão o que GAT-58 diz
-- [ ] Os testes de `answer` continuam; gate quick passa
+- [x] Cada rota: o corpo enviado, `ok`, recusa com `error`, status 500, corpo sem `ok`, exceção e 2000 ms sem resposta dão o que GAT-58 diz
+- [x] Os testes de `answer` continuam; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
