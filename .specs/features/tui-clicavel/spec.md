@@ -321,7 +321,7 @@ cada item, e com o que ficou sem conferir.
 | CLK-07 | P1: O terminal conta onde o mouse clicou | T21 | Implementing |
 | CLK-08 | P1: O terminal conta onde o mouse clicou | T21 | Implementing |
 | CLK-09 | P1: O terminal conta onde o mouse clicou | T2, T11 | Implementing |
-| CLK-10 | P1: O terminal conta onde o mouse clicou | T2, T11, T21 | Implementing |
+| CLK-10 | P1: O terminal conta onde o mouse clicou | T2, T11, T21, T28 | Implementing |
 | CLK-11 | P1: O terminal conta onde o mouse clicou | T12 | Implementing |
 | CLK-12 | P1: O terminal conta onde o mouse clicou | T20 | Implementing |
 | CLK-13 | P1: O terminal conta onde o mouse clicou | T12, T20 | Implementing |

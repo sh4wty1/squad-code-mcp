@@ -96,6 +96,12 @@ T19 → T20 → T21
 T22 → T23 → T24 → T25 → T26 → T27
 ```
 
+### Phase 6: Correções do Verifier
+
+```
+T28
+```
+
 ---
 
 ## Task Breakdown
@@ -706,13 +712,13 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 ---
 
-### F1: CLK-10 no terminal pequeno
+### T28: CLK-10 no terminal pequeno
 
 Da volta 1 do Verifier (`validation.md`, Fix 1): o mutante M31, que na tela pequena procura `q` caractere a caractere em vez de item a item de `keysOf`, sobreviveu.
 
 **What**: um teste de CLK-10 no laço com o terminal menor que 120×40: o relatório antigo `ESC [ M q!`, inteiro e partido em duas leituras, não sai da TUI nem pede nada ao broker, e a tela que volta em 120×40 é a de antes.
 **Where**: `broker/test/unit/tui-mouse-loop.test.ts`
-**Depends on**: T27
+**Depends on**: None (a fase anterior inteira)
 **Requirement**: CLK-10
 
 **Done when**:
@@ -729,13 +735,14 @@ Da volta 1 do Verifier (`validation.md`, Fix 1): o mutante M31, que na tela pequ
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6
 
 Phase 1:  T1
 Phase 2:  T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10
 Phase 3:  T11 → T12 → T13 → T14 → T15 → T16 → T17 → T18
 Phase 4:  T19 → T20 → T21
 Phase 5:  T22 → T23 → T24 → T25 → T26 → T27
+Phase 6:  T28
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fase 2 (9 tarefas); fase 3 (8); fases 4 e 5 até a T24 ficam com o orquestrador, porque a fase 5 precisa do dev no terminal (T25) e do Docker (T26).
@@ -775,6 +782,7 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T25: Conferência | 1 documento | ✅ Granular |
 | T26: Suíte no Linux | 1 registro | ✅ Granular |
 | T27: Fechamento | 3 documentos do fechamento, coesos | ⚠️ OK |
+| T28: CLK-10 no terminal pequeno | 1 teste | ✅ Granular |
 
 ---
 
@@ -809,6 +817,7 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T25 | T24 | T24 → T25 | ✅ Match |
 | T26 | T25 | T25 → T26 | ✅ Match |
 | T27 | T26 | T26 → T27 | ✅ Match |
+| T28 | None (a fase anterior inteira) | início da fase 6 | ✅ Match |
 
 ---
 
@@ -829,3 +838,4 @@ Depois da última tarefa, fora da lista: o Verifier numa cópia física com `bun
 | T22 | Tela de ajuda e desvios | unit | unit | ✅ OK |
 | T23, T24 | Documentação | none | none | ✅ OK |
 | T25 a T27 | `.specs/` e documentação | none | none | ✅ OK |
+| T28 | Laço | unit | unit | ✅ OK |
