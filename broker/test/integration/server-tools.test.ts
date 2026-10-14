@@ -42,16 +42,16 @@ function seqOf(answer: { isError: boolean; text: string }): number {
 
 const COMMON = ["list_peers", "state", "history", "blocked", "unblocked"];
 const SENDING = [
-  "send_task", "send_result", "send_verdict", "plan", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question",
+  "send_task", "send_result", "send_verdict", "plan", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question", "gate",
 ];
 
 for (const [name, own] of [
-  ["mother", ["send_task", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question"]],
+  ["mother", ["send_task", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question", "gate"]],
   ["leader", ["plan", "send_task", "send_result", "ask", "answer", "escalate"]],
   ["worker-2", ["send_result", "ask", "answer", "escalate"]],
   ["judge", ["send_verdict", "ask"]],
 ] as const) {
-  test(`EVT-89: after ready ${name} lists the common tools and ${own.join(", ")}, and can call no other`, async () => {
+  test(`EVT-89/GAT-34: after ready ${name} lists the common tools and ${own.join(", ")}, and can call no other`, async () => {
     broker = await startBroker();
     const session = await joined(broker, name);
     expect(await session.toolNames()).toEqual([...COMMON, ...own]);

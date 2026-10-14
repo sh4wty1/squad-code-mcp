@@ -247,8 +247,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] Só a mother lista `gate`, com os obrigatórios e opcionais de GAT-34; `allowed("mother")` tem `mcp__plugin_squad_squad__gate` e nenhum outro papel tem
-- [ ] Testes em `test/unit/tools.test.ts` e `test/unit/launch-args.test.ts`; gate quick passa
+- [x] Só a mother lista `gate`, com os obrigatórios e opcionais de GAT-34; `allowed("mother")` tem `mcp__plugin_squad_squad__gate` e nenhum outro papel tem
+- [x] Testes em `test/unit/tools.test.ts` e `test/unit/launch-args.test.ts`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

@@ -178,6 +178,15 @@ test("PAP-43: the whole allowed list of the worker, which has no tool of another
   }
 });
 
+test("GAT-35: the allowed list of the mother has the gate tool, and that of no other role has it", () => {
+  for (const platform of ["linux", "win32"]) {
+    expect(allowed("mother", platform)).toContain("mcp__plugin_squad_squad__gate");
+    for (const role of ["leader", "worker", "judge"]) {
+      expect([role, allowed(role, platform).includes("mcp__plugin_squad_squad__gate")]).toEqual([role, false]);
+    }
+  }
+});
+
 test("PAP-44: git merge is the last Bash rule of the leader and of no other role", () => {
   expect(allowed("leader", "linux").at(-1)).toBe("Bash(git merge:*)");
   for (const role of ["mother", "worker", "judge"]) {
