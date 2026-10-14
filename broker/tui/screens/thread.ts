@@ -44,6 +44,8 @@ export function thread(view: View): Grid {
   chrome(g, view, "thread", KEYS);
   const ticket = squad.tickets.find((t) => t.ticket_ref === threadTicket(view));
   g.box(0, 2, 76, 36, "bwhite", ticket ? `thread ${ticket.ticket_ref} · ${ticket.title}` : "thread", "bwhite");
+  // The wheel scrolls the entries anywhere in their box
+  g.mark(0, 2, 76, 36, { wheel: "thread" });
   g.box(76, 2, 44, 36, "gray", "judge · nota por critério", "bwhite");
   if (!ticket) {
     g.put(2, 5, "○ nenhum ticket ainda", "gray", { bold: true });

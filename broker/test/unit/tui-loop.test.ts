@@ -83,7 +83,7 @@ function launch(events: SquadEvent[] = EVENTS, settings: { intervalMs?: number; 
   };
   const tui = start(
     { fetch, now: () => t.now, size: () => t.size, write: (text) => (t.out += text), raw: (on) => t.raw.push(on), project: "portal-89fm", token: () => t.token },
-    { url: BROKER, intervalMs: 5, glyphs: new Map(), prices: PRICES, ...settings }
+    { url: BROKER, intervalMs: 5, glyphs: new Map(), prices: PRICES, mouse: false, ...settings }
   );
   return { ...tui, t };
 }

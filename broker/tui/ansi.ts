@@ -29,6 +29,10 @@ const FG: Record<Color, number> = {
 // and back out of the three
 export const ENTER = "\x1b[?1049h\x1b[?25l\x1b[?2004h";
 export const LEAVE = "\x1b[?2004l\x1b[?25h\x1b[?1049l";
+// Asks the terminal for a report of each button pressed and released (mode 1000), with the
+// coordinates as text (mode 1006), and takes the request back
+export const MOUSE_ON = "\x1b[?1000h\x1b[?1006h";
+export const MOUSE_OFF = "\x1b[?1006l\x1b[?1000l";
 // Erases the screen, before a drawing that does not start from the one before
 export const CLEAR = "\x1b[2J";
 

@@ -15,11 +15,12 @@ import { brokerUrl, tokenPath } from "./shared/config.ts";
 import type { SquadEvent } from "./shared/contract.ts";
 import { squad } from "./shared/derive.ts";
 import { getGitRoot } from "./shared/git.ts";
-import { CLEAR, ENTER, LEAVE, paint, parseGlyphs } from "./tui/ansi.ts";
-import { prices, readIntervalMs, type PriceTable } from "./tui/config.ts";
+import { CLEAR, ENTER, LEAVE, MOUSE_OFF, MOUSE_ON, paint, parseGlyphs } from "./tui/ansi.ts";
+import { mouseOn, prices, readIntervalMs, type PriceTable } from "./tui/config.ts";
 import { feed, type FeedRow } from "./tui/feed.ts";
 import type { Grid } from "./tui/grid.ts";
-import { input, keysOf, marks, settle, START, sync, visible } from "./tui/keys.ts";
+import { keysOf, marks, settle, START, sync, visible } from "./tui/keys.ts";
+import { take, type Drawn, type Pointer } from "./tui/mouse.ts";
 import { createReader, type Fetch } from "./tui/reader.ts";
 import { answer } from "./tui/screens/answer.ts";
 import { down as frozen } from "./tui/screens/down.ts";
@@ -42,11 +43,13 @@ export interface Settings {
   intervalMs: number;
   glyphs: Map<string, string>;
   prices: PriceTable;
+  // whether the terminal is asked for the reports of the mouse when the TUI starts
+  mouse: boolean;
 }
 
 // Throws with the message of the setting that is not valid
 export function config(env: Record<string, string | undefined> = process.env): Settings {
-  return { url: brokerUrl(env), intervalMs: readIntervalMs(env), glyphs: parseGlyphs(env.SQUAD_TUI_GLYPHS), prices: prices(env) };
+  return { url: brokerUrl(env), intervalMs: readIntervalMs(env), glyphs: parseGlyphs(env.SQUAD_TUI_GLYPHS), prices: prices(env), mouse: mouseOn(env) };
 }
 
 // The name of the repository of the directory, by the rule of the broker; null outside one
@@ -84,6 +87,7 @@ export function start(io: Io, settings: Settings) {
   const reader = createReader({ fetch: io.fetch, url: settings.url });
   const writer = createWriter({ fetch: io.fetch, url: settings.url });
   let ui: Ui = START;
+  let pointer: Pointer = { on: settings.mouse, clickedAt: null };
   let log: SquadEvent[] = [];
   // The lines of `fed`, and the ones on the screen: they differ while the feed is paused
   let fed: SquadEvent[] | null = null;
@@ -91,6 +95,8 @@ export function start(io: Io, settings: Settings) {
   let rows: FeedRow[] = [];
   let down: View["down"] = null;
   let prev: Grid | null = null;
+  // What a report of the mouse hits: the marks of the last drawing written
+  let drawn: Drawn | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let stopped = false;
   let pending = "";
@@ -114,9 +120,12 @@ export function start(io: Io, settings: Settings) {
 
   function draw(whole = false) {
     const size = io.size();
+    // The small screen and the frozen one cover the screen of the state
+    const covered = cramped(size) || down !== null;
     const next = cramped(size) ? small(size.cols, size.rows) : down ? frozen(view()) : screen();
     io.write((whole ? CLEAR : "") + paint(next, whole ? null : prev, settings.glyphs));
     prev = next;
+    drawn = covered ? null : { hits: next.hits, screen: ui.screen };
   }
 
   function end(settle: () => void) {
@@ -124,7 +133,9 @@ export function start(io: Io, settings: Settings) {
     stopped = true;
     clearTimeout(timer);
     clearTimeout(escapeTimer);
-    io.write(LEAVE);
+    // The request for the reports is taken back on every way out, also when it was never
+    // made: a terminal left with them on writes in the shell at each click
+    io.write(MOUSE_OFF + LEAVE);
     io.raw(false);
     settle();
   }
@@ -171,9 +182,11 @@ export function start(io: Io, settings: Settings) {
         return keysOf(chunk).some((k) => k === "q" || k === "\x03") ? stop() : undefined;
       }
       const sending = ui.send;
-      const next = input(ui, chunk, view(), more);
+      const next = take({ ui, pointer }, chunk, view(), more, drawn);
       if (!next) return stop();
-      ui = next;
+      // `m` turned the mouse off or on: the terminal is told
+      if (next.pointer.on !== pointer.on) io.write(next.pointer.on ? MOUSE_ON : MOUSE_OFF);
+      ({ ui, pointer } = next);
       // One POST for each answer: the one on its way stays in `send` until it is settled
       if (ui.send && ui.send !== sending) post();
       draw();
@@ -187,8 +200,10 @@ export function start(io: Io, settings: Settings) {
     clearTimeout(escapeTimer);
     const input = pending + chunk;
     // stdin chunks can end inside a CSI sequence. Wait briefly for its remaining bytes;
-    // a lone Escape must still navigate back when no more input arrives.
-    pending = /\x1b(?:\[[0-9;]*)?$/u.exec(input)?.[0] ?? "";
+    // a lone Escape must still navigate back when no more input arrives. A report of the
+    // mouse is held the same way: the SGR one up to its letter, and the old one, `ESC [ M`,
+    // up to its three characters. What is left of one after the wait is no key and no text.
+    pending = /\x1b(?:\[(?:<[0-9;]*|M[^]{0,2}|[0-9;]*))?$/u.exec(input)?.[0] ?? "";
     const complete = input.slice(0, input.length - pending.length);
     // The escape held back is a key of this chunk: a line break before it was not typed alone
     if (complete) dispatch(complete, pending !== "");
@@ -209,7 +224,7 @@ export function start(io: Io, settings: Settings) {
   }
 
   io.raw(true);
-  io.write(ENTER);
+  io.write(ENTER + (settings.mouse ? MOUSE_ON : ""));
   tick().catch(fail);
   return { key, resize, stop, done };
 }

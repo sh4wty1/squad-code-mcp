@@ -40,6 +40,11 @@ function drawModal(g: Grid, items: Item[], title: string, tone: Color) {
   const h = items.reduce((sum, item) => sum + rows(item), 2);
   let y = Math.floor((40 - h) / 2);
   g.clear(X - 1, y - 1, BOX + 2, h + 2);
+  // With the modal open every mark is of the modal, over the ones of the tab: a click outside
+  // the box is esc, also on the empty margin around it, and inside it only a line of the
+  // choice mode is clicked
+  g.mark(0, 0, 120, 39, { modal: true, key: "\x1b" });
+  g.mark(X, y, BOX, h, { modal: true });
   g.box(X, y, BOX, h, "bwhite", title, tone);
   y++;
   const x = X + 3;
@@ -54,6 +59,7 @@ function drawModal(g: Grid, items: Item[], title: string, tone: Color) {
       }
       g.put(x + 2, y, item.option + 1, "bwhite", { bold: true });
       g.put(x + 5, y, cut(item.label, W - 4), item.chosen ? "bwhite" : item.other ? "gray" : "white", { bold: item.chosen });
+      g.mark(X + 1, y, BOX - 2, 1, { modal: true, option: item.option });
     }
     y += rows(item);
   }
@@ -112,7 +118,8 @@ export function answer(g: Grid, view: View): Grid {
       ? [["esc", "fechar"]]
       : choosing
         ? [[`1-${q.options.length + 1}`, "escolher"], ["↑↓", "mover"], ["enter", "confirmar"], ["esc", "cancelar"]]
-        : [["enter", "enviar"], ["ctrl+e", expanded ? "recolher" : "expandir"], ["ctrl+u", "limpar"], ["esc", "cancelar"]]
+        : [["enter", "enviar"], ["ctrl+e", expanded ? "recolher" : "expandir"], ["ctrl+u", "limpar"], ["esc", "cancelar"]],
+    true
   );
   return g;
 }

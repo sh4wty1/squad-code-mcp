@@ -2,7 +2,8 @@
 // A deviation replaces `width` columns of a line of the frame with `text`; what a line is
 // expected to be is the frame with its deviations applied in order. Classes (spec,
 // Assumptions): D1, the derivation gives a status or a text other than the one written by
-// hand in the prototype; D2, the frame shows what no event has; D3, cut by the spec.
+// hand in the prototype; D2, the frame shows what no event has; D3, cut by the spec; D4, a
+// line the clickable TUI adds and the prototype, made for the keyboard alone, does not have.
 
 import { len, pad } from "../../tui/grid.ts";
 import { frame } from "./view.ts";
@@ -12,7 +13,7 @@ export interface Deviation {
   col: number;
   width: number;
   text: string;
-  class: "D1" | "D2" | "D3";
+  class: "D1" | "D2" | "D3" | "D4";
   why: string;
 }
 
@@ -366,6 +367,7 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ),
   ],
   "11": [
+    ...d("D4", "CLK-55: the key that turns the mouse off and on is in the panel of the keys, on the line the frame leaves empty after the global ones", [10, 62, 56, "m           mouse liga / desliga · clique = tecla"]),
     ...d(
       "D3",
       "TUI-49, QST-88, Out of Scope: the modals of gate and of permission are screens of the slice Gate; their keys do nothing here",

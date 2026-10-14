@@ -19,6 +19,8 @@ function agents(g: Grid, view: View, frame: Color) {
   const { squad, rows } = view;
   const here = squad.agents.filter((a) => a.status !== "never").length;
   g.box(0, 2, 28, 36, frame, "agentes · " + (here < 6 ? here + "/6 no ar" : "6"), "bwhite");
+  // A click anywhere in the box, its border too, gives the focus to its panel
+  g.mark(0, 2, 28, 36, { panel: 0 });
 
   squad.agents.forEach((a: Agent, i) => {
     const y = 3 + i * 4;
@@ -85,6 +87,8 @@ function tickets(g: Grid, view: View, frame: Color) {
     const owner = squad.agents.find((a) => a.name === t.owner && !t.dropped);
     const short = owner?.short ?? "—";
     g.put(2, y, t.ticket_ref, t.dropped ? "gray" : "bwhite", { bold: !t.dropped });
+    // A click on a line of the ticket, inside the box, shows its thread
+    g.mark(1, y, 26, compact ? 1 : 2, { panel: 0, ticket: t.ticket_ref });
     if (compact) {
       g.put(9, y, `⟳${Math.min(n, 2)}/2`, reworks);
       g.put(14, y, `[${t.status}]`, TICKET_TONE[t.status], { bold: strong });
@@ -164,6 +168,8 @@ function feedPanel(g: Grid, view: View, frame: Color) {
   const feature = squad.feature;
   const lastEnd = rows.findLastIndex((row) => row.sys === "closed");
   g.box(28, 2, 58, 36, frame, feature ? "feed · " + cut(feature.title, 32) : "feed · sem feature aberta", "bwhite");
+  // The wheel moves the selection of the feed anywhere in its box
+  g.mark(28, 2, 58, 36, { panel: 1, wheel: "feed" });
   const live: [string, Color] = ui.paused ? ["○ pausado", "byellow"] : !feature && lastEnd >= 0 ? ["○ ocioso", "gray"] : ["● ao vivo", "green"];
   g.put(84 - len(live[0]) - 2, 2, ` ${live[0]} `, live[1]);
   g.put(31, 3, "hora", "gray");
@@ -208,6 +214,8 @@ function feedPanel(g: Grid, view: View, frame: Color) {
     } else {
       const chosen = item.row.seq === ui.selected;
       feedRow(g, y, item.row, chosen, item.dim && !chosen);
+      // A click on the line of an event, inside the box, selects it
+      g.mark(29, y, 56, 1, { panel: 1, wheel: "feed", row: item.row.seq });
     }
   });
   if (rows.length === 0) {
@@ -224,6 +232,7 @@ export function main(view: View): Grid {
   tickets(g, view, frame(0));
   feedPanel(g, view, frame(1));
   g.box(86, 2, 34, 36, frame(2), "detalhe", "bwhite");
+  g.mark(86, 2, 34, 36, { panel: 2 });
   drawRows(g, 88, 3, 36, detailLines(view, view.rows.find((row) => row.seq === view.ui.selected)), 86, 34, frame(2));
   stats(g, view);
   return g;

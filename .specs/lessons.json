@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 90,
+  "next_id": 95,
   "lessons": [
     {
       "id": "L-001",
@@ -188,7 +188,7 @@
         "question"
       ],
       "recurrence": 2,
-      "harmful": 0,
+      "harmful": 1,
       "evidence": [
         "mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server)",
         "mutant C3 broker/cli.ts:78 (PEER-44 lookup finds nothing) (cli)",
@@ -196,7 +196,7 @@
         "X01 broker/question.ts:351 (QST-12: /merge-question has no test of a failed write) (broker tests)"
       ],
       "created": "2026-10-07T19:35:33Z",
-      "last_seen": "2026-10-10T11:07:42Z"
+      "last_seen": "2026-10-14T16:16:04Z"
     },
     {
       "id": "L-011",
@@ -739,17 +739,19 @@
       "text": "Test a count limit or a rounding rule at its boundary value, not only well past it",
       "signal": "surviving_mutant",
       "scope": "tui",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "tui-leitura"
+        "tui-leitura",
+        "tui-clicavel"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "L08 broker/tui/screens/main.ts:77, S23 broker/tui/screens/chrome.ts:127 (tui)"
+        "L08 broker/tui/screens/main.ts:77, S23 broker/tui/screens/chrome.ts:127 (tui)",
+        "N30 broker/tui/screens/questions.ts:216 (validation.md volta 2) (tui)"
       ],
       "created": "2026-10-09T17:54:51Z",
-      "last_seen": "2026-10-09T17:54:51Z"
+      "last_seen": "2026-10-14T16:15:56Z"
     },
     {
       "id": "L-041",
@@ -1021,17 +1023,19 @@
       "text": "State at which moment of a multi-key input a rule that depends on the mode reads the mode",
       "signal": "spec_precision_gap",
       "scope": "spec",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "question"
+        "question",
+        "tui-clicavel"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "QST-78 (mode read at the start of the chunk); broker/tui/keys.ts:44 (spec)"
+        "QST-78 (mode read at the start of the chunk); broker/tui/keys.ts:44 (spec)",
+        "CLK-14, CLK-15 (validation.md volta 3) (spec)"
       ],
       "created": "2026-10-10T11:07:43Z",
-      "last_seen": "2026-10-10T11:07:43Z"
+      "last_seen": "2026-10-14T16:15:57Z"
     },
     {
       "id": "L-056",
@@ -1057,17 +1061,19 @@
       "text": "When an AC states a rule for each mode of a component, state what the same input does when the component is in none of them",
       "signal": "spec_precision_gap",
       "scope": "spec",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "question"
+        "question",
+        "tui-clicavel"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "QST-78 vs Assumptions row 'Colagem com quebra de linha'; mutant K4 broker/tui/keys.ts:187 (validation.md round 3, P3) (spec)"
+        "QST-78 vs Assumptions row 'Colagem com quebra de linha'; mutant K4 broker/tui/keys.ts:187 (validation.md round 3, P3) (spec)",
+        "CLK-50 on the frozen screen (validation.md volta 3) (spec)"
       ],
       "created": "2026-10-10T12:21:06Z",
-      "last_seen": "2026-10-10T12:21:06Z"
+      "last_seen": "2026-10-14T16:15:57Z"
     },
     {
       "id": "L-058",
@@ -1244,17 +1250,19 @@
       "text": "Assert a rule an AC states for an input loop through the loop, not only on the pure function the loop calls",
       "signal": "surviving_mutant",
       "scope": "tui input",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "question"
+        "question",
+        "tui-clicavel"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "V13 tui.ts:170; test/unit/tui-keys.test.ts:591 (QST-99, round 6 gap 4) (tui input)"
+        "V13 tui.ts:170; test/unit/tui-keys.test.ts:591 (QST-99, round 6 gap 4) (tui input)",
+        "R20 broker/tui/keys.ts:40 (validation.md volta 3, Fix 1) (tui input)"
       ],
       "created": "2026-10-11T08:09:51Z",
-      "last_seen": "2026-10-11T08:09:51Z"
+      "last_seen": "2026-10-14T16:15:56Z"
     },
     {
       "id": "L-068",
@@ -1262,17 +1270,19 @@
       "text": "Test a rule that holds for any item of a list with the item first, last and between two others",
       "signal": "surviving_mutant",
       "scope": "tui input",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "question"
+        "question",
+        "tui-clicavel"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "V2 tui.ts:171; test/unit/tui-loop.test.ts:628 (QST-99, round 6 gap 6) (tui input)"
+        "V2 tui.ts:171; test/unit/tui-loop.test.ts:628 (QST-99, round 6 gap 6) (tui input)",
+        "R32 broker/tui/mouse.ts:110 (validation.md volta 3, Fix 2) (tui input)"
       ],
       "created": "2026-10-11T08:09:52Z",
-      "last_seen": "2026-10-11T08:09:52Z"
+      "last_seen": "2026-10-14T16:15:56Z"
     },
     {
       "id": "L-069",
@@ -1280,17 +1290,19 @@
       "text": "When an AC names an input of several bytes, state what happens when it arrives split across two reads",
       "signal": "spec_precision_gap",
       "scope": "spec",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "question"
+        "question",
+        "tui-clicavel"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "SP4, QST-78 with QST-99; V8 tui.ts:191 (round 6) (spec)"
+        "SP4, QST-78 with QST-99; V8 tui.ts:191 (round 6) (spec)",
+        "CLK-10 (validation.md volta 3) (spec)"
       ],
       "created": "2026-10-11T08:09:52Z",
-      "last_seen": "2026-10-11T08:09:52Z"
+      "last_seen": "2026-10-14T16:15:57Z"
     },
     {
       "id": "L-070",
@@ -1352,17 +1364,19 @@
       "text": "When two ACs give different outcomes for the same case, state in both which one wins",
       "signal": "spec_precision_gap",
       "scope": "spec",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "papeis"
+        "papeis",
+        "tui-clicavel"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "validation.md PAP-66 and PAP-68, plugin/skills/worker/SKILL.md:79 (spec)"
+        "validation.md PAP-66 and PAP-68, plugin/skills/worker/SKILL.md:79 (spec)",
+        "CLK-41, CLK-44 (validation.md volta 3) (spec)"
       ],
       "created": "2026-10-12T08:33:57Z",
-      "last_seen": "2026-10-12T08:33:57Z"
+      "last_seen": "2026-10-14T16:15:56Z"
     },
     {
       "id": "L-074",
@@ -1478,17 +1492,19 @@
       "text": "When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes",
       "signal": "surviving_mutant",
       "scope": "broker tests",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "papeis"
+        "papeis",
+        "tui-clicavel"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests)"
+        "F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests)",
+        "M31 broker/tui.ts:182 (validation.md volta 1) (tui input)"
       ],
       "created": "2026-10-12T09:24:37Z",
-      "last_seen": "2026-10-12T09:24:37Z"
+      "last_seen": "2026-10-14T16:15:56Z"
     },
     {
       "id": "L-081",
@@ -1653,6 +1669,96 @@
       ],
       "created": "2026-10-12T11:29:27Z",
       "last_seen": "2026-10-12T11:29:27Z"
+    },
+    {
+      "id": "L-090",
+      "key": "spec_precision_gap::when an ac emits more than one sequence for one step state their order",
+      "text": "When an AC emits more than one sequence for one step, state their order",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "tui-clicavel"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CLK-01, CLK-02, CLK-50 (validation.md volta 3) (spec)"
+      ],
+      "created": "2026-10-14T16:15:57Z",
+      "last_seen": "2026-10-14T16:15:57Z"
+    },
+    {
+      "id": "L-091",
+      "key": "spec_precision_gap::when a rule measures the time since the previous event state which events count as previous and which clock measures it",
+      "text": "When a rule measures the time since the previous event, state which events count as previous and which clock measures it",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "tui-clicavel"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CLK-46 (validation.md volta 3) (spec)"
+      ],
+      "created": "2026-10-14T16:15:57Z",
+      "last_seen": "2026-10-14T16:15:57Z"
+    },
+    {
+      "id": "L-092",
+      "key": "spec_precision_gap::when an ac parses a sequence of the input state what happens when a character outside its grammar ends it",
+      "text": "When an AC parses a sequence of the input, state what happens when a character outside its grammar ends it",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "tui-clicavel"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CLK-09 (validation.md volta 3) (spec)"
+      ],
+      "created": "2026-10-14T16:15:57Z",
+      "last_seen": "2026-10-14T16:15:57Z"
+    },
+    {
+      "id": "L-093",
+      "key": "spec_precision_gap::state what a tool that reads one kind of input does with every other input",
+      "text": "State what a tool that reads one kind of input does with every other input",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "tui-clicavel"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CLK-17 (validation.md volta 3) (spec)"
+      ],
+      "created": "2026-10-14T16:15:57Z",
+      "last_seen": "2026-10-14T16:15:57Z"
+    },
+    {
+      "id": "L-094",
+      "key": "spec_precision_gap::when a toggle turns a feature off and on state which state of the feature survives the toggle",
+      "text": "When a toggle turns a feature off and on, state which state of the feature survives the toggle",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "tui-clicavel"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "CLK-46, CLK-50 (validation.md volta 3) (spec)"
+      ],
+      "created": "2026-10-14T16:15:57Z",
+      "last_seen": "2026-10-14T16:15:57Z"
     }
   ]
 }

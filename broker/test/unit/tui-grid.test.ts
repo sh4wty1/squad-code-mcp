@@ -6,7 +6,7 @@ import { START } from "../../tui/keys.ts";
 import { main } from "../../tui/screens/main.ts";
 import { PRICES } from "../frames/logs.ts";
 import { setup } from "./helpers.ts";
-import { age, clock, cut, grid, len, mmss, pad, wrap } from "../../tui/grid.ts";
+import { age, clock, cut, grid, len, mmss, pad, wrap, type Grid } from "../../tui/grid.ts";
 
 test("TUI-19: the grid is 120 by 40 cells of character, color, background and bold", () => {
   const g = grid();
@@ -124,6 +124,80 @@ test("TUI-19: age and mmss format seconds as the prototype does", () => {
 test("TUI-19: clock is the local time as HH:MM:SS", () => {
   expect(clock(new Date(2026, 9, 7, 14, 5, 9).getTime())).toBe("14:05:09");
   expect(clock(new Date(2026, 9, 7, 0, 0, 0).getTime())).toBe("00:00:00");
+});
+
+// The cells of a grid that have a mark, as `x,y`
+const marked = (g: Grid): string[] => g.hits.flatMap((row, y) => row.flatMap((hit, x) => (hit ? [`${x},${y}`] : [])));
+
+test("CLK-14: a new grid has no mark in any of its 40 by 120 cells", () => {
+  const g = grid();
+  expect(g.hits.length).toBe(40);
+  expect(g.hits.every((row) => row.length === 120)).toBe(true);
+  expect(g.hits.flat().every((hit) => hit === null)).toBe(true);
+});
+
+test("CLK-14: mark marks the cells of its rectangle and no other", () => {
+  const g = grid();
+  g.mark(3, 5, 4, 2, { key: "p" });
+  expect(marked(g)).toEqual(["3,5", "4,5", "5,5", "6,5", "3,6", "4,6", "5,6", "6,6"]);
+  expect(g.hits[5]![3]).toEqual({ key: "p" });
+  expect(g.hits[6]![6]).toEqual({ key: "p" });
+  // The cells around the rectangle
+  expect([g.hits[4]![3], g.hits[7]![3], g.hits[5]![2], g.hits[5]![7]]).toEqual([null, null, null, null]);
+});
+
+test("CLK-14: what a mark has outside the grid is not marked, and does not throw", () => {
+  const g = grid(6, 3);
+  g.mark(-2, -1, 4, 3, { panel: 0 });
+  g.mark(4, 2, 5, 5, { panel: 2 });
+  g.mark(9, 9, 2, 2, { panel: 1 });
+  g.mark(-9, 1, 3, 1, { panel: 1 });
+  expect(marked(g)).toEqual(["0,0", "1,0", "0,1", "1,1", "4,2", "5,2"]);
+  expect(g.hits[1]![1]).toEqual({ panel: 0 });
+  expect(g.hits[2]![5]).toEqual({ panel: 2 });
+  // The layer is still of 3 lines of 6 cells
+  expect(g.hits.map((row) => row.length)).toEqual([6, 6, 6]);
+  expect(Object.keys(g.hits[1]!)).toEqual(["0", "1", "2", "3", "4", "5"]);
+});
+
+test("CLK-14: a second mark on a cell replaces the first, with nothing left of it", () => {
+  const g = grid();
+  g.mark(10, 10, 4, 1, { panel: 1, wheel: "feed" });
+  g.mark(12, 10, 4, 1, { key: "\x1b", modal: true });
+  expect(g.hits[10]!.slice(10, 16)).toEqual([{ panel: 1, wheel: "feed" }, { panel: 1, wheel: "feed" }, { key: "\x1b", modal: true }, { key: "\x1b", modal: true }, { key: "\x1b", modal: true }, { key: "\x1b", modal: true }]);
+});
+
+test("CLK-14: clear erases the marks of its region and leaves the ones around it", () => {
+  const g = grid();
+  g.mark(0, 0, 120, 40, { panel: 2 });
+  g.clear(18, 3, 84, 30);
+  expect(g.hits.slice(3, 33).every((row) => row.slice(18, 102).every((hit) => hit === null))).toBe(true);
+  expect(marked(g).length).toBe(120 * 40 - 84 * 30);
+  // The cells around the four corners of the region
+  for (const [x, y] of [[17, 3], [18, 2], [102, 3], [101, 2], [17, 32], [18, 33], [102, 32], [101, 33]] as const) expect(g.hits[y]![x]).toEqual({ panel: 2 });
+  // A region that leaves the grid erases what it has inside
+  g.clear(110, 38, 50, 50);
+  expect(g.hits[38]!.slice(108, 120)).toEqual([{ panel: 2 }, { panel: 2 }, ...Array(10).fill(null)]);
+  expect(g.hits[37]![119]).toEqual({ panel: 2 });
+});
+
+test("CLK-14: a mark is no field of a cell: the text and the escapes of a grid are the same with and without marks", () => {
+  const draw = (g: Grid) => {
+    g.box(0, 2, 28, 10, "bwhite", "agentes", "bwhite");
+    g.put(1, 39, "p", "bwhite", { bold: true, bg: "black" });
+    g.put(3, 39, "pausa", "gray", { bg: "black" });
+    return g;
+  };
+  const plain = draw(grid());
+  const hit = draw(grid());
+  hit.mark(0, 2, 28, 10, { panel: 0 });
+  hit.mark(1, 39, 7, 1, { key: "p" });
+  expect(hit.text()).toEqual(plain.text());
+  expect(hit.rows).toEqual(plain.rows);
+  expect(Object.keys(hit.rows[39]![1]!)).toEqual(["ch", "fg", "bg", "bold"]);
+  expect(paint(hit, null)).toBe(paint(plain, null));
+  // And no line of one differs from the other
+  expect(paint(hit, plain)).toBe("");
 });
 
 test("F4 / TUI-19: controls never become cells, including a title accepted by the broker", () => {

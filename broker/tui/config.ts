@@ -1,4 +1,5 @@
-// Settings of the TUI: the price table and how often it reads the broker.
+// Settings of the TUI: the price table, how often it reads the broker and whether it asks
+// the terminal for the mouse.
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -48,4 +49,13 @@ export function cost(totals: Record<string, Amounts>, table: PriceTable): number
 export function readIntervalMs(env: Env = process.env): number {
   const value = env.SQUAD_POLL_INTERVAL_MS ?? "";
   return /^\d+$/.test(value) && Number(value) > 0 ? Number(value) : 1000;
+}
+
+// Whether the TUI asks the terminal for the mouse reports: SQUAD_TUI_MOUSE, on when it is
+// absent, empty or 1 and off when it is 0. Any other value is refused.
+export function mouseOn(env: Env = process.env): boolean {
+  const value = env.SQUAD_TUI_MOUSE ?? "";
+  if (value === "" || value === "1") return true;
+  if (value === "0") return false;
+  throw new Error(`SQUAD_TUI_MOUSE: "${value}" is not 0 or 1`);
 }

@@ -41,13 +41,36 @@ export function tone(name: string): Color {
 
 export const segLen = (segs: Seg[]): number => segs.reduce((n, seg) => n + (seg && seg.length ? len(seg[0]) : 0), 0);
 
-// The line of keys; returns the column after the last one
-export function drawKeys(g: Grid, y: number, keys: Keys): number {
+// What the terminal sends for the key a shortcut names
+const SENT = new Map([
+  ["tab", "\t"],
+  ["enter", "\r"],
+  ["esc", "\x1b"],
+  ["ctrl+e", "\x05"],
+  ["ctrl+u", "\x15"],
+  ...["b", "g", "x", "p", "h", "?", "q"].map((key): [string, string] => [key, key]),
+]);
+
+// The shortcuts of two keys, and what the terminal sends for each of their characters
+const PAIRS = ["j/k", "[ ]", "↑↓"];
+const EACH = new Map([["j", "j"], ["k", "k"], ["[", "["], ["]", "]"], ["↑", "\x1b[A"], ["↓", "\x1b[B"]]);
+
+// The line of keys; returns the column after the last one. A click on a shortcut is its key,
+// on the key or on what it does; one of two keys is clicked on the character of each key, and
+// one of a range (`1-4`) is not clicked. `modal` says the modal of answer drew the line.
+export function drawKeys(g: Grid, y: number, keys: Keys, modal = false): number {
   g.clear(0, y, g.w, 1);
   g.bg(0, y, g.w, "black");
+  const mark = (x: number, w: number, key: string | undefined) => {
+    if (key !== undefined) g.mark(x, y, w, 1, modal ? { modal: true, key } : { key });
+  };
   let x = 1;
   for (const [key, does] of keys) {
+    const kx = x;
     x = g.put(x, y, key, "bwhite", { bold: true });
+    mark(kx, len(key), SENT.get(key));
+    mark(x + 1, len(does), SENT.get(key));
+    if (PAIRS.includes(key)) [...key].forEach((ch, i) => mark(kx + i, 1, EACH.get(ch)));
     x = g.put(x + 1, y, does, "gray");
     x += 3;
   }
@@ -75,6 +98,8 @@ export function chrome(g: Grid, view: View, tab: (typeof TABS)[number][2], keys:
   if (down) g.put(qx, 0, count, "gray");
   else if (blocking) g.put(qx, 0, count, "bwhite", { bg: "red", bold: true });
   else g.put(qx, 0, count, asked.length ? "byellow" : "gray", { bold: asked.length > 0 });
+  // A click on the counter is the key of the tab of the questions it counts
+  g.mark(qx, 0, len(count), 1, { key: "4" });
 
   // The title takes what is left
   const limit = qx - 2;
@@ -94,12 +119,15 @@ export function chrome(g: Grid, view: View, tab: (typeof TABS)[number][2], keys:
 
   x = 1;
   for (const [key, name, id] of TABS) {
+    const from = x;
     if (id === tab) x = g.put(x, 1, ` ${key} ${name} `, "bg", { bg: "white", bold: true });
     else {
       x = g.put(x, 1, " " + key, "bwhite", { bold: true });
       x = g.put(x, 1, ` ${name} `, "gray");
     }
     if (id === "questions" && asked.length) x = g.put(x - 1, 1, ` ${asked.length} `, blocking ? "bred" : "byellow", { bold: true });
+    // A click on a tab is its key, on its spaces and on its count too
+    g.mark(from, 1, x - from, 1, { key });
     x += 1;
   }
 
@@ -109,6 +137,10 @@ export function chrome(g: Grid, view: View, tab: (typeof TABS)[number][2], keys:
     rx -= len(text);
     if (rx <= 66) break;
     g.put(rx, 1, text, color, { bold: true });
+    // The seal of the gates and the one of the permissions end by their key; no other has one,
+    // and the reason of a block is text of the agent, which may end the same way
+    const key = /^⚠ (\d+ gates pendentes|gate \S+ pendente) · g$/.test(text) ? "g" : /^⚠ (\d+ permissões|permissão \S+) · x$/.test(text) ? "x" : null;
+    if (key) g.mark(rx, 1, len(text), 1, { key });
     rx -= 3;
   }
   drawKeys(g, 39, keys);
@@ -128,9 +160,12 @@ export function stats(g: Grid, view: View) {
   }
   const used: Map<string, Totals> = session ? squad.usage.session : squad.usage.feature;
   const dollars = [...used.values()].reduce((sum, totals) => sum + cost(totals, view.prices), 0);
+  // A click on the cost is t, the key that changes whose cost it is
+  const from = x;
   x = g.put(x, y, `│ ${session ? "sessão" : "feature"} `, "gray");
   x = g.put(x, y, "≈$" + dollars.toFixed(2), "bwhite", { bold: true });
-  g.put(x, y, " est.", "gray");
+  x = g.put(x, y, " est.", "gray");
+  g.mark(from, y, x - from, 1, { key: "t" });
 
   const side: Seg[] = right(squad, view.rows, ui).map(([text, color]) => [text, color, true]);
   g.segs(119 - segLen(side), y, side);

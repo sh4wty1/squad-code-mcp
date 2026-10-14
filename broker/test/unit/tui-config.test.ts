@@ -2,7 +2,7 @@ import { afterAll, expect, test } from "bun:test";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { cost, prices, readIntervalMs } from "../../tui/config.ts";
+import { cost, mouseOn, prices, readIntervalMs } from "../../tui/config.ts";
 
 const dir = mkdtempSync(join(tmpdir(), "squad-prices-"));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -86,5 +86,17 @@ test("TUI-58: the TUI reads every SQUAD_POLL_INTERVAL_MS when it is a positive i
 for (const value of [undefined, "", "abc", "0", "-5", "1.5"]) {
   test(`TUI-58: the TUI reads every 1000 ms when SQUAD_POLL_INTERVAL_MS is ${JSON.stringify(value)}`, () => {
     expect(readIntervalMs({ SQUAD_POLL_INTERVAL_MS: value })).toBe(1000);
+  });
+}
+
+for (const [value, on] of [[undefined, true], ["", true], ["1", true], ["0", false]] as const) {
+  test(`CLK-52: with SQUAD_TUI_MOUSE ${JSON.stringify(value)} the mouse is ${on ? "on" : "off"}`, () => {
+    expect(mouseOn({ SQUAD_TUI_MOUSE: value })).toBe(on);
+  });
+}
+
+for (const value of ["sim", " 0", "00", "true", "off"]) {
+  test(`CLK-53: SQUAD_TUI_MOUSE ${JSON.stringify(value)} is refused with the variable and the value`, () => {
+    expect(() => mouseOn({ SQUAD_TUI_MOUSE: value })).toThrow(`SQUAD_TUI_MOUSE: "${value}" is not 0 or 1`);
   });
 }

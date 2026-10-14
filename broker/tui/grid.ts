@@ -28,6 +28,26 @@ export interface Cell {
   bold: boolean;
 }
 
+// What a cell is to the mouse: what a click or the wheel hits there
+export interface Hit {
+  // drawn by the modal of answer
+  modal?: true;
+  // the key a click here presses
+  key?: string;
+  // the panel of the main screen the cell is in
+  panel?: 0 | 1 | 2;
+  // the seq of the line of the feed
+  row?: number;
+  ticket?: string;
+  // the id of a question of the list
+  question?: number;
+  history?: true;
+  // what the wheel rolls here
+  wheel?: "feed" | "thread" | "list" | "history";
+  // the line of the choice mode of the modal; the one after the options is `outra resposta…`
+  option?: number;
+}
+
 // Text, color and bold. A missing or empty segment draws nothing.
 export type Seg = [text: string | number, fg?: Color | null, bold?: boolean] | null | undefined | false;
 
@@ -79,6 +99,8 @@ export function grid(w = 120, h = 40) {
   const rows: Cell[][] = Array.from({ length: h }, () =>
     Array.from({ length: w }, (): Cell => ({ ch: " ", fg: "white", bg: null, bold: false }))
   );
+  // The mark of each cell, in a layer of its own: nothing of it is drawn
+  const hits: (Hit | null)[][] = Array.from({ length: h }, () => Array.from({ length: w }, () => null));
 
   // Writes from column x and returns the column after the text. What falls outside the grid is
   // not written. The background of a cell stays unless `bg` is given.
@@ -113,11 +135,24 @@ export function grid(w = 120, h = 40) {
     }
   }
 
+  // Empties the cells of the region, and takes their marks
   function clear(x: number, y: number, bw: number, bh: number) {
     for (let j = 0; j < bh; j++) {
       for (let i = 0; i < bw; i++) {
         const cell = rows[y + j]?.[x + i];
-        if (cell) Object.assign(cell, { ch: " ", fg: "white", bg: null, bold: false });
+        if (!cell) continue;
+        Object.assign(cell, { ch: " ", fg: "white", bg: null, bold: false });
+        hits[y + j]![x + i] = null;
+      }
+    }
+  }
+
+  // Marks the cells of the rectangle that fall inside the grid. The mark replaces the one a
+  // cell had: who marks says all the cell is.
+  function mark(x: number, y: number, bw: number, bh: number, hit: Hit) {
+    for (let j = 0; j < bh; j++) {
+      for (let i = 0; i < bw; i++) {
+        if (rows[y + j]?.[x + i]) hits[y + j]![x + i] = hit;
       }
     }
   }
@@ -144,7 +179,7 @@ export function grid(w = 120, h = 40) {
   // The lines without the spaces at the right, as the frames are stored
   const text = (): string[] => rows.map((row) => row.map((cell) => cell.ch).join("").replace(/\s+$/, ""));
 
-  return { w, h, rows, put, segs, bg, clear, box, sep, dim, text };
+  return { w, h, rows, hits, put, segs, bg, clear, mark, box, sep, dim, text };
 }
 
 export type Grid = ReturnType<typeof grid>;

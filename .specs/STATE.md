@@ -164,18 +164,65 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 - **Date**: 2026-10-11
 - **Status**: active
 
+### AD-021
+- **Decision**: Todo efeito do mouse na TUI é o de uma tecla, ou de uma sequência de teclas, que já existe naquele estado. Cada tela marca, ao desenhar, o que há em cada célula (a camada `hits` do `Grid`); `tui/mouse.ts` lê a marca do último desenho escrito e muda o estado da tela só por `press`, tecla a tecla. O que é do mouse, ligado ou não e a hora do último clique, fica em `Pointer`, fora de `Ui`. `m` é tecla, não relatório: `take` a trata, porque ela muda `Pointer`, e só põe o aviso de 4 s.
+- **Reason**: O design manda tudo navegável por teclado e os frames são os casos de teste (AD-010). Com o clique reduzido a teclas, nenhuma tela ganha comportamento que o teclado não tem, e o teste de cada clique compara com `press` aplicado ao mesmo estado. O envio de uma resposta pelo mouse é o da tecla `enter` (AD-014): um `POST` por resposta, com a credencial lida na hora. `Ui` é escrito campo a campo em testes de teclas e de frames que a fatia não altera.
+- **Trade-off**: O mouse não faz nada que uma tecla não faça: não há hover, arrasto, rolagem do feed separada da seleção, nem clique num agente ou num nó da topologia. Um elemento só é clicável se a tela o marca ao desenhar, e uma tecla só é alcançada pelo mouse se aparece num atalho ou num elemento marcado. Com um modal aberto, o clique que chega menos de 500 ms depois do anterior não faz nada, também quando o dev quis clicar duas vezes.
+- **Scope**: `broker/tui/mouse.ts`, `broker/tui/grid.ts`, `broker/tui/screens/`, `broker/tui.ts`, e os modais de gate e de permissão da fatia Gate, que ficam clicáveis pela mesma regra: o clique marca e não decide, a decisão sai de um atalho da linha 39 que a nomeia, e clicar fora fecha. Detalha o AD-010 e o AD-014.
+- **Date**: 2026-10-13
+- **Status**: active
+
 ## Handoff
 
-Atualizado em 2026-10-12, no fechamento da fatia Papéis, e em 2026-10-13 na ordem das fatias: a Papéis foi mesclada e a TUI clicável entrou antes da Gate.
+Atualizado em 2026-10-14, no fechamento da fatia TUI clicável, à espera do sim do dev para o `git push` e o PR. As seções da Papéis, abaixo, são do fechamento dela em 2026-10-12 e continuam valendo.
 
-- **Feature**: Papéis, `.specs/features/papeis/`, fechada por decisão do dev com o resíduo da terceira volta de verificação registrado. A próxima fatia é a TUI clicável, com spec em `.specs/features/tui-clicavel/`; depois dela vem a Gate, que ainda não tem spec.
-- **Phase / Task**: Papéis: Execute encerrado, T1 a T31 commitadas, `tasks.md` em `Done`. TUI clicável: spec e `context.md` escritos, sem design nem tarefas. Gate: nada começado.
-- **Completed**: T1 a T31, de `f9ec67e` a `ac25e8d`; `real-sessions.md`; três voltas do Verifier, as três FAIL sem defeito de produção (`validation-round-1.md`, `validation-round-2.md`, e `validation.md`, que é a terceira); a suíte no Windows e no Linux sobre `ac25e8d`; o fechamento na spec, em `tasks.md` e em `ROADMAP.md`.
+- **Feature**: a próxima é a Gate, que ainda não tem spec e fecha o MVP. A TUI clicável, `.specs/features/tui-clicavel/`, está fechada no branch `feat/tui-clicavel`, ainda não enviado. A Papéis está fechada e mesclada na `main` pelo PR 12, com o resíduo registrado abaixo.
+- **Phase / Task**: TUI clicável fechada. T1 a T31 commitadas. As três voltas do Verifier deram FAIL, cada uma por lacuna de teste, sem defeito de produção. O dev decidiu em 2026-10-14 aplicar o Fix 1 e o Fix 2 da volta 3 como T30 e T31 e fechar sem uma quarta volta, e deixar as lacunas de precisão da spec como o código faz.
+- **Completed**: T1 `313d433`; a aprovação do design e das tarefas, `db54d04`; T2 a T10, de `e0cc06e` a `726f1e6`, por um worker; a correção do selo de bloqueio, `2622949`; T11 a T18, de `0fd0088` a `9d5f345`, por outro worker, com um ajuste fora da lista em `0ae5896`; T19 `b958711`, T20 `8b68837`, T21 `87739b1`, T22 `ba3eb25`, T23 `18eed8d`, T24 `5744614`, T25 `08f3c88`, T26 `4b9b0eb` e T27 `5441e1c`, pelo orquestrador. Verifier: volta 1 `9928924`, T28 `6b2f6cf` (com `923a71d`, que a nomeia), volta 2 `23d399f`, T29 `b0468be`, volta 3 `82dc531`; as lições, `40c766d`; o Handoff da espera, `8a97d4a`. T30 `85f3860` e T31 `dafa7f1`, pelo orquestrador, e o fechamento no commit seguinte.
 - **In-progress** (file:line): nada.
-- **Next step**: a fatia TUI clicável, numa sessão nova com o prompt dela em `ROADMAP.md`. A primeira tarefa é a sonda de mouse, que o dev roda num Windows Terminal. Depois, a fatia Gate.
-- **Blockers**: nenhum.
+- **Next step**: com o sim do dev, o `git push` de `feat/tui-clicavel` e o PR contra a `main`, revisado por `/the-judge`. Depois do merge, a spec da Gate: o que a TUI clicável deixa para ela está abaixo.
+- **Blockers**: o sim do dev para o push e o PR.
+- **A conferência em terminal real**: o dev decidiu em 2026-10-14 fechar a fatia sem ela. `real-terminal.md` tem a RT-01 como "funcionou, segundo o dev", sem a versão do terminal e sem os quatro cantos, RT-02 a RT-07 "não conferido" e RT-08 "não exercitado". Na spec ficaram sem marcar, com a razão, a meta do percurso com o mouse, a da volta do terminal, e os critérios de sucesso do percurso só com o mouse e da RT-07. Ela está em "Pendências fora da ordem" de `ROADMAP.md`.
 - **Uncommitted files**: nenhum.
-- **Branch**: `feat/papeis`, saído da `main` em `f162184`, mesclado na `main` pelo PR 12 em 2026-10-13. A spec da TUI clicável foi escrita no branch `spec/tui-clicavel`, num segundo worktree (`squad-code-mcp.worktrees/tui-clicavel`), que pode ser removido depois do merge desse branch.
+- **Branch**: `feat/tui-clicavel`, saído da `main` em `36440a6`, só local: nada foi enviado. `git push` e o PR pedem o sim do dev na hora. O commit de cada tarefa não pede (decisão do dev de 2026-10-13, nas regras de `tasks.md`).
+
+### Como o Verifier da TUI clicável terminou
+
+- Cada volta rodou numa cópia física (`git clone` em pasta temporária) com `bun install --frozen-lockfile` próprio, no Windows com o Bun 1.3.14. A árvore real só recebeu o `validation.md`.
+- Volta 1, sobre `5441e1c`: 33 mutações, 30 mortas, 2 equivalentes, 1 viva, M31 (`broker/tui.ts:182`: na tela pequena, `q` procurado caractere a caractere sai da TUI com `ESC [ M q!`). T28 pôs o caso de CLK-10 em 119×40 e 120×39.
+- Volta 2, sobre `923a71d`: o M31 morre; 43 mutações novas, 42 mortas, 1 viva, N30 (`broker/tui/screens/questions.ts:216`, `ky <= 24` → `ky < 24`: com Q-07 de 4 opções a linha das teclas do detalhe cai na última linha da caixa e fica sem marcas). T29 pôs os dois casos de CLK-33 com 4 opções.
+- Volta 3, sobre `b0468be`: M31 e N30 morrem; 34 mutações novas, 32 mortas, 2 vivas:
+  - **R20**, CLK-03 e CLK-04, `broker/tui/keys.ts:40`: com `[0-9;]{0,24}` no lugar de `[0-9;]*`, um relatório com um inteiro de 400 dígitos vira 382 itens, e os dígitos agem como teclas (`2` troca de tela, `9` entra no campo do modal). Os testes do edge case de inteiros longos chamam `parse` e `point` direto, nunca `keysOf`, `input` ou `take`. Fix 1: um caso de CLK-04 em `test/unit/tui-mouse-input.test.ts` pela entrada.
+  - **R32**, CLK-20, `broker/tui/mouse.ts:110`: com `from <= 0` no lugar de `from < 0`, com a primeira linha do log selecionada um clique noutra linha do feed deixa a seleção na primeira. Os testes partem da linha 417 ou de nenhuma seleção. Fix 2: um caso de CLK-20 em `test/unit/tui-mouse.test.ts` com `seq` 1 selecionada.
+- O padrão das quatro vivas é o mesmo: o teste usa só a forma mais comum da entrada, longe do limite. Todas as mutações que gravariam uma resposta por engano morreram nas três voltas.
+- O fechamento: T30 (`85f3860`) pôs dois casos de CLK-04 com um inteiro de 400 dígitos `2`, na coluna e na linha, por `keysOf`, `input` e `take`; T31 (`dafa7f1`) pôs um caso de CLK-20 com a linha de `seq` 1 selecionada. Numa cópia física do branch, os casos da T30 falham com o R20 e o da T31 com o R32, e passam sem eles. Na spec os 57 requisitos estão `Verified`; `validation.md` tem, no fim, uma nota de fechamento que diz isso e que não houve quarta volta, por decisão do dev.
+- O que ficou sem cobrir, por não haver quarta volta: nenhuma varredura de mutantes nova sobre `b0468be..dafa7f1`, nem releitura independente dos três casos novos, que só acrescentam testes.
+- `python .claude/skills/tlc-spec-driven/scripts/validate_state.py tui-clicavel` sai com 1, porque o veredito da volta 3 continua FAIL. É o estado aceito, como na Papéis: não ajustar o relatório para o script passar.
+- As lições: oito candidatas de fatias anteriores voltaram e foram confirmadas (L-040, L-055, L-057, L-067, L-068, L-069, L-073, L-080); cinco candidatas novas de lacunas de precisão da spec (L-090 a L-094); L-010, carregada pela fatia, levou uma penalidade, porque a volta 1 a achou descumprida em CLK-10.
+
+### As lacunas de precisão da spec, decididas
+
+As nove que o Verifier acusou nas três voltas (CLK-09; CLK-14 e CLK-15; CLK-50 com `m` na tela congelada; a ordem dos pares de CLK-01, CLK-02 e CLK-50; o "clique anterior" de CLK-46; `m` e o clique anterior; a borda de CLK-41 com CLK-44; o formato antigo partido de CLK-10; a sonda de CLK-17) ficam como o código faz, por decisão do dev de 2026-10-14. Cada uma está em "Assumptions" da spec, com o que o código faz. Nenhum código mudou por elas.
+
+Da lista dos workers, o Verifier não acusou e ninguém registrou na spec: a cor do aviso de `m` e `m` dentro de uma colagem; CLK-39 (o custo vale `t` mesmo com o lado direito da linha 38 desenhado por cima); os bits de modificador que `parse` deixa no botão e `point` tira.
+
+### Onde a TUI clicável está
+
+- A suíte da T26, em `b63acf8`: Windows com `tsc` 0 e 2073 pass, 5 skip, 0 fail, 83 arquivos, em 149 s; Linux no contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps`, sobre um clone feito com `git clone -c core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2077 pass, 1 skip, 0 fail, 83 arquivos, entre 79 e 81 s. Antes da fatia, no Windows: 1646 pass, 5 skip. Na volta 3, em `b0468be`, Windows: `tsc` 0 e 2076 pass, 5 skip, 1 fail, o `EVT-43`, que passou sozinho em seguida. No fechamento, em `dafa7f1`: Windows, Bun 1.3.14, `tsc` 0 e 2080 pass, 5 skip, 0 fail, 83 arquivos, em 164 s (o `EVT-43` passou); Linux, no mesmo contêiner e do mesmo jeito, `tsc` 0 e 3 de 3 execuções com 2084 pass, 1 skip, 0 fail, 83 arquivos, entre 78 e 79 s.
+- **O Bun do Windows mudou**: em 2026-10-14 a máquina tem o Bun 1.3.14 do winget (`C:\Users\Dev\AppData\Local\Microsoft\WinGet\Links\bun.exe`), não o 1.4.2 das fatias anteriores, e o Docker passou de 28.0.4 a 29.8.0. A imagem `oven/bun:1.4.2` voltou a estar no Docker no fechamento. A T26 rodou o Windows com o 1.3.14 e o registrou. Instalar outro Bun é decisão do dev; o winget oferece o 1.4.3.
+- Na prévia da T26, em `c4205ad`, a primeira de cinco execuções no Linux teve 21 falhas em 1422 s: `PEER-38/13` estourou 5 s, e vinte casos de `test/unit/launch.test.ts` e `test/unit/launch-worktree.test.ts` (PAP-37, 38, 42, 51 a 55, 57, 58) estouraram 60 s com um `git` de `Bun.spawnSync` que não voltou, stderr vazio. Nas três execuções da T26 não voltou. A causa não foi achada; entra na lista dos instáveis: uma falha assim no Linux pede outra execução antes de concluir que algo quebrou.
+- **`EVT-43` falha muito no Windows com o Bun 1.3.14**: depois da T26, 2 de 2 execuções da suíte inteira e 8 de 8 do arquivo sozinho, com o `acked_at` gravado pelo processo do broker de 1 a 4 ms antes do `Date.now()` do teste; na `main` em `36440a6`, num clone com `bun install` próprio, 3 de 3. Nas cópias do Verifier passou nas voltas 1 e 2 e falhou na 3, passando sozinho em seguida. Não é a fatia. Com o Bun 1.4.2 a falha era rara (lista dos instáveis). Uma falha só dele não bloqueia a suíte.
+- `EVT-90/92` de `test/integration/server-tools.test.ts`, anterior à fatia, falhou uma vez em cinco execuções da suíte inteira no Windows (3335 ms) e passou sozinho na seguinte: entra na lista dos instáveis de "Evidência e limites".
+- No Linux o clone se faz com `git clone -c core.autocrlf=false`: nesta máquina `core.autocrlf` é `true` e o repositório não tem `.gitattributes`, então um clone sem a opção leva CRLF para o contêiner.
+- Na T27, o critério de sucesso do clique duplo foi marcado pelos testes, com uma leitura: com o modal já aberto, o primeiro clique de um duplo sobre `enter confirmar` envia, como a tecla `enter`; o segundo não faz nada.
+- Notado e não tocado: o detalhe de uma pergunta com 8 ou mais opções desenha `undefined …` (`broker/tui/screens/questions.ts:164`, anterior à fatia); a seção da TUI de `broker/README.md` ainda diz que ela não escreve nada no broker e não lista a tecla `4`, de antes da fatia Question; `test/unit/tui-mouse.test.ts` repete ajudantes que `tui-hits.test.ts` tem (os testes do laço usam `test/terminal.ts`).
+- Num heredoc do Bash desta máquina, um escape com barra invertida (`\r`, `\t`) não chega ao arquivo como foi escrito: vira o caractere de verdade ou perde uma barra. Código com esses escapes se escreve com Write ou Edit. Os `.md` de `.specs/` e o `ROADMAP.md` têm CRLF na cópia de trabalho: um script que troca um trecho de várias linhas tem de levar isso em conta.
+
+### O que a TUI clicável deixa para a Gate
+
+- A seção "O que esta fatia deixa para a Gate" da spec: os selos de gate e de permissão já valem como `g` e `x` (CLK-36, CLK-37), e os modais de gate e de permissão seguem as regras do modal de resposta com o mouse (CLK-40, CLK-41, CLK-43, CLK-45, CLK-46).
+- A regra do clique é o AD-021: todo efeito do mouse é o de uma tecla que já existe. Um modal novo da Gate ganha o clique marcando as células dele no grid ao desenhar, como o modal de resposta.
+- A conferência em terminal real não feita (RT-02 a RT-08) e a versão do Windows Terminal da RT-01.
 
 ### Como a Papéis fechou
 
