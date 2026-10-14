@@ -789,8 +789,8 @@ T38 → T30
 
 **Done when**:
 
-- [ ] Uma feature fechada com `verdict` `approve` de um ticket, e a feature aberta com um gate `delivery` pendente e um `plan` com esse ticket ainda sem `verdict`: a linha `judge` não traz o ticket e traz os outros desta feature que têm `verdict`
-- [ ] Falha com `gate.ts:82` sem `&& row.event.feature_id === squad.feature?.id` numa cópia; gate quick passa e, por ser a última da fase, o full também
+- [x] Uma feature fechada com `verdict` `approve` de um ticket, e a feature aberta com um gate `delivery` pendente e um `plan` com esse ticket ainda sem `verdict`: a linha `judge` não traz o ticket e traz os outros desta feature que têm `verdict`
+- [x] Falha com `gate.ts:82` sem `&& row.event.feature_id === squad.feature?.id` numa cópia; gate quick passa e, por ser a última da fase, o full também
 
 **Tests**: unit
 **Gate**: quick

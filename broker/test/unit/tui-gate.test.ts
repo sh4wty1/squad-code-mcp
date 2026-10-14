@@ -203,6 +203,26 @@ test("GAT-47: the judge of a ticket is its latest verdict, ✗ for a rework; wit
   expect(none.box.slice(6, 9)).toEqual([row("perguntas ✓ 2 pelo dev · 2 entre agentes  ⟳ 3 default aplicado  ▶ 1 mescla…"), row(""), row("[a]provar      [r]ejeitar      [c]omentar            esc fechar")]);
 });
 
+test("GAT-47: a ticket of the latest plan with no verdict in this feature has no judge, even when its ref had a verdict in an earlier feature", () => {
+  // Feature 1, closed before the log of 19a, where TKT-15 was approved; the feature of 19a is
+  // feature 2, and after G-01 a plan adds TKT-15 to it
+  const events = LOGS["19a"]!.events;
+  const opened = events.find((e) => e.kind === "feature_opened")!;
+  const verdict = events.find((e) => e.kind === "verdict" && e.ticket_ref === "TKT-14")!;
+  const plan = events.find((e) => e.kind === "plan")! as SquadEvent & { tickets: object[] };
+  const before = opened.ts - 3_600_000;
+  const earlier = [
+    { ...opened, seq: 0.1, ts: before, feature_id: 1 },
+    { ...verdict, seq: 0.2, ts: before + 1000, feature_id: 1, ticket_ref: "TKT-15" },
+    { ...opened, seq: 0.3, ts: before + 2000, feature_id: 1, kind: "feature_closed", outcome: "delivered", body: "" },
+  ] as SquadEvent[];
+  const later = { ...plan, seq: 458.5, ts: G02.ts + 2000, tickets: [...plan.tickets, { ticket_ref: "TKT-15", title: "player no iOS" }] } as SquadEvent;
+  const change: Change = (events) => [...earlier, ...only({ body: "" }, [later])(events).map((e) => (e.feature_id === 1 ? { ...e, feature_id: 2 } : e))];
+  const v = frameView("19a", change);
+  expect([v.squad.feature?.id, v.squad.tickets.map((t) => t.ticket_ref)]).toEqual([2, ["TKT-12", "TKT-13", "TKT-14", "TKT-15"]]);
+  expect(draw(modal(1), change).box.filter((line) => line.startsWith("│  judge"))).toEqual([row("judge     ✓ TKT-12 5/5  ✓ TKT-13 1/1  ✓ TKT-14 1/1")]);
+});
+
 test("GAT-43: ticket and rework take the plural with a number other than 1", () => {
   const plan = LOGS["19a"]!.events.find((e) => e.kind === "plan")!;
   const one = { ...plan, tickets: [{ ticket_ref: "TKT-12", title: "player de áudio" }] } as SquadEvent;
