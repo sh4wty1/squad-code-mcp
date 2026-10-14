@@ -376,7 +376,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-33 | P1: Paridade com o log | T2 | Implementing |
 | GAT-34 | P1: O que a mother vê | T8 | Implementing |
 | GAT-35 | P1: O que a mother vê | T8 | Implementing |
-| GAT-36 | P1: O que a mother vê | T9 | In Tasks |
+| GAT-36 | P1: O que a mother vê | T9 | Implementing |
 | GAT-37 | P1: O que a mother vê | T10, T29 | In Tasks |
 | GAT-38 | P1: O que a mother vê | T10, T29 | In Tasks |
 | GAT-39 | P1: O que a mother vê | T10, T29 | In Tasks |

@@ -265,8 +265,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] A tool `gate` chamada pela sessão de teste grava o gate; o `approve` com a credencial humana chega como notificação do canal e a entrega fica confirmada
-- [ ] Gate full passa
+- [x] A tool `gate` chamada pela sessão de teste grava o gate; o `approve` com a credencial humana chega como notificação do canal e a entrega fica confirmada
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full
