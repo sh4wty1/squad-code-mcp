@@ -691,8 +691,8 @@ T36 → T30
 
 **Done when**:
 
-- [ ] A linha `perguntas` tem `<a>` um a mais e `<s>` um a menos que a do frame 19a
-- [ ] Falha com `gate.ts:42` trocado por `q.merged_into !== null` numa cópia; gate quick passa
+- [x] A linha `perguntas` tem `<a>` um a mais e `<s>` um a menos que a do frame 19a
+- [x] Falha com `gate.ts:42` trocado por `q.merged_into !== null` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

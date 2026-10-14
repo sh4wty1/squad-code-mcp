@@ -211,6 +211,13 @@ test("GAT-43: a ticket the latest plan dropped is not counted", () => {
   expect(draw(modal(1), (events) => only()(events).map((e) => (e === plan ? four : e))).box[5]).toBe(row("feature   3 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)"));
 });
 
+test("GAT-44: a merged question with an answer of its own counts once, by its resolved_by, and not as merged", () => {
+  // The mother answers Q-12, merged into Q-07 at 14:31:36, to the leader
+  const between = LOGS["19a"]!.events.find((e) => e.kind === "answer" && e.seq === 404)!;
+  const own = { ...between, seq: 431.5, ts: between.ts + 751_000, ticket_ref: "TKT-12", question_id: 12 } as SquadEvent;
+  expect(draw(modal(1), only({}, [own])).box[6]).toBe(row("perguntas ✓ 2 pelo dev · 3 entre agentes  ⟳ 3 default aplicado  ▶ 0 mescla…"));
+});
+
 test("GAT-44: an open question counts in none of the four", () => {
   // At 14:32:07 Q-07 and Q-08 wait for the dev, and Q-12 is merged into Q-07
   const v = frameView("01", (events) => [...events, { ...LOGS["19a"]!.events.find((e) => e.kind === "gate" && e.gate_id === 1)!, seq: 432.5 } as SquadEvent]);
