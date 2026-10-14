@@ -678,8 +678,8 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 
 **Done when**:
 
-- [ ] A seção "Success Criteria" da spec tem as contagens do Windows e do Linux com o commit, ou diz qual dos dois ficou sem rodar e por quê
-- [ ] Gate build passa nos dois: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] A seção "Success Criteria" da spec tem as contagens do Windows e do Linux com o commit, ou diz qual dos dois ficou sem rodar e por quê
+- [x] Gate build passa nos dois: `bun node_modules/typescript/bin/tsc --noEmit && bun test`. Em `b63acf8`: Windows com Bun 1.3.14, porque o 1.4.2 não está mais instalado na máquina; Linux com o 1.4.2 do contêiner
 
 **Tests**: none
 **Gate**: build

@@ -22,7 +22,7 @@ não faz nada que uma tecla não faça.
 - [ ] Toda tecla das fatias TUI leitura e Question continua fazendo o que faz, e todo efeito de um clique é o de uma tecla que já existe.
 - [ ] Nenhum clique grava uma resposta por engano: pelo mouse, o envio só sai de um clique no atalho `enter` do modal, e nunca do segundo clique de um clique duplo.
 - [ ] O terminal volta ao que era por qualquer saída da TUI: nenhum relatório de mouse chega ao shell depois.
-- [ ] A suíte passa no Windows e no Linux.
+- [x] A suíte passa no Windows e no Linux. Em `b63acf8`: Windows, `tsc` 0 e 2073 pass, 5 skip, 0 fail; Linux, `tsc` 0 e 3 de 3 execuções com 2077 pass, 1 skip, 0 fail.
 
 ## Out of Scope
 
@@ -380,5 +380,5 @@ cada item, e com o que ficou sem conferir.
 - [ ] Os testes de teclas e de frames das fatias TUI leitura e Question passam sem alteração, fora a linha de CLK-55.
 - [ ] Um clique duplo em qualquer ponto da tela, com um broker de teste, não grava nenhum `answer`.
 - [ ] Depois de sair da TUI por `q`, por `ctrl+c` e por erro, clicar no shell não escreve nada (RT-07).
-- [ ] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar.
+- [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Antes da fatia, `main` em `36440a6`: Windows, 1646 pass, 5 skip. Depois da fatia, em `b63acf8`, 2026-10-14: Windows, Bun 1.3.14 (o que está instalado na máquina), `tsc` 0 e 2073 pass, 5 skip, 0 fail, 83 arquivos, em 149 s; Linux, contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` sobre um clone feito com `git clone -c core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2077 pass, 1 skip, 0 fail, 83 arquivos, entre 79 e 81 s cada. O skip do Linux é o de `QST-99`, anterior à fatia. A falha instável do `git` de `Bun.spawnSync` em `launch*.test.ts` e o estouro de `PEER-38`, vistos uma vez em cinco na prévia, não voltaram.
 - [ ] `real-terminal.md` tem o resultado de RT-01 a RT-08, ou o que ficou sem conferir.
