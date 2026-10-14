@@ -341,105 +341,105 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| GAT-01 | P1: Pedir gate | - | Pending |
-| GAT-02 | P1: Pedir gate | - | Pending |
-| GAT-03 | P1: Pedir gate | - | Pending |
-| GAT-04 | P1: Pedir gate | - | Pending |
-| GAT-05 | P1: Pedir gate | - | Pending |
-| GAT-06 | P1: Pedir gate | - | Pending |
-| GAT-07 | P1: Pedir gate | - | Pending |
-| GAT-08 | P1: Pedir gate | - | Pending |
-| GAT-09 | P1: Pedir gate | - | Pending |
-| GAT-10 | P1: Pedir gate | - | Pending |
-| GAT-11 | P1: Pedir gate | - | Pending |
-| GAT-12 | P1: Reemitir depois do comentário | - | Pending |
-| GAT-13 | P1: Reemitir depois do comentário | - | Pending |
-| GAT-14 | P1: Reemitir depois do comentário | - | Pending |
-| GAT-15 | P1: Decidir um gate | - | Pending |
-| GAT-16 | P1: Decidir um gate | - | Pending |
-| GAT-17 | P1: Decidir um gate | - | Pending |
-| GAT-18 | P1: Decidir um gate | - | Pending |
-| GAT-19 | P1: Decidir um gate | - | Pending |
-| GAT-20 | P1: Decidir um gate | - | Pending |
-| GAT-21 | P1: Decidir um gate | - | Pending |
-| GAT-22 | P1: Decidir um gate | - | Pending |
-| GAT-23 | P1: Decidir um gate | - | Pending |
-| GAT-24 | P1: Decidir um gate | - | Pending |
-| GAT-25 | P1: Decidir um gate | - | Pending |
-| GAT-26 | P1: Encerrar a feature com o gate | - | Pending |
-| GAT-27 | P1: Encerrar a feature com o gate | - | Pending |
-| GAT-28 | P1: Encerrar a feature com o gate | - | Pending |
-| GAT-29 | P1: Encerrar a feature com o gate | - | Pending |
-| GAT-30 | P1: Paridade com o log | - | Pending |
-| GAT-31 | P1: Paridade com o log | - | Pending |
-| GAT-32 | P1: Paridade com o log | - | Pending |
-| GAT-33 | P1: Paridade com o log | - | Pending |
-| GAT-34 | P1: O que a mother vê | - | Pending |
-| GAT-35 | P1: O que a mother vê | - | Pending |
-| GAT-36 | P1: O que a mother vê | - | Pending |
-| GAT-37 | P1: O que a mother vê | - | Pending |
-| GAT-38 | P1: O que a mother vê | - | Pending |
-| GAT-39 | P1: O que a mother vê | - | Pending |
-| GAT-40 | P1: Modal de gate | - | Pending |
-| GAT-41 | P1: Modal de gate | - | Pending |
-| GAT-42 | P1: Modal de gate | - | Pending |
-| GAT-43 | P1: Modal de gate | - | Pending |
-| GAT-44 | P1: Modal de gate | - | Pending |
-| GAT-45 | P1: Modal de gate | - | Pending |
-| GAT-46 | P1: Modal de gate | - | Pending |
-| GAT-47 | P1: Modal de gate | - | Pending |
-| GAT-48 | P1: Modal de gate | - | Pending |
-| GAT-49 | P1: Modal de gate | - | Pending |
-| GAT-50 | P1: Modal de gate | - | Pending |
-| GAT-51 | P1: Modal de gate | - | Pending |
-| GAT-52 | P1: Modal de gate | - | Pending |
-| GAT-53 | P1: Modal de gate | - | Pending |
-| GAT-54 | P1: Modal de gate | - | Pending |
-| GAT-55 | P1: Modal de gate | - | Pending |
-| GAT-56 | P1: Modal de gate | - | Pending |
-| GAT-57 | P1: Modal de gate | - | Pending |
-| GAT-58 | P1: Modal de gate | - | Pending |
-| GAT-59 | P1: Modal de gate | - | Pending |
-| GAT-60 | P1: Modal de permissão | - | Pending |
-| GAT-61 | P1: Modal de permissão | - | Pending |
-| GAT-62 | P1: Modal de permissão | - | Pending |
-| GAT-63 | P1: Modal de permissão | - | Pending |
-| GAT-64 | P1: Modal de permissão | - | Pending |
-| GAT-65 | P1: Modal de permissão | - | Pending |
-| GAT-66 | P1: Modal de permissão | - | Pending |
-| GAT-67 | P1: Modal de permissão | - | Pending |
-| GAT-68 | P1: Modal de permissão | - | Pending |
-| GAT-69 | P1: Modal de permissão | - | Pending |
-| GAT-70 | P1: Modal de permissão | - | Pending |
-| GAT-71 | P1: Modal de permissão | - | Pending |
-| GAT-72 | P1: Teclado e escrita comuns aos modais | - | Pending |
-| GAT-73 | P1: Teclado e escrita comuns aos modais | - | Pending |
-| GAT-74 | P1: Teclado e escrita comuns aos modais | - | Pending |
-| GAT-75 | P1: Teclado e escrita comuns aos modais | - | Pending |
-| GAT-76 | P1: Teclado e escrita comuns aos modais | - | Pending |
-| GAT-77 | P1: Teclado e escrita comuns aos modais | - | Pending |
-| GAT-78 | P1: Teclado e escrita comuns aos modais | - | Pending |
-| GAT-79 | P1: Mouse nos modais | - | Pending |
-| GAT-80 | P1: Mouse nos modais | - | Pending |
-| GAT-81 | P1: Mouse nos modais | - | Pending |
-| GAT-82 | P1: Mouse nos modais | - | Pending |
-| GAT-83 | P1: Mouse nos modais | - | Pending |
-| GAT-84 | P1: Mouse nos modais | - | Pending |
-| GAT-85 | P1: Frames e legenda | - | Pending |
-| GAT-86 | P1: Frames e legenda | - | Pending |
-| GAT-87 | P1: Frames e legenda | - | Pending |
-| GAT-88 | P1: Frames e legenda | - | Pending |
-| GAT-89 | P1: Frames e legenda | - | Pending |
-| GAT-90 | P1: Frames e legenda | - | Pending |
-| GAT-91 | Edge cases | - | Pending |
-| GAT-92 | Edge cases | - | Pending |
-| GAT-93 | Edge cases | - | Pending |
-| GAT-94 | Edge cases | - | Pending |
-| GAT-95 | Edge cases | - | Pending |
-| GAT-96 | Edge cases | - | Pending |
-| GAT-97 | Edge cases | - | Pending |
+| GAT-01 | P1: Pedir gate | T1, T3 | In Tasks |
+| GAT-02 | P1: Pedir gate | T1, T3 | In Tasks |
+| GAT-03 | P1: Pedir gate | T3 | In Tasks |
+| GAT-04 | P1: Pedir gate | T3 | In Tasks |
+| GAT-05 | P1: Pedir gate | T3, T6 | In Tasks |
+| GAT-06 | P1: Pedir gate | T3 | In Tasks |
+| GAT-07 | P1: Pedir gate | T3 | In Tasks |
+| GAT-08 | P1: Pedir gate | T3 | In Tasks |
+| GAT-09 | P1: Pedir gate | T3 | In Tasks |
+| GAT-10 | P1: Pedir gate | T3 | In Tasks |
+| GAT-11 | P1: Pedir gate | T6 | In Tasks |
+| GAT-12 | P1: Reemitir depois do comentário | T3 | In Tasks |
+| GAT-13 | P1: Reemitir depois do comentário | T3 | In Tasks |
+| GAT-14 | P1: Reemitir depois do comentário | T3 | In Tasks |
+| GAT-15 | P1: Decidir um gate | T4 | In Tasks |
+| GAT-16 | P1: Decidir um gate | T4 | In Tasks |
+| GAT-17 | P1: Decidir um gate | T4 | In Tasks |
+| GAT-18 | P1: Decidir um gate | T4, T9 | In Tasks |
+| GAT-19 | P1: Decidir um gate | T4 | In Tasks |
+| GAT-20 | P1: Decidir um gate | T4, T6 | In Tasks |
+| GAT-21 | P1: Decidir um gate | T4 | In Tasks |
+| GAT-22 | P1: Decidir um gate | T4 | In Tasks |
+| GAT-23 | P1: Decidir um gate | T4 | In Tasks |
+| GAT-24 | P1: Decidir um gate | T4, T7 | In Tasks |
+| GAT-25 | P1: Decidir um gate | T4 | In Tasks |
+| GAT-26 | P1: Encerrar a feature com o gate | T5, T6, T26 | In Tasks |
+| GAT-27 | P1: Encerrar a feature com o gate | T5, T26 | In Tasks |
+| GAT-28 | P1: Encerrar a feature com o gate | T5 | In Tasks |
+| GAT-29 | P1: Encerrar a feature com o gate | T5 | In Tasks |
+| GAT-30 | P1: Paridade com o log | T2, T7 | In Tasks |
+| GAT-31 | P1: Paridade com o log | T2 | In Tasks |
+| GAT-32 | P1: Paridade com o log | T2 | In Tasks |
+| GAT-33 | P1: Paridade com o log | T2 | In Tasks |
+| GAT-34 | P1: O que a mother vê | T8 | In Tasks |
+| GAT-35 | P1: O que a mother vê | T8 | In Tasks |
+| GAT-36 | P1: O que a mother vê | T9 | In Tasks |
+| GAT-37 | P1: O que a mother vê | T10, T29 | In Tasks |
+| GAT-38 | P1: O que a mother vê | T10, T29 | In Tasks |
+| GAT-39 | P1: O que a mother vê | T10, T29 | In Tasks |
+| GAT-40 | P1: Modal de gate | T13, T20, T26 | In Tasks |
+| GAT-41 | P1: Modal de gate | T17, T18 | In Tasks |
+| GAT-42 | P1: Modal de gate | T18 | In Tasks |
+| GAT-43 | P1: Modal de gate | T18 | In Tasks |
+| GAT-44 | P1: Modal de gate | T18 | In Tasks |
+| GAT-45 | P1: Modal de gate | T18 | In Tasks |
+| GAT-46 | P1: Modal de gate | T18 | In Tasks |
+| GAT-47 | P1: Modal de gate | T18 | In Tasks |
+| GAT-48 | P1: Modal de gate | T18 | In Tasks |
+| GAT-49 | P1: Modal de gate | T18 | In Tasks |
+| GAT-50 | P1: Modal de gate | T13 | In Tasks |
+| GAT-51 | P1: Modal de gate | T18 | In Tasks |
+| GAT-52 | P1: Modal de gate | T13, T26 | In Tasks |
+| GAT-53 | P1: Modal de gate | T18 | In Tasks |
+| GAT-54 | P1: Modal de gate | T13 | In Tasks |
+| GAT-55 | P1: Modal de gate | T13 | In Tasks |
+| GAT-56 | P1: Modal de gate | T13, T18 | In Tasks |
+| GAT-57 | P1: Modal de gate | T15 | In Tasks |
+| GAT-58 | P1: Modal de gate | T11, T15 | In Tasks |
+| GAT-59 | P1: Modal de gate | T15 | In Tasks |
+| GAT-60 | P1: Modal de permissão | T14, T20, T26 | In Tasks |
+| GAT-61 | P1: Modal de permissão | T12, T17, T19 | In Tasks |
+| GAT-62 | P1: Modal de permissão | T12, T19 | In Tasks |
+| GAT-63 | P1: Modal de permissão | T17, T19 | In Tasks |
+| GAT-64 | P1: Modal de permissão | T19 | In Tasks |
+| GAT-65 | P1: Modal de permissão | T14 | In Tasks |
+| GAT-66 | P1: Modal de permissão | T14, T26 | In Tasks |
+| GAT-67 | P1: Modal de permissão | T14 | In Tasks |
+| GAT-68 | P1: Modal de permissão | T15 | In Tasks |
+| GAT-69 | P1: Modal de permissão | T11, T15 | In Tasks |
+| GAT-70 | P1: Modal de permissão | T12, T15 | In Tasks |
+| GAT-71 | P1: Modal de permissão | T12, T14, T19 | In Tasks |
+| GAT-72 | P1: Teclado e escrita comuns aos modais | T11, T25, T27 | In Tasks |
+| GAT-73 | P1: Teclado e escrita comuns aos modais | T15, T25 | In Tasks |
+| GAT-74 | P1: Teclado e escrita comuns aos modais | T15, T25 | In Tasks |
+| GAT-75 | P1: Teclado e escrita comuns aos modais | T16 | In Tasks |
+| GAT-76 | P1: Teclado e escrita comuns aos modais | T13 | In Tasks |
+| GAT-77 | P1: Teclado e escrita comuns aos modais | T16 | In Tasks |
+| GAT-78 | P1: Teclado e escrita comuns aos modais | T25 | In Tasks |
+| GAT-79 | P1: Mouse nos modais | T23, T24 | In Tasks |
+| GAT-80 | P1: Mouse nos modais | T24 | In Tasks |
+| GAT-81 | P1: Mouse nos modais | T24 | In Tasks |
+| GAT-82 | P1: Mouse nos modais | T23, T24 | In Tasks |
+| GAT-83 | P1: Mouse nos modais | T24 | In Tasks |
+| GAT-84 | P1: Mouse nos modais | T24 | In Tasks |
+| GAT-85 | P1: Frames e legenda | T21 | In Tasks |
+| GAT-86 | P1: Frames e legenda | T22 | In Tasks |
+| GAT-87 | P1: Frames e legenda | T20 | In Tasks |
+| GAT-88 | P1: Frames e legenda | T20, T21, T22 | In Tasks |
+| GAT-89 | P1: Frames e legenda | T21, T22, T28, T30 | In Tasks |
+| GAT-90 | P1: Frames e legenda | T13 | In Tasks |
+| GAT-91 | Edge cases | T13 | In Tasks |
+| GAT-92 | Edge cases | T13 | In Tasks |
+| GAT-93 | Edge cases | T18 | In Tasks |
+| GAT-94 | Edge cases | T14, T19 | In Tasks |
+| GAT-95 | Edge cases | T14, T19 | In Tasks |
+| GAT-96 | Edge cases | T12 | In Tasks |
+| GAT-97 | Edge cases | T15 | In Tasks |
 
-**Coverage:** 97 total, 0 mapped to tasks, 97 unmapped.
+**Coverage:** 97 total, 97 mapped to tasks, 0 unmapped.
 
 ---
 
