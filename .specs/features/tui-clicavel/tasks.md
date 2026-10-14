@@ -704,6 +704,26 @@ Commit: `313d433`. O dev rodou a sonda num Windows Terminal em 2026-10-13 e diss
 **Tests**: none
 **Gate**: build
 
+
+---
+
+### F1: CLK-10 no terminal pequeno
+
+Da volta 1 do Verifier (`validation.md`, Fix 1): o mutante M31, que na tela pequena procura `q` caractere a caractere em vez de item a item de `keysOf`, sobreviveu.
+
+**What**: um teste de CLK-10 no laço com o terminal menor que 120×40: o relatório antigo `ESC [ M q!`, inteiro e partido em duas leituras, não sai da TUI nem pede nada ao broker, e a tela que volta em 120×40 é a de antes.
+**Where**: `broker/test/unit/tui-mouse-loop.test.ts`
+**Depends on**: T27
+**Requirement**: CLK-10
+
+**Done when**:
+
+- [ ] Em 119×40 e em 120×39, `t.raw` fica `[true]`, só há `GET`, e em 120×40 a tela principal é a de antes
+- [ ] O teste mata o M31 (`broker/tui.ts:182`, `keysOf(chunk)` → `[...chunk]`)
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
 ---
 
 ## Phase Execution Map
