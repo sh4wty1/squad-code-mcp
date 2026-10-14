@@ -8,7 +8,7 @@ import type { Hit } from "./grid.ts";
 import { input, isReport, keysOf, notice, press } from "./keys.ts";
 import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
-import type { Modal, Ui, View } from "./view.ts";
+import type { Ui, View } from "./view.ts";
 
 // The three integers of a report as the terminal sent them: the column and the line count from 1
 export interface Report {
@@ -61,7 +61,7 @@ const WHEEL = new Map([
 ]);
 const FEED_LINES = 3;
 
-// With the modal of answer open, a click that comes less than this after the one before it
+// With a modal open, a click that comes less than this after the one before it
 // is the second of a double click
 const DOUBLE_MS = 500;
 
@@ -129,13 +129,28 @@ function clicked(hit: Hit, ui: Ui, view: View): Ui | null {
   return focused;
 }
 
-// The keys of a click on a cell the modal of answer drew: the key of the cell, or `k` or `j`
-// from the marked line of the choice mode to the clicked one, and enter on the line after
-// the options, the other answer, which leads to the text. A click marks an option and never
-// confirms it.
-function answered(hit: Hit, modal: Modal, view: View): string[] {
+// Whether a modal is open: the one of answer, of gate or of permission
+const opened = (ui: Ui): boolean => ui.modal !== null || !!ui.gate || !!ui.permission;
+
+// The keys that take a queue of a modal from the marked item to the clicked one; none when
+// one of them is no longer in it
+function queued(queue: number[], from: number, to: number): string[] {
+  const [a, b] = [queue.indexOf(from), queue.indexOf(to)];
+  return a < 0 || b < 0 ? [] : walk(a, b, "[", "]");
+}
+
+// The keys of a click on a cell a modal drew: the key of the cell; in the queue of the modal
+// of gate or of permission, `[` or `]` from the marked item to the clicked one; in the modal
+// of answer, `k` or `j` from the marked line of the choice mode to the clicked one, and enter
+// on the line after the options, the other answer, which leads to the text. A click marks
+// and never decides.
+function answered(hit: Hit, ui: Ui, view: View): string[] {
   if (hit.key !== undefined) return [hit.key];
-  if (hit.option === undefined || modal.choice === null) return [];
+  const { squad } = view;
+  if (ui.gate && hit.gate !== undefined) return queued(squad.gates.filter((g) => g.pending).map((g) => g.id), ui.gate.id, hit.gate);
+  if (ui.permission && hit.request !== undefined) return queued(squad.permissions.map((p) => p.seq), ui.permission.seq, hit.request);
+  const modal = ui.modal;
+  if (!modal || hit.option === undefined || modal.choice === null) return [];
   const other = view.squad.questions.find((q) => q.id === modal.question)?.options.length;
   return [...walk(modal.choice, hit.option), ...(hit.option === other ? ["\r"] : [])];
 }
@@ -163,12 +178,13 @@ export function point(at: Entry, item: string, view: View, drawn: Drawn | null):
   const [x, y] = [report.x - 1, report.y - 1];
   if (x < 0 || x >= COLS || y < 0 || y >= LINES) return still;
   const hit = drawn.hits[y]?.[x];
-  // With the modal of answer open only what it drew is clicked, and without it nothing of it
-  if (!hit || (hit.modal === true) !== (ui.modal !== null)) return still;
-  // In the modal the wheel rolls nothing, and the second click of a double one does nothing:
-  // the click that opened the modal would confirm an option with it, or close the modal
-  if (ui.modal && (wheel || quick)) return still;
-  const next = ui.modal ? tap(ui, view, answered(hit, ui.modal, view)) : wheel ? tap(ui, view, rolled(hit, wheel, ui)) : clicked(hit, ui, view);
+  // With a modal open only what it drew is clicked, and without one nothing of it
+  const open = opened(ui);
+  if (!hit || (hit.modal === true) !== open) return still;
+  // In a modal the wheel rolls nothing, and the second click of a double one does nothing:
+  // the click that opened the modal would decide with it, or close the modal
+  if (open && (wheel || quick)) return still;
+  const next = open ? tap(ui, view, answered(hit, ui, view)) : wheel ? tap(ui, view, rolled(hit, wheel, ui)) : clicked(hit, ui, view);
   return next && { ...still, ui: next };
 }
 
@@ -184,7 +200,7 @@ export function take(at: Entry, chunk: string, view: View, more: boolean, drawn:
     if (!next) return null;
     if (isReport(item)) return point(next, item, view, drawn);
     const { ui, pointer } = next;
-    if (item === "m" && !ui.modal) {
+    if (item === "m" && !opened(ui)) {
       const on = !pointer.on;
       return { ui: { ...ui, toast: notice(view, on ? "mouse ligado" : "mouse desligado · o terminal seleciona texto") }, pointer: { ...pointer, on } };
     }

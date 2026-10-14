@@ -420,11 +420,11 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-77 | P1: Teclado e escrita comuns aos modais | T16 | Implementing |
 | GAT-78 | P1: Teclado e escrita comuns aos modais | T25 | In Tasks |
 | GAT-79 | P1: Mouse nos modais | T23, T24 | Implementing |
-| GAT-80 | P1: Mouse nos modais | T24 | In Tasks |
-| GAT-81 | P1: Mouse nos modais | T24 | In Tasks |
+| GAT-80 | P1: Mouse nos modais | T24 | Implementing |
+| GAT-81 | P1: Mouse nos modais | T24 | Implementing |
 | GAT-82 | P1: Mouse nos modais | T23, T24 | Implementing |
-| GAT-83 | P1: Mouse nos modais | T24 | In Tasks |
-| GAT-84 | P1: Mouse nos modais | T24 | In Tasks |
+| GAT-83 | P1: Mouse nos modais | T24 | Implementing |
+| GAT-84 | P1: Mouse nos modais | T24 | Implementing |
 | GAT-85 | P1: Frames e legenda | T21 | Implementing |
 | GAT-86 | P1: Frames e legenda | T22 | Implementing |
 | GAT-87 | P1: Frames e legenda | T20 | Implementing |

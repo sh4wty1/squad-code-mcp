@@ -538,8 +538,8 @@ T27 → T28 → T29 → T30
 
 **Done when**:
 
-- [ ] `test/unit/tui-mouse-gate.test.ts`: cada GAT comparado com `press` no mesmo estado; fora da caixa nos quatro modos de gate e nos dois de permissão; a fila do primeiro ao último e o marcado; dentro da caixa inerte; a roda; 499 e 500 ms
-- [ ] Os testes de `tui-mouse.test.ts` continuam; gate quick passa
+- [x] `test/unit/tui-mouse-gate.test.ts`: cada GAT comparado com `press` no mesmo estado; fora da caixa nos quatro modos de gate e nos dois de permissão; a fila do primeiro ao último e o marcado; dentro da caixa inerte; a roda; 499 e 500 ms
+- [x] Os testes de `tui-mouse.test.ts` continuam; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
