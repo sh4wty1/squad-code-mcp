@@ -273,6 +273,28 @@ test("GAT-83: a click on an item of the queue of requests does ] or [ as many ti
   });
 });
 
+// A click on the cell of an item the last drawing had in the queue, decided by the read after
+// it. The marked item is the second of the new queue, so that walking to the first is a change.
+test("GAT-83: a click on a gate that left the queue after the last drawing changes nothing", () => {
+  const before = gates3(3);
+  const g = screen(before);
+  const [x, y] = queueCells(g, modalBox(g), ["G-01 entrega"])[0]!;
+  const approved = { ...G02, seq: 501, ts: G02.ts + 1000, from: "human", role_from: "human", to: "mother", kind: "gate_decision", gate_id: 1, decision: "approve", summary: "G-01 aprovado", body: "" } as SquadEvent;
+  const after = view("19b", { gate: gateModal(3) }, (events) => [...threeGates(events), approved]);
+  expect(after.squad.gates.filter((gt) => gt.pending).map((gt) => gt.id)).toEqual([2, 3]);
+  expect(point(entry(after), click(x, y), after, drawing(before, g))!.ui).toBe(after.ui);
+});
+
+test("GAT-83: a click on a request that left the queue after the last drawing changes nothing", () => {
+  const before = view("22d", { permission: permissionModal(500) }, threeRequests);
+  const g = screen(before);
+  const [x, y] = queueCells(g, modalBox(g), ["P-01 w1 Bash"])[0]!;
+  const denied = { ...REQUEST, seq: 600, ts: REQUEST.ts + 30_000, kind: "permission_decision", from: "human", role_from: "human", to: "worker-1", request_seq: 459, behavior: "deny", summary: "", body: "" } as SquadEvent;
+  const after = view("22d", { permission: permissionModal(500) }, (events) => [...threeRequests(events), denied]);
+  expect(after.squad.permissions.map((p) => p.seq)).toEqual([460, 500]);
+  expect(point(entry(after), click(x, y), after, drawing(before, g))!.ui).toBe(after.ui);
+});
+
 // A cell of each thing a click does in a modal: a shortcut that changes it, and one outside its box
 function targets(v: View, label: string, does: string): [number, number][] {
   const g = screen(v);

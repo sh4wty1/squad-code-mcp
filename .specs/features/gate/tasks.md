@@ -709,9 +709,9 @@ T36 → T30
 
 **Done when**:
 
-- [ ] Três gates pendentes, modal em G-03, uma leitura com G-01 aprovado: o clique na célula de G-01 do desenho antigo deixa `Ui` igual, com o marcado no índice 1 da fila nova
-- [ ] O mesmo para a fila de pedidos, com três abertos, o terceiro marcado e o primeiro decidido
-- [ ] Falha com `mouse.ts:139` trocado por `a < 0 ? []` numa cópia; gate quick passa
+- [x] Três gates pendentes, modal em G-03, uma leitura com G-01 aprovado: o clique na célula de G-01 do desenho antigo deixa `Ui` igual, com o marcado no índice 1 da fila nova
+- [x] O mesmo para a fila de pedidos, com três abertos, o terceiro marcado e o primeiro decidido
+- [x] Falha com `mouse.ts:139` trocado por `a < 0 ? []` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
