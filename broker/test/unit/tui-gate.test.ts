@@ -205,6 +205,12 @@ test("GAT-43: ticket and rework take the plural with a number other than 1", () 
   expect(draw(modal(1), (events) => only()(events).filter((e) => e !== verdict)).box[5]).toBe(row("feature   3 tickets · 0 reworks · 34 min · ≈$10.17 (custo est.)"));
 });
 
+test("GAT-43: a ticket the latest plan dropped is not counted", () => {
+  const plan = LOGS["19a"]!.events.find((e) => e.kind === "plan")! as SquadEvent & { tickets: object[] };
+  const four = { ...plan, tickets: [...plan.tickets, { ticket_ref: "TKT-15", title: "x", dropped: true }] } as SquadEvent;
+  expect(draw(modal(1), (events) => only()(events).map((e) => (e === plan ? four : e))).box[5]).toBe(row("feature   3 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)"));
+});
+
 test("GAT-44: an open question counts in none of the four", () => {
   // At 14:32:07 Q-07 and Q-08 wait for the dev, and Q-12 is merged into Q-07
   const v = frameView("01", (events) => [...events, { ...LOGS["19a"]!.events.find((e) => e.kind === "gate" && e.gate_id === 1)!, seq: 432.5 } as SquadEvent]);

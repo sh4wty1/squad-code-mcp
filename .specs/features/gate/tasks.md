@@ -673,8 +673,8 @@ T36 → T30
 
 **Done when**:
 
-- [ ] A linha `feature` com o quarto ticket descartado no `plan` é `feature   3 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)`
-- [ ] Falha com `gate.ts:27` trocado por `t.planned` numa cópia; gate quick passa
+- [x] A linha `feature` com o quarto ticket descartado no `plan` é `feature   3 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)`
+- [x] Falha com `gate.ts:27` trocado por `t.planned` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
