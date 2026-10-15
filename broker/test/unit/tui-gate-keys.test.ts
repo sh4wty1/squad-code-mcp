@@ -299,6 +299,12 @@ test("GAT-59: a read changes nothing in a modal whose decision is on its way, no
   expect(sync(pending.ui, pending)).toBe(pending.ui);
 });
 
+test("GAT-59: a read that shows another gate decided leaves the modal of a gate still pending open", () => {
+  // G-01 approved, the modal on G-02
+  const v = opened("19a", modal(2, { mode: "comment", text: "e o iOS?" }), (events) => [...events, decided(500, 1, "approve")]);
+  expect(sync(v.ui, v)).toBe(v.ui);
+});
+
 // ---- a paste, and the broker not answering ----
 
 const START_PASTE = "\x1b[200~";

@@ -922,8 +922,8 @@ T47 → T30
 
 **Done when**:
 
-- [ ] Modal de G-02 no modo de comentário com texto, G-01 aprovado: `sync` devolve o mesmo `Ui`
-- [ ] Falha com `keys.ts:398` com o `find` trocado por `() => true` numa cópia; gate quick passa
+- [x] Modal de G-02 no modo de comentário com texto, G-01 aprovado: `sync` devolve o mesmo `Ui`
+- [x] Falha com `keys.ts:398` com o `find` trocado por `() => true` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
