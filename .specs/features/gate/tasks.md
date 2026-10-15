@@ -886,8 +886,8 @@ T47 → T30
 
 **Done when**:
 
-- [ ] A linha `feature` é `feature   2 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)` e a `judge` é `judge     ✓ TKT-13 1/1  ✓ TKT-14 1/1`
-- [ ] Falha com `gate.ts:80` sem `&& !t.dropped` e com `gate.ts:28` `squad.tickets.reduce` trocado por `live.reduce`, cada um numa cópia; gate quick passa
+- [x] A linha `feature` é `feature   2 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)` e a `judge` é `judge     ✓ TKT-13 1/1  ✓ TKT-14 1/1`
+- [x] Falha com `gate.ts:80` sem `&& !t.dropped` e com `gate.ts:28` `squad.tickets.reduce` trocado por `live.reduce`, cada um numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

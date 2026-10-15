@@ -239,6 +239,15 @@ test("GAT-43: a ticket the latest plan dropped is not counted", () => {
   expect(draw(modal(1), (events) => only()(events).map((e) => (e === plan ? four : e))).box[5]).toBe(row("feature   3 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)"));
 });
 
+test("GAT-43, GAT-47: a ticket a later plan drops after its verdict leaves the judge and the count of tickets, and its rework still counts", () => {
+  // after G-02 a plan drops TKT-12, the ticket of the rework of 19a
+  const plan = LOGS["19a"]!.events.find((e) => e.kind === "plan")! as SquadEvent & { tickets: { ticket_ref: string }[] };
+  const later = { ...plan, seq: 458.5, ts: G02.ts + 2000, tickets: plan.tickets.map((t) => (t.ticket_ref === "TKT-12" ? { ...t, dropped: true } : t)) } as SquadEvent;
+  const { box } = draw(modal(1), only({}, [later]));
+  expect(box[5]).toBe(row("feature   2 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)"));
+  expect(box.filter((line) => line.startsWith("│  judge"))).toEqual([row("judge     ✓ TKT-13 1/1  ✓ TKT-14 1/1")]);
+});
+
 test("GAT-44: a merged question with an answer of its own counts once, by its resolved_by, and not as merged", () => {
   // The mother answers Q-12, merged into Q-07 at 14:31:36, to the leader
   const between = LOGS["19a"]!.events.find((e) => e.kind === "answer" && e.seq === 404)!;
