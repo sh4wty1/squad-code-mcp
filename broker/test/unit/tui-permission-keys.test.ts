@@ -233,6 +233,12 @@ test("GAT-70: a read that shows the request of the modal decided by another deci
   expect(sync(v.ui, v)).toEqual({ ...v.ui, permission: null, toast: toast(v, "P-01 decidido", "gray") });
 });
 
+test("GAT-70: a read that shows another request decided leaves the modal of a request still open as it was", () => {
+  // 459 decided by another TUI, the modal on 460
+  const v = view("22c", { permission: modal(460, { offset: 3 }) }, DECIDED);
+  expect(sync(v.ui, v)).toBe(v.ui);
+});
+
 test("GAT-71, GAT-96: a read that shows the request closed by its peer or by its peer_left leaves the modal open, to say it was answered in the terminal", () => {
   for (const change of [later("turn_started"), LEFT]) {
     const v = view("14", { permission: modal(459) }, change);

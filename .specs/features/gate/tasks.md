@@ -940,8 +940,8 @@ T47 → T30
 
 **Done when**:
 
-- [ ] Modal de 460 no `offset` 3, 459 decidido: `sync` devolve o mesmo `Ui`
-- [ ] Falha com `keys.ts:408` com o `find` trocado por `() => true` numa cópia; gate quick passa
+- [x] Modal de 460 no `offset` 3, 459 decidido: `sync` devolve o mesmo `Ui`
+- [x] Falha com `keys.ts:408` com o `find` trocado por `() => true` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
