@@ -123,16 +123,17 @@ export function createGate(db: Database, log: Log, token: string) {
     if (body.human_token !== token) {
       return refuse("invalid_token", "human_token is not the human credential. Only the dev decides a gate.");
     }
-    const { gate_id, decision, text } = body;
+    const { gate_id, request_seq, decision, text } = body;
     if (
       !Number.isInteger(gate_id) ||
+      !Number.isInteger(request_seq) ||
       typeof decision !== "string" ||
       (text !== undefined && typeof text !== "string") ||
       ((decision === "reject" || decision === "comment") && (typeof text !== "string" || text.trim() === ""))
     ) {
       return refuse(
         "missing_field",
-        "Send gate_id as the integer id of the gate, decision as a string and text, if any, as a string. reject and comment take a text with the reason in it."
+        "Send gate_id as the integer id of the gate, request_seq as the integer seq of the version of it you decide, decision as a string and text, if any, as a string. reject and comment take a text with the reason in it."
       );
     }
     if (!DECISIONS.includes(decision) || !find(gate_id as number)) {
@@ -141,10 +142,12 @@ export function createGate(db: Database, log: Log, token: string) {
 
     // The row is read and the decision written in one transaction, so a gate has one final
     // decision, the first to come (GAT-24). A pending gate of a feature that is not open has
-    // no one to decide it.
-    const seq = log.transaction(() => {
+    // no one to decide it, and a decision of a version the mother asked again is of a version
+    // that is no longer asked (GAT-98).
+    const seq = log.transaction((): number | "gate_closed" | "gate_reissued" => {
       const row = find(gate_id as number)!;
-      if (row.status !== "pending" || row.feature_id !== log.openFeature()?.id) return null;
+      if (row.status !== "pending" || row.feature_id !== log.openFeature()?.id) return "gate_closed";
+      if (row.request_seq !== request_seq) return "gate_reissued";
       const said = decision === "approve" ? "" : `: ${text}`;
       const seq = log.record({
         kind: "gate_decision",
@@ -167,8 +170,11 @@ export function createGate(db: Database, log: Log, token: string) {
       }
       return seq;
     });
-    if (seq === null) {
+    if (seq === "gate_closed") {
       return refuse("gate_closed", `${gid(gate_id as number)} is already decided, or its feature closed. Nothing was recorded.`);
+    }
+    if (seq === "gate_reissued") {
+      return refuse("gate_reissued", `${gid(gate_id as number)} was asked again in a new version. Read it and decide that one. Nothing was recorded.`);
     }
     return { ok: true, seq };
   }

@@ -118,9 +118,13 @@ function run(seed: number, seen: ReturnType<typeof tally>) {
 
   function decide() {
     const decision = chance(0.95) ? pick(["approve", "reject", "comment"]) : "bogus";
+    const gate_id = anId();
+    // the version the gate has now most of the time, otherwise one before it (GAT-98)
+    const now = rows().find((g) => g.id === gate_id)?.request_seq ?? 1;
     const body: Record<string, unknown> = {
       human_token: chance(0.95) ? HUMAN_TOKEN : "wrong",
-      gate_id: anId(),
+      gate_id,
+      request_seq: chance(0.9) ? now : now - 1,
       decision,
     };
     if (decision === "approve" ? chance(0.3) : chance(0.94)) body.text = pick(["looks good", "not this", " "]);
@@ -200,6 +204,7 @@ test("GAT-30/24: after each step of 200 generated sequences of 40 calls, the gat
       "decide invalid_field",
       "decide approve gate_closed",
       "decide reject gate_closed",
+      "decide approve gate_reissued",
       "close gate_required",
     ].filter((s) => !seen.refused.has(s))
   ).toEqual([]);

@@ -83,7 +83,7 @@ test("GAT-76: with the modal of answer open g goes into its text, or does nothin
   const text = view("18a", { screen: "questions", modal: { question: 8, choice: null, text: "ab", expanded: false, sending: false, refused: false } });
   const typed = key("g", text)!;
   expect(typed.modal!.text).toBe("abg");
-  expect(typed.gate).toBeUndefined();
+  expect(typed.gate).toBeNull();
   const choice = view("01", { screen: "questions", modal: { question: 7, choice: 0, text: "", expanded: false, sending: false, refused: false } });
   expect(key("g", choice)).toBe(choice.ui);
 });
@@ -143,7 +143,15 @@ test("GAT-50: ] and [ skip a decided gate, which is out of the queue", () => {
 
 test("GAT-52: in the confirm mode y leaves the approve of the gate to send, without text, and the modal waits for the broker", () => {
   const v = opened("18a", modal(1, { mode: "confirm" }));
-  expect(key("y", v)).toEqual({ ...v.ui, gate: modal(1, { mode: "confirm", sending: true }), send: { gate_id: 1, decision: "approve" } });
+  expect(key("y", v)).toEqual({ ...v.ui, gate: modal(1, { mode: "confirm", sending: true }), send: { gate_id: 1, request_seq: 439, decision: "approve" } });
+});
+
+test("GAT-98: the approve and the text of a reject or a comment carry the request_seq of the version on the screen: 457 of G-01 asked again in 18b", () => {
+  const v = opened("18b", modal(1, { mode: "confirm", version: 2 }));
+  expect(key("y", v)!.send).toEqual({ gate_id: 1, request_seq: 457, decision: "approve" });
+  for (const mode of ["reject", "comment"] as const) {
+    expect(key("\r", opened("18b", modal(1, { mode, text: "falta", version: 2 })))!.send).toEqual({ gate_id: 1, request_seq: 457, decision: mode, text: "falta" });
+  }
 });
 
 test("GAT-52: in the confirm mode esc goes back to the view mode, and no other key changes the screen", () => {
@@ -185,7 +193,7 @@ for (const mode of ["reject", "comment"] as const) {
     expect(key("\r", v)).toEqual({
       ...v.ui,
       gate: modal(1, { mode, text: "  falta o teste do parser  ", sending: true }),
-      send: { gate_id: 1, decision: mode, text: "falta o teste do parser" },
+      send: { gate_id: 1, request_seq: 439, decision: mode, text: "falta o teste do parser" },
     });
   });
 
@@ -227,22 +235,22 @@ test("GAT-57: when the broker takes the decision the modal closes and says in gr
     ["reject", "reject", "✓ G-01 rejeitado"],
     ["comment", "comment", "✓ G-01 comentado · continua pendente"],
   ] as const) {
-    const v = sending(modal(1, { mode, text: decision === "approve" ? "" : "falta" }), { gate_id: 1, decision, ...(decision !== "approve" && { text: "falta" }) });
+    const v = sending(modal(1, { mode, text: decision === "approve" ? "" : "falta" }), { gate_id: 1, request_seq: 439, decision, ...(decision !== "approve" && { text: "falta" }) });
     expect(settle(v.ui, { ok: true }, v)).toEqual({ ...v.ui, gate: null, send: null, toast: toast(v, text, "bgreen") });
   }
 });
 
 test("GAT-58: gate_closed closes the modal and says in red for 4 s that the gate was already decided", () => {
-  const v = sending(modal(1, { mode: "reject", text: "falta" }), { gate_id: 1, decision: "reject", text: "falta" });
+  const v = sending(modal(1, { mode: "reject", text: "falta" }), { gate_id: 1, request_seq: 439, decision: "reject", text: "falta" });
   expect(settle(v.ui, { ok: false, error: "gate_closed" }, v)).toEqual({ ...v.ui, gate: null, send: null, toast: toast(v, "✗ G-01 já decidido", "bred") });
 });
 
 test("GAT-58: another refusal, or the broker not answering, takes the modal back to the mode it sent from, with its text, and says in red for 4 s why", () => {
-  for (const error of ["invalid_token", "missing_field", "invalid_field", "broker não respondeu"]) {
+  for (const error of ["invalid_token", "missing_field", "invalid_field", "gate_reissued", "broker não respondeu"]) {
     for (const [m, send] of [
-      [modal(1, { mode: "confirm" }), { gate_id: 1, decision: "approve" }],
-      [modal(1, { mode: "reject", text: "  falta o teste  " }), { gate_id: 1, decision: "reject", text: "falta o teste" }],
-      [modal(1, { mode: "comment", text: "e o iOS?", expanded: true }), { gate_id: 1, decision: "comment", text: "e o iOS?" }],
+      [modal(1, { mode: "confirm" }), { gate_id: 1, request_seq: 439, decision: "approve" }],
+      [modal(1, { mode: "reject", text: "  falta o teste  " }), { gate_id: 1, request_seq: 439, decision: "reject", text: "falta o teste" }],
+      [modal(1, { mode: "comment", text: "e o iOS?", expanded: true }), { gate_id: 1, request_seq: 439, decision: "comment", text: "e o iOS?" }],
     ] as const) {
       const v = sending(m, send);
       expect(settle(v.ui, { ok: false, error }, v)).toEqual({ ...v.ui, gate: m, send: null, toast: toast(v, `✗ decisão não enviada · ${error}`, "bred") });
@@ -252,7 +260,7 @@ test("GAT-58: another refusal, or the broker not answering, takes the modal back
 
 test("GAT-74: with no human credential nothing is sent, the modal goes back to the mode it sent from and says so", () => {
   const m = modal(1, { mode: "reject", text: "falta" });
-  const v = sending(m, { gate_id: 1, decision: "reject", text: "falta" });
+  const v = sending(m, { gate_id: 1, request_seq: 439, decision: "reject", text: "falta" });
   expect(settle(v.ui, null, v)).toEqual({ ...v.ui, gate: m, send: null, toast: toast(v, "✗ credencial humana não encontrada", "bred") });
 });
 
@@ -339,7 +347,7 @@ test("GAT-75: between the marks of a delimited paste, split in two reads, y and 
   expect(chunks(confirm, `${START_PASTE}a`, `y\r${END_PASTE}`)).toEqual(confirm.ui);
   expect(chunks(confirm, START_PASTE, "y", END_PASTE)).toEqual(confirm.ui);
   expect(chunks(confirm, START_PASTE, "\r", END_PASTE)).toEqual(confirm.ui);
-  expect(chunks(confirm, START_PASTE, "y", END_PASTE, "y")!.send).toEqual({ gate_id: 1, decision: "approve" });
+  expect(chunks(confirm, START_PASTE, "y", END_PASTE, "y")!.send).toEqual({ gate_id: 1, request_seq: 439, decision: "approve" });
   const reading = opened("18a", modal(1));
   expect(chunks(reading, START_PASTE, "a", END_PASTE)).toEqual(reading.ui);
 });

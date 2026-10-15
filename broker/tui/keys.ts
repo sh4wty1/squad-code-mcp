@@ -13,7 +13,7 @@ import { preview, PREVIEW_ROWS } from "./screens/permission.ts";
 import type { GateModal, Modal, PermissionModal, Ui, View } from "./view.ts";
 import type { Sent } from "./writer.ts";
 
-export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null, pasting: false };
+export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, gate: null, permission: null, send: null, pasting: false };
 
 // How long a notice stays in the footer
 const TOAST_MS = 4000;
@@ -124,6 +124,11 @@ function gating(ui: Ui, m: GateModal, key: string, view: View): Ui | null {
   const set = (gate: Partial<GateModal>): Ui => ({ ...ui, gate: { ...m, ...gate } });
   // The pending gates, the oldest first: the queue of the modal
   const queue = view.squad.gates.filter((g) => g.pending);
+  // The decision names the version on the screen: the broker refuses it when the mother asked
+  // the gate again after the read (GAT-98)
+  const shown = queue.find((g) => g.id === m.id);
+  const decide = (decision: "approve" | "reject" | "comment", text?: string): Ui =>
+    shown ? { ...ui, gate: { ...m, sending: true }, send: { gate_id: m.id, request_seq: shown.request_seq, decision, ...(text !== undefined && { text }) } } : ui;
 
   if (m.mode === "view") {
     switch (key) {
@@ -131,7 +136,7 @@ function gating(ui: Ui, m: GateModal, key: string, view: View): Ui | null {
         return { ...ui, gate: null };
       case "a":
         // What is confirmed is the version on the screen now
-        return set({ mode: "confirm", version: queue.find((g) => g.id === m.id)?.version ?? m.version });
+        return set({ mode: "confirm", version: shown?.version ?? m.version });
       case "r":
       case "c":
         return set({ mode: key === "r" ? "reject" : "comment", text: "", expanded: false, empty: false });
@@ -145,7 +150,7 @@ function gating(ui: Ui, m: GateModal, key: string, view: View): Ui | null {
     return ui;
   }
   if (m.mode === "confirm") {
-    if (key === "y") return { ...ui, gate: { ...m, sending: true }, send: { gate_id: m.id, decision: "approve" } };
+    if (key === "y") return decide("approve");
     return key === "\x1b" ? set({ mode: "view" }) : ui;
   }
   // The text of a reject or of a comment: every key but these is text, q and the digits too
@@ -154,7 +159,7 @@ function gating(ui: Ui, m: GateModal, key: string, view: View): Ui | null {
       return set({ mode: "view", text: "", empty: false });
     case "\r": {
       const text = m.text.trim();
-      return text ? { ...ui, gate: { ...m, sending: true }, send: { gate_id: m.id, decision: m.mode, text } } : set({ empty: true });
+      return text ? decide(m.mode, text) : set({ empty: true });
     }
     case "\x05":
       return set({ expanded: !m.expanded });
@@ -362,7 +367,7 @@ export function settle(ui: Ui, result: Sent | null, view: View): Ui {
     if (result.error === "gate_closed") return { ...idle, gate: null, toast: failed(`✗ ${gid(send.gate_id)} já decidido`) };
     return back(`✗ decisão não enviada · ${result.error}`);
   }
-  if (send && "request_seq" in send) {
+  if (send && "behavior" in send) {
     const p = ui.permission;
     if (!p) return idle;
     const stay: Ui = { ...idle, permission: { ...p, sending: false } };

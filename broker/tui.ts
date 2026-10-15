@@ -119,7 +119,7 @@ export function start(io: Io, settings: Settings) {
   // and of permission are drawn over the main screen
   function screen(): Grid {
     const seen = view();
-    if (ui.gate) return gate(main(seen), seen);
+    if (ui.gate) return gate(main(seen), { ...seen, rows: fresh });
     if (ui.permission) return permission(main(seen), seen);
     return answer(SCREENS[ui.screen](seen), seen);
   }
@@ -171,7 +171,7 @@ export function start(io: Io, settings: Settings) {
       "question_id" in sent
         ? writer.answer(token, sent.question_id, sent.answer)
         : "gate_id" in sent
-          ? writer.gate(token, sent.gate_id, sent.decision, sent.text)
+          ? writer.gate(token, sent.gate_id, sent.request_seq, sent.decision, sent.text)
           : writer.permission(token, sent.request_seq, sent.behavior);
     posted
       .then((result) => {

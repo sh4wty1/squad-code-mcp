@@ -102,7 +102,7 @@ test("GAT-52, GAT-72: g a y makes one POST /gate-decision with the approve and t
     for (const k of ["g", "a"]) key(k);
     expect(t.posts).toEqual([]);
     key("y");
-    expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, decision: "approve" } }]);
+    expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, request_seq: 439, decision: "approve" } }]);
     expect(t.lines()).toEqual(gated(t.view({ gate: gateModal({ mode: "confirm", sending: true }) })));
     reply(Response.json({ ok: true, seq: 500 }));
     await t.shows(main(t.view({ toast: t.notice("✓ G-01 aprovado", "bgreen") })).text(), "the main screen with the notice");
@@ -118,7 +118,7 @@ test("GAT-55, GAT-72: g r and g c with a text and enter make one POST /gate-deci
     try {
       await t.shows(main(t.view()).text(), "the main screen");
       for (const k of ["g", mode, " ", "d", "e", "p", "o", "i", "s", " ", "\r"]) key(k);
-      expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, decision, text: "depois" } }]);
+      expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, request_seq: 439, decision, text: "depois" } }]);
       await until(() => t.lines()[38]!.includes(said), "the notice of the decision");
     } finally {
       stop();
@@ -154,7 +154,7 @@ test("GAT-74: without a credential no decision is sent, the modal stays in the m
     // The broker wrote the file meanwhile
     t.token = TOKEN;
     key("\r");
-    expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, decision: "reject", text: "x" } }]);
+    expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, request_seq: 439, decision: "reject", text: "x" } }]);
   } finally {
     gating.stop();
   }
@@ -221,7 +221,7 @@ test("GAT-75: through the loop a paste never decides: ay pasted in the modal of 
     expect(t.posts).toEqual([]);
     expect(t.lines()).toEqual(gated(t.view({ gate: gateModal({ mode: "confirm" }) })));
     key("y");
-    expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, decision: "approve" } }]);
+    expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, request_seq: 439, decision: "approve" } }]);
   } finally {
     gating.stop();
   }
@@ -250,7 +250,7 @@ test("GAT-75: through the loop a pasted line break is a space in the text of a r
     expect(t.posts).toEqual([]);
     expect(t.lines()).toEqual(gated(t.view({ gate: gateModal({ mode: "reject", text: "sem changelog  " }) })));
     key("\r");
-    expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, decision: "reject", text: "sem changelog" } }]);
+    expect(t.posts).toEqual([{ url: GATE, body: { human_token: TOKEN, gate_id: 1, request_seq: 439, decision: "reject", text: "sem changelog" } }]);
   } finally {
     stop();
   }
@@ -312,7 +312,7 @@ test("GAT-72: in a session that decides a gate and a permission request and quit
   key("q");
   await done;
   expect(t.posts).toEqual([
-    { url: GATE, body: { human_token: TOKEN, gate_id: 1, decision: "approve" } },
+    { url: GATE, body: { human_token: TOKEN, gate_id: 1, request_seq: 439, decision: "approve" } },
     { url: PERMISSION, body: { human_token: TOKEN, request_seq: 500, behavior: "deny" } },
   ]);
   for (const call of t.calls.filter((call) => call.method === "GET")) expect(call.url).toMatch(/^http:\/\/127\.0\.0\.1:7900\/events\?after=\d+$/);
@@ -320,4 +320,22 @@ test("GAT-72: in a session that decides a gate and a permission request and quit
     { method: "POST", url: GATE },
     { method: "POST", url: PERMISSION },
   ]);
+});
+
+test("GAT-47: with the feed paused, a verdict that comes after the pause is the one of the judge of the modal of gate, over the lines of the paused feed", async () => {
+  const { t, key, stop } = launch("08");
+  try {
+    await t.shows(main(t.view()).text(), "the main screen");
+    key("p");
+    const before = t.events;
+    const verdict = before.find((e) => e.kind === "verdict" && e.ticket_ref === "TKT-14")!;
+    t.events = [...before, { ...verdict, seq: 440, ts: t.now, outcome: "rework", criteria: [{ n: 1, text: "horário legível na setlist", pass: false }] } as SquadEvent];
+    key("g");
+    const ui = { paused: true, gate: gateModal() };
+    const drawn = gate(main({ ...t.view(ui), rows: feed(before) }), t.view(ui)).text();
+    expect(drawn.join("\n")).toContain("✗ TKT-14 0/1");
+    await t.shows(drawn, "the modal with the verdict after the pause");
+  } finally {
+    stop();
+  }
 });

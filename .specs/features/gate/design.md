@@ -72,7 +72,7 @@ graph TD
 - **Interfaces**:
   - `createGate(db, log, token)` → `{ request(peer, body), decide(body), approved(): boolean }`
   - `request`: valida na ordem de GAT-07; cria (GAT-01, GAT-02) ou reemite (GAT-12); `refused` com `attempted_kind` `gate`.
-  - `decide`: valida na ordem de GAT-25; numa transação relê a linha (`pending`?), grava o `gate_decision` com `recipients: [requested_by]` e atualiza a linha (GAT-15 a GAT-17, GAT-24).
+  - `decide`: valida na ordem de GAT-25; numa transação relê a linha (`pending`? o `request_seq` é o da versão decidida, GAT-98?), grava o `gate_decision` com `recipients: [requested_by]` e atualiza a linha (GAT-15 a GAT-17, GAT-24).
   - `approved()`: a feature aberta tem gate `delivery` `approved`; `feature.ts` a recebe por injeção.
 - **Reuses**: `isText`, `SUMMARY_MAX` de `send.ts`; `refuse` de `peers.ts`; `tickets()` de `derive.ts` sobre `log.featureEvents()` para `tickets_open`.
 

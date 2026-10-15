@@ -46,11 +46,12 @@ export interface PermissionModal {
   sending: boolean;
 }
 
-// What the loop has to send to the broker: an answer, the decision of a gate or that of a
-// permission request, told apart by their fields
+// What the loop has to send to the broker: an answer, the decision of a gate, with the
+// request_seq of the version on the screen, or that of a permission request, told apart by
+// their fields
 export type Send =
   | { question_id: number; answer: string }
-  | { gate_id: number; decision: "approve" | "reject" | "comment"; text?: string }
+  | { gate_id: number; request_seq: number; decision: "approve" | "reject" | "comment"; text?: string }
   | { request_seq: number; behavior: "allow" | "deny" };
 
 export interface Ui {
@@ -73,9 +74,9 @@ export interface Ui {
   // how many of the latest resolved questions the history leaves above
   historyOffset: number;
   modal: Modal | null;
-  // the modals of gate and of permission; absent is closed, as null
-  gate?: GateModal | null;
-  permission?: PermissionModal | null;
+  // the modals of gate and of permission; null is closed
+  gate: GateModal | null;
+  permission: PermissionModal | null;
   send: Send | null;
   // the terminal sent the mark of the start of a paste, and not yet the one of its end
   pasting: boolean;

@@ -95,7 +95,7 @@ test("GAT-76: with the modal of gate open x does nothing, and with the modal of 
   expect(key("x", gate)).toBe(gate.ui);
   const answer = view("14", { screen: "questions", modal: { question: 8, choice: null, text: "ab", expanded: false, sending: false, refused: false } });
   expect(key("x", answer)!.modal!.text).toBe("abx");
-  expect(key("x", answer)!.permission).toBeUndefined();
+  expect(key("x", answer)!.permission).toBeNull();
 });
 
 test("GAT-65, GAT-76: with the request open esc closes the modal without sending, no other key changes the screen, not even q, g, x, 4 or enter, and ctrl+c quits", () => {

@@ -40,8 +40,8 @@ export function createWriter({ fetch, url, timeoutMs = 2000 }: { fetch: Fetch; u
   return {
     answer: (token: string, question_id: number, answer: string) => post("/answer", { human_token: token, question_id, answer }),
     // text only when there is one: the approve of the modal has none
-    gate: (token: string, gate_id: number, decision: "approve" | "reject" | "comment", text?: string) =>
-      post("/gate-decision", { human_token: token, gate_id, decision, ...(text !== undefined && { text }) }),
+    gate: (token: string, gate_id: number, request_seq: number, decision: "approve" | "reject" | "comment", text?: string) =>
+      post("/gate-decision", { human_token: token, gate_id, request_seq, decision, ...(text !== undefined && { text }) }),
     permission: (token: string, request_seq: number, behavior: "allow" | "deny") =>
       post("/permission-decision", { human_token: token, request_seq, behavior }),
   };

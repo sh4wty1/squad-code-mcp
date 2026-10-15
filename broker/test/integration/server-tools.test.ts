@@ -268,7 +268,7 @@ test("GAT-36/18: the gate tool of the mother records the gate, and the approve o
   expect(gate).toMatchObject({ seq: 3, kind: "gate", from_name: "mother", to_name: "human", gate_id: 1 });
 
   const humanToken = readFileSync(b.tokenFile, "utf8").trim();
-  const decided = await post(b.url, "/gate-decision", { human_token: humanToken, gate_id: 1, decision: "approve" });
+  const decided = await post(b.url, "/gate-decision", { human_token: humanToken, gate_id: 1, request_seq: 3, decision: "approve" });
   expect(decided.json).toEqual({ ok: true, seq: 4 });
 
   await waitFor(() => mother.pushed().length > 0, "the push of the gate_decision");

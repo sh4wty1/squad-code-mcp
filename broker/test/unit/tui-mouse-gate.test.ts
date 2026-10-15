@@ -175,13 +175,13 @@ const SHORTCUTS: [View, label: string, does: string, key: string, expected: (v: 
   [frameView("08"), "esc", "fechar sem decidir", "\x1b", () => ({ gate: null })],
   [gates3(2), "]", "próximo gate", "]", () => ({ gate: gateModal(3) })],
   [gates3(2), "[", "anterior", "[", () => ({ gate: gateModal(1) })],
-  [frameView("17"), "y", "confirmar", "y", (v) => ({ gate: { ...v.ui.gate!, sending: true }, send: { gate_id: 1, decision: "approve" } })],
+  [frameView("17"), "y", "confirmar", "y", (v) => ({ gate: { ...v.ui.gate!, sending: true }, send: { gate_id: 1, request_seq: 439, decision: "approve" } })],
   [frameView("17"), "esc", "voltar ao gate", "\x1b", (v) => ({ gate: { ...v.ui.gate!, mode: "view" } })],
-  [frameView("16a"), "enter", "enviar", "\r", (v) => ({ gate: { ...v.ui.gate!, sending: true }, send: { gate_id: 1, decision: "reject", text: TXT16A } })],
+  [frameView("16a"), "enter", "enviar", "\r", (v) => ({ gate: { ...v.ui.gate!, sending: true }, send: { gate_id: 1, request_seq: 439, decision: "reject", text: TXT16A } })],
   [frameView("16a"), "ctrl+e", "expandir", "\x05", (v) => ({ gate: { ...v.ui.gate!, expanded: true } })],
   [frameView("16a"), "ctrl+u", "limpar", "\x15", (v) => ({ gate: { ...v.ui.gate!, text: "" } })],
   [frameView("16a"), "esc", "voltar ao gate", "\x1b", (v) => ({ gate: { ...v.ui.gate!, mode: "view", text: "" } })],
-  [frameView("16b"), "enter", "enviar", "\r", (v) => ({ gate: { ...v.ui.gate!, sending: true }, send: { gate_id: 1, decision: "comment", text: TXT16B } })],
+  [frameView("16b"), "enter", "enviar", "\r", (v) => ({ gate: { ...v.ui.gate!, sending: true }, send: { gate_id: 1, request_seq: 439, decision: "comment", text: TXT16B } })],
   [frameView("16b"), "ctrl+e", "recolher", "\x05", (v) => ({ gate: { ...v.ui.gate!, expanded: false } })],
   // An empty text is not sent, and the field stays red
   [frameView("16c"), "enter", "enviar", "\r", (v) => ({ gate: { ...v.ui.gate!, empty: true } })],
@@ -330,7 +330,7 @@ test("GAT-84: a click on a aprovar and another on y confirmar 600 ms later leave
   expect(first.ui.gate!.mode).toBe("confirm");
   const confirm = { ...v, ui: first.ui };
   const y = at(screen(confirm), 39, "y confirmar");
-  for (const [ms, send] of [[600, { gate_id: 1, decision: "approve" }], [300, null]] as const) {
+  for (const [ms, send] of [[600, { gate_id: 1, request_seq: 439, decision: "approve" }], [300, null]] as const) {
     const then = later(confirm, ms);
     const second = point(first, click(y, 39), then, drawing(then))!;
     expect(second.ui.send).toEqual(send);
@@ -359,7 +359,7 @@ test("GAT-80, GAT-73: while a decision waits for the broker no click and no whee
   const gating = frameView("17");
   const permitting = frameView("22a");
   for (const v of [
-    { ...gating, ui: { ...gating.ui, gate: { ...gating.ui.gate!, sending: true }, send: { gate_id: 1, decision: "approve" as const } } },
+    { ...gating, ui: { ...gating.ui, gate: { ...gating.ui.gate!, sending: true }, send: { gate_id: 1, request_seq: 439, decision: "approve" as const } } },
     { ...permitting, ui: { ...permitting.ui, permission: { ...permitting.ui.permission!, sending: true }, send: { request_seq: 459, behavior: "deny" as const } } },
   ]) {
     const drawn = drawing(v);

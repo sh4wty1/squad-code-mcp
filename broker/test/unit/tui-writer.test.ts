@@ -117,19 +117,19 @@ test("QST-86: the writer asks the broker for nothing but POST /answer", async ()
 
 // ---- the decisions of a gate and of a permission request ----
 
-test("GAT-58, GAT-72: the writer asks POST /gate-decision with the credential, the gate, the decision and the text as JSON", async () => {
+test("GAT-58, GAT-72: the writer asks POST /gate-decision with the credential, the gate, the request_seq of its version, the decision and the text as JSON", async () => {
   const { fetch, calls } = fake(json({ ok: true, seq: 50 }), json({ ok: true, seq: 51 }), json({ ok: true, seq: 52 }));
   const writer = createWriter({ fetch, url: BROKER });
-  await writer.gate(TOKEN, 1, "reject", "falta o teste do parser");
-  await writer.gate(TOKEN, 2, "comment", "e o changelog?");
-  await writer.gate(TOKEN, 1, "approve");
+  await writer.gate(TOKEN, 1, 439, "reject", "falta o teste do parser");
+  await writer.gate(TOKEN, 2, 458, "comment", "e o changelog?");
+  await writer.gate(TOKEN, 1, 457, "approve");
 
   const headers = { "Content-Type": "application/json" };
   expect(calls).toEqual([
-    { method: "POST", url: "http://127.0.0.1:7900/gate-decision", headers, body: { human_token: TOKEN, gate_id: 1, decision: "reject", text: "falta o teste do parser" } },
-    { method: "POST", url: "http://127.0.0.1:7900/gate-decision", headers, body: { human_token: TOKEN, gate_id: 2, decision: "comment", text: "e o changelog?" } },
+    { method: "POST", url: "http://127.0.0.1:7900/gate-decision", headers, body: { human_token: TOKEN, gate_id: 1, request_seq: 439, decision: "reject", text: "falta o teste do parser" } },
+    { method: "POST", url: "http://127.0.0.1:7900/gate-decision", headers, body: { human_token: TOKEN, gate_id: 2, request_seq: 458, decision: "comment", text: "e o changelog?" } },
     // the approve of the modal has no text: the body has no text field
-    { method: "POST", url: "http://127.0.0.1:7900/gate-decision", headers, body: { human_token: TOKEN, gate_id: 1, decision: "approve" } },
+    { method: "POST", url: "http://127.0.0.1:7900/gate-decision", headers, body: { human_token: TOKEN, gate_id: 1, request_seq: 457, decision: "approve" } },
   ]);
 });
 
@@ -148,7 +148,7 @@ test("GAT-69, GAT-72: the writer asks POST /permission-decision with the credent
 
 // Each of the two decisions, sent by the writer
 const DECISIONS: [string, (writer: ReturnType<typeof createWriter>) => Promise<unknown>, string[]][] = [
-  ["gate", (writer) => writer.gate(TOKEN, 1, "approve"), ["gate_closed", "invalid_token", "missing_field", "invalid_field"]],
+  ["gate", (writer) => writer.gate(TOKEN, 1, 439, "approve"), ["gate_closed", "gate_reissued", "invalid_token", "missing_field", "invalid_field"]],
   ["permission", (writer) => writer.permission(TOKEN, 14, "allow"), ["permission_closed", "invalid_token", "missing_field", "invalid_field"]],
 ];
 

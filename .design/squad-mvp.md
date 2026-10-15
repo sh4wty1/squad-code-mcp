@@ -568,7 +568,7 @@ Alternatives considered: o agente reportar o próprio uso - não ganha em nenhum
 | Dev fecha o modal com `esc` | Nada é enviado; o gate continua pendente | - |
 
 `POST /gate` `{ id, gate_id?, scope, commit?, summary, body, action, effect, diffstat?, ticket_ref? }` → `{ ok, gate_id, seq }`
-`POST /gate-decision` `{ human_token, gate_id, decision, text? }` → `{ ok, seq }`
+`POST /gate-decision` `{ human_token, gate_id, request_seq, decision, text? }` → `{ ok, seq }`, `request_seq` o da versão que o dev viu
 
 Table `gates`.
 

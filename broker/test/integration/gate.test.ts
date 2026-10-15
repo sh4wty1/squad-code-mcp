@@ -90,7 +90,7 @@ test("GAT-26/05/20: delivered is refused with gate_required until the mother ask
   expectRefusal(await post(b.url, "/close-feature", { id: mother, outcome: "delivered" }), "gate_required");
 
   // the id of a peer that comes along makes no difference: the human credential decides
-  const decided = await post(b.url, "/gate-decision", { id: mother, human_token: humanToken(b), gate_id: 1, decision: "approve" });
+  const decided = await post(b.url, "/gate-decision", { id: mother, human_token: humanToken(b), gate_id: 1, request_seq: 5, decision: "approve" });
   expect(decided.json).toEqual({ ok: true, seq: 7 });
   const polled = (await post(b.url, "/poll-messages", { id: mother })).json.events as any[];
   expect(polled).toEqual([
@@ -110,7 +110,7 @@ test("GAT-26/05/20: delivered is refused with gate_required until the mother ask
     },
   ]);
   expect(gateRows(b)[0]).toMatchObject({ status: "approved", decision_seq: 7 });
-  expectRefusal(await post(b.url, "/gate-decision", { human_token: humanToken(b), gate_id: 1, decision: "approve" }), "gate_closed");
+  expectRefusal(await post(b.url, "/gate-decision", { human_token: humanToken(b), gate_id: 1, request_seq: 5, decision: "approve" }), "gate_closed");
 
   expect((await post(b.url, "/close-feature", { id: mother, outcome: "delivered" })).json).toEqual({ ok: true, seq: 8 });
   expect(readDb(b.dbFile).events.at(-1)).toMatchObject({ seq: 8, kind: "feature_closed", data: { outcome: "delivered" } });

@@ -13,8 +13,11 @@ function pending() {
   return { ...b, feature_id };
 }
 
+// The decision of the dev on the version the gate has now (GAT-98)
 function decide(b: Broker, decision: unknown, fields: Record<string, unknown> = {}) {
-  return b.gate.decide({ human_token: HUMAN_TOKEN, gate_id: 1, decision, ...fields });
+  const gate_id = fields.gate_id ?? 1;
+  const request_seq = (b.gateRows() as { id: number; request_seq: number }[]).find((row) => row.id === gate_id)?.request_seq;
+  return b.gate.decide({ human_token: HUMAN_TOKEN, gate_id, request_seq, decision, ...fields });
 }
 
 // The decision of the dev on the gate 1, as stored
@@ -65,7 +68,7 @@ function refusedDecision(b: Broker, body: Record<string, unknown>, error: string
   expect(b.gateRows()).toEqual(rows);
 }
 
-const valid = (fields: Record<string, unknown>): Record<string, unknown> => ({ human_token: HUMAN_TOKEN, gate_id: 1, decision: "approve", ...fields });
+const valid = (fields: Record<string, unknown>): Record<string, unknown> => ({ human_token: HUMAN_TOKEN, gate_id: 1, request_seq: 2, decision: "approve", ...fields });
 
 test("GAT-15: approve is stored from human to who asked, with the id in the column, and the row is approved by its seq", () => {
   const b = pending();
@@ -176,6 +179,10 @@ for (const [what, fields] of [
   ["gate_id null", { gate_id: null }],
   ["gate_id as a text", { gate_id: "1" }],
   ["gate_id a fraction", { gate_id: 1.5 }],
+  ["request_seq absent", { request_seq: undefined }],
+  ["request_seq null", { request_seq: null }],
+  ["request_seq as a text", { request_seq: "2" }],
+  ["request_seq a fraction", { request_seq: 2.5 }],
   ["decision absent", { decision: undefined }],
   ["decision null", { decision: null }],
   ["decision a number", { decision: 1 }],
@@ -267,6 +274,29 @@ test("GAT-25: invalid_field comes before gate_closed", () => {
   const b = pending();
   decide(b, "approve");
   refusedDecision(b, valid({ decision: "bogus" }), "invalid_field");
+});
+
+test("GAT-98: after the mother asks the gate again, a decision of the version before is refused with gate_reissued in the three decisions, and one of the new version is taken", () => {
+  const b = pending();
+  b.gate.request(MOTHER, { ...ASKED, gate_id: 1, action: "DROP TABLE legacy CASCADE" });
+  for (const fields of [{}, { decision: "reject", text: "no" }, { decision: "comment", text: "and?" }]) {
+    refusedDecision(b, valid(fields), "gate_reissued");
+  }
+  expect(b.gate.decide(valid({ request_seq: 3 }))).toEqual({ ok: true, seq: 4 });
+  expect(b.gateRows()).toEqual([gateRow({ status: "approved", request_seq: 3, decision_seq: 4 })]);
+});
+
+test("GAT-98: a request_seq that is not of the gate is refused with gate_reissued", () => {
+  const b = pending();
+  for (const request_seq of [0, 1, 3, 99]) refusedDecision(b, valid({ request_seq }), "gate_reissued");
+});
+
+test("GAT-25: gate_closed comes before gate_reissued", () => {
+  const b = pending();
+  decide(b, "comment", { text: "split it" });
+  b.gate.request(MOTHER, { ...ASKED, gate_id: 1 });
+  decide(b, "approve");
+  refusedDecision(b, valid({}), "gate_closed");
 });
 
 test("GAT-10: a failure on the delivery leaves neither the event nor the change of the row", () => {

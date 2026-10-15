@@ -26,8 +26,8 @@ const DELIVERY = { scope: "delivery", summary: "deliver", action: "merge feat/im
 
 // Asks a gate and decides it as the dev; returns the gate_id
 function decided(b: ReturnType<typeof setup>, decision: string | null, fields: Record<string, unknown> = {}): number {
-  const asked = b.gate.request(MOTHER, { ...DELIVERY, ...fields }) as { gate_id: number };
-  if (decision) b.gate.decide({ human_token: HUMAN_TOKEN, gate_id: asked.gate_id, decision, text: "because" });
+  const asked = b.gate.request(MOTHER, { ...DELIVERY, ...fields }) as { gate_id: number; seq: number };
+  if (decision) b.gate.decide({ human_token: HUMAN_TOKEN, gate_id: asked.gate_id, request_seq: asked.seq, decision, text: "because" });
   return asked.gate_id;
 }
 

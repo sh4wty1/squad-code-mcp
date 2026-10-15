@@ -120,6 +120,12 @@ T39 → T40 → T41 → T42 → T43 → T44 → T45 → T46 → T47
 T47 → T30
 ```
 
+### Phase 11: Revisão do PR
+
+```
+T30 → T48 → T49 → T50
+```
+
 ---
 
 ## Task Breakdown
@@ -983,6 +989,61 @@ T47 → T30
 
 ---
 
+### T48: A decisão nomeia a versão do gate
+
+**What**: achado F1 da revisão do PR: `/gate-decision` leva o `request_seq` da versão que o dev viu e recusa com `gate_reissued` a de uma versão que a mother já pediu de novo; a TUI envia o da versão na tela.
+**Where**: `broker/gate.ts`, `broker/tui/keys.ts`, `broker/tui/view.ts`, `broker/tui/writer.ts`, `broker/tui.ts`
+**Depends on**: T30
+**Reuses**: a releitura da linha na transação do `gate_decision` (GAT-24)
+**Requirement**: GAT-15, GAT-21, GAT-25, GAT-52, GAT-55, GAT-98
+
+**Done when**:
+
+- [x] Depois de uma reemissão, as três decisões com o `request_seq` de antes recebem `gate_reissued` sem gravar nada, e a com o novo é gravada
+- [x] `gate_closed` vem antes de `gate_reissued`; `request_seq` ausente ou não inteiro é `missing_field`
+- [x] No 18b, `y` e o `enter` de um texto deixam em `send` o `request_seq` 457 da versão 2
+- [x] A sequência gerada de GAT-30 passa por `gate_reissued`
+
+**Tests**: unit, integration
+**Gate**: full
+
+---
+
+### T49: O `judge` do modal com o feed pausado
+
+**What**: achado F2 da revisão do PR: o modal de gate lê as linhas do log, não as do feed pausado; a tela principal embaixo continua com as pausadas.
+**Where**: `broker/tui.ts`
+**Depends on**: T48
+**Reuses**: `fresh` do laço
+**Requirement**: GAT-47
+
+**Done when**:
+
+- [x] Com o feed pausado, um `verdict` que chega depois da pausa é o da linha `judge` do modal
+- [x] Falha com `gate(main(seen), seen)` em `screen()`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T50: Modal fechado é `null`
+
+**What**: achado F3 da revisão do PR: `gate` e `permission` de `Ui` são obrigatórios, `null` fechados, como `modal`.
+**Where**: `broker/tui/view.ts`, `broker/tui/keys.ts`
+**Depends on**: T49
+**Reuses**: -
+**Requirement**: -
+
+**Done when**:
+
+- [x] `START` tem `gate: null` e `permission: null`; `tsc` passa
+
+**Tests**: unit
+**Gate**: full
+
+---
+
 ## Diagram-Definition Cross-Check
 
 | Task | Depends On (task body) | Diagram Shows | Status |
@@ -1006,6 +1067,8 @@ T47 → T30
 | T39 | a fase anterior | início da fase 9 | ✅ |
 | T40 a T47 | a anterior | a seta da anterior | ✅ |
 | T30 | T47 | única da fase 10 | ✅ |
+| T48 | T30 | início da fase 11 | ✅ |
+| T49, T50 | a anterior | a seta da anterior | ✅ |
 
 ## Test Co-location Validation
 
@@ -1027,3 +1090,5 @@ T47 → T30
 | T31 a T36 | Telas, mouse e regras do broker (só testes) | unit | unit | ✅ |
 | T37, T38 | Telas (só testes) | unit | unit | ✅ |
 | T39 a T47 | Redutor de teclas, derivação e telas (só testes) | unit | unit | ✅ |
+| T48 | Regras do broker, rotas HTTP, redutor de teclas e escritor | unit, integration | unit, integration | ✅ |
+| T49, T50 | Laço e estado da TUI | unit | unit | ✅ |

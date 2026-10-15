@@ -31,8 +31,8 @@ for (const outcome of ["delivered", "abandoned"]) {
     const b = seven();
     // a delivered feature has its delivery approved first (GAT-26): two more events, 13 and 14
     if (outcome === "delivered") {
-      b.gate.request(MOTHER, { scope: "delivery", summary: "deliver", action: "merge", effect: "main gets it", commit: "abc1234" });
-      b.gate.decide({ human_token: HUMAN_TOKEN, gate_id: 1, decision: "approve" });
+      const asked = b.gate.request(MOTHER, { scope: "delivery", summary: "deliver", action: "merge", effect: "main gets it", commit: "abc1234" }) as { seq: number };
+      b.gate.decide({ human_token: HUMAN_TOKEN, gate_id: 1, request_seq: asked.seq, decision: "approve" });
     }
     const seq = b.events().length + 1;
     const events = b.events();

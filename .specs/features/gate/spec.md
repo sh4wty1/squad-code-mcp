@@ -60,7 +60,8 @@ permissão na TUI, com teclado e mouse. É a última fatia do MVP.
 | `text` em `approve` | Aceito e guardado como chegou, também vazio; não é exigido | O design só torna o texto obrigatório em `reject` e `comment` | n |
 | Gate inexistente, de outra feature ou de feature fechada | `/gate` com `gate_id` que não é de um gate da feature aberta: `invalid_field`. `/gate-decision` com `gate_id` que não está em `gates`: `invalid_field`; de gate não `pending` (inclusive o de uma feature fechada): `gate_closed` | É o que `/escalate` e `/answer` fazem com uma pergunta inexistente (AD-005) | n |
 | Ordem das recusas de `/gate` | `unknown_peer`, `edge_not_allowed`, `missing_field`, `invalid_field` dos campos, `no_open_feature`, `invalid_field` do `gate_id`, `gate_closed`, `tickets_open` | `close_feature` e `merge_question` recusam o papel primeiro; a feature aberta vem antes do que só existe nela | n |
-| Ordem das recusas de `/gate-decision` | `invalid_token`, `missing_field`, `invalid_field`, `gate_closed` | É a de `/permission-decision` | n |
+| Ordem das recusas de `/gate-decision` | `invalid_token`, `missing_field`, `invalid_field`, `gate_closed`, `gate_reissued` | É a de `/permission-decision`, com `gate_reissued` depois: um gate decidido não tem versão para conferir | n |
+| Versão de uma decisão | `/gate-decision` leva o `request_seq` da versão que o dev viu e é recusado com `gate_reissued` quando a mother pediu o gate de novo depois dela | Achado F1 da revisão do PR: sem ele, um `y` entre a reemissão e a leitura seguinte aprova uma versão que o dev não viu, contra o primeiro critério de ADR-008. Decidido pelo dev em 2026-10-15 | n |
 | Ordem das recusas de `/close-feature` | `edge_not_allowed`, `no_open_feature`, `missing_field`, `invalid_field`, `gate_required` | `gate_required` é a única regra nova e depende do `outcome` já válido | n |
 | `tickets_open` sem `plan` | Aceito: sem `plan` não há ticket em aberto | "ticket do `plan` nem aprovado nem descartado" | n |
 | Onde o modal de gate e o de permissão são desenhados | Sobre a tela principal escurecida, como `rGate` e `rPerm` do protótipo: `g` e `x` levam à tela principal antes de abrir | O modal de resposta abre sobre a aba Perguntas pela mesma razão: é a tela do protótipo | n |
@@ -151,17 +152,18 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 
 **Acceptance Criteria**:
 
-1. **GAT-15** WHEN `POST /gate-decision` recebe `{ human_token, gate_id, decision: "approve", text? }` válido para um gate `pending` THEN o broker SHALL gravar um evento `gate_decision` de `human` (`from_name` e `role_from` `human`) para o `requested_by` do gate, com a coluna `gate_id`, `data` com `gate_id`, `decision` e, quando enviado, `text`, e na mesma transação pôr na linha `status` `approved` e `decision_seq` igual ao `seq` do evento, e responder `{ ok: true, seq }`.
+1. **GAT-15** WHEN `POST /gate-decision` recebe `{ human_token, gate_id, request_seq, decision: "approve", text? }` válido para um gate `pending` com aquele `request_seq` THEN o broker SHALL gravar um evento `gate_decision` de `human` (`from_name` e `role_from` `human`) para o `requested_by` do gate, com a coluna `gate_id`, `data` com `gate_id`, `decision` e, quando enviado, `text`, e na mesma transação pôr na linha `status` `approved` e `decision_seq` igual ao `seq` do evento, e responder `{ ok: true, seq }`.
 2. **GAT-16** WHEN a `decision` é `reject` com texto válido THEN o broker SHALL gravar como em GAT-15 e pôr na linha `status` `rejected` e `decision_seq` igual ao `seq`.
 3. **GAT-17** WHEN a `decision` é `comment` com texto válido THEN o broker SHALL gravar o evento como em GAT-15 e não mudar a linha: o gate SHALL continuar `pending`, com `decision_seq` nulo.
 4. **GAT-18** WHEN o broker grava um `gate_decision` THEN SHALL gravar na mesma transação uma entrega pendente para o `requested_by` do gate, nas três decisões.
 5. **GAT-19** The broker SHALL escrever no `gate_decision` o `summary` `G-NN aprovado`, `G-NN rejeitado: <text>` ou `G-NN comentado: <text>`, cortado em 80 caracteres, e o `body` igual a `text`, vazio sem `text`.
 6. **GAT-20** IF `human_token` não é o conteúdo do arquivo da credencial humana THEN o broker SHALL responder `invalid_token`, sem gravar nada; nenhuma recusa de `/gate-decision` SHALL gravar `refused`.
-7. **GAT-21** IF `gate_id` não é inteiro, `decision` não é texto, `text` está presente e não é texto, ou `decision` é `reject` ou `comment` e `text` está ausente ou não tem um caractere que não seja espaço THEN o broker SHALL responder `missing_field`.
+7. **GAT-21** IF `gate_id` não é inteiro, `request_seq` não é inteiro, `decision` não é texto, `text` está presente e não é texto, ou `decision` é `reject` ou `comment` e `text` está ausente ou não tem um caractere que não seja espaço THEN o broker SHALL responder `missing_field`.
 8. **GAT-22** IF `decision` não é `approve`, `reject` nem `comment`, ou `gate_id` não é o id de uma linha de `gates` THEN o broker SHALL responder `invalid_field`.
 9. **GAT-23** IF o gate não está `pending` THEN o broker SHALL responder `gate_closed`, nas três decisões, sem gravar nada.
 10. **GAT-24** IF uma decisão e outra chegam para o mesmo gate pendente THEN SHALL valer a primeira a gravar, e a outra, se é `approve` ou `reject`, SHALL receber `gate_closed`: um gate SHALL ter no máximo um `gate_decision` de `approve` ou `reject`.
-11. **GAT-25** IF `/gate-decision` falha em mais de uma regra THEN o broker SHALL responder a primeira nesta ordem: `invalid_token`, `missing_field`, `invalid_field`, `gate_closed`.
+11. **GAT-25** IF `/gate-decision` falha em mais de uma regra THEN o broker SHALL responder a primeira nesta ordem: `invalid_token`, `missing_field`, `invalid_field`, `gate_closed`, `gate_reissued`.
+12. **GAT-98** IF o gate está `pending` e `request_seq` não é o `request_seq` da linha, porque a mother pediu o gate de novo depois da versão que o dev viu THEN o broker SHALL responder `gate_reissued`, nas três decisões, sem gravar nada.
 
 **Independent Test**: com um gate pendente, `POST /gate-decision` com `approve` e a credencial humana: a linha fica `approved`, a mother recebe a entrega no polling, e um segundo `approve` recebe `gate_closed`.
 
@@ -240,10 +242,10 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 10. **GAT-49** WHILE o modal está no modo de leitura the modal SHALL terminar com uma linha vazia e `[a]provar      [r]ejeitar      [c]omentar` seguido de `            esc fechar` com um gate pendente, ou de `      ] próximo  [ anterior` com mais; e o rodapé SHALL ser `a aprovar   r rejeitar   c comentar   esc fechar sem decidir`, com `] próximo gate   [ anterior` antes de `esc` quando há mais de um.
 11. **GAT-50** WHILE o modal está no modo de leitura `a` SHALL passar ao modo de confirmação, `r` ao de texto de rejeição com o campo vazio, `c` ao de texto de comentário com o campo vazio, `]` e `[` SHALL mudar para o gate pendente seguinte ou anterior da fila, sem passar do último nem do primeiro, `esc` SHALL fechar o modal sem enviar, e nenhuma outra tecla, nem `q`, SHALL mudar o estado da tela; `ctrl+c` SHALL sair da TUI.
 12. **GAT-51** WHILE o modal está no modo de confirmação the modal SHALL ter, depois de um separador, `⚠ confirmar aprovação de G-NN · não dá para desfazer`, `  ação    <action>`, `  efeito  <effect>`, uma linha vazia e `[y] sim, aprovar e executar            esc voltar ao gate sem decidir`, com o rodapé `y confirmar   esc voltar ao gate`.
-13. **GAT-52** WHILE o modal está no modo de confirmação `y` SHALL enviar `POST /gate-decision` com `{ human_token, gate_id, decision: "approve" }`, `esc` SHALL voltar ao modo de leitura, e nenhuma outra tecla SHALL mudar o estado da tela.
+13. **GAT-52** WHILE o modal está no modo de confirmação `y` SHALL enviar `POST /gate-decision` com `{ human_token, gate_id, request_seq, decision: "approve" }`, `request_seq` o da versão na tela, `esc` SHALL voltar ao modo de leitura, e nenhuma outra tecla SHALL mudar o estado da tela.
 14. **GAT-53** WHILE o modal está num modo de texto the modal SHALL ter, depois de um separador, `rejeitar G-NN · motivo (obrigatório)` ou `comentar G-NN · comentário (obrigatório)  · o gate continua pendente`; o campo de 3 linhas, ou de 7 quando expandido, como o do modal de resposta (QST-73, QST-75), com as últimas 5 linhas do texto quando expandido; e `⚠ fica gravado no log da feature e não pode ser apagado`; o rodapé SHALL ser `enter enviar   ctrl+e expandir   ctrl+u limpar   esc voltar ao gate`, com `recolher` quando expandido.
 15. **GAT-54** WHILE o modal está num modo de texto um caractere imprimível SHALL entrar no fim do texto, `backspace` SHALL apagar o último, `ctrl+u` SHALL esvaziar o campo, `ctrl+e` SHALL alternar o tamanho, `esc` SHALL voltar ao modo de leitura sem o texto, e as letras de comando, os dígitos e `q` SHALL entrar no texto.
-16. **GAT-55** WHEN `enter` é pressionada num modo de texto com ao menos um caractere que não seja espaço THEN a TUI SHALL enviar `POST /gate-decision` com `{ human_token, gate_id, decision, text }`, `decision` `reject` ou `comment` pelo modo e `text` sem os espaços das pontas.
+16. **GAT-55** WHEN `enter` é pressionada num modo de texto com ao menos um caractere que não seja espaço THEN a TUI SHALL enviar `POST /gate-decision` com `{ human_token, gate_id, request_seq, decision, text }`, `request_seq` o da versão na tela, `decision` `reject` ou `comment` pelo modo e `text` sem os espaços das pontas.
 17. **GAT-56** IF `enter` é pressionada num modo de texto com o campo vazio ou só com espaços THEN a TUI SHALL não enviar, pintar a borda do campo de vermelho e mostrar abaixo do aviso fixo `✗ motivo obrigatório · nada foi enviado` ou `✗ comentário obrigatório · nada foi enviado`, até a próxima tecla que mude o texto.
 18. **GAT-57** WHEN o broker responde `{ ok: true }` a uma decisão THEN a TUI SHALL fechar o modal e avisar em verde por 4 s `✓ G-NN aprovado`, `✓ G-NN rejeitado` ou `✓ G-NN comentado · continua pendente`.
 19. **GAT-58** WHEN o broker responde `gate_closed` THEN a TUI SHALL fechar o modal e avisar em vermelho por 4 s `✗ G-NN já decidido`; IF responde outra recusa, um status que não é 200, um corpo que não é `{ ok }`, ou não responde em 2000 ms THEN SHALL voltar ao modo de onde enviou, com o texto, e avisar em vermelho por 4 s `✗ decisão não enviada · <erro>`, com o `error` da recusa ou `broker não respondeu`.
@@ -449,8 +451,9 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-95 | Edge cases | T14, T19 | Verified |
 | GAT-96 | Edge cases | T12 | Verified |
 | GAT-97 | Edge cases | T15 | Verified |
+| GAT-98 | P1: Decidir um gate | T48 | Implemented |
 
-**Coverage:** 97 total, 97 mapped to tasks, 0 unmapped.
+**Coverage:** 98 total, 98 mapped to tasks, 0 unmapped.
 
 ---
 
