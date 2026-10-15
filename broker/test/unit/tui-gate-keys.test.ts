@@ -246,7 +246,7 @@ test("GAT-58: gate_closed closes the modal and says in red for 4 s that the gate
 });
 
 test("GAT-58: another refusal, or the broker not answering, takes the modal back to the mode it sent from, with its text, and says in red for 4 s why", () => {
-  for (const error of ["invalid_token", "missing_field", "invalid_field", "gate_reissued", "broker não respondeu"]) {
+  for (const error of ["invalid_token", "missing_field", "invalid_field", "broker não respondeu"]) {
     for (const [m, send] of [
       [modal(1, { mode: "confirm" }), { gate_id: 1, request_seq: 439, decision: "approve" }],
       [modal(1, { mode: "reject", text: "  falta o teste  " }), { gate_id: 1, request_seq: 439, decision: "reject", text: "falta o teste" }],
@@ -255,6 +255,24 @@ test("GAT-58: another refusal, or the broker not answering, takes the modal back
       const v = sending(m, send);
       expect(settle(v.ui, { ok: false, error }, v)).toEqual({ ...v.ui, gate: m, send: null, toast: toast(v, `✗ decisão não enviada · ${error}`, "bred") });
     }
+  }
+});
+
+test("GAT-58, GAT-59: gate_reissued takes the confirm mode back to the view mode, so a second y does not approve the version asked again, and a text mode back as it was", () => {
+  // y on G-01 in 18a, then the read of 18b, where the mother asked it again, while the approve is on its way
+  const sent = key("y", opened("18a", modal(1, { mode: "confirm" })))!;
+  expect(sent.send).toEqual({ gate_id: 1, request_seq: 439, decision: "approve" });
+  const after = view("18b", sent);
+  expect(sync(sent, after)).toBe(sent);
+  const settled = settle(sent, { ok: false, error: "gate_reissued" }, after);
+  expect(settled).toEqual({ ...sent, gate: modal(1), send: null, toast: toast(after, "✗ decisão não enviada · gate_reissued", "bred") });
+  expect(press(settled, "y", { ...after, ui: settled })).toBe(settled);
+  for (const [m, send] of [
+    [modal(1, { mode: "reject", text: "falta" }), { gate_id: 1, request_seq: 439, decision: "reject", text: "falta" }],
+    [modal(1, { mode: "comment", text: "e o iOS?" }), { gate_id: 1, request_seq: 439, decision: "comment", text: "e o iOS?" }],
+  ] as const) {
+    const v = sending(m, send);
+    expect(settle(v.ui, { ok: false, error: "gate_reissued" }, v)).toEqual({ ...v.ui, gate: m, send: null, toast: toast(v, "✗ decisão não enviada · gate_reissued", "bred") });
   }
 });
 
