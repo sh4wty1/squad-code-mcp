@@ -904,8 +904,8 @@ T47 → T30
 
 **Done when**:
 
-- [ ] Modal de G-02 com G-01 na versão 2: `a` dá o modo de confirmação com `version` 1
-- [ ] Falha com `keys.ts:134` com o `find` trocado por `() => true` numa cópia; gate quick passa
+- [x] Modal de G-02 com G-01 na versão 2: `a` dá o modo de confirmação com `version` 1
+- [x] Falha com `keys.ts:134` com o `find` trocado por `() => true` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

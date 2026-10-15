@@ -100,6 +100,12 @@ test("GAT-50: in the view mode a goes to the confirm mode of the version on the 
   expect(key("a", two)!.gate).toEqual(modal(1, { mode: "confirm", version: 2 }));
 });
 
+test("GAT-50: a confirms the version of the gate of the modal, not that of another gate of the queue", () => {
+  // G-01 asked again, in version 2; the modal is on G-02, in version 1
+  const v = opened("19a", modal(2), (events) => [...events, { ...G02, seq: 501, gate_id: 1 } as SquadEvent]);
+  expect(key("a", v)!.gate).toEqual(modal(2, { mode: "confirm", version: 1 }));
+});
+
 test("GAT-50: in the view mode esc closes the modal without sending", () => {
   const v = opened("18a", modal(1));
   expect(key("\x1b", v)).toEqual({ ...v.ui, gate: null });
