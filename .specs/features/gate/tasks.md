@@ -813,8 +813,8 @@ T47 → T30
 
 **Done when**:
 
-- [ ] G-01 aprovado, G-02 e G-03 pendentes, modal em G-02: `[` devolve o mesmo `Ui` e `]` dá o modal de G-03
-- [ ] Falha com `keys.ts:126` sem o `.filter((g) => g.pending)` numa cópia; gate quick passa
+- [x] G-01 aprovado, G-02 e G-03 pendentes, modal em G-02: `[` devolve o mesmo `Ui` e `]` dá o modal de G-03
+- [x] Falha com `keys.ts:126` sem o `.filter((g) => g.pending)` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

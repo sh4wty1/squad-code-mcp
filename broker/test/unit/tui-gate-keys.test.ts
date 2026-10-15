@@ -126,6 +126,13 @@ test("GAT-50: ] and [ go to the next and the previous pending gate of the queue,
   expect(key("]", at(1))).toEqual({ ...at(1).ui, gate: modal(2) });
 });
 
+test("GAT-50: ] and [ skip a decided gate, which is out of the queue", () => {
+  // G-01 approved, G-02 and G-03 pending: G-02 is the first of the queue
+  const v = opened("19a", modal(2), (events) => [...third(events), decided(501, 1, "approve")]);
+  expect(key("[", v)).toBe(v.ui);
+  expect(key("]", v)!.gate).toEqual(modal(3));
+});
+
 // ---- the confirm mode ----
 
 test("GAT-52: in the confirm mode y leaves the approve of the gate to send, without text, and the modal waits for the broker", () => {
