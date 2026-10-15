@@ -168,7 +168,7 @@ Two routes take no `id`:
 | Route | Body | Answer |
 | --- | --- | --- |
 | `/permission-decision` | `{ human_token, request_seq, behavior }`, `behavior` being `allow` or `deny` | `{ ok: true, seq }`, or `invalid_token`, `missing_field`, `invalid_field`, `permission_closed` |
-| `/gate-decision` | `{ human_token, gate_id, decision, text? }`, `decision` being `approve`, `reject` or `comment`, the last two with a text | `{ ok: true, seq }`, or `invalid_token`, `missing_field`, `invalid_field`, `gate_closed` |
+| `/gate-decision` | `{ human_token, gate_id, request_seq, decision, text? }`, `request_seq` being the `seq` of the version of the gate the dev decides, `decision` being `approve`, `reject` or `comment`, the last two with a text | `{ ok: true, seq }`, or `invalid_token`, `missing_field`, `invalid_field`, `gate_closed`, `gate_reissued` |
 | `GET /events?after=<seq>` | | `{ events, last_seq }`: every event after the cursor, the whole log without `after`. `invalid_field` if `after` is not an integer of zero or more |
 
 An event is read as a flat object: `{ seq, ts, kind, feature_id, from, role_from, to, summary, body, ticket_ref }` plus the fields of its kind.
