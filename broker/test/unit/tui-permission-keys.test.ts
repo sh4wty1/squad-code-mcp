@@ -240,6 +240,14 @@ test("GAT-71, GAT-96: a read that shows the request closed by its peer or by its
   }
 });
 
+test("GAT-70, GAT-71: a read with the decision of another request before the event of the peer leaves the modal open, with no notice", () => {
+  // 460, of worker-2, decided; then worker-1 acts and closes 459 in the terminal
+  const other = later("permission_decision", { seq: 599, ts: REQUEST.ts + 40_000, from: "human", role_from: "human", to: "worker-2", request_seq: 460, behavior: "allow" });
+  const v = view("22c", { permission: modal(459) }, (events) => later("turn_started")(other(events)));
+  expect(v.squad.requests.find((r) => r.request.seq === 459)!.closedBy).toBe("peer");
+  expect(sync(v.ui, v)).toBe(v.ui);
+});
+
 test("GAT-70: a read changes nothing in a modal whose decision is on its way, nor in that of a request still open", () => {
   const onTheWay = view("14", { permission: modal(459, { sending: true }) }, DECIDED);
   expect(sync(onTheWay.ui, onTheWay)).toBe(onTheWay.ui);

@@ -849,9 +849,9 @@ T47 → T30
 
 **Done when**:
 
-- [ ] `requests()` com 3 (worker-1) e 4 (worker-2) abertos, a decisão de 4 e depois um evento de worker-1: 3 fechado por `peer` no `ts` do evento de worker-1, 4 por `decision` no `ts` da decisão
-- [ ] `sync` com o modal de 459 aberto, a decisão de 460 e depois um evento de worker-1 deixa o `Ui` igual, sem aviso
-- [ ] Falha com `derive.ts:252` sem `&& e.request_seq === request.seq` numa cópia; gate quick passa
+- [x] `requests()` com 3 (worker-1) e 4 (worker-2) abertos, a decisão de 4 e depois um evento de worker-1: 3 fechado por `peer` no `ts` do evento de worker-1, 4 por `decision` no `ts` da decisão
+- [x] `sync` com o modal de 459 aberto, a decisão de 460 e depois um evento de worker-1 deixa o `Ui` igual, sem aviso
+- [x] Falha com `derive.ts:252` sem `&& e.request_seq === request.seq` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

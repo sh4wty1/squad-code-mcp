@@ -223,6 +223,14 @@ test("GAT-71: a request closed by a later event of its peer is closed by the pee
   expect(requests(log).map(row)).toEqual([[3, "P-01", false, "peer", T0 + 7000]]);
 });
 
+test("GAT-70, GAT-71: the decision of another request does not close a request, which its peer closes later", () => {
+  const log = [ask(3, "worker-1"), ask(4, "worker-2"), allow(6, 4), of(8, "turn_started", "worker-1")];
+  expect(requests(log).map(row)).toEqual([
+    [3, "P-01", false, "peer", T0 + 8000],
+    [4, "P-02", false, "decision", T0 + 6000],
+  ]);
+});
+
 test("GAT-96: a request whose peer left is closed by the peer, at the ts of the peer_left", () => {
   const log = [ask(3, "worker-1"), left(4, "worker-2"), left(6, "worker-1")];
   expect(requests(log).map(row)).toEqual([[3, "P-01", false, "peer", T0 + 6000]]);
