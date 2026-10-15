@@ -831,8 +831,8 @@ T47 → T30
 
 **Done when**:
 
-- [ ] 459 fechado por um `turn_started` de worker-1, 460 e 500 abertos, modal em 460: `[` devolve o mesmo `Ui` e `]` dá o modal de 500
-- [ ] Falha com `keys.ts:200` trocado por `view.squad.requests.map((r) => r.request)` numa cópia; gate quick passa
+- [x] 459 fechado por um `turn_started` de worker-1, 460 e 500 abertos, modal em 460: `[` devolve o mesmo `Ui` e `]` dá o modal de 500
+- [x] Falha com `keys.ts:200` trocado por `view.squad.requests.map((r) => r.request)` numa cópia; gate quick passa
 
 **Tests**: unit
 **Gate**: quick

@@ -170,6 +170,13 @@ test("GAT-65: ] and [ go to the next and the previous open request, oldest first
   expect(key("[", on(500))!.permission).toEqual(modal(460));
 });
 
+test("GAT-65: ] and [ skip a request closed in the terminal, which is out of the queue", () => {
+  // 459 closed by a later event of worker-1, 460 and 500 open: 460 is the first of the queue
+  const v = view("22c", { permission: modal(460) }, (events) => later("turn_started")(third(events)));
+  expect(key("[", v)).toBe(v.ui);
+  expect(key("]", v)!.permission).toEqual(modal(500));
+});
+
 for (const [what, change] of [
   ["a later event of its peer", later("turn_started")],
   ["the peer_left of its peer", LEFT],
