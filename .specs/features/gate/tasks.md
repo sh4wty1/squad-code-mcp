@@ -976,7 +976,7 @@ T47 → T30
 
 **Done when**:
 
-- [ ] A fatia marcada, o marco do MVP conferido ou não, o Handoff apontando o PR
+- [x] A fatia marcada, o marco do MVP conferido ou não, o Handoff apontando o PR
 
 **Tests**: none
 **Gate**: build

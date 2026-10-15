@@ -20,13 +20,13 @@ permissão na TUI, com teclado e mouse. É a última fatia do MVP.
 
 ## Goals
 
-- [ ] A mother pede um gate, o dev aprova, rejeita ou comenta pela TUI com a credencial humana, e o gate tem exatamente uma decisão final.
-- [ ] `close_feature` com `delivered` só passa com um gate `delivery` aprovado na feature.
-- [ ] O dev decide um pedido de permissão pela TUI, sem ir ao terminal do agente.
-- [ ] A tabela `gates` e `gates()` de `broker/shared/derive.ts`, aplicada aos eventos, dizem a mesma coisa depois de qualquer sequência de chamadas.
-- [ ] Os frames 08, 16a, 16b, 16c, 17, 18b, 19b, 22a, 22b, 22d, 22e, 22f e 29d são casos do teste de frames, sem edição dos arquivos extraídos; os 47 que já existem continuam passando, e a legenda do frame 11 perde os desvios D3 dos modais.
+- [x] A mother pede um gate, o dev aprova, rejeita ou comenta pela TUI com a credencial humana, e o gate tem exatamente uma decisão final.
+- [x] `close_feature` com `delivered` só passa com um gate `delivery` aprovado na feature.
+- [x] O dev decide um pedido de permissão pela TUI, sem ir ao terminal do agente.
+- [x] A tabela `gates` e `gates()` de `broker/shared/derive.ts`, aplicada aos eventos, dizem a mesma coisa depois de qualquer sequência de chamadas.
+- [x] Os frames 08, 16a, 16b, 16c, 17, 18b, 19b, 22a, 22b, 22d, 22e, 22f e 29d são casos do teste de frames, sem edição dos arquivos extraídos; os 47 que já existem continuam passando, e a legenda do frame 11 perde os desvios D3 dos modais.
 - [x] O marco do MVP: uma feature de dois tickets vai do kickoff ao gate aprovado com o dev usando só o terminal da mother e a TUI.
-- [ ] A suíte passa no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar.
+- [x] A suíte passa no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar.
 
 ## Out of Scope
 
@@ -352,103 +352,103 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| GAT-01 | P1: Pedir gate | T1, T3 | Implementing |
-| GAT-02 | P1: Pedir gate | T1, T3 | Implementing |
-| GAT-03 | P1: Pedir gate | T3 | Implementing |
-| GAT-04 | P1: Pedir gate | T3 | Implementing |
-| GAT-05 | P1: Pedir gate | T3, T6 | Implementing |
-| GAT-06 | P1: Pedir gate | T3 | Implementing |
-| GAT-07 | P1: Pedir gate | T3 | Implementing |
-| GAT-08 | P1: Pedir gate | T3 | Implementing |
-| GAT-09 | P1: Pedir gate | T3 | Implementing |
-| GAT-10 | P1: Pedir gate | T3 | Implementing |
-| GAT-11 | P1: Pedir gate | T6 | Implementing |
-| GAT-12 | P1: Reemitir depois do comentário | T3 | Implementing |
-| GAT-13 | P1: Reemitir depois do comentário | T3 | Implementing |
-| GAT-14 | P1: Reemitir depois do comentário | T3 | Implementing |
-| GAT-15 | P1: Decidir um gate | T4 | Implementing |
-| GAT-16 | P1: Decidir um gate | T4 | Implementing |
-| GAT-17 | P1: Decidir um gate | T4 | Implementing |
-| GAT-18 | P1: Decidir um gate | T4, T9 | Implementing |
-| GAT-19 | P1: Decidir um gate | T4 | Implementing |
-| GAT-20 | P1: Decidir um gate | T4, T6 | Implementing |
-| GAT-21 | P1: Decidir um gate | T4 | Implementing |
-| GAT-22 | P1: Decidir um gate | T4 | Implementing |
-| GAT-23 | P1: Decidir um gate | T4 | Implementing |
-| GAT-24 | P1: Decidir um gate | T4, T7 | Implementing |
-| GAT-25 | P1: Decidir um gate | T4 | Implementing |
-| GAT-26 | P1: Encerrar a feature com o gate | T5, T6, T26 | Implementing |
-| GAT-27 | P1: Encerrar a feature com o gate | T5, T26 | Implementing |
-| GAT-28 | P1: Encerrar a feature com o gate | T5 | Implementing |
-| GAT-29 | P1: Encerrar a feature com o gate | T5 | Implementing |
-| GAT-30 | P1: Paridade com o log | T2, T7 | Implementing |
-| GAT-31 | P1: Paridade com o log | T2 | Implementing |
-| GAT-32 | P1: Paridade com o log | T2 | Implementing |
-| GAT-33 | P1: Paridade com o log | T2 | Implementing |
-| GAT-34 | P1: O que a mother vê | T8 | Implementing |
-| GAT-35 | P1: O que a mother vê | T8 | Implementing |
-| GAT-36 | P1: O que a mother vê | T9 | Implementing |
-| GAT-37 | P1: O que a mother vê | T10, T29 | Implementing |
-| GAT-38 | P1: O que a mother vê | T10, T29 | Implementing |
-| GAT-39 | P1: O que a mother vê | T10, T29 | Implementing |
-| GAT-40 | P1: Modal de gate | T13, T20, T26 | Implementing |
-| GAT-41 | P1: Modal de gate | T17, T18 | Implementing |
-| GAT-42 | P1: Modal de gate | T18 | Implementing |
-| GAT-43 | P1: Modal de gate | T18 | Implementing |
-| GAT-44 | P1: Modal de gate | T18 | Implementing |
-| GAT-45 | P1: Modal de gate | T18 | Implementing |
-| GAT-46 | P1: Modal de gate | T18 | Implementing |
-| GAT-47 | P1: Modal de gate | T18 | Implementing |
-| GAT-48 | P1: Modal de gate | T18 | Implementing |
-| GAT-49 | P1: Modal de gate | T18 | Implementing |
-| GAT-50 | P1: Modal de gate | T13 | Implementing |
-| GAT-51 | P1: Modal de gate | T18 | Implementing |
-| GAT-52 | P1: Modal de gate | T13, T26 | Implementing |
-| GAT-53 | P1: Modal de gate | T18 | Implementing |
-| GAT-54 | P1: Modal de gate | T13 | Implementing |
-| GAT-55 | P1: Modal de gate | T13 | Implementing |
-| GAT-56 | P1: Modal de gate | T13, T18 | Implementing |
-| GAT-57 | P1: Modal de gate | T15 | Implementing |
-| GAT-58 | P1: Modal de gate | T11, T15 | Implementing |
-| GAT-59 | P1: Modal de gate | T15 | Implementing |
-| GAT-60 | P1: Modal de permissão | T14, T20, T26 | Implementing |
-| GAT-61 | P1: Modal de permissão | T12, T17, T19 | Implementing |
-| GAT-62 | P1: Modal de permissão | T12, T19 | Implementing |
-| GAT-63 | P1: Modal de permissão | T17, T19 | Implementing |
-| GAT-64 | P1: Modal de permissão | T19 | Implementing |
-| GAT-65 | P1: Modal de permissão | T14 | Implementing |
-| GAT-66 | P1: Modal de permissão | T14, T26 | Implementing |
-| GAT-67 | P1: Modal de permissão | T14 | Implementing |
-| GAT-68 | P1: Modal de permissão | T15 | Implementing |
-| GAT-69 | P1: Modal de permissão | T11, T15 | Implementing |
-| GAT-70 | P1: Modal de permissão | T12, T15 | Implementing |
-| GAT-71 | P1: Modal de permissão | T12, T14, T19 | Implementing |
-| GAT-72 | P1: Teclado e escrita comuns aos modais | T11, T25, T27 | Implementing |
-| GAT-73 | P1: Teclado e escrita comuns aos modais | T15, T25 | Implementing |
-| GAT-74 | P1: Teclado e escrita comuns aos modais | T15, T25 | Implementing |
-| GAT-75 | P1: Teclado e escrita comuns aos modais | T16 | Implementing |
-| GAT-76 | P1: Teclado e escrita comuns aos modais | T13 | Implementing |
-| GAT-77 | P1: Teclado e escrita comuns aos modais | T16 | Implementing |
-| GAT-78 | P1: Teclado e escrita comuns aos modais | T25 | Implementing |
-| GAT-79 | P1: Mouse nos modais | T23, T24 | Implementing |
-| GAT-80 | P1: Mouse nos modais | T24 | Implementing |
-| GAT-81 | P1: Mouse nos modais | T24 | Implementing |
-| GAT-82 | P1: Mouse nos modais | T23, T24 | Implementing |
-| GAT-83 | P1: Mouse nos modais | T24 | Implementing |
-| GAT-84 | P1: Mouse nos modais | T24 | Implementing |
-| GAT-85 | P1: Frames e legenda | T21 | Implementing |
-| GAT-86 | P1: Frames e legenda | T22 | Implementing |
-| GAT-87 | P1: Frames e legenda | T20 | Implementing |
-| GAT-88 | P1: Frames e legenda | T20, T21, T22 | Implementing |
-| GAT-89 | P1: Frames e legenda | T21, T22, T28, T30 | Implementing |
-| GAT-90 | P1: Frames e legenda | T13 | Implementing |
-| GAT-91 | Edge cases | T13 | Implementing |
-| GAT-92 | Edge cases | T13 | Implementing |
-| GAT-93 | Edge cases | T18 | Implementing |
-| GAT-94 | Edge cases | T14, T19 | Implementing |
-| GAT-95 | Edge cases | T14, T19 | Implementing |
-| GAT-96 | Edge cases | T12 | Implementing |
-| GAT-97 | Edge cases | T15 | Implementing |
+| GAT-01 | P1: Pedir gate | T1, T3 | Verified |
+| GAT-02 | P1: Pedir gate | T1, T3 | Verified |
+| GAT-03 | P1: Pedir gate | T3 | Verified |
+| GAT-04 | P1: Pedir gate | T3 | Verified |
+| GAT-05 | P1: Pedir gate | T3, T6 | Verified |
+| GAT-06 | P1: Pedir gate | T3 | Verified |
+| GAT-07 | P1: Pedir gate | T3 | Verified |
+| GAT-08 | P1: Pedir gate | T3 | Verified |
+| GAT-09 | P1: Pedir gate | T3 | Verified |
+| GAT-10 | P1: Pedir gate | T3 | Verified |
+| GAT-11 | P1: Pedir gate | T6 | Verified |
+| GAT-12 | P1: Reemitir depois do comentário | T3 | Verified |
+| GAT-13 | P1: Reemitir depois do comentário | T3, T35 | Verified |
+| GAT-14 | P1: Reemitir depois do comentário | T3 | Verified |
+| GAT-15 | P1: Decidir um gate | T4 | Verified |
+| GAT-16 | P1: Decidir um gate | T4 | Verified |
+| GAT-17 | P1: Decidir um gate | T4 | Verified |
+| GAT-18 | P1: Decidir um gate | T4, T9 | Verified |
+| GAT-19 | P1: Decidir um gate | T4 | Verified |
+| GAT-20 | P1: Decidir um gate | T4, T6 | Verified |
+| GAT-21 | P1: Decidir um gate | T4 | Verified |
+| GAT-22 | P1: Decidir um gate | T4 | Verified |
+| GAT-23 | P1: Decidir um gate | T4 | Verified |
+| GAT-24 | P1: Decidir um gate | T4, T7 | Verified |
+| GAT-25 | P1: Decidir um gate | T4 | Verified |
+| GAT-26 | P1: Encerrar a feature com o gate | T5, T6, T26 | Verified |
+| GAT-27 | P1: Encerrar a feature com o gate | T5, T26 | Verified |
+| GAT-28 | P1: Encerrar a feature com o gate | T5 | Verified |
+| GAT-29 | P1: Encerrar a feature com o gate | T5 | Verified |
+| GAT-30 | P1: Paridade com o log | T2, T7 | Verified |
+| GAT-31 | P1: Paridade com o log | T2 | Verified |
+| GAT-32 | P1: Paridade com o log | T2 | Verified |
+| GAT-33 | P1: Paridade com o log | T2 | Verified |
+| GAT-34 | P1: O que a mother vê | T8 | Verified |
+| GAT-35 | P1: O que a mother vê | T8 | Verified |
+| GAT-36 | P1: O que a mother vê | T9 | Verified |
+| GAT-37 | P1: O que a mother vê | T10, T29 | Verified |
+| GAT-38 | P1: O que a mother vê | T10, T29 | Verified |
+| GAT-39 | P1: O que a mother vê | T10, T29 | Verified |
+| GAT-40 | P1: Modal de gate | T13, T20, T26 | Verified |
+| GAT-41 | P1: Modal de gate | T17, T18, T37 | Verified |
+| GAT-42 | P1: Modal de gate | T18 | Verified |
+| GAT-43 | P1: Modal de gate | T18, T32, T43 | Verified |
+| GAT-44 | P1: Modal de gate | T18, T33 | Verified |
+| GAT-45 | P1: Modal de gate | T18 | Verified |
+| GAT-46 | P1: Modal de gate | T18 | Verified |
+| GAT-47 | P1: Modal de gate | T18, T38, T43, T47 | Verified |
+| GAT-48 | P1: Modal de gate | T18 | Verified |
+| GAT-49 | P1: Modal de gate | T18 | Verified |
+| GAT-50 | P1: Modal de gate | T13, T39, T44 | Verified |
+| GAT-51 | P1: Modal de gate | T18 | Verified |
+| GAT-52 | P1: Modal de gate | T13, T26 | Verified |
+| GAT-53 | P1: Modal de gate | T18 | Verified |
+| GAT-54 | P1: Modal de gate | T13 | Verified |
+| GAT-55 | P1: Modal de gate | T13 | Verified |
+| GAT-56 | P1: Modal de gate | T13, T18 | Verified |
+| GAT-57 | P1: Modal de gate | T15 | Verified |
+| GAT-58 | P1: Modal de gate | T11, T15 | Verified |
+| GAT-59 | P1: Modal de gate | T15, T45 | Verified |
+| GAT-60 | P1: Modal de permissão | T14, T20, T26 | Verified |
+| GAT-61 | P1: Modal de permissão | T12, T17, T19, T31, T42 | Verified |
+| GAT-62 | P1: Modal de permissão | T12, T19, T42 | Verified |
+| GAT-63 | P1: Modal de permissão | T17, T19 | Verified |
+| GAT-64 | P1: Modal de permissão | T19 | Verified |
+| GAT-65 | P1: Modal de permissão | T14, T40 | Verified |
+| GAT-66 | P1: Modal de permissão | T14, T26 | Verified |
+| GAT-67 | P1: Modal de permissão | T14 | Verified |
+| GAT-68 | P1: Modal de permissão | T15 | Verified |
+| GAT-69 | P1: Modal de permissão | T11, T15 | Verified |
+| GAT-70 | P1: Modal de permissão | T12, T15, T41, T46 | Verified |
+| GAT-71 | P1: Modal de permissão | T12, T14, T19, T31, T41 | Verified |
+| GAT-72 | P1: Teclado e escrita comuns aos modais | T11, T25, T27 | Verified |
+| GAT-73 | P1: Teclado e escrita comuns aos modais | T15, T25 | Verified |
+| GAT-74 | P1: Teclado e escrita comuns aos modais | T15, T25 | Verified |
+| GAT-75 | P1: Teclado e escrita comuns aos modais | T16 | Verified |
+| GAT-76 | P1: Teclado e escrita comuns aos modais | T13 | Verified |
+| GAT-77 | P1: Teclado e escrita comuns aos modais | T16 | Verified |
+| GAT-78 | P1: Teclado e escrita comuns aos modais | T25 | Verified |
+| GAT-79 | P1: Mouse nos modais | T23, T24 | Verified |
+| GAT-80 | P1: Mouse nos modais | T24 | Verified |
+| GAT-81 | P1: Mouse nos modais | T24 | Verified |
+| GAT-82 | P1: Mouse nos modais | T23, T24 | Verified |
+| GAT-83 | P1: Mouse nos modais | T24, T34 | Verified |
+| GAT-84 | P1: Mouse nos modais | T24 | Verified |
+| GAT-85 | P1: Frames e legenda | T21 | Verified |
+| GAT-86 | P1: Frames e legenda | T22 | Verified |
+| GAT-87 | P1: Frames e legenda | T20 | Verified |
+| GAT-88 | P1: Frames e legenda | T20, T21, T22 | Verified |
+| GAT-89 | P1: Frames e legenda | T21, T22, T28, T30 | Verified |
+| GAT-90 | P1: Frames e legenda | T13 | Verified |
+| GAT-91 | Edge cases | T13 | Verified |
+| GAT-92 | Edge cases | T13 | Verified |
+| GAT-93 | Edge cases | T18, T36 | Verified |
+| GAT-94 | Edge cases | T14, T19 | Verified |
+| GAT-95 | Edge cases | T14, T19 | Verified |
+| GAT-96 | Edge cases | T12 | Verified |
+| GAT-97 | Edge cases | T15 | Verified |
 
 **Coverage:** 97 total, 97 mapped to tasks, 0 unmapped.
 
@@ -456,10 +456,10 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 
 ## Success Criteria
 
-- [ ] Clientes MCP de teste da mother, do leader e de um worker levam uma feature de dois tickets do `open_feature` ao `gate` de entrega, e a TUI, sobre o mesmo broker, aprova o gate pelo modal; `close_feature` `delivered` passa só depois disso.
-- [ ] Depois de qualquer sequência de chamadas, `gates()` aplicada a `GET /events` devolve as linhas de `gates` (GAT-30).
-- [ ] Nenhum caminho deixa um gate com duas decisões finais.
-- [ ] A TUI, sobre um broker de teste, decide um pedido de permissão pelo modal, e o servidor MCP do peer recebe o veredito.
-- [ ] Os 60 frames passam no teste de frames; os 47 anteriores não mudam.
+- [x] Clientes MCP de teste da mother, do leader e de um worker levam uma feature de dois tickets do `open_feature` ao `gate` de entrega, e a TUI, sobre o mesmo broker, aprova o gate pelo modal; `close_feature` `delivered` passa só depois disso. `broker/test/integration/gate-e2e.test.ts` (T26).
+- [x] Depois de qualquer sequência de chamadas, `gates()` aplicada a `GET /events` devolve as linhas de `gates` (GAT-30). `broker/test/unit/gate-replay.test.ts` (T7).
+- [x] Nenhum caminho deixa um gate com duas decisões finais. GAT-24 em `broker/test/unit/gate-replay.test.ts` (T7) e os testes de T4.
+- [x] A TUI, sobre um broker de teste, decide um pedido de permissão pelo modal, e o servidor MCP do peer recebe o veredito. `broker/test/integration/gate-e2e.test.ts` (T26).
+- [x] Os 60 frames passam no teste de frames; os 47 anteriores não mudam. `broker/test/unit/tui-frames.test.ts` (T21, T22).
 - [x] O marco do MVP conferido com sessões reais, ou o que ficou sem conferir registrado em `marco-mvp.md`. Conferido em 2026-10-14 sobre `a6a96a8`: a feature `slugs`, de dois tickets, do kickoff ao `feature_closed` `delivered`, com o dev só no terminal da mother (uma mensagem) e na TUI (11 pedidos de permissão, um comentário e a aprovação do gate).
-- [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Antes da fatia, `main` em `3922651`: Windows, 2080 pass, 5 skip. Em `eb39b01`, 2026-10-14: Windows 11, Bun 1.3.14, `tsc` 0 e 2431 pass, 5 skip, 0 fail, 96 arquivos, em 130 s; Linux, contêiner `oven/bun:1.4.2` (kernel 6.18 do WSL2) com `git`, `lsof` e `procps`, sobre um clone com `core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2435 pass, 1 skip, 0 fail, 96 arquivos, em 82 s cada.
+- [x] `bun node_modules/typescript/bin/tsc --noEmit` e `bun test` passam no Windows e no Linux, ou a spec registra qual dos dois ficou sem rodar. Antes da fatia, `main` em `3922651`: Windows, 2080 pass, 5 skip. Em `eb39b01`, 2026-10-14: Windows 11, Bun 1.3.14, `tsc` 0 e 2431 pass, 5 skip, 0 fail, 96 arquivos, em 130 s; Linux, contêiner `oven/bun:1.4.2` (kernel 6.18 do WSL2) com `git`, `lsof` e `procps`, sobre um clone com `core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2435 pass, 1 skip, 0 fail, 96 arquivos, em 82 s cada. No fechamento, em `1fcba77`, 2026-10-15, depois de T39 a T47, que só acrescentam testes: Windows 11, Bun 1.3.14, `tsc` 0 e 2449 pass, 5 skip, 0 fail, 96 arquivos, em 142 s; Linux, no mesmo contêiner e do mesmo jeito, `tsc` 0 e 3 de 3 execuções com 2453 pass, 1 skip, 0 fail, 96 arquivos, entre 91 e 95 s.

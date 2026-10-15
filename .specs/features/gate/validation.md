@@ -696,3 +696,34 @@ Todas de teste: cada uma deve falhar com o mutante indicado e passar no código 
 **Issues found**: os seis vivos são o mesmo padrão das voltas 1 e 2 (L-039): uma fila, uma contagem ou um fechamento que filtra por uma condição, testado só com itens que passam nela. Cada volta achou alguns casos; esta mostra que o padrão continua nos dois modais e em `requests()`.
 
 **Next steps**: escalar ao dev com Fix 9 a 13. Recomendação: em vez de mais uma volta de poucos casos, uma tarefa que varra cada `filter`/`find` de `tui/keys.ts`, `tui/screens/gate.ts`, `tui/screens/permission.ts` e `requests()` com um item que falha a condição.
+
+---
+
+## Nota de fechamento (2026-10-15, depois da volta 3)
+
+Escrita pelo orquestrador, não pelo Verifier. O veredito da volta 3 acima continua **FAIL** e não foi mudado.
+
+- O dev decidiu em 2026-10-15 aplicar do Fix 9 ao Fix 13 como tarefas de teste e fechar a fatia **sem uma quarta volta do Verifier**, como fez com a Papéis e a TUI clicável. Pela recomendação da volta 3, as tarefas também cobrem a varredura de cada `filter` e `find` de `broker/tui/keys.ts`, `broker/tui/screens/gate.ts`, `broker/tui/screens/permission.ts` e de `requests()` (com `openPermissions()`, que ela usa) em `broker/shared/derive.ts`, cada um com um item que falha a condição (L-039).
+- Tudo rodou numa cópia fora da árvore, um `git worktree` destacado em `C:\tmp\gate-mut` com `bun install --frozen-lockfile` próprio, no Windows com o Bun 1.3.14. Cada mutação, uma por vez, contra os arquivos `tui-*` e `derive*` (1386 testes antes dos novos), com o arquivo restaurado depois. A árvore real só recebeu testes e `.specs/`; nenhum código de produção mudou (`git diff --stat cdb8517..1fcba77 -- broker ':!broker/test'` vazio).
+- **A varredura**: 51 mutações, o predicado de cada `filter`/`find` trocado por `() => true` (ou o `filter` tirado) e, num predicado de mais de uma condição, cada condição tirada por vez. 39 morreram pelos testes que já existiam. Das 12 vivas, 4 são mutantes do relatório (V15, V18, V10, V28) e uma variante de V23 (`permission.ts:47` com todos os pedidos na fila); 4 são novas e viraram T44 a T47; 4 são equivalentes:
+  - `gate.ts:41` sem o `filter((q) => !q.open)`: uma pergunta aberta não tem `merged_into` (uma mesclada não é aberta, `derive.ts:419`) nem `resolved_by`, então não entra em nenhuma das quatro contagens com ou sem o filtro.
+  - `gate.ts:42` sem `q.merged_into !== null &&`: toda pergunta fechada da feature aberta que não é mesclada tem `answered_by` (o autor da resposta, ou `broker` no default); só o `feature_closed` fecha sem resposta, e ele tira a feature do modal.
+  - `gate.ts:72` sem o `filter((line) => line.includes("|"))`: a linha sem `|` de um `diffstat` é o total (`N files changed, …`), que nunca é o texto antes do `|` de uma linha de arquivo.
+  - `gate.ts:80` sem `t.planned &&`: um ticket com `verdict` recebeu `task`, que exige ticket do `plan` (`send.ts:101`), e um `plan` novo não tira um ticket começado (`plan.ts:76`): ele fica com `dropped: true`.
+- **Cada teste novo falha com a sua mutação e passa sem ela**, na mesma cópia:
+
+| Tarefa | Commit | Mutação | Testes que falham |
+| ------ | ------ | ------- | ----------------- |
+| T39 (Fix 9) | `439c2e1` | V15, `keys.ts:126` sem `.filter((g) => g.pending)` | 1, o de T39 |
+| T40 (Fix 10) | `97ac84d` | V18, `keys.ts:200` `view.squad.requests.map((r) => r.request)` | 1, o de T40 |
+| T41 (Fix 11) | `4380b38` | V10, `derive.ts:252` sem `&& e.request_seq === request.seq` | 2, os dois de T41 |
+| T42 (Fix 12) | `465cd7e` | V23, `permission.ts:112` `squad.requests.length`; e `permission.ts:47` com todos os pedidos | 1 cada, o de T42 |
+| T43 (Fix 13) | `2219259` | V28, `gate.ts:80` sem `&& !t.dropped`; V27, `gate.ts:28` `live.reduce` | 1 cada, o de T43 |
+| T44 | `f0b857b` | K134, `keys.ts:134` `queue.find(() => true)` | 1, o de T44 |
+| T45 | `abed948` | K398, `keys.ts:398` `gates.find(() => true)` | 1, o de T45 |
+| T46 | `20ab72b` | K408, `keys.ts:408` `requests.find(() => true)` | 1, o de T46 |
+| T47 | `1fcba77` | G82a, `gate.ts:82` sem `row.event.kind === "verdict" &&` | 1, o de T47 |
+
+- A suíte em `1fcba77`: Windows 11, Bun 1.3.14, `tsc` 0 e 2449 pass, 5 skip, 0 fail, 96 arquivos, 142 s; Linux, contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` sobre um clone `core.autocrlf=false` montado só para leitura, `tsc` 0 e 3 de 3 execuções com 2453 pass, 1 skip, 0 fail, 96 arquivos, entre 91 e 95 s.
+- Na spec, os 97 requisitos passam a `Verified`: GAT-43, GAT-47, GAT-50, GAT-61, GAT-65, GAT-70 e GAT-71 pelos testes de T39 a T43, e GAT-50, GAT-59, GAT-70 e GAT-47 também pelos de T44 a T47.
+- **O que ficou sem cobrir**, por não haver quarta volta: a varredura e a conferência das mutações foram do autor dos testes, não de um Verifier independente; nenhuma releitura independente dos dez testes novos; a varredura só trocou predicados de `filter`/`find`, sem outros tipos de mutação nesses arquivos. `validate_state.py gate` continua saindo com 1, porque o veredito acima é FAIL: é o estado aceito.
