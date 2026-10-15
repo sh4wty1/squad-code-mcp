@@ -1,4 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
 import { FEATURE, closeSessions, openFeature, post, readDb, readDeliveries, startBroker, startSession, waitFor } from "./helpers.ts";
 
 type Broker = Awaited<ReturnType<typeof startBroker>>;
@@ -42,16 +43,16 @@ function seqOf(answer: { isError: boolean; text: string }): number {
 
 const COMMON = ["list_peers", "state", "history", "blocked", "unblocked"];
 const SENDING = [
-  "send_task", "send_result", "send_verdict", "plan", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question",
+  "send_task", "send_result", "send_verdict", "plan", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question", "gate",
 ];
 
 for (const [name, own] of [
-  ["mother", ["send_task", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question"]],
+  ["mother", ["send_task", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question", "gate"]],
   ["leader", ["plan", "send_task", "send_result", "ask", "answer", "escalate"]],
   ["worker-2", ["send_result", "ask", "answer", "escalate"]],
   ["judge", ["send_verdict", "ask"]],
 ] as const) {
-  test(`EVT-89: after ready ${name} lists the common tools and ${own.join(", ")}, and can call no other`, async () => {
+  test(`EVT-89/GAT-34: after ready ${name} lists the common tools and ${own.join(", ")}, and can call no other`, async () => {
     broker = await startBroker();
     const session = await joined(broker, name);
     expect(await session.toolNames()).toEqual([...COMMON, ...own]);
@@ -242,4 +243,47 @@ test("EVT-92: state and history call their routes with the id of the session and
   expect(refused.isError).toBe(true);
   expect(refused.text).toContain("missing_field");
   expect(refused.text).toContain("Send exactly one of ticket_ref");
+});
+
+test("GAT-36/18: the gate tool of the mother records the gate, and the approve of the dev is pushed to her session and then confirmed", async () => {
+  broker = await startBroker();
+  const b = broker;
+  const mother = await startSession(b.port, { SQUAD_NAME: "mother", SQUAD_ROLE: "mother", SQUAD_POLL_INTERVAL_MS: "50" });
+  await mother.register();
+  await openFeature(b.url, readDb(b.dbFile).peers[0]!.id);
+
+  // 3: the gate; 2 is the feature_opened, which goes to the other five
+  const asked = await mother.call("gate", {
+    scope: "delivery",
+    summary: "deliver the importer",
+    action: "merge feat/x into main",
+    effect: "main gets the importer",
+    commit: "abc1234",
+    id: "not-an-id",
+  });
+  expect(seqOf(asked)).toBe(3);
+  // GAT-38: the mother asks the gate again after a comment by this id
+  expect(asked.text).toBe("Gate 1 requested with seq 3.");
+  const gate = readDb(b.dbFile).events.at(-1)!;
+  expect(gate).toMatchObject({ seq: 3, kind: "gate", from_name: "mother", to_name: "human", gate_id: 1 });
+
+  const humanToken = readFileSync(b.tokenFile, "utf8").trim();
+  const decided = await post(b.url, "/gate-decision", { human_token: humanToken, gate_id: 1, request_seq: 3, decision: "approve" });
+  expect(decided.json).toEqual({ ok: true, seq: 4 });
+
+  await waitFor(() => mother.pushed().length > 0, "the push of the gate_decision");
+  const [push] = mother.pushed();
+  expect(push!.params.meta).toEqual({ kind: "gate_decision", seq: "4", from: "human" });
+  expect(push!.params.content).toContain("G-01 aprovado");
+  expect(push!.params.content).toContain("gate_id: 1");
+  expect(push!.params.content).toContain("decision: approve");
+
+  await waitFor(
+    () => readDeliveries(b.dbFile).some((d) => d.event_seq === 4 && d.acked_at !== null),
+    "the ack of the gate_decision"
+  );
+  expect(readDeliveries(b.dbFile).filter((d) => d.event_seq === 4)).toEqual([
+    { event_seq: 4, recipient: "mother", acked_at: expect.any(Number) },
+  ]);
+  expect(mother.pushed()).toHaveLength(1);
 });

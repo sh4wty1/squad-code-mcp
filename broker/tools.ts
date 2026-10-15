@@ -287,13 +287,34 @@ const MERGE_QUESTION_TOOL: Tool = {
   },
 };
 
+const GATE_TOOL: Tool = {
+  name: "gate",
+  description:
+    "Ask the dev to approve an irreversible action before you run it: the final delivery (scope delivery, with the commit of the branch of the feature) or another action (scope action). The dev approves, rejects or comments; the decision arrives as kind=\"gate_decision\". After a comment, ask again with the same gate_id.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      scope: { type: "string", enum: ["delivery", "action"], description: "delivery or action" },
+      summary: string("What is to be approved, in one line of up to 80 characters"),
+      action: string("The exact action you will run once it is approved"),
+      effect: string("What the action changes, and what cannot be undone"),
+      body: string("The summary of the work, or what changed since the comment of the dev. Optional."),
+      commit: string("The commit the action runs on. Required when scope is delivery."),
+      diffstat: string("The diff stat of the change, as git prints it. Optional."),
+      ticket_ref: string("The ticket the gate is about. Optional."),
+      gate_id: integer("The id of the pending gate you ask again after a comment. Optional."),
+    },
+    required: ["scope", "summary", "action", "effect"],
+  },
+};
+
 // What every registered session has
 const COMMON = [LIST_PEERS_TOOL, STATE_TOOL, HISTORY_TOOL, BLOCKED_TOOL, UNBLOCKED_TOOL];
 
 // What each role sends, after the edges of the star. Every role asks; the judge holds no
-// question, so it neither answers nor escalates, and only the mother merges.
+// question, so it neither answers nor escalates, and only the mother merges and asks the dev for a gate.
 const OF_ROLE: Record<string, Tool[]> = {
-  mother: [SEND_TASK_TOOL, OPEN_FEATURE_TOOL, CLOSE_FEATURE_TOOL, ASK_TOOL, ANSWER_TOOL, ESCALATE_TOOL, MERGE_QUESTION_TOOL],
+  mother: [SEND_TASK_TOOL, OPEN_FEATURE_TOOL, CLOSE_FEATURE_TOOL, ASK_TOOL, ANSWER_TOOL, ESCALATE_TOOL, MERGE_QUESTION_TOOL, GATE_TOOL],
   leader: [PLAN_TOOL, SEND_TASK_TOOL, SEND_RESULT_TOOL, ASK_TOOL, ANSWER_TOOL, ESCALATE_TOOL],
   worker: [SEND_RESULT_TOOL, ASK_TOOL, ANSWER_TOOL, ESCALATE_TOOL],
   judge: [SEND_VERDICT_TOOL, ASK_TOOL],
@@ -321,4 +342,5 @@ export const ROUTE_OF: Record<string, { path: string; kind?: "task" | "result" |
   answer: { path: "/answer" },
   escalate: { path: "/escalate" },
   merge_question: { path: "/merge-question" },
+  gate: { path: "/gate" },
 };

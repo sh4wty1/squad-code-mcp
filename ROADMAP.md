@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** a TUI clicável está pronta no branch `feat/tui-clicavel`, só local, com 31 tarefas, à espera do sim do dev para o `git push` e o PR contra a `main`. As três voltas do Verifier deram FAIL por lacunas de teste, sem defeito de produção; o dev decidiu em 2026-10-14 aplicar as duas últimas como T30 e T31 e fechar sem uma quarta volta, com as lacunas de precisão da spec registradas como o código faz (`.specs/features/tui-clicavel/spec.md`, "Assumptions"). A conferência em terminal real ficou quase toda por fazer, por decisão do dev. A próxima fatia é a Gate, que fecha o MVP e ainda não tem spec. O estado está no Handoff de `.specs/STATE.md`.
+**Agora:** a Gate, última fatia do MVP, está fechada no branch `feat/gate`, com o [PR 14](https://github.com/sh4wty1/squad-code-mcp/pull/14) contra a `main` à espera de revisão. Com ela as oito fatias estão prontas, e o marco do MVP foi conferido com sessões reais (`.specs/features/gate/marco-mvp.md`). As três voltas do Verifier deram FAIL só por lacuna de teste; as cinco correções da volta 3 entraram como testes e a fatia fechou sem quarta volta, por decisão do dev. O estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 
@@ -36,11 +36,11 @@ tarefas, implementação e verificação independente, com PR revisado por `/the
 | [x] | Question | 3 | Perguntar, escalar, mesclar, responder e expirar; aba Perguntas | TUI leitura |
 | [x] | Papéis | 4 | `roles.json`, quatro skills de papel, launcher, plugin com hooks | Question |
 | [x] | TUI clicável | — | Clique em abas, linhas, tickets, perguntas, atalhos e no modal de resposta; roda do mouse; `m` liga e desliga | Question |
-| [ ] | Gate | 5 | Pedido e decisão de gate; modal com texto e confirmação | Papéis, TUI clicável |
+| [x] | Gate | 5 | Pedido e decisão de gate; modal com texto e confirmação | Papéis, TUI clicável |
 
 **Marco do broker:** com Peer, Event e Feature prontas, duas sessões trocam mensagens pelo
 fork. **Marco do MVP:** com as oito prontas, uma feature de dois tickets vai do kickoff ao
-gate aprovado usando só o terminal da mother e a TUI.
+gate aprovado usando só o terminal da mother e a TUI. Conferido em 2026-10-14 com sessões reais: a feature `slugs`, de dois tickets, do kickoff ao `feature_closed` `delivered` ([`marco-mvp.md`](.specs/features/gate/marco-mvp.md)).
 
 A TUI clicável não está no design do MVP nem no START: o dev a pediu em 2026-10-12. A
 fonte dela é [`.specs/features/tui-clicavel/spec.md`](.specs/features/tui-clicavel/spec.md).

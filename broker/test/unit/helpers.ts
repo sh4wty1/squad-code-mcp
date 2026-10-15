@@ -1,6 +1,7 @@
 import { expect } from "bun:test";
 import { openDatabase } from "../../db.ts";
 import { createFeature } from "../../feature.ts";
+import { createGate } from "../../gate.ts";
 import { createLog, type FeatureFields } from "../../log.ts";
 import { createPeers, type RegisterRequest } from "../../peers.ts";
 import { createPermission } from "../../permission.ts";
@@ -135,7 +136,8 @@ export function setup() {
   const session = createSession(log);
   const permission = createPermission(log, HUMAN_TOKEN);
   const { state } = createState(log);
-  const feature = createFeature(log);
+  const gate = createGate(db, log, HUMAN_TOKEN);
+  const feature = createFeature(log, gate.approved);
 
   // Registers a live session and returns what the broker answered
   function join(name: string, role: string, pid: number, extra: Partial<RegisterRequest> = {}) {
@@ -165,9 +167,10 @@ export function setup() {
     return answer.feature_id;
   }
 
-  // Closes the open feature by the rule, as delivered. Returns the seq of the feature_closed.
+  // Closes the open feature by the rule, as abandoned: a delivered one needs an approved
+  // delivery gate (GAT-26). Returns the seq of the feature_closed.
   function closeFeature(): number {
-    const answer = feature.close(MOTHER, { outcome: "delivered" });
+    const answer = feature.close(MOTHER, { outcome: "abandoned" });
     if (!answer.ok) throw new Error(`the feature was not closed: ${answer.error}`);
     return answer.seq;
   }
@@ -182,6 +185,10 @@ export function setup() {
 
   function questionRows() {
     return db.query("SELECT * FROM questions ORDER BY id").all() as Record<string, unknown>[];
+  }
+
+  function gateRows() {
+    return db.query("SELECT * FROM gates ORDER BY id").all() as Record<string, unknown>[];
   }
 
   // Events of the cycle of a ticket put straight in the log, as the rules would leave
@@ -247,6 +254,6 @@ export function setup() {
   }
 
   return {
-    db, peers, log, send, plan, session, permission, state, feature, question, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, questionRows, refusedWith, given,
+    db, peers, log, send, plan, session, permission, state, feature, question, alive, clock, join, events, rows, openFeature, closeFeature, deliveries, questionRows, gateRows, gate, refusedWith, given,
   };
 }

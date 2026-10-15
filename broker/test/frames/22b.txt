@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:31:05
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother        [waiting]││  hora     de    p/  kind            corpo              ││ evento do broker               │
+│   objetivo · aguarda squ…││  14:17:48 ▶ feature aberta · player ao vivo com setlist││ ✓ 14:31:02                     │
+│   tlc-discover to-spec t…││  14:18:02 mot → ldr [task]          spec: player ao vi…│├────────────────────────────────┤
+│                          ││  14:18:40 ldr → mot [question]      setlist vem da API…││ O worker-1 voltou a agir às    │
+│ ● leader        [working]││  14:19:05 mot → ldr [answer]        API /v1/setlist, p…││ 14:31:02 sem decisão da TUI: o │
+│   tech lead · TKT-13     ││  14:19:50 ▶ plano v1 de ldr · 3 tickets · 1 dependência││ P-01 foi respondido no         │
+│   tlc-plan help-me       ││  14:20:11 ldr → w1  [task]          player de áudio HLS││ terminal dele. A TUI fecha o   │
+│                                                                                                     nvia nada.       │
+│ ● worker-1       ┌─ ⚠ permissão P-01 · w1 · Bash ──────────────────────── resolvido no terminal ──┐                  │
+│   worker · TKT-1 │  worker-1 pediu permissão às 14:30:10 · o pedido já foi respondido             │                  │
+│   tlc-implement  │                                                                                │                  │
+│                  │  agente    w1 worker-1  [working]                                              │                  │
+│ ○ worker-2       │  ticket    TKT-12 player de áudio                                              │                  │
+│   worker · TKT-1 │  tool      Bash                                                                │                  │
+│   tlc-implement  │  descrição "Rodar os testes do player"  · texto do agente, não diz o que roda  │                  │
+│                  ├────────────────────────────────────────────────────────────────────────────────┤                  │
+│ ○ worker-3       │  vai executar  · a entrada exata e inteira                                     │                  │
+│   worker · TKT-1 │  ┌─ entrada · Bash ─────────────────────────────────────────────────────────┐  │                  │
+│   sem loadout    │  │  1 bun test src/player                                                   │  │                  │
+│                  │  └──────────────────────────────────────────────────────────────────────────┘  │                  │
+│ ● judge          ├────────────────────────────────────────────────────────────────────────────────┤                  │
+│   judge · rev TK │  ⚠ já respondido no terminal do worker-1                                       │                  │
+│   spec-driven-ev │  a TUI soube às 14:31:02, quando o worker-1 voltou a agir. Nada foi enviado.   │                  │
+│                  │  a e d não valem mais · esc fecha                                              │                  │
+│                  └────────────────────────────────────────────────────────────────────────────────┘                  │
+│                                                                                                                      │
+├─ tickets ────────────────┤│                                                        ││                                │
+│ TKT-12 player de áudio w1││                                                        ││                                │
+│ ⟳1/2 [blocked]           ││                                                        ││                                │
+│ TKT-13 API da setlist  w2││                                                        ││                                │
+│ ⟳0/2 [review]            ││                                                        ││                                │
+│ TKT-14 data na setlist w3││                                                        ││                                │
+│ ⟳0/2 [done]              ││                                                        ││                                │
+│                          ││                                                        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 38k  ldr 84k  w1 109k  w2 92k  w3 22k  jdg 48k  │ feature ≈$5.90 est.                          rework TKT-12 ⟳ 1/2
+ esc fechar

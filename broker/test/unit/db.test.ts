@@ -4,6 +4,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { appendBrokerEvent, appendEvent, openDatabase } from "../../db.ts";
+import { createLog } from "../../log.ts";
 
 function columns(db: ReturnType<typeof openDatabase>, table: string): string[] {
   return (db.query(`PRAGMA table_info(${table})`).all() as { name: string }[]).map((c) => c.name);
@@ -287,4 +288,53 @@ test("QST-42: a database file without the table gains it at the next openDatabas
   expect(before.events).toHaveLength(2);
   db.close();
   rmSync(dir, { recursive: true, force: true });
+});
+
+const GATE_COLUMNS = ["id", "feature_id", "requested_by", "scope", "commit", "status", "request_seq", "decision_seq"];
+
+test("GAT-01: gates has exactly the eight columns of the design, with id as the primary key", () => {
+  const db = openDatabase(":memory:");
+  const info = db.query("PRAGMA table_info(gates)").all() as { name: string; pk: number; notnull: number }[];
+  expect(info.map((c) => c.name)).toEqual(GATE_COLUMNS);
+  expect(info.filter((c) => c.pk > 0).map((c) => c.name)).toEqual(["id"]);
+  // what a pending gate leaves null: the commit of an action and the decision
+  expect(info.filter((c) => c.notnull === 0 && c.pk === 0).map((c) => c.name)).toEqual(["commit", "decision_seq"]);
+});
+
+test("GAT-01: the same database file opens twice and keeps its gates, and a database without the table gains it", () => {
+  const dir = mkdtempSync(join(tmpdir(), "squad-db-"));
+  const file = join(dir, "squad.db");
+  const first = openDatabase(file);
+  const seq = appendEvent(first, { ts: 1000, kind: "gate", from_name: "mother", role_from: "mother", gate_id: 1 });
+  first.run(
+    `INSERT INTO gates (id, feature_id, requested_by, scope, "commit", status, request_seq) VALUES (1, 1, 'mother', 'delivery', 'abc1234', 'pending', ?)`,
+    [seq]
+  );
+  const before = first.query("SELECT * FROM gates").all();
+  first.close();
+
+  const again = openDatabase(file);
+  expect(again.query("SELECT * FROM gates").all()).toEqual(before);
+  expect(before).toEqual([
+    { id: 1, feature_id: 1, requested_by: "mother", scope: "delivery", commit: "abc1234", status: "pending", request_seq: seq, decision_seq: null },
+  ]);
+  again.run("DROP TABLE gates");
+  again.close();
+
+  const db = openDatabase(file);
+  expect(columns(db, "gates")).toEqual(GATE_COLUMNS);
+  expect(stored(db)).toHaveLength(1);
+  db.close();
+  rmSync(dir, { recursive: true, force: true });
+});
+
+test("GAT-02: a record with gate_id stores it in its column, and one without it stores null", () => {
+  const db = openDatabase(":memory:");
+  const log = createLog(db, () => 1000);
+  const gate = log.record({ kind: "gate", from: "mother", role_from: "mother", to: "human", gate_id: 3, data: { gate_id: 3 } });
+  const other = log.record({ kind: "task", from: "mother", role_from: "mother", to: "leader" });
+  expect(db.query("SELECT seq, gate_id FROM events ORDER BY seq").all()).toEqual([
+    { seq: gate, gate_id: 3 },
+    { seq: other, gate_id: null },
+  ]);
 });

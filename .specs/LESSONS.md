@@ -26,6 +26,12 @@ Corroborated across multiple features. Safe to apply as guidance.
 - evidence: mutant M12 broker/broker.ts:59 (PEER-21 id ausente) (mcp-server) (+3 more)
 - last seen: 2026-10-14T16:16:04Z
 
+### L-012 - Assert every element of a refusal, hint included, for each input class the AC names
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `routes` · harmful: 0
+- features: peer, gate
+- evidence: X1 broker.ts:65 (PEER-18) (routes) (+1 more)
+- last seen: 2026-10-14T21:37:53Z
+
 ### L-020 - Assert a spec-defined limit with the literal value from the spec, not with the constant imported from the code under test
 - signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker tests` · harmful: 0
 - features: peer, tui-leitura
@@ -43,6 +49,12 @@ Corroborated across multiple features. Safe to apply as guidance.
 - features: event, question, papeis
 - evidence: EVT-50, EVT-51 (ticket_ref vazio em /blocked); broker/session.ts:24 (spec routes) (+2 more)
 - last seen: 2026-10-12T08:33:56Z
+
+### L-039 - When code picks or filters by a condition an AC names, test with an item that fails the condition, not only with items that pass it
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `tui` · harmful: 0
+- features: tui-leitura, gate
+- evidence: X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui) (+10 more)
+- last seen: 2026-10-14T23:08:57Z
 
 ### L-040 - Test a count limit or a rounding rule at its boundary value, not only well past it
 - signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `tui` · harmful: 0
@@ -154,12 +166,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `broker tests` · harmful: 0
 - features: peer
 - evidence: X5 peers.ts:100 (PEER-10) (broker tests)
-- last seen: 2026-10-07T20:24:49Z
-
-### L-012 - Assert every element of a refusal, hint included, for each input class the AC names
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `routes` · harmful: 0
-- features: peer
-- evidence: X1 broker.ts:65 (PEER-18) (routes)
 - last seen: 2026-10-07T20:24:49Z
 
 ### L-013 - Assert the mechanism an AC names on every supported platform, not only an outcome one platform reaches without it
@@ -299,12 +305,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: tui-leitura
 - evidence: D17 broker/shared/derive.ts:584, D19 broker/shared/derive.ts:527 (spec tests)
 - last seen: 2026-10-09T17:54:51Z
-
-### L-039 - When code picks or filters by a condition an AC names, test with an item that fails the condition, not only with items that pass it
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
-- features: tui-leitura
-- evidence: X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui) (+1 more)
-- last seen: 2026-10-09T18:48:24Z
 
 ### L-041 - Test a validated collection with one valid and one invalid entry, not only with a single invalid entry
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `config` · harmful: 0
@@ -575,6 +575,30 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: tui-clicavel
 - evidence: CLK-46, CLK-50 (validation.md volta 3) (spec)
 - last seen: 2026-10-14T16:15:57Z
+
+### L-095 - When an AC says a state of a screen shows no list, test that state while the list still has two or more other items
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
+- features: gate
+- evidence: P05 broker/tui/screens/permission.ts:47 (GAT-71) (tui)
+- last seen: 2026-10-14T21:37:53Z
+
+### L-096 - Test a click on an item drawn before a read that removed it, not only on items still in the list
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui input` · harmful: 0
+- features: gate
+- evidence: M06 broker/tui/mouse.ts:139 (GAT-83, Assumptions) (tui input)
+- last seen: 2026-10-14T21:37:53Z
+
+### L-097 - When a rule picks by the larger of two counts, state what it does when they are equal
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: gate
+- evidence: S04 broker/tui/screens/gate.ts:163 (GAT-93) (spec)
+- last seen: 2026-10-14T21:37:53Z
+
+### L-098 - When an AC counts over a whole set next to a count over a filtered part of it, test with an item only the whole set has
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `tui` · harmful: 0
+- features: gate
+- evidence: V27 broker/tui/screens/gate.ts:28 (GAT-43) (tui)
+- last seen: 2026-10-14T23:08:57Z
 
 ## Quarantined (failed when applied - ignore)
 

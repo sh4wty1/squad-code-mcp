@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 95,
+  "next_id": 99,
   "lessons": [
     {
       "id": "L-001",
@@ -222,17 +222,19 @@
       "text": "Assert every element of a refusal, hint included, for each input class the AC names",
       "signal": "surviving_mutant",
       "scope": "routes",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "peer"
+        "peer",
+        "gate"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "X1 broker.ts:65 (PEER-18) (routes)"
+        "X1 broker.ts:65 (PEER-18) (routes)",
+        "G19 broker/gate.ts:71 (GAT-13) (routes)"
       ],
       "created": "2026-10-07T20:24:49Z",
-      "last_seen": "2026-10-07T20:24:49Z"
+      "last_seen": "2026-10-14T21:37:53Z"
     },
     {
       "id": "L-013",
@@ -720,18 +722,28 @@
       "text": "When code picks or filters by a condition an AC names, test with an item that fails the condition, not only with items that pass it",
       "signal": "surviving_mutant",
       "scope": "tui",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "tui-leitura"
+        "tui-leitura",
+        "gate"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
         "X11 broker/tui/screens/detail.ts:419, X02 broker/tui/screens/detail.ts:366, L16 broker/tui/screens/topology.ts:144 (TUI-40, TUI-45) (tui)",
-        "N21 tui/feed.ts:98 (tui)"
+        "N21 tui/feed.ts:98 (tui)",
+        "S05 broker/tui/screens/gate.ts:27 (GAT-43) (tui)",
+        "S07 broker/tui/screens/gate.ts:42 (GAT-44) (tui)",
+        "N02 broker/tui/screens/gate.ts:169 (GAT-41) (tui)",
+        "N09 broker/tui/screens/gate.ts:82 (GAT-47) (tui)",
+        "V15 broker/tui/keys.ts:126 (GAT-50) (tui)",
+        "V18 broker/tui/keys.ts:200 (GAT-65) (tui)",
+        "V10 broker/shared/derive.ts:252 (GAT-70, GAT-71) (tui)",
+        "V23 broker/tui/screens/permission.ts:112 (GAT-61) (tui)",
+        "V28 broker/tui/screens/gate.ts:80 (GAT-47) (tui)"
       ],
       "created": "2026-10-09T17:54:51Z",
-      "last_seen": "2026-10-09T18:48:24Z"
+      "last_seen": "2026-10-14T23:08:57Z"
     },
     {
       "id": "L-040",
@@ -1759,6 +1771,78 @@
       ],
       "created": "2026-10-14T16:15:57Z",
       "last_seen": "2026-10-14T16:15:57Z"
+    },
+    {
+      "id": "L-095",
+      "key": "surviving_mutant::when an ac says a state of a screen shows no list test that state while the list still has two or more other items",
+      "text": "When an AC says a state of a screen shows no list, test that state while the list still has two or more other items",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "gate"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "P05 broker/tui/screens/permission.ts:47 (GAT-71) (tui)"
+      ],
+      "created": "2026-10-14T21:37:53Z",
+      "last_seen": "2026-10-14T21:37:53Z"
+    },
+    {
+      "id": "L-096",
+      "key": "surviving_mutant::test a click on an item drawn before a read that removed it not only on items still in the list",
+      "text": "Test a click on an item drawn before a read that removed it, not only on items still in the list",
+      "signal": "surviving_mutant",
+      "scope": "tui input",
+      "status": "candidate",
+      "features": [
+        "gate"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M06 broker/tui/mouse.ts:139 (GAT-83, Assumptions) (tui input)"
+      ],
+      "created": "2026-10-14T21:37:53Z",
+      "last_seen": "2026-10-14T21:37:53Z"
+    },
+    {
+      "id": "L-097",
+      "key": "spec_precision_gap::when a rule picks by the larger of two counts state what it does when they are equal",
+      "text": "When a rule picks by the larger of two counts, state what it does when they are equal",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "gate"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "S04 broker/tui/screens/gate.ts:163 (GAT-93) (spec)"
+      ],
+      "created": "2026-10-14T21:37:53Z",
+      "last_seen": "2026-10-14T21:37:53Z"
+    },
+    {
+      "id": "L-098",
+      "key": "surviving_mutant::when an ac counts over a whole set next to a count over a filtered part of it test with an item only the whole set has",
+      "text": "When an AC counts over a whole set next to a count over a filtered part of it, test with an item only the whole set has",
+      "signal": "surviving_mutant",
+      "scope": "tui",
+      "status": "candidate",
+      "features": [
+        "gate"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "V27 broker/tui/screens/gate.ts:28 (GAT-43) (tui)"
+      ],
+      "created": "2026-10-14T23:08:57Z",
+      "last_seen": "2026-10-14T23:08:57Z"
     }
   ]
 }

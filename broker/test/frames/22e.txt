@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:31:40
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda                                       ⚠ 2 permissões · x
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother        [waiting]││  hora     de    p/  kind            corpo              ││ msg #0459  [permission_request]│
+│   objetivo · aguarda squ…││  14:17:48 ▶ feature aberta · player ao vivo com setlist││ de    w1  worker-1             │
+│   tlc-discover to-spec t…││  14:18:02 mot → ldr [task]          spec: player ao vi…││ para  hum dev  pela TUI        │
+│                                                                                                                      │
+│ ● leader         ┌─ ⚠ permissão P-02 · w2 · Bash ──────────────────────────────── pedido 2 de 2 ──┐ player de áudio  │
+│   tech lead · TK │  worker-2 parou o turno e pede permissão para usar uma tool · há 59s           │ ─────────────────┤
+│   tlc-plan help- │  fila        P-01 w1 Bash   ▶ P-02 w2 Bash   antigo antes                      │                  │
+│                  │                                                                                │ xto do agente    │
+│ ⚠ worker-1    [b │  agente    w2 worker-2  [blocked x]                                            │ es do player"    │
+│   worker · TKT-1 │  ticket    TKT-13 API da setlist                                               │                  │
+│   x Bash · bun t │  tool      Bash                                                                │ layer            │
+│                  │  descrição "Atualizar a fixture da setlist"  · texto do agente, não diz o que… │ ─────────────────┤
+│ ⚠ worker-2    [b ├────────────────────────────────────────────────────────────────────────────────┤ ocked x]         │
+│   worker · TKT-1 │  vai executar  · a entrada exata e inteira                                     │ s                │
+│   x Bash · curl  │  ┌─ entrada · Bash ─────────────────────────────────────────────────────────┐  │ lquer tela       │
+│                  │  │  1 curl -sS --retry 3 \                                                  │  │ nega             │
+│ ○ worker-3       │  │  2   -H "Authorization: Bearer $RADIO_API_KEY" \                         │  │ ─────────────────┤
+│   worker · TKT-1 │  │  3   -H "Accept: application/json" \                                     │  │ ios              │
+│   sem loadout    │  │  4   "https://api.radio89.com.br/v1/setlist?limit=50&include=artist,cover│  │ -09, fora daqui  │
+│                  │  │  · ,program" \                                                           │  │ ecla, aqui       │
+│ ○ judge          │  │  5   | jq '[.items[] | {artist: .artist.name, track: .title, played_at, c│  │ ─────────────────┤
+│   judge · sem re │  │  · over: .cover.url // null}]' \                                         │  │ -1               │
+│   spec-driven-ev │  │  6   > src/api/__fixtures__/setlist.json \                               │  │ ·                │
+│                  │  └────────────────────────────────────────────── 1–8 de 13 · ▼ mais abaixo ─┘  │ nes · ponytail · │
+│                  ├────────────────────────────────────────────────────────────────────────────────┤ ctices           │
+│                  │  [a] permitir      [d] negar      esc fechar · o pedido continua pendente      │                  │
+├─ tickets ─────── │  a só vale depois de ver o fim da prévia · j/k rola · G vai ao fim             │                  │
+│ TKT-12 player de │  a: worker-2 roda o comando e segue o turno · d: recebe a recusa e escolhe     │                  │
+│ ⟳1/2 [blocked]   │  outro caminho                                                                 │                  │
+│ TKT-13 API da se └────────────────────────────────────────────────────────────────────────────────┘                  │
+│ ⟳0/2 [blocked]                                                                                                       │
+│ TKT-14 data na setlist w3││                                                        ││                                │
+│ ⟳0/2 [done]              ││                                                        ││                                │
+│                          ││                                                        ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 38k  ldr 84k  w1 109k  w2 71k  w3 22k  jdg 44k  │ feature ≈$5.53 est.                 ⚠ 2 bloqueados por permissão
+ a permitir (veja o fim)   d negar   j/k rolar   G fim   ] próximo   [ anterior   esc fechar sem decidir

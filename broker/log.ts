@@ -47,6 +47,8 @@ export interface NewRecord {
   ticket_ref?: string | null;
   // the column of `events`. Who records puts the same id in data, which is what is read.
   question_id?: number;
+  // the same, for a gate
+  gate_id?: number;
   // who waits for the event, in place of the rule of its kind
   recipients?: string[];
   // the fields of the kind
@@ -88,6 +90,7 @@ export function createLog(db: Database, now: () => number = Date.now) {
       body: event.body,
       ticket_ref: event.ticket_ref,
       question_id: event.question_id,
+      gate_id: event.gate_id,
       data: event.data,
     });
     const recipients =
@@ -136,6 +139,11 @@ export function createLog(db: Database, now: () => number = Date.now) {
   // open one, its deliveries and the row, together or not at all. Returns the seq.
   const close = db.transaction((by: Caller, outcome: string, body: string): number => {
     const seq = write({ kind: "feature_closed", from: by.name, role_from: by.role, to: "*", body, data: { outcome } });
+    // Its gates still pending close with it, rejected with no decision (GAT-28)
+    db.run(
+      `UPDATE gates SET status = 'rejected'
+       WHERE status = 'pending' AND feature_id = (SELECT id FROM features WHERE closed_seq IS NULL)`
+    );
     // Its questions still waiting close with it, with no answer: by their default, or discarded
     db.run(
       `UPDATE questions SET status = CASE WHEN default_answer IS NOT NULL THEN 'defaulted' ELSE 'discarded' END

@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:55:45
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda                                 ⚠ gate G-01 pendente · g
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother        [waiting]││  hora     de    p/  kind            corpo              ││ msg #0457               [gate] │
+│   objetivo · G-01 com o …││  14:21:00 w3  → ldr [question]      Q-05 formato de da…││ de    mot mother               │
+│   tlc-discover to                                                                                                    │
+│                   ┌─ ⚠ gate G-01 · atualizado ───────────────────────────────────────────────────┐ 0                 │
+│ ✓ leader          │  mother reemitiu G-01 com conteúdo atualizado · versão 2 · 14:55:40          │ e (sem ticket)    │
+│   tech lead · 3/3 │                                                                              │ ──────────────────┤
+│   tlc-plan help-m │  ação      merge feat/player-ao-vivo → main                                  │ o com conteúdo    │
+│                   │  efeito    deploy automático em produção                                     │  judge verificou  │
+│ ✓ worker-1        │  feature   3 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)              │  iOS (critério 6) │
+│   worker · TKT-12 │  perguntas ✓ 2 pelo dev · 1 entre agentes  ⟳ 3 default aplicado  ▶ 1 mescla… │  mudou.           │
+│   tlc-implement c ├──────────────────────────────────────────────────────────────────────────────┤ ──────────────────┤
+│                   │  seu comentário · 14:53:02                                                   │ ture · 7 msgs     │
+│ ✓ worker-2        │  "Antes do merge, confirme que o player não faz autoplay no iOS."            │ r [answer]        │
+│   worker · TKT-13 │  o que a mother mudou                                                        │ t [result]        │
+│   tlc-implement c │  + judge verificou o autoplay no iOS: só toca após gesto (critério 6)        │ m [gate]          │
+│                   │  ~ src/player/PlayerBar.tsx: 142 → 151 linhas, guarda de autoplay            │ t [gate_decision] │
+│ ✓ worker-3        │  + resumo e diff stat atualizados; ação e efeito iguais                      │ m [gate]          │
+│   worker · TKT-14 ├──────────────────────────────────────────────────────────────────────────────┤ ──────────────────┤
+│   sem loadout     │  diff stat                                                                   │ r                 │
+│                   │   src/player/PlayerBar.tsx        | 151 +++++++++++++--   ~ mudou            │ · to-spec ·       │
+│ ✓ judge           │   src/player/useHlsStream.ts      | 118 +++++++++++-                         │                   │
+│   judge · 7/7 cri │   src/player/NowPlaying.tsx       |  64 ++++++                               │                   │
+│   spec-driven-eva │   src/api/setlist.ts              |  97 ++++++++++                           │                   │
+│                   │   src/api/setlist.test.ts         |  51 +++++                                │                   │
+│                   │   src/lib/formatTime.ts           |  40 ++++                                 │                   │
+│                   │   6 files changed, 480 insertions(+), 41 deletions(-)                        │                   │
+├─ tickets ──────── ├──────────────────────────────────────────────────────────────────────────────┤                   │
+│ TKT-12 player de  │  judge     ✓ TKT-12 5/5  ✓ TKT-13 1/1  ✓ TKT-14 1/1                          │                   │
+│ ⟳1/2 [done]       │                                                                              │                   │
+│ TKT-13 API da set │  [a]provar      [r]ejeitar      [c]omentar            esc fechar             │                   │
+│ ⟳0/2 [done]       └──────────────────────────────────────────────────────────────────────────────┘                   │
+│ TKT-14 data na se                                                                                                    │
+│ ⟳0/2 [done]              ││  14:53:02 hum → mot [gate_decision] comentário: autopl…││                                │
+│                          ││▶ 14:55:40 mot → hum [gate]          G-01 atualizado (v…││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 58k  ldr 121k  w1 171k  w2 112k  w3 22k  jdg 193k  │ feature ≈$10.17 est.                      ⚠ G-01 aguarda você
+ a aprovar   r rejeitar   c comentar   esc fechar sem decidir

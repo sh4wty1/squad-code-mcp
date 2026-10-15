@@ -40,6 +40,8 @@ const ROUTE_OF: Record<string, string> = {
   question: "/ask",
   answer: "/answer",
   question_merged: "/merge-question",
+  gate: "/gate",
+  gate_decision: "/gate-decision",
 };
 
 // What the rule of an edge decides: the refusal, or what is stored besides the envelope

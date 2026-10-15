@@ -30,7 +30,7 @@ export interface Cell {
 
 // What a cell is to the mouse: what a click or the wheel hits there
 export interface Hit {
-  // drawn by the modal of answer
+  // drawn by a modal
   modal?: true;
   // the key a click here presses
   key?: string;
@@ -46,6 +46,10 @@ export interface Hit {
   wheel?: "feed" | "thread" | "list" | "history";
   // the line of the choice mode of the modal; the one after the options is `outra resposta…`
   option?: number;
+  // the id of a gate of the queue of the modal of gate
+  gate?: number;
+  // the seq of a request of the queue of the modal of permission
+  request?: number;
 }
 
 // Text, color and bold. A missing or empty segment draws nothing.

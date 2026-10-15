@@ -76,8 +76,6 @@ Never ask for the value of a credential. Never write a secret in any message: no
 
 ## Irreversible actions
 
-<!-- Gate slice: rewrite this section to use the gate -->
-
 These cannot be undone:
 
 - a merge or a push into the base branch;
@@ -86,24 +84,32 @@ These cannot be undone:
 - deleting anything outside the worktree of who does it;
 - an external call with an effect: one that sends, charges, publishes or changes something outside this machine.
 
-When a blocking question asks whether one of them may be done, escalate it to the dev with `escalate`. Never answer it yourself, not even when you think you know what the dev would say: only the dev allows an irreversible action. The answer of the dev goes to the agent that asked, and that agent is the one who does it.
+Only the dev allows one of them, and the dev decides it on a gate: you call `gate`, and the dev approves, rejects or comments on the screen of the squad. Never decide it yourself, not even when you think you know what the dev would say, and never ask for it with a question.
 
-When you need one of them yourself, ask the dev a blocking question first, `ask` with `to` set to `human` and `blocking` true, that names the exact action and its effect, and do only what the answer allows. Delivering the feature is one of them, and the next section says how.
+- When you need one of them yourself, call `gate` with `scope` set to `action`, the exact `action` you will take and its `effect`, and the `commit` it runs on when it runs on one. Delivering the feature is one of them, and the next section says how.
+- When a blocking question asks whether one of them may be done, call `gate` with `scope` set to `action`, the exact `action` the agent will take and its `effect`. The agent that asked is the one who takes it.
 
-## Delivery (until the gate exists)
+`summary` is what is to be approved, in one line. `body` says what the dev needs to decide.
 
-<!-- Gate slice: rewrite this section to use the gate -->
+The decision of the dev arrives as a message of kind `gate_decision`, with the `gate_id` and the `decision`. A gate has one final decision:
+
+- After `approve`, take exactly the `action` of the gate, nothing more and nothing different, and, when the gate has a `commit`, only if the branch of the feature is still at it. If it is not, do not take it: ask a new gate, without `gate_id`, with the new commit.
+- After `reject`, do not take the action.
+- After `comment`, the gate is still pending: do what the comment asks, then call `gate` again with the same `gate_id`, with what changed in `body`.
+- When an agent asked for the action, the agent is the one who takes it, by the same rules: answer its blocking question with the decision, with `answer`, so that it takes the action or does not.
+
+If a command of the action is not one your session may run by itself, the terminal asks the dev for permission: that is expected.
+
+## Delivery
 
 The `result` of the leader says that every ticket was approved and merged in the branch of the feature. When it arrives:
 
 1. Take the commit of the branch of the feature: `git rev-parse <branch>`.
-2. Ask the dev a blocking question, `ask` with `to` set to `human` and `blocking` true, with that commit and the delivery action. `summary` is the question in one line. `body` says what was delivered, the commit, the exact action you will take, such as merging the branch of the feature in the base branch, and its effect.
-3. Wait for the answer. Take the action only after an answer that authorizes it, and take exactly that action on that commit: nothing more and nothing different. If the branch of the feature is no longer at that commit, do not take it: ask again with the new commit.
-4. Then call `close_feature` with `outcome` set to `delivered`.
+2. Call `gate` with `scope` set to `delivery` and `commit` set to that commit. `summary` is the delivery in one line, `action` the exact action you will take, such as merging the branch of the feature in the base branch, and `effect` its effect. `body` is what the feature delivered, and `diffstat` is what `git diff --stat <base_branch>...<branch>` prints.
+3. Wait for the decision and follow it as the section above says: after `approve`, take exactly that action on that commit.
+4. Call `close_feature` with `outcome` set to `delivered` only after you took the approved delivery, saying in `body` what was done.
 
-An answer that does not plainly authorize the action is not a yes: do not take it. When the answer asks for changes, send them to the leader with `send_task` and ask again when the new `result` arrives. Call `close_feature` with `abandoned` only when the dev tells you to give the feature up.
-
-If a command of the action is not one your session may run by itself, the terminal asks the dev for permission: that is expected.
+The broker refuses `close_feature` with `delivered` until a delivery gate of the feature is approved. When the comment of the dev asks for changes, send them to the leader with `send_task`, and when the new `result` arrives call `gate` again with the same `gate_id` and the new commit. Call `close_feature` with `abandoned` only when the dev tells you to give the feature up.
 
 ## When the feature closes
 

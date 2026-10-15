@@ -111,5 +111,81 @@ test("QST-86: the writer asks the broker for nothing but POST /answer", async ()
 
   expect(calls).toHaveLength(5);
   for (const call of calls) expect([call.method, call.url]).toEqual(["POST", "http://127.0.0.1:7900/answer"]);
-  expect(Object.keys(createWriter({ fetch, url: BROKER }))).toEqual(["answer"]);
+  // GAT-72: the other two writes are the decisions of a gate and of a permission request
+  expect(Object.keys(createWriter({ fetch, url: BROKER }))).toEqual(["answer", "gate", "permission"]);
 });
+
+// ---- the decisions of a gate and of a permission request ----
+
+test("GAT-58, GAT-72: the writer asks POST /gate-decision with the credential, the gate, the request_seq of its version, the decision and the text as JSON", async () => {
+  const { fetch, calls } = fake(json({ ok: true, seq: 50 }), json({ ok: true, seq: 51 }), json({ ok: true, seq: 52 }));
+  const writer = createWriter({ fetch, url: BROKER });
+  await writer.gate(TOKEN, 1, 439, "reject", "falta o teste do parser");
+  await writer.gate(TOKEN, 2, 458, "comment", "e o changelog?");
+  await writer.gate(TOKEN, 1, 457, "approve");
+
+  const headers = { "Content-Type": "application/json" };
+  expect(calls).toEqual([
+    { method: "POST", url: "http://127.0.0.1:7900/gate-decision", headers, body: { human_token: TOKEN, gate_id: 1, request_seq: 439, decision: "reject", text: "falta o teste do parser" } },
+    { method: "POST", url: "http://127.0.0.1:7900/gate-decision", headers, body: { human_token: TOKEN, gate_id: 2, request_seq: 458, decision: "comment", text: "e o changelog?" } },
+    // the approve of the modal has no text: the body has no text field
+    { method: "POST", url: "http://127.0.0.1:7900/gate-decision", headers, body: { human_token: TOKEN, gate_id: 1, request_seq: 457, decision: "approve" } },
+  ]);
+});
+
+test("GAT-69, GAT-72: the writer asks POST /permission-decision with the credential, the seq of the request and the behavior as JSON", async () => {
+  const { fetch, calls } = fake(json({ ok: true, seq: 61 }), json({ ok: true, seq: 62 }));
+  const writer = createWriter({ fetch, url: BROKER });
+  await writer.permission(TOKEN, 14, "allow");
+  await writer.permission(TOKEN, 15, "deny");
+
+  const headers = { "Content-Type": "application/json" };
+  expect(calls).toEqual([
+    { method: "POST", url: "http://127.0.0.1:7900/permission-decision", headers, body: { human_token: TOKEN, request_seq: 14, behavior: "allow" } },
+    { method: "POST", url: "http://127.0.0.1:7900/permission-decision", headers, body: { human_token: TOKEN, request_seq: 15, behavior: "deny" } },
+  ]);
+});
+
+// Each of the two decisions, sent by the writer
+const DECISIONS: [string, (writer: ReturnType<typeof createWriter>) => Promise<unknown>, string[]][] = [
+  ["gate", (writer) => writer.gate(TOKEN, 1, 439, "approve"), ["gate_closed", "gate_reissued", "invalid_token", "missing_field", "invalid_field"]],
+  ["permission", (writer) => writer.permission(TOKEN, 14, "allow"), ["permission_closed", "invalid_token", "missing_field", "invalid_field"]],
+];
+
+for (const [route, send, errors] of DECISIONS) {
+  test(`GAT-58, GAT-69: a decision of ${route} the broker took is ok, without its seq`, async () => {
+    const { fetch } = fake(json({ ok: true, seq: 50 }));
+    expect(await send(createWriter({ fetch, url: BROKER }))).toEqual({ ok: true });
+  });
+
+  for (const error of errors) {
+    test(`GAT-58, GAT-69: the refusal ${error} of a decision of ${route} gives its error, without the hint`, async () => {
+      const { fetch } = fake(json({ ok: false, error, hint: "what to do about it" }));
+      expect(await send(createWriter({ fetch, url: BROKER }))).toEqual({ ok: false, error });
+    });
+  }
+
+  for (const [what, answer] of FAILURES) {
+    test(`GAT-58, GAT-69: ${what} is the broker not answering a decision of ${route}`, async () => {
+      const { fetch } = fake(answer);
+      expect(await send(createWriter({ fetch, url: BROKER }))).toEqual(SILENT);
+    });
+  }
+
+  test(`GAT-58, GAT-69: with no answer to a decision of ${route} in 2000 ms the writer gives up and says the broker did not answer`, async () => {
+    const hung: Fetch = (_url, init) => new Promise((_resolve, reject) => init!.signal!.addEventListener("abort", () => reject(init!.signal!.reason)));
+    const clock = fakeClock();
+    try {
+      let said: unknown = null;
+      const sending = send(createWriter({ fetch: hung, url: BROKER })).then((result) => (said = result));
+      clock.advance(1999);
+      await turn();
+      expect(said).toBeNull();
+      clock.advance(1);
+      await sending;
+      expect(said).toEqual(SILENT);
+    } finally {
+      clock.restore();
+    }
+  });
+}

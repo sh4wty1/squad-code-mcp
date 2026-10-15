@@ -56,7 +56,7 @@ test("FEAT-29: the session of the mother lists open_feature and close_feature, a
   const leader = await joined(broker, "leader");
   expect(await mother.toolNames()).toEqual([
     "list_peers", "state", "history", "blocked", "unblocked", "send_task", "open_feature", "close_feature",
-    "ask", "answer", "escalate", "merge_question",
+    "ask", "answer", "escalate", "merge_question", "gate",
   ]);
   const ofLeader = await leader.toolNames();
   expect(ofLeader).not.toContain("open_feature");
@@ -136,13 +136,14 @@ test("FEAT-33: the leader gets the feature_opened and the feature_closed through
   await waitFor(() => pendingFor(b, "leader").length === 0, "the ack of the feature_opened");
   expect((await post(b.url, "/poll-messages", { id: idOf(b, "leader") })).json).toEqual({ events: [] });
 
-  expect((await mother.call("close_feature", { outcome: "delivered", body: "all tickets approved" })).text).toBe(
+  // abandoned: a delivered one needs an approved delivery gate (GAT-26)
+  expect((await mother.call("close_feature", { outcome: "abandoned", body: "all tickets approved" })).text).toBe(
     "Recorded with seq 4."
   );
   await waitFor(() => leader.pushed().length === 2, "the push of the feature_closed");
   const closed = leader.pushed()[1]!;
   expect(closed.params.meta).toEqual({ kind: "feature_closed", seq: "4", from: "mother" });
-  expect(closed.params.content).toBe("all tickets approved\n\noutcome: delivered");
+  expect(closed.params.content).toBe("all tickets approved\n\noutcome: abandoned");
   await waitFor(() => pendingFor(b, "leader").length === 0, "the ack of the feature_closed");
   expect((await post(b.url, "/poll-messages", { id: idOf(b, "leader") })).json).toEqual({ events: [] });
 
@@ -174,7 +175,8 @@ test("FEAT-13/14: the mother and the leader go from open_feature to close_featur
     isError: false,
     text: "Recorded with seq 6.",
   });
-  expect((await mother.call("close_feature", { outcome: "delivered" })).text).toBe("Recorded with seq 7.");
+  // abandoned: a delivered one needs an approved delivery gate (GAT-26)
+  expect((await mother.call("close_feature", { outcome: "abandoned" })).text).toBe("Recorded with seq 7.");
   expect((await leader.call("plan", { tickets: [{ ticket_ref: "A", title: "the parser" }] })).text).toContain(
     "no_open_feature"
   );
@@ -190,6 +192,6 @@ test("FEAT-13/14: the mother and the leader go from open_feature to close_featur
     [8, "refused", null],
   ]);
   expect(featureRows(b).map(({ project, ...row }) => row)).toEqual([
-    { id: 1, ...FIELDS, opened_seq: 4, closed_seq: 7, outcome: "delivered" },
+    { id: 1, ...FIELDS, opened_seq: 4, closed_seq: 7, outcome: "abandoned" },
   ]);
 });

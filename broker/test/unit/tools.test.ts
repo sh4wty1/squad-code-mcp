@@ -11,9 +11,9 @@ function tool(role: string, name: string) {
   return found;
 }
 
-test("EVT-89/FEAT-29/QST-52: the mother has the common tools, send_task, open_feature, close_feature and the four of the questions, and no other", () => {
+test("EVT-89/FEAT-29/QST-52/GAT-34: the mother has the common tools, send_task, open_feature, close_feature, the four of the questions and gate, and no other", () => {
   expect(names("mother")).toEqual([
-    ...COMMON, "send_task", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question",
+    ...COMMON, "send_task", "open_feature", "close_feature", "ask", "answer", "escalate", "merge_question", "gate",
   ]);
 });
 
@@ -97,6 +97,25 @@ test("QST-53: ask, answer, escalate and merge_question declare the fields of the
   expect(merge.properties.question_id.type).toBe("integer");
   expect(merge.properties.into.type).toBe("integer");
   expect(merge.required).toEqual(["question_id", "into"]);
+});
+
+test("GAT-34: no role but the mother has gate", () => {
+  expect(["mother", "leader", "worker", "judge"].filter((role) => names(role).includes("gate"))).toEqual(["mother"]);
+});
+
+test("GAT-34: gate requires scope, summary, action and effect, takes body, commit, diffstat, ticket_ref and gate_id, and calls /gate", () => {
+  const schema = tool("mother", "gate").inputSchema as any;
+  expect(schema.type).toBe("object");
+  expect(Object.keys(schema.properties)).toEqual([
+    "scope", "summary", "action", "effect", "body", "commit", "diffstat", "ticket_ref", "gate_id",
+  ]);
+  for (const field of ["scope", "summary", "action", "effect", "body", "commit", "diffstat", "ticket_ref"]) {
+    expect(schema.properties[field].type).toBe("string");
+  }
+  expect(schema.properties.scope.enum).toEqual(["delivery", "action"]);
+  expect(schema.properties.gate_id.type).toBe("integer");
+  expect(schema.required).toEqual(["scope", "summary", "action", "effect"]);
+  expect(ROUTE_OF.gate).toEqual({ path: "/gate" });
 });
 
 test("EVT-89: a role that does not exist has no tools", () => {
@@ -191,6 +210,7 @@ test("EVT-90/92: each tool but list_peers has its route, and each tool that send
     answer: { path: "/answer" },
     escalate: { path: "/escalate" },
     merge_question: { path: "/merge-question" },
+    gate: { path: "/gate" },
   });
   const listed = new Set(["mother", "leader", "worker", "judge"].flatMap(names));
   expect([...listed].sort()).toEqual(["list_peers", ...Object.keys(ROUTE_OF)].sort());

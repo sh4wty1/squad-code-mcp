@@ -2,8 +2,10 @@ import { expect, test } from "bun:test";
 import type { Grid } from "../../tui/grid.ts";
 import { answer } from "../../tui/screens/answer.ts";
 import { down } from "../../tui/screens/down.ts";
+import { gate } from "../../tui/screens/gate.ts";
 import { help } from "../../tui/screens/help.ts";
 import { main } from "../../tui/screens/main.ts";
+import { permission } from "../../tui/screens/permission.ts";
 import { questions } from "../../tui/screens/questions.ts";
 import { small } from "../../tui/screens/small.ts";
 import { thread } from "../../tui/screens/thread.ts";
@@ -30,6 +32,8 @@ const SCREENS: [name: string, ids: string[], draw: (view: View) => Grid, require
   ["frozen screen", ["12"], (view) => down(frozen(view))],
   ["tab of questions", ["04"], questions, "QST-69"],
   ["modal of answer", ["05", "06", "07", "20a", "20b"], (view) => answer(questions(view), view), "QST-87"],
+  ["modal of gate", ["08", "16a", "16b", "16c", "17", "18b", "19b"], (view) => gate(main(view), view), "GAT-85"],
+  ["modal of permission", ["22a", "22b", "22d", "22e", "22f", "29d"], (view) => permission(main(view), view), "GAT-86"],
 ];
 
 for (const [name, ids, draw, requirement = "TUI-43"] of SCREENS) {
@@ -125,32 +129,34 @@ test("QST-58: the default of the detail behind the modal of frames 06 and 07 is 
   }
 });
 
-test("TUI-49: the legend leaves frame 11 only where it cites a key or a screen of another slice", () => {
+test("TUI-49, GAT-87, GAT-88: the legend leaves frame 11 only for the key of the mouse and the line of a request closed in the terminal", () => {
   const lines = frame("11").map((line) => [...line.padEnd(120)]);
   const cut = DEVIATIONS["11"]!.map((dev) => [dev.class, dev.text, lines[dev.line]!.slice(dev.col, dev.col + dev.width).join("").trim()]);
   expect(cut).toEqual([
     ["D4", "m           mouse liga / desliga · clique = tecla", ""],
-    ...[
-      "gate (modal)",
-      "a           aprovar → pede confirmação (y)",
-      "r · c       rejeitar · comentar, texto obrigatório",
-      "] [ · esc   fila de gates · fechar sem decidir",
-      "permissão (modal)",
-      "a · d       permitir (após ver o fim) · negar",
-      "j k · G     rolar a prévia · ir ao fim",
-      "] [ · esc   fila · fechar, o pedido segue",
-      "✓ P-01 fechado no terminal",
-    ].map((text) => ["D3", "", text]),
+    ["D3", "", "✓ P-01 fechado no terminal"],
   ]);
+  expect(DEVIATIONS["11"]![1]!.why).toContain("`✓ P-NN fechado no terminal`");
 });
 
-test("QST-88: the legend has the four lines of Question where frame 11 has them, and the lines of gate and of permission empty", () => {
+test("QST-88, GAT-87: the legend has the four lines of Question and the eight of the modals of gate and of permission where frame 11 has them", () => {
   const drawn = help(frameView("11")).text();
   // The text of the panel of the keys, inside its box
   const keys = drawn.map((line) => [...line.padEnd(120)].slice(62, 118).join("").trimEnd());
   expect(keys.slice(19, 25)).toEqual(["h           foco no histórico", "", "modal de resposta", "1–4 enter   escolher · enviar · esc cancela", "ctrl+e · u  expandir o texto · limpar", ""]);
-  for (const y of [19, 21, 22, 23]) expect(drawn[y]).toBe(frame("11")[y]!);
-  expect([25, 26, 27, 28, 30, 31, 32, 33].map((y) => keys[y])).toEqual(["", "", "", "", "", "", "", ""]);
+  expect(keys.slice(25, 34)).toEqual([
+    "gate (modal)",
+    "a           aprovar → pede confirmação (y)",
+    "r · c       rejeitar · comentar, texto obrigatório",
+    "] [ · esc   fila de gates · fechar sem decidir",
+    "",
+    "permissão (modal)",
+    "a · d       permitir (após ver o fim) · negar",
+    "j k · G     rolar a prévia · ir ao fim",
+    "] [ · esc   fila · fechar, o pedido segue",
+  ]);
+  // Line 30 has at its left the line of system the slice leaves out
+  for (const y of [19, 21, 22, 23, 25, 26, 27, 28, 31, 32, 33]) expect(drawn[y]).toBe(frame("11")[y]!);
 });
 
 test("QST-89: no frame of Question has a D3 deviation, and no deviation is there for a screen or a key of the slice Question", () => {
@@ -159,6 +165,38 @@ test("QST-89: no frame of Question has a D3 deviation, and no deviation is there
   // What the spec cut is of the slices to come, and Question is not one of them
   expect(all.filter((dev) => dev.class === "D3" && /Question/.test(dev.why)).map((dev) => `${dev.id} line ${dev.line}`)).toEqual([]);
   expect(all.filter((dev) => /of the slices? Question/.test(dev.why)).map((dev) => `${dev.id} line ${dev.line}`)).toEqual([]);
+});
+
+// The cells of the box of the modal of a frame: from the column of its top left corner, `w` wide
+function boxOf(id: string, x: number, w: number) {
+  const lines = frame(id).map((line) => [...line.padEnd(120)]);
+  const top = lines.findIndex((line) => line[x] === "┌" && line.join("").includes("⚠"));
+  const bottom = lines.findIndex((line, y) => y > top && line[x] === "└");
+  return (dev: { line: number; col: number; width: number }) => dev.line >= top && dev.line <= bottom && dev.col < x + w && dev.col + dev.width > x;
+}
+
+test("GAT-85, GAT-88: every deviation of the frames of the modal of gate is D1 or D2, and the only one in the box is the count of the questions an agent answered", () => {
+  for (const id of ["08", "16a", "16b", "16c", "17", "18b", "19b"]) {
+    expect(DEVIATIONS[id]!.length).toBeGreaterThan(0);
+    expect(DEVIATIONS[id]!.filter((dev) => !["D1", "D2"].includes(dev.class)).map((dev) => `${id} line ${dev.line}`)).toEqual([]);
+    const inside = DEVIATIONS[id]!.filter(boxOf(id, 20, 80));
+    expect(inside.map((dev) => [dev.class, dev.width, dev.text])).toEqual([["D1", 1, "2"]]);
+    expect(inside[0]!.why).toContain("GAT-44");
+    expect([...frame(id)[inside[0]!.line]!].slice(inside[0]!.col, inside[0]!.col + 15).join("")).toBe("1 entre agentes");
+  }
+});
+
+test("GAT-86, GAT-88: the frames of the modal of permission leave its box as the prototype has it, and the line of a request closed in the terminal is the only D3 of the slice, in frames 11 and 22b", () => {
+  for (const id of ["22a", "22b", "22d", "22e", "22f", "29d"]) {
+    expect(DEVIATIONS[id]!.length).toBeGreaterThan(0);
+    expect(DEVIATIONS[id]!.filter(boxOf(id, 19, 82)).map((dev) => `${id} line ${dev.line}`)).toEqual([]);
+    expect(DEVIATIONS[id]!.filter((dev) => !["D1", "D2", ...(id === "22b" ? ["D3"] : [])].includes(dev.class)).map((dev) => `${id} line ${dev.line}`)).toEqual([]);
+  }
+  const all = Object.entries(DEVIATIONS).flatMap(([id, list]) => list.map((dev) => ({ id, ...dev })));
+  const gate = all.filter((dev) => /slice Gate/.test(dev.why));
+  expect([...new Set(gate.map((dev) => `${dev.id} ${dev.class}`))]).toEqual(["11 D3", "22b D3"]);
+  expect(gate.filter((dev) => !dev.why.includes("`✓ P-NN fechado no terminal`"))).toEqual([]);
+  expect(all.filter((dev) => dev.id === "22b" && dev.class === "D3" && !/slice Gate/.test(dev.why))).toEqual([]);
 });
 
 test("TUI-54: a terminal of 80 by 24 shows frame 21", () => {

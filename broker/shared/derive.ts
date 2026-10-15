@@ -229,6 +229,43 @@ export function openPermissions(events: SquadEvent[]): EventOf<"permission_reque
   );
 }
 
+// A permission request of the log, with how it closed
+export interface PermissionRequest {
+  request: EventOf<"permission_request">;
+  // `P-01` for the first permission_request of the whole log
+  label: string;
+  // as openPermissions says
+  open: boolean;
+  // the permission_decision that cites it, or a later event of its peer or its peer_left
+  closedBy: "decision" | "peer" | null;
+  // of the event that closed it
+  closedTs: number | null;
+}
+
+// Every permission request of the log, in ascending seq
+export function requests(events: SquadEvent[]): PermissionRequest[] {
+  const ordered = bySeq(events);
+  const open = new Set(openPermissions(events).map((e) => e.seq));
+  return ordered
+    .filter((e): e is EventOf<"permission_request"> => e.kind === "permission_request")
+    .map((request, i) => {
+      const decides = (e: SquadEvent) => e.kind === "permission_decision" && e.request_seq === request.seq;
+      // ponytail: a scan of the log per request, an index by peer if the log grows long
+      const closer = open.has(request.seq)
+        ? undefined
+        : ordered.find(
+            (e) => e.seq > request.seq && (decides(e) || e.from === request.from || (e.kind === "peer_left" && e.peer === request.from))
+          );
+      return {
+        request,
+        label: "P-" + String(i + 1).padStart(2, "0"),
+        open: open.has(request.seq),
+        closedBy: closer === undefined ? null : decides(closer) ? "decision" : "peer",
+        closedTs: closer?.ts ?? null,
+      };
+    });
+}
+
 // The block each name declared: its latest `blocked` with no `unblocked` of the name after it
 export function blocks(events: SquadEvent[]): Map<string, EventOf<"blocked">> {
   const all = new Map<string, EventOf<"blocked">>();
@@ -386,29 +423,87 @@ export function questions(events: SquadEvent[]): Question[] {
 
 export interface Gate {
   id: number;
-  // no gate_decision of approve or reject: a comment does not decide
+  requested_by: string;
+  // of the current version, as the row of `gates` keeps them
+  scope: "delivery" | "action";
+  commit: string | null;
+  status: "pending" | "approved" | "rejected";
+  // no gate_decision of approve or reject and no feature_closed: a comment does not decide
   pending: boolean;
-  // the seq of the gate
+  // the seq of the latest gate
   request_seq: number;
+  // of the gate_decision that decided it; null when the feature_closed closed it
+  decision_seq: number | null;
   decision: "approve" | "reject" | null;
+  // how many `gate` it has, and what the latest one says
+  version: number;
+  summary: string;
+  body: string;
+  action: string;
+  effect: string;
+  diffstat: string | null;
+  // the diffstat of the version before the current one
+  previous: string | null;
+  // of the first gate and of the current one
+  first_ts: number;
+  ts: number;
+  // the latest comment
+  comment: { text: string; ts: number } | null;
+  // of the decision that decided it
+  text: string | null;
 }
 
-// Every gate, in the order they were asked
+// Every gate, in the order they were asked. `events` are those of one feature: its
+// feature_closed rejects the gates still pending, with no decision.
 export function gates(events: SquadEvent[]): Gate[] {
   const ordered = bySeq(events);
   const all = new Map<number, Gate>();
   for (const e of ordered) {
-    if (e.kind === "gate" && !all.has(e.gate_id)) {
-      all.set(e.gate_id, { id: e.gate_id, pending: true, request_seq: e.seq, decision: null });
-    }
+    if (e.kind !== "gate") continue;
+    const before = all.get(e.gate_id);
+    all.set(e.gate_id, {
+      id: e.gate_id,
+      requested_by: before?.requested_by ?? e.from,
+      scope: e.scope,
+      commit: e.commit ?? null,
+      status: "pending",
+      pending: true,
+      request_seq: e.seq,
+      decision_seq: null,
+      decision: null,
+      version: (before?.version ?? 0) + 1,
+      summary: e.summary,
+      body: e.body,
+      action: e.action,
+      effect: e.effect,
+      diffstat: e.diffstat ?? null,
+      previous: before?.diffstat ?? null,
+      first_ts: before?.first_ts ?? e.ts,
+      ts: e.ts,
+      comment: null,
+      text: null,
+    });
   }
   for (const e of ordered) {
-    if (e.kind !== "gate_decision" || e.decision === "comment") continue;
-    const gate = all.get(e.gate_id);
-    if (gate?.pending) {
-      gate.pending = false;
-      gate.decision = e.decision;
+    if (e.kind === "feature_closed") {
+      for (const gate of all.values()) {
+        if (gate.pending) Object.assign(gate, { pending: false, status: "rejected" });
+      }
+      continue;
     }
+    if (e.kind !== "gate_decision") continue;
+    const gate = all.get(e.gate_id);
+    if (!gate?.pending) continue;
+    if (e.decision === "comment") {
+      gate.comment = { text: e.text ?? "", ts: e.ts };
+      continue;
+    }
+    // The first decision written is the one that counts
+    gate.pending = false;
+    gate.status = e.decision === "approve" ? "approved" : "rejected";
+    gate.decision = e.decision;
+    gate.decision_seq = e.seq;
+    gate.text = e.text ?? null;
   }
   return [...all.values()];
 }
@@ -512,6 +607,8 @@ export interface Squad {
   gates: Gate[];
   // the open requests
   permissions: EventOf<"permission_request">[];
+  // every request of the log, open or closed
+  requests: PermissionRequest[];
   // by name; `feature` is empty without an open feature
   usage: { session: Map<string, Totals>; feature: Map<string, Totals> };
 }
@@ -647,6 +744,7 @@ export function squad(log: SquadEvent[], now: number): Squad {
     questions: asked,
     gates: requested,
     permissions,
+    requests: requests(events),
     usage,
   };
 }

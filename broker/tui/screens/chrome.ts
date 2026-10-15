@@ -48,7 +48,7 @@ const SENT = new Map([
   ["esc", "\x1b"],
   ["ctrl+e", "\x05"],
   ["ctrl+u", "\x15"],
-  ...["b", "g", "x", "p", "h", "?", "q"].map((key): [string, string] => [key, key]),
+  ...["b", "g", "x", "p", "h", "?", "q", "a", "r", "c", "y", "d", "G", "]", "["].map((key): [string, string] => [key, key]),
 ]);
 
 // The shortcuts of two keys, and what the terminal sends for each of their characters
@@ -146,6 +146,12 @@ export function chrome(g: Grid, view: View, tab: (typeof TABS)[number][2], keys:
   drawKeys(g, 39, keys);
 }
 
+// The dollars of the tokens of each name
+const spent = (used: Map<string, Totals>, view: View): number => [...used.values()].reduce((sum, totals) => sum + cost(totals, view.prices), 0);
+
+// What the open feature cost, as the footer shows it
+export const featureCost = (view: View): number => spent(view.squad.usage.feature, view);
+
 // Line 38: the tokens of each agent, the cost and the right side
 export function stats(g: Grid, view: View) {
   const { squad, ui } = view;
@@ -158,8 +164,7 @@ export function stats(g: Grid, view: View) {
     x = g.put(x + 1, y, tokens ? Math.round(tokens / 1000) + "k" : "—", tokens ? "white" : "gray");
     x += 2;
   }
-  const used: Map<string, Totals> = session ? squad.usage.session : squad.usage.feature;
-  const dollars = [...used.values()].reduce((sum, totals) => sum + cost(totals, view.prices), 0);
+  const dollars = session ? spent(squad.usage.session, view) : featureCost(view);
   // A click on the cost is t, the key that changes whose cost it is
   const from = x;
   x = g.put(x, y, `│ ${session ? "sessão" : "feature"} `, "gray");

@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › player ao vivo com setlist   workflow tlc                  ? 0   broker ● conectado  14:52:03
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda                                 ⚠ gate G-01 pendente · g
+┌─ agentes · 6 ────────────┐┌─ feed · player ao vivo com setlist ──────── ● ao vivo ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother        [waiting]││  hora     de    p/  kind            corpo              ││ msg #0439               [gate] │
+│   objetivo · G-01 com o …││  14:20:12 ldr → w2  [task]          API da setlist + c…││ de    mot mother               │
+│   tlc-discover to-spec t…││  14:20:13 ldr → w3  [task]          formato de data da…││ para  hum dev                  │
+│                          ││  14:21:00 w3  → ldr [question]      Q-05 formato de da…││ hora  14:51:58                 │
+│ ✓ leader           [done]││  14:21:30 mot → hum [question]      ? Q-05 timeout 4min││ escopo feature (sem ticket)    │
+│   tech lead · 3/3 tickets││  14:23:40 w2  → ldr [question]      Q-06 público ou au…│├────────────────────────────────┤
+│   tlc-plan help-m                                                                                  rovação para o    │
+│                   ┌─ ⚠ gate G-01 ────────────────────────────────────────────────────────────────┐ /player-ao-vivo   │
+│ ✓ worker-1        │  mother pede aprovação antes de uma ação irreversível · 14:51:58             │ ara deploy        │
+│   worker · TKT-12 │                                                                              │  produção.        │
+│   tlc-implement c │  ação      merge feat/player-ao-vivo → main                                  │ ──────────────────┤
+│                   │  efeito    deploy automático em produção                                     │ ture · 5 msgs     │
+│ ✓ worker-2        │  feature   3 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)              │ r [task]          │
+│   worker · TKT-13 │  perguntas ✓ 2 pelo dev · 1 entre agentes  ⟳ 3 default aplicado  ▶ 1 mescla… │ t [question]      │
+│   tlc-implement c ├──────────────────────────────────────────────────────────────────────────────┤ r [answer]        │
+│                   │  resumo                                                                      │ t [result]        │
+│ ✓ worker-3        │  Player ao vivo com setlist pronto. TKT-12 (player HLS) aprovado após 1      │ m [gate]          │
+│   worker · TKT-14 │  rework, com retry infinito conforme sua resposta à Q-07; TKT-13 (setlist    │ ──────────────────┤
+│   sem loadout     │  com cache 30s + ETag) e TKT-14 aprovados direto. Judge: 7/7 critérios.      │ r                 │
+│                   │  diff      6 files changed, 471 insertions(+), 41 deletions(-)               │ · to-spec ·       │
+│ ✓ judge           ├──────────────────────────────────────────────────────────────────────────────┤                   │
+│   judge · 7/7 cri │  ⚠ confirmar aprovação de G-01 · não dá para desfazer                        │                   │
+│   spec-driven-eva │    ação    merge feat/player-ao-vivo → main                                  │                   │
+│                   │    efeito  deploy automático em produção                                     │                   │
+│                   │                                                                              │                   │
+│                   │  [y] sim, aprovar e executar            esc voltar ao gate sem decidir       │                   │
+├─ tickets ──────── └──────────────────────────────────────────────────────────────────────────────┘                   │
+│ TKT-12 player de                                                                                                     │
+│ ⟳1/2 [done]              ││  14:35:15 ⟳ Q-08 timeout · default aplicado: logo da 89││                                │
+│ TKT-13 API da setlist  w2││  14:39:52 w1  → jdg [result]        backoff + retomada…││                                │
+│ ⟳0/2 [done]              ││  14:43:50 jdg → ldr [verdict]       approve 5/5        ││                                │
+│ TKT-14 data na setlist w3││  14:45:30 jdg → ldr [verdict]       approve 1/1        ││                                │
+│ ⟳0/2 [done]              ││  14:45:41 ldr → mot [result]        3/3 tickets aprova…││                                │
+│                          ││▶ 14:51:58 mot → hum [gate]          G-01 entrega final ││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 58k  ldr 121k  w1 171k  w2 112k  w3 22k  jdg 193k  │ feature ≈$10.17 est.                      ⚠ G-01 aguarda você
+ y confirmar   esc voltar ao gate

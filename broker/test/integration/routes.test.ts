@@ -392,7 +392,7 @@ test("EVT-69: /history by ticket_ref answers the events of the ticket in the ope
   expect(snapshot(broker, feature)).toEqual(before);
 
   // Once the feature is closed its tickets are of no open feature
-  expect((await post(broker.url, "/close-feature", { id: mother, outcome: "delivered" })).json).toEqual({ ok: true, seq: 9 });
+  expect((await post(broker.url, "/close-feature", { id: mother, outcome: "abandoned" })).json).toEqual({ ok: true, seq: 9 });
   expect((await post(broker.url, "/history", { id: worker, ticket_ref: "T1" })).json).toEqual({ events: [] });
 });
 

@@ -172,19 +172,32 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 - **Date**: 2026-10-13
 - **Status**: active
 
+### AD-022
+- **Decision**: O `feature_closed` encerra os gates pendentes da feature, em `delivered` e em `abandoned`, sem evento novo: a linha de `gates` passa a `rejected` com `decision_seq` nulo, e a derivação trata do mesmo jeito o gate pendente de feature fechada. O broker escreve o `summary` de um `gate_decision` (`G-NN aprovado`, `G-NN rejeitado: <texto>`, `G-NN comentado: <texto>`, cortado em 80), e a tool `gate` responde o `gate_id`. A TUI rotula um pedido de permissão `P-NN` pela ordem dele entre todos os `permission_request` do log.
+- **Reason**: O Handoff mandou tratar gates pendentes no encerramento como as perguntas (AD-012); o design só dizia "gates pendentes rejeitados" no `abandoned`. `/gate-decision` não recebe `summary` e o kind é de mensagem. A mother reemite pelo `gate_id` depois de um comentário. O contrato não tem id de pedido de permissão além do `seq` e do `request_id` do Claude Code.
+- **Trade-off**: Um gate `action` pendente numa entrega aprovada fecha rejeitado sem que o dev o decida. O `P-NN` cresce pelo banco inteiro e não recomeça a cada feature.
+- **Scope**: `broker/gate.ts`, `broker/log.ts`, `broker/shared/derive.ts`, `broker/server.ts`, TUI. Detalha o ADR-008, o ADR-011 e o AD-012. Os defaults da fatia que não são de projeto estão em "Assumptions" de `.specs/features/gate/spec.md`.
+- **Date**: 2026-10-14
+- **Status**: active
+
 ## Handoff
 
-Atualizado em 2026-10-14, no fechamento da fatia TUI clicável, à espera do sim do dev para o `git push` e o PR. As seções da Papéis, abaixo, são do fechamento dela em 2026-10-12 e continuam valendo.
+Atualizado em 2026-10-15, com a fatia Gate fechada e o PR aberto contra a `main`, à espera da revisão do dev. As seções abaixo desta, da TUI clicável e da Papéis, continuam valendo.
 
-- **Feature**: a próxima é a Gate, que ainda não tem spec e fecha o MVP. A TUI clicável, `.specs/features/tui-clicavel/`, está fechada no branch `feat/tui-clicavel`, ainda não enviado. A Papéis está fechada e mesclada na `main` pelo PR 12, com o resíduo registrado abaixo.
-- **Phase / Task**: TUI clicável fechada. T1 a T31 commitadas. As três voltas do Verifier deram FAIL, cada uma por lacuna de teste, sem defeito de produção. O dev decidiu em 2026-10-14 aplicar o Fix 1 e o Fix 2 da volta 3 como T30 e T31 e fechar sem uma quarta volta, e deixar as lacunas de precisão da spec como o código faz.
-- **Completed**: T1 `313d433`; a aprovação do design e das tarefas, `db54d04`; T2 a T10, de `e0cc06e` a `726f1e6`, por um worker; a correção do selo de bloqueio, `2622949`; T11 a T18, de `0fd0088` a `9d5f345`, por outro worker, com um ajuste fora da lista em `0ae5896`; T19 `b958711`, T20 `8b68837`, T21 `87739b1`, T22 `ba3eb25`, T23 `18eed8d`, T24 `5744614`, T25 `08f3c88`, T26 `4b9b0eb` e T27 `5441e1c`, pelo orquestrador. Verifier: volta 1 `9928924`, T28 `6b2f6cf` (com `923a71d`, que a nomeia), volta 2 `23d399f`, T29 `b0468be`, volta 3 `82dc531`; as lições, `40c766d`; o Handoff da espera, `8a97d4a`. T30 `85f3860` e T31 `dafa7f1`, pelo orquestrador, e o fechamento no commit seguinte.
+- **Feature**: a Gate, `.specs/features/gate/`, no branch `feat/gate`, saído da `main` em `3922651` e enviado ao `origin`. É a última fatia do MVP: com ela as oito estão prontas.
+- **PR**: [PR 14](https://github.com/sh4wty1/squad-code-mcp/pull/14), `feat/gate` → `main`. O dev pediu o push e o PR, e parar: nada foi mesclado.
+- **Phase / Task**: fechada. T1 a T47 commitadas; T30 é o fechamento. As três voltas do Verifier deram FAIL só por lacuna de teste (volta 1, 84 mutações, 5 vivas, T31 a T36; volta 2, 55 novas, 2 vivas, T37 e T38; volta 3, 31 novas, 6 vivas). O dev decidiu em 2026-10-15 fechar sem quarta volta: as cinco correções da volta 3 e a varredura de cada `filter` e `find` que ela recomendou viraram T39 a T47, só testes. O veredito de `validation.md` continua FAIL, com uma nota de fechamento no fim; `python .claude/skills/tlc-spec-driven/scripts/validate_state.py gate` sai com 1, o estado aceito, como na Papéis e na TUI clicável.
+- **Completed**: spec `07d311c`, design e tarefas `438d603`; T1 a T7 de `04b2ac4` a `595a80c`; T8 a T16 de `7fc4413` a `8f433b9`, com `cc6da26` (a tool `gate` responde o `gate_id`); T17 a T23 de `d037a31` a `41a285a`; T24 a T26 de `b0b40d9` a `fdccdec`; T27 `eb39b01`; T28 `a6a96a8`; T29 `fed6607`; voltas do Verifier `d351ae8`, `798b999`, `b098e0c`; T31 a T36 de `c691138` a `1078607`; T37 `393d3b1`, T38 `be4118d`; plano da volta 3 `50c6aec`; T39 a T47 de `439c2e1` a `1fcba77`; T30 no commit de fechamento, o último do branch.
 - **In-progress** (file:line): nada.
-- **Next step**: com o sim do dev, o `git push` de `feat/tui-clicavel` e o PR contra a `main`, revisado por `/the-judge`. Depois do merge, a spec da Gate: o que a TUI clicável deixa para ela está abaixo.
-- **Blockers**: o sim do dev para o push e o PR.
-- **A conferência em terminal real**: o dev decidiu em 2026-10-14 fechar a fatia sem ela. `real-terminal.md` tem a RT-01 como "funcionou, segundo o dev", sem a versão do terminal e sem os quatro cantos, RT-02 a RT-07 "não conferido" e RT-08 "não exercitado". Na spec ficaram sem marcar, com a razão, a meta do percurso com o mouse, a da volta do terminal, e os critérios de sucesso do percurso só com o mouse e da RT-07. Ela está em "Pendências fora da ordem" de `ROADMAP.md`.
+- **Next step**: a revisão do PR pelo dev e o merge. Depois do merge, apontar o `ROADMAP.md` e este Handoff para "Depois do MVP".
+- **Blockers**: nenhum.
+- **Para o dev revisar**: as linhas `n` de "Assumptions" da spec são defaults do agente; as que mudam o que o dev vê ou o contrato estão listadas no corpo do PR e no AD-022.
+- **A varredura da volta 3**: 51 mutações de predicado em `broker/tui/keys.ts`, `broker/tui/screens/gate.ts`, `broker/tui/screens/permission.ts` e `requests()` de `broker/shared/derive.ts`, num `git worktree` fora da árvore. 39 morreram pelos testes que havia; das vivas, as do relatório morrem por T39 a T43, quatro novas por T44 a T47, e quatro são equivalentes (`gate.ts:41`, `gate.ts:42`, `gate.ts:72`, `gate.ts:80` sem `t.planned`), com a razão na nota de fechamento de `validation.md`. Cada teste novo falha com a sua mutação e passa sem ela. Nenhum código de produção mudou.
+- **Suíte**: em `1fcba77`, Windows com Bun 1.3.14, `tsc` 0 e 2449 pass, 5 skip, 0 fail, 96 arquivos, 142 s; Linux no contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps`, sobre um clone com `core.autocrlf=false` montado só para leitura (`docker run --rm -v <clone>:/src:ro oven/bun:1.4.2 sh -c 'apt-get install git lsof procps; cp -r /src /work; cd /work/broker; bun install --frozen-lockfile; ...'`), `tsc` 0 e 3 de 3 com 2453 pass, 1 skip, 0 fail, entre 91 e 95 s. O `EVT-43` passou desta vez.
+- **Marco do MVP**: conferido em 2026-10-14 com sessões reais, `.specs/features/gate/marco-mvp.md`: a feature `slugs` de dois tickets do kickoff ao `feature_closed` `delivered`, com o dev só no terminal da mother e na TUI.
+- **Notado e não tocado**: o laço da TUI sobre o log do frame 22a, que tem `seq` fracionário, não termina o primeiro desenho num teste (T25 usou o de 22c); o broker só grava `seq` inteiro. A mensagem do commit `b0b40d9` diz "500 ms" onde é "menos de 500 ms". O Claude Code 2.1.299 mostra na subida um diálogo novo, da extensão do Chrome, que o launcher não trata.
 - **Uncommitted files**: nenhum.
-- **Branch**: `feat/tui-clicavel`, saído da `main` em `36440a6`, só local: nada foi enviado. `git push` e o PR pedem o sim do dev na hora. O commit de cada tarefa não pede (decisão do dev de 2026-10-13, nas regras de `tasks.md`).
+- **Branch**: `feat/gate`, enviado ao `origin`.
 
 ### Como o Verifier da TUI clicável terminou
 

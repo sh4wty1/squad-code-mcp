@@ -9,7 +9,9 @@ import { START } from "../../tui/keys.ts";
 import type { Fetch } from "../../tui/reader.ts";
 import { answer } from "../../tui/screens/answer.ts";
 import { down } from "../../tui/screens/down.ts";
+import { gate } from "../../tui/screens/gate.ts";
 import { main } from "../../tui/screens/main.ts";
+import { permission } from "../../tui/screens/permission.ts";
 import { questions } from "../../tui/screens/questions.ts";
 import { small } from "../../tui/screens/small.ts";
 import { topology } from "../../tui/screens/topology.ts";
@@ -193,13 +195,14 @@ test("TUI-63: the notice of a key stays 4 s in the footer", async () => {
   const { t, key, stop } = launch();
   await t.shows(main(t.view()).text(), "the main screen");
 
+  // frame 01 has no pending gate
   key("g");
-  expect(t.lines()[38]).toContain("chega com a fatia Gate");
+  expect(t.lines()[38]).toContain("nenhum gate pendente");
   t.now += 3999;
   await t.reads(t.calls.length + 2);
-  expect(t.lines()[38]).toContain("chega com a fatia Gate");
+  expect(t.lines()[38]).toContain("nenhum gate pendente");
   t.now += 1;
-  await until(() => !t.lines()[38]!.includes("chega com a fatia Gate"), "the notice to leave");
+  await until(() => !t.lines()[38]!.includes("nenhum gate pendente"), "the notice to leave");
   stop();
 });
 
@@ -248,6 +251,28 @@ test("TUI-54: a terminal smaller than 120×40 shows only its size, and the scree
   tui.resize();
   expect(t.lines()).toEqual(main(t.view()).text());
   tui.stop();
+});
+
+test("GAT-40, GAT-60: from another tab, g and x draw the main screen with the modal of the gate or of the request over it", async () => {
+  // In 18a G-01 is pending; in 22c worker-1 waits for P-01 and worker-2 for P-02
+  for (const [id, k, more] of [
+    ["18a", "g", { gate: { id: 1, mode: "view", text: "", expanded: false, empty: false, sending: false, version: 1 } }],
+    ["22c", "x", { permission: { seq: 459, offset: 0, sending: false } }],
+  ] as const) {
+    const { t, key, stop } = launch(LOGS[id]!.events);
+    try {
+      await t.shows(main(t.view()).text(), "the main screen");
+      key("2");
+      expect(t.lines()).toEqual(topology(t.view({ screen: "topology" })).text());
+      key(k);
+      const view = t.view(more);
+      const drawn = (k === "g" ? gate(main(view), view) : permission(main(view), view)).text();
+      expect(drawn.some((line) => line.includes(k === "g" ? "┌─ ⚠ gate G-01 " : "┌─ ⚠ permissão P-01 "))).toBe(true);
+      expect(t.lines()).toEqual(drawn);
+    } finally {
+      stop();
+    }
+  }
 });
 
 test("edge case: a resize erases the terminal and draws the whole screen again", async () => {

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { createFeature } from "../../feature.ts";
-import { JUDGE, LEADER, MOTHER, NOW, setup, WORKER_1 } from "./helpers.ts";
+import { HUMAN_TOKEN, JUDGE, LEADER, MOTHER, NOW, setup, WORKER_1 } from "./helpers.ts";
 
 const FIELDS = {
   title: "the importer",
@@ -18,7 +18,21 @@ const USAGE = { session_id: "s-123", model: "opus", input: 1200, output: 340, ca
 
 function start() {
   const b = setup();
-  return { ...b, feature: createFeature(b.log) };
+  return { ...b, feature: createFeature(b.log, b.gate.approved) };
+}
+
+// What the mother asks to deliver the feature
+const DELIVERY = { scope: "delivery", summary: "deliver", action: "merge feat/importer", effect: "develop gets it", commit: "abc1234" };
+
+// Asks a gate and decides it as the dev; returns the gate_id
+function decided(b: ReturnType<typeof setup>, decision: string | null, fields: Record<string, unknown> = {}): number {
+  const asked = b.gate.request(MOTHER, { ...DELIVERY, ...fields }) as { gate_id: number; seq: number };
+  if (decision) b.gate.decide({ human_token: HUMAN_TOKEN, gate_id: asked.gate_id, request_seq: asked.seq, decision, text: "because" });
+  return asked.gate_id;
+}
+
+function gateRows(b: ReturnType<typeof setup>) {
+  return b.db.query("SELECT id, status, decision_seq FROM gates ORDER BY id").all();
 }
 
 // A broker with a feature opened by the rule
@@ -43,10 +57,13 @@ function refusedClose(b: ReturnType<typeof start>, peer: typeof MOTHER, body: Re
 for (const outcome of ["delivered", "abandoned"]) {
   test(`FEAT-14: the mother closes the feature as ${outcome} and gets the seq of the feature_closed`, () => {
     const b = opened();
+    // delivered after the dev approved the delivery (GAT-26): the gate and its decision are 2 and 3
+    if (outcome === "delivered") decided(b, "approve");
+    const seq = b.events().length + 1;
     b.clock.now = NOW + 600;
-    expect(b.feature.close(MOTHER, { outcome, body: "what was left out" })).toEqual({ ok: true, seq: 2 });
-    expect(b.events()[1]).toEqual({
-      seq: 2,
+    expect(b.feature.close(MOTHER, { outcome, body: "what was left out" })).toEqual({ ok: true, seq });
+    expect(b.events()[seq - 1]).toEqual({
+      seq,
       ts: NOW + 600,
       kind: "feature_closed",
       feature_id: b.feature_id,
@@ -61,7 +78,7 @@ for (const outcome of ["delivered", "abandoned"]) {
       data: { outcome },
     });
     expect(featureRows(b)).toEqual([
-      { id: b.feature_id, project: "importer", ...FIELDS, opened_seq: 1, closed_seq: 2, outcome },
+      { id: b.feature_id, project: "importer", ...FIELDS, opened_seq: 1, closed_seq: seq, outcome },
     ]);
   });
 }
@@ -145,7 +162,7 @@ test("FEAT-22: closing with a peer blocked records no unblocked for it", () => {
 
 test("FEAT-22: blocked, usage and turn_started after the close are recorded with feature_id null", () => {
   const b = opened();
-  b.feature.close(MOTHER, { outcome: "delivered" });
+  b.feature.close(MOTHER, { outcome: "abandoned" });
   expect(b.session.blocked(WORKER_1, BLOCKED)).toEqual({ ok: true, seq: 3 });
   expect(b.session.usage(WORKER_1, USAGE)).toEqual({ ok: true, seq: 4 });
   expect(b.session.turnStarted(WORKER_1)).toEqual({ ok: true, seq: 5 });
@@ -156,17 +173,9 @@ test("FEAT-22: blocked, usage and turn_started after the close are recorded with
   ]);
 });
 
-test("FEAT-23: delivered is accepted with no gate in the log", () => {
-  const b = opened();
-  b.given.task("T", "worker-1");
-  expect(b.feature.close(MOTHER, { outcome: "delivered" })).toEqual({ ok: true, seq: 3 });
-  expect(b.events().map((e) => e.kind)).toEqual(["feature_opened", "task", "feature_closed"]);
-  expect(featureRows(b).map((f) => f.outcome)).toEqual(["delivered"]);
-});
-
 test("FEAT-24: after the close, /send and /plan are refused with no_open_feature", () => {
   const b = opened();
-  b.feature.close(MOTHER, { outcome: "delivered" });
+  b.feature.close(MOTHER, { outcome: "abandoned" });
   b.refusedWith(() => b.send(MOTHER, { kind: "task", to: "leader", summary: "go" }), "mother", "task", "no_open_feature");
   b.refusedWith(
     () => b.plan(LEADER, { tickets: [{ ticket_ref: "A", title: "the parser" }] }),
@@ -228,4 +237,117 @@ test("FEAT-25: after the close a new feature is opened, and the tickets of the e
     ["task", next.feature_id, "U"],
   ]);
   expect(b.state(WORKER_1).ticket).toEqual({ ticket_ref: "U", title: "the writer", task_seq: sent.seq, reworks: 0 });
+});
+
+test("GAT-26: delivered without any gate is refused with gate_required and the feature stays open", () => {
+  const b = opened();
+  b.given.task("T", "worker-1");
+  refusedClose(b, MOTHER, { outcome: "delivered" }, "gate_required");
+  expect(b.log.openFeature()!.id).toBe(b.feature_id);
+});
+
+for (const [what, given] of [
+  ["a delivery gate pending", (b: ReturnType<typeof setup>) => decided(b, null)],
+  ["a delivery gate commented", (b: ReturnType<typeof setup>) => decided(b, "comment")],
+  ["a delivery gate rejected", (b: ReturnType<typeof setup>) => decided(b, "reject")],
+  ["only an action gate approved", (b: ReturnType<typeof setup>) => decided(b, "approve", { scope: "action" })],
+] as [string, (b: ReturnType<typeof setup>) => void][]) {
+  test(`GAT-26: delivered with ${what} is refused with gate_required`, () => {
+    const b = opened();
+    given(b);
+    refusedClose(b, MOTHER, { outcome: "delivered" }, "gate_required");
+    expect(b.log.openFeature()!.id).toBe(b.feature_id);
+  });
+}
+
+test("GAT-26: the delivery approved in a feature that closed does not deliver the next one", () => {
+  const b = opened();
+  decided(b, "approve");
+  expect(b.feature.close(MOTHER, { outcome: "delivered" })).toMatchObject({ ok: true });
+  b.feature.open(mother, { ...FIELDS, title: "the next one" });
+  refusedClose(b, MOTHER, { outcome: "delivered" }, "gate_required");
+});
+
+test("GAT-27: delivered with a delivery gate approved closes the feature, beside a rejected one and an action", () => {
+  const b = opened();
+  decided(b, "reject");
+  decided(b, "approve", { scope: "action" });
+  decided(b, "approve");
+  const seq = b.events().length + 1;
+  expect(b.feature.close(MOTHER, { outcome: "delivered" })).toEqual({ ok: true, seq });
+  expect(featureRows(b).map((f) => [f.closed_seq, f.outcome])).toEqual([[seq, "delivered"]]);
+});
+
+test("GAT-27: abandoned closes the feature with a delivery gate pending", () => {
+  const b = opened();
+  decided(b, null);
+  expect(b.feature.close(MOTHER, { outcome: "abandoned" })).toEqual({ ok: true, seq: 3 });
+  expect(featureRows(b).map((f) => [f.closed_seq, f.outcome])).toEqual([[3, "abandoned"]]);
+});
+
+for (const outcome of ["delivered", "abandoned"]) {
+  test(`GAT-28: closing as ${outcome} rejects the pending gates with decision_seq null, leaves the decided ones and writes no other event`, () => {
+    const b = opened();
+    // 1 pending, 2 commented, 3 rejected by 6, 4 approved by 8: a delivery
+    decided(b, null, { scope: "action" });
+    decided(b, "comment", { scope: "action" });
+    decided(b, "reject", { scope: "action" });
+    decided(b, "approve");
+    const events = b.events();
+    expect(gateRows(b)).toEqual([
+      { id: 1, status: "pending", decision_seq: null },
+      { id: 2, status: "pending", decision_seq: null },
+      { id: 3, status: "rejected", decision_seq: 6 },
+      { id: 4, status: "approved", decision_seq: 8 },
+    ]);
+    expect(b.feature.close(MOTHER, { outcome })).toEqual({ ok: true, seq: 9 });
+    expect(gateRows(b)).toEqual([
+      { id: 1, status: "rejected", decision_seq: null },
+      { id: 2, status: "rejected", decision_seq: null },
+      { id: 3, status: "rejected", decision_seq: 6 },
+      { id: 4, status: "approved", decision_seq: 8 },
+    ]);
+    expect(b.events().slice(0, 8)).toEqual(events);
+    expect(b.events().slice(8).map((e) => e.kind)).toEqual(["feature_closed"]);
+  });
+}
+
+test("GAT-28: closing a feature does not touch a pending gate of another feature", () => {
+  const b = opened();
+  decided(b, null, { scope: "action" });
+  b.feature.close(MOTHER, { outcome: "abandoned" });
+  b.db.run("UPDATE gates SET status = 'pending' WHERE id = 1");
+  b.feature.open(mother, { ...FIELDS, title: "the next one" });
+  b.feature.close(MOTHER, { outcome: "abandoned" });
+  expect(gateRows(b)).toEqual([{ id: 1, status: "pending", decision_seq: null }]);
+});
+
+test("GAT-10/28: the feature_closed and its gates are one transaction: when a gate cannot be closed the feature stays open", () => {
+  const b = opened();
+  decided(b, null);
+  const events = b.events();
+  b.db.run("CREATE TRIGGER broken BEFORE UPDATE ON gates BEGIN SELECT RAISE(ABORT, 'the disk is full'); END");
+  expect(() => b.feature.close(MOTHER, { outcome: "abandoned" })).toThrow("the disk is full");
+  expect(b.events()).toEqual(events);
+  expect(gateRows(b)).toEqual([{ id: 1, status: "pending", decision_seq: null }]);
+  expect(b.log.openFeature()?.id).toBe(b.feature_id);
+});
+
+// GAT-29: each rule before gate_required, in a call to deliver without a gate
+test("GAT-29: edge_not_allowed comes before no_open_feature, and both before gate_required", () => {
+  refusedClose(start(), LEADER, { outcome: "delivered" }, "edge_not_allowed");
+  refusedClose(opened(), LEADER, { outcome: "delivered" }, "edge_not_allowed");
+  refusedClose(start(), MOTHER, { outcome: "delivered" }, "no_open_feature");
+});
+
+test("GAT-29: missing_field comes before invalid_field and before gate_required", () => {
+  refusedClose(opened(), MOTHER, { outcome: "delivered", body: 5 }, "missing_field");
+  refusedClose(opened(), MOTHER, { outcome: "done", body: null }, "missing_field");
+});
+
+test("GAT-29: invalid_field comes before gate_required, and gate_required is the last", () => {
+  const b = opened();
+  decided(b, null);
+  refusedClose(b, MOTHER, { outcome: "Delivered" }, "invalid_field");
+  refusedClose(b, MOTHER, { outcome: "delivered", body: "all done" }, "gate_required");
 });

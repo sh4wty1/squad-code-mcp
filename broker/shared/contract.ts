@@ -38,6 +38,9 @@ export type Kind = (typeof KINDS)[number];
 // `Q-07` for question 7: what the broker writes in the summary of an answer and the TUI draws
 export const qid = (id: number): string => "Q-" + String(id).padStart(2, "0");
 
+// `G-01` for gate 1: what the broker writes in the summary of a decision and the TUI draws
+export const gid = (id: number): string => "G-" + String(id).padStart(2, "0");
+
 // A non-blocking question without timeout_s waits this long for the dev
 export const TIMEOUT_S = 240;
 

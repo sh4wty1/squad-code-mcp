@@ -1,18 +1,19 @@
 // What a key does to the state of the screen. Pure: the clock is the one of the view, and a
 // key is the string the terminal sends in raw mode. Ported from `onKey` and `textKeys` of
-// the prototype, without the modals of gate and of permission.
+// the prototype.
 
-import { qid } from "../shared/contract.ts";
-import type { Question } from "../shared/derive.ts";
+import { gid, qid } from "../shared/contract.ts";
+import type { Gate, Question } from "../shared/derive.ts";
 import { resolved, waiting } from "./asked.ts";
 import type { FeedRow } from "./feed.ts";
 import type { Color } from "./grid.ts";
 import { selected } from "./screens/questions.ts";
 import { threadTicket } from "./screens/thread.ts";
-import type { Modal, Ui, View } from "./view.ts";
+import { preview, PREVIEW_ROWS } from "./screens/permission.ts";
+import type { GateModal, Modal, PermissionModal, Ui, View } from "./view.ts";
 import type { Sent } from "./writer.ts";
 
-export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, send: null, pasting: false };
+export const START: Ui = { screen: "main", selected: null, focus: 1, paused: false, scope: "feature", toast: null, threadTicket: null, threadOffset: 0, question: null, qfocus: "list", historyOffset: 0, modal: null, gate: null, permission: null, send: null, pasting: false };
 
 // How long a notice stays in the footer
 const TOAST_MS = 4000;
@@ -101,10 +102,121 @@ function answering(ui: Ui, m: Modal, key: string, view: View): Ui | null {
   return [...key].length === 1 && !/[\x00-\x1f\x7f-\x9f]/u.test(key) ? set({ text: m.text + key }) : ui;
 }
 
+// The text after a key that edits it: a character that is not a control one goes to the end,
+// backspace takes the last one, ctrl+u empties it. null for a key that does not edit it; an
+// arrow is not one character.
+function typed(text: string, key: string): string | null {
+  if (key === "\x7f" || key === "\x08") return [...text].slice(0, -1).join("");
+  if (key === "\x15") return "";
+  return [...key].length === 1 && !/[\x00-\x1f\x7f-\x9f]/u.test(key) ? text + key : null;
+}
+
+// The modal of a gate, in the view mode
+const gateModal = (g: Gate): GateModal => ({ id: g.id, mode: "view", text: "", expanded: false, empty: false, sending: false, version: g.version });
+
+// What a key does with the modal of gate open. The decision is not sent here: it is left in
+// `send`, for the loop. Only y of the confirm mode and enter of a text mode decide.
+function gating(ui: Ui, m: GateModal, key: string, view: View): Ui | null {
+  if (key === "\x03") return null;
+  // No key changes the modal while the broker did not say what it did with the decision, nor
+  // while it does not answer the reads
+  if (m.sending || view.down) return ui;
+  const set = (gate: Partial<GateModal>): Ui => ({ ...ui, gate: { ...m, ...gate } });
+  // The pending gates, the oldest first: the queue of the modal
+  const queue = view.squad.gates.filter((g) => g.pending);
+  // The decision names the version on the screen: the broker refuses it when the mother asked
+  // the gate again after the read (GAT-98)
+  const shown = queue.find((g) => g.id === m.id);
+  const decide = (decision: "approve" | "reject" | "comment", text?: string): Ui =>
+    shown ? { ...ui, gate: { ...m, sending: true }, send: { gate_id: m.id, request_seq: shown.request_seq, decision, ...(text !== undefined && { text }) } } : ui;
+
+  if (m.mode === "view") {
+    switch (key) {
+      case "\x1b":
+        return { ...ui, gate: null };
+      case "a":
+        // What is confirmed is the version on the screen now
+        return set({ mode: "confirm", version: shown?.version ?? m.version });
+      case "r":
+      case "c":
+        return set({ mode: key === "r" ? "reject" : "comment", text: "", expanded: false, empty: false });
+      case "]":
+      case "[": {
+        const at = queue.findIndex((g) => g.id === m.id);
+        const next = queue[Math.max(0, Math.min(queue.length - 1, at + (key === "]" ? 1 : -1)))];
+        return at < 0 || next!.id === m.id ? ui : { ...ui, gate: gateModal(next!) };
+      }
+    }
+    return ui;
+  }
+  if (m.mode === "confirm") {
+    if (key === "y") return decide("approve");
+    return key === "\x1b" ? set({ mode: "view" }) : ui;
+  }
+  // The text of a reject or of a comment: every key but these is text, q and the digits too
+  switch (key) {
+    case "\x1b":
+      return set({ mode: "view", text: "", empty: false });
+    case "\r": {
+      const text = m.text.trim();
+      return text ? decide(m.mode, text) : set({ empty: true });
+    }
+    case "\x05":
+      return set({ expanded: !m.expanded });
+  }
+  const text = typed(m.text, key);
+  // The mark of an empty text stays until a key changes the text
+  return text === null || text === m.text ? ui : set({ text, empty: false });
+}
+
+// The modal of a permission request, with its preview on the first line
+const permissionModal = (seq: number): PermissionModal => ({ seq, offset: 0, sending: false });
+
+// What a key does with the modal of permission open. The decision is not sent here: it is
+// left in `send`, for the loop. a allows only with the end of the preview in view.
+function permitting(ui: Ui, m: PermissionModal, key: string, view: View): Ui | null {
+  if (key === "\x03") return null;
+  if (m.sending || view.down) return ui;
+  if (key === "\x1b") return { ...ui, permission: null };
+  const request = view.squad.requests.find((r) => r.request.seq === m.seq);
+  // A request answered in the terminal takes no key but esc
+  if (!request?.open) return ui;
+  // The offset that has the end of the preview in view
+  const end = Math.max(0, preview(request.request.input_preview).length - PREVIEW_ROWS);
+  const scroll = (offset: number): Ui => (offset === m.offset ? ui : { ...ui, permission: { ...m, offset } });
+  const send = (behavior: "allow" | "deny"): Ui => ({ ...ui, permission: { ...m, sending: true }, send: { request_seq: m.seq, behavior } });
+
+  switch (key) {
+    case "j":
+    case DOWN:
+      return scroll(Math.min(end, m.offset + 1));
+    case "k":
+    case UP:
+      return scroll(Math.max(0, m.offset - 1));
+    case "G":
+      return scroll(end);
+    case "a":
+      return m.offset >= end ? send("allow") : ui;
+    case "d":
+      return send("deny");
+    case "]":
+    case "[": {
+      // The open requests, the oldest first: the queue of the modal
+      const queue = view.squad.permissions;
+      const at = queue.findIndex((p) => p.seq === m.seq);
+      const next = queue[Math.max(0, Math.min(queue.length - 1, at + (key === "]" ? 1 : -1)))];
+      return at < 0 || next!.seq === m.seq ? ui : { ...ui, permission: permissionModal(next!.seq) };
+    }
+  }
+  return ui;
+}
+
 // The state after the key, or null when the key quits
 export function press(ui: Ui, key: string, view: View): Ui | null {
   // With the modal open every key is its own: q, the digits and the letters are text
   if (ui.modal) return answering(ui, ui.modal, key, view);
+  if (ui.gate) return gating(ui, ui.gate, key, view);
+  if (ui.permission) return permitting(ui, ui.permission, key, view);
   const { squad, rows } = view;
   const toast = (text: string, color?: Color): Ui => ({ ...ui, toast: notice(view, text, color) });
   const thread = (): Ui => ({ ...ui, screen: "thread", threadTicket: null, threadOffset: 0 });
@@ -140,9 +252,19 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
       return { ...ui, screen: "main" };
     case "4":
       return { ...ui, screen: "questions" };
-    case "g":
-    case "x":
-      return toast("chega com a fatia Gate");
+    case "g": {
+      // The oldest pending gate, over the main screen. A broker that does not answer the reads
+      // would not take the decision.
+      if (view.down) return toast("broker desconectado · gate desabilitado");
+      const g = squad.gates.find((g) => g.pending);
+      return g ? { ...ui, screen: "main", gate: gateModal(g) } : toast("nenhum gate pendente");
+    }
+    case "x": {
+      // The oldest open request, over the main screen
+      if (view.down) return toast("broker desconectado · permissão desabilitada");
+      const r = squad.permissions[0];
+      return r ? { ...ui, screen: "main", permission: permissionModal(r.seq) } : toast("nenhum pedido de permissão");
+    }
     case "h":
       return ui.screen === "questions" ? { ...ui, qfocus: ui.qfocus === "list" ? "history" : "list" } : ui;
     case "\r": {
@@ -202,7 +324,10 @@ export function press(ui: Ui, key: string, view: View): Ui | null {
 // chunk had keys after these, which the loop holds back. Between the two marks of a delimited
 // paste every chunk is of the paste, a line break alone in its read too; the marks are no key
 // of a screen, and esc ends a paste whose mark of the end did not come. A mouse report
-// presses no key, and still counts as one of the keys of its chunk.
+// presses no key, and still counts as one of the keys of its chunk. Nor does a paste decide a
+// gate or a permission request: y, a, d and a line break whose turn comes with the modal of
+// gate reading or confirming, or with the modal of permission open, are no key; in the text
+// of a gate the line break is a space, as in the modal of answer.
 export function input(ui: Ui, chunk: string, view: View, more = false): Ui | null {
   const keys = keysOf(chunk);
   let next: Ui | null = ui;
@@ -213,18 +338,46 @@ export function input(ui: Ui, chunk: string, view: View, more = false): Ui | nul
     }
     if (isReport(k)) continue;
     if (k === "\x1b") next = paste(next, false);
-    const pasted = (next.pasting || more || keys.length > 1) && next.modal !== null && (k === "\r" || k === "\n");
+    const pasting = next.pasting || more || keys.length > 1;
+    const deciding = next.permission || (next.gate && (next.gate.mode === "view" || next.gate.mode === "confirm"));
+    if (pasting && deciding && ["y", "a", "d", "\r", "\n"].includes(k)) continue;
+    const pasted = pasting && (next.modal || next.gate) && (k === "\r" || k === "\n");
     next = press(next, pasted ? " " : k, { ...view, ui: next });
     if (!next) return null;
   }
   return next;
 }
 
-// The state after the answer of `send` was sent, which is no longer to send. `result` is what
-// the broker said of it, or null when there was no human credential to send it with.
+// What the summary of a gate the broker took says of each decision
+const DECIDED = { approve: "aprovado", reject: "rejeitado", comment: "comentado · continua pendente" };
+
+// The state after the decision of `send` was sent, which is no longer to send. `result` is
+// what the broker said of it, or null when there was no human credential to send it with.
 export function settle(ui: Ui, result: Sent | null, view: View): Ui {
   const { modal: m, send } = ui;
   const idle: Ui = { ...ui, send: null };
+  const failed = (text: string) => notice(view, text, "bred");
+  if (send && "gate_id" in send) {
+    const g = ui.gate;
+    if (!g) return idle;
+    // The modal in the mode it sent from, with its text, to send again
+    const back = (text: string): Ui => ({ ...idle, gate: { ...g, sending: false }, toast: failed(text) });
+    if (!result) return back("✗ credencial humana não encontrada");
+    if (result.ok) return { ...idle, gate: null, toast: notice(view, `✓ ${gid(send.gate_id)} ${DECIDED[send.decision]}`, "bgreen") };
+    if (result.error === "gate_closed") return { ...idle, gate: null, toast: failed(`✗ ${gid(send.gate_id)} já decidido`) };
+    return back(`✗ decisão não enviada · ${result.error}`);
+  }
+  if (send && "behavior" in send) {
+    const p = ui.permission;
+    if (!p) return idle;
+    const stay: Ui = { ...idle, permission: { ...p, sending: false } };
+    if (!result) return { ...stay, toast: failed("✗ credencial humana não encontrada") };
+    const label = view.squad.requests.find((r) => r.request.seq === send.request_seq)?.label ?? "pedido";
+    if (result.ok) return { ...idle, permission: null, toast: notice(view, `✓ ${label} ${send.behavior === "allow" ? "permitido" : "negado"}`, "bgreen") };
+    // The request closed before the decision: the log says it was answered in the terminal
+    if (result.error === "permission_closed") return stay;
+    return { ...stay, toast: failed(`✗ decisão não enviada · ${result.error}`) };
+  }
   if (!m || !send) return idle;
   // The modal as it was before the send, to send again
   const back = (text: string): Ui => ({ ...idle, modal: { ...m, sending: false }, toast: notice(view, text, "bred") });
@@ -235,11 +388,38 @@ export function settle(ui: Ui, result: Sent | null, view: View): Ui {
   return back(`✗ resposta não enviada · ${result.error}`);
 }
 
-// The state after a read. The selection of the tab follows its question when the order of
-// the list changes, and goes to the first when the question left it. The modal of a question
-// that closed is closed and its text is lost; the one of a refused answer stays, and the one
-// of an answer on its way waits for what the broker says of it.
+// The state after a read, for the tab of questions, its modal and the modals of gate and of
+// permission. A modal whose decision is on its way waits for what the broker says of it.
 export function sync(ui: Ui, view: View): Ui {
+  return requestSync(gateSync(questionSync(ui, view), view), view);
+}
+
+// The modal of a gate no longer pending is closed and its text is lost: decided, or closed
+// with its feature. A new version of the gate takes the confirm mode back to the view mode:
+// what is approved is what was on the screen.
+function gateSync(ui: Ui, view: View): Ui {
+  const m = ui.gate;
+  if (!m || m.sending) return ui;
+  const g = view.squad.gates.find((g) => g.id === m.id);
+  if (!g?.pending) return { ...ui, gate: null, toast: notice(view, `${gid(m.id)} fechado`) };
+  return m.mode === "confirm" && g.version !== m.version ? { ...ui, gate: { ...m, mode: "view" } } : ui;
+}
+
+// The modal of a request decided by another decision is closed. The one of a request
+// answered in the terminal stays, to say so, until esc.
+function requestSync(ui: Ui, view: View): Ui {
+  const m = ui.permission;
+  if (!m || m.sending) return ui;
+  const r = view.squad.requests.find((r) => r.request.seq === m.seq);
+  if (r && r.closedBy !== "decision") return ui;
+  return { ...ui, permission: null, toast: r ? notice(view, `${r.label} decidido`) : ui.toast };
+}
+
+// The selection of the tab follows its question when the order of the list changes, and goes
+// to the first when the question left it. The modal of a question that closed is closed and
+// its text is lost; the one of a refused answer stays, and the one of an answer on its way
+// waits for what the broker says of it.
+function questionSync(ui: Ui, view: View): Ui {
   const { squad } = view;
   const asked = waiting(squad);
   const question = asked.some((q) => q.id === ui.question) ? ui.question : (asked[0]?.id ?? null);

@@ -150,6 +150,53 @@ const Q08_HOPS = (line: number) => hops(line, 30, "w2 → ldr → você", 21);
 const modalOf = (id: string, from: number, to: number) => frame(id).slice(from, to + 1).map((line) => [...line.padEnd(120)].slice(18, 102).join(""));
 const EFFECT = 'Assumptions, `Linha "efeito"`: the TUI writes the effect from who asked and the ticket (QST-59), and the one the prototype writes by hand for Q-09 is in no event';
 
+// The modals of gate and of permission, over the main screen. The deviations of the screen
+// behind a modal are cut to the cells it leaves in view: outside columns x0 to x1, its box
+// and its margin, on the lines of the box and its margin. A part that leaves the line as the
+// parts before it left it goes away.
+function behind(id: string, x0: number, x1: number, ...devs: Deviation[]): Deviation[] {
+  const lines = frame(id).map((line) => [...line.padEnd(120)]);
+  const top = lines.findIndex((line) => line[x0 + 1] === "┌" && line.join("").includes("⚠"));
+  const bottom = lines.findIndex((line, y) => y > top && line[x0 + 1] === "└");
+  return devs.flatMap((dev) => {
+    const text = [...pad(dev.text, dev.width)];
+    const end = dev.col + dev.width;
+    const parts = dev.line < top - 1 || dev.line > bottom + 1 ? [[dev.col, end]] : [[dev.col, Math.min(end, x0)], [Math.max(dev.col, x1 + 1), end]];
+    return parts
+      .filter(([from, to]) => from! < to!)
+      .map(([from, to]) => ({ ...dev, col: from!, width: to! - from!, text: text.slice(from! - dev.col, to! - dev.col).join("") }))
+      .filter((part) => {
+        const now = lines[dev.line]!.slice(part.col, part.col + part.width).join("");
+        lines[dev.line]!.splice(part.col, part.width, ...part.text);
+        return part.text !== now;
+      });
+  });
+}
+const GATE_BOX: [number, number] = [19, 100];
+// The count of the questions answered between agents, in the box of the modal of gate
+const BETWEEN =
+  "GAT-44 counts every question of the feature an agent answered: the one the leader asked the mother at 14:18:40, answered by her at 14:19:05, is one of them, and the count the prototype writes by hand leaves it out, as its history does (QST-60)";
+function between(id: string): Deviation[] {
+  const lines = frame(id).map((line) => [...line]);
+  const y = lines.findIndex((line) => line.join("").includes("perguntas ✓ 2 pelo dev · 1 entre agentes"));
+  const x = lines[y]!.findIndex((_, i) => lines[y]!.slice(i, i + 15).join("") === "1 entre agentes");
+  return d("D1", BETWEEN, [y, x, 1, "2"]);
+}
+// The detail of the gate behind the modal: its body and the thread of the feature, from line 9
+const GATE_BODY =
+  "spec Assumptions, `Log do frame 08 e seguintes`: the body of G-01 is the summary its modal shows, not the prose of the prototype, which no event has; the detail behind the modal takes more lines with it, and the thread and the loadout come down";
+const G01_DETAIL = panel(
+  "D2",
+  GATE_BODY,
+  9,
+  "Player ao vivo com setlist", "pronto. TKT-12 (player HLS)", "aprovado após 1 rework, com", "retry infinito conforme sua", "resposta à Q-07; TKT-13", "(setlist com cache 30s + ETag)", "e TKT-14 aprovados direto.", "Judge: 7/7 critérios.",
+  "---", "thread da feature · 5 msgs", " 14:18 mot→ldr [task]", " 14:18 ldr→mot [question]", " 14:19 mot→ldr [answer]", " 14:45 ldr→mot [result]", "▶14:51 mot→hum [gate]", "---", "loadout mother"
+);
+const gateFrame = (id: string) => [...behind(id, ...GATE_BOX, ...skills(MOT, LDR, W1, W2, JDG), ...G01_DETAIL, ...loadout(26, 1)), ...between(id)];
+
+// The one line of system the slice Gate leaves out
+const SYSTEM_LINE = "Out of Scope of the slice Gate: the line of system `✓ P-NN fechado no terminal` has no event, since a request closes with any later event of its peer, which has its own line; the modal of permission says it instead (GAT-71)";
+
 export const DEVIATIONS: Record<string, Deviation[]> = {
   "01": [...skills(MOT, LDR, W2, JDG), ...doing(8, "tech lead · escalou TK…", ESCALATED), ...entered("01"), ...plan(9), ...loadout(33, 2)],
   "09a": [...skills(MOT, LDR, W1, W2, JDG), ...counts(15)],
@@ -231,7 +278,7 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ...d("D1", SUMMARY, [32, 72, 13, "allow: Bash"]),
     ...panel(
       "D2",
-      "the broker writes a permission_decision without body: the text of the frame is prose of the scenario, with the id P-01 of the modal (out of scope), so the thread and the loadout come four lines up",
+      "the broker writes a permission_decision without body: the text of the frame is prose of the scenario, with the id P-01 the modal of permission gives the request, so the thread and the loadout come four lines up",
       10,
       "", "---", "thread TKT-12 · 6 msgs", " 14:26 w1→jdg [result]", " 14:28 jdg→ldr [verdict]", " 14:28 ldr→w1  [task]", " 14:30 w1→hum [permission_reques", "▶14:31 hum→w1  [permission_decis",
       "---", "loadout worker-1", "sem loadout", "", "", "", "", ""
@@ -368,12 +415,7 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
   ],
   "11": [
     ...d("D4", "CLK-55: the key that turns the mouse off and on is in the panel of the keys, on the line the frame leaves empty after the global ones", [10, 62, 56, "m           mouse liga / desliga · clique = tecla"]),
-    ...d(
-      "D3",
-      "TUI-49, QST-88, Out of Scope: the modals of gate and of permission are screens of the slice Gate; their keys do nothing here",
-      ...[25, 26, 27, 28, 30, 31, 32, 33].map((line): At => [line, 62, 56, ""])
-    ),
-    ...d("D3", "Out of Scope: the ids `P-nn` and the line of a request answered in the terminal only exist in the modal of permission (slice Gate); the feed of this slice never draws it", [30, 29, 29, ""]),
+    ...d("D3", SYSTEM_LINE, [30, 29, 29, ""]),
   ],
   // The main screen of 01, frozen
   "12": [
@@ -414,7 +456,53 @@ export const DEVIATIONS: Record<string, Deviation[]> = {
     ),
   ],
   "20b": [...Q08_HOPS(14), ...d("D1", ASKED_MOTHER + "; it is one more in the count and one more below the four (QST-62)", [26, 15, 1, "8"], [35, 3, 1, "4"])],
+  // The modal of a gate, over the main screen of 14:52:03 with G-01 selected
+  "08": gateFrame("08"),
+  "16a": gateFrame("16a"),
+  "16b": gateFrame("16b"),
+  "16c": gateFrame("16c"),
+  "17": gateFrame("17"),
+  // G-01 asked again, selected
+  "18b": [
+    ...behind(
+      "18b",
+      ...GATE_BOX,
+      ...skills(MOT, LDR, W1, W2, JDG),
+      ...panel(
+        "D2",
+        "spec Assumptions, `Conteúdo do modal de gate que o log não tem`: the body of the gate asked again is what the mother changed, the part of its modal; the prose of the prototype has no event, and the detail behind the modal takes more lines with it, so the thread and the loadout come down",
+        9,
+        "+ judge verificou o autoplay", "no iOS: só toca após gesto", "(critério 6)", "~ src/player/PlayerBar.tsx:", "142 → 151 linhas, guarda de", "autoplay", "+ resumo e diff stat", "atualizados; ação e efeito", "iguais",
+        "---", "thread da feature · 7 msgs", " 14:19 mot→ldr [answer]", " 14:45 ldr→mot [result]", " 14:51 mot→hum [gate]", " 14:53 hum→mot [gate_decision]", "▶14:55 mot→hum [gate]", "---", "loadout mother"
+      ),
+      ...loadout(27, 1)
+    ),
+    ...between("18b"),
+  ],
+  // G-02 selected, as in 19a
+  "19b": [...behind("19b", ...GATE_BOX, ...skills(MOT, LDR, W1, W2, JDG), ...loadout(21, 1)), ...between("19b")],
 };
+
+// The modal of a permission request, over the main screen of the frame with the same log and
+// the same selected line: 14, 22c and 29c
+const PERM_BOX: [number, number] = [18, 101];
+DEVIATIONS["22a"] = behind("22a", ...PERM_BOX, ...DEVIATIONS["14"]!);
+DEVIATIONS["22d"] = behind("22d", ...PERM_BOX, ...DEVIATIONS["22c"]!);
+DEVIATIONS["22e"] = behind("22e", ...PERM_BOX, ...DEVIATIONS["22c"]!);
+DEVIATIONS["22f"] = behind("22f", ...PERM_BOX, ...DEVIATIONS["22c"]!);
+DEVIATIONS["29d"] = behind("29d", ...PERM_BOX, ...DEVIATIONS["29c"]!);
+// P-01 answered in the terminal of worker-1, who acts again at 14:31:02: the log of 14 with no
+// line selected, since the line the prototype selects is the one of system the slice leaves out
+DEVIATIONS["22b"] = behind(
+  "22b",
+  ...PERM_BOX,
+  ...DEVIATIONS["14"]!.filter((dev) => dev.col < 86),
+  ...skills(W1),
+  ...d("D1", ".design/squad-mvp.md line 364: a ticket is `blocked` while the worker that owns it is; worker-1 acts again and the frame itself draws him `working`", [31, 7, 9, "[working]"]),
+  ...d("D3", SYSTEM_LINE + "; the prototype selects that line, so here no line of the feed is selected", [30, 29, 1, ""]),
+  ...panel("D3", SYSTEM_LINE + "; the prototype selects that line and shows its detail, so here no line is selected", 3, "nenhuma mensagem selecionada", "", "", "", "", "", "", ""),
+  ...footer("D3", SYSTEM_LINE + "; the right side of the footer is the one of no selected line, where the prototype has the rework of the ticket of that line", "rework —")
+);
 
 // The lines the screen has to draw for the frame, and the deviations that change nothing
 export function expected(id: string): { lines: string[]; dead: Deviation[] } {

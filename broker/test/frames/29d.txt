@@ -1,0 +1,40 @@
+ squad-tui  portal-89fm › ○ sem feature aberta                                       ? 0   broker ● conectado  14:57:40
+  1 principal   2 topologia   3 thread   4 perguntas   ? ajuda                                       ⚠ permissão w1 · x
+┌─ agentes · 6 ────────────┐┌─ feed · sem feature aberta ───────────────── ○ ocioso ─┐┌─ detalhe ──────────────────────┐
+│ ○ mother           [idle]││  hora     de    p/  kind            corpo              ││ msg #0487  [permission_request]│
+│   objetivo · sem feature ││  14:21:00 w3  → ldr [question]      Q-05 formato de da…││ de    w1  worker-1             │
+│   tlc-discover to-spec t…││  14:21:30 mot → hum [question]      ? Q-05 timeout 4min││ para  hum dev  pela TUI        │
+│                          ││  14:23:40 w2  → ldr [question]      Q-06 público ou au…││ hora  14:55:02                 │
+│ ○ leader           [idle]││  14:23:52 mot → hum [question]      ? Q-06 [BLOQUEANTE]││ ticket — sem feature aberta    │
+│   tech lead · sem tickets││  14:24:10 hum → w2  [answer]        Q-06: público, só …│├────────────────────────────────┤
+│   tlc-plan help-me       ││  14:25:30 ⟳ Q-05 timeout · default aplicado: HH:mm     ││ tool  Bash                     │
+│                                                                                                     xto do agente    │
+│ ⚠ worker-1    [b ┌─ ⚠ permissão P-01 · w1 · Bash ─────────────────────────────────────────────────┐ ch local da      │
+│   worker · sem f │  worker-1 parou o turno e pede permissão para usar uma tool · há 2m38s         │                  │
+│   x Bash · git b │                                                                                │                  │
+│                  │  agente    w1 worker-1  [blocked x]                                            │ feat/player-ao-v │
+│ ○ worker-2       │  ticket    — sem feature aberta                                                │                  │
+│   worker · sem t │  tool      Bash                                                                │ ─────────────────┤
+│   tlc-implement  │  descrição "Apagar a branch local da feature"  · texto do agente, não diz o q… │ ocked x]         │
+│                  ├────────────────────────────────────────────────────────────────────────────────┤ s                │
+│ ○ worker-3       │  vai executar  · a entrada exata e inteira                                     │ lquer tela       │
+│   worker · sem t │  ┌─ entrada · Bash ─────────────────────────────────────────────────────────┐  │ nega             │
+│   sem loadout    │  │  1 git branch -d feat/player-ao-vivo                                     │  │ ─────────────────┤
+│                  │  └──────────────────────────────────────────────────────────────────────────┘  │ ios              │
+│ ○ judge          ├────────────────────────────────────────────────────────────────────────────────┤ -09, fora daqui  │
+│   judge · sem re │  [a] permitir      [d] negar      esc fechar · o pedido continua pendente      │ ecla, aqui       │
+│   spec-driven-ev │  a: worker-1 roda o comando e segue o turno · d: recebe a recusa e escolhe     │ ─────────────────┤
+│                  │  outro caminho                                                                 │ -1               │
+│                  └────────────────────────────────────────────────────────────────────────────────┘ ·                │
+│                                                                                                     nes · ponytail · │
+├─ tickets ────────────────┤│  14:35:15 ⟳ Q-08 timeout · default aplicado: logo da 89││ react-best-practices           │
+│                          ││  14:39:52 w1  → jdg [result]        backoff + retomada…││                                │
+│ ○ sem feature aberta     ││  14:43:50 jdg → ldr [verdict]       approve 5/5        ││                                │
+│   os da última feature   ││  14:45:30 jdg → ldr [verdict]       approve 1/1        ││                                │
+│   ficam no resumo →      ││  14:45:41 ldr → mot [result]        3/3 tickets aprova…││                                │
+│                          ││  14:53:31 ✓ feature encerrada · entregue               ││                                │
+│                          ││─ squad sem feature desde 14:53:31 · 1 fora de [idle] ──││                                │
+│                          ││▶ 14:55:02 w1  → hum [permission_request] Bash · git br…││                                │
+└──────────────────────────┘└────────────────────────────────────────────────────────┘└────────────────────────────────┘
+ mot 70k  ldr 121k  w1 171k  w2 112k  w3 22k  jdg 193k  │ sessão ≈$10.35 est.     ⚠ w1 bloqueado · ○ ocioso desde 14:53
+ a permitir   d negar   esc fechar sem decidir

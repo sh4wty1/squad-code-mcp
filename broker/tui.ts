@@ -4,7 +4,8 @@
  *
  * Reads the log of the broker every second and draws the squad in the terminal: the feed,
  * the agents, the tickets, the topology, the thread of a ticket and the questions that wait
- * for the dev. It writes one thing: the answer of the dev to a question.
+ * for the dev. It writes three things, with the human credential: the answer of the dev to a
+ * question, the decision of a gate and the decision of a permission request.
  *
  *   bun tui.ts
  */
@@ -24,8 +25,10 @@ import { take, type Drawn, type Pointer } from "./tui/mouse.ts";
 import { createReader, type Fetch } from "./tui/reader.ts";
 import { answer } from "./tui/screens/answer.ts";
 import { down as frozen } from "./tui/screens/down.ts";
+import { gate } from "./tui/screens/gate.ts";
 import { help } from "./tui/screens/help.ts";
 import { main } from "./tui/screens/main.ts";
+import { permission } from "./tui/screens/permission.ts";
 import { questions } from "./tui/screens/questions.ts";
 import { small } from "./tui/screens/small.ts";
 import { thread } from "./tui/screens/thread.ts";
@@ -112,9 +115,12 @@ export function start(io: Io, settings: Settings) {
     return { squad: squad(log, io.now()), rows, ui, project: io.project, down, prices: settings.prices };
   }
 
-  // The screen of the state, under the modal of answer when one is open
+  // The screen of the state, under the modal of answer when one is open; the modals of gate
+  // and of permission are drawn over the main screen
   function screen(): Grid {
     const seen = view();
+    if (ui.gate) return gate(main(seen), { ...seen, rows: fresh });
+    if (ui.permission) return permission(main(seen), seen);
     return answer(SCREENS[ui.screen](seen), seen);
   }
 
@@ -154,14 +160,20 @@ export function start(io: Io, settings: Settings) {
     timer = setTimeout(() => tick().catch(fail), settings.intervalMs);
   }
 
-  // Sends the answer the keys left in `send`, with the credential as its file has it now:
-  // the broker may have written it after the TUI started. The token goes nowhere else.
+  // Sends what the keys left in `send`, to the route of its fields: an answer, the decision of
+  // a gate or that of a permission request. The credential is the one its file has now: the
+  // broker may have written it after the TUI started. The token goes nowhere else.
   function post() {
     const sent = ui.send!;
     const token = io.token();
     if (token === null) return void (ui = settle(ui, null, view()));
-    writer
-      .answer(token, sent.question_id, sent.answer)
+    const posted =
+      "question_id" in sent
+        ? writer.answer(token, sent.question_id, sent.answer)
+        : "gate_id" in sent
+          ? writer.gate(token, sent.gate_id, sent.request_seq, sent.decision, sent.text)
+          : writer.permission(token, sent.request_seq, sent.behavior);
+    posted
       .then((result) => {
         if (stopped) return;
         ui = settle(ui, result, view());
@@ -187,7 +199,7 @@ export function start(io: Io, settings: Settings) {
       // `m` turned the mouse off or on: the terminal is told
       if (next.pointer.on !== pointer.on) io.write(next.pointer.on ? MOUSE_ON : MOUSE_OFF);
       ({ ui, pointer } = next);
-      // One POST for each answer: the one on its way stays in `send` until it is settled
+      // One POST for each decision: the one on its way stays in `send` until it is settled
       if (ui.send && ui.send !== sending) post();
       draw();
     } catch (error) {

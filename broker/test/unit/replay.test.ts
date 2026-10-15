@@ -16,7 +16,7 @@ const mother = { ...MOTHER, cwd: "/work/wt", git_root: "/work/importer/.git" };
 
 test("FEAT-27: the features derived from the whole log are the rows of the table without project", () => {
   const b = setup();
-  const feature = createFeature(b.log);
+  const feature = createFeature(b.log, b.gate.approved);
   const table = () =>
     (b.db.query("SELECT * FROM features ORDER BY id").all() as Record<string, unknown>[]).map(({ project, ...row }) => row);
   const replayed = () => features(b.log.after(0)) as object[];

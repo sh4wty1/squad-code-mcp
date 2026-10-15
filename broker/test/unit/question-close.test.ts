@@ -29,6 +29,12 @@ function seven() {
 for (const outcome of ["delivered", "abandoned"]) {
   test(`QST-43: a feature closed as ${outcome} closes its open and merged questions by their default or discards them, with no answer`, () => {
     const b = seven();
+    // a delivered feature has its delivery approved first (GAT-26): two more events, 13 and 14
+    if (outcome === "delivered") {
+      const asked = b.gate.request(MOTHER, { scope: "delivery", summary: "deliver", action: "merge", effect: "main gets it", commit: "abc1234" }) as { seq: number };
+      b.gate.decide({ human_token: HUMAN_TOKEN, gate_id: 1, request_seq: asked.seq, decision: "approve" });
+    }
+    const seq = b.events().length + 1;
     const events = b.events();
     const deliveries = b.deliveries();
     const closed = [
@@ -54,7 +60,7 @@ for (const outcome of ["delivered", "abandoned"]) {
       closed[1]!,
     ]);
 
-    expect(b.feature.close(MOTHER, { outcome })).toEqual({ ok: true, seq: 13 });
+    expect(b.feature.close(MOTHER, { outcome })).toEqual({ ok: true, seq });
     expect(b.questionRows()).toEqual([
       questionRow(1, b.feature_id, { status: "discarded" }),
       questionRow(2, b.feature_id, { asked_by: "worker-2", blocking: 0, default_answer: "8080", status: "defaulted" }),
@@ -65,9 +71,9 @@ for (const outcome of ["delivered", "abandoned"]) {
       closed[1]!,
     ]);
     // the feature_closed and its deliveries, and nothing else
-    expect(b.events().slice(0, 12)).toEqual(events);
-    expect(b.events().slice(12).map((e) => [e.seq, e.kind, e.data])).toEqual([[13, "feature_closed", { outcome }]]);
-    expect(b.deliveries()).toEqual([...deliveries, ...toOthers(13)]);
+    expect(b.events().slice(0, seq - 1)).toEqual(events);
+    expect(b.events().slice(seq - 1).map((e) => [e.seq, e.kind, e.data])).toEqual([[seq, "feature_closed", { outcome }]]);
+    expect(b.deliveries()).toEqual([...deliveries, ...toOthers(seq)]);
   });
 }
 
@@ -156,7 +162,7 @@ test("QST-43: the feature_closed and its questions are one transaction: when a q
   const events = b.events();
   const deliveries = b.deliveries();
   b.db.run("CREATE TRIGGER broken BEFORE UPDATE ON questions BEGIN SELECT RAISE(ABORT, 'the disk is full'); END");
-  expect(() => b.feature.close(MOTHER, { outcome: "delivered" })).toThrow("the disk is full");
+  expect(() => b.feature.close(MOTHER, { outcome: "abandoned" })).toThrow("the disk is full");
   expect(b.events()).toEqual(events);
   expect(b.deliveries()).toEqual(deliveries);
   expect(b.questionRows()).toEqual([questionRow(1, id)]);

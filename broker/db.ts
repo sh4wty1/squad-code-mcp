@@ -92,6 +92,21 @@ export function openDatabase(path: string): Database {
     )
   `);
 
+  // The state of each gate, written by gate.ts and closed with its feature by log.ts.
+  // "commit" is a keyword of SQLite: quoted wherever it is named. No row is deleted.
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gates (
+      id INTEGER PRIMARY KEY,
+      feature_id INTEGER NOT NULL REFERENCES features(id),
+      requested_by TEXT NOT NULL,
+      scope TEXT NOT NULL,
+      "commit" TEXT,
+      status TEXT NOT NULL,
+      request_seq INTEGER NOT NULL REFERENCES events(seq),
+      decision_seq INTEGER REFERENCES events(seq)
+    )
+  `);
+
   db.run("CREATE INDEX IF NOT EXISTS events_feature_ticket ON events (feature_id, ticket_ref)");
   db.run("CREATE INDEX IF NOT EXISTS events_question ON events (question_id)");
   db.run("CREATE INDEX IF NOT EXISTS events_gate ON events (gate_id)");
@@ -128,6 +143,20 @@ export interface QuestionRow {
   status: "open" | "answered" | "defaulted" | "merged" | "discarded";
   merged_into: number | null;
   answer_seq: number | null;
+}
+
+// A row of `gates`, as stored
+export interface GateRow {
+  id: number;
+  feature_id: number;
+  requested_by: string;
+  scope: "delivery" | "action";
+  commit: string | null;
+  status: "pending" | "approved" | "rejected";
+  // the seq of the latest `gate` of it
+  request_seq: number;
+  // the seq of the `gate_decision` that decided it; null while pending and when its feature closed it
+  decision_seq: number | null;
 }
 
 export interface NewEvent {
