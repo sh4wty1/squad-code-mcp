@@ -108,10 +108,16 @@ T31 → T32 → T33 → T34 → T35 → T36
 T37 → T38
 ```
 
-### Phase 9: Fechamento depois da volta 2
+### Phase 9: Volta 3 do Verifier
 
 ```
-T38 → T30
+T39 → T40 → T41 → T42 → T43 → T44 → T45 → T46 → T47
+```
+
+### Phase 10: Fechamento depois da volta 3
+
+```
+T47 → T30
 ```
 
 ---
@@ -797,11 +803,174 @@ T38 → T30
 
 ---
 
+### T39: `]`/`[` do gate com um gate decidido
+
+**What**: com G-01 aprovado e G-02 e G-03 pendentes, `[` no modal de G-02 não faz nada e `]` vai a G-03: a fila de `]` e `[` é a dos pendentes (Fix 9 da volta 3, mutante V15).
+**Where**: `broker/test/unit/tui-gate-keys.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: o log do frame 19a, `third` e `decided`
+**Requirement**: GAT-50
+
+**Done when**:
+
+- [ ] G-01 aprovado, G-02 e G-03 pendentes, modal em G-02: `[` devolve o mesmo `Ui` e `]` dá o modal de G-03
+- [ ] Falha com `keys.ts:126` sem o `.filter((g) => g.pending)` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T40: `]`/`[` do pedido com um pedido fechado
+
+**What**: com 459 fechado no terminal (um evento posterior de worker-1) e 460 e 500 abertos, `[` no modal de 460 não faz nada e `]` vai a 500 (Fix 10, mutante V18).
+**Where**: `broker/test/unit/tui-permission-keys.test.ts`
+**Depends on**: T39
+**Reuses**: o log do frame 22c, `third` e `later`
+**Requirement**: GAT-65
+
+**Done when**:
+
+- [ ] 459 fechado por um `turn_started` de worker-1, 460 e 500 abertos, modal em 460: `[` devolve o mesmo `Ui` e `]` dá o modal de 500
+- [ ] Falha com `keys.ts:200` trocado por `view.squad.requests.map((r) => r.request)` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T41: Pedido fechado pelo peer com a decisão de outro no meio
+
+**What**: a `permission_decision` de outro pedido não fecha um pedido: P-01 de worker-1 fecha pelo evento seguinte de worker-1, como `peer`, mesmo com a decisão de P-02 antes dele (Fix 11, mutante V10).
+**Where**: `broker/test/unit/derive-gate.test.ts`, `broker/test/unit/tui-permission-keys.test.ts`
+**Depends on**: T40
+**Reuses**: `ask`, `allow` e `of` de `derive-gate.test.ts`; o log do frame 22c e `later`
+**Requirement**: GAT-70, GAT-71
+
+**Done when**:
+
+- [ ] `requests()` com 3 (worker-1) e 4 (worker-2) abertos, a decisão de 4 e depois um evento de worker-1: 3 fechado por `peer` no `ts` do evento de worker-1, 4 por `decision` no `ts` da decisão
+- [ ] `sync` com o modal de 459 aberto, a decisão de 460 e depois um evento de worker-1 deixa o `Ui` igual, sem aviso
+- [ ] Falha com `derive.ts:252` sem `&& e.request_seq === request.seq` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T42: Etiqueta ` pedido n de N ` com um pedido fechado
+
+**What**: com 459 fechado no terminal e 460 e 500 abertos, o modal de 460 tem a etiqueta ` pedido 1 de 2 ` e a fila só com os abertos (Fix 12, mutante V23).
+**Where**: `broker/test/unit/tui-permission.test.ts`
+**Depends on**: T41
+**Reuses**: o log do teste de T31, que passa a ser `answeredFirst`
+**Requirement**: GAT-61, GAT-62
+
+**Done when**:
+
+- [ ] Modal de 460: a borda de cima com ` pedido 1 de 2 ` e a linha `fila` com P-02 e P-03, sem P-01
+- [ ] Falha com `permission.ts:112` `queue.length` trocado por `squad.requests.length` numa cópia, e com `permission.ts:47` trocado por `squad.requests.map((r) => r.request)`; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T43: `judge` e `feature` com ticket descartado depois do `verdict`
+
+**What**: um `plan` posterior que descarta TKT-12, o ticket do rework do 19a, tira-o da linha `judge` e da contagem de tickets, e o rework dele continua contado (Fix 13, mutantes V28 e V27).
+**Where**: `broker/test/unit/tui-gate.test.ts`
+**Depends on**: T42
+**Reuses**: o log do frame 19a e `only`
+**Requirement**: GAT-43, GAT-47
+
+**Done when**:
+
+- [ ] A linha `feature` é `feature   2 tickets · 1 rework · 34 min · ≈$10.17 (custo est.)` e a `judge` é `judge     ✓ TKT-13 1/1  ✓ TKT-14 1/1`
+- [ ] Falha com `gate.ts:80` sem `&& !t.dropped` e com `gate.ts:28` `squad.tickets.reduce` trocado por `live.reduce`, cada um numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T44: `a` confirma a versão do gate do modal
+
+**What**: com G-01 reemitido na versão 2 e o modal em G-02, na versão 1, `a` passa à confirmação da versão 1. Da varredura dos `filter`/`find` que o Verifier recomendou (mutante K134).
+**Where**: `broker/test/unit/tui-gate-keys.test.ts`
+**Depends on**: T43
+**Reuses**: o log do frame 19a e `G02`
+**Requirement**: GAT-50
+
+**Done when**:
+
+- [ ] Modal de G-02 com G-01 na versão 2: `a` dá o modo de confirmação com `version` 1
+- [ ] Falha com `keys.ts:134` com o `find` trocado por `() => true` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T45: A leitura com outro gate decidido
+
+**What**: uma leitura que mostra G-01 aprovado deixa aberto, como estava, o modal de G-02, ainda pendente (varredura, mutante K398).
+**Where**: `broker/test/unit/tui-gate-keys.test.ts`
+**Depends on**: T44
+**Reuses**: o log do frame 19a e `decided`
+**Requirement**: GAT-59
+
+**Done when**:
+
+- [ ] Modal de G-02 no modo de comentário com texto, G-01 aprovado: `sync` devolve o mesmo `Ui`
+- [ ] Falha com `keys.ts:398` com o `find` trocado por `() => true` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T46: A leitura com outro pedido decidido
+
+**What**: uma leitura que mostra 459 decidido por outra TUI deixa como estava o modal de 460, ainda aberto (varredura, mutante K408).
+**Where**: `broker/test/unit/tui-permission-keys.test.ts`
+**Depends on**: T45
+**Reuses**: o log do frame 22c e `DECIDED`
+**Requirement**: GAT-70
+
+**Done when**:
+
+- [ ] Modal de 460 no `offset` 3, 459 decidido: `sync` devolve o mesmo `Ui`
+- [ ] Falha com `keys.ts:408` com o `find` trocado por `() => true` numa cópia; gate quick passa
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T47: `judge` com outro evento do ticket depois do `verdict`
+
+**What**: uma pergunta com o `ticket_ref` de TKT-13 depois do `verdict` dele não tira TKT-13 da linha `judge`: o `judge` é o `verdict` mais recente, não o evento mais recente do ticket (varredura, mutante G82a).
+**Where**: `broker/test/unit/tui-gate.test.ts`
+**Depends on**: T46
+**Reuses**: o log do frame 19a e `only`
+**Requirement**: GAT-47
+
+**Done when**:
+
+- [ ] Uma `question` de `ticket_ref` TKT-13 depois do `verdict` dele: a linha `judge` é `judge     ✓ TKT-12 5/5  ✓ TKT-13 1/1  ✓ TKT-14 1/1`
+- [ ] Falha com `gate.ts:82` sem `row.event.kind === "verdict" && ` numa cópia; gate quick passa e, por ser a última da fase, o full também
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ### T30: Fechamento
 
 **What**: roadmap, Handoff e traceability.
 **Where**: `ROADMAP.md`
-**Depends on**: T38
+**Depends on**: T47
 **Reuses**: -
 **Requirement**: GAT-89
 
@@ -834,7 +1003,9 @@ T38 → T30
 | T32 a T36 | a anterior | a seta da anterior | ✅ |
 | T37 | a fase anterior | início da fase 8 | ✅ |
 | T38 | a anterior | a seta da anterior | ✅ |
-| T30 | T38 | única da fase 9 | ✅ |
+| T39 | a fase anterior | início da fase 9 | ✅ |
+| T40 a T47 | a anterior | a seta da anterior | ✅ |
+| T30 | T47 | única da fase 10 | ✅ |
 
 ## Test Co-location Validation
 
@@ -855,3 +1026,4 @@ T38 → T30
 | T27 a T30 | Documentação e `.specs/` | none | none | ✅ |
 | T31 a T36 | Telas, mouse e regras do broker (só testes) | unit | unit | ✅ |
 | T37, T38 | Telas (só testes) | unit | unit | ✅ |
+| T39 a T47 | Redutor de teclas, derivação e telas (só testes) | unit | unit | ✅ |
