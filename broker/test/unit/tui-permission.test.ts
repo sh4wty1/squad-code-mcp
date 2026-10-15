@@ -85,14 +85,16 @@ test("GAT-71: a request answered in the terminal says when the TUI learned it, w
   expect(draw("14", modal(459)).g.rows[y + 10]![27]!.fg).toBe("bwhite");
 });
 
+// Frame 22c with a third request, of worker-3, and worker-1 acting again at 14:31:02: 459 closed, 460 and 500 open
+const REQUEST = LOGS["22c"]!.events.find((e) => e.seq === 459)!;
+const answeredFirst: Change = (events) => [
+  ...events,
+  { ...REQUEST, seq: 500, from: "worker-3", request_id: "r500" } as SquadEvent,
+  { ...REQUEST, seq: 600, ts: REQUEST.ts + 52_000, kind: "turn_started", summary: "", body: "", to: null } as SquadEvent,
+];
+
 test("GAT-71, GAT-61: a request answered in the terminal while two others are open has no queue, the tag of the state and only esc", () => {
-  // Frame 22c with a third request, of worker-3, and worker-1 acting again at 14:31:02
-  const request = LOGS["22c"]!.events.find((e) => e.seq === 459)!;
-  const { box, lines } = draw("22c", modal(459), (events) => [
-    ...events,
-    { ...request, seq: 500, from: "worker-3", request_id: "r500" } as SquadEvent,
-    { ...request, seq: 600, ts: request.ts + 52_000, kind: "turn_started", summary: "", body: "", to: null } as SquadEvent,
-  ]);
+  const { box, lines } = draw("22c", modal(459), answeredFirst);
   expect(box[0]).toBe(top("⚠ permissão P-01 · w1 · Bash", " resolvido no terminal "));
   expect(box[1]).toBe(row("worker-1 pediu permissão às 14:30:10 · o pedido já foi respondido"));
   expect(box.filter((line) => line.slice(3).startsWith("fila"))).toEqual([]);
@@ -119,6 +121,12 @@ test("GAT-61, GAT-62, GAT-64: with two open requests the tag says which, the que
   expect(second.box[0]).toBe(top("⚠ permissão P-02 · w2 · Bash", " pedido 2 de 2 "));
   expect(second.box[2]).toBe(row("fila        P-01 w1 Bash   ▶ P-02 w2 Bash   antigo antes"));
   expect(second.box[7]).toBe(row("descrição \"Atualizar a fixture da setlist\"  · texto do agente, não diz o que…"));
+});
+
+test("GAT-61, GAT-62: with a request closed in the terminal the tag and the queue count only the open ones", () => {
+  const { box } = draw("22c", modal(460), answeredFirst);
+  expect(box[0]).toBe(top("⚠ permissão P-02 · w2 · Bash", " pedido 1 de 2 "));
+  expect(box[2]).toBe(row("fila      ▶ P-02 w2 Bash     P-03 w3 Bash   antigo antes"));
 });
 
 test("GAT-63, GAT-64: a preview of 13 lines shows 8 from the offset, says which on its border, and a waits for the end in view", () => {

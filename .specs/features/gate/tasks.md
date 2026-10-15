@@ -868,8 +868,8 @@ T47 → T30
 
 **Done when**:
 
-- [ ] Modal de 460: a borda de cima com ` pedido 1 de 2 ` e a linha `fila` com P-02 e P-03, sem P-01
-- [ ] Falha com `permission.ts:112` `queue.length` trocado por `squad.requests.length` numa cópia, e com `permission.ts:47` trocado por `squad.requests.map((r) => r.request)`; gate quick passa
+- [x] Modal de 460: a borda de cima com ` pedido 1 de 2 ` e a linha `fila` com P-02 e P-03, sem P-01
+- [x] Falha com `permission.ts:112` `queue.length` trocado por `squad.requests.length` numa cópia, e com `permission.ts:47` trocado por `squad.requests.map((r) => r.request)`; gate quick passa
 
 **Tests**: unit
 **Gate**: quick
