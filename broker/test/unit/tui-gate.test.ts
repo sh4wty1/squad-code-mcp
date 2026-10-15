@@ -223,6 +223,14 @@ test("GAT-47: a ticket of the latest plan with no verdict in this feature has no
   expect(draw(modal(1), change).box.filter((line) => line.startsWith("│  judge"))).toEqual([row("judge     ✓ TKT-12 5/5  ✓ TKT-13 1/1  ✓ TKT-14 1/1")]);
 });
 
+test("GAT-47: another event of a ticket after its verdict, a question about it, leaves its judge as the verdict says", () => {
+  const events = LOGS["19a"]!.events;
+  const verdict = events.find((e) => e.kind === "verdict" && e.ticket_ref === "TKT-13")!;
+  const question = events.find((e) => e.kind === "question")!;
+  const about = { ...question, seq: verdict.seq + 0.5, ts: verdict.ts + 1000, question_id: 99, ticket_ref: "TKT-13" } as SquadEvent;
+  expect(draw(modal(1), only({}, [about])).box.filter((line) => line.startsWith("│  judge"))).toEqual([row("judge     ✓ TKT-12 5/5  ✓ TKT-13 1/1  ✓ TKT-14 1/1")]);
+});
+
 test("GAT-43: ticket and rework take the plural with a number other than 1", () => {
   const plan = LOGS["19a"]!.events.find((e) => e.kind === "plan")!;
   const one = { ...plan, tickets: [{ ticket_ref: "TKT-12", title: "player de áudio" }] } as SquadEvent;

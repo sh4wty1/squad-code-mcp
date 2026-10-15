@@ -958,8 +958,8 @@ T47 → T30
 
 **Done when**:
 
-- [ ] Uma `question` de `ticket_ref` TKT-13 depois do `verdict` dele: a linha `judge` é `judge     ✓ TKT-12 5/5  ✓ TKT-13 1/1  ✓ TKT-14 1/1`
-- [ ] Falha com `gate.ts:82` sem `row.event.kind === "verdict" && ` numa cópia; gate quick passa e, por ser a última da fase, o full também
+- [x] Uma `question` de `ticket_ref` TKT-13 depois do `verdict` dele: a linha `judge` é `judge     ✓ TKT-12 5/5  ✓ TKT-13 1/1  ✓ TKT-14 1/1`
+- [x] Falha com `gate.ts:82` sem `row.event.kind === "verdict" && ` numa cópia; gate quick passa e, por ser a última da fase, o full também
 
 **Tests**: unit
 **Gate**: quick
