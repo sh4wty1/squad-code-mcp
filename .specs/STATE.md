@@ -181,6 +181,7 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 - **Status**: active
 
 ## Handoff
+
 Atualizado em 2026-10-15, com a fatia Gate implementada e a terceira volta do Verifier em FAIL, à espera de outra sessão que aplique as correções e feche. As seções abaixo desta, da TUI clicável e da Papéis, continuam valendo.
 
 - **Feature**: a Gate, `.specs/features/gate/`, no branch `feat/gate`, saído da `main` em `3922651`, só local: nada foi enviado. É a última fatia do MVP.
