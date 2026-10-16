@@ -182,6 +182,8 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
+**2026-10-16, o resíduo da Papéis.** Os PRs 14 e 15 estão mergeados na `main` (`055d629`) e o MVP está fechado. No branch `test/papeis-gaps`, T32 a T39 de `.specs/features/papeis/tasks.md` aplicaram os Fix 1 a Fix 9 de `validation.md`, só testes e texto da spec; nenhum código de produção mudou. Cada teste novo falha com o seu mutante e passa sem ele. A reverificação independente (`validation.md`, "Reverificação do resíduo") deu FAIL: os oito mutantes do resíduo morrem, PAP-21, PAP-31 e PAP-53 ficam `Verified`, e cinco mutações novas sobrevivem (Fix 10 a Fix 14, só de teste; o Fix 12 pede ao dev decidir se a caixa conta em PAP-39). Suíte em `959bcb6`: Windows, Bun 1.3.14, `tsc` 0 e 2466 pass, 5 skip, 0 fail, 96 arquivos, 196 s; Linux, contêiner `oven/bun:1.4.2` com `git`, `lsof` e `procps` sobre clone com `core.autocrlf=false`, `tsc` 0 e 3 de 3 com 2470 pass, 1 skip, 0 fail, entre 110 e 120 s. `validate_state.py papeis` sai com 1. A seção abaixo, da Gate, é de 2026-10-15.
+
 Atualizado em 2026-10-15, com a fatia Gate fechada e o PR aberto contra a `main`, à espera da revisão do dev. As seções abaixo desta, da TUI clicável e da Papéis, continuam valendo.
 
 - **Feature**: a Gate, `.specs/features/gate/`, no branch `feat/gate`, saído da `main` em `3922651` e enviado ao `origin`. É a última fatia do MVP: com ela as oito estão prontas.

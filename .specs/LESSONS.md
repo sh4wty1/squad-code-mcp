@@ -600,6 +600,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: V27 broker/tui/screens/gate.ts:28 (GAT-43) (tui)
 - last seen: 2026-10-14T23:08:57Z
 
+### L-099 - Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+2 more)
+- last seen: 2026-10-16T15:08:17Z
+
+### L-100 - Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: W17 broker/launch.ts:184 (PAP-37) (launcher)
+- last seen: 2026-10-16T15:08:17Z
+
+### L-101 - Test every way a process can end that must still clean up, signals included, on the platform where that way runs
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `server` · harmful: 0
+- features: papeis
+- evidence: W2 broker/server.ts:400 (PAP-07) (server)
+- last seen: 2026-10-16T15:08:17Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
