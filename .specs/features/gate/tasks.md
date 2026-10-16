@@ -123,7 +123,7 @@ T47 → T30
 ### Phase 11: Revisão do PR
 
 ```
-T30 → T48 → T49 → T50
+T30 → T48 → T49 → T50 → T51
 ```
 
 ---
@@ -1044,6 +1044,24 @@ T30 → T48 → T49 → T50
 
 ---
 
+### T51: `gate_reissued` volta a confirmação ao modo de leitura
+
+**What**: nota da segunda revisão do PR: a recusa `gate_reissued` de um `approve` leva o modal ao modo de leitura, não ao de confirmação, para um segundo `y` não aprovar a versão pedida de novo sem o dev a ler; um modo de texto volta como estava.
+**Where**: `broker/tui/keys.ts`
+**Depends on**: T50
+**Reuses**: `back` de `settle`
+**Requirement**: GAT-58
+
+**Done when**:
+
+- [x] 18a e depois 18b: `y`, a leitura com o envio em curso e `gate_reissued` deixam o modal no modo de leitura, e um segundo `y` não muda nada
+- [x] Falha com `settle` voltando ao modo de onde enviou
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ## Diagram-Definition Cross-Check
 
 | Task | Depends On (task body) | Diagram Shows | Status |
@@ -1068,7 +1086,7 @@ T30 → T48 → T49 → T50
 | T40 a T47 | a anterior | a seta da anterior | ✅ |
 | T30 | T47 | única da fase 10 | ✅ |
 | T48 | T30 | início da fase 11 | ✅ |
-| T49, T50 | a anterior | a seta da anterior | ✅ |
+| T49 a T51 | a anterior | a seta da anterior | ✅ |
 
 ## Test Co-location Validation
 
@@ -1092,3 +1110,4 @@ T30 → T48 → T49 → T50
 | T39 a T47 | Redutor de teclas, derivação e telas (só testes) | unit | unit | ✅ |
 | T48 | Regras do broker, rotas HTTP, redutor de teclas e escritor | unit, integration | unit, integration | ✅ |
 | T49, T50 | Laço e estado da TUI | unit | unit | ✅ |
+| T51 | Redutor de teclas | unit | unit | ✅ |

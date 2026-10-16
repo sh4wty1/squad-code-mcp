@@ -560,6 +560,7 @@ Alternatives considered: o agente reportar o próprio uso - não ganha em nenhum
 | Dev comenta | Texto obrigatório. Gate continua `pending`; a mother responde reemitindo o gate com o mesmo id | `{ ok, seq }` |
 | Rejeitar ou comentar sem texto | Recusa | `missing_field` |
 | Decisão para gate já decidido | Recusa | `gate_closed` |
+| Decisão para uma versão do gate que a mother já pediu de novo | Recusa | `gate_reissued` |
 | Mother reemite gate já decidido | Recusa | `gate_closed` |
 | Dois gates pendentes | O contrato admite; a TUI mostra um por vez, o mais antigo primeiro | - |
 | Gate pendente não entra na contagem de perguntas | O contador `? N` não o inclui, como no design | - |

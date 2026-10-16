@@ -361,10 +361,12 @@ export function settle(ui: Ui, result: Sent | null, view: View): Ui {
     const g = ui.gate;
     if (!g) return idle;
     // The modal in the mode it sent from, with its text, to send again
-    const back = (text: string): Ui => ({ ...idle, gate: { ...g, sending: false }, toast: failed(text) });
+    const back = (text: string, mode = g.mode): Ui => ({ ...idle, gate: { ...g, mode, sending: false }, toast: failed(text) });
     if (!result) return back("✗ credencial humana não encontrada");
     if (result.ok) return { ...idle, gate: null, toast: notice(view, `✓ ${gid(send.gate_id)} ${DECIDED[send.decision]}`, "bgreen") };
     if (result.error === "gate_closed") return { ...idle, gate: null, toast: failed(`✗ ${gid(send.gate_id)} já decidido`) };
+    // Asked again while the approve was on its way: back to the view mode, as a read takes it there
+    if (result.error === "gate_reissued" && g.mode === "confirm") return back(`✗ decisão não enviada · ${result.error}`, "view");
     return back(`✗ decisão não enviada · ${result.error}`);
   }
   if (send && "behavior" in send) {

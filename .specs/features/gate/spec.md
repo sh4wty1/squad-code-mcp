@@ -248,7 +248,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 16. **GAT-55** WHEN `enter` é pressionada num modo de texto com ao menos um caractere que não seja espaço THEN a TUI SHALL enviar `POST /gate-decision` com `{ human_token, gate_id, request_seq, decision, text }`, `request_seq` o da versão na tela, `decision` `reject` ou `comment` pelo modo e `text` sem os espaços das pontas.
 17. **GAT-56** IF `enter` é pressionada num modo de texto com o campo vazio ou só com espaços THEN a TUI SHALL não enviar, pintar a borda do campo de vermelho e mostrar abaixo do aviso fixo `✗ motivo obrigatório · nada foi enviado` ou `✗ comentário obrigatório · nada foi enviado`, até a próxima tecla que mude o texto.
 18. **GAT-57** WHEN o broker responde `{ ok: true }` a uma decisão THEN a TUI SHALL fechar o modal e avisar em verde por 4 s `✓ G-NN aprovado`, `✓ G-NN rejeitado` ou `✓ G-NN comentado · continua pendente`.
-19. **GAT-58** WHEN o broker responde `gate_closed` THEN a TUI SHALL fechar o modal e avisar em vermelho por 4 s `✗ G-NN já decidido`; IF responde outra recusa, um status que não é 200, um corpo que não é `{ ok }`, ou não responde em 2000 ms THEN SHALL voltar ao modo de onde enviou, com o texto, e avisar em vermelho por 4 s `✗ decisão não enviada · <erro>`, com o `error` da recusa ou `broker não respondeu`.
+19. **GAT-58** WHEN o broker responde `gate_closed` THEN a TUI SHALL fechar o modal e avisar em vermelho por 4 s `✗ G-NN já decidido`; IF responde outra recusa, um status que não é 200, um corpo que não é `{ ok }`, ou não responde em 2000 ms THEN SHALL voltar ao modo de onde enviou, com o texto, e avisar em vermelho por 4 s `✗ decisão não enviada · <erro>`, com o `error` da recusa ou `broker não respondeu`; a recusa `gate_reissued` de um envio do modo de confirmação SHALL voltar ao modo de leitura, como em GAT-59.
 20. **GAT-59** WHEN uma leitura mostra que o gate do modal não está mais pendente, sem envio dele em curso THEN a TUI SHALL fechar o modal, descartar o texto e avisar `G-NN fechado` por 4 s; WHEN mostra uma versão nova do gate com o modal no modo de confirmação THEN SHALL voltar ao modo de leitura.
 
 **Independent Test**: com um broker de teste e um gate pendente, `g`, `a`, `y`: o log ganha `hum → mot [gate_decision]` com `approve`, e o selo some.
@@ -411,7 +411,7 @@ Valem as das specs da Event, da Feature, da TUI leitura, da Question e da TUI cl
 | GAT-55 | P1: Modal de gate | T13 | Verified |
 | GAT-56 | P1: Modal de gate | T13, T18 | Verified |
 | GAT-57 | P1: Modal de gate | T15 | Verified |
-| GAT-58 | P1: Modal de gate | T11, T15 | Verified |
+| GAT-58 | P1: Modal de gate | T11, T15, T51 | Implemented |
 | GAT-59 | P1: Modal de gate | T15, T45 | Verified |
 | GAT-60 | P1: Modal de permissão | T14, T20, T26 | Verified |
 | GAT-61 | P1: Modal de permissão | T12, T17, T19, T31, T42 | Verified |
