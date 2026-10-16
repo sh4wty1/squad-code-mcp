@@ -600,6 +600,42 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: V27 broker/tui/screens/gate.ts:28 (GAT-43) (tui)
 - last seen: 2026-10-14T23:08:57Z
 
+### L-099 - Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+9 more)
+- last seen: 2026-10-16T18:05:43Z
+
+### L-100 - Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: W17 broker/launch.ts:184 (PAP-37) (launcher)
+- last seen: 2026-10-16T15:08:17Z
+
+### L-101 - Test every way a process can end that must still clean up, signals included, on the platform where that way runs
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `server` · harmful: 0
+- features: papeis
+- evidence: W2 broker/server.ts:400 (PAP-07) (server) (+1 more)
+- last seen: 2026-10-16T15:49:01Z
+
+### L-102 - Test a deadline with an answer that arrives after it, not only with one that never arrives: a bound on the exit time lets a longer deadline pass
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: Y9 broker/launch.ts:186 (PAP-37) (launcher)
+- last seen: 2026-10-16T15:49:02Z
+
+### L-103 - Fence a suffix rule on a name in one go on its four sides, the dot, the anchor at the end, the case and the place in the path, instead of one side per round
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)
+- last seen: 2026-10-16T18:05:43Z
+
+### L-104 - Run the tests of a file-system layer on Linux too: a mutant on the case of a directory name lives on the case-insensitive file system of Windows
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: Q7 plugin/hooks/usage.ts:82 (PAP-18) (hooks)
+- last seen: 2026-10-16T18:05:43Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

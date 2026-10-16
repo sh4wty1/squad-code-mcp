@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 99,
+  "next_id": 105,
   "lessons": [
     {
       "id": "L-001",
@@ -1843,6 +1843,124 @@
       ],
       "created": "2026-10-14T23:08:57Z",
       "last_seen": "2026-10-14T23:08:57Z"
+    },
+    {
+      "id": "L-099",
+      "key": "surviving_mutant::test each word of a rule that narrows its input regular file the case of a prefix the extension a path loses with an input only that word leaves out",
+      "text": "Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "W12 broker/launch.ts:97 (PAP-39) (launcher)",
+        "W15 broker/launch.ts:157 (PAP-56) (launcher)",
+        "W5 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "Y5 plugin/hooks/usage.ts:82 (PAP-18) (launcher)",
+        "Y6 plugin/hooks/usage.ts:85 (PAP-18) (launcher)",
+        "Y7 broker/launch.ts:97 (PAP-39) (launcher)",
+        "Z4 plugin/hooks/usage.ts:85 (PAP-18) (hooks)",
+        "Z11 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "Q2 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "Q5 plugin/hooks/usage.ts:85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-16T15:08:16Z",
+      "last_seen": "2026-10-16T18:05:43Z"
+    },
+    {
+      "id": "L-100",
+      "key": "surviving_mutant::bound a test of a deadline by the deadline plus a margin not by several times the time measured a wide bound lets a late abort pass",
+      "text": "Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "W17 broker/launch.ts:184 (PAP-37) (launcher)"
+      ],
+      "created": "2026-10-16T15:08:17Z",
+      "last_seen": "2026-10-16T15:08:17Z"
+    },
+    {
+      "id": "L-101",
+      "key": "surviving_mutant::test every way a process can end that must still clean up signals included on the platform where that way runs",
+      "text": "Test every way a process can end that must still clean up, signals included, on the platform where that way runs",
+      "signal": "surviving_mutant",
+      "scope": "server",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "W2 broker/server.ts:400 (PAP-07) (server)",
+        "Y1 broker/server.ts:399 (PAP-07) (server)"
+      ],
+      "created": "2026-10-16T15:08:17Z",
+      "last_seen": "2026-10-16T15:49:01Z"
+    },
+    {
+      "id": "L-102",
+      "key": "surviving_mutant::test a deadline with an answer that arrives after it not only with one that never arrives a bound on the exit time lets a longer deadline pass",
+      "text": "Test a deadline with an answer that arrives after it, not only with one that never arrives: a bound on the exit time lets a longer deadline pass",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Y9 broker/launch.ts:186 (PAP-37) (launcher)"
+      ],
+      "created": "2026-10-16T15:49:02Z",
+      "last_seen": "2026-10-16T15:49:02Z"
+    },
+    {
+      "id": "L-103",
+      "key": "surviving_mutant::fence a suffix rule on a name in one go on its four sides the dot the anchor at the end the case and the place in the path instead of one side per round",
+      "text": "Fence a suffix rule on a name in one go on its four sides, the dot, the anchor at the end, the case and the place in the path, instead of one side per round",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-16T18:05:43Z",
+      "last_seen": "2026-10-16T18:05:43Z"
+    },
+    {
+      "id": "L-104",
+      "key": "surviving_mutant::run the tests of a file system layer on linux too a mutant on the case of a directory name lives on the case insensitive file system of windows",
+      "text": "Run the tests of a file-system layer on Linux too: a mutant on the case of a directory name lives on the case-insensitive file system of Windows",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Q7 plugin/hooks/usage.ts:82 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-16T18:05:43Z",
+      "last_seen": "2026-10-16T18:05:43Z"
     }
   ]
 }
