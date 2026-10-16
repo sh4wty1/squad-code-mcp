@@ -887,10 +887,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] Registrada a sessão e encerrado o broker, ao fechar a sessão o arquivo de credencial some e o processo sai com 0 sozinho
-- [ ] Morre, conferido e desfeito, o K13 (o `rmSync` dentro do `try` do `unregister` em `broker/server.ts`); o V6 continua morto
-- [ ] Nenhum código de produção muda
-- [ ] Gate full passa
+- [x] Registrada a sessão e encerrado o broker, ao fechar a sessão o arquivo de credencial some e o processo sai com 0 sozinho
+- [x] Morre, conferido e desfeito, o K13 (o `rmSync` dentro do `try` do `unregister` em `broker/server.ts`); o V6 continua morto
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

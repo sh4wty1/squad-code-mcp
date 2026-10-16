@@ -373,7 +373,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-04 | P1: Plugin em diretório próprio | T19 | Verified |
 | PAP-05 | P1: Plugin em diretório próprio | T3 | Verified |
 | PAP-06 | P1: Credencial da sessão para os hooks | T2 | Verified |
-| PAP-07 | P1: Credencial da sessão para os hooks | T2 | Needs Fix (Fix 2 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-07 | P1: Credencial da sessão para os hooks | T2, T33 | Implementing: Fix 2 de `validation.md` aplicado na T33, à espera da reverificação |
 | PAP-08 | P1: Credencial da sessão para os hooks | T2 | Verified |
 | PAP-09 | P1: Credencial da sessão para os hooks | T2 | Verified |
 | PAP-10 | P1: Início de turno | T7, T22 | Verified |
