@@ -403,7 +403,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-34 | P1: `roles.json` | T11 | Verified |
 | PAP-35 | P1: `roles.json` | T1, T14 | Verified |
 | PAP-36 | P1: `roles.json` | T14 | Verified |
-| PAP-37 | P1: Lançar uma sessão | T1, T14, T22, T38 | Needs Fix (Fix 14 de `validation.md`), com ressalva: o texto fechou na T38 e A10 morre; W17, a leitura abandonada 4 s depois do prazo, passa no limite de 10 s do teste |
+| PAP-37 | P1: Lançar uma sessão | T1, T14, T22, T38, T44 | Implementing: Fix 14 de `validation.md` aplicado na T44, à espera da reverificação |
 | PAP-38 | P1: Lançar uma sessão | T14 | Verified |
 | PAP-39 | P1: Lançar uma sessão | T12, T42 | Implementing: Fix 12 de `validation.md` aplicado na T42, à espera da reverificação |
 | PAP-40 | P1: Lançar uma sessão | T12, T22 | Verified |

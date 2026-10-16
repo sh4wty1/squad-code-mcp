@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/papeis/design.md`
-**Status**: Done. T1 a T39 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`
+**Status**: Done. T1 a T44 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`; e o que a reverificação achou, a fase 10, T40 a T44
 
 Regras do repositório que valem para toda tarefa:
 
@@ -1120,10 +1120,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] Com um broker que aceita a conexão e nunca responde, `start mother` sai com 129 em menos de 5000 ms, contados do início ao fim do processo do CLI
-- [ ] Morre, conferido e desfeito, o W17 (a leitura abortada 4000 ms depois do prazo em `broker/launch.ts`): o CLI sai aos 6,2 s; o A10 segue morto
-- [ ] Nenhum código de produção muda
-- [ ] Gate full passa
+- [x] Com um broker que aceita a conexão e nunca responde, `start mother` sai com 129 em menos de 5000 ms, contados do início ao fim do processo do CLI
+- [x] Morre, conferido e desfeito, o W17 (a leitura abortada 4000 ms depois do prazo em `broker/launch.ts`): o CLI sai aos 6,2 s; o A10 segue morto
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

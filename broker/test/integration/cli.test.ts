@@ -34,6 +34,7 @@ async function cli(b: Broker, command: string, extraEnv: Record<string, string> 
 // `bun cli.ts` with these arguments, outside a terminal, with the settings given. With an
 // `input`, its standard input is a pipe that gets the text and is closed.
 async function runCli(args: string[], env: Record<string, string> = {}, cwd = BROKER_DIR, input?: string) {
+  const started = Date.now();
   const proc = Bun.spawn([process.execPath, join(BROKER_DIR, "cli.ts"), ...args], {
     env: cleanEnv(env),
     cwd,
@@ -46,7 +47,9 @@ async function runCli(args: string[], env: Record<string, string> = {}, cwd = BR
     await proc.stdin!.end();
   }
   const [out, err] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text()]);
-  return { out, err, code: await proc.exited };
+  const code = await proc.exited;
+  // how long the CLI took, from its start to its exit
+  return { out, err, code, ms: Date.now() - started };
 }
 
 // The command each line of the usage is about, in the order they are written
@@ -229,15 +232,14 @@ test("PAP-37: with a broker that takes the connection and never answers, start e
   await new Promise<void>((done) => silent.listen(0, "127.0.0.1", done));
   try {
     const port = String((silent.address() as { port: number }).port);
-    const started = Date.now();
     await startWith(
       "git",
       "mother",
       ({ res }) => {
         expect(res.code).toBe(129);
-        // 2000 ms of the read and the session, which exits at once; a read left waiting holds
-        // the launcher for minutes
-        expect(Date.now() - started).toBeLessThan(10_000);
+        // 2000 ms of the read, the session, which exits at once, and the start of bun: a read
+        // abandoned after its deadline holds the launcher past that
+        expect(res.ms).toBeLessThan(5000);
       },
       undefined,
       { SQUAD_PORT: port }
