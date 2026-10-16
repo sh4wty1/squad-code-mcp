@@ -603,8 +603,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-099 - Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
 - features: papeis
-- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+9 more)
-- last seen: 2026-10-16T18:05:43Z
+- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+10 more)
+- last seen: 2026-10-16T23:13:15Z
 
 ### L-100 - Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
@@ -635,6 +635,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: papeis
 - evidence: Q7 plugin/hooks/usage.ts:82 (PAP-18) (hooks)
 - last seen: 2026-10-16T18:05:43Z
+
+### L-105 - Fence a suffix rule on a name also with a name that ends in a shorter start of the suffix, such as .json for .jsonl
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: R1, R2, R4 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)
+- last seen: 2026-10-16T23:13:15Z
+
+### L-106 - Test that one unreadable entry does not hide the others with an entry that fails already at stat, such as a dangling link, not only with one that fails at read
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: R17 plugin/hooks/usage.ts:85 (PAP-18) (hooks)
+- last seen: 2026-10-16T23:13:15Z
+
+### L-107 - To test a sort of directory entries, create the files in an order that is neither the sorted one nor its reverse: tmpfs lists the newest first
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: R5 plugin/hooks/usage.ts:85 (PAP-18, design.md:117) (hooks)
+- last seen: 2026-10-16T23:13:15Z
 
 ## Quarantined (failed when applied - ignore)
 
