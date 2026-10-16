@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/papeis/design.md`
-**Status**: Done. T1 a T44 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`; e o que a reverificação achou, a fase 10, T40 a T44
+**Status**: Done. T1 a T49 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`; o que a reverificação achou, a fase 10, T40 a T44; e o que a quinta volta achou, a fase 11, T45 a T49
 
 Regras do repositório que valem para toda tarefa:
 
@@ -1228,10 +1228,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] `start worker` abre a sessão como `worker-1`: a leitura que não respondeu em 2000 ms falhou, e ninguém está online
-- [ ] Morre, conferido e desfeito, o Y9 (o prazo de 1,5 × 2000 ms em `broker/launch.ts`): a sessão abre como `worker-2`; W17 e A10 seguem mortos pelo caso da T44
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `start worker` abre a sessão como `worker-1`: a leitura que não respondeu em 2000 ms falhou, e ninguém está online
+- [x] Morre, conferido e desfeito, o Y9 (o prazo de 1,5 × 2000 ms em `broker/launch.ts`): a sessão abre como `worker-2`; W17 e A10 seguem mortos pelo caso da T44
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
