@@ -987,11 +987,11 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] A definição diz que a leitura que não responde no prazo é abandonada nele e que nada dela segura o launcher depois de a sessão sair
-- [ ] Com um servidor que aceita a conexão e nunca responde, `start mother` sai com 129, o código da sessão, em menos de 10 s, e o servidor recebeu a conexão
-- [ ] Morre, conferido e desfeito, o A10 (sem `abort.abort()` em `broker/launch.ts`): o launcher fica preso além do prazo do teste
-- [ ] Nenhum código de produção muda
-- [ ] Gate full passa
+- [x] A definição diz que a leitura que não responde no prazo é abandonada nele e que nada dela segura o launcher depois de a sessão sair
+- [x] Com um servidor que aceita a conexão e nunca responde, `start mother` sai com 129, o código da sessão, em menos de 10 s, e o servidor recebeu a conexão
+- [x] Morre, conferido e desfeito, o A10 (sem `abort.abort()` em `broker/launch.ts`): o launcher fica preso além do prazo do teste
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

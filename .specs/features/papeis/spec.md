@@ -100,7 +100,7 @@ Valem as das specs anteriores. Mais:
 - **Arquivo de credencial** de um nome: o caminho de `SQUAD_DB` (default `<home>/.squad-code-mcp.db`) seguido de `.<nome>.id`.
 - **Checkout principal**: a primeira árvore de trabalho de `git worktree list --porcelain`, de onde quer que o comando rode.
 - **Diretório de worktrees**: `SQUAD_WORKTREES`, ou `<pai do checkout principal>/<nome do diretório do checkout principal>.squad`.
-- **Feature aberta, para o launcher**: a feature sem `feature_closed` em `GET /events?after=0`, lido com prazo de 2000 ms. Se a leitura falha não há feature aberta e ninguém está online. A leitura falha quando não responde no prazo, responde com status diferente de 200 ou responde algo que não é um objeto com `events` lista.
+- **Feature aberta, para o launcher**: a feature sem `feature_closed` em `GET /events?after=0`, lido com prazo de 2000 ms. Se a leitura falha não há feature aberta e ninguém está online. A leitura falha quando não responde no prazo, responde com status diferente de 200 ou responde algo que não é um objeto com `events` lista. A leitura que não responde no prazo é abandonada nele: depois de a sessão sair, nada dela segura o launcher, que sai com o código da sessão (PAP-37).
 - **Tools do squad de um papel**: `ready` mais as de `toolsFor(papel)` de `broker/tools.ts`, cada uma com o prefixo `mcp__plugin_squad_squad__`.
 - **Linha contada** de um transcript: linha que é um objeto JSON com `type` `assistant`, `message.usage` objeto e `message.model` texto não vazio diferente de `<synthetic>`.
 - **Transcripts da sessão**: o arquivo de `transcript_path` e todo `*.jsonl` de `<transcript_path sem a extensão .jsonl>/subagents/`.
@@ -403,7 +403,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-34 | P1: `roles.json` | T11 | Verified |
 | PAP-35 | P1: `roles.json` | T1, T14 | Verified |
 | PAP-36 | P1: `roles.json` | T14 | Verified |
-| PAP-37 | P1: Lançar uma sessão | T1, T14, T22 | Verified, com texto e teste a reforçar (Fix 8 de `validation.md`) |
+| PAP-37 | P1: Lançar uma sessão | T1, T14, T22, T38 | Implementing: Fix 8 de `validation.md` aplicado na T38, à espera da reverificação |
 | PAP-38 | P1: Lançar uma sessão | T14 | Verified |
 | PAP-39 | P1: Lançar uma sessão | T12 | Texto mudado na revisão do PR 12 (as três variáveis que ficam), com o teste do Fix 5 de `validation.md` junto; sem volta do Verifier depois disso |
 | PAP-40 | P1: Lançar uma sessão | T12, T22 | Verified |

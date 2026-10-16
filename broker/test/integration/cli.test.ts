@@ -223,6 +223,33 @@ test("PAP-37: start gives the session command the standard input and the standar
   );
 }, 60_000);
 
+test("PAP-37: with a broker that takes the connection and never answers, start exits with the code of the session soon after it, with the read of the log abandoned", async () => {
+  const sockets = new Set<import("node:net").Socket>();
+  const silent = createServer((socket) => void sockets.add(socket));
+  await new Promise<void>((done) => silent.listen(0, "127.0.0.1", done));
+  try {
+    const port = String((silent.address() as { port: number }).port);
+    const started = Date.now();
+    await startWith(
+      "git",
+      "mother",
+      ({ res }) => {
+        expect(res.code).toBe(129);
+        // 2000 ms of the read and the session, which exits at once; a read left waiting holds
+        // the launcher for minutes
+        expect(Date.now() - started).toBeLessThan(10_000);
+      },
+      undefined,
+      { SQUAD_PORT: port }
+    );
+    // the launcher did reach the broker
+    expect(sockets.size).toBeGreaterThan(0);
+  } finally {
+    for (const socket of sockets) socket.destroy();
+    silent.close();
+  }
+}, 30_000);
+
 test("PAP-45: start gives the launcher the platform it runs on: the session has the PowerShell rules on win32, and only there", async () => {
   await startWith(reportCommand(), "mother", ({ res }) => {
     const { args } = JSON.parse(res.out) as Reported;
