@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mainCheckout, worktree } from "../../launch.ts";
@@ -296,6 +296,30 @@ test("PAP-56: the regular files of the root that start with .env and git does no
   expect(readFileSync(join(dir, ".env.local"), "utf8")).toBe("LOCAL=1\n");
   expect(readFileSync(join(dir, ".envrc"), "utf8")).toBe("RC=1\n");
   expect(readFileSync(join(dir, ".env-production"), "utf8")).toBe("PRODUCTION=1\n");
+}, SLOW);
+
+// Windows creates a symbolic link only with the developer mode or as an administrator
+const canLink = (() => {
+  const dir = mkdtempSync(join(tmpdir(), "squad-link-"));
+  try {
+    writeFileSync(join(dir, "target"), "");
+    symlinkSync(join(dir, "target"), join(dir, "link"), "file");
+    return true;
+  } catch {
+    return false;
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+})();
+
+test.skipIf(!canLink)("PAP-56: a .env* that is a symbolic link to a regular file is not a regular file, and is not copied", () => {
+  const { parent, main } = repo();
+  writeFileSync(join(parent, "secret"), "SECRET=1\n");
+  symlinkSync(join(parent, "secret"), join(main, ".env.link"), "file");
+  writeFileSync(join(main, ".env"), "KEY=1\n");
+
+  const dir = worktree(main, "worker-1", "worker", null, {});
+  expect(readdirSync(dir).sort()).toEqual([".env", ".git", "README.md"]);
 }, SLOW);
 
 test("PAP-56: a tracked .env.example is not copied over the one that came with the checkout", () => {

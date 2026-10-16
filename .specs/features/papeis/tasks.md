@@ -1099,11 +1099,11 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] PAP-56 diz que um link simbólico, mesmo para um arquivo regular, não é arquivo regular e não é copiado
-- [ ] O worktree não recebe o `.env.link`; o `.env` ao lado é copiado
-- [ ] Morre, conferido e desfeito, o W15 (`file.isDirectory()` no lugar de `!file.isFile()` em `broker/launch.ts`)
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] PAP-56 diz que um link simbólico, mesmo para um arquivo regular, não é arquivo regular e não é copiado
+- [x] O worktree não recebe o `.env.link`; o `.env` ao lado é copiado
+- [x] Morre, conferido e desfeito, o W15 (`file.isDirectory()` no lugar de `!file.isFile()` em `broker/launch.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

@@ -291,7 +291,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 3. **PAP-53** WHEN o worktree de um `worker` ou `judge` não existe THEN o launcher SHALL criá-lo com HEAD destacado no commit da ponta do branch da feature aberta, ou no `HEAD` do checkout principal quando não há feature aberta ou o branch dela não existe no repositório.
 4. **PAP-54** WHEN o worktree do `leader` não existe THEN o launcher SHALL criá-lo no branch da feature aberta, ou com HEAD destacado no `HEAD` do checkout principal quando não há feature aberta ou o branch dela não existe no repositório.
 5. **PAP-55** WHEN o diretório do worktree já existe THEN o launcher SHALL usá-lo como está, sem rodar comando git que escreva e sem copiar arquivo.
-6. **PAP-56** WHEN o launcher cria um worktree THEN o launcher SHALL copiar para a raiz dele cada arquivo regular da raiz do checkout principal cujo nome começa com `.env` e que o git não versiona, com o mesmo nome e conteúdo, sem sobrescrever arquivo que já esteja lá.
+6. **PAP-56** WHEN o launcher cria um worktree THEN o launcher SHALL copiar para a raiz dele cada arquivo regular da raiz do checkout principal cujo nome começa com `.env` e que o git não versiona, com o mesmo nome e conteúdo, sem sobrescrever arquivo que já esteja lá; um link simbólico, mesmo para um arquivo regular, não é arquivo regular e não é copiado.
 7. **PAP-57** IF `git worktree add` falha THEN o launcher SHALL falhar como em PAP-41 com a mensagem do git na linha, sem copiar arquivo.
 8. **PAP-58** WHEN `squad start` roda de dentro de um worktree do repositório THEN o launcher SHALL resolver o checkout principal e o diretório de worktrees como se rodasse do checkout principal.
 
@@ -422,7 +422,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-53 | P1: Worktree por papel | T13, T36 | Verified (reverificação de 2026-10-16: A2 morre pela T36, para worker e judge) |
 | PAP-54 | P1: Worktree por papel | T13 | Verified |
 | PAP-55 | P1: Worktree por papel | T13, T14 | Verified |
-| PAP-56 | P1: Worktree por papel | T13, T34 | Needs Fix (Fix 13 de `validation.md`): K1 morre pela T34; W15, um link simbólico `.env*` copiado, sobrevive, e a spec não diz se o link é arquivo regular |
+| PAP-56 | P1: Worktree por papel | T13, T34, T43 | Implementing: Fix 13 de `validation.md` aplicado na T43, à espera da reverificação |
 | PAP-57 | P1: Worktree por papel | T13 | Verified |
 | PAP-58 | P1: Worktree por papel | T13, T14 | Verified |
 | PAP-59 | P1: Comando `squad` | T15 | Verified |
