@@ -967,10 +967,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] Com `transcript_path` `0` o log ganha um único `usage` de `unknown` com os quatro números 0, e o hook sai com 0 sem escrever na saída padrão
-- [ ] Morre, conferido e desfeito, o K9 (sem a guarda de `transcript_path` que não é texto em `plugin/hooks/usage.ts`)
-- [ ] Nenhum código de produção muda
-- [ ] Gate full passa
+- [x] Com `transcript_path` `0` o log ganha um único `usage` de `unknown` com os quatro números 0, e o hook sai com 0 sem escrever na saída padrão
+- [x] Morre, conferido e desfeito, o K9 (sem a guarda de `transcript_path` que não é texto em `plugin/hooks/usage.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
 
 **Tests**: integration
 **Gate**: full

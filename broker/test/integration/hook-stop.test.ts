@@ -150,6 +150,15 @@ test("PAP-21: without transcript_path in the payload the log gains a single usag
   expect(usages(b)).toEqual([["worker-1", { session_id: SESSION, model: "unknown", ...ZERO }]]);
 });
 
+// 0 is the number of the standard input of the hook: a read of it is not a read of a transcript
+test("PAP-21: with a transcript_path 0 the log gains a single usage of the model unknown with the four numbers 0", async () => {
+  const { b, env } = await alone();
+  const hook = await runHook("stop.ts", env, payload({ transcript_path: 0 }));
+  expect(hook.code).toBe(0);
+  expect(hook.stdout).toBe("");
+  expect(usages(b)).toEqual([["worker-1", { session_id: SESSION, model: "unknown", ...ZERO }]]);
+});
+
 test("PAP-25: two runs over the same transcripts record the same numbers", async () => {
   const { b, env } = await alone();
   const input = payload({ transcript_path: twoModels() });
