@@ -947,10 +947,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] Com esse branch noutro commit, o worktree do `worker` e o do `judge` nascem destacados na ponta do branch da feature
-- [ ] Morre, conferido e desfeito, o A2 (sem `--detach` na ponta do branch em `broker/launch.ts`); a linha dele na tabela da T31 já diz que não é equivalente
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Com esse branch noutro commit, o worktree do `worker` e o do `judge` nascem destacados na ponta do branch da feature
+- [x] Morre, conferido e desfeito, o A2 (sem `--detach` na ponta do branch em `broker/launch.ts`); a linha dele na tabela da T31 já diz que não é equivalente
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

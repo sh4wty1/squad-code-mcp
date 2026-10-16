@@ -419,7 +419,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-50 | P1: Lançar uma sessão | T14, T15 | Verified |
 | PAP-51 | P1: Worktree por papel | T14 | Verified |
 | PAP-52 | P1: Worktree por papel | T14 | Verified |
-| PAP-53 | P1: Worktree por papel | T13 | Needs Fix (Fix 6 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-53 | P1: Worktree por papel | T13, T36 | Implementing: Fix 6 de `validation.md` aplicado na T36, à espera da reverificação |
 | PAP-54 | P1: Worktree por papel | T13 | Verified |
 | PAP-55 | P1: Worktree por papel | T13, T14 | Verified |
 | PAP-56 | P1: Worktree por papel | T13, T34 | Implementing: Fix 3 de `validation.md` aplicado na T34, à espera da reverificação |

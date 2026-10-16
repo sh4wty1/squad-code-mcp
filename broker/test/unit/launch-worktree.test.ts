@@ -193,6 +193,28 @@ test("PAP-54: without an open feature a branch called null is not taken for one:
   expect(branch(dir)).toBe("");
 }, SLOW);
 
+// A branch whose short name is the whole ref of the branch of the feature, at the HEAD of the
+// main checkout: git reads a name as a short name of a branch before it reads it as a ref
+function shortNamed(main: string) {
+  feature(main);
+  git(main, "branch", `refs/heads/${FEATURE}`, "main");
+  expect(git(main, "rev-parse", `refs/heads/refs/heads/${FEATURE}`)).toBe(head(main));
+  expect(tip(main)).not.toBe(head(main));
+}
+
+for (const role of ["worker", "judge"] as const) {
+  const name = role === "worker" ? "worker-1" : "judge";
+
+  test(`PAP-53: with a branch whose short name is refs/heads/<branch of the feature>, the worktree of the ${role} is born detached at the tip of the branch of the feature`, () => {
+    const { main } = repo();
+    shortNamed(main);
+
+    const dir = worktree(main, name, role, FEATURE, {});
+    expect(head(dir)).toBe(tip(main));
+    expect(branch(dir)).toBe("");
+  }, SLOW);
+}
+
 test("PAP-48: with the branch of the feature checked out in the main checkout the worktree of the leader fails with the message of git, and nothing is copied", () => {
   const { main, worktrees } = repo();
   feature(main);
