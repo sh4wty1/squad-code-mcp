@@ -302,12 +302,17 @@ test("PAP-39: the three CLAUDE variables the dev sets for Claude Code stay, and 
     CLAUDE_CONFIG_DIR_OLD: "/home/dev/.claude",
     CLAUDE_CODE_OAUTH_SCOPES: "user:inference",
     CLAUDE_CODE_CHILD_SESSION: "1",
+    // the comparison minds the case: these do not start with CLAUDE, and stay
+    claude_home: "/home/dev/claude",
+    Claude_Code_Entrypoint: "cli",
   };
   expect(sessionEnv(env, "mother", "mother")).toEqual({
     PATH: "/usr/bin",
     CLAUDE_CONFIG_DIR: "/home/dev/.claude-work",
     CLAUDE_CODE_OAUTH_TOKEN: "token",
     CLAUDE_CODE_GIT_BASH_PATH: "C:\\Program Files\\Git\\bin\\bash.exe",
+    claude_home: "/home/dev/claude",
+    Claude_Code_Entrypoint: "cli",
     SQUAD_NAME: "mother",
     SQUAD_ROLE: "mother",
   });

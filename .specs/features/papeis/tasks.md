@@ -1078,11 +1078,11 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] PAP-39 diz que a caixa conta no nome: `claude_home` não começa com `CLAUDE` e fica
-- [ ] `claude_home` e `Claude_Code_Entrypoint` ficam no ambiente da sessão
-- [ ] Morre, conferido e desfeito, o W12 (o prefixo conferido sem caixa em `broker/launch.ts`)
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] PAP-39 diz que a caixa conta no nome: `claude_home` não começa com `CLAUDE` e fica
+- [x] `claude_home` e `Claude_Code_Entrypoint` ficam no ambiente da sessão
+- [x] Morre, conferido e desfeito, o W12 (o prefixo conferido sem caixa em `broker/launch.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
