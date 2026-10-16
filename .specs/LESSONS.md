@@ -603,8 +603,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-099 - Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
 - features: papeis
-- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+7 more)
-- last seen: 2026-10-16T16:19:24Z
+- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+9 more)
+- last seen: 2026-10-16T18:05:43Z
 
 ### L-100 - Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
@@ -623,6 +623,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: papeis
 - evidence: Y9 broker/launch.ts:186 (PAP-37) (launcher)
 - last seen: 2026-10-16T15:49:02Z
+
+### L-103 - Fence a suffix rule on a name in one go on its four sides, the dot, the anchor at the end, the case and the place in the path, instead of one side per round
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)
+- last seen: 2026-10-16T18:05:43Z
+
+### L-104 - Run the tests of a file-system layer on Linux too: a mutant on the case of a directory name lives on the case-insensitive file system of Windows
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: Q7 plugin/hooks/usage.ts:82 (PAP-18) (hooks)
+- last seen: 2026-10-16T18:05:43Z
 
 ## Quarantined (failed when applied - ignore)
 

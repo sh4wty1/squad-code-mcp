@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 103,
+  "next_id": 105,
   "lessons": [
     {
       "id": "L-001",
@@ -1864,10 +1864,12 @@
         "Y6 plugin/hooks/usage.ts:85 (PAP-18) (launcher)",
         "Y7 broker/launch.ts:97 (PAP-39) (launcher)",
         "Z4 plugin/hooks/usage.ts:85 (PAP-18) (hooks)",
-        "Z11 plugin/hooks/usage.ts:82 (PAP-18) (hooks)"
+        "Z11 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "Q2 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "Q5 plugin/hooks/usage.ts:85 (PAP-18) (hooks)"
       ],
       "created": "2026-10-16T15:08:16Z",
-      "last_seen": "2026-10-16T16:19:24Z"
+      "last_seen": "2026-10-16T18:05:43Z"
     },
     {
       "id": "L-100",
@@ -1923,6 +1925,42 @@
       ],
       "created": "2026-10-16T15:49:02Z",
       "last_seen": "2026-10-16T15:49:02Z"
+    },
+    {
+      "id": "L-103",
+      "key": "surviving_mutant::fence a suffix rule on a name in one go on its four sides the dot the anchor at the end the case and the place in the path instead of one side per round",
+      "text": "Fence a suffix rule on a name in one go on its four sides, the dot, the anchor at the end, the case and the place in the path, instead of one side per round",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-16T18:05:43Z",
+      "last_seen": "2026-10-16T18:05:43Z"
+    },
+    {
+      "id": "L-104",
+      "key": "surviving_mutant::run the tests of a file system layer on linux too a mutant on the case of a directory name lives on the case insensitive file system of windows",
+      "text": "Run the tests of a file-system layer on Linux too: a mutant on the case of a directory name lives on the case-insensitive file system of Windows",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Q7 plugin/hooks/usage.ts:82 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-16T18:05:43Z",
+      "last_seen": "2026-10-16T18:05:43Z"
     }
   ]
 }
