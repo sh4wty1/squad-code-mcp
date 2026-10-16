@@ -603,8 +603,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-099 - Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
 - features: papeis
-- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+5 more)
-- last seen: 2026-10-16T15:49:02Z
+- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+7 more)
+- last seen: 2026-10-16T16:19:24Z
 
 ### L-100 - Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
