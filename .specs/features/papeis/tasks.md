@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/papeis/design.md`
-**Status**: Done. T1 a T31 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`)
+**Status**: Done. T1 a T39 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`
 
 Regras do repositório que valem para toda tarefa:
 
@@ -1008,12 +1008,12 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] PAP-01 diz quais são os arquivos do plugin; PAP-15, o `message.id` que não é texto não vazio; PAP-18, o arquivo de `subagents` que não pode ser lido; PAP-33, `workflows: null`; PAP-42, o que é uma opção e em que posição vem; PAP-68, que nenhuma resposta autoriza merge ou push ao worker
-- [ ] As linhas dessas seis em "Leituras da spec" dizem que o texto agora está no AC
-- [ ] O K2 do Fix 5 morre com o teste de `e9bb908`, conferido e desfeito
-- [ ] As outras três partes do Fix 9 já estavam feitas: a confirmação de `spec.md:74` (2026-10-12), o `Status` deste arquivo e os três pacotes do Linux no Handoff
-- [ ] Nenhum código de produção muda
-- [ ] Gate build passa
+- [x] PAP-01 diz quais são os arquivos do plugin; PAP-15, o `message.id` que não é texto não vazio; PAP-18, o arquivo de `subagents` que não pode ser lido; PAP-33, `workflows: null`; PAP-42, o que é uma opção e em que posição vem; PAP-68, que nenhuma resposta autoriza merge ou push ao worker
+- [x] As linhas dessas seis em "Leituras da spec" dizem que o texto agora está no AC
+- [x] O K2 do Fix 5 morre com o teste de `e9bb908`, conferido e desfeito
+- [x] As outras três partes do Fix 9 já estavam feitas: a confirmação de `spec.md:74` (2026-10-12), o `Status` deste arquivo e os três pacotes do Linux no Handoff
+- [x] Nenhum código de produção muda
+- [x] Gate build passa
 
 **Tests**: none
 **Gate**: build
@@ -1044,21 +1044,21 @@ Depois da última tarefa, fora da lista: a suíte no Linux (contêiner `oven/bun
 
 ## Leituras da spec
 
-Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
+Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC. As seis leituras do Fix 9 de `validation.md`, sete linhas (a de `--skip-permissions` entrou em PAP-42 com a da opção), foram levadas ao texto dos ACs na T39, sem mudar o que dizem.
 
 | Ponto | Leitura | Tarefa |
 | ----- | ------- | ------ |
-| `workflows: null` no `roles.json` (PAP-33, "se presente") | Recusado: a chave está presente e o valor não é objeto | T10 |
-| `--skip-permissions` antes do papel (PAP-37 mostra depois) | Aceito em qualquer posição | T12 |
-| "Arquivo do plugin dentro de `broker/`" (PAP-01) | `.claude-plugin`, `hooks`, `skills` e `roles.json`. O `broker/.mcp.json` do upstream não é do plugin e fica | T4 |
+| `workflows: null` no `roles.json` (PAP-33, "se presente") | Recusado: a chave está presente e o valor não é objeto. Desde a T39, no texto de PAP-33 | T10 |
+| `--skip-permissions` antes do papel (PAP-37 mostra depois) | Aceito em qualquer posição. Desde a T39, no texto de PAP-42 | T12 |
+| "Arquivo do plugin dentro de `broker/`" (PAP-01) | `.claude-plugin`, `hooks`, `skills` e `roles.json`. O `broker/.mcp.json` do upstream não é do plugin e fica. Desde a T39, no texto de PAP-01 | T4 |
 | Tool de gate que a skill da mother não cita (PAP-72) | Nenhum texto entre crases com `gate` no nome | T19 |
-| `message.id` que não é texto não vazio (PAP-15, "sem `message.id`") | Linha sem id: conta sozinha | T5 |
+| `message.id` que não é texto não vazio (PAP-15, "sem `message.id`") | Linha sem id: conta sozinha. Desde a T39, no texto de PAP-15 | T5 |
 | `message.usage` que é uma lista (PAP-17, "`message.usage` objeto") | Não é objeto: a linha é ignorada | T5 |
-| Arquivo de `subagents/` que não pode ser lido (PAP-18; PAP-19 só fala do principal) | Não conta nada; o principal e os outros arquivos contam | T5 |
-| O que é uma opção em `squad start` (PAP-42, "uma opção que não é `--skip-permissions`") | Todo argumento que começa com `-`; nunca é lido como papel nem como nome | T12 |
+| Arquivo de `subagents/` que não pode ser lido (PAP-18; PAP-19 só fala do principal) | Não conta nada; o principal e os outros arquivos contam. Desde a T39, no texto de PAP-18 | T5 |
+| O que é uma opção em `squad start` (PAP-42, "uma opção que não é `--skip-permissions`") | Todo argumento que começa com `-`; nunca é lido como papel nem como nome. Desde a T39, no texto de PAP-42 | T12 |
 | Leitura do log pelo launcher que responde outro status, ou algo sem `events` lista ("se a leitura falha", na definição de feature aberta para o launcher) | Leitura que falhou, como em PAP-31: sem feature aberta e ninguém online | T14 |
 | Tool do squad "citada entre crases" e literal de uma seção (PAP-61, PAP-62, PAP-68 a PAP-72) | Proibida: todo identificador de um trecho entre crases, ou de uma linha de bloco cercado, que é nome de tool de outro papel (`kind="answer"` conta na skill do judge). Exigida: um trecho entre crases que é só o nome. Um comando literal vale no trecho que é o literal ou começa por ele | T16 |
-| Merge ou push pedido a um worker com resposta que autoriza (PAP-66 lista os dois, PAP-68 diz nunca) | Continua proibido: a skill do worker diz que nenhuma resposta levanta a regra de `Your work` | T16 |
+| Merge ou push pedido a um worker com resposta que autoriza (PAP-66 lista os dois, PAP-68 diz nunca) | Continua proibido: a skill do worker diz que nenhuma resposta levanta a regra de `Your work`. Desde a T39, no texto de PAP-68 | T16 |
 | Como o teste confere "antes de `open_feature`" (PAP-71) | Em `Your work` da mother, a primeira citação de `git switch -c`, a de `git commit`, a de `git switch <base_branch>` e a de `open_feature`, nessa ordem | T19 |
 | Tool de gate nas skills de worker, leader e judge (PAP-72 só fala da mother) | A mesma regra nas quatro: nenhuma tool de gate existe para papel algum | T19 |
 
