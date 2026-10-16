@@ -397,7 +397,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-28 | P1: Devolver ao trabalho quem para devendo | T8, T9, T22 | Verified |
 | PAP-29 | P1: Devolver ao trabalho quem para devendo | T8 | Verified |
 | PAP-30 | P1: Devolver ao trabalho quem para devendo | T9 | Verified |
-| PAP-31 | P1: Devolver ao trabalho quem para devendo | T9 | Needs Fix (Fix 1 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-31 | P1: Devolver ao trabalho quem para devendo | T9, T32 | Implementing: Fix 1 de `validation.md` aplicado na T32, à espera da reverificação |
 | PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Verified |
 | PAP-33 | P1: `roles.json` | T10 | Verified |
 | PAP-34 | P1: `roles.json` | T11 | Verified |

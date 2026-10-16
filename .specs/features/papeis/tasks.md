@@ -124,6 +124,14 @@ O que o Verifier pediu na segunda volta: quatro testes que não matavam um mutan
 T27 → T28 → T29 → T30 → T31
 ```
 
+### Phase 9: O resíduo da volta 3
+
+Os Fix 1 a Fix 9 de `validation.md`, decididos pelo dev em 2026-10-16: um caso ou uma asserção por mutante vivo, o texto de PAP-37 e as leituras da spec levadas aos ACs. Nenhum código de produção muda. O Fix 5 (PAP-39, K2) não tem tarefa: o teste entrou com a revisão do PR 12 (`e9bb908`), e a T39 confere que ele mata o K2.
+
+```
+T32 → T33 → T34 → T35 → T36 → T37 → T38 → T39
+```
+
 ---
 
 ## Task Breakdown
@@ -849,10 +857,173 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T32: `/events` respondido com outro 2xx
+
+**What**: Fix 1. O caso de PAP-31 do log em que `worker-1` deve, respondido também com status 201.
+**Where**: `broker/test/integration/hook-stop.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O caso de 500 da T26, que vira um laço sobre 500 e 201
+**Requirement**: PAP-31
+
+**Done when**:
+
+- [x] Com `/events` respondendo 201 com o log de um broker real em que `worker-1` deve o `result`, a saída padrão do hook é vazia, os dois `POST /usage` são feitos e o código é 0
+- [x] Morre, conferido e desfeito, o K16 (`!res.ok` no lugar de `res.status !== 200` em `plugin/hooks/stop.ts`); o S10 continua morto
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T33: A sessão fecha com o broker fora
+
+**What**: Fix 2. Um caso de PAP-07 em que a sessão registra, o broker é encerrado e só então a sessão fecha.
+**Where**: `broker/test/integration/server-credential.test.ts`
+**Depends on**: T32
+**Reuses**: `worker` e o caso de PAP-08 do mesmo arquivo
+**Requirement**: PAP-07
+
+**Done when**:
+
+- [ ] Registrada a sessão e encerrado o broker, ao fechar a sessão o arquivo de credencial some e o processo sai com 0 sozinho
+- [ ] Morre, conferido e desfeito, o K13 (o `rmSync` dentro do `try` do `unregister` em `broker/server.ts`); o V6 continua morto
+- [ ] Nenhum código de produção muda
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T34: Um `.env*` que não é `.env` nem `.env.<algo>`
+
+**What**: Fix 3. Um `.envrc` e um `.env-production` não versionados no caso de PAP-56 dos arquivos copiados.
+**Where**: `broker/test/unit/launch-worktree.test.ts`
+**Depends on**: T33
+**Reuses**: O caso de PAP-56 dos arquivos regulares da raiz
+**Requirement**: PAP-56
+
+**Done when**:
+
+- [ ] `.envrc` e `.env-production` não versionados chegam ao worktree com o conteúdo
+- [ ] Morre, conferido e desfeito, o K1 (só `.env` e `.env.<algo>` copiados em `broker/launch.ts`)
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T35: Um arquivo de subagente com outro nome
+
+**What**: Fix 4. Um `sidechain-7.jsonl` em `subagents/` no caso de PAP-18 da soma.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T34
+**Reuses**: O primeiro caso de PAP-18 do arquivo
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [ ] As linhas de um `*.jsonl` de `subagents/` cujo nome não começa com `agent-` entram na soma
+- [ ] Morre, conferido e desfeito, o K15 (só `agent-*.jsonl` lido em `plugin/hooks/usage.ts`)
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T36: Um branch de nome curto `refs/heads/<branch da feature>`
+
+**What**: Fix 6. Um repositório com um branch cujo nome curto é o ref inteiro do branch da feature, no `HEAD` do checkout principal, para o worker e para o judge.
+**Where**: `broker/test/unit/launch-worktree.test.ts`
+**Depends on**: T35
+**Reuses**: Os casos da tag e do branch `null` da T31
+**Requirement**: PAP-53
+
+**Done when**:
+
+- [ ] Com esse branch noutro commit, o worktree do `worker` e o do `judge` nascem destacados na ponta do branch da feature
+- [ ] Morre, conferido e desfeito, o A2 (sem `--detach` na ponta do branch em `broker/launch.ts`); a linha dele na tabela da T31 já diz que não é equivalente
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T37: `transcript_path` que é um número de descritor
+
+**What**: Fix 7. `stop.ts` como processo com `transcript_path` `0`.
+**Where**: `broker/test/integration/hook-stop.test.ts`
+**Depends on**: T36
+**Reuses**: O caso de PAP-21 sem `transcript_path`
+**Requirement**: PAP-21
+
+**Done when**:
+
+- [ ] Com `transcript_path` `0` o log ganha um único `usage` de `unknown` com os quatro números 0, e o hook sai com 0 sem escrever na saída padrão
+- [ ] Morre, conferido e desfeito, o K9 (sem a guarda de `transcript_path` que não é texto em `plugin/hooks/usage.ts`)
+- [ ] Nenhum código de produção muda
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T38: O launcher sai quando a sessão sai, com o broker sem responder
+
+**What**: Fix 8. A frase na definição de "feature aberta, para o launcher" e um `squad start` com um broker que aceita a conexão e nunca responde.
+**Where**: `broker/test/integration/cli.test.ts`, `.specs/features/papeis/spec.md`
+**Depends on**: T37
+**Reuses**: `startWith` com `git` no lugar da sessão
+**Requirement**: PAP-37
+
+**Done when**:
+
+- [ ] A definição diz que a leitura que não responde no prazo é abandonada nele e que nada dela segura o launcher depois de a sessão sair
+- [ ] Com um servidor que aceita a conexão e nunca responde, `start mother` sai com 129, o código da sessão, em menos de 10 s, e o servidor recebeu a conexão
+- [ ] Morre, conferido e desfeito, o A10 (sem `abort.abort()` em `broker/launch.ts`): o launcher fica preso além do prazo do teste
+- [ ] Nenhum código de produção muda
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T39: Documentos
+
+**What**: Fix 9. As seis leituras de "Leituras da spec" que a spec deveria dizer ela mesma, no texto dos ACs.
+**Where**: `.specs/features/papeis/spec.md`, `.specs/features/papeis/tasks.md`
+**Depends on**: T38
+**Reuses**: "Leituras da spec" desta lista
+**Requirement**: PAP-01, PAP-15, PAP-18, PAP-33, PAP-42, PAP-66, PAP-68
+
+**Done when**:
+
+- [ ] PAP-01 diz quais são os arquivos do plugin; PAP-15, o `message.id` que não é texto não vazio; PAP-18, o arquivo de `subagents` que não pode ser lido; PAP-33, `workflows: null`; PAP-42, o que é uma opção e em que posição vem; PAP-68, que nenhuma resposta autoriza merge ou push ao worker
+- [ ] As linhas dessas seis em "Leituras da spec" dizem que o texto agora está no AC
+- [ ] O K2 do Fix 5 morre com o teste de `e9bb908`, conferido e desfeito
+- [ ] As outras três partes do Fix 9 já estavam feitas: a confirmação de `spec.md:74` (2026-10-12), o `Status` deste arquivo e os três pacotes do Linux no Handoff
+- [ ] Nenhum código de produção muda
+- [ ] Gate build passa
+
+**Tests**: none
+**Gate**: build
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -862,6 +1033,7 @@ Phase 5:  T20 → T21
 Phase 6:  T22, T23 (sem ordem entre as duas no diagrama: a T23 nasce da T22 e é commitada antes de ela fechar)
 Phase 7:  T24 → T25 → T26
 Phase 8:  T27 → T28 → T29 → T30 → T31
+Phase 9:  T32 → T33 → T34 → T35 → T36 → T37 → T38 → T39
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
@@ -927,6 +1099,14 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
 | T29: Mensagem do git com mais de uma linha | 1 arquivo: `launch-worktree.test.ts` | ✅ Granular |
 | T30: `events` que não é lista na leitura do launcher | 1 arquivo: `launch.test.ts` | ✅ Granular |
 | T31: Varredura de mutantes do launcher e do comando | testes dos quatro arquivos do launcher e do comando, um método | ⚠️ Coeso |
+| T32: `/events` respondido com outro 2xx | 1 arquivo: `hook-stop.test.ts` | ✅ Granular |
+| T33: A sessão fecha com o broker fora | 1 arquivo: `server-credential.test.ts` | ✅ Granular |
+| T34: Um `.env*` que não é `.env` nem `.env.<algo>` | 1 arquivo: `launch-worktree.test.ts` | ✅ Granular |
+| T35: Um arquivo de subagente com outro nome | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T36: Um branch de nome curto `refs/heads/<branch da feature>` | 1 arquivo: `launch-worktree.test.ts` | ✅ Granular |
+| T37: `transcript_path` que é um número de descritor | 1 arquivo: `hook-stop.test.ts` | ✅ Granular |
+| T38: O launcher sai quando a sessão sai, com o broker sem responder | 1 frase da spec e o teste dela em `cli.test.ts` | ⚠️ Coeso |
+| T39: Documentos | seis ACs de `spec.md` | ✅ Granular |
 
 Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.json`, T12 no `export` de `namesOf` em `peers.ts`, T15 em `broker/package.json` e T16 no conferidor de `skills.test.ts`. É a ligação do que a própria tarefa cria. T4 e T12 ficam inteiras: os três JSON só valem juntos como um plugin, e as cinco funções de T12 são uma linha cada sobre a mesma entrada.
 
@@ -967,6 +1147,14 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T29 | T28 | T28 → T29 | ✅ Match |
 | T30 | T29 | T29 → T30 | ✅ Match |
 | T31 | T30 | T30 → T31 | ✅ Match |
+| T32 | None (a fase anterior inteira) | início da fase 9 | ✅ Match |
+| T33 | T32 | T32 → T33 | ✅ Match |
+| T34 | T33 | T33 → T34 | ✅ Match |
+| T35 | T34 | T34 → T35 | ✅ Match |
+| T36 | T35 | T35 → T36 | ✅ Match |
+| T37 | T36 | T36 → T37 | ✅ Match |
+| T38 | T37 | T37 → T38 | ✅ Match |
+| T39 | T38 | T38 → T39 | ✅ Match |
 
 ---
 
@@ -1005,3 +1193,11 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T29: Mensagem do git com mais de uma linha | Launcher | unit | unit | ✅ OK |
 | T30: `events` que não é lista na leitura do launcher | Launcher | unit | unit | ✅ OK |
 | T31: Varredura de mutantes do launcher e do comando | Launcher | unit | unit | ✅ OK |
+| T32: `/events` respondido com outro 2xx | Hook, processo | integration | integration | ✅ OK |
+| T33: A sessão fecha com o broker fora | Servidor MCP | integration | integration | ✅ OK |
+| T34: Um `.env*` que não é `.env` nem `.env.<algo>` | Launcher | unit | unit | ✅ OK |
+| T35: Um arquivo de subagente com outro nome | Hook, parte pura | unit | unit | ✅ OK |
+| T36: Um branch de nome curto `refs/heads/<branch da feature>` | Launcher | unit | unit | ✅ OK |
+| T37: `transcript_path` que é um número de descritor | Hook, processo | integration | integration | ✅ OK |
+| T38: O launcher sai quando a sessão sai, com o broker sem responder | CLI | integration | integration | ✅ OK |
+| T39: Documentos | Documentação | none | none | ✅ OK |
