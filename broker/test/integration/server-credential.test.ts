@@ -93,18 +93,20 @@ test("PAP-07: when the session closes after registering with the broker already 
   expect(existsSync(file)).toBe(false);
 });
 
-// Windows has no SIGTERM to listen to: the signal ends the process there, and a session ends
-// by closing its input
-test.skipIf(process.platform === "win32")("PAP-07: when the session registered is ended by SIGTERM, its credential file is gone and it exits with 0", async () => {
-  broker = await startBroker();
-  const { session, file } = await worker(broker);
-  await session.register();
-  expect(existsSync(file)).toBe(true);
+// Windows has no SIGTERM nor SIGINT to listen to: the signal ends the process there, and a
+// session ends by closing its input. ctrl+c on the terminal sends SIGINT to the server too.
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+  test.skipIf(process.platform === "win32")(`PAP-07: when the session registered is ended by ${signal}, its credential file is gone and it exits with 0`, async () => {
+    broker = await startBroker();
+    const { session, file } = await worker(broker);
+    await session.register();
+    expect(existsSync(file)).toBe(true);
 
-  process.kill(session.transport.pid!, "SIGTERM");
-  expect(await Promise.race([session.exited, Bun.sleep(1500).then(() => "still running")])).toBe(0);
-  expect(existsSync(file)).toBe(false);
-});
+    process.kill(session.transport.pid!, signal);
+    expect(await Promise.race([session.exited, Bun.sleep(1500).then(() => "still running")])).toBe(0);
+    expect(existsSync(file)).toBe(false);
+  });
+}
 
 test("PAP-08: with a directory where the credential file goes, ready registers the same way", async () => {
   broker = await startBroker();

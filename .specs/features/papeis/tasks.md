@@ -140,6 +140,14 @@ Os Fix 10 a Fix 14 da reverificação de 2026-10-16 em `validation.md`, decidido
 T40 → T41 → T42 → T43 → T44
 ```
 
+### Phase 11: O que a quinta volta achou
+
+Os Fix 15 a Fix 19 da quinta volta em `validation.md`, decididos pelo dev em 2026-10-16: um caso ou uma asserção por mutante vivo, só de teste. Nenhum código de produção muda, nem texto da spec.
+
+```
+T45 → T46 → T47 → T48 → T49
+```
+
 ---
 
 ## Task Breakdown
@@ -1130,10 +1138,110 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T45: A sessão encerrada por `SIGINT`
+
+**What**: Fix 15. O caso de `SIGTERM` da T40 vira um laço sobre `SIGTERM` e `SIGINT`, pulado no Windows.
+**Where**: `broker/test/integration/server-credential.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O caso de PAP-07 da T40
+**Requirement**: PAP-07
+
+**Done when**:
+
+- [x] No Linux, com a sessão registrada encerrada por `SIGINT`, o processo sai com 0 sozinho e o arquivo de credencial some
+- [x] Morre no Linux, conferido e desfeito num contêiner `oven/bun:1.4.2`, o Y1 (sem `process.on("SIGINT", cleanup)` em `broker/server.ts`); o W2 segue morto
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T46: Uma pasta com `.jsonl` no nome
+
+**What**: Fix 16. Um transcript `logs.jsonl.d/s1.jsonl` com `logs.jsonl.d/s1/subagents/agent-a.jsonl`.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T45
+**Reuses**: Os casos de PAP-18 do arquivo
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [ ] O subagente de `logs.jsonl.d/s1/subagents/` entra na soma: só o `.jsonl` do fim sai do caminho
+- [ ] Morre, conferido e desfeito, o Y5 (`/\.jsonl/` sem `$` em `plugin/hooks/usage.ts`)
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T47: Um nome de `subagents/` que só tem `.jsonl` dentro
+
+**What**: Fix 17. Um `agent-d.jsonl.bak` no caso de PAP-18 da soma.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T46
+**Reuses**: O primeiro caso de PAP-18 do arquivo
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [ ] `agent-d.jsonl.bak` não entra na soma: não é `*.jsonl`
+- [ ] Morre, conferido e desfeito, o Y6 (todo nome que contém `.jsonl` contado em `plugin/hooks/usage.ts`)
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T48: Uma das três variáveis do dev em outra caixa
+
+**What**: Fix 18. `CLAUDE_config_dir` no caso de PAP-39 das três variáveis do dev, fora do esperado.
+**Where**: `broker/test/unit/launch-args.test.ts`
+**Depends on**: T47
+**Reuses**: O caso de PAP-39 da T42
+**Requirement**: PAP-39
+
+**Done when**:
+
+- [ ] `CLAUDE_config_dir` sai do ambiente da sessão: com a caixa contando, começa com `CLAUDE` e não é uma das três
+- [ ] Morre, conferido e desfeito, o Y7 (as três comparadas sem caixa em `broker/launch.ts`); o W12 segue morto
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T49: O log que chega depois do prazo
+
+**What**: Fix 19. Um `fetch` que obedece ao sinal e responde aos 2500 ms um log em que `worker-1` está online.
+**Where**: `broker/test/unit/launch.test.ts`
+**Depends on**: T48
+**Reuses**: O caso de PAP-38 dos 2000 ms
+**Requirement**: PAP-37, PAP-38
+
+**Done when**:
+
+- [ ] `start worker` abre a sessão como `worker-1`: a leitura que não respondeu em 2000 ms falhou, e ninguém está online
+- [ ] Morre, conferido e desfeito, o Y9 (o prazo de 1,5 × 2000 ms em `broker/launch.ts`): a sessão abre como `worker-2`; W17 e A10 seguem mortos pelo caso da T44
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -1145,6 +1253,7 @@ Phase 7:  T24 → T25 → T26
 Phase 8:  T27 → T28 → T29 → T30 → T31
 Phase 9:  T32 → T33 → T34 → T35 → T36 → T37 → T38 → T39
 Phase 10: T40 → T41 → T42 → T43 → T44
+Phase 11: T45 → T46 → T47 → T48 → T49
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
@@ -1223,6 +1332,11 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC. As 
 | T42: A caixa no nome das variáveis `CLAUDE` | 1 frase da spec e o teste dela em `launch-args.test.ts` | ✅ Granular |
 | T43: Um `.env*` que é link simbólico | 1 frase da spec e o teste dela em `launch-worktree.test.ts` | ✅ Granular |
 | T44: O launcher sai no prazo, não depois dele | 1 arquivo: `cli.test.ts` | ✅ Granular |
+| T45: A sessão encerrada por `SIGINT` | 1 arquivo: `server-credential.test.ts` | ✅ Granular |
+| T46: Uma pasta com `.jsonl` no nome | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T47: Um nome de `subagents/` que só tem `.jsonl` dentro | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T48: Uma das três variáveis do dev em outra caixa | 1 arquivo: `launch-args.test.ts` | ✅ Granular |
+| T49: O log que chega depois do prazo | 1 arquivo: `launch.test.ts` | ✅ Granular |
 
 Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.json`, T12 no `export` de `namesOf` em `peers.ts`, T15 em `broker/package.json` e T16 no conferidor de `skills.test.ts`. É a ligação do que a própria tarefa cria. T4 e T12 ficam inteiras: os três JSON só valem juntos como um plugin, e as cinco funções de T12 são uma linha cada sobre a mesma entrada.
 
@@ -1276,6 +1390,11 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T42 | T41 | T41 → T42 | ✅ Match |
 | T43 | T42 | T42 → T43 | ✅ Match |
 | T44 | T43 | T43 → T44 | ✅ Match |
+| T45 | None (a fase anterior inteira) | início da fase 11 | ✅ Match |
+| T46 | T45 | T45 → T46 | ✅ Match |
+| T47 | T46 | T46 → T47 | ✅ Match |
+| T48 | T47 | T47 → T48 | ✅ Match |
+| T49 | T48 | T48 → T49 | ✅ Match |
 
 ---
 
@@ -1327,3 +1446,8 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T42: A caixa no nome das variáveis `CLAUDE` | Launcher | unit | unit | ✅ OK |
 | T43: Um `.env*` que é link simbólico | Launcher | unit | unit | ✅ OK |
 | T44: O launcher sai no prazo, não depois dele | CLI | integration | integration | ✅ OK |
+| T45: A sessão encerrada por `SIGINT` | Servidor MCP | integration | integration | ✅ OK |
+| T46: Uma pasta com `.jsonl` no nome | Hook, parte pura | unit | unit | ✅ OK |
+| T47: Um nome de `subagents/` que só tem `.jsonl` dentro | Hook, parte pura | unit | unit | ✅ OK |
+| T48: Uma das três variáveis do dev em outra caixa | Launcher | unit | unit | ✅ OK |
+| T49: O log que chega depois do prazo | Launcher | unit | unit | ✅ OK |
