@@ -1168,10 +1168,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] O subagente de `logs.jsonl.d/s1/subagents/` entra na soma: só o `.jsonl` do fim sai do caminho
-- [ ] Morre, conferido e desfeito, o Y5 (`/\.jsonl/` sem `$` em `plugin/hooks/usage.ts`)
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] O subagente de `logs.jsonl.d/s1/subagents/` entra na soma: só o `.jsonl` do fim sai do caminho
+- [x] Morre, conferido e desfeito, o Y5 (`/\.jsonl/` sem `$` em `plugin/hooks/usage.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

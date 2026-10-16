@@ -384,7 +384,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-15 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5, T35, T41 | Needs Fix (Fix 16 e Fix 17 de `validation.md`): K15 e W5 morrem pela T35 e pela T41; Y5, `.jsonl` tirado do primeiro lugar do caminho, e Y6, um `*.jsonl.bak` contado, sobrevivem. Lacuna de teste da quinta volta |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46 | Implementing: Fix 16 de `validation.md` aplicado na T46, à espera da reverificação |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |
