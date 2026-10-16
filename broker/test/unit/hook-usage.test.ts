@@ -221,6 +221,12 @@ test("PAP-18: a file of subagents that cannot be read counts nothing, and the ot
   });
 });
 
+test("PAP-18: only .jsonl leaves the transcript path: the subagents of s1.txt are in s1.txt/subagents, not in s1/subagents", () => {
+  const path = file(["extension", "s1.txt"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+  file(["extension", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
+});
+
 test("PAP-19: without the main transcript there is no model, even with files of subagents", () => {
   file(["absent", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "a1", [5, 6, 7, 8])]);
   expect(sessionUsage(join(dir, "absent", "s1.jsonl"))).toEqual({});

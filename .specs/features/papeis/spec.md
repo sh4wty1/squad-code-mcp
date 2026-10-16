@@ -384,7 +384,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-15 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5, T35 | Needs Fix (Fix 11 de `validation.md`): K15 morre pela T35; W5, o diretório `subagents` achado tirando qualquer extensão, sobrevive. Lacuna de teste da reverificação de 2026-10-16 |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41 | Implementing: Fix 11 de `validation.md` aplicado na T41, à espera da reverificação |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |

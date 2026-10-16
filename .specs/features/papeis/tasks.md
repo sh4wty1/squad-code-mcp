@@ -1058,10 +1058,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] Com `transcript_path` `s1.txt`, os subagentes de `s1/` não contam: só o principal entra na soma, como a definição de "Transcripts da sessão" diz
-- [ ] Morre, conferido e desfeito, o W5 (o diretório `subagents` achado tirando qualquer extensão em `plugin/hooks/usage.ts`)
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Com `transcript_path` `s1.txt`, os subagentes de `s1/` não contam: só o principal entra na soma, como a definição de "Transcripts da sessão" diz
+- [x] Morre, conferido e desfeito, o W5 (o diretório `subagents` achado tirando qualquer extensão em `plugin/hooks/usage.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
