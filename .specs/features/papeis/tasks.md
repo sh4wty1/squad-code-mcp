@@ -132,6 +132,14 @@ Os Fix 1 a Fix 9 de `validation.md`, decididos pelo dev em 2026-10-16: um caso o
 T32 → T33 → T34 → T35 → T36 → T37 → T38 → T39
 ```
 
+### Phase 10: O que a reverificação do resíduo achou
+
+Os Fix 10 a Fix 14 da reverificação de 2026-10-16 em `validation.md`, decididos pelo dev no mesmo dia: um caso ou uma asserção por mutante vivo, só de teste, e duas frases da spec. Em PAP-39 a caixa conta, como o código faz. Nenhum código de produção muda.
+
+```
+T40 → T41 → T42 → T43 → T44
+```
+
 ---
 
 ## Task Breakdown
@@ -1020,10 +1028,112 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T40: A sessão encerrada por `SIGTERM`
+
+**What**: Fix 10. Um caso de PAP-07 em que a sessão registrada recebe `SIGTERM`, pulado no Windows, onde o sinal termina o processo sem ouvinte.
+**Where**: `broker/test/integration/server-credential.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: `worker` e o caso de PAP-07 da T33
+**Requirement**: PAP-07
+
+**Done when**:
+
+- [x] No Linux, com a sessão registrada encerrada por `SIGTERM`, o processo sai com 0 sozinho e o arquivo de credencial some
+- [x] Morre no Linux, conferido e desfeito num contêiner `oven/bun:1.4.2`, o W2 (sem `process.on("SIGTERM", cleanup)` em `broker/server.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T41: Um `transcript_path` que não termina em `.jsonl`
+
+**What**: Fix 11. Um transcript `s1.txt` com `s1/subagents/agent-a.jsonl` ao lado.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T40
+**Reuses**: Os casos de PAP-18 do arquivo
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [ ] Com `transcript_path` `s1.txt`, os subagentes de `s1/` não contam: só o principal entra na soma, como a definição de "Transcripts da sessão" diz
+- [ ] Morre, conferido e desfeito, o W5 (o diretório `subagents` achado tirando qualquer extensão em `plugin/hooks/usage.ts`)
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T42: A caixa no nome das variáveis `CLAUDE`
+
+**What**: Fix 12. `claude_home` e `Claude_Code_Entrypoint` no caso de PAP-39 das três variáveis do dev, e a frase da caixa em PAP-39.
+**Where**: `broker/test/unit/launch-args.test.ts`
+**Depends on**: T41
+**Reuses**: O caso de PAP-39 de `e9bb908`
+**Requirement**: PAP-39
+
+**Done when**:
+
+- [ ] PAP-39 diz que a caixa conta no nome: `claude_home` não começa com `CLAUDE` e fica
+- [ ] `claude_home` e `Claude_Code_Entrypoint` ficam no ambiente da sessão
+- [ ] Morre, conferido e desfeito, o W12 (o prefixo conferido sem caixa em `broker/launch.ts`)
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T43: Um `.env*` que é link simbólico
+
+**What**: Fix 13. Um `.env.link` que é link simbólico para um arquivo regular fora da raiz, pulado onde o link não pode ser criado, e a frase do link em PAP-56.
+**Where**: `broker/test/unit/launch-worktree.test.ts`
+**Depends on**: T42
+**Reuses**: Os casos de PAP-56 do arquivo
+**Requirement**: PAP-56
+
+**Done when**:
+
+- [ ] PAP-56 diz que um link simbólico, mesmo para um arquivo regular, não é arquivo regular e não é copiado
+- [ ] O worktree não recebe o `.env.link`; o `.env` ao lado é copiado
+- [ ] Morre, conferido e desfeito, o W15 (`file.isDirectory()` no lugar de `!file.isFile()` em `broker/launch.ts`)
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T44: O launcher sai no prazo, não depois dele
+
+**What**: Fix 14. O caso de PAP-37 da T38 mede só o processo do CLI e passa a pedir menos de 5000 ms.
+**Where**: `broker/test/integration/cli.test.ts`
+**Depends on**: T43
+**Reuses**: `runCli`, que passa a devolver quanto o CLI levou
+**Requirement**: PAP-37
+
+**Done when**:
+
+- [ ] Com um broker que aceita a conexão e nunca responde, `start mother` sai com 129 em menos de 5000 ms, contados do início ao fim do processo do CLI
+- [ ] Morre, conferido e desfeito, o W17 (a leitura abortada 4000 ms depois do prazo em `broker/launch.ts`): o CLI sai aos 6,2 s; o A10 segue morto
+- [ ] Nenhum código de produção muda
+- [ ] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -1034,6 +1144,7 @@ Phase 6:  T22, T23 (sem ordem entre as duas no diagrama: a T23 nasce da T22 e é
 Phase 7:  T24 → T25 → T26
 Phase 8:  T27 → T28 → T29 → T30 → T31
 Phase 9:  T32 → T33 → T34 → T35 → T36 → T37 → T38 → T39
+Phase 10: T40 → T41 → T42 → T43 → T44
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
@@ -1107,6 +1218,11 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC. As 
 | T37: `transcript_path` que é um número de descritor | 1 arquivo: `hook-stop.test.ts` | ✅ Granular |
 | T38: O launcher sai quando a sessão sai, com o broker sem responder | 1 frase da spec e o teste dela em `cli.test.ts` | ⚠️ Coeso |
 | T39: Documentos | seis ACs de `spec.md` | ✅ Granular |
+| T40: A sessão encerrada por `SIGTERM` | 1 arquivo: `server-credential.test.ts` | ✅ Granular |
+| T41: Um `transcript_path` que não termina em `.jsonl` | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T42: A caixa no nome das variáveis `CLAUDE` | 1 frase da spec e o teste dela em `launch-args.test.ts` | ✅ Granular |
+| T43: Um `.env*` que é link simbólico | 1 frase da spec e o teste dela em `launch-worktree.test.ts` | ✅ Granular |
+| T44: O launcher sai no prazo, não depois dele | 1 arquivo: `cli.test.ts` | ✅ Granular |
 
 Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.json`, T12 no `export` de `namesOf` em `peers.ts`, T15 em `broker/package.json` e T16 no conferidor de `skills.test.ts`. É a ligação do que a própria tarefa cria. T4 e T12 ficam inteiras: os três JSON só valem juntos como um plugin, e as cinco funções de T12 são uma linha cada sobre a mesma entrada.
 
@@ -1155,6 +1271,11 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T37 | T36 | T36 → T37 | ✅ Match |
 | T38 | T37 | T37 → T38 | ✅ Match |
 | T39 | T38 | T38 → T39 | ✅ Match |
+| T40 | None (a fase anterior inteira) | início da fase 10 | ✅ Match |
+| T41 | T40 | T40 → T41 | ✅ Match |
+| T42 | T41 | T41 → T42 | ✅ Match |
+| T43 | T42 | T42 → T43 | ✅ Match |
+| T44 | T43 | T43 → T44 | ✅ Match |
 
 ---
 
@@ -1201,3 +1322,8 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T37: `transcript_path` que é um número de descritor | Hook, processo | integration | integration | ✅ OK |
 | T38: O launcher sai quando a sessão sai, com o broker sem responder | CLI | integration | integration | ✅ OK |
 | T39: Documentos | Documentação | none | none | ✅ OK |
+| T40: A sessão encerrada por `SIGTERM` | Servidor MCP | integration | integration | ✅ OK |
+| T41: Um `transcript_path` que não termina em `.jsonl` | Hook, parte pura | unit | unit | ✅ OK |
+| T42: A caixa no nome das variáveis `CLAUDE` | Launcher | unit | unit | ✅ OK |
+| T43: Um `.env*` que é link simbólico | Launcher | unit | unit | ✅ OK |
+| T44: O launcher sai no prazo, não depois dele | CLI | integration | integration | ✅ OK |
