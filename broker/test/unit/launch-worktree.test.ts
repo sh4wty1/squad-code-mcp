@@ -258,6 +258,9 @@ test("PAP-56: the regular files of the root that start with .env and git does no
   // one ignored, one merely untracked
   writeFileSync(join(main, ".env"), "KEY=1\nOTHER=two words\n");
   writeFileSync(join(main, ".env.local"), "LOCAL=1\n");
+  // names that start with .env and are neither .env nor .env.<something>
+  writeFileSync(join(main, ".envrc"), "RC=1\n");
+  writeFileSync(join(main, ".env-production"), "PRODUCTION=1\n");
   // what does not count: a directory, a name that does not start with .env, a file below the root
   mkdirSync(join(main, ".env.d"));
   writeFileSync(join(main, ".env.d", "inner"), "INNER=1\n");
@@ -266,9 +269,11 @@ test("PAP-56: the regular files of the root that start with .env and git does no
   writeFileSync(join(main, "sub", ".env"), "SUB=1\n");
 
   const dir = worktree(main, "worker-1", "worker", null, {});
-  expect(readdirSync(dir).sort()).toEqual([".env", ".env.local", ".git", ".gitignore", "README.md"]);
+  expect(readdirSync(dir).sort()).toEqual([".env", ".env-production", ".env.local", ".envrc", ".git", ".gitignore", "README.md"]);
   expect(readFileSync(join(dir, ".env"), "utf8")).toBe("KEY=1\nOTHER=two words\n");
   expect(readFileSync(join(dir, ".env.local"), "utf8")).toBe("LOCAL=1\n");
+  expect(readFileSync(join(dir, ".envrc"), "utf8")).toBe("RC=1\n");
+  expect(readFileSync(join(dir, ".env-production"), "utf8")).toBe("PRODUCTION=1\n");
 }, SLOW);
 
 test("PAP-56: a tracked .env.example is not copied over the one that came with the checkout", () => {

@@ -422,7 +422,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-53 | P1: Worktree por papel | T13 | Needs Fix (Fix 6 de `validation.md`): lacuna de teste, aceita pelo dev |
 | PAP-54 | P1: Worktree por papel | T13 | Verified |
 | PAP-55 | P1: Worktree por papel | T13, T14 | Verified |
-| PAP-56 | P1: Worktree por papel | T13 | Needs Fix (Fix 3 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-56 | P1: Worktree por papel | T13, T34 | Implementing: Fix 3 de `validation.md` aplicado na T34, à espera da reverificação |
 | PAP-57 | P1: Worktree por papel | T13 | Verified |
 | PAP-58 | P1: Worktree por papel | T13, T14 | Verified |
 | PAP-59 | P1: Comando `squad` | T15 | Verified |

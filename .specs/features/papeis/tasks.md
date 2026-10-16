@@ -907,10 +907,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] `.envrc` e `.env-production` não versionados chegam ao worktree com o conteúdo
-- [ ] Morre, conferido e desfeito, o K1 (só `.env` e `.env.<algo>` copiados em `broker/launch.ts`)
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `.envrc` e `.env-production` não versionados chegam ao worktree com o conteúdo
+- [x] Morre, conferido e desfeito, o K1 (só `.env` e `.env.<algo>` copiados em `broker/launch.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
