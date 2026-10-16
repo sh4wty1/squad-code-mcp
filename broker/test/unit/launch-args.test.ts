@@ -302,6 +302,8 @@ test("PAP-39: the three CLAUDE variables the dev sets for Claude Code stay, and 
     CLAUDE_CONFIG_DIR_OLD: "/home/dev/.claude",
     CLAUDE_CODE_OAUTH_SCOPES: "user:inference",
     CLAUDE_CODE_CHILD_SESSION: "1",
+    // with the case counting, this starts with CLAUDE and is not one of the three: it leaves
+    CLAUDE_config_dir: "/home/dev/.claude-other",
     // the comparison minds the case: these do not start with CLAUDE, and stay
     claude_home: "/home/dev/claude",
     Claude_Code_Entrypoint: "cli",

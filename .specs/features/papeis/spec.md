@@ -405,7 +405,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-36 | P1: `roles.json` | T14 | Verified |
 | PAP-37 | P1: Lançar uma sessão | T1, T14, T22, T38, T44 | Needs Fix (Fix 19 de `validation.md`): o texto fechou na T38, e A10 e W17 morrem pela T44; Y9, um prazo de 3000 ms, sobrevive, porque nenhum caso responde ao log entre 2000 e 3000 ms. Lacuna de teste da quinta volta |
 | PAP-38 | P1: Lançar uma sessão | T14 | Verified |
-| PAP-39 | P1: Lançar uma sessão | T12, T42 | Needs Fix (Fix 18 de `validation.md`): K2 e W12 morrem pela T42; Y7, as três variáveis do dev comparadas sem caixa, sobrevive. Lacuna de teste da quinta volta |
+| PAP-39 | P1: Lançar uma sessão | T12, T42, T48 | Implementing: Fix 18 de `validation.md` aplicado na T48, à espera da reverificação |
 | PAP-40 | P1: Lançar uma sessão | T12, T22 | Verified |
 | PAP-41 | P1: Lançar uma sessão | T14 | Verified |
 | PAP-42 | P1: Lançar uma sessão | T12, T14 | Verified |

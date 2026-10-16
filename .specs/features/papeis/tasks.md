@@ -1208,10 +1208,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] `CLAUDE_config_dir` sai do ambiente da sessão: com a caixa contando, começa com `CLAUDE` e não é uma das três
-- [ ] Morre, conferido e desfeito, o Y7 (as três comparadas sem caixa em `broker/launch.ts`); o W12 segue morto
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `CLAUDE_config_dir` sai do ambiente da sessão: com a caixa contando, começa com `CLAUDE` e não é uma das três
+- [x] Morre, conferido e desfeito, o Y7 (as três comparadas sem caixa em `broker/launch.ts`); o W12 segue morto
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
