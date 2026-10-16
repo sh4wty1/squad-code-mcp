@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 102,
+  "next_id": 103,
   "lessons": [
     {
       "id": "L-001",
@@ -1859,10 +1859,13 @@
       "evidence": [
         "W12 broker/launch.ts:97 (PAP-39) (launcher)",
         "W15 broker/launch.ts:157 (PAP-56) (launcher)",
-        "W5 plugin/hooks/usage.ts:82 (PAP-18) (hooks)"
+        "W5 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "Y5 plugin/hooks/usage.ts:82 (PAP-18) (launcher)",
+        "Y6 plugin/hooks/usage.ts:85 (PAP-18) (launcher)",
+        "Y7 broker/launch.ts:97 (PAP-39) (launcher)"
       ],
       "created": "2026-10-16T15:08:16Z",
-      "last_seen": "2026-10-16T15:08:17Z"
+      "last_seen": "2026-10-16T15:49:02Z"
     },
     {
       "id": "L-100",
@@ -1895,10 +1898,29 @@
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "W2 broker/server.ts:400 (PAP-07) (server)"
+        "W2 broker/server.ts:400 (PAP-07) (server)",
+        "Y1 broker/server.ts:399 (PAP-07) (server)"
       ],
       "created": "2026-10-16T15:08:17Z",
-      "last_seen": "2026-10-16T15:08:17Z"
+      "last_seen": "2026-10-16T15:49:01Z"
+    },
+    {
+      "id": "L-102",
+      "key": "surviving_mutant::test a deadline with an answer that arrives after it not only with one that never arrives a bound on the exit time lets a longer deadline pass",
+      "text": "Test a deadline with an answer that arrives after it, not only with one that never arrives: a bound on the exit time lets a longer deadline pass",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Y9 broker/launch.ts:186 (PAP-37) (launcher)"
+      ],
+      "created": "2026-10-16T15:49:02Z",
+      "last_seen": "2026-10-16T15:49:02Z"
     }
   ]
 }

@@ -1,13 +1,17 @@
 # Papéis Validation
 
-**Result**: FAIL
+**Result**: FAIL. Na fatia, 71 de 75 requisitos verificados: PAP-56 nesta volta, PAP-21, PAP-31 e PAP-53 na volta 4, e os outros antes. PAP-07, PAP-18, PAP-37 e PAP-39 seguem com lacuna de teste (Fix 15 a Fix 19)
 
-**Round**: 4, reverificação do resíduo da volta 3 (Fix 1 a Fix 9), pedida pelo dev em 2026-10-16
+**Round**: 5, reverificação dos Fix 10 a Fix 14 (T40 a T44), pedida pelo dev em 2026-10-16
 **Date**: 2026-10-16
 **Spec**: `.specs/features/papeis/spec.md`, PAP-01 a PAP-75, edge cases e "Success Criteria"
-**Diff range**: `055d629..959bcb6` (`main..test/papeis-gaps` em `959bcb6`). A volta 3 foi `f162184..ac25e8d`
-**Verifier**: agente novo e independente (author ≠ verifier). Não escreveu código, testes, tarefas nem relatórios da fatia, e não é o Verifier das voltas 1 a 3.
-**Environment**: volta 4: Windows 11 Pro 10.0.26200, Bun 1.3.14, clone físico `verifier4` do branch em `959bcb6`, fora do repositório, com `bun install --frozen-lockfile` próprio; duas sondas no Linux, num contêiner `oven/bun:1.3.14` sobre uma cópia desse clone. Volta 3: Bun 1.4.2, clone em `ac25e8d` e contêiner `oven/bun:1.4.2`.
+**Diff range**: `c8cb88c..ce5f774` (fase 10 de `test/papeis-gaps`, sobre `main` em `055d629`). A volta 4 foi `055d629..959bcb6`
+**Verifier**: agente novo e independente (author ≠ verifier). Não escreveu código, testes, tarefas nem relatórios da fatia, e não é o Verifier das voltas 1 a 4.
+**Environment**: volta 5: Windows 11 Pro 10.0.26200, Bun 1.3.14, clone físico `verifier5` do branch em `ce5f774`, fora do repositório, com `bun install --frozen-lockfile` próprio; Linux num contêiner `oven/bun:1.4.2` sobre uma cópia desse clone. Volta 4: Bun 1.3.14, clone `verifier4` em `959bcb6` e contêiner `oven/bun:1.3.14`. Volta 3: Bun 1.4.2, clone em `ac25e8d` e contêiner `oven/bun:1.4.2`.
+
+Os cinco sobreviventes da volta 4 morrem, cada um no teste que a correção trouxe: W5, W12, W15 e W17 no Windows, W2 no Linux. K13, K15, K2, K1, A10 e V6 seguem mortos. Nenhum arquivo de produção mudou em `055d629..ce5f774`, e nenhuma asserção foi afrouxada: o único esperado trocado, o limite do caso de PAP-37, ficou mais estrito (10 s do caso inteiro para 5000 ms só do processo do CLI). As duas frases novas dizem o que o código faz: a caixa conta em PAP-39 (`broker/launch.ts:97`), e um link simbólico não é arquivo regular em PAP-56 (`broker/launch.ts:157`). O caso de PAP-37 mediu de 2138 a 2439 ms em oito execuções, com 2,5 s de folga até o limite. Mesmo assim a volta falha: das 10 mutações novas, 2 morrem, 3 são equivalentes com sonda, e 5 sobrevivem mudando um resultado que um requisito define. Y1: sem o tratamento de `SIGINT` (`broker/server.ts:399`), o arquivo de credencial fica no Linux (PAP-07). Y5: o `.jsonl` sai do primeiro lugar do caminho, não do fim (`plugin/hooks/usage.ts:82`, PAP-18). Y6: um `agent-b.jsonl.bak` de `subagents` conta (`plugin/hooks/usage.ts:85`, PAP-18). Y7: as três variáveis que ficam são comparadas sem caixa, e `CLAUDE_config_dir` fica (`broker/launch.ts:97`, PAP-39). Y9: o prazo da leitura do log é de 3000 ms, e não de 2000 (`broker/launch.ts:186`, PAP-37). Com Y9, um log respondido aos 2500 ms é lido, e o worker abre como `worker-2` em vez de `worker-1`; o CLI sai aos 3,14 s, abaixo do limite. PAP-56 fica verificado. Nenhum defeito de produção foi visto: em todas as sondas, o código original faz o que a spec diz.
+
+Os parágrafos abaixo são da volta 4.
 
 Os oito mutantes do resíduo (K1, K2, K9, K13, K15, K16, A2, A10) morrem, cada um no teste que a correção trouxe, e S10 e V6 seguem mortos. Nenhum arquivo de produção mudou em `055d629..959bcb6` e nenhuma asserção foi afrouxada. Os seis textos do Fix 9 dizem o que o código e os testes já faziam. A frase nova da definição de feature aberta (`spec.md:103`) fecha a lacuna de precisão de PAP-37 no texto. Mesmo assim a volta falha: das 18 mutações novas, 11 morrem, 2 são equivalentes com sonda, e 5 sobrevivem mudando um resultado que um requisito define. W2: sem o tratamento de `SIGTERM` (`broker/server.ts:400`) o arquivo de credencial fica no Linux (PAP-07). W5: o diretório `subagents` é procurado tirando qualquer extensão (`plugin/hooks/usage.ts:82`, PAP-18). W12: uma variável `claude_*` em minúsculas sai do ambiente (`broker/launch.ts:97`, PAP-39). W15: um link simbólico `.env*` é copiado (`broker/launch.ts:157`, PAP-56). W17: a leitura do log é abandonada 4 s depois do prazo, e o launcher sai aos 6,09 s em vez de 2,16 s; o limite de 10 s de `test/integration/cli.test.ts:240` deixa passar (PAP-37, com ressalva). Ficam verificados PAP-21, PAP-31 e PAP-53. Nenhum defeito de produção foi visto: em todas as sondas, o código original faz o que a spec diz.
 
@@ -27,6 +31,7 @@ O padrão das seis: o teste usa só a forma mais comum da entrada. Todo `.env*` 
 | 2 | `f162184..8f4e442` | FAIL | C1b, C1c (`cli.ts`, PAP-37), F1, F6, F3 (`launch.ts`, PAP-53/54, PAP-41/57, PAP-38) | T27 a T31 (`8539150`, `3166093`, `117ab87`, `a3280e3`, `ac25e8d`), só de teste, e uma frase na definição de "feature aberta, para o launcher" |
 | 3 | `f162184..ac25e8d` | FAIL | K1, K2 (`launch.ts`, PAP-56, PAP-39), K13 (`server.ts`, PAP-07), K9, K15, K16 (`plugin/hooks/`, PAP-21, PAP-18, PAP-31), A2 (`launch.ts`, PAP-53) e A10 com ressalva (`launch.ts`, PAP-37) | Fix 1 a Fix 9, abaixo |
 | 4 | `055d629..959bcb6` | FAIL | Os oito do resíduo morrem. Sobrevivem W2 (`server.ts`, PAP-07, só no Linux), W5 (`usage.ts`, PAP-18), W12 e W15 (`launch.ts`, PAP-39, PAP-56) e W17 com ressalva (`launch.ts`, PAP-37) | Fix 10 a Fix 14, em "Reverificação do resíduo (2026-10-16)" |
+| 5 | `c8cb88c..ce5f774` | FAIL | Os cinco da volta 4 morrem (W2 no Linux). Sobrevivem Y1 (`server.ts`, PAP-07, só no Linux), Y5 e Y6 (`usage.ts`, PAP-18), Y7 (`launch.ts`, PAP-39) e Y9 (`launch.ts`, PAP-37) | Fix 15 a Fix 19, em "Reverificação dos Fix 10 a Fix 14 (2026-10-16)" |
 
 O que foi feito nesta volta:
 
@@ -647,3 +652,145 @@ Pelo `lessons.py`, todas como candidatas:
 - L-099: W12, W15 e W5, com o mesmo texto, juntados pelo script.
 - L-100: W17.
 - L-101: W2.
+
+---
+
+## Reverificação dos Fix 10 a Fix 14 (2026-10-16)
+
+Volta 5. O dev decidiu em 2026-10-16 aplicar Fix 10 a Fix 14, com a caixa contando em PAP-39 como o código faz (Fix 12 só em texto e teste). O autor fez isso em `test/papeis-gaps`, `9f1ebd0..ce5f774` sobre `c8cb88c` (T40 a T44, fase 10 de `tasks.md`). Escopo desta volta: PAP-07, PAP-18, PAP-37, PAP-39 e PAP-56. As linhas de código citadas são de `ce5f774`.
+
+### Ambiente e isolamento
+
+- **Intervalo**: `c8cb88c..ce5f774`.
+- **Ambiente**: Windows 11 Pro 10.0.26200, Bun 1.3.14. Clone físico `scratchpad\verifier5` (`git clone --no-hardlinks -c core.autocrlf=false --branch test/papeis-gaps`) em `ce5f774`, com `bun install --frozen-lockfile` próprio. Linux: contêiner `oven/bun:1.4.2` sobre `scratchpad\v5lin`, um clone de `verifier5` montado só para leitura e copiado para dentro, com `git`, `lsof`, `procps` e `bun install` próprios.
+- **Repositório real**: `git status --porcelain` antes, vazio, em `test/papeis-gaps` e `ce5f774`. Nenhum stash, commit, push, troca de branch nem reset. As mutações rodaram no clone, uma de cada vez. Depois de cada uma: `git checkout -- <arquivo>`, e `git status --porcelain` vazio conferido pelo script antes da seguinte. As sondas rodam numa terceira cópia (`scratchpad\v5probe`), com o mutante gravado ao lado do original como `<arquivo>.<id>.ts` e apagado depois; essa cópia ficou limpa. Os scripts e as saídas ficam em `scratchpad\v5`. Os clones `mut`, `lin` e `verifier4` não foram tocados. Nenhum `claude` real rodou: os casos de `cli.test.ts` usam `SQUAD_CLAUDE=git` ou um script compilado. Todo `broker.ts` e `server.ts` subiu pelos ajudantes de teste, com `SQUAD_DB` e `SQUAD_TOKEN_FILE` temporários.
+- **No fim**: `git status --porcelain` mostra `.specs/features/papeis/validation.md` (este relatório), `.specs/LESSONS.md` e `.specs/lessons.json` (gravados pelo `lessons.py`), e nada mais.
+
+### Produção intacta
+
+- `git diff 055d629..ce5f774 --name-only` só lista arquivos de `broker/test/`, de `.specs/` e `ROADMAP.md`. Nenhum arquivo de produção.
+- `c8cb88c..ce5f774` muda `spec.md`, `tasks.md` e cinco arquivos de `broker/test/`, com 191 linhas a mais e 15 a menos. O diff de `broker/test` foi lido linha a linha. Nenhum `expect` foi removido. Entraram dois `skipIf`, ambos em casos novos: o de `SIGTERM`, no Windows, e o do link, onde o link não pode ser criado; neste Windows o link é criado e o caso roda. As linhas removidas:
+  - o `started` do caso de PAP-37;
+  - o comentário e o `expect(Date.now() - started).toBeLessThan(10_000)`, trocados por `expect(res.ms).toBeLessThan(5000)` (`test/integration/cli.test.ts:242`), mais estrito: o tempo agora conta só o processo do CLI, sem o repositório de teste que `startWith` monta;
+  - o `return` de `runCli`, que ganhou `ms` e manteve o resto. O `import` de `launch-worktree.test.ts` ganhou `symlinkSync`.
+- `spec.md` mudou em PAP-39 (a caixa), em PAP-56 (o link) e nas cinco linhas de rastreabilidade, que dizem `Implementing`.
+
+### Spec-Anchored Acceptance Criteria
+
+Caminhos de teste relativos a `broker/`.
+
+| Criterion | Spec-defined outcome | `file:line` + assertion | Result |
+| --------- | -------------------- | ----------------------- | ------ |
+| PAP-07 | O arquivo de credencial some quando o servidor MCP encerra depois de registrado | `test/integration/server-credential.test.ts:98`–`:107`: sessão registrada, `process.kill(pid, "SIGTERM")` (`:104`), sai com 0 em até 1500 ms (`:105`), o arquivo some (`:107`). Pulado no Windows. O 0 é o que o código dá (`broker/server.ts:396`) e o que PAP-08 pede ao encerramento; o resultado de PAP-07 é o arquivo | ❌ GAP parcial. O caso mata W2 no Linux. Nenhum caso encerra a sessão por `SIGINT`, e Y1 vive: sem `process.on("SIGINT", cleanup)` (`broker/server.ts:399`), o processo morre pelo sinal e o arquivo fica. Ctrl+C no terminal manda `SIGINT` ao grupo de processos inteiro, servidor MCP incluído |
+| PAP-18 | Todo `*.jsonl` de `<transcript_path sem a extensão .jsonl>/subagents/` soma (`spec.md:106`) | `test/unit/hook-usage.test.ts:224`–`:228`: `s1.txt` com `s1/subagents/agent-a.jsonl` ao lado; `toEqual` com só o principal (1 em cada campo) | ❌ GAP parcial. O caso afirma o resultado da definição e mata W5. Sobrevivem Y5: o `.jsonl` sai do primeiro lugar do caminho, não do fim (`plugin/hooks/usage.ts:82`). E Y6: um nome que só contém `.jsonl`, como `agent-b.jsonl.bak`, conta (`:85`). Nenhum caminho dos testes tem `.jsonl` antes do fim, e nenhum arquivo de `subagents` termina em outra coisa depois de `.jsonl`. O título diz que os subagentes de `s1.txt` ficam em `s1.txt/subagents`; esse diretório não pode existir, porque `s1.txt` é um arquivo (`ENOTDIR`, sonda de Y10). O título é coerente com a definição, só que vazio |
+| PAP-37 | Um processo, código de saída dele; pela definição (`spec.md:103`), a leitura lida com prazo de 2000 ms que não responde nele é abandonada nele, e nada dela segura o launcher | `test/integration/cli.test.ts:229`–`:253`: broker que aceita e nunca responde, `git` no lugar da sessão; `:239` `toBe(129)`; `:242` `res.ms` menor que 5000; a conexão chegou. Oito execuções sem mutação: de 2138 a 2439 ms (abaixo) | ❌ GAP parcial. O limite é certo para o que mede, e não oscila: a folga é de 2,5 s sobre o maior tempo visto. Mata W17 (6248 ms) e A10 (o caso estoura os 30 s). Um limite de tempo de saída não fixa o valor do prazo: Y9, prazo de 3000 ms, sai aos 3140 ms e passa, e `test/unit/launch.test.ts:337`–`:339` (de 2000 a 5000 ms) também deixa passar. A sonda mostra o resultado que muda: um log respondido aos 2500 ms é abandonado pelo original e lido pelo mutante |
+| PAP-39 | Sem nenhuma variável cujo nome começa com `CLAUDE`, com a caixa contando, a não ser as três do dev; as outras sem mudança | `test/unit/launch-args.test.ts:294`–`:319`: `claude_home` e `Claude_Code_Entrypoint` ficam (`:306`, `:314`), com o objeto inteiro | ❌ GAP parcial. A frase nova diz o que `broker/launch.ts:97` faz (`startsWith` e `includes` com caixa), e o caso mata W12 e K2. A caixa vale também para as três exceções: `CLAUDE_config_dir` começa com `CLAUDE` e não é `CLAUDE_CONFIG_DIR`, e sai. Nenhum caso tem uma exceção com outra caixa, e Y7 vive. ⚠️ No Windows o sistema não distingue a caixa: a `Claude_Code_Entrypoint` que fica chega à sessão como a `CLAUDE_CODE_ENTRYPOINT` que PAP-39 tira. Quem põe o nome com outra caixa é o dev; a decisão foi dele e está escrita |
+| PAP-56 | Cópia de cada arquivo regular da raiz cujo nome começa com `.env` e que o git não versiona; um link simbólico, mesmo para um arquivo regular, não é arquivo regular e não é copiado | `test/unit/launch-worktree.test.ts:315`–`:323`: `.env.link`, link para `secret` fora da raiz; `:322` a listagem inteira é `.env`, `.git`, `README.md`. Pulado onde o link não pode ser criado; rodou no Windows e no Linux | ✅ PASS. A frase nova diz o que `broker/launch.ts:157` faz: `Dirent.isFile()` de `readdirSync(..., { withFileTypes: true })` não segue o link. O caso mata W15 no Windows e no Linux; K1 e Y8 morrem |
+
+### Discrimination Sensor
+
+Um script aplica cada mutação, confere que ela casou uma vez só, roda os testes da camada e restaura o arquivo com `git checkout --`. Depois confere `git status --porcelain` vazio no clone antes da seguinte. Controle: sem mutação, os sete arquivos passam (abaixo, "Gate no clone"). Testes por camada:
+
+- `server-credential.test.ts` e `server.test.ts` para `server.ts`;
+- `hook-usage.test.ts` e `hook-stop.test.ts` para `usage.ts`;
+- `launch-args.test.ts`, `launch.test.ts` e `cli.test.ts` para `sessionEnv`;
+- os três `launch*.test.ts` e `cli.test.ts` para o `worktree`;
+- `launch.test.ts` e `cli.test.ts` para `readLog`.
+
+No Linux, rodaram sem mutação, com W2, Y1, Y4 e W15: `server-credential.test.ts`, `server.test.ts` e `launch-worktree.test.ts`, e a sonda de `SIGINT`. Sem mutação: 65 pass, 0 fail.
+
+#### Os cinco da volta 4 e os seis mortos antes, reinjetados
+
+| Mutation | File:line at ce5f774 | Description | Killed? |
+| -------- | -------------------- | ----------- | ------- |
+| W2 | `broker/server.ts:400` | PAP-07: sem `process.on("SIGTERM", cleanup)` | ✅ Morto no Linux, 1 falha: `PAP-07: when the session registered is ended by SIGTERM, its credential file is gone and it exits with 0`. No Windows vive (25 pass), porque o caso é pulado lá, como deve |
+| W5 | `plugin/hooks/usage.ts:82` | PAP-18: o diretório dos subagentes é o `transcript_path` sem qualquer extensão | ✅ Morto, 1 falha: `PAP-18: only .jsonl leaves the transcript path: the subagents of s1.txt are in s1.txt/subagents, not in s1/subagents` |
+| W12 | `broker/launch.ts:97` | PAP-39: o prefixo `CLAUDE` conferido sem caixa (`toUpperCase`) | ✅ Morto, 1 falha: `PAP-39: the three CLAUDE variables the dev sets for Claude Code stay, and every other one leaves` |
+| W15 | `broker/launch.ts:157` | PAP-56: `!file.isFile()` vira `file.isDirectory()`, e o link é copiado | ✅ Morto, 1 falha no Windows e no Linux: `PAP-56: a .env* that is a symbolic link to a regular file is not a regular file, and is not copied` |
+| W17 | `broker/launch.ts:184` | PAP-37: a leitura abortada 2 × 2000 ms depois do prazo | ✅ Morto, 1 falha: `PAP-37: with a broker that takes the connection and never answers, start exits with the code of the session soon after it, with the read of the log abandoned`. O CLI sai aos 6248 ms |
+| K13 | `broker/server.ts:386` | PAP-07: o `rmSync` dentro do `try` do `/unregister` | ✅ Morto, 1 falha: `PAP-07: when the session closes after registering with the broker already gone, its credential file is gone and it exits with 0` |
+| K15 | `plugin/hooks/usage.ts:85` | PAP-18: só `agent-*.jsonl` de `subagents/` | ✅ Morto, 1 falha: `PAP-18: the lines of the files of subagents add to the ones of the main transcript` |
+| K2 | `broker/launch.ts:97` | PAP-39: só `CLAUDE_*` e `CLAUDECODE*` saem | ✅ Morto, 1 falha: o mesmo teste de W12 |
+| K1 | `broker/launch.ts:157` | PAP-56: só `.env` e `.env.<algo>` copiados | ✅ Morto, 1 falha: `PAP-56: the regular files of the root that start with .env and git does not track are copied with their content` |
+| A10 | `broker/launch.ts:184` | PAP-37: sem `abort.abort()` no prazo | ✅ Morto, 1 falha: o mesmo teste de W17, que estoura os 30 s dele |
+| V6 | `broker/server.ts:390` | PAP-08: sem o `try` em volta do `rmSync` | ✅ Morto, 1 falha: `PAP-08: with the credential file swapped for a directory that is not empty, the server records the peer_left and exits with 0` |
+
+#### Mutações novas
+
+Nenhuma está nas tabelas das voltas 1 a 4, nem entre as da T31.
+
+| Mutation | File:line at ce5f774 | Description | Killed? |
+| -------- | -------------------- | ----------- | ------- |
+| Y1 | `broker/server.ts:399` | PAP-07: sem `process.on("SIGINT", cleanup)` | ❌ Sobreviveu (25 pass no Windows; no Linux, 0 falhas fora da sonda). Sonda abaixo: muda o resultado no Linux |
+| Y2 | `broker/server.ts:385` | PAP-07, PAP-08: o `/unregister` é mandado sem `await`, e o processo sai logo depois do `rmSync` | ⚪ Equivalente, com sonda e ressalva (25 pass) |
+| Y3 | `broker/server.ts:396` | PAP-07, PAP-08: o encerramento sai com 1 | ✅ Morto, 2 falham. Primeiro: `PAP-07: when the session closes after registering with the broker already gone, its credential file is gone and it exits with 0` |
+| Y4 | `broker/server.ts:402` | PAP-07: sem o ouvinte de `close` da entrada; fica o de `end` | ⚪ Equivalente, com sonda (25 pass no Windows, 38 no Linux) |
+| Y5 | `plugin/hooks/usage.ts:82` | PAP-18: `/\.jsonl/` sem `$`: sai o primeiro `.jsonl` do caminho, não o do fim | ❌ Sobreviveu (51 pass, 0 fail) |
+| Y6 | `plugin/hooks/usage.ts:85` | PAP-18: conta todo nome de `subagents/` que contém `.jsonl`, não só o que termina nele | ❌ Sobreviveu (51 pass, 0 fail) |
+| Y7 | `broker/launch.ts:97` | PAP-39: as três que ficam são comparadas sem caixa (`OF_THE_DEV.includes(key.toUpperCase())`) | ❌ Sobreviveu (120 pass, 0 fail) |
+| Y8 | `broker/launch.ts:155` | PAP-56: `git ls-files -z -- .env`, e só o `.env` conta como versionado | ✅ Morto, 1 falha: `PAP-56: a file git tracks in the main checkout is not copied to a worktree whose commit does not have it` |
+| Y9 | `broker/launch.ts:186` | PAP-37: o prazo da leitura do log é 1,5 × 2000 ms | ❌ Sobreviveu (64 pass, 0 fail). O caso de `cli.test.ts` mede 3140 ms |
+| Y10 | `plugin/hooks/usage.ts:82` | PAP-18: sem `.jsonl` no fim, nenhum diretório de subagentes é procurado | ⚪ Equivalente, com sonda (51 pass) |
+
+**Sensor depth**: 11 reinjeções e 10 mutações novas, em `broker/server.ts` (4), `plugin/hooks/usage.ts` (4) e `broker/launch.ts` (2) entre as novas; W2, Y1, Y4 e W15 também no Linux
+**Sensor result**: 11 de 11 reinjetados mortos (W2 no Linux). Dos 10 novos, 2 mortos, 3 equivalentes com sonda e 5 sobreviventes. FAIL
+
+#### As sondas
+
+Cada sonda roda o original e o mutante com a mesma entrada, fora do clone das mutações.
+
+| Mutante | Entrada | Original | Mutante | Julgamento |
+| ------- | ------- | -------- | ------- | ---------- |
+| Y1 | Linux (`oven/bun:1.4.2`): o caso de `SIGTERM` de `server-credential.test.ts:98` com `SIGINT`, numa cópia do arquivo | Sai com 0; o arquivo some | Morre pelo sinal (código `null`); o arquivo fica | Sobrevivente no Linux. PAP-07 vale para todo encerramento depois do registro, e Ctrl+C no terminal manda `SIGINT` ao servidor MCP junto com a sessão |
+| Y2 | `server-credential.test.ts -t "PAP-0[78]" --rerun-each 10`: 40 casos no Windows, 50 no Linux | Todos passam; `peer_left` com `reason: "unregistered"` | Todos passam; o mesmo `peer_left` | Equivalente para PAP-07: o `rmSync` é síncrono e roda antes do `process.exit` nos dois, então o arquivo some igual. Ressalva para PAP-08: o `peer_left` passa a depender de o `fetch` do Bun escrever o pedido antes da saída; em 90 de 90 encerramentos escreveu |
+| Y4 | Os casos de `server-credential.test.ts`, que fecham a entrada, no Windows e no Linux; e o pai da sessão registrada morto com `kill(9)`, 5 vezes em cada | Os casos passam. No Linux o pai morto dá fim de arquivo, e o arquivo some (`peer_left:unregistered`) 5 de 5. No Windows o servidor morre com o pai, e o arquivo fica 5 de 5 | O mesmo nos três | Equivalente: o fim da entrada dá `end` antes de `close`, e `cleanup` só corre uma vez (`exiting`, `broker/server.ts:378`). No Windows nenhum ouvinte roda, porque o processo é terminado |
+| Y5 | `transcript_path` `logs.jsonl.d/s1.jsonl` (1 em cada campo) e `logs.jsonl.d/s1/subagents/agent-a.jsonl` (100) | `claude-opus` com 101 | `claude-opus` com 1 | Sobrevivente: o mutante procura em `logs.d/s1.jsonl/subagents`. Pouco peso: uma pasta de projeto com `.jsonl` no nome |
+| Y6 | `s1.jsonl` (1), `s1/subagents/agent-a.jsonl` (10) e `s1/subagents/agent-b.jsonl.bak` (100) | `claude-opus` com 11 | `claude-opus` com 111 | Sobrevivente: `agent-b.jsonl.bak` não é `*.jsonl` (`spec.md:106`) |
+| Y7 | `sessionEnv` com `CLAUDE_config_dir`, `Claude_Config_Dir`, `CLAUDE_CODE_oauth_token` e `CLAUDE_CONFIG_DIR` | Saem `CLAUDE_config_dir` e `CLAUDE_CODE_oauth_token`; ficam `Claude_Config_Dir` e `CLAUDE_CONFIG_DIR` | Ficam as quatro | Sobrevivente: com a caixa contando, `CLAUDE_config_dir` começa com `CLAUDE` e não é uma das três |
+| Y9 | `launch(["worker"])` num repositório, com um `fetch` que responde aos 2500 ms um log em que `worker-1` está online e que obedece ao sinal | Abandona a leitura aos 2000 ms: abre `worker-1`, em 2136 ms | Lê o log: abre `worker-2`, em 2648 ms | Sobrevivente: pela definição (`spec.md:103`) a leitura que não responde em 2000 ms falha, e ninguém está online. Muda também o nome que PAP-38 escolhe |
+| Y10 | `s1.txt` com `s1/subagents/agent-a.jsonl` (100); `mkdirSync("s1.txt/subagents")`; e `s2.JSONL` com `s2/subagents/agent-a.jsonl` | 1 em cada campo nos dois; o diretório não pode ser criado (`ENOTDIR`) | O mesmo | Equivalente: quando o principal pode ser lido, ele é um arquivo, e `<caminho sem .jsonl>/subagents` só difere do caminho quando ele termina em `.jsonl` |
+
+### Os tempos do caso de PAP-37
+
+O mesmo caso de `test/integration/cli.test.ts:229`, oito vezes seguidas no Windows, sem mutação, com `res.ms` impresso por uma linha posta só para isso e tirada depois (`git checkout --`): 2171, 2142, 2138, 2166, 2141, 2157, 2439 e 2327 ms. Os oito passam. No gate e nas 9 mutações que rodam `cli.test.ts`, o caso só falhou com as duas do prazo (W17 e A10). Com mutação: W17 6248 ms (falha), Y9 3140 ms (passa), A10 acima de 30 s (falha).
+
+O limite de 5000 ms são os 2000 ms do prazo mais a partida do `bun`, o `git` do launcher e a sessão, que sai na hora, com 2,5 s de folga sobre o maior tempo visto. É certo para o que o caso afirma, que a leitura não segura o launcher muito depois do prazo, e não oscila nesta máquina. Não pode ser apertado a ponto de fixar o valor do prazo sem ficar instável: o que distingue o prazo é uma resposta que chega depois dele (Fix 19).
+
+### Gate no clone
+
+- `bun node_modules/typescript/bin/tsc --noEmit`: código 0.
+- Os sete arquivos sem mutação (`server-credential`, `hook-usage`, `launch-args`, `launch-worktree`, `cli`, `launch`, `hook-stop`): 206 pass, 4 skip, 0 fail, 210 testes, 697 asserções, 55,30 s. Os quatro pulados no Windows: o modo `0600` e o `SIGTERM` de `server-credential.test.ts`, e os dois casos do laço de `test/integration/cli.test.ts:419`, pulados no Windows. O caso do link rodou.
+- No Linux, sem mutação, `server-credential.test.ts`, `server.test.ts` e `launch-worktree.test.ts`: 65 pass, 0 fail.
+- A suíte inteira no Windows e no Linux é do orquestrador; esta volta não a rodou.
+
+### Correções propostas
+
+Todas são de teste. Nenhuma pede mudança de produção nem de texto.
+
+- **Fix 15 (PAP-07, Y1)**: em `test/integration/server-credential.test.ts:98`, o caso de `SIGTERM` também com `SIGINT`: o arquivo some e o processo sai com 0. Pulado no Windows, como o de `SIGTERM`. Done when: Y1 morre no Linux e W2 segue morto.
+- **Fix 16 (PAP-18, Y5)**: em `test/unit/hook-usage.test.ts`, um transcript numa pasta com `.jsonl` no nome (`logs.jsonl.d/s1.jsonl`, com `logs.jsonl.d/s1/subagents/agent-a.jsonl`): o subagente conta. Done when: Y5 morre.
+- **Fix 17 (PAP-18, Y6)**: no mesmo arquivo, um `agent-b.jsonl.bak` em `subagents/` não conta. Done when: Y6 morre.
+- **Fix 18 (PAP-39, Y7)**: em `test/unit/launch-args.test.ts:294`, `CLAUDE_config_dir` no ambiente e fora do esperado. Done when: Y7 morre e W12 segue morto.
+- **Fix 19 (PAP-37, Y9)**: em `test/unit/launch.test.ts`, junto ao caso de `:328`, um `fetch` que obedece ao sinal e responde aos 2500 ms um log em que `worker-1` está online: o worker abre como `worker-1`. A folga é de 500 ms para cada lado do prazo, sem limite de tempo de saída. Done when: Y9 morre, e W17 e A10 seguem mortos.
+
+### Requirement Traceability Update
+
+Não editei `spec.md`. O que o orquestrador deve gravar:
+
+| Requirement | Previous Status | New Status |
+| ----------- | --------------- | ---------- |
+| PAP-07 | Implementing: Fix 10 de `validation.md` aplicado na T40, à espera da reverificação | ❌ Needs Fix (Fix 15): K13 e V6 morrem; W2 morre no Linux em `test/integration/server-credential.test.ts:98`; Y1 sobrevive no Linux, `broker/server.ts:399` |
+| PAP-18 | Implementing: Fix 11 de `validation.md` aplicado na T41, à espera da reverificação | ❌ Needs Fix (Fix 16, Fix 17): W5 morre em `test/unit/hook-usage.test.ts:224`, K15 segue morto; Y5 (`plugin/hooks/usage.ts:82`) e Y6 (`:85`) sobrevivem |
+| PAP-37 | Implementing: Fix 14 de `validation.md` aplicado na T44, à espera da reverificação | ❌ Needs Fix (Fix 19): W17 e A10 morrem em `test/integration/cli.test.ts:242`, que mediu de 2138 a 2439 ms; Y9, o prazo de 3000 ms, sobrevive, `broker/launch.ts:186` |
+| PAP-39 | Implementing: Fix 12 de `validation.md` aplicado na T42, à espera da reverificação | ❌ Needs Fix (Fix 18): a frase da caixa bate com `broker/launch.ts:97`; W12 e K2 morrem em `test/unit/launch-args.test.ts:294`; Y7 sobrevive |
+| PAP-56 | Implementing: Fix 13 de `validation.md` aplicado na T43, à espera da reverificação | ✅ Verified: a frase do link bate com `broker/launch.ts:157`; W15 morre em `test/unit/launch-worktree.test.ts:315` no Windows e no Linux; K1 e Y8 morrem |
+
+Y9 muda também o nome que PAP-38 escolhe, porque a definição de feature aberta é a mesma; o caso do Fix 19 cobre os dois.
+
+### Lições registradas
+
+Pelo `lessons.py`, como candidatas:
+
+- Y1 junto a L-101, com o mesmo texto.
+- Y5, Y6 e Y7 junto a L-099, com o mesmo texto.
+- L-102: Y9, lição nova.

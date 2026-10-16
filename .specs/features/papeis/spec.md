@@ -373,7 +373,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-04 | P1: Plugin em diretório próprio | T19 | Verified |
 | PAP-05 | P1: Plugin em diretório próprio | T3 | Verified |
 | PAP-06 | P1: Credencial da sessão para os hooks | T2 | Verified |
-| PAP-07 | P1: Credencial da sessão para os hooks | T2, T33, T40 | Implementing: Fix 10 de `validation.md` aplicado na T40, à espera da reverificação |
+| PAP-07 | P1: Credencial da sessão para os hooks | T2, T33, T40 | Needs Fix (Fix 15 de `validation.md`): K13 e W2 morrem pela T33 e pela T40; Y1, sem o tratamento de `SIGINT`, sobrevive no Linux. Lacuna de teste da quinta volta, 2026-10-16 |
 | PAP-08 | P1: Credencial da sessão para os hooks | T2 | Verified |
 | PAP-09 | P1: Credencial da sessão para os hooks | T2 | Verified |
 | PAP-10 | P1: Início de turno | T7, T22 | Verified |
@@ -384,7 +384,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-15 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5, T35, T41 | Implementing: Fix 11 de `validation.md` aplicado na T41, à espera da reverificação |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41 | Needs Fix (Fix 16 e Fix 17 de `validation.md`): K15 e W5 morrem pela T35 e pela T41; Y5, `.jsonl` tirado do primeiro lugar do caminho, e Y6, um `*.jsonl.bak` contado, sobrevivem. Lacuna de teste da quinta volta |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |
@@ -403,9 +403,9 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-34 | P1: `roles.json` | T11 | Verified |
 | PAP-35 | P1: `roles.json` | T1, T14 | Verified |
 | PAP-36 | P1: `roles.json` | T14 | Verified |
-| PAP-37 | P1: Lançar uma sessão | T1, T14, T22, T38, T44 | Implementing: Fix 14 de `validation.md` aplicado na T44, à espera da reverificação |
+| PAP-37 | P1: Lançar uma sessão | T1, T14, T22, T38, T44 | Needs Fix (Fix 19 de `validation.md`): o texto fechou na T38, e A10 e W17 morrem pela T44; Y9, um prazo de 3000 ms, sobrevive, porque nenhum caso responde ao log entre 2000 e 3000 ms. Lacuna de teste da quinta volta |
 | PAP-38 | P1: Lançar uma sessão | T14 | Verified |
-| PAP-39 | P1: Lançar uma sessão | T12, T42 | Implementing: Fix 12 de `validation.md` aplicado na T42, à espera da reverificação |
+| PAP-39 | P1: Lançar uma sessão | T12, T42 | Needs Fix (Fix 18 de `validation.md`): K2 e W12 morrem pela T42; Y7, as três variáveis do dev comparadas sem caixa, sobrevive. Lacuna de teste da quinta volta |
 | PAP-40 | P1: Lançar uma sessão | T12, T22 | Verified |
 | PAP-41 | P1: Lançar uma sessão | T14 | Verified |
 | PAP-42 | P1: Lançar uma sessão | T12, T14 | Verified |
@@ -422,7 +422,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-53 | P1: Worktree por papel | T13, T36 | Verified (reverificação de 2026-10-16: A2 morre pela T36, para worker e judge) |
 | PAP-54 | P1: Worktree por papel | T13 | Verified |
 | PAP-55 | P1: Worktree por papel | T13, T14 | Verified |
-| PAP-56 | P1: Worktree por papel | T13, T34, T43 | Implementing: Fix 13 de `validation.md` aplicado na T43, à espera da reverificação |
+| PAP-56 | P1: Worktree por papel | T13, T34, T43 | Verified (quinta volta, 2026-10-16: K1, W15 e Y8 morrem pela T34 e pela T43) |
 | PAP-57 | P1: Worktree por papel | T13 | Verified |
 | PAP-58 | P1: Worktree por papel | T13, T14 | Verified |
 | PAP-59 | P1: Comando `squad` | T15 | Verified |
@@ -443,7 +443,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-74 | P1: Skills de protocolo | T23 | Verified |
 | PAP-75 | P1: Skills de protocolo | T23 | Verified |
 
-**Coverage:** 75 total, 75 mapped to tasks, 0 unmapped. PAP-74 e PAP-75 vieram das sessões reais (T22) e foram implementados na T23. Depois da terceira volta do Verifier (`validation.md`, FAIL, sem defeito de produção): 68 `Verified` e 7 com lacuna de teste, em que o código faz o que o requisito diz e nenhum teste distingue um mutante do trecho. O dev aceitou a fatia com essas lacunas em 2026-10-12. Em 2026-10-16 o resíduo foi aplicado (T32 a T39) e reverificado (`validation.md`, FAIL, sem defeito de produção): os oito mutantes do resíduo morrem, PAP-21, PAP-31 e PAP-53 passam a `Verified`, e cinco mutações novas deixam PAP-07, PAP-18, PAP-37, PAP-39 e PAP-56 com lacuna de teste (Fix 10 a Fix 14): 70 `Verified` e 5 `Needs Fix`.
+**Coverage:** 75 total, 75 mapped to tasks, 0 unmapped. PAP-74 e PAP-75 vieram das sessões reais (T22) e foram implementados na T23. Depois da terceira volta do Verifier (`validation.md`, FAIL, sem defeito de produção): 68 `Verified` e 7 com lacuna de teste, em que o código faz o que o requisito diz e nenhum teste distingue um mutante do trecho. O dev aceitou a fatia com essas lacunas em 2026-10-12. Em 2026-10-16 o resíduo foi aplicado (T32 a T39) e reverificado (`validation.md`, FAIL, sem defeito de produção): os oito mutantes do resíduo morrem, PAP-21, PAP-31 e PAP-53 passam a `Verified`, e cinco mutações novas deixam PAP-07, PAP-18, PAP-37, PAP-39 e PAP-56 com lacuna de teste (Fix 10 a Fix 14): 70 `Verified` e 5 `Needs Fix`. Os Fix 10 a Fix 14 entraram na T40 a T44, e a quinta volta (`validation.md`, FAIL, sem defeito de produção) matou os cinco mutantes deles, deu PAP-56 por `Verified` e achou cinco mutações novas vivas em PAP-07, PAP-18, PAP-37 e PAP-39 (Fix 15 a Fix 19): 71 `Verified` e 4 `Needs Fix`.
 
 ---
 

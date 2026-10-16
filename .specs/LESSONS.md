@@ -603,8 +603,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-099 - Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
 - features: papeis
-- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+2 more)
-- last seen: 2026-10-16T15:08:17Z
+- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+5 more)
+- last seen: 2026-10-16T15:49:02Z
 
 ### L-100 - Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
@@ -615,8 +615,14 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-101 - Test every way a process can end that must still clean up, signals included, on the platform where that way runs
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `server` · harmful: 0
 - features: papeis
-- evidence: W2 broker/server.ts:400 (PAP-07) (server)
-- last seen: 2026-10-16T15:08:17Z
+- evidence: W2 broker/server.ts:400 (PAP-07) (server) (+1 more)
+- last seen: 2026-10-16T15:49:01Z
+
+### L-102 - Test a deadline with an answer that arrives after it, not only with one that never arrives: a bound on the exit time lets a longer deadline pass
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: Y9 broker/launch.ts:186 (PAP-37) (launcher)
+- last seen: 2026-10-16T15:49:02Z
 
 ## Quarantined (failed when applied - ignore)
 
