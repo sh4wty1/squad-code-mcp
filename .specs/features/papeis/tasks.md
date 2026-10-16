@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/papeis/design.md`
-**Status**: Done. T1 a T49 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`; o que a reverificação achou, a fase 10, T40 a T44; e o que a quinta volta achou, a fase 11, T45 a T49
+**Status**: Done. T1 a T50 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`; o que a reverificação achou, a fase 10, T40 a T44; e o que a quinta volta achou, a fase 11, T45 a T49; e o que a sexta volta achou, a fase 12, T50
 
 Regras do repositório que valem para toda tarefa:
 
@@ -146,6 +146,14 @@ Os Fix 15 a Fix 19 da quinta volta em `validation.md`, decididos pelo dev em 202
 
 ```
 T45 → T46 → T47 → T48 → T49
+```
+
+### Phase 12: O que a sexta volta achou
+
+O Fix 20 da sexta volta em `validation.md`, decidido pelo dev em 2026-10-16: dois casos de teste e uma frase na definição "Transcripts da sessão". Em `.jsonl` a caixa conta, como o código faz e como PAP-39 diz para os nomes `CLAUDE`. Nenhum código de produção muda.
+
+```
+T50
 ```
 
 ---
@@ -1238,10 +1246,32 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T50: A caixa de `.jsonl`
+
+**What**: Fix 20. Um `agent-e.JSONL` no caso de PAP-18 da soma, fora dela; um caso com o transcript `s1.JSONL` e `s1/subagents/agent-a.jsonl`, em que só o principal conta; e a frase da caixa na definição "Transcripts da sessão".
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O primeiro caso de PAP-18 do arquivo e o caso de `s1.txt` da T41
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] A definição "Transcripts da sessão" diz que a caixa conta em `.jsonl`, como PAP-39 diz para os nomes `CLAUDE`
+- [x] `agent-e.JSONL` não entra na soma: não é `*.jsonl`
+- [x] Com `transcript_path` `s1.JSONL`, os subagentes de `s1/` não contam: só o principal entra na soma
+- [x] Morrem, conferidos e desfeitos num clone fora do repositório, o Z4 (o nome de `subagents/` conferido sem caixa em `plugin/hooks/usage.ts`) e o Z11 (`/\.jsonl$/i` em `plugin/hooks/usage.ts`); Y5, Y6, W5 e K15 seguem mortos
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -1254,6 +1284,7 @@ Phase 8:  T27 → T28 → T29 → T30 → T31
 Phase 9:  T32 → T33 → T34 → T35 → T36 → T37 → T38 → T39
 Phase 10: T40 → T41 → T42 → T43 → T44
 Phase 11: T45 → T46 → T47 → T48 → T49
+Phase 12: T50
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
@@ -1337,6 +1368,7 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC. As 
 | T47: Um nome de `subagents/` que só tem `.jsonl` dentro | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
 | T48: Uma das três variáveis do dev em outra caixa | 1 arquivo: `launch-args.test.ts` | ✅ Granular |
 | T49: O log que chega depois do prazo | 1 arquivo: `launch.test.ts` | ✅ Granular |
+| T50: A caixa de `.jsonl` | 1 arquivo: `hook-usage.test.ts`, e uma frase da spec | ✅ Granular |
 
 Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.json`, T12 no `export` de `namesOf` em `peers.ts`, T15 em `broker/package.json` e T16 no conferidor de `skills.test.ts`. É a ligação do que a própria tarefa cria. T4 e T12 ficam inteiras: os três JSON só valem juntos como um plugin, e as cinco funções de T12 são uma linha cada sobre a mesma entrada.
 
@@ -1395,6 +1427,7 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T47 | T46 | T46 → T47 | ✅ Match |
 | T48 | T47 | T47 → T48 | ✅ Match |
 | T49 | T48 | T48 → T49 | ✅ Match |
+| T50 | None (a fase anterior inteira) | início da fase 12 | ✅ Match |
 
 ---
 
@@ -1451,3 +1484,4 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T47: Um nome de `subagents/` que só tem `.jsonl` dentro | Hook, parte pura | unit | unit | ✅ OK |
 | T48: Uma das três variáveis do dev em outra caixa | Launcher | unit | unit | ✅ OK |
 | T49: O log que chega depois do prazo | Launcher | unit | unit | ✅ OK |
+| T50: A caixa de `.jsonl` | Hook, parte pura | unit | unit | ✅ OK |

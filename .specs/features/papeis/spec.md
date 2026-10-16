@@ -103,7 +103,7 @@ Valem as das specs anteriores. Mais:
 - **Feature aberta, para o launcher**: a feature sem `feature_closed` em `GET /events?after=0`, lido com prazo de 2000 ms. Se a leitura falha não há feature aberta e ninguém está online. A leitura falha quando não responde no prazo, responde com status diferente de 200 ou responde algo que não é um objeto com `events` lista. A leitura que não responde no prazo é abandonada nele: depois de a sessão sair, nada dela segura o launcher, que sai com o código da sessão (PAP-37).
 - **Tools do squad de um papel**: `ready` mais as de `toolsFor(papel)` de `broker/tools.ts`, cada uma com o prefixo `mcp__plugin_squad_squad__`.
 - **Linha contada** de um transcript: linha que é um objeto JSON com `type` `assistant`, `message.usage` objeto e `message.model` texto não vazio diferente de `<synthetic>`.
-- **Transcripts da sessão**: o arquivo de `transcript_path` e todo `*.jsonl` de `<transcript_path sem a extensão .jsonl>/subagents/`.
+- **Transcripts da sessão**: o arquivo de `transcript_path` e todo `*.jsonl` de `<transcript_path sem a extensão .jsonl>/subagents/`, com a caixa contando em `.jsonl`, como nos nomes `CLAUDE` de PAP-39: `agent-a.JSONL` não é `*.jsonl`, e `s1.JSONL` não tem a extensão `.jsonl` para tirar, então os subagentes dele são os de `s1.JSONL/subagents/`.
 - **Fim de turno hipotético**: o log de `GET /events?after=0` mais um `usage` do nome com `seq` e `ts` depois dos últimos.
 - **Raiz do squad**: o diretório que contém `broker/` e `plugin/`.
 
@@ -384,7 +384,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-15 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47 | Needs Fix (Fix 20 de `validation.md`): K15, W5, Y5 e Y6 morrem pela T35, pela T41, pela T46 e pela T47; Z4 e Z11, a caixa de `.jsonl` (`agent-a.JSONL`, `s1.JSONL`), sobrevivem. Lacuna de teste da sexta volta, com a dúvida de leitura da caixa na definição "Transcripts da sessão" |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50 | Implementing: Fix 20 de `validation.md` aplicado na T50, com a caixa contando em `.jsonl` na definição "Transcripts da sessão", à espera da reverificação |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |
