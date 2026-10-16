@@ -927,10 +927,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] As linhas de um `*.jsonl` de `subagents/` cujo nome não começa com `agent-` entram na soma
-- [ ] Morre, conferido e desfeito, o K15 (só `agent-*.jsonl` lido em `plugin/hooks/usage.ts`)
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] As linhas de um `*.jsonl` de `subagents/` cujo nome não começa com `agent-` entram na soma
+- [x] Morre, conferido e desfeito, o K15 (só `agent-*.jsonl` lido em `plugin/hooks/usage.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

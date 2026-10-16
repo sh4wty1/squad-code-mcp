@@ -384,7 +384,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-15 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5 | Needs Fix (Fix 4 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-18 | P1: Uso no fim do turno | T5, T35 | Implementing: Fix 4 de `validation.md` aplicado na T35, à espera da reverificação |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9 | Needs Fix (Fix 7 de `validation.md`): lacuna de teste, aceita pelo dev |

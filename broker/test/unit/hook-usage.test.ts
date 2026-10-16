@@ -176,10 +176,12 @@ test("PAP-18: the lines of the files of subagents add to the ones of the main tr
     line("claude-haiku", "b1", [100, 200, 300, 400], {}, { isSidechain: true }),
     line("claude-opus", "b2", [1, 1, 1, 1], {}, { isSidechain: true }),
   ]);
+  // a *.jsonl whose name does not start with agent- counts too
+  file(["sub", "s1", "subagents", "sidechain-7.jsonl"], [line("claude-opus", "s7", [100, 100, 100, 100], {}, { isSidechain: true })]);
   // only *.jsonl is a transcript
   file(["sub", "s1", "subagents", "agent-c.txt"], [line("claude-haiku", "c1", [9000, 9000, 9000, 9000])]);
   expect(sessionUsage(path)).toEqual({
-    "claude-opus": { input: 11, output: 21, cache_write: 31, cache_read: 41 },
+    "claude-opus": { input: 111, output: 121, cache_write: 131, cache_read: 141 },
     "claude-haiku": { input: 105, output: 206, cache_write: 307, cache_read: 408 },
   });
 });
