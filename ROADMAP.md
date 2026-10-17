@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** o MVP está fechado. As oito fatias estão na `main`: a Gate entrou pelo [PR 14](https://github.com/sh4wty1/squad-code-mcp/pull/14) e o seguimento do `gate_reissued` pelo [PR 15](https://github.com/sh4wty1/squad-code-mcp/pull/15), e o marco do MVP foi conferido com sessões reais (`.specs/features/gate/marco-mvp.md`). As lacunas de teste que a fatia Papéis deixou (Fix 1 a Fix 9) foram fechadas no branch `test/papeis-gaps`; as reverificações seguintes fecharam os Fix 10 a Fix 19, e a sexta à nona volta deixaram 74 de 75 requisitos verificados, com uma lacuna de teste em PAP-18: os Fix 20 e 21 entraram, os Fix 20 a 22 entraram, e a nona volta pede o Fix 23. O que sobra antes de "Depois do MVP" são as pendências fora da ordem abaixo; o estado está no Handoff de `.specs/STATE.md`.
+**Agora:** o MVP está fechado. As oito fatias estão na `main`: a Gate entrou pelo [PR 14](https://github.com/sh4wty1/squad-code-mcp/pull/14) e o seguimento do `gate_reissued` pelo [PR 15](https://github.com/sh4wty1/squad-code-mcp/pull/15), e o marco do MVP foi conferido com sessões reais (`.specs/features/gate/marco-mvp.md`). As lacunas de teste que a fatia Papéis deixou (Fix 1 a Fix 9) foram fechadas no branch `test/papeis-gaps`; as reverificações seguintes fecharam os Fix 10 a Fix 19, e a sexta à décima volta deixaram 74 de 75 requisitos verificados, com uma lacuna de teste em PAP-18: os Fix 20 a 23 entraram, e a décima volta pede o Fix 24. O que sobra antes de "Depois do MVP" são as pendências fora da ordem abaixo; o estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 
@@ -83,10 +83,16 @@ fonte dela é [`.specs/features/tui-clicavel/spec.md`](.specs/features/tui-clica
       `.specs/features/papeis/validation.md` (PAP-18, `.json` no lugar de `.jsonl` e um
       link sem alvo em `subagents`). Fechada em 2026-10-17 (T52); a nona volta matou os
       quatro mutantes e achou outros nove em PAP-18.
-- [ ] Lacuna de teste da nona volta da fatia Papéis: Fix 23 de
+- [x] Lacuna de teste da nona volta da fatia Papéis: Fix 23 de
       `.specs/features/papeis/validation.md` (PAP-18, seis formas novas do nome em
-      `usage.ts:82` e `:85`, e três mutações que fazem `sessionUsage` lançar), decidido
-      pelo dev em 2026-10-17, com uma décima volta.
+      `usage.ts:82` e `:85`, e três mutações que fazem `sessionUsage` lançar). Fechada em
+      2026-10-17 (T53, T54); a décima volta matou os nove mutantes e achou outros onze
+      em PAP-18.
+- [ ] Lacuna de teste da décima volta da fatia Papéis: Fix 24 de
+      `.specs/features/papeis/validation.md` (PAP-18, nomes com espaço, `\n` ou sem o
+      ponto, o nome do principal em `subagents`, um teto na lista, textos iguais, o
+      principal que não conta nada e um link para si mesmo), ou aceitar a fatia com ela
+      registrada.
 - [ ] Conferência em terminal real da TUI clicável: RT-02 a RT-08 de
       `.specs/features/tui-clicavel/real-terminal.md`, e a versão do terminal e os quatro
       cantos da RT-01.

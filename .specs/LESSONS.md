@@ -113,8 +113,8 @@ Corroborated across multiple features. Safe to apply as guidance.
 ### L-080 - When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes
 - signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker tests` · harmful: 0
 - features: papeis, tui-clicavel
-- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests) (+1 more)
-- last seen: 2026-10-14T16:15:56Z
+- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests) (+2 more)
+- last seen: 2026-10-17T22:01:11Z
 
 ## Candidates (under observation - do NOT load as guidance yet)
 
@@ -627,8 +627,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-103 - Fence a suffix rule on a name in one go on its four sides, the dot, the anchor at the end, the case and the place in the path, instead of one side per round
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
 - features: papeis
-- evidence: Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks) (+1 more)
-- last seen: 2026-10-17T19:53:26Z
+- evidence: Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks) (+2 more)
+- last seen: 2026-10-17T22:01:11Z
 
 ### L-104 - Run the tests of a file-system layer on Linux too: a mutant on the case of a directory name lives on the case-insensitive file system of Windows
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
@@ -695,6 +695,42 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: papeis
 - evidence: U7 plugin/hooks/usage.ts:85 (PAP-18, spec.md:106) (hooks)
 - last seen: 2026-10-17T19:53:26Z
+
+### L-115 - Give a rule that takes every matching entry of a directory an entry with the name of the file the directory belongs to, so a filter that drops that name fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N7 plugin/hooks/usage.ts:85 (PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-116 - Test a rule over every file of a directory with more files than any other case reads, so a cap on how many are read fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N12 plugin/hooks/usage.ts:89 (PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-117 - Test a sum over several files with two files of the same text, so a dedup of the texts fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N14 plugin/hooks/usage.ts:96 (PAP-15, PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-118 - Test that the files next to a main file add to it also when the main file counts nothing, so a shortcut on an empty main fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N15 plugin/hooks/usage.ts:81-82 (PAP-18, PAP-19) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-119 - Test that an unreadable entry is skipped with an error code the other cases do not raise, such as a link loop, so a list of the codes let through fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N16, N17 plugin/hooks/usage.ts:86, :92 (PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-120 - When files are read in the order of their names, say whether the extension is part of the name compared, and test it with a stem that is a prefix of another
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N13 plugin/hooks/usage.ts:85, design.md:117 (PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
 
 ## Quarantined (failed when applied - ignore)
 

@@ -1,13 +1,17 @@
 # Papéis Validation
 
-**Result**: FAIL. Na fatia, 74 de 75 requisitos verificados: PAP-07, PAP-37 e PAP-39 na volta 6, PAP-56 na volta 5, PAP-21, PAP-31 e PAP-53 na volta 4, e os outros antes. PAP-18 segue com lacuna de teste (Fix 23)
+**Result**: FAIL. Na fatia, 74 de 75 requisitos verificados: PAP-07, PAP-37 e PAP-39 na volta 6, PAP-56 na volta 5, PAP-21, PAP-31 e PAP-53 na volta 4, e os outros antes. PAP-18 segue com lacuna de teste (Fix 24)
 
-**Round**: 9, reverificação do Fix 22 (T52), pedida pelo dev em 2026-10-17
+**Round**: 10, reverificação do Fix 23 (T53, T54), pedida pelo dev em 2026-10-17
 **Date**: 2026-10-17
 **Spec**: `.specs/features/papeis/spec.md`, PAP-01 a PAP-75, edge cases e "Success Criteria"
-**Diff range**: `d8f7371..18f6d10` (fase 14 de `test/papeis-gaps`, sobre `main` em `055d629`). A volta 8 foi `8d03ff4..3344174`, a volta 7 `5c7f815..15b7a37`, a volta 6 `7f79a02..dbe2483`, a volta 5 `c8cb88c..ce5f774`, e a volta 4 `055d629..959bcb6`
-**Verifier**: agente novo e independente (author ≠ verifier). Não escreveu código, testes, tarefas nem relatórios da fatia, e não é o Verifier das voltas 1 a 8.
-**Environment**: volta 9: só Linux (Linux 7.0.0-38-generic, `/tmp` em tmpfs), Bun 1.3.14, cópia `scratchpad/verifier9` de `plugin/` e `broker/` em `18f6d10` por `git archive`, fora do repositório, com `broker/node_modules` ligado ao do repositório. Nesta máquina não há Windows nem docker: nenhuma mutação nem sonda desta volta rodou no Windows. Volta 8: só Linux (Linux 7.0.0-38-generic, `/tmp` em tmpfs), Bun 1.3.14, cópia `scratchpad/verifier8` de `plugin/` e `broker/` em `3344174` por `git archive`, fora do repositório, com `broker/node_modules` ligado ao do repositório. Nesta máquina não há Windows nem docker: nenhuma mutação nem sonda desta volta rodou no Windows. Volta 7: Windows 11 Pro 10.0.26200, Bun 1.3.14, clone físico `verifier7` do branch em `15b7a37`, fora do repositório, com `bun install --frozen-lockfile` próprio; Linux num contêiner `oven/bun:1.4.2` sobre uma cópia desse clone, só para os dois arquivos da camada. Volta 6: Bun 1.3.14, clone `verifier6` em `dbe2483` e contêiner `oven/bun:1.4.2`. Volta 5: Bun 1.3.14, clone `verifier5` em `ce5f774` e contêiner `oven/bun:1.4.2`. Volta 4: Bun 1.3.14, clone `verifier4` em `959bcb6` e contêiner `oven/bun:1.3.14`. Volta 3: Bun 1.4.2, clone em `ac25e8d` e contêiner `oven/bun:1.4.2`.
+**Diff range**: `bd014a3..a7f81d6` (fase 15 de `test/papeis-gaps`, sobre `main` em `055d629`). A volta 9 foi `d8f7371..18f6d10`, a volta 8 foi `8d03ff4..3344174`, a volta 7 `5c7f815..15b7a37`, a volta 6 `7f79a02..dbe2483`, a volta 5 `c8cb88c..ce5f774`, e a volta 4 `055d629..959bcb6`
+**Verifier**: agente novo e independente (author ≠ verifier). Não escreveu código, testes, tarefas nem relatórios da fatia, e não é o Verifier das voltas 1 a 9.
+**Environment**: volta 10: só Linux (Linux 7.0.0-38-generic, `/tmp` em tmpfs, usuário 1000), Bun 1.3.14, cópia `scratchpad/verifier10` de `plugin/` e `broker/` em `a7f81d6` por `git archive`, fora do repositório, com `broker/node_modules` ligado ao do repositório. Nesta máquina não há Windows nem docker: nenhuma mutação nem sonda desta volta rodou no Windows. Volta 9: só Linux (Linux 7.0.0-38-generic, `/tmp` em tmpfs), Bun 1.3.14, cópia `scratchpad/verifier9` de `plugin/` e `broker/` em `18f6d10` por `git archive`, fora do repositório, com `broker/node_modules` ligado ao do repositório. Nesta máquina não há Windows nem docker: nenhuma mutação nem sonda desta volta rodou no Windows. Volta 8: só Linux (Linux 7.0.0-38-generic, `/tmp` em tmpfs), Bun 1.3.14, cópia `scratchpad/verifier8` de `plugin/` e `broker/` em `3344174` por `git archive`, fora do repositório, com `broker/node_modules` ligado ao do repositório. Nesta máquina não há Windows nem docker: nenhuma mutação nem sonda desta volta rodou no Windows. Volta 7: Windows 11 Pro 10.0.26200, Bun 1.3.14, clone físico `verifier7` do branch em `15b7a37`, fora do repositório, com `bun install --frozen-lockfile` próprio; Linux num contêiner `oven/bun:1.4.2` sobre uma cópia desse clone, só para os dois arquivos da camada. Volta 6: Bun 1.3.14, clone `verifier6` em `dbe2483` e contêiner `oven/bun:1.4.2`. Volta 5: Bun 1.3.14, clone `verifier5` em `ce5f774` e contêiner `oven/bun:1.4.2`. Volta 4: Bun 1.3.14, clone `verifier4` em `959bcb6` e contêiner `oven/bun:1.3.14`. Volta 3: Bun 1.4.2, clone em `ac25e8d` e contêiner `oven/bun:1.4.2`.
+
+Os nove sobreviventes da volta 9 morrem, cada um no caso que o Fix 23 trouxe: U8 pelo `subagents` que é arquivo regular (`test/unit/hook-usage.test.ts:264`) e pelo `subagents` de modo `0o000` (`:252`–`:260`), U9 e U13 pelo `agent-y.jsonl` de modo `0o000` (`:245`), U2 e U12 pela lista do caso da soma (`:191`, `:192`), U4 pelo caso dos pontos (`:272`), U1 e U3 pelo laço dos transcripts sem a extensão (`:296`), U5 pelo laço dos que a perdem (`:283`, `:284`). R1, R2, R4, R17, R5, Q2, Q5, Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos. Nenhum arquivo de produção mudou em `055d629..a7f81d6`, e nenhuma asserção foi afrouxada nem apagada: os cinco casos de um transcript que saíram voltam nos dois laços com a mesma entrada e o mesmo esperado, e o de `logs.jsonl.d` ganhou um `s1/subagents` que não conta. O único skip novo é o do caso das permissões no Windows e no root, e aqui ele roda. Os casos novos afirmam o que a spec diz. Das 22 mutações novas, 9 morrem, 1 é equivalente, e 1 vive só numa ordem que a spec não decide (N13, a ordem com ou sem a extensão no nome): lacuna de precisão. Mesmo assim a volta falha: 11 sobrevivem e mudam o que a spec diz, de quatro naturezas. Formas do nome que as listas não têm: `trim()` do caminho em `:82` (N2: `"s1.jsonl "` ganha os de `s1/`; original 1, mutante 101), `/\.?jsonl$/` em `:82` (N6: `s1jsonl`; 1 contra 101), `trim()` do nome em `:85` (N8: `"agent-k.jsonl "` conta; 1 contra 9001), `/\.jsonl$/m` em `:82` e `:85` (N20, N21: um `\n` depois de `.jsonl`; 1 contra 101 e 1 contra 9001), e um filtro que tira o nome do principal em `:85` (N7: `subagents/s1.jsonl` não conta; 101 contra 1). A lista: um teto de três arquivos em `:89` (N12: quatro de 100; 401 contra 301), e os textos iguais lidos uma vez só em `:96` (N14: dois arquivos com a mesma linha sem id; 201 contra 101). O principal que não conta nada: `return {}` antes de `:82` (N15: um principal só com uma linha `user`, ou vazio, e `agent-a.jsonl` de 100; 100 contra `{}`). E listas de códigos de erro que deixam passar só os que os testes fazem: em `:86` (N16: `subagents` que é um link para si mesmo; 1 contra `ELOOP` lançado) e em `:92` (N17: `agent-l.jsonl` que é um link para si mesmo; 1 e haiku 5 contra `ELOOP`). Lançar ali derruba o hook em `plugin/hooks/stop.ts:50`. Nenhum defeito de produção foi visto: em todas as sondas, o código original faz o que a spec diz.
+
+Os parágrafos abaixo são da volta 9.
 
 Os quatro sobreviventes da volta 8 morrem, cada um no caso que o Fix 22 trouxe: R1 pelo caso novo do transcript `s1.json` (`test/unit/hook-usage.test.ts:258`), R2 e R4 pelo `agent-g.json` do caso da soma (`:189`), R17 pelo link sem alvo do caso do ilegível (`:227`). R5, recomendado fora do veredito, morre também, no caso da ordem escrito b, c, a (`:205`–`:207`). Q2, Q5, Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos. Nenhum arquivo de produção mudou em `055d629..18f6d10`, e nenhuma asserção foi afrouxada, apagada ou pulada: o diff de teste de `d8f7371..18f6d10` tem 14 linhas a mais e 3 a menos: acrescenta 11 e troca 3 (o import de `symlinkSync`, um comentário e a linha de `agent-c`, que mudou de lugar), sem tocar em nenhum `expect`. Os casos novos afirmam o que a spec diz: `agent-g.json` não é `*.jsonl`, `s1.json` não tem a extensão `.jsonl` para tirar (`spec.md:106`), e um link sem alvo não pode ser lido, não conta, e os outros contam (PAP-18). Das 15 mutações novas em `plugin/hooks/usage.ts`, 1 morre, 2 são equivalentes, e 3 vivem só em entradas que a spec não decide (U6, a ordem por localidade; U7, um nome que começa com ponto; U11, o nome que é só `.jsonl`): lacuna de precisão. Mesmo assim a volta falha: 9 sobrevivem e mudam o que a spec diz, em formas que nenhum teste usa. As letras depois do sufixo: `/\.jsonl\w*$/` em `:82` (U1: `s1.jsonld` ganha os subagentes de `s1/`; original 1, mutante 101) e em `:85` (U2: `agent-h.jsonld` conta; 101 contra 9101). O ponto do transcript: `/.jsonl$/` sem escape em `:82` (U3: `s1-jsonl` ganha os de `s1/`; 1 contra 101). Outro ponto no nome: `/^[^.]+\.jsonl$/` em `:85` (U4: `agent.2.jsonl` não conta; 1101 contra 101) e o corte no primeiro ponto do nome do transcript em `:82` (U5: `s1.v2.jsonl` lê `s1/subagents`; 101 contra 10001). Um subdiretório: `readdirSync(..., { recursive: true })` em `:85` (U12: `subagents/nested/agent-n.jsonl` conta; 101 contra 1101). E uma checagem antes da leitura no lugar de um `try`: `existsSync` antes do `readdirSync` de `:85` (U8: um `subagents` que é arquivo regular, ou um diretório sem permissão, faz `sessionUsage` lançar `ENOTDIR` ou `EACCES`, onde o original dá 1), e `statSync(...).isFile()` antes do `readFileSync` de `:91` (U9; e U13, que só engole `EISDIR` e `ENOENT`): um `agent-a.jsonl` sem permissão de leitura faz `sessionUsage` lançar `EACCES`, onde o original conta os outros (PAP-18). Lançar ali derruba o hook: `plugin/hooks/stop.ts:50` chama `sessionUsage` sem `try`, o processo sai com 1 e nenhum `usage` é gravado (PAP-23, PAP-24). Nenhum defeito de produção foi visto: em todas as sondas, o código original faz o que a spec diz.
 
@@ -1373,3 +1377,185 @@ Pelo `scripts/lessons.py`:
 - L-112: um subdiretório com um arquivo que casa, para que uma listagem recursiva falhe (U12).
 - L-113 (lacuna de precisão): dizer se a ordem dos nomes é por unidade de código ou por localidade, e testar com nomes que diferem na caixa (U6).
 - L-114 (lacuna de precisão): dizer se um padrão como `*.jsonl` pega um nome que começa com ponto (U7).
+
+---
+## Reverificação do Fix 23 (2026-10-17)
+
+Volta 10. O dev decidiu em 2026-10-17 aplicar o Fix 23 inteiro. O autor fez isso em `test/papeis-gaps`, `bd014a3..a7f81d6` (T53 `f387585` e T54 `a7f81d6`, fase 15 de `tasks.md`), só em `broker/test/unit/hook-usage.test.ts`. Escopo desta volta: só PAP-18. As linhas de código citadas são de `a7f81d6`.
+
+### Ambiente e isolamento
+
+- **Intervalo**: `bd014a3..a7f81d6`.
+- **Ambiente**: só Linux: Linux 7.0.0-38-generic, Bun 1.3.14, `os.tmpdir()` em `/tmp`, que é tmpfs, usuário 1000 (não root, então o caso de `:241` roda). Nesta máquina não há Windows nem docker, e nenhuma mutação nem sonda desta volta rodou no Windows.
+- **Cópia**: `scratchpad/verifier10`, feita com `git archive a7f81d6 plugin broker`, fora do repositório, com `broker/node_modules` como link para o do repositório. `diff -r` da `plugin/` e da `broker/` da cópia contra as do repositório: iguais.
+- **Repositório real**: `git status --porcelain` antes, em `test/papeis-gaps` e `a7f81d6`: `?? docs/tasks/2026-10-17-papeis-fix-23.md`, o registro da fase 15, de outro agente, não tocado. Nenhum stash, commit, push, troca de branch nem reset. As mutações rodaram na cópia, uma de cada vez, pelo script `scratchpad/v10/run.py` com as trocas de `scratchpad/v10/muts.py`: confere que cada troca casa uma vez só, grava o mutante, roda os testes da camada, regrava o original e compara com a cópia guardada (`restored: True` nas 46 execuções; no fim, `cmp` de `usage.ts` e `stop.ts` da cópia contra os do repositório: iguais). A sonda (`scratchpad/v10/probe.ts`) carrega o original e cada mutante como módulos à parte em `scratchpad/v10probe`, fora da cópia das mutações, e apaga os dados dela no fim. As saídas ficaram em `scratchpad/v10` (`mutate-old.txt`, `mutate-new.txt`, `probe.txt`). Nenhum `claude` real rodou.
+- **No fim**: `git status --porcelain` depois das mutações e da sonda: o mesmo `?? docs/tasks/2026-10-17-papeis-fix-23.md` de antes. Depois deste relatório entram `.specs/features/papeis/validation.md` e os dois arquivos das lições (`.specs/lessons.json`, `.specs/LESSONS.md`).
+
+### Produção intacta
+
+- `git diff --stat 055d629..a7f81d6 -- plugin broker ':!broker/test'`: nenhuma linha. Nenhum arquivo de produção mudou desde `main`.
+- `git diff --numstat bd014a3..a7f81d6`: `spec.md` (1 linha trocada, a de PAP-18 na rastreabilidade, `:387`), `tasks.md` (55 a mais, 1 a menos) e `broker/test/unit/hook-usage.test.ts` (73 a mais, 33 a menos).
+- O diff de teste. O import ganha `chmodSync` (`:2`). No caso da soma, as cinco linhas de um nome que não conta viram a lista de `:184`–`:195`, com os mesmos cinco nomes e mais `jsonl`, `agent-h.jsonld` e `nested/agent-n.jsonl`, todos com 9000; o `expect` de `:196`–`:199` não mudou. Saem cinco casos de um transcript (`s1.txt`, `logs.jsonl.d/s1.jsonl`, `s1.JSONL`, `s1.jsonl.bak`, `s1.json`) e voltam nos dois laços com a mesma entrada e o mesmo esperado: `logs.jsonl.d/s1.jsonl` em `:282`, agora com um `s1/subagents` de 9000 ao lado (`:289`), que não conta, e os outros quatro em `:296`. Entram o caso das permissões (`:240`–`:262`, com `test.skipIf(process.platform === "win32" || process.getuid?.() === 0)` em `:241`), o do `subagents` arquivo (`:264`–`:268`), o dos pontos (`:270`–`:276`) e os laços de `:278`–`:292` e `:294`–`:302`. Das quatro linhas de `expect` a menos no diff, as quatro voltam iguais nos laços (`:290`, `:300`). Nenhum `expect` afrouxado, nenhum caso pulado fora do Windows e do root, nenhum texto de AC nem de definição mudou.
+- O caso das permissões restaura o modo de `subagents` num `finally` (`:257`–`:260`); o `agent-y.jsonl` fica em `0o000`, e o `rmSync(..., { force: true })` de `:8` o apaga assim mesmo, porque apagar depende do diretório, não do arquivo. Nenhum resto em `/tmp` depois do gate.
+
+### Spec-Anchored Acceptance Criteria
+
+Caminhos de teste relativos a `broker/`. PAP-18 (`spec.md:209`): os `*.jsonl` de `subagents` somam às linhas do principal, com PAP-15 entre todos os arquivos; um arquivo de `subagents` que não pode ser lido não conta nada, e os outros contam. "Transcripts da sessão" (`spec.md:106`): o principal e todo `*.jsonl` de `<transcript_path sem a extensão .jsonl>/subagents/`, com a caixa contando em `.jsonl`. PAP-19 (`spec.md:210`): só um principal que não existe ou não pode ser lido dá nenhum modelo. `design.md:117`: `subagents/*.jsonl` em ordem de nome.
+
+| Criterion | Spec-defined outcome | `file:line` + assertion | Result |
+| --------- | -------------------- | ----------------------- | ------ |
+| PAP-18, a soma | Principal mais todo `*.jsonl` de `s1/subagents`, e nada de nome que não é `*.jsonl` nem de subdiretório | `test/unit/hook-usage.test.ts:172`–`:200`: principal opus (10, 20, 30, 40); `agent-a.jsonl` haiku (5, 6, 7, 8); `agent-b.jsonl` haiku (100, 200, 300, 400) e opus 1; `sidechain-7.jsonl` opus 100; fora, com 9000, a lista de `:184`–`:193`. `toEqual` do objeto inteiro (`:196`–`:199`): opus 111, 121, 131, 141; haiku 105, 206, 307, 408 | ✅ PASS no que afirma. U2, U12, R2, R4, Q5, Z4, Y6, K15 e N9 morrem aqui. N7, N8, N12 e N21 não: nenhum nome tem espaço ou `\n` depois de `.jsonl`, nenhum tem o nome do principal, e nenhum caso tem mais de três arquivos que contam |
+| PAP-18 com PAP-15 entre arquivos | Um `message.id` repetido conta uma vez, a última linha | `:202`–`:206`: `toEqual` 12, 23, 34, 45. `:220`–`:225`: `usageOf` nas duas ordens | ✅ PASS. N14 não morre: nenhum caso tem dois arquivos com o mesmo texto e linhas sem id |
+| Ordem entre arquivos de subagentes | Não está na spec; `design.md:117` diz "em ordem de nome" | `:208`–`:218`: escritos `agent-b`, `agent-c`, `agent-a`, com o mesmo id; `toEqual` haiku 1, o de `agent-c` | ✅ no que afirma: R5 morre aqui. ⚠️ Lacuna de precisão no nome comparado (N13, abaixo) |
+| PAP-18, o ilegível | Não conta, e os outros contam | `:227`–`:238`: diretório `agent-a.jsonl`, link sem alvo `agent-z.jsonl`, `agent-b.jsonl` haiku 5, 6, 7, 8; `toEqual` opus 10, 20, 30, 40 e haiku 5, 6, 7, 8 | ✅ PASS. R17 e N19 morrem aqui |
+| PAP-18, o ilegível por permissão (novo) | Um `agent-y.jsonl` sem leitura não conta, e `agent-b.jsonl` conta; um `subagents` sem leitura não tem arquivo que conte | `:240`–`:262`: `agent-y.jsonl` em `0o000` (`:245`), `toEqual` opus 10, 20, 30, 40 e haiku 5, 6, 7, 8 (`:247`–`:250`); `subagents` em `0o000` (`:254`), `toEqual` opus 1 (`:256`) | ✅ PASS. U8, U9, U13, N18 e N19 morrem aqui. N16 e N17 não: o erro de cada entrada é `EACCES`, `EISDIR`, `ENOENT` ou `ENOTDIR`, e uma lista desses códigos passa |
+| PAP-18, `subagents` arquivo (novo) | Um `subagents` que não é diretório não tem arquivo de subagente: só o principal | `:264`–`:268`: `toEqual` 1 em cada campo | ✅ PASS. U8 e N18 morrem aqui |
+| PAP-18, outros pontos no nome (novo) | `agent.2.jsonl`, `agent-i.json.jsonl` e `agent-j.jsonl.jsonl` são `*.jsonl` e contam | `:270`–`:276`: 100 cada, principal 1; `toEqual` 301 em cada campo | ✅ PASS. U4, K15, N10 e N11 morrem aqui |
+| Definição: o `.jsonl` do fim sai (novo laço) | `s1.jsonl`, `logs.jsonl.d/s1.jsonl`, `s1.v2.jsonl` e `s1.jsonl.jsonl` têm os subagentes de `s1`, `logs.jsonl.d/s1`, `s1.v2` e `s1.jsonl`; os de `s1/subagents`, quando não é esse, não contam | `:278`–`:292`: 100 no diretório certo, 9000 em `s1/subagents` (`:289`); `toEqual` 101 em cada campo (`:290`) | ✅ PASS. U5, Y5, N3, N4 e N5 morrem aqui |
+| Definição: sem a extensão `.jsonl` (novo laço) | `s1.txt`, `s1.JSONL`, `s1.jsonl.bak`, `s1.json`, `s1.jsonld` e `s1-jsonl` não perdem nada; `s1/subagents` não conta | `:294`–`:302`: `toEqual` 1 em cada campo (`:300`) | ✅ PASS. U1, U3, R1, Q1, Q2, Z11, W5, N5 e N18 morrem aqui. N2, N6 e N20 não: nenhum nome é `s1jsonl`, nem tem espaço ou `\n` depois de `.jsonl` |
+| PAP-18 com um principal que não conta nada | O principal existe e é lido (PAP-19 não vale); os subagentes somam às zero linhas dele | Nenhum caso | ❌ GAP: N15 sobrevive |
+| PAP-19 | Sem o principal, nada | `:304`–`:314` | ✅ PASS |
+| PAP-18 pelo hook | O `usage` de opus soma o subagente | `test/integration/hook-stop.test.ts:48`–`:61`: `agent-a.jsonl` opus 5 ao lado do principal; `OPUS` 15, 25, 35, 45 | ✅ PASS. N22 morre aqui |
+
+**Status**: ❌ GAP parcial em PAP-18. Cada asserção bate com o resultado que a spec define, e os nove da volta 9 morrem. Falta distinguir formas que a spec também decide e que nenhum caso usa: um espaço ou um `\n` depois de `.jsonl` (N2, N8, N20, N21), `s1jsonl` (N6), um subagente com o nome do principal (N7), mais de três arquivos que contam (N12), dois arquivos de texto igual (N14), um principal que não conta nada (N15), e um erro de leitura de código que os casos não fazem (N16, N17).
+
+### Discrimination Sensor
+
+Testes da camada, de dentro de `broker/`: `bun test test/unit/hook-usage.test.ts test/integration/hook-stop.test.ts` (só `stop.ts` importa `usage.ts`). Controle sem mutação: 63 pass, 0 fail, 161 asserções, 0 skip; cinco vezes seguidas, 63 pass.
+
+#### Os nove do Fix 23 e os catorze mortos antes, reinjetados
+
+| Mutation | File:line at a7f81d6 | Description | Killed? |
+| -------- | -------------------- | ----------- | ------- |
+| U1 | `plugin/hooks/usage.ts:82` | `/\.jsonl\w*$/` | ✅ Morto, 1 falha: `PAP-18: s1.jsonld has no extension .jsonl: the subagents of s1/subagents do not count` |
+| U2 | `plugin/hooks/usage.ts:85` | `/\.jsonl\w*$/.test(name)` | ✅ Morto, 1 falha: `PAP-18: the lines of the files of subagents add to the ones of the main transcript` |
+| U3 | `plugin/hooks/usage.ts:82` | `/.jsonl$/`, o ponto sem escape | ✅ Morto, 1 falha: o caso de `s1-jsonl` |
+| U4 | `plugin/hooks/usage.ts:85` | `/^[^.]+\.jsonl$/.test(name)` | ✅ Morto, 1 falha: `PAP-18: a *.jsonl of subagents with other dots in its name counts` |
+| U5 | `plugin/hooks/usage.ts:10`, `:82` | O nome do transcript cortado no primeiro ponto | ✅ Morto, 2 falhas: os casos de `s1.v2.jsonl` e de `s1.jsonl.jsonl` |
+| U8 | `plugin/hooks/usage.ts:9`, `:83`–`:88` | `existsSync` no lugar do `try` | ✅ Morto, 2 falhas: o caso das permissões e `PAP-18: a subagents that is a file has no file of subagents: only the main transcript counts` |
+| U9 | `plugin/hooks/usage.ts:9`, `:90`–`:94` | `statSync(...)?.isFile()` no lugar do `try` | ✅ Morto, 1 falha: `PAP-18: a file of subagents without permission to read, or a subagents directory without it, counts nothing, and the others count` |
+| U12 | `plugin/hooks/usage.ts:85` | `readdirSync(subagents, { recursive: true })` | ✅ Morto, 1 falha: o caso da soma |
+| U13 | `plugin/hooks/usage.ts:92` | O `catch` relança o que não é `EISDIR` nem `ENOENT` | ✅ Morto, 1 falha: o caso das permissões |
+| R1 | `plugin/hooks/usage.ts:82` | `/\.jsonl?$/` | ✅ Morto, 1 falha: o caso de `s1.json` |
+| R2 | `plugin/hooks/usage.ts:85` | `/\.jsonl?$/.test(name)` | ✅ Morto, 1 falha: o caso da soma |
+| R4 | `plugin/hooks/usage.ts:85` | `\|\| name.endsWith(".json")` | ✅ Morto, 1 falha: o caso da soma |
+| R17 | `plugin/hooks/usage.ts:9`, `:85` | O filtro também exige `statSync(...).isFile()` | ✅ Morto, 1 falha: `PAP-18: a file of subagents that cannot be read counts nothing, and the others count` |
+| R5 | `plugin/hooks/usage.ts:85` | Sem o `.sort()` | ✅ Morto, 1 falha: o caso da ordem |
+| Q2 | `plugin/hooks/usage.ts:82` | Corta no último `.jsonl` do caminho | ✅ Morto, 2 falhas: os casos de `s1.jsonl.bak` e de `s1.jsonld` |
+| Q5 | `plugin/hooks/usage.ts:85` | `name.endsWith("jsonl")` | ✅ Morto, 1 falha: o caso da soma |
+| Z4 | `plugin/hooks/usage.ts:85` | `name.toLowerCase().endsWith(".jsonl")` | ✅ Morto, 1 falha: o caso da soma |
+| Z11 | `plugin/hooks/usage.ts:82` | `/\.jsonl$/i` | ✅ Morto, 1 falha: o caso de `s1.JSONL` |
+| Y5 | `plugin/hooks/usage.ts:82` | `/\.jsonl/` sem `$` | ✅ Morto, 1 falha: o caso de `logs.jsonl.d/s1.jsonl`. Na primeira execução falhou também um caso de PAP-31 (o do status 201), com um tempo de 7064464927279 ms, que é leitura de relógio, não demora; na segunda, só o de PAP-18, e o controle passou cinco vezes seguidas |
+| Y6 | `plugin/hooks/usage.ts:85` | `name.includes(".jsonl")` | ✅ Morto, 1 falha: o caso da soma |
+| W5 | `plugin/hooks/usage.ts:82` | Tira qualquer extensão | ✅ Morto, 4 falhas: os casos de `s1.txt`, `s1.JSONL`, `s1.json` e `s1.jsonld` |
+| K15 | `plugin/hooks/usage.ts:85` | Só `agent-*.jsonl` | ✅ Morto, 2 falhas: o caso da soma e o dos pontos |
+| Q1 | `plugin/hooks/usage.ts:82` | Tira sempre os 6 últimos caracteres | ✅ Morto, 2 falhas: os casos de `s1.JSONL` e de `s1-jsonl` |
+
+#### Mutações novas
+
+Nenhuma está nas tabelas das voltas 1 a 9 (as de `usage.ts` são W4 a W6, Y5, Y6, Y10, Z4, Z5, Z11, K9, K15, Q1 a Q7, R1 a R19 e U1 a U15). N1 a N6 e N20 são outras formas de `:82`; N7 a N11 e N21, de `:85`; N12 a N15, da lista e do principal; N16 a N19, dos caminhos de erro; N22, da chamada de `plugin/hooks/stop.ts:50`.
+
+| Mutation | File:line at a7f81d6 | Description | Killed? |
+| -------- | -------------------- | ----------- | ------- |
+| N1 | `plugin/hooks/usage.ts:82` | `p.endsWith(".jsonl") ? p.slice(0, -6) : p` | ➖ Equivalente: sem a flag `m`, o `$` de uma regex de JS só casa no fim do texto, e então `/\.jsonl$/` casa onde `endsWith(".jsonl")` é verdadeiro e tira os mesmos 6 caracteres. Sonda com cinco formas, abaixo |
+| N2 | `plugin/hooks/usage.ts:82` | `transcriptPath.trim().replace(/\.jsonl$/, "")` | ❌ Sobreviveu (63 pass, 0 fail) |
+| N3 | `plugin/hooks/usage.ts:82` | `/(\.jsonl)+$/`: todos os `.jsonl` do fim saem | ✅ Morto, 1 falha: o caso de `s1.jsonl.jsonl` |
+| N4 | `plugin/hooks/usage.ts:82` | `/\.jsonl\b/` | ✅ Morto, 1 falha: o caso de `logs.jsonl.d/s1.jsonl` |
+| N5 | `plugin/hooks/usage.ts:82` | `/\.jsonl[^/]*$/`: o `.jsonl` e o resto do nome saem | ✅ Morto, 3 falhas: `s1.jsonl.jsonl`, `s1.jsonl.bak` e `s1.jsonld` |
+| N6 | `plugin/hooks/usage.ts:82` | `/\.?jsonl$/`: o ponto opcional | ❌ Sobreviveu (63 pass, 0 fail) |
+| N7 | `plugin/hooks/usage.ts:10`, `:85` | `name.endsWith(".jsonl") && name !== basename(transcriptPath)` | ❌ Sobreviveu (63 pass, 0 fail) |
+| N8 | `plugin/hooks/usage.ts:85` | `name.trim().endsWith(".jsonl")` | ❌ Sobreviveu (63 pass, 0 fail) |
+| N9 | `plugin/hooks/usage.ts:85` | `name.lastIndexOf(".jsonl") === name.length - 6`: um nome de 5 caracteres conta | ✅ Morto, 1 falha: o caso da soma, pelo nome `jsonl` |
+| N10 | `plugin/hooks/usage.ts:85` | `name.split(".")[1] === "jsonl"` | ✅ Morto, 2 falhas: o caso da soma e o dos pontos |
+| N11 | `plugin/hooks/usage.ts:85` | O filtro tira um nome com outro `.jsonl` antes do fim | ✅ Morto, 1 falha: o caso dos pontos, por `agent-j.jsonl.jsonl` |
+| N12 | `plugin/hooks/usage.ts:89` | `for (const name of names.slice(0, 3))`: no máximo três arquivos | ❌ Sobreviveu (63 pass, 0 fail) |
+| N13 | `plugin/hooks/usage.ts:85` | `.sort((a, b) => (a.slice(0, -6) < b.slice(0, -6) ? -1 : 1))`: a ordem pelo nome sem a extensão | ⚠ Vive (63 pass) só numa ordem que a spec não decide: lacuna de precisão |
+| N14 | `plugin/hooks/usage.ts:96` | `usageOf([...new Set(transcripts)])`: textos iguais contam uma vez | ❌ Sobreviveu (63 pass, 0 fail) |
+| N15 | `plugin/hooks/usage.ts:81`–`:82` | `if (Object.keys(usageOf(transcripts)).length === 0) return {}` antes dos subagentes | ❌ Sobreviveu (63 pass, 0 fail) |
+| N16 | `plugin/hooks/usage.ts:86` | O `catch` do `readdirSync` relança o que não é `ENOENT`, `ENOTDIR` nem `EACCES` | ❌ Sobreviveu (63 pass, 0 fail) |
+| N17 | `plugin/hooks/usage.ts:92` | O `catch` da leitura relança o que não é `EISDIR`, `ENOENT` nem `EACCES` | ❌ Sobreviveu (63 pass, 0 fail) |
+| N18 | `plugin/hooks/usage.ts:86` | O `catch` do `readdirSync` dá `return {}` no que não é `ENOENT` | ✅ Morto, 8 falhas: o caso das permissões, o do `subagents` arquivo e os seis do laço de `:296` |
+| N19 | `plugin/hooks/usage.ts:92` | Um arquivo ilegível descarta os subagentes lidos antes dele (`transcripts.length = 1`) | ✅ Morto, 2 falhas: o caso do ilegível e o das permissões |
+| N20 | `plugin/hooks/usage.ts:82` | `/\.jsonl$/m` | ❌ Sobreviveu (63 pass, 0 fail) |
+| N21 | `plugin/hooks/usage.ts:85` | `/\.jsonl$/m.test(name)` | ❌ Sobreviveu (63 pass, 0 fail) |
+| N22 | `plugin/hooks/stop.ts:17`, `:50` | O hook lê só o principal: `usageOf([readFileSync(...)])` no lugar de `sessionUsage` | ✅ Morto, 11 falhas. Primeiro: `PAP-23: the log gains one usage per model, in ascending order of the model, with the sums and the session_id of the payload` |
+
+**Sensor depth**: 23 reinjeções e 22 mutações novas, 21 em `plugin/hooks/usage.ts` (`:82`, `:83` a `:96`, com os imports de `:9` e `:10`) e 1 em `plugin/hooks/stop.ts:50`, só no Linux
+**Sensor result**: 23 de 23 reinjetados mortos. Dos 22 novos, 9 mortos, 1 equivalente, 1 vivo numa ordem que a spec não decide e 11 sobreviventes. FAIL
+
+#### As sondas
+
+Cada sonda roda o original e o mutante com a mesma entrada, fora da cópia das mutações (`probe.txt`; os números são o `input` de `claude-opus`, ou de `claude-haiku` onde dito, e os quatro campos andam juntos).
+
+| Mutante | Entrada | Original | Mutante | Julgamento |
+| ------- | ------- | -------- | ------- | ---------- |
+| N1 | `s1.jsonl`, `s1.JSONL`, `s1.jsonl.bak`, `"s1.jsonl\n"` e `s1-jsonl`, cada um com `s1/subagents` | igual ao mutante nos cinco | igual | Equivalente |
+| N2 | `"s1.jsonl "` (1, com espaço no fim) e `s1/subagents/agent-a.jsonl` (100) | 1 | 101 | Sobrevivente: `"s1.jsonl "` não tem a extensão `.jsonl`; os subagentes dele seriam os de `"s1.jsonl "/subagents` (`spec.md:106`). Com `s1.jsonl`, os dois dão 101 |
+| N6 | `s1jsonl` (1) com `s1/subagents/agent-a.jsonl` (100); e `s1-jsonl` | 1; 1 | 101; 1 | Sobrevivente: `s1jsonl` não tem a extensão `.jsonl`. O laço de `:296` tem `s1-jsonl`, que mata U3 e não este |
+| N7 | `s1.jsonl` (1) com `s1/subagents/s1.jsonl` (100) | 101 | 1 | Sobrevivente: `s1.jsonl` de `subagents` é um `*.jsonl` de `subagents` e conta (PAP-18, `spec.md:106`) |
+| N8 | `s1.jsonl` (1) com `subagents/"agent-k.jsonl "` (9000) | 1 | 9001 | Sobrevivente: `"agent-k.jsonl "` não é `*.jsonl` |
+| N12 | `s1.jsonl` (1) com `agent-a` a `agent-d.jsonl`, 100 cada | 401 | 301 | Sobrevivente: todo `*.jsonl` de `subagents` conta. Os casos que mais têm arquivos que contam têm três (`:172`, `:208`, `:270`) |
+| N13 | `agent-a.jsonl` (haiku 1) e `agent-a-2.jsonl` (haiku 70), mesmo id | haiku 1 | haiku 70 | Fora do que a spec decide: com a extensão, `agent-a-2.jsonl` vem antes (`-` antes de `.`); sem ela, `agent-a` vem antes. A spec não fala de ordem entre arquivos, e `design.md:117` diz "em ordem de nome" sem dizer se o nome tem a extensão. Com `agent-a`, `agent-b`, `agent-c`, os dois dão 1 |
+| N14 | `s1.jsonl` (1) com `agent-a.jsonl` e `agent-b.jsonl`, cada um com a mesma linha sem `message.id` (100) | 201 | 101 | Sobrevivente: uma linha contada sem `message.id` é contada sozinha (PAP-15), e as linhas de cada arquivo somam (PAP-18). Com a mesma linha com id, os dois dão 101 |
+| N15 | Principal só com uma linha `user`, e `agent-a.jsonl` (100); e principal vazio, com o mesmo | 100; 100 | `{}`; `{}` | Sobrevivente: o principal existe e é lido, então PAP-19 não vale, e PAP-18 soma as linhas dos subagentes às dele, que são nenhuma. No hook, o `usage` de opus 100 viraria o `unknown` com 0 de PAP-24 |
+| N16 | `s1.jsonl` (1) com `s1/subagents` que é um link para si mesmo | 1 | lança `ELOOP` | Sobrevivente: um `subagents` que não pode ser listado não tem arquivo que conte, e o cálculo dá o principal, como U8 na volta 9. Lançar derruba `stop.ts:50`, que sai com 1 sem `usage` (PAP-23, PAP-24) |
+| N16 | `subagents` em `0o000` com `agent-a.jsonl` (100) | 1 | 1 | Igual: `EACCES` está na lista |
+| N17 | `agent-l.jsonl` que é um link para si mesmo, e `agent-b.jsonl` (haiku 5) | opus 1, haiku 5 | lança `ELOOP` | Sobrevivente: `agent-l.jsonl` não pode ser lido, não conta, e os outros contam (PAP-18, a letra do critério). Lançar derruba `stop.ts:50` |
+| N17 | `agent-y.jsonl` em `0o000` e `agent-b.jsonl` (haiku 5) | opus 1, haiku 5 | opus 1, haiku 5 | Igual |
+| N20 | `"s1.jsonl\nx"` (1) com `"s1\nx/subagents/agent-a.jsonl"` (100) | 1 | 101 | Sobrevivente: `"s1.jsonl\nx"` não tem a extensão `.jsonl`. Com a flag `m`, o `$` casa antes do `\n`. No Linux o nome é válido; no Windows não |
+| N21 | `s1.jsonl` (1) com `subagents/"agent-k.jsonl\nx"` (9000) | 1 | 9001 | Sobrevivente: `"agent-k.jsonl\nx"` não é `*.jsonl` |
+
+Que lançar em `sessionUsage` derruba o hook foi conferido na volta 9: `plugin/hooks/stop.ts:50` chama `sessionUsage` sem `try`, e um módulo do hook que lança depois de um `await` no nível de cima faz `bun` sair com 1, antes das chamadas de `/usage` de `:52`–`:56`.
+
+### Gate na cópia
+
+- `bun node_modules/typescript/bin/tsc --noEmit`: código 0.
+- `bun test test/unit`: 2249 pass, 1 skip, 0 fail, 657801 asserções, 77 arquivos, 52,49 s. O skip é `test/unit/tui-loop.test.ts:1015` (QST-99, só com `SQUAD_TEST_FULL`), fora da fatia; o de `test/unit/hook-usage.test.ts:241` não pula aqui. Oito testes a mais que na volta 9: 13 casos entram e 5 saem em `hook-usage.test.ts`.
+- Os dois arquivos da camada sem mutação: 63 pass, 0 fail, 161 asserções.
+- A suíte inteira, e qualquer coisa no Windows, é do orquestrador; esta volta não as rodou. O Done when da T53 e da T54 pede U1 a U5, U8 e U12 mortos também no Windows: não conferido aqui.
+
+### Lacunas de precisão
+
+- **O nome comparado na ordem (N13)**: `design.md:117` diz "em ordem de nome", e o código compara o nome inteiro, com a extensão. Se a ordem fica no design, dizer "o nome do arquivo, com a extensão, por unidade de código" e testar com `agent-a.jsonl` e `agent-a-2.jsonl` fecha esta lacuna e a de U6. Não entra no veredito.
+- **Link simbólico em `subagents` (R18)**, **nome que começa com ponto (U7)**, **o nome que é só `.jsonl` (U11, Q4, Q6)** e **a ordem por localidade (U6)**: como estavam.
+
+### Correções propostas
+
+Só de teste. Nenhuma pede mudança de produção.
+
+- **Fix 24 (PAP-18, N2, N6, N7, N8, N12, N14, N15, N16, N17, N20 e N21)**: em `test/unit/hook-usage.test.ts`:
+  1. no laço de `:296`, `s1jsonl` (mata N6); e, num laço só fora do Windows, que não aceita esses nomes, `"s1.jsonl "` e `"s1.jsonl\nx"`, cada um com o `s1/subagents` (100) e, para o segundo, também `"s1\nx/subagents"` (100), em que só o principal conta, 1 em cada campo (matam N2 e N20);
+  2. na lista de `:184`, fora do Windows, `"agent-k.jsonl "` e `"agent-k.jsonl\nx"`, com 9000 (matam N8 e N21); o `expect` de `:196` não muda;
+  3. no caso dos pontos de `:270`, um `s1.jsonl` dentro de `subagents`, o nome do principal, que conta (mata N7), e arquivos que contam até passar de três, por exemplo `agent-0.jsonl` a `agent-9.jsonl` com 100 cada, com o `toEqual` refeito (mata N12 e qualquer teto abaixo de dez);
+  4. um caso com dois arquivos de `subagents` de texto igual, uma linha contada sem `message.id`, em que os dois contam (mata N14);
+  5. um caso com o principal só com a linha `USER`, e outro com o principal vazio, cada um com `agent-a.jsonl` de 100, em que o subagente conta, 100 em cada campo (mata N15);
+  6. no caso do ilegível, um `agent-l.jsonl` que é link para si mesmo, e um caso com `s1/subagents` que é link para si mesmo, em que os outros contam e nada lança (matam N16 e N17), com o skip de link de `test/unit/launch-worktree.test.ts:315` onde o link não puder ser criado.
+
+  Done when: N2, N6, N7, N8, N12, N14, N15, N16, N17, N20 e N21 morrem no Linux, N6, N7, N12, N14, N15, N16 e N17 também no Windows, e os 23 reinjetados desta volta seguem mortos.
+
+Sobre o caminho: é a sétima volta seguida em PAP-18, e nenhuma achou defeito de produção. As listas da T54 fecharam as formas que as voltas 4 a 9 acharam, mas uma lista só tem o que se pôs nela, e a forma vizinha ficou de fora: `s1-jsonl` está e `s1jsonl` não; letras depois de `.jsonl` estão, espaço e `\n` não. Uma forma de parar essa parte é gerar os nomes, prefixo × separador × `jsonl` em cada caixa × sufixo (vazio, letra, espaço, `\n`, `.bak`, `.jsonl`), e comparar cada um com o que a definição de `spec.md:106` diz dele, num laço só para `:82` e outro para `:85`. Os caminhos de erro são de outra natureza: N16 e N17 deixam passar exatamente os códigos que os casos fazem, e qualquer lista fixa tem a próxima; o link para si mesmo mata estes dois, e um caso que faz `readdirSync` e `readFileSync` lançarem um código qualquer, por exemplo `EIO`, com o `node:fs` substituído só nesse caso, mataria a classe inteira. N12, N14 e N15 são da lista e do principal, que nenhuma volta antes testou. Aplicar o Fix 24 e reverificar, ou aceitar PAP-18 com esses mutantes registrados, é decisão do dev, como foi na volta 3; o laço de correção e reverificação desta fatia já passou das três voltas que a skill dá antes de levar ao dev.
+
+### Requirement Traceability Update
+
+Não editei `spec.md`. O que o orquestrador deve gravar:
+
+| Requirement | Previous Status | New Status |
+| ----------- | --------------- | ---------- |
+| PAP-18 | Implementing: Fix 23 de `validation.md` aplicado inteiro na T53 (U8, U9 e U13) e na T54 (U1 a U5 e U12, com os casos de um nome trocados por listas de nomes), à espera da décima volta | ❌ Needs Fix (Fix 24): U8 morre em `test/unit/hook-usage.test.ts:252`–`:268`, U9 e U13 em `:245`, U2 e U12 em `:191`–`:192`, U4 em `:272`, U1 e U3 em `:296`, U5 em `:283`–`:284`; R1, R2, R4, R17, R5, Q2, Q5, Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos; N2, N6 e N20 (`plugin/hooks/usage.ts:82`: `"s1.jsonl "`, `s1jsonl` e `"s1.jsonl\nx"`), N7, N8 e N21 (`:85`: `subagents/s1.jsonl`, `"agent-k.jsonl "` e `"agent-k.jsonl\nx"`), N12 (`:89`: um teto de três arquivos), N14 (`:96`: textos iguais uma vez), N15 (`:81`–`:82`: o principal que não conta nada dá `{}`) e N16 e N17 (`:86`, `:92`: um link para si mesmo faz `sessionUsage` lançar `ELOOP`) sobrevivem |
+
+A linha de cobertura de `spec.md:446` segue com 74 `Verified` e 1 `Needs Fix`.
+
+Para quando PAP-18 passar: `scripts/validate_state.py` junta, do arquivo inteiro, a linha do resultado do topo e a linha do resultado do sensor de cada volta (`_verdict`, `:52`–`:71`), e as das voltas 1 a 10 dizem FAIL. Com o veredito do topo aprovado, ele leria os dois juntos e daria o veredito por não preenchido. Quem gravar a aprovação precisa tirar o FAIL dessas linhas das voltas passadas, ou mover o histórico para outro arquivo.
+
+### Lições registradas
+
+Pelo `scripts/lessons.py`:
+
+- N2 e N8 somados a L-080 (confirmada), o `trim()` que muda o nome antes da regra do sufixo, com o mesmo texto. Não penalizei L-080: não há como mostrar que ela foi carregada na T53 e na T54.
+- N6, N20 e N21 somados a L-103, o ponto e a âncora do fim, com o mesmo texto.
+- L-115: uma entrada com o nome do arquivo a que o diretório pertence, para que um filtro que tira esse nome falhe (N7).
+- L-116: mais arquivos do que qualquer outro caso lê, para que um teto falhe (N12).
+- L-117: dois arquivos de texto igual numa soma, para que tirar textos repetidos falhe (N14).
+- L-118: os arquivos ao lado do principal somam também quando o principal não conta nada (N15).
+- L-119: o ilegível com um código de erro que os outros casos não fazem, como um link em laço, para que uma lista de códigos falhe (N16, N17).
+- L-120 (lacuna de precisão): dizer se a extensão faz parte do nome comparado na ordem, e testar com um nome que é prefixo do outro (N13).

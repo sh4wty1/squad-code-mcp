@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 115,
+  "next_id": 121,
   "lessons": [
     {
       "id": "L-001",
@@ -1513,10 +1513,11 @@
       "harmful": 0,
       "evidence": [
         "F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests)",
-        "M31 broker/tui.ts:182 (validation.md volta 1) (tui input)"
+        "M31 broker/tui.ts:182 (validation.md volta 1) (tui input)",
+        "N2, N8 plugin/hooks/usage.ts:82, :85 (PAP-18, volta 10) (hooks)"
       ],
       "created": "2026-10-12T09:24:37Z",
-      "last_seen": "2026-10-14T16:15:56Z"
+      "last_seen": "2026-10-17T22:01:11Z"
     },
     {
       "id": "L-081",
@@ -1942,10 +1943,11 @@
       "harmful": 0,
       "evidence": [
         "Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)",
-        "U3 plugin/hooks/usage.ts:82 (PAP-18) (hooks)"
+        "U3 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "N6, N20, N21 plugin/hooks/usage.ts:82, :85 (PAP-18, volta 10) (hooks)"
       ],
       "created": "2026-10-16T18:05:43Z",
-      "last_seen": "2026-10-17T19:53:26Z"
+      "last_seen": "2026-10-17T22:01:11Z"
     },
     {
       "id": "L-104",
@@ -2144,6 +2146,114 @@
       ],
       "created": "2026-10-17T19:53:26Z",
       "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-115",
+      "key": "surviving_mutant::give a rule that takes every matching entry of a directory an entry with the name of the file the directory belongs to so a filter that drops that name fails",
+      "text": "Give a rule that takes every matching entry of a directory an entry with the name of the file the directory belongs to, so a filter that drops that name fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N7 plugin/hooks/usage.ts:85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-116",
+      "key": "surviving_mutant::test a rule over every file of a directory with more files than any other case reads so a cap on how many are read fails",
+      "text": "Test a rule over every file of a directory with more files than any other case reads, so a cap on how many are read fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N12 plugin/hooks/usage.ts:89 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-117",
+      "key": "surviving_mutant::test a sum over several files with two files of the same text so a dedup of the texts fails",
+      "text": "Test a sum over several files with two files of the same text, so a dedup of the texts fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N14 plugin/hooks/usage.ts:96 (PAP-15, PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-118",
+      "key": "surviving_mutant::test that the files next to a main file add to it also when the main file counts nothing so a shortcut on an empty main fails",
+      "text": "Test that the files next to a main file add to it also when the main file counts nothing, so a shortcut on an empty main fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N15 plugin/hooks/usage.ts:81-82 (PAP-18, PAP-19) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-119",
+      "key": "surviving_mutant::test that an unreadable entry is skipped with an error code the other cases do not raise such as a link loop so a list of the codes let through fails",
+      "text": "Test that an unreadable entry is skipped with an error code the other cases do not raise, such as a link loop, so a list of the codes let through fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N16, N17 plugin/hooks/usage.ts:86, :92 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-120",
+      "key": "spec_precision_gap::when files are read in the order of their names say whether the extension is part of the name compared and test it with a stem that is a prefix of another",
+      "text": "When files are read in the order of their names, say whether the extension is part of the name compared, and test it with a stem that is a prefix of another",
+      "signal": "spec_precision_gap",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N13 plugin/hooks/usage.ts:85, design.md:117 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
     }
   ]
 }
