@@ -172,6 +172,14 @@ O Fix 22 da oitava volta em `validation.md`, decidido pelo dev em 2026-10-17: tr
 T52
 ```
 
+### Phase 15: O que a nona volta achou
+
+O Fix 23 da nona volta em `validation.md`, decidido pelo dev em 2026-10-17, inteiro: primeiro os três mutantes que fazem `sessionUsage` lançar e derrubariam o hook em `plugin/hooks/stop.ts:50` (T53), depois as formas novas do nome, com os casos de um nome trocados por listas de nomes, como o Verifier sugeriu, para cortar a sequência de voltas (T54). Nenhum código de produção e nenhuma frase da spec mudam.
+
+```
+T53 → T54
+```
+
 ---
 
 ## Task Breakdown
@@ -1328,10 +1336,55 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T53: O que não pode ser lido sem derrubar o hook
+
+**What**: Fix 23, itens 1 e 2, os que fazem `sessionUsage` lançar e o hook sair em `plugin/hooks/stop.ts:50`. Um caso com um `agent-y.jsonl` de modo `0o000` ao lado de `agent-b.jsonl`, e com um `subagents` de modo `0o000`, só fora do Windows e fora do root; e um caso com `s1/subagents` que é um arquivo regular.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O caso do ilegível e o skip de PAP-06 em `test/integration/server-credential.test.ts:57`
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] Um `agent-y.jsonl` sem permissão de leitura não conta, `agent-b.jsonl` segue contando 5, 6, 7, 8 e o principal 10, 20, 30, 40, sem lançar
+- [x] Um `subagents` sem permissão de leitura não tem arquivo que conte: só o principal, 1 em cada campo, sem lançar; o modo volta a `0o755` para o diretório do teste sair
+- [x] O caso das permissões tem `test.skipIf(process.platform === "win32" || process.getuid?.() === 0)`: no Windows `chmod` não tira a leitura e o root lê assim mesmo
+- [x] Um `subagents` que é arquivo regular não tem arquivo que conte: só o principal, 1 em cada campo, sem lançar, nas duas plataformas
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o U8 (`existsSync` no lugar do `try` de `:84`), o U9 (`statSync(...)?.isFile()` no lugar do `try` de `:90`) e o U13 (o `catch` de `:92` relança o que não é `EISDIR` nem `ENOENT`), e uma variante do U8 em que o `catch` de `:86` relança o que não é `ENOENT` nem `ENOTDIR`, que sem os casos novos passam; R1, R2, R4, R17, R5, Q2, Q5, Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T54: As formas do nome em listas
+
+**What**: Fix 23, itens 3 a 5, com a sugestão do Verifier de trocar os casos de um nome por laços. No caso da soma, os nomes de `subagents/` que não contam viram uma lista, com `agent-h.jsonld`, `nested/agent-n.jsonl` e `jsonl`; um caso com `agent.2.jsonl`, que conta; e os casos de transcript viram dois laços: os nomes que perdem o `.jsonl` do fim (`s1.jsonl`, `logs.jsonl.d/s1.jsonl`, `s1.v2.jsonl`, com os subagentes do nome cortado no primeiro ponto ao lado, que não contam) e os que não têm a extensão `.jsonl` (`s1.txt`, `s1.JSONL`, `s1.jsonl.bak`, `s1.json`, `s1.jsonld`, `s1-jsonl`), em que só o principal conta.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T53
+**Reuses**: O caso da soma e os casos de transcript das T41, T46, T50, T51 e T52
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [ ] `agent-h.jsonld`, `nested/agent-n.jsonl` e `jsonl` não entram na soma, com os nomes que já não entravam; o `expect` da soma não muda
+- [ ] `agent.2.jsonl` conta: 101 em cada campo com o principal
+- [ ] Cada nome de transcript que termina em `.jsonl` tem os subagentes do nome sem esse `.jsonl`, 101 em cada campo; cada um que não termina tem só o principal, 1 em cada campo
+- [ ] Morrem, conferidos e desfeitos numa cópia fora do repositório, o U1 (`/\.jsonl\w*$/` em `:82`), o U2 (`/\.jsonl\w*$/` em `:85`), o U3 (`/.jsonl$/` em `:82`), o U4 (`/^[^.]+\.jsonl$/` em `:85`), o U5 (o nome do transcript cortado no primeiro ponto em `:82`) e o U12 (`readdirSync` recursivo em `:85`), que sem os casos novos passam; R1, R2, R4, R17, R5, Q2, Q5, Z4, Z11, Y5, Y6, W5, K15, Q1, U8, U9 e U13 seguem mortos
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12 → Phase 13 → Phase 14
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12 → Phase 13 → Phase 14 → Phase 15
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -1347,6 +1400,7 @@ Phase 11: T45 → T46 → T47 → T48 → T49
 Phase 12: T50
 Phase 13: T51
 Phase 14: T52
+Phase 15: T53 → T54
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.

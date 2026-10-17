@@ -1,5 +1,5 @@
 import { afterAll, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { sessionUsage, usageOf } from "../../../plugin/hooks/usage.ts";
@@ -229,6 +229,36 @@ test("PAP-18: a file of subagents that cannot be read counts nothing, and the ot
     "claude-opus": { input: 10, output: 20, cache_write: 30, cache_read: 40 },
     "claude-haiku": { input: 5, output: 6, cache_write: 7, cache_read: 8 },
   });
+});
+
+// Windows has no file mode and root reads it anyway: only there the case does not run
+test.skipIf(process.platform === "win32" || process.getuid?.() === 0)(
+  "PAP-18: a file of subagents without permission to read, or a subagents directory without it, counts nothing, and the others count",
+  () => {
+    const path = file(["denied", "s1.jsonl"], [line("claude-opus", "m1", [10, 20, 30, 40])]);
+    chmodSync(file(["denied", "s1", "subagents", "agent-y.jsonl"], [line("claude-haiku", "y1", [9000, 9000, 9000, 9000])]), 0o000);
+    file(["denied", "s1", "subagents", "agent-b.jsonl"], [line("claude-haiku", "b1", [5, 6, 7, 8])]);
+    expect(sessionUsage(path)).toEqual({
+      "claude-opus": { input: 10, output: 20, cache_write: 30, cache_read: 40 },
+      "claude-haiku": { input: 5, output: 6, cache_write: 7, cache_read: 8 },
+    });
+
+    const closed = file(["closed", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+    file(["closed", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+    chmodSync(join(dir, "closed", "s1", "subagents"), 0o000);
+    try {
+      expect(sessionUsage(closed)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
+    } finally {
+      // so that the directory of the test can be removed
+      chmodSync(join(dir, "closed", "s1", "subagents"), 0o755);
+    }
+  }
+);
+
+test("PAP-18: a subagents that is a file has no file of subagents: only the main transcript counts", () => {
+  const path = file(["plain", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+  file(["plain", "s1", "subagents"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
 });
 
 test("PAP-18: only .jsonl leaves the transcript path: the subagents of s1.txt are in s1.txt/subagents, not in s1/subagents", () => {
