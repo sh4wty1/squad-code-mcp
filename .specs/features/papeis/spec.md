@@ -384,7 +384,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-15 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51 | Needs Fix (Fix 22 de `validation.md`): Q2 e Q5 morrem pela T51, e K15, W5, Y5, Y6, Z4, Z11 e Q1 seguem mortos; R1 e R2/R4 (`.json` no transcript e em `subagents`) e R17 (um link sem alvo em `subagents` que esvazia a lista) sobrevivem. Lacuna de teste da oitava volta |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52 | Implementing: Fix 22 de `validation.md` aplicado na T52 (`agent-g.json` fora da soma, o transcript `s1.json` sem os subagentes de `s1/`, e um link sem alvo em `subagents` que não esvazia a lista), à espera da nona volta |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |

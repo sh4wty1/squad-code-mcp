@@ -1,5 +1,5 @@
 import { afterAll, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { sessionUsage, usageOf } from "../../../plugin/hooks/usage.ts";
@@ -185,6 +185,8 @@ test("PAP-18: the lines of the files of subagents add to the ones of the main tr
   file(["sub", "s1", "subagents", "agent-e.JSONL"], [line("claude-haiku", "e1", [9000, 9000, 9000, 9000])]);
   // the dot counts: agent-fjsonl ends in jsonl but is not a *.jsonl
   file(["sub", "s1", "subagents", "agent-fjsonl"], [line("claude-haiku", "f1", [9000, 9000, 9000, 9000])]);
+  // every letter counts: agent-g.json is the start of .jsonl but is not a *.jsonl
+  file(["sub", "s1", "subagents", "agent-g.json"], [line("claude-haiku", "g1", [9000, 9000, 9000, 9000])]);
   expect(sessionUsage(path)).toEqual({
     "claude-opus": { input: 111, output: 121, cache_write: 131, cache_read: 141 },
     "claude-haiku": { input: 105, output: 206, cache_write: 307, cache_read: 408 },
@@ -199,9 +201,9 @@ test("PAP-18: a message.id repeated in the main transcript and in a subagent cou
 
 test("PAP-18: the files of subagents are read in the order of their names, after the main transcript", () => {
   const path = file(["order", "s1.jsonl"], [line("claude-opus", "m1", [10, 20, 30, 40])]);
-  // written last to first: the order is of the names, not of the creation
-  file(["order", "s1", "subagents", "agent-c.jsonl"], [line("claude-haiku", "x", [1, 2, 3, 4])]);
+  // written b, c, a: the order is of the names, not of the creation
   file(["order", "s1", "subagents", "agent-b.jsonl"], [line("claude-haiku", "x", [70, 70, 70, 70])]);
+  file(["order", "s1", "subagents", "agent-c.jsonl"], [line("claude-haiku", "x", [1, 2, 3, 4])]);
   file(["order", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "x", [900, 900, 900, 900])]);
   expect(sessionUsage(path)).toEqual({
     "claude-opus": { input: 10, output: 20, cache_write: 30, cache_read: 40 },
@@ -220,6 +222,9 @@ test("PAP-18: a file of subagents that cannot be read counts nothing, and the ot
   const path = file(["unreadable", "s1.jsonl"], [line("claude-opus", "m1", [10, 20, 30, 40])]);
   mkdirSync(join(dir, "unreadable", "s1", "subagents", "agent-a.jsonl"), { recursive: true });
   file(["unreadable", "s1", "subagents", "agent-b.jsonl"], [line("claude-haiku", "b1", [5, 6, 7, 8])]);
+  // a link without a target fails already when it is looked at, not only when it is read;
+  // a junction needs no privilege on Windows, and the type is ignored elsewhere
+  symlinkSync(join(dir, "missing"), join(dir, "unreadable", "s1", "subagents", "agent-z.jsonl"), "junction");
   expect(sessionUsage(path)).toEqual({
     "claude-opus": { input: 10, output: 20, cache_write: 30, cache_read: 40 },
     "claude-haiku": { input: 5, output: 6, cache_write: 7, cache_read: 8 },
@@ -247,6 +252,12 @@ test("PAP-18: the case counts in .jsonl: the subagents of s1.JSONL are in s1.JSO
 test("PAP-18: only a .jsonl at the end leaves the transcript path: the subagents of s1.jsonl.bak are in s1.jsonl.bak/subagents, not in s1/subagents", () => {
   const path = file(["suffix", "s1.jsonl.bak"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
   file(["suffix", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
+});
+
+test("PAP-18: only the whole .jsonl leaves the transcript path: the subagents of s1.json are in s1.json/subagents, not in s1/subagents", () => {
+  const path = file(["letters", "s1.json"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+  file(["letters", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
   expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
 });
 

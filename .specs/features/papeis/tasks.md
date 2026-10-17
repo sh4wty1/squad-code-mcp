@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/papeis/design.md`
-**Status**: Done. T1 a T51 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`; o que a reverificação achou, a fase 10, T40 a T44; e o que a quinta volta achou, a fase 11, T45 a T49; e o que a sexta volta achou, a fase 12, T50; e o que a sétima volta achou, a fase 13, T51
+**Status**: Done. T1 a T52 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`; o que a reverificação achou, a fase 10, T40 a T44; e o que a quinta volta achou, a fase 11, T45 a T49; e o que a sexta volta achou, a fase 12, T50; e o que a sétima volta achou, a fase 13, T51; e o que a oitava volta achou, a fase 14, T52
 
 Regras do repositório que valem para toda tarefa:
 
@@ -162,6 +162,14 @@ O Fix 21 da sétima volta em `validation.md`, decidido pelo dev em 2026-10-16: d
 
 ```
 T51
+```
+
+### Phase 14: O que a oitava volta achou
+
+O Fix 22 da oitava volta em `validation.md`, decidido pelo dev em 2026-10-17: três casos de teste, e a ordem de escrita do caso da ordem dos nomes, recomendada fora do veredito. Nenhum código de produção e nenhuma frase da spec mudam: a definição "Transcripts da sessão" já diz `*.jsonl` e o `.jsonl` do fim, e PAP-18 já diz que um arquivo ilegível não conta e os outros contam.
+
+```
+T52
 ```
 
 ---
@@ -1297,10 +1305,33 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T52: As letras do sufixo `.jsonl` e o link sem alvo
+
+**What**: Fix 22. Um `agent-g.json` no caso de PAP-18 da soma, fora dela; um caso com o transcript `s1.json` e `s1/subagents/agent-a.jsonl`, em que só o principal conta; e, no caso do ilegível, um `agent-z.jsonl` que é um link sem alvo. E, recomendado fora do veredito, os três arquivos do caso da ordem escritos na ordem b, c, a (R5).
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O primeiro caso de PAP-18 do arquivo, o caso de `s1.jsonl.bak` da T51 e o caso do ilegível
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] `agent-g.json` não entra na soma: é o começo de `.jsonl`, mas não é `*.jsonl`
+- [x] Com `transcript_path` `s1.json`, os subagentes de `s1/` não contam: só o principal entra na soma, 1 em cada campo
+- [x] Um `agent-z.jsonl` que é um link sem alvo, criado com `symlinkSync(..., "junction")`, não conta, e `agent-b.jsonl` segue contando 5, 6, 7, 8
+- [x] O caso da ordem escreve `agent-b`, `agent-c` e `agent-a`, nessa ordem, e o resultado segue o de `agent-c`
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o R1 (`/\.jsonl?$/` em `:82`), o R2 (`/\.jsonl?$/.test(name)` em `:85`), o R4 (`.jsonl` ou `.json` em `:85`), o R17 (`statSync(...).isFile()` no filtro de `:85`) e o R5 (sem o `.sort()`), que sem os casos novos passam; Q2, Q5, Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12 → Phase 13
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12 → Phase 13 → Phase 14
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -1315,6 +1346,7 @@ Phase 10: T40 → T41 → T42 → T43 → T44
 Phase 11: T45 → T46 → T47 → T48 → T49
 Phase 12: T50
 Phase 13: T51
+Phase 14: T52
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
@@ -1400,6 +1432,7 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC. As 
 | T49: O log que chega depois do prazo | 1 arquivo: `launch.test.ts` | ✅ Granular |
 | T50: A caixa de `.jsonl` | 1 arquivo: `hook-usage.test.ts`, e uma frase da spec | ✅ Granular |
 | T51: O ponto e o fim do sufixo `.jsonl` | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T52: As letras do sufixo `.jsonl` e o link sem alvo | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
 
 Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.json`, T12 no `export` de `namesOf` em `peers.ts`, T15 em `broker/package.json` e T16 no conferidor de `skills.test.ts`. É a ligação do que a própria tarefa cria. T4 e T12 ficam inteiras: os três JSON só valem juntos como um plugin, e as cinco funções de T12 são uma linha cada sobre a mesma entrada.
 
@@ -1460,6 +1493,7 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T49 | T48 | T48 → T49 | ✅ Match |
 | T50 | None (a fase anterior inteira) | início da fase 12 | ✅ Match |
 | T51 | None (a fase anterior inteira) | início da fase 13 | ✅ Match |
+| T52 | None (a fase anterior inteira) | início da fase 14 | ✅ Match |
 
 ---
 
@@ -1518,3 +1552,4 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T49: O log que chega depois do prazo | Launcher | unit | unit | ✅ OK |
 | T50: A caixa de `.jsonl` | Hook, parte pura | unit | unit | ✅ OK |
 | T51: O ponto e o fim do sufixo `.jsonl` | Hook, parte pura | unit | unit | ✅ OK |
+| T52: As letras do sufixo `.jsonl` e o link sem alvo | Hook, parte pura | unit | unit | ✅ OK |
