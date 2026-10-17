@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 108,
+  "next_id": 115,
   "lessons": [
     {
       "id": "L-001",
@@ -1867,10 +1867,11 @@
         "Z11 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
         "Q2 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
         "Q5 plugin/hooks/usage.ts:85 (PAP-18) (hooks)",
-        "R1, R2, R4 plugin/hooks/usage.ts:82, :85 (PAP-18) (launcher)"
+        "R1, R2, R4 plugin/hooks/usage.ts:82, :85 (PAP-18) (launcher)",
+        "U1, U2, U4, U5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
       ],
       "created": "2026-10-16T15:08:16Z",
-      "last_seen": "2026-10-16T23:13:15Z"
+      "last_seen": "2026-10-17T19:53:25Z"
     },
     {
       "id": "L-100",
@@ -1940,10 +1941,11 @@
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
+        "Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)",
+        "U3 plugin/hooks/usage.ts:82 (PAP-18) (hooks)"
       ],
       "created": "2026-10-16T18:05:43Z",
-      "last_seen": "2026-10-16T18:05:43Z"
+      "last_seen": "2026-10-17T19:53:26Z"
     },
     {
       "id": "L-104",
@@ -2016,6 +2018,132 @@
       ],
       "created": "2026-10-16T23:13:15Z",
       "last_seen": "2026-10-16T23:13:15Z"
+    },
+    {
+      "id": "L-108",
+      "key": "surviving_mutant::fence a suffix rule on a name also with a name whose extension only starts with the suffix such as jsonld for jsonl",
+      "text": "Fence a suffix rule on a name also with a name whose extension only starts with the suffix, such as .jsonld for .jsonl",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U1, U2 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-109",
+      "key": "surviving_mutant::give a rule on a file extension a name whose stem has dots of its own such as agent 2 jsonl so a rule that cuts at the first dot fails",
+      "text": "Give a rule on a file extension a name whose stem has dots of its own, such as agent.2.jsonl, so a rule that cuts at the first dot fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U4, U5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-110",
+      "key": "surviving_mutant::test that an unreadable file counts nothing also with a regular file without read permission the one a stat check before the read lets through",
+      "text": "Test that an unreadable file counts nothing also with a regular file without read permission, the one a stat check before the read lets through",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U9, U13 plugin/hooks/usage.ts:90-94 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-111",
+      "key": "surviving_mutant::test a directory that is listed for its entries also when the path is a regular file so a check that it exists before listing it fails",
+      "text": "Test a directory that is listed for its entries also when the path is a regular file, so a check that it exists before listing it fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U8 plugin/hooks/usage.ts:84-88 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-112",
+      "key": "surviving_mutant::give a rule on the entries of a directory a subdirectory with a matching file inside so a recursive listing fails",
+      "text": "Give a rule on the entries of a directory a subdirectory with a matching file inside, so a recursive listing fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U12 plugin/hooks/usage.ts:85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-113",
+      "key": "spec_precision_gap::when files are read in the order of their names say whether the order is by code unit or by locale and test it with names that differ in case",
+      "text": "When files are read in the order of their names, say whether the order is by code unit or by locale, and test it with names that differ in case",
+      "signal": "spec_precision_gap",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U6 plugin/hooks/usage.ts:85 (PAP-18, design.md:117) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-114",
+      "key": "spec_precision_gap::when a spec selects files by a pattern such as jsonl say whether a name that starts with a dot matches",
+      "text": "When a spec selects files by a pattern such as *.jsonl, say whether a name that starts with a dot matches",
+      "signal": "spec_precision_gap",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U7 plugin/hooks/usage.ts:85 (PAP-18, spec.md:106) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
     }
   ]
 }

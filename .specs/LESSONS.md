@@ -603,8 +603,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-099 - Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
 - features: papeis
-- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+10 more)
-- last seen: 2026-10-16T23:13:15Z
+- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+11 more)
+- last seen: 2026-10-17T19:53:25Z
 
 ### L-100 - Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
@@ -627,8 +627,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-103 - Fence a suffix rule on a name in one go on its four sides, the dot, the anchor at the end, the case and the place in the path, instead of one side per round
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
 - features: papeis
-- evidence: Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)
-- last seen: 2026-10-16T18:05:43Z
+- evidence: Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks) (+1 more)
+- last seen: 2026-10-17T19:53:26Z
 
 ### L-104 - Run the tests of a file-system layer on Linux too: a mutant on the case of a directory name lives on the case-insensitive file system of Windows
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
@@ -653,6 +653,48 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: papeis
 - evidence: R5 plugin/hooks/usage.ts:85 (PAP-18, design.md:117) (hooks)
 - last seen: 2026-10-16T23:13:15Z
+
+### L-108 - Fence a suffix rule on a name also with a name whose extension only starts with the suffix, such as .jsonld for .jsonl
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U1, U2 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-109 - Give a rule on a file extension a name whose stem has dots of its own, such as agent.2.jsonl, so a rule that cuts at the first dot fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U4, U5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-110 - Test that an unreadable file counts nothing also with a regular file without read permission, the one a stat check before the read lets through
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U9, U13 plugin/hooks/usage.ts:90-94 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-111 - Test a directory that is listed for its entries also when the path is a regular file, so a check that it exists before listing it fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U8 plugin/hooks/usage.ts:84-88 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-112 - Give a rule on the entries of a directory a subdirectory with a matching file inside, so a recursive listing fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U12 plugin/hooks/usage.ts:85 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-113 - When files are read in the order of their names, say whether the order is by code unit or by locale, and test it with names that differ in case
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U6 plugin/hooks/usage.ts:85 (PAP-18, design.md:117) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-114 - When a spec selects files by a pattern such as *.jsonl, say whether a name that starts with a dot matches
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U7 plugin/hooks/usage.ts:85 (PAP-18, spec.md:106) (hooks)
+- last seen: 2026-10-17T19:53:26Z
 
 ## Quarantined (failed when applied - ignore)
 

@@ -384,7 +384,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-15 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52 | Implementing: Fix 22 de `validation.md` aplicado na T52 (`agent-g.json` fora da soma, o transcript `s1.json` sem os subagentes de `s1/`, e um link sem alvo em `subagents` que não esvazia a lista), à espera da nona volta |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52 | Needs Fix (Fix 23 de `validation.md`): R1, R2, R4, R17 e R5 morrem pela T52, e Q2, Q5, Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos; U1, U3 e U5 (`usage.ts:82`: `s1.jsonld`, `s1-jsonl`, `s1.v2.jsonl`), U2, U4 e U12 (`:85`: `agent-h.jsonld`, `agent.2.jsonl`, um subdiretório) e U8, U9 e U13 (`:84` a `:94`: um `subagents` que não é diretório e um arquivo sem permissão fazem `sessionUsage` lançar) sobrevivem. Lacuna de teste da nona volta |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |
