@@ -384,7 +384,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-15 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52, T53 | Implementing: Fix 23 de `validation.md`, itens 1 e 2, aplicado na T53 (U8, U9 e U13 morrem); os itens 3 a 5 vão na T54 |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52, T53, T54 | Implementing: Fix 23 de `validation.md` aplicado inteiro na T53 (U8, U9 e U13) e na T54 (U1 a U5 e U12, com os casos de um nome trocados por listas de nomes), à espera da décima volta |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |

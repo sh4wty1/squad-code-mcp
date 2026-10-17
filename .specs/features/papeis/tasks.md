@@ -1369,12 +1369,12 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] `agent-h.jsonld`, `nested/agent-n.jsonl` e `jsonl` não entram na soma, com os nomes que já não entravam; o `expect` da soma não muda
-- [ ] `agent.2.jsonl` conta: 101 em cada campo com o principal
-- [ ] Cada nome de transcript que termina em `.jsonl` tem os subagentes do nome sem esse `.jsonl`, 101 em cada campo; cada um que não termina tem só o principal, 1 em cada campo
-- [ ] Morrem, conferidos e desfeitos numa cópia fora do repositório, o U1 (`/\.jsonl\w*$/` em `:82`), o U2 (`/\.jsonl\w*$/` em `:85`), o U3 (`/.jsonl$/` em `:82`), o U4 (`/^[^.]+\.jsonl$/` em `:85`), o U5 (o nome do transcript cortado no primeiro ponto em `:82`) e o U12 (`readdirSync` recursivo em `:85`), que sem os casos novos passam; R1, R2, R4, R17, R5, Q2, Q5, Z4, Z11, Y5, Y6, W5, K15, Q1, U8, U9 e U13 seguem mortos
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] `agent-h.jsonld`, `nested/agent-n.jsonl` e `jsonl` não entram na soma, com os nomes que já não entravam; o `expect` da soma não muda
+- [x] `agent.2.jsonl` conta: 101 em cada campo com o principal
+- [x] Cada nome de transcript que termina em `.jsonl` tem os subagentes do nome sem esse `.jsonl`, 101 em cada campo; cada um que não termina tem só o principal, 1 em cada campo
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o U1 (`/\.jsonl\w*$/` em `:82`), o U2 (`/\.jsonl\w*$/` em `:85`), o U3 (`/.jsonl$/` em `:82`), o U4 (`/^[^.]+\.jsonl$/` em `:85`), o U5 (o nome do transcript cortado no primeiro ponto em `:82`) e o U12 (`readdirSync` recursivo em `:85`), que sem os casos novos passam; R1, R2, R4, R17, R5, Q2, Q5, Z4, Z11, Y5, Y6, W5, K15, Q1, U8, U9 e U13 seguem mortos; e dois nomes a mais das listas matam o que pretendem: `jsonl` em `subagents/` mata `name.split(".").pop() === "jsonl"`, e `s1.jsonl.jsonl` mata `/\.jsonl/g`
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

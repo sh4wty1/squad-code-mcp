@@ -178,15 +178,21 @@ test("PAP-18: the lines of the files of subagents add to the ones of the main tr
   ]);
   // a *.jsonl whose name does not start with agent- counts too
   file(["sub", "s1", "subagents", "sidechain-7.jsonl"], [line("claude-opus", "s7", [100, 100, 100, 100], {}, { isSidechain: true })]);
-  // only *.jsonl is a transcript: not a name that only has .jsonl inside it
-  file(["sub", "s1", "subagents", "agent-c.txt"], [line("claude-haiku", "c1", [9000, 9000, 9000, 9000])]);
-  file(["sub", "s1", "subagents", "agent-d.jsonl.bak"], [line("claude-haiku", "d1", [9000, 9000, 9000, 9000])]);
-  // the case counts in .jsonl: agent-e.JSONL is not a *.jsonl
-  file(["sub", "s1", "subagents", "agent-e.JSONL"], [line("claude-haiku", "e1", [9000, 9000, 9000, 9000])]);
-  // the dot counts: agent-fjsonl ends in jsonl but is not a *.jsonl
-  file(["sub", "s1", "subagents", "agent-fjsonl"], [line("claude-haiku", "f1", [9000, 9000, 9000, 9000])]);
-  // every letter counts: agent-g.json is the start of .jsonl but is not a *.jsonl
-  file(["sub", "s1", "subagents", "agent-g.json"], [line("claude-haiku", "g1", [9000, 9000, 9000, 9000])]);
+  // only a *.jsonl of subagents itself is a transcript: not a name that only has .jsonl inside
+  // it, in another case, without the dot, with fewer or more letters, nor a *.jsonl of a
+  // directory inside subagents
+  for (const name of [
+    "agent-c.txt",
+    "agent-d.jsonl.bak",
+    "agent-e.JSONL",
+    "agent-fjsonl",
+    "jsonl",
+    "agent-g.json",
+    "agent-h.jsonld",
+    "nested/agent-n.jsonl",
+  ]) {
+    file(["sub", "s1", "subagents", ...name.split("/")], [line("claude-haiku", name, [9000, 9000, 9000, 9000])]);
+  }
   expect(sessionUsage(path)).toEqual({
     "claude-opus": { input: 111, output: 121, cache_write: 131, cache_read: 141 },
     "claude-haiku": { input: 105, output: 206, cache_write: 307, cache_read: 408 },
@@ -261,35 +267,39 @@ test("PAP-18: a subagents that is a file has no file of subagents: only the main
   expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
 });
 
-test("PAP-18: only .jsonl leaves the transcript path: the subagents of s1.txt are in s1.txt/subagents, not in s1/subagents", () => {
-  const path = file(["extension", "s1.txt"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
-  file(["extension", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
-  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
+test("PAP-18: a *.jsonl of subagents with other dots in its name counts", () => {
+  const path = file(["dots", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+  for (const name of ["agent.2.jsonl", "agent-i.json.jsonl", "agent-j.jsonl.jsonl"]) {
+    file(["dots", "s1", "subagents", name], [line("claude-opus", name, [100, 100, 100, 100])]);
+  }
+  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 301, output: 301, cache_write: 301, cache_read: 301 } });
 });
 
-test("PAP-18: only the .jsonl at the end leaves the transcript path: a folder with .jsonl in its name keeps it", () => {
-  const path = file(["folder", "logs.jsonl.d", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
-  file(["folder", "logs.jsonl.d", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
-  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 101, output: 101, cache_write: 101, cache_read: 101 } });
-});
+// [the transcript, the directory of its subagents]: only the whole .jsonl at the end of the
+// name leaves it. The subagents of s1, when it is not that directory, do not count.
+for (const [i, [transcript, subagents]] of ([
+  ["s1.jsonl", "s1"],
+  ["logs.jsonl.d/s1.jsonl", "logs.jsonl.d/s1"],
+  ["s1.v2.jsonl", "s1.v2"],
+  ["s1.jsonl.jsonl", "s1.jsonl"],
+] as const).entries()) {
+  test(`PAP-18: the subagents of ${transcript} are in ${subagents}/subagents`, () => {
+    const path = file(["kept", String(i), ...transcript.split("/")], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+    file(["kept", String(i), ...subagents.split("/"), "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+    if (subagents !== "s1") file(["kept", String(i), "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "s1", [9000, 9000, 9000, 9000])]);
+    expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 101, output: 101, cache_write: 101, cache_read: 101 } });
+  });
+}
 
-test("PAP-18: the case counts in .jsonl: the subagents of s1.JSONL are in s1.JSONL/subagents, not in s1/subagents", () => {
-  const path = file(["case", "s1.JSONL"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
-  file(["case", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
-  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
-});
-
-test("PAP-18: only a .jsonl at the end leaves the transcript path: the subagents of s1.jsonl.bak are in s1.jsonl.bak/subagents, not in s1/subagents", () => {
-  const path = file(["suffix", "s1.jsonl.bak"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
-  file(["suffix", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
-  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
-});
-
-test("PAP-18: only the whole .jsonl leaves the transcript path: the subagents of s1.json are in s1.json/subagents, not in s1/subagents", () => {
-  const path = file(["letters", "s1.json"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
-  file(["letters", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
-  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
-});
+// A transcript without the extension .jsonl, in its case and with its dot, keeps its whole
+// name: its subagents are in <name>/subagents, which a file cannot have
+for (const [i, transcript] of ["s1.txt", "s1.JSONL", "s1.jsonl.bak", "s1.json", "s1.jsonld", "s1-jsonl"].entries()) {
+  test(`PAP-18: ${transcript} has no extension .jsonl: the subagents of s1/subagents do not count`, () => {
+    const path = file(["whole", String(i), transcript], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+    file(["whole", String(i), "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+    expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
+  });
+}
 
 test("PAP-19: without the main transcript there is no model, even with files of subagents", () => {
   file(["absent", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "a1", [5, 6, 7, 8])]);
