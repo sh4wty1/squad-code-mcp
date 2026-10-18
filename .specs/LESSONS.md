@@ -113,8 +113,8 @@ Corroborated across multiple features. Safe to apply as guidance.
 ### L-080 - When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes
 - signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker tests` · harmful: 0
 - features: papeis, tui-clicavel
-- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests) (+2 more)
-- last seen: 2026-10-17T22:01:11Z
+- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests) (+3 more)
+- last seen: 2026-10-18T18:22:10Z
 
 ## Candidates (under observation - do NOT load as guidance yet)
 
@@ -513,8 +513,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-084 - When a surviving mutant gets a test, give the same case to every other place that has the same check
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
 - features: papeis
-- evidence: K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)
-- last seen: 2026-10-12T11:29:27Z
+- evidence: K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks) (+1 more)
+- last seen: 2026-10-18T18:22:10Z
 
 ### L-085 - Test a shutdown with each external dependency already gone, and assert every cleanup that must still happen
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `server` · harmful: 0
@@ -731,6 +731,30 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: papeis
 - evidence: N13 plugin/hooks/usage.ts:85, design.md:117 (PAP-18) (hooks)
 - last seen: 2026-10-17T22:01:11Z
+
+### L-121 - When test names are generated, generate the stem too, with a space and a letter outside ASCII, so a filter on the characters of the name fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: validation.md volta 11, G4, G25 (plugin/hooks/usage.ts:85) (hooks)
+- last seen: 2026-10-18T18:22:10Z
+
+### L-122 - Test a rule over every line of every file with a file of the size a real one reaches, so a cap on the bytes or the lines read fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: validation.md volta 11, G8, G9 (plugin/hooks/usage.ts:54, :90-91) (hooks)
+- last seen: 2026-10-18T18:22:10Z
+
+### L-123 - Test an entry without id next to an entry whose id is the text of a small number, so a counter key that can equal a real id fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: validation.md volta 11, G2 (plugin/hooks/usage.ts:56) (hooks)
+- last seen: 2026-10-18T18:22:10Z
+
+### L-124 - State the text encoding of every file a spec reads, and test it with a value outside ASCII
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: papeis
+- evidence: validation.md volta 11, G10 (plugin/hooks/usage.ts:91) (spec)
+- last seen: 2026-10-18T18:22:11Z
 
 ## Quarantined (failed when applied - ignore)
 

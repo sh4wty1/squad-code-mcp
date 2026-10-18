@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 121,
+  "next_id": 125,
   "lessons": [
     {
       "id": "L-001",
@@ -1514,10 +1514,11 @@
       "evidence": [
         "F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests)",
         "M31 broker/tui.ts:182 (validation.md volta 1) (tui input)",
-        "N2, N8 plugin/hooks/usage.ts:82, :85 (PAP-18, volta 10) (hooks)"
+        "N2, N8 plugin/hooks/usage.ts:82, :85 (PAP-18, volta 10) (hooks)",
+        "validation.md volta 11, G6, G7, G23 (plugin/hooks/usage.ts:82, :85) (broker tests)"
       ],
       "created": "2026-10-12T09:24:37Z",
-      "last_seen": "2026-10-17T22:01:11Z"
+      "last_seen": "2026-10-18T18:22:10Z"
     },
     {
       "id": "L-081",
@@ -1588,10 +1589,11 @@
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)"
+        "K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)",
+        "validation.md volta 11, G3 (plugin/hooks/usage.ts:79-81) (hooks)"
       ],
       "created": "2026-10-12T11:29:27Z",
-      "last_seen": "2026-10-12T11:29:27Z"
+      "last_seen": "2026-10-18T18:22:10Z"
     },
     {
       "id": "L-085",
@@ -2254,6 +2256,78 @@
       ],
       "created": "2026-10-17T22:01:11Z",
       "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-121",
+      "key": "surviving_mutant::when test names are generated generate the stem too with a space and a letter outside ascii so a filter on the characters of the name fails",
+      "text": "When test names are generated, generate the stem too, with a space and a letter outside ASCII, so a filter on the characters of the name fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md volta 11, G4, G25 (plugin/hooks/usage.ts:85) (hooks)"
+      ],
+      "created": "2026-10-18T18:22:10Z",
+      "last_seen": "2026-10-18T18:22:10Z"
+    },
+    {
+      "id": "L-122",
+      "key": "surviving_mutant::test a rule over every line of every file with a file of the size a real one reaches so a cap on the bytes or the lines read fails",
+      "text": "Test a rule over every line of every file with a file of the size a real one reaches, so a cap on the bytes or the lines read fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md volta 11, G8, G9 (plugin/hooks/usage.ts:54, :90-91) (hooks)"
+      ],
+      "created": "2026-10-18T18:22:10Z",
+      "last_seen": "2026-10-18T18:22:10Z"
+    },
+    {
+      "id": "L-123",
+      "key": "surviving_mutant::test an entry without id next to an entry whose id is the text of a small number so a counter key that can equal a real id fails",
+      "text": "Test an entry without id next to an entry whose id is the text of a small number, so a counter key that can equal a real id fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md volta 11, G2 (plugin/hooks/usage.ts:56) (hooks)"
+      ],
+      "created": "2026-10-18T18:22:10Z",
+      "last_seen": "2026-10-18T18:22:10Z"
+    },
+    {
+      "id": "L-124",
+      "key": "spec_precision_gap::state the text encoding of every file a spec reads and test it with a value outside ascii",
+      "text": "State the text encoding of every file a spec reads, and test it with a value outside ASCII",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md volta 11, G10 (plugin/hooks/usage.ts:91) (spec)"
+      ],
+      "created": "2026-10-18T18:22:11Z",
+      "last_seen": "2026-10-18T18:22:11Z"
     }
   ]
 }
