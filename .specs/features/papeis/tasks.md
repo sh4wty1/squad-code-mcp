@@ -1511,10 +1511,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] As duas linhas contam, cada uma sozinha
-- [ ] Morre, conferido e desfeito numa cópia fora do repositório, o G2 (`String(alone++)` em `:56`), que sem o caso novo passa
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] As duas linhas contam, cada uma sozinha
+- [x] Morre, conferido e desfeito numa cópia fora do repositório, o G2 (`String(alone++)` em `:56`), que sem o caso novo passa
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick

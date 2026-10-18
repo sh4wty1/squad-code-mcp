@@ -381,7 +381,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-12 | P1: Início de turno | T6, T7, T9 | Verified |
 | PAP-13 | P1: Início de turno | T7 | Verified |
 | PAP-14 | P1: Uso no fim do turno | T5, T59 | Verified |
-| PAP-15 | P1: Uso no fim do turno | T5, T57 | Needs Fix (Fix 25 de `validation.md`): G2 (`usage.ts:56`, `String(alone++)`: um id `"0"` ao lado de uma linha sem id dá 7 em vez de 12) sobrevive. Lacuna de teste da décima primeira volta |
+| PAP-15 | P1: Uso no fim do turno | T5, T57, T60 | Implementing: Fix 25 de `validation.md`, G2 na T60 (um `message.id` `"0"` ao lado de uma linha sem id), à espera do fechamento na T61 |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52, T53, T54, T55, T56, T57, T59 | Implementing: Fix 25 de `validation.md`, G8 e G9 na T59 (um transcript do tamanho de uma sessão real), à espera do fechamento na T61, com G4, G25, G23, G6 e G7 aceitos |

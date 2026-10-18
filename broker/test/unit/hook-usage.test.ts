@@ -100,6 +100,14 @@ test("PAP-15: a counted line without message.id counts alone, even next to an eq
   expect(usageOf([[alone, alone].join("\n")])).toEqual({ "claude-opus": { input: 6, output: 8, cache_write: 10, cache_read: 12 } });
 });
 
+test("PAP-15: a counted line without message.id counts alone next to one of message.id \"0\", in either order", () => {
+  const alone = line("claude-opus", undefined, [3, 4, 5, 6]);
+  const zero = line("claude-opus", "0", [3, 4, 5, 6]);
+  for (const transcript of [[alone, zero], [zero, alone]]) {
+    expect(usageOf([transcript.join("\n")])).toEqual({ "claude-opus": { input: 6, output: 8, cache_write: 10, cache_read: 12 } });
+  }
+});
+
 test("PAP-15: a message.id that is not a non-empty text is no id: its line counts alone", () => {
   for (const id of ["", 7, null]) {
     const transcript = [line("claude-opus", id, [3, 4, 5, 6]), line("claude-opus", id, [3, 4, 5, 6])].join("\n");
