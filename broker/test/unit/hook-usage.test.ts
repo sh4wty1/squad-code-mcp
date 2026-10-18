@@ -443,6 +443,37 @@ test("PAP-19: a main transcript that is a directory gives no model, even with fi
   expect(sessionUsage(join(dir, "folder", "s1.jsonl"))).toEqual({});
 });
 
+test.skipIf(!canLink)("PAP-19: a main transcript that is a link to itself gives no model, even with files of subagents", () => {
+  const path = join(dir, "self", "s1.jsonl");
+  file(["self", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "a1", [5, 6, 7, 8])]);
+  symlinkSync(path, path, "file");
+  expect(sessionUsage(path)).toEqual({});
+});
+
+// Windows has no file mode and root reads it anyway: only there the case does not run
+test.skipIf(process.platform === "win32" || process.getuid?.() === 0)(
+  "PAP-19: a main transcript without permission to read gives no model, even with files of subagents",
+  () => {
+    const path = file(["locked", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+    file(["locked", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "a1", [5, 6, 7, 8])]);
+    chmodSync(path, 0o000);
+    expect(sessionUsage(path)).toEqual({});
+  }
+);
+
+test("PAP-19: a main transcript whose reading fails with any error gives no model, even with files of subagents", () => {
+  const path = file(["eio-main", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+  file(["eio-main", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "a1", [5, 6, 7, 8])]);
+  const { readFileSync } = fs;
+  const read = spyOn(fs, "readFileSync").mockImplementation(((file: string, options: "utf8") =>
+    file === path ? EIO() : readFileSync(file, options)) as typeof readFileSync);
+  try {
+    expect(sessionUsage(path)).toEqual({});
+  } finally {
+    read.mockRestore();
+  }
+});
+
 test("PAP-21: a transcript path that is not a text, or is an empty one, gives no model", () => {
   expect(sessionUsage(undefined)).toEqual({});
   expect(sessionUsage(12)).toEqual({});

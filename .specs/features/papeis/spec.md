@@ -385,7 +385,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52, T53, T54, T55, T56, T57 | Needs Fix (Fix 25 de `validation.md`): N16, N17, N2, N6, N20, N7, N8, N12, N21, N14 e N15 morrem pela T55, a T56 e a T57, e os 23 mortos antes seguem mortos; G4, G25 e G23 (`usage.ts:85`, `:82`: `"agent 1.jsonl"`, `agente-ç.jsonl`, `"s1 .jsonl"`), G6 e G7 (NFKC em `:85` e `:82`) e G8 e G9 (um teto de 64 KiB por arquivo e de 1000 linhas) sobrevivem. Lacuna de teste da décima primeira volta |
-| PAP-19 | P1: Uso no fim do turno | T5 | Needs Fix (Fix 25 de `validation.md`): G3 (`usage.ts:79`–`:81`, o `catch` do principal relança `ELOOP` e `EACCES`, e derruba `stop.ts:50`) sobrevive. Lacuna de teste da décima primeira volta |
+| PAP-19 | P1: Uso no fim do turno | T5, T58 | Implementing: Fix 25 de `validation.md`, G3 na T58 (um principal que é link para si mesmo, sem permissão ou com `EIO`), à espera do fechamento na T61 |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |
 | PAP-22 | Edge case | T8, T9 | Verified |

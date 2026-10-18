@@ -188,6 +188,14 @@ O Fix 24 da décima volta em `validation.md`, decidido pelo dev em 2026-10-18, i
 T55 → T56 → T57
 ```
 
+### Phase 17: O que a décima primeira volta achou, e o fechamento
+
+Do Fix 25 da décima primeira volta em `validation.md`, o dev decidiu em 2026-10-18 aplicar só o que derruba o hook ou conta errado em uso real: G3 (T58), G8 e G9 (T59) e G2 (T60). Depois a fatia fecha sem décima segunda volta. G4, G25, G23, G6 e G7 ficam registrados em "Assumptions" da spec, com uma nota de fechamento em `validation.md` (T61), como na Gate. Nenhum código de produção muda.
+
+```
+T58 → T59 → T60 → T61
+```
+
 ---
 
 ## Task Breakdown
@@ -1453,10 +1461,89 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T58: O principal que não pode ser lido, com qualquer erro
+
+**What**: Fix 25, item 1. Nos casos de PAP-19, três casos novos com um `s1/subagents/agent-a.jsonl` ao lado: um principal que é link para si mesmo (`test.skipIf(!canLink)`), um de modo `0o000` (fora do Windows e do root), e um cujo `readFileSync` lança `EIO` só no caminho do principal, por `spyOn`.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O `canLink`, o `EIO` e o `spyOn` da T55; o skip de permissão da T53
+**Requirement**: PAP-19
+
+**Done when**:
+
+- [x] Nos três, `sessionUsage` dá `{}` sem lançar, mesmo com o subagente ao lado
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o G3 (o `catch` de `:79` relança o que não é `ENOENT` nem `EISDIR`) e as variantes dele que deixam passar também `ELOOP`, ou `ELOOP` e `EACCES`, que sem os casos novos passam
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T59: Um transcript do tamanho de uma sessão real
+
+**What**: Fix 25, item 4. Um caso com um principal de 100 000 linhas e um arquivo de `subagents` de mais de 8 MiB, cada um com a linha contada no fim.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T58
+**Reuses**: O caso da soma
+**Requirement**: PAP-14, PAP-18
+
+**Done when**:
+
+- [ ] A linha do fim de cada um conta, com o `toEqual` escrito com o literal
+- [ ] Morrem, conferidos e desfeitos numa cópia fora do repositório, o G8 (um teto de 64 KiB por arquivo) e o G9 (um teto de 1000 linhas por transcript), que sem o caso novo passam
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T60: Um `message.id` `"0"` ao lado de uma linha sem id
+
+**What**: Fix 25, item 5. No caso de PAP-15 da linha sem id, uma linha de `message.id` `"0"` ao lado de uma linha sem id.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T59
+**Reuses**: Os casos de PAP-15
+**Requirement**: PAP-15
+
+**Done when**:
+
+- [ ] As duas linhas contam, cada uma sozinha
+- [ ] Morre, conferido e desfeito numa cópia fora do repositório, o G2 (`String(alone++)` em `:56`), que sem o caso novo passa
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T61: O fechamento da fatia
+
+**What**: A linha de "Assumptions" da spec com os mutantes aceitos (G4, G25, G23, G6 e G7) e as lacunas de precisão N13 e G10; a rastreabilidade de PAP-15, PAP-18 e PAP-19; a nota de fechamento no fim de `validation.md`; o item do Fix 25 em `ROADMAP.md`.
+**Where**: `.specs/features/papeis/spec.md`, `.specs/features/papeis/validation.md`
+**Depends on**: T60
+**Reuses**: A nota de fechamento da Gate em `.specs/features/gate/validation.md`
+**Requirement**: PAP-15, PAP-18, PAP-19
+
+**Done when**:
+
+- [ ] "Assumptions" diz que a fatia fecha sem décima segunda volta por decisão do dev de 2026-10-18, com os cinco mutantes aceitos e o que cada um muda
+- [ ] A nota de fechamento diz o que T58 a T60 mataram, conferido numa cópia, e o que ficou sem reverificação independente
+- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+
+**Tests**: none
+**Gate**: build
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12 → Phase 13 → Phase 14 → Phase 15 → Phase 16
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12 → Phase 13 → Phase 14 → Phase 15 → Phase 16 → Phase 17
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -1474,6 +1561,7 @@ Phase 13: T51
 Phase 14: T52
 Phase 15: T53 → T54
 Phase 16: T55 → T56 → T57
+Phase 17: T58 → T59 → T60 → T61
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
