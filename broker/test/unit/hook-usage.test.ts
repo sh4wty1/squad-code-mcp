@@ -431,6 +431,13 @@ test("PAP-18: a main transcript that counts nothing, or is empty, still has the 
   expect(sessionUsage(empty)).toEqual({ "claude-opus": { input: 100, output: 100, cache_write: 100, cache_read: 100 } });
 });
 
+test("PAP-18: a transcript of the size of a real session counts to its last line: 100 000 lines in the main one, more than 8 MiB in a subagent", () => {
+  const path = file(["large", "s1.jsonl"], [...Array(99_999).fill(USER), line("claude-opus", "m1", [1, 1, 1, 1])]);
+  const lines = Math.ceil((8 * 1024 * 1024) / USER.length);
+  file(["large", "s1", "subagents", "agent-a.jsonl"], [...Array(lines).fill(USER), line("claude-opus", "a1", [100, 100, 100, 100])]);
+  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 101, output: 101, cache_write: 101, cache_read: 101 } });
+});
+
 test("PAP-19: without the main transcript there is no model, even with files of subagents", () => {
   file(["absent", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "a1", [5, 6, 7, 8])]);
   expect(sessionUsage(join(dir, "absent", "s1.jsonl"))).toEqual({});

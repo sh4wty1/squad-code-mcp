@@ -1491,10 +1491,10 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] A linha do fim de cada um conta, com o `toEqual` escrito com o literal
-- [ ] Morrem, conferidos e desfeitos numa cópia fora do repositório, o G8 (um teto de 64 KiB por arquivo) e o G9 (um teto de 1000 linhas por transcript), que sem o caso novo passam
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] A linha do fim de cada um conta, com o `toEqual` escrito com o literal
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o G8 (um teto de 64 KiB por arquivo) e o G9 (um teto de 1000 linhas por transcript), que sem o caso novo passam
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
