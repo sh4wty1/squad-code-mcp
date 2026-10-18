@@ -1,4 +1,5 @@
-import { afterAll, expect, test } from "bun:test";
+import { afterAll, expect, spyOn, test } from "bun:test";
+import * as fs from "node:fs";
 import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -265,6 +266,69 @@ test("PAP-18: a subagents that is a file has no file of subagents: only the main
   const path = file(["plain", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
   file(["plain", "s1", "subagents"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
   expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
+});
+
+// Windows creates a symbolic link only with the developer mode or as an administrator
+const canLink = (() => {
+  const probe = mkdtempSync(join(tmpdir(), "squad-link-"));
+  try {
+    writeFileSync(join(probe, "target"), "");
+    symlinkSync(join(probe, "target"), join(probe, "link"), "file");
+    return true;
+  } catch {
+    return false;
+  } finally {
+    rmSync(probe, { recursive: true, force: true });
+  }
+})();
+
+test.skipIf(!canLink)("PAP-18: a file of subagents or a subagents directory that is a link to itself counts nothing, and the others count", () => {
+  const path = file(["loop", "s1.jsonl"], [line("claude-opus", "m1", [10, 20, 30, 40])]);
+  const looped = join(dir, "loop", "s1", "subagents", "agent-l.jsonl");
+  file(["loop", "s1", "subagents", "agent-b.jsonl"], [line("claude-haiku", "b1", [5, 6, 7, 8])]);
+  symlinkSync(looped, looped, "file");
+  expect(sessionUsage(path)).toEqual({
+    "claude-opus": { input: 10, output: 20, cache_write: 30, cache_read: 40 },
+    "claude-haiku": { input: 5, output: 6, cache_write: 7, cache_read: 8 },
+  });
+
+  const closed = file(["looped", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+  mkdirSync(join(dir, "looped", "s1"));
+  symlinkSync(join(dir, "looped", "s1", "subagents"), join(dir, "looped", "s1", "subagents"), "dir");
+  expect(sessionUsage(closed)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
+});
+
+// Any error of the disk, not only the ones a test can make: EIO stands for them
+const EIO = () => {
+  throw Object.assign(new Error("EIO: i/o error"), { code: "EIO" });
+};
+
+test("PAP-18: a subagents directory whose reading fails with any error has no file of subagents: only the main transcript counts", () => {
+  const path = file(["eio", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+  file(["eio", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+  const list = spyOn(fs, "readdirSync").mockImplementation(EIO);
+  try {
+    expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1, output: 1, cache_write: 1, cache_read: 1 } });
+  } finally {
+    list.mockRestore();
+  }
+});
+
+test("PAP-18: a file of subagents whose reading fails with any error counts nothing, and the others count", () => {
+  const path = file(["eio-file", "s1.jsonl"], [line("claude-opus", "m1", [10, 20, 30, 40])]);
+  const failing = file(["eio-file", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "a1", [9000, 9000, 9000, 9000])]);
+  file(["eio-file", "s1", "subagents", "agent-b.jsonl"], [line("claude-haiku", "b1", [5, 6, 7, 8])]);
+  const { readFileSync } = fs;
+  const read = spyOn(fs, "readFileSync").mockImplementation(((path: string, options: "utf8") =>
+    path === failing ? EIO() : readFileSync(path, options)) as typeof readFileSync);
+  try {
+    expect(sessionUsage(path)).toEqual({
+      "claude-opus": { input: 10, output: 20, cache_write: 30, cache_read: 40 },
+      "claude-haiku": { input: 5, output: 6, cache_write: 7, cache_read: 8 },
+    });
+  } finally {
+    read.mockRestore();
+  }
 });
 
 test("PAP-18: a *.jsonl of subagents with other dots in its name counts", () => {

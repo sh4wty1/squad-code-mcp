@@ -180,6 +180,14 @@ O Fix 23 da nona volta em `validation.md`, decidido pelo dev em 2026-10-17, inte
 T53 → T54
 ```
 
+### Phase 16: O que a décima volta achou
+
+O Fix 24 da décima volta em `validation.md`, decidido pelo dev em 2026-10-18, inteiro e com as duas sugestões do Verifier para cortar a sequência de voltas. Primeiro os caminhos de erro, com um `fs` que lança `EIO` além dos links para si mesmos (T55). Depois os nomes, gerados por combinação e não mais listados (T56). Por fim o que nenhuma volta testou, os textos iguais e o principal que não conta nada (T57). Nenhum código de produção e nenhuma frase da spec mudam.
+
+```
+T55 → T56 → T57
+```
+
 ---
 
 ## Task Breakdown
@@ -1381,10 +1389,74 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T55: Um erro qualquer do disco sem derrubar o hook
+
+**What**: Fix 24, item 6, com a sugestão do Verifier para a classe inteira. Um caso com um `agent-l.jsonl` que é link para si mesmo, ao lado de `agent-b.jsonl`, e com um `s1/subagents` que é link para si mesmo, com o skip de link de `test/unit/launch-worktree.test.ts:302`; e dois casos com o `readdirSync` e o `readFileSync` de `node:fs` trocados por `spyOn`, só neles, por um que lança `EIO`.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O caso do ilegível, o `canLink` de `test/unit/launch-worktree.test.ts:302`
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] Um `agent-l.jsonl` que é link para si mesmo não conta, `agent-b.jsonl` segue contando 5, 6, 7, 8 e o principal 10, 20, 30, 40, sem lançar; um `subagents` que é link para si mesmo não tem arquivo que conte: só o principal, 1 em cada campo, sem lançar
+- [x] O caso dos links tem `test.skipIf(!canLink)`: no Windows sem o modo de desenvolvedor não se cria link
+- [x] Com o `readdirSync` lançando `EIO`, só o principal conta, 1 em cada campo, sem lançar; com o `readFileSync` lançando `EIO` só para `agent-a.jsonl`, `agent-b.jsonl` conta 5, 6, 7, 8 e o principal 10, 20, 30, 40, sem lançar; o `spyOn` é desfeito em `finally`
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N16 (o `catch` de `:86` relança o que não é `ENOENT`, `ENOTDIR` nem `EACCES`) e o N17 (o `catch` de `:92` relança o que não é `EISDIR`, `ENOENT` nem `EACCES`), e as variantes dos dois que deixam passar também `ELOOP`, que sem os casos novos passam; uma lista que já tem `EIO` segue viva, como toda lista fixa tem a próxima
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T56: As formas do nome geradas
+
+**What**: Fix 24, itens 1 a 3, com a sugestão do Verifier de gerar os nomes. As formas do fim de um nome são separador (vazio, `.`, `-`) × `jsonl` em três formas (`jsonl`, `JSONL`, `json`) × o que vem depois (vazio, `d`, `.bak`, `.jsonl` e, fora do Windows, espaço, `\n` e `\nx`). Um laço de transcripts `s1<forma>`, com os subagentes de cada nome que um erro de leitura tiraria (o nome sem um pedaço que tem `json`), que não contam. E um caso de `subagents/` com `agent<forma>` e `s1.jsonl`, o nome do principal.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T55
+**Reuses**: Os laços de transcript e o caso dos pontos da T54
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [ ] Cada transcript `s1<forma>` que termina em `.jsonl`, com o ponto e em minúsculas, tem os subagentes do nome sem esse `.jsonl`, 101 em cada campo; cada um que não termina tem só o principal, 1 em cada campo; em nenhum os subagentes de outro nome sem um pedaço com `json` contam
+- [ ] Em `subagents/`, os onze nomes que terminam em `.jsonl` contam, `s1.jsonl` entre eles, 1101 em cada campo com o principal, escrito com o literal; os outros não contam
+- [ ] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N2 (`trim()` em `:82`), o N6 (`/\.?jsonl$/` em `:82`), o N20 (`/\.jsonl$/m` em `:82`), o N7 (o nome do principal fora em `:85`), o N8 (`trim()` em `:85`), o N21 (`/\.jsonl$/m` em `:85`) e o N12 (um teto de três arquivos, e de dez), que sem os casos novos passam; U1, U2, U3, R1, Z11, Q2, Q5 e Z4 seguem mortos
+- [ ] Nenhum código de produção muda
+- [ ] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T57: Os textos iguais e o principal que não conta nada
+
+**What**: Fix 24, itens 4 e 5. Um caso com dois arquivos de `subagents/` de texto igual, uma linha contada sem `message.id`; um com o principal só com a linha `USER`, e um com o principal vazio, cada um com um `agent-a.jsonl` de 100.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T56
+**Reuses**: O caso da soma
+**Requirement**: PAP-15, PAP-18
+
+**Done when**:
+
+- [ ] Dois arquivos de texto igual contam os dois: 201 em cada campo com o principal (PAP-15: uma linha sem `message.id` conta sozinha)
+- [ ] Um principal que não conta nada, só `USER` ou vazio, não tira os subagentes: 100 em cada campo
+- [ ] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N14 (`new Set` sobre os textos em `:96`) e o N15 (`return {}` quando o principal não conta nada), que sem os casos novos passam
+- [ ] Nenhum código de produção muda
+- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+
+**Tests**: unit
+**Gate**: build
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12 → Phase 13 → Phase 14 → Phase 15
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12 → Phase 13 → Phase 14 → Phase 15 → Phase 16
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -1401,6 +1473,7 @@ Phase 12: T50
 Phase 13: T51
 Phase 14: T52
 Phase 15: T53 → T54
+Phase 16: T55 → T56 → T57
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.

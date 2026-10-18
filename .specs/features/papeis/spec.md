@@ -384,7 +384,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-15 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52, T53, T54 | Needs Fix (Fix 24 de `validation.md`): U8, U9, U13, U1 a U5 e U12 morrem pela T53 e pela T54, e R1, R2, R4, R17, R5, Q2, Q5, Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos; N2, N6 e N20 (`usage.ts:82`: `"s1.jsonl "`, `s1jsonl`, `"s1.jsonl\nx"`), N7, N8 e N21 (`:85`: `subagents/s1.jsonl`, `"agent-k.jsonl "`, `"agent-k.jsonl\nx"`), N12 (`:89`: um teto de três arquivos), N14 (`:96`: textos iguais uma vez), N15 (`:81`–`:82`: o principal que não conta nada dá `{}`) e N16 e N17 (`:86`, `:92`: um link para si mesmo faz `sessionUsage` lançar `ELOOP`) sobrevivem. Lacuna de teste da décima volta |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52, T53, T54, T55 | Implementing: Fix 24 de `validation.md`, a T55 com os caminhos de erro (N16, N17: um link para si mesmo e um `fs` que lança `EIO`), à espera da T56 e da T57 |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |
