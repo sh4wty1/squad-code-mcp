@@ -365,6 +365,53 @@ for (const [i, transcript] of ["s1.txt", "s1.JSONL", "s1.jsonl.bak", "s1.json", 
   });
 }
 
+// The forms of the end of a name: a separator, jsonl in a case, and what comes after it. A
+// form is *.jsonl only when the name ends in .jsonl, with its dot and in lowercase. Windows
+// takes no line break in a name and drops a space at its end: there those ends are left out.
+const AFTER = ["", "d", ".bak", ".jsonl", ...(process.platform === "win32" ? [] : [" ", "\n", "\nx"])];
+const FORMS = ["", ".", "-"].flatMap((separator) =>
+  ["jsonl", "JSONL", "json"].flatMap((jsonl) =>
+    AFTER.map((after) => [separator + jsonl + after, after === ".jsonl" || (after === "" && separator + jsonl === ".jsonl")] as const)
+  )
+);
+
+// Every name a wrong reading of the extension could take for the stem: the name without a
+// piece that has json in it, in any case
+function misread(name: string): Set<string> {
+  const names = new Set<string>();
+  for (let i = 0; i < name.length; i++) {
+    for (let j = i + 4; j <= name.length; j++) {
+      if (/json/i.test(name.slice(i, j))) names.add(name.slice(0, i) + name.slice(j));
+    }
+  }
+  return names;
+}
+
+for (const [i, [form, jsonl]] of FORMS.entries()) {
+  const transcript = `s1${form}`;
+  // the name without the .jsonl of its end, or none: a file cannot have a subagents directory
+  const stem = jsonl ? transcript.slice(0, -".jsonl".length) : null;
+  test(`PAP-18: the subagents of ${JSON.stringify(transcript)} are ${stem === null ? "none" : `in ${JSON.stringify(stem)}/subagents`}`, () => {
+    const path = file(["formed", String(i), transcript], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+    for (const other of misread(transcript)) {
+      if (other !== stem) file(["formed", String(i), other, "subagents", "agent-a.jsonl"], [line("claude-haiku", "a9", [9000, 9000, 9000, 9000])]);
+    }
+    if (stem !== null) file(["formed", String(i), stem, "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+    const n = stem === null ? 1 : 101;
+    expect(sessionUsage(path)).toEqual({ "claude-opus": { input: n, output: n, cache_write: n, cache_read: n } });
+  });
+}
+
+test("PAP-18: every name of subagents that ends in .jsonl counts, the one of the main transcript too, and no other", () => {
+  const path = file(["formed", "names", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+  for (const [form, jsonl] of [...FORMS.map(([form, jsonl]) => [`agent${form}`, jsonl] as const), ["s1.jsonl", true] as const]) {
+    const counts = jsonl ? [100, 100, 100, 100] : [9000, 9000, 9000, 9000];
+    file(["formed", "names", "s1", "subagents", form], [line(jsonl ? "claude-opus" : "claude-haiku", form, counts)]);
+  }
+  // agent.jsonl, the nine that end in .jsonl after another form, and s1.jsonl: 11 of 100
+  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1101, output: 1101, cache_write: 1101, cache_read: 1101 } });
+});
+
 test("PAP-19: without the main transcript there is no model, even with files of subagents", () => {
   file(["absent", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "a1", [5, 6, 7, 8])]);
   expect(sessionUsage(join(dir, "absent", "s1.jsonl"))).toEqual({});

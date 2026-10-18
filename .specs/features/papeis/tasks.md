@@ -1421,11 +1421,11 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] Cada transcript `s1<forma>` que termina em `.jsonl`, com o ponto e em minúsculas, tem os subagentes do nome sem esse `.jsonl`, 101 em cada campo; cada um que não termina tem só o principal, 1 em cada campo; em nenhum os subagentes de outro nome sem um pedaço com `json` contam
-- [ ] Em `subagents/`, os onze nomes que terminam em `.jsonl` contam, `s1.jsonl` entre eles, 1101 em cada campo com o principal, escrito com o literal; os outros não contam
-- [ ] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N2 (`trim()` em `:82`), o N6 (`/\.?jsonl$/` em `:82`), o N20 (`/\.jsonl$/m` em `:82`), o N7 (o nome do principal fora em `:85`), o N8 (`trim()` em `:85`), o N21 (`/\.jsonl$/m` em `:85`) e o N12 (um teto de três arquivos, e de dez), que sem os casos novos passam; U1, U2, U3, R1, Z11, Q2, Q5 e Z4 seguem mortos
-- [ ] Nenhum código de produção muda
-- [ ] Gate quick passa: `bun test test/unit`
+- [x] Cada transcript `s1<forma>` que termina em `.jsonl`, com o ponto e em minúsculas, tem os subagentes do nome sem esse `.jsonl`, 101 em cada campo; cada um que não termina tem só o principal, 1 em cada campo; em nenhum os subagentes de outro nome sem um pedaço com `json` contam
+- [x] Em `subagents/`, os onze nomes que terminam em `.jsonl` contam, `s1.jsonl` entre eles, 1101 em cada campo com o principal, escrito com o literal; os outros não contam
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N2 (`trim()` em `:82`), o N6 (`/\.?jsonl$/` em `:82`), o N20 (`/\.jsonl$/m` em `:82`), o N7 (o nome do principal fora em `:85`), o N8 (`trim()` em `:85`), o N21 (`/\.jsonl$/m` em `:85`) e o N12 (um teto de três arquivos, e de dez), que sem os casos novos passam; U1, U2, U3, R1, Z11, Q2, Q5 e Z4 seguem mortos
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
 
 **Tests**: unit
 **Gate**: quick
