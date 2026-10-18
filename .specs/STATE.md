@@ -182,6 +182,16 @@ Só decisões novas. O que já está em `docs/adr/` não se repete aqui.
 
 ## Handoff
 
+**2026-10-18, o fechamento do resíduo da Papéis.** Do Fix 25, o dev decidiu aplicar só o que derruba o hook ou conta errado numa sessão real e fechar sem décima segunda volta. A fase 17 tem quatro tarefas, todas commitadas:
+- T58 (`7834595`): um principal que é link para si mesmo, um sem permissão e um com `EIO`, mata G3;
+- T59 (`bf2da98`): um principal de 100 000 linhas e um subagente de mais de 8 MiB, mata G8 e G9;
+- T60 (`92cc928`): um id `"0"` ao lado de uma linha sem id, mata G2;
+- T61, o commit de fechamento: a linha de "Assumptions" com G4, G25, G23, G6 e G7 aceitos e N13 e G10 como o código faz, a rastreabilidade (75 `Verified`, PAP-18 com o resíduo aceito), a nota de fechamento no fim de `validation.md` e o `ROADMAP.md`.
+
+Cada caso novo passa no `usage.ts` original e falha com o seu mutante e as variantes, numa cópia fora do repositório. A conferência é do autor dos testes, e não houve volta independente depois das T58 a T60. Nenhum código de produção mudou desde `055d629`. Suíte em `92cc928`, só no Linux, nesta máquina: `tsc` 0 e 2561 pass, 1 skip, 0 fail, 96 arquivos, 130 s. `validate_state.py papeis` sai com 1, porque o veredito da volta 11 é FAIL: é o estado aceito, como na Gate. Não ajustar o relatório para o script passar.
+
+Próximo passo: a suíte no Windows, com duas coisas a olhar lá: se o `spyOn` em `node:fs` chega a `usage.ts` e quanto tempo leva o caso da T59. Depois, o push do `test/papeis-gaps` e a descrição do PR 16, que esperam o sim do dev. O branch tem commits locais sem push desde `d8f7371`. O parágrafo abaixo é o anterior.
+
 **2026-10-18, a décima primeira volta.** No Linux, a fase 16 aplicou o Fix 24 inteiro, só de teste, em três commits. A T55 (`5166c35`) traz um `agent-l.jsonl` e um `subagents` que são links para si mesmos (`test.skipIf(!canLink)`), e dois casos com o `readdirSync` e o `readFileSync` de `node:fs` trocados por `spyOn`, só neles, por um que lança `EIO`. A T56 (`91a0b8c`) gera as formas do fim do nome: separador × `jsonl`, `JSONL` ou `json` × o que vem depois. São 63 transcripts `s1<forma>`, cada um ao lado dos subagentes de todo nome que uma leitura errada tomaria pelo radical, e um `subagents` com `agent<forma>` e `s1.jsonl`. A T57 (`22cf788`) traz dois arquivos de texto igual e um principal que não conta nada. Numa cópia fora do repositório, cada um dos onze passa nos testes de antes e falha nos novos. Suíte em `22cf788`, só no Linux, nesta máquina: `tsc` 0 e 2556 pass, 1 skip, 0 fail, 96 arquivos, 138 s. O Windows não rodou, e lá falta conferir se o `spyOn` em `node:fs` chega a `usage.ts`; no Linux chega e não vaza, segundo o Verifier.
 
 A décima primeira volta independente (`validation.md`, "Reverificação do Fix 24") deu FAIL por PAP-18, PAP-15 e PAP-19, sem defeito de produção: 72 de 75. Das 64 mutações, 52 morrem, 1 é equivalente, 2 são lacuna de precisão (N13 e G10, a codificação dos transcripts) e 9 sobrevivem. Na ordem de risco do Verifier:

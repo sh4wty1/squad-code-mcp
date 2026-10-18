@@ -1747,3 +1747,21 @@ Pelo `scripts/lessons.py`:
 - L-122: uma regra sobre toda linha de todo arquivo, com um arquivo do tamanho que um real alcança, para que um teto de bytes ou de linhas falhe (G8, G9).
 - L-123: uma entrada sem id ao lado de uma cujo id é o texto de um número pequeno, para que uma chave de contador que pode igualar um id real falhe (G2).
 - L-124 (lacuna de precisão): dizer a codificação de todo arquivo que a spec lê, e testar com um valor fora do ASCII (G10).
+
+## Nota de fechamento (2026-10-18, depois da volta 11)
+
+Escrita pelo orquestrador, não pelo Verifier. O veredito da volta 11 acima continua **FAIL** e não foi mudado.
+
+- O dev decidiu em 2026-10-18 aplicar do Fix 25 só G3, G8, G9 e G2, o que derruba o hook ou conta errado numa sessão real, e fechar a fatia **sem uma décima segunda volta do Verifier**, como fez com a Gate e com a volta 3 desta fatia. G4, G25, G23, G6 e G7 ficam aceitos, e N13 e G10 ficam como o código faz, numa linha de "Assumptions" da spec.
+- Cada mutação rodou numa cópia fora do repositório, por `git archive` de `plugin/` e `broker/` no scratchpad, com `broker/node_modules` ligado ao do repositório, no Linux com o Bun 1.3.14. Cada uma rodou uma vez com o arquivo de teste de antes da tarefa e outra com o de depois, e o `usage.ts` original voltou ao fim. Nenhum código de produção mudou (`git diff --stat 055d629..HEAD -- plugin broker ':!broker/test'` vazio).
+- **Cada caso novo falha com a sua mutação e passa sem ela**:
+
+| Tarefa | Commit | Mutação | Antes | Depois |
+| ------ | ------ | ------- | ----- | ------ |
+| T58 | `7834595` | G3, o `catch` de `usage.ts:79` relança o que não é `ENOENT` nem `EISDIR`; e as variantes que deixam passar também `ELOOP`, ou `ELOOP` e `EACCES` | passa | falha |
+| T59 | `bf2da98` | G8, `.slice(0, 65536)` no texto de um arquivo de `subagents` em `:91`, e a variante de 4 MiB; G9, `.slice(0, 1000)` nas linhas de `:54`, e a variante de 65 536 | passa | falha |
+| T60 | `92cc928` | G2, `String(alone++)` em `:56`, e a variante `` `${alone++}` `` | passa | falha |
+
+- A suíte em `92cc928`, só no Linux, nesta máquina, sem contêiner: `tsc` 0 e 2561 pass, 1 skip, 0 fail, 96 arquivos, 130 s. O Windows não rodou. Lá falta conferir se o `spyOn` em `node:fs` dos casos de `EIO` chega a `usage.ts` (no Linux chega e não vaza, pela volta 11) e quanto tempo o caso da T59 leva, com 15 MB de transcripts.
+- **O que ficou sem cobrir**, por não haver décima segunda volta: a conferência das mutações das T58 a T60 foi do autor dos testes, não de um Verifier independente; nenhuma releitura independente dos cinco casos novos; nenhuma busca de mutações novas sobre `22cf788..92cc928`. Os cinco mutantes aceitos seguem vivos. Uma lista de códigos de erro que já tenha `EIO` também segue viva nos três `catch`, como toda lista fixa.
+- `validate_state.py papeis` continua saindo com 1, porque o veredito acima é FAIL: é o estado aceito, não trabalho pela metade. Não ajustar o relatório para o script passar.

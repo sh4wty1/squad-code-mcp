@@ -1531,9 +1531,9 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] "Assumptions" diz que a fatia fecha sem décima segunda volta por decisão do dev de 2026-10-18, com os cinco mutantes aceitos e o que cada um muda
-- [ ] A nota de fechamento diz o que T58 a T60 mataram, conferido numa cópia, e o que ficou sem reverificação independente
-- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] "Assumptions" diz que a fatia fecha sem décima segunda volta por decisão do dev de 2026-10-18, com os cinco mutantes aceitos e o que cada um muda
+- [x] A nota de fechamento diz o que T58 a T60 mataram, conferido numa cópia, e o que ficou sem reverificação independente
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: none
 **Gate**: build
