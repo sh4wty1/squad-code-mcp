@@ -381,10 +381,10 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-12 | P1: Início de turno | T6, T7, T9 | Verified |
 | PAP-13 | P1: Início de turno | T7 | Verified |
 | PAP-14 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-15 | P1: Uso no fim do turno | T5 | Verified |
+| PAP-15 | P1: Uso no fim do turno | T5, T57 | Verified |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52, T53, T54, T55, T56 | Implementing: Fix 24 de `validation.md`, a T55 com os caminhos de erro (N16, N17: um link para si mesmo e um `fs` que lança `EIO`) e a T56 com as formas do nome geradas (N2, N6, N7, N8, N12, N20, N21), à espera da T57 |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52, T53, T54, T55, T56, T57 | Implementing: Fix 24 de `validation.md` aplicado inteiro, a T55 com os caminhos de erro (N16, N17: um link para si mesmo e um `fs` que lança `EIO`), a T56 com as formas do nome geradas (N2, N6, N7, N8, N12, N20, N21) e a T57 com os textos iguais e o principal que não conta nada (N14, N15), à espera da décima primeira volta |
 | PAP-19 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-20 | Edge case | T6 | Verified |
 | PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |

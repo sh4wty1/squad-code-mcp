@@ -412,6 +412,25 @@ test("PAP-18: every name of subagents that ends in .jsonl counts, the one of the
   expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1101, output: 1101, cache_write: 1101, cache_read: 1101 } });
 });
 
+test("PAP-18: two files of subagents with the same text both count, a line without message.id being a message of its own", () => {
+  const path = file(["twins", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
+  for (const name of ["agent-a.jsonl", "agent-b.jsonl"]) {
+    file(["twins", "s1", "subagents", name], [line("claude-opus", undefined, [100, 100, 100, 100])]);
+  }
+  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 201, output: 201, cache_write: 201, cache_read: 201 } });
+});
+
+test("PAP-18: a main transcript that counts nothing, or is empty, still has the files of its subagents", () => {
+  const user = file(["silent", "s1.jsonl"], [USER]);
+  file(["silent", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+  expect(sessionUsage(user)).toEqual({ "claude-opus": { input: 100, output: 100, cache_write: 100, cache_read: 100 } });
+
+  const empty = join(dir, "empty", "s1.jsonl");
+  file(["empty", "s1", "subagents", "agent-a.jsonl"], [line("claude-opus", "a1", [100, 100, 100, 100])]);
+  writeFileSync(empty, "");
+  expect(sessionUsage(empty)).toEqual({ "claude-opus": { input: 100, output: 100, cache_write: 100, cache_read: 100 } });
+});
+
 test("PAP-19: without the main transcript there is no model, even with files of subagents", () => {
   file(["absent", "s1", "subagents", "agent-a.jsonl"], [line("claude-haiku", "a1", [5, 6, 7, 8])]);
   expect(sessionUsage(join(dir, "absent", "s1.jsonl"))).toEqual({});

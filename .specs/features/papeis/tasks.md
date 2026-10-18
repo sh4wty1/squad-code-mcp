@@ -1442,11 +1442,11 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 **Done when**:
 
-- [ ] Dois arquivos de texto igual contam os dois: 201 em cada campo com o principal (PAP-15: uma linha sem `message.id` conta sozinha)
-- [ ] Um principal que não conta nada, só `USER` ou vazio, não tira os subagentes: 100 em cada campo
-- [ ] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N14 (`new Set` sobre os textos em `:96`) e o N15 (`return {}` quando o principal não conta nada), que sem os casos novos passam
-- [ ] Nenhum código de produção muda
-- [ ] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+- [x] Dois arquivos de texto igual contam os dois: 201 em cada campo com o principal (PAP-15: uma linha sem `message.id` conta sozinha)
+- [x] Um principal que não conta nada, só `USER` ou vazio, não tira os subagentes: 100 em cada campo
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N14 (`new Set` sobre os textos em `:96`) e o N15 (`return {}` quando o principal não conta nada), que sem os casos novos passam
+- [x] Nenhum código de produção muda
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
 
 **Tests**: unit
 **Gate**: build
