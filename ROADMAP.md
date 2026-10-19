@@ -4,7 +4,7 @@ Onde o projeto está e o que falta. Marque `[x]` ao concluir um item; é o únic
 diz o estado geral. O desenho de cada fatia está em [`.design/squad-mvp.md`](.design/squad-mvp.md)
 e as decisões em [`docs/adr/`](docs/adr/).
 
-**Agora:** o MVP está fechado. As oito fatias estão na `main`: a Gate entrou pelo [PR 14](https://github.com/sh4wty1/squad-code-mcp/pull/14) e o seguimento do `gate_reissued` pelo [PR 15](https://github.com/sh4wty1/squad-code-mcp/pull/15), e o marco do MVP foi conferido com sessões reais (`.specs/features/gate/marco-mvp.md`). As lacunas de teste que a fatia Papéis deixou (Fix 1 a Fix 9) foram fechadas no branch `test/papeis-gaps`; as reverificações seguintes fecharam os Fix 10 a Fix 19, e a sexta à décima volta deixaram 74 de 75 requisitos verificados, com uma lacuna de teste em PAP-18. Os Fix 20 a 24 entraram, e a décima primeira volta deixou 72 de 75. Em 2026-10-18 a parte do Fix 25 que derruba o hook ou conta errado entrou, e o resíduo da fatia fechou sem décima segunda volta, com cinco mutantes aceitos em PAP-18; o [PR 16](https://github.com/sh4wty1/squad-code-mcp/pull/16) está mergeado (`d6e4c93`). A suíte no Windows, depois do merge, achou o caso dos nomes de `subagents` falhando porque o NTFS não diferencia caixa; a T62 corrige só o teste, no branch `test/papeis-windows-case`, com PR aberto contra a `main`. O que sobra antes de "Depois do MVP" são as pendências fora da ordem abaixo; o estado está no Handoff de `.specs/STATE.md`.
+**Agora:** o MVP está fechado. As oito fatias estão na `main`: a Gate entrou pelo [PR 14](https://github.com/sh4wty1/squad-code-mcp/pull/14) e o seguimento do `gate_reissued` pelo [PR 15](https://github.com/sh4wty1/squad-code-mcp/pull/15), e o marco do MVP foi conferido com sessões reais (`.specs/features/gate/marco-mvp.md`). As lacunas de teste que a fatia Papéis deixou (Fix 1 a Fix 9) foram fechadas no branch `test/papeis-gaps`; as reverificações seguintes fecharam os Fix 10 a Fix 19, e a sexta à décima volta deixaram 74 de 75 requisitos verificados, com uma lacuna de teste em PAP-18. Os Fix 20 a 24 entraram, e a décima primeira volta deixou 72 de 75. Em 2026-10-18 a parte do Fix 25 que derruba o hook ou conta errado entrou, e o resíduo da fatia fechou sem décima segunda volta, com cinco mutantes aceitos em PAP-18; o [PR 16](https://github.com/sh4wty1/squad-code-mcp/pull/16) está mergeado (`d6e4c93`). A suíte no Windows, depois do merge, achou o caso dos nomes de `subagents` falhando porque o NTFS não diferencia caixa; a T62 corrige só o teste, no branch `test/papeis-windows-case`, com o [PR 17](https://github.com/sh4wty1/squad-code-mcp/pull/17) aberto contra a `main`. Em 2026-10-19 o dev conferiu a TUI clicável no Windows Terminal (RT-01 a RT-07); falta a RT-08, no Linux. O que sobra antes de "Depois do MVP" são as pendências fora da ordem abaixo; o estado está no Handoff de `.specs/STATE.md`.
 
 ## Decidir (concluído)
 
@@ -99,9 +99,9 @@ fonte dela é [`.specs/features/tui-clicavel/spec.md`](.specs/features/tui-clica
       volta, por decisão do dev: G3, G8, G9 e G2 entraram (T58 a T60), e a frente do
       nome com espaço ou acento e os caracteres de largura cheia ficam aceitos em
       "Assumptions" da spec (T61).
-- [ ] Conferência em terminal real da TUI clicável: RT-02 a RT-08 de
-      `.specs/features/tui-clicavel/real-terminal.md`, e a versão do terminal e os quatro
-      cantos da RT-01.
+- [ ] Conferência em terminal real da TUI clicável: RT-08 de
+      `.specs/features/tui-clicavel/real-terminal.md`, num terminal Linux. RT-01 a RT-07
+      funcionaram no Windows Terminal 1.24.12741.0 em 2026-10-19, segundo o dev.
 
 ## Depois do MVP
 
