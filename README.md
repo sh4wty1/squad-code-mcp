@@ -2,8 +2,6 @@
 
 Run Claude Code sessions as a squad (mother, leader, workers, judge) over a shared MCP broker, with a terminal UI to watch them work and answer their open questions.
 
-> **Status: under construction.** The broker registers sessions by name and role ([`broker/`](broker/README.md)); it does not carry messages yet. Progress is in [`ROADMAP.md`](ROADMAP.md).
-
 ## How it works
 
 Each Claude Code session joins the broker with a role. Messages flow in a star: workers never talk to each other.
@@ -32,13 +30,13 @@ dev ⇄ Mother ⇄ Leader ⇄ Worker 1..N
 
 ## Running a squad
 
-You need [Bun](https://bun.sh), git and Claude Code with a claude.ai login, which the channel requires. Put the `squad` command on your path once:
+You need [Bun](https://bun.sh), git and Claude Code with a claude.ai login, which the channel requires. Install the `squad` command once:
 
 ```bash
-cd broker
-bun install
-bun link
+bun add -g github:sh4wty1/squad-code-mcp
 ```
+
+Bun puts `squad` in its folder of global commands. If your shell does not find `squad`, add that folder to your `PATH`: `bun pm bin -g` prints it.
 
 Then open one terminal for each session, inside the repository the squad will work on, and start one role in each:
 
@@ -55,7 +53,7 @@ In one more terminal, of 120×40 or more, open the TUI:
 squad tui
 ```
 
-Each `squad start` opens one Claude Code session with its name and role in the environment, the plugin of [`plugin/`](plugin) loaded from that directory as a channel, and the protocol skill of the role as its first instruction. The plugin is not installed anywhere: the launcher points the session at the directory.
+Each `squad start` opens one Claude Code session with its name and role in the environment, the plugin of [`plugin/`](plugin) loaded from that directory as a channel, and the protocol skill of the role as its first instruction. The plugin is not installed in Claude Code: the launcher points the session at the `plugin/` directory of the package.
 
 - **Names.** `mother`, `leader` and `judge` are one each. `squad start worker` takes the first of `worker-1`, `worker-2` and `worker-3` that is not online, and `squad start worker worker-2` relaunches that one. A session is online only after you answer its two dialogs and it registers, which the TUI shows: a second `squad start worker` before that takes `worker-1` too, with the same worktree, and is refused when it registers. Wait until the previous worker is online, or give each one its name.
 - **Environment.** The session gets the environment of your terminal with `SQUAD_NAME` and `SQUAD_ROLE` set. The `CLAUDE*` variables are left out, because a `squad start` run from inside another Claude Code session would inherit that session's own, except the three you set for Claude Code yourself: `CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_OAUTH_TOKEN` and `CLAUDE_CODE_GIT_BASH_PATH`.
