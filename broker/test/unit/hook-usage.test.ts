@@ -376,6 +376,9 @@ for (const [i, transcript] of ["s1.txt", "s1.JSONL", "s1.jsonl.bak", "s1.json", 
 // The forms of the end of a name: a separator, jsonl in a case, and what comes after it. A
 // form is *.jsonl only when the name ends in .jsonl, with its dot and in lowercase. Windows
 // takes no line break in a name and drops a space at its end: there those ends are left out.
+// NTFS does not tell case apart either: two names of one directory that differ only in case
+// are one file there, and the second written replaces the first (agent.JSONL over
+// agent.jsonl). A case that writes them side by side keeps there only the first of each.
 const AFTER = ["", "d", ".bak", ".jsonl", ...(process.platform === "win32" ? [] : [" ", "\n", "\nx"])];
 const FORMS = ["", ".", "-"].flatMap((separator) =>
   ["jsonl", "JSONL", "json"].flatMap((jsonl) =>
@@ -412,12 +415,18 @@ for (const [i, [form, jsonl]] of FORMS.entries()) {
 
 test("PAP-18: every name of subagents that ends in .jsonl counts, the one of the main transcript too, and no other", () => {
   const path = file(["formed", "names", "s1.jsonl"], [line("claude-opus", "m1", [1, 1, 1, 1])]);
-  for (const [form, jsonl] of [...FORMS.map(([form, jsonl]) => [`agent${form}`, jsonl] as const), ["s1.jsonl", true] as const]) {
+  const names = [...FORMS.map(([form, jsonl]) => [`agent${form}`, jsonl] as const), ["s1.jsonl", true] as const];
+  const written = process.platform === "win32"
+    ? names.filter(([name], i) => names.findIndex(([other]) => other.toLowerCase() === name.toLowerCase()) === i)
+    : names;
+  for (const [form, jsonl] of written) {
     const counts = jsonl ? [100, 100, 100, 100] : [9000, 9000, 9000, 9000];
     file(["formed", "names", "s1", "subagents", form], [line(jsonl ? "claude-opus" : "claude-haiku", form, counts)]);
   }
-  // agent.jsonl, the nine that end in .jsonl after another form, and s1.jsonl: 11 of 100
-  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: 1101, output: 1101, cache_write: 1101, cache_read: 1101 } });
+  // agent.jsonl, the nine that end in .jsonl after another form, and s1.jsonl: 11 of 100,
+  // 1101; on Windows the three agent<sep>JSONL.jsonl are left out, 801
+  const n = 1 + 100 * written.filter(([, jsonl]) => jsonl).length;
+  expect(sessionUsage(path)).toEqual({ "claude-opus": { input: n, output: n, cache_write: n, cache_read: n } });
 });
 
 test("PAP-18: two files of subagents with the same text both count, a line without message.id being a message of its own", () => {

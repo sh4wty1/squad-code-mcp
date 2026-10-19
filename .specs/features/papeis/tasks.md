@@ -192,8 +192,10 @@ T55 → T56 → T57
 
 Do Fix 25 da décima primeira volta em `validation.md`, o dev decidiu em 2026-10-18 aplicar só o que derruba o hook ou conta errado em uso real: G3 (T58), G8 e G9 (T59) e G2 (T60). Depois a fatia fecha sem décima segunda volta. G4, G25, G23, G6 e G7 ficam registrados em "Assumptions" da spec, com uma nota de fechamento em `validation.md` (T61), como na Gate. Nenhum código de produção muda.
 
+Depois do merge do PR 16, a suíte no Windows mostrou o caso dos nomes de `subagents` falhando pelo NTFS, que não diferencia caixa: a T62 o corrige, só no teste.
+
 ```
-T58 → T59 → T60 → T61
+T58 → T59 → T60 → T61 → T62
 ```
 
 ---
@@ -1540,6 +1542,28 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T62: Os nomes de `subagents` que só diferem na caixa, no Windows
+
+**What**: O caso "every name of subagents that ends in .jsonl counts" grava, no mesmo `subagents`, nomes que só diferem na caixa. No NTFS, `agent.JSONL` grava por cima de `agent.jsonl`, que conta, e `agent<sep>JSONL.jsonl` por cima de `agent<sep>jsonl.jsonl` nos três separadores: a suíte em `d6e4c93` deu opus 701 e haiku 9000 no lugar de opus 1101. No win32 o caso grava só o primeiro nome de cada grafia sem diferença de caixa, como `AFTER` já tira os fins que o Windows não aceita, e o total esperado sai da lista gravada: 1101 no Linux, 801 no Windows.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T61
+**Reuses**: O `process.platform === "win32"` de `AFTER`
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] No Linux a lista gravada e o total (1101) são os de antes
+- [x] O comentário de `AFTER` diz por que o NTFS pede um nome por grafia
+- [x] Os 36 casos por forma do Windows não colidem do mesmo jeito: em três (`s1JSONL.jsonl`, `s1.JSONL.jsonl`, `s1-JSONL.jsonl`) um diretório da leitura errada só difere do radical na caixa, mas o arquivo que conta é gravado depois e fica
+- [x] Numa cópia fora do repositório, no Linux (contêiner `oven/bun:1.4.2`), um `usage.ts` que conta `agent.JSONL` falha só neste caso, e o original passa; no Windows o caso passa
+- [x] Nenhum código de produção muda
+- [x] Gate build passa no Windows: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+
+**Tests**: unit
+**Gate**: build
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -1561,7 +1585,7 @@ Phase 13: T51
 Phase 14: T52
 Phase 15: T53 → T54
 Phase 16: T55 → T56 → T57
-Phase 17: T58 → T59 → T60 → T61
+Phase 17: T58 → T59 → T60 → T61 → T62
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
