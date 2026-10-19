@@ -13,9 +13,9 @@ fechado, e o README ainda diz "under construction".
 
 ## Goals
 
-- [ ] Numa máquina sem o repositório, `bun add -g github:sh4wty1/squad-code-mcp` instala o comando `squad`, no Windows e no Linux.
-- [ ] Dentro de outro repositório git, `squad status`, `squad start mother` (até o diálogo do canal) e `squad tui` funcionam com o pacote instalado.
-- [ ] O README explica só esse caminho, e a suíte de `broker/` continua passando.
+- [x] Numa máquina sem o repositório, `bun add -g github:sh4wty1/squad-code-mcp` instala o comando `squad`, no Windows e no Linux.
+- [x] Dentro de outro repositório git, `squad status`, `squad start mother` (até o diálogo do canal) e `squad tui` funcionam com o pacote instalado.
+- [x] O README explica só esse caminho, e a suíte de `broker/` continua passando.
 
 ## Out of Scope
 
@@ -78,7 +78,7 @@ termina com erro; as outras dimensões não se aplicam a esta fatia.
 
 1. WHEN o dev roda `squad status` dentro de outro repositório git, com o broker parado, THEN o `squad` SHALL escrever `Broker is not running.` e sair com 0.
 2. WHEN o dev roda `squad start mother` dentro de outro repositório git THEN o launcher SHALL abrir o Claude Code com o plugin da pasta do pacote instalado, até o diálogo do canal de desenvolvimento.
-3. WHEN o dev roda `squad tui` dentro de outro repositório git, num terminal de 120×40 ou maior, THEN o `squad` SHALL abrir a TUI.
+3. WHEN o dev roda `squad tui` dentro de outro repositório git, num terminal de 120×40 ou maior, THEN o `squad` SHALL abrir a TUI, que desenha a sua primeira tela (a principal ou a de broker fora do ar) e sai com `q`.
 
 **Independent Test**: num repositório git novo, fora deste, com o `squad` instalado como em P1.
 
@@ -124,18 +124,18 @@ termina com erro; as outras dimensões não se aplicam a esta fatia.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| DIST-01 | P1: Instalar, AC 1 | Execute | Pending |
-| DIST-02 | P1: Instalar, AC 2 | Execute | Pending |
-| DIST-03 | P1: Instalar, AC 3 | Execute | Pending |
-| DIST-04 | P1: Instalar, AC 4 | Execute | Pending |
-| DIST-05 | P1: Instalar, AC 5 | Execute | Pending |
-| DIST-06 | P1: Rodar, AC 1 | Execute | Pending |
-| DIST-07 | P1: Rodar, AC 2 | Execute | Pending |
-| DIST-08 | P1: Rodar, AC 3 | Execute | Pending |
-| DIST-09 | P1: README, AC 1 | Execute | Pending |
-| DIST-10 | P1: README, AC 2 | Execute | Pending |
-| DIST-11 | P1: README, AC 3 | Execute | Pending |
-| DIST-12 | P1: Suíte, AC 1 | Execute | Pending |
+| DIST-01 | P1: Instalar, AC 1 | Execute | Verified |
+| DIST-02 | P1: Instalar, AC 2 | Execute | Verified |
+| DIST-03 | P1: Instalar, AC 3 | Execute | Verified |
+| DIST-04 | P1: Instalar, AC 4 | Execute | Verified |
+| DIST-05 | P1: Instalar, AC 5 | Execute | Verified |
+| DIST-06 | P1: Rodar, AC 1 | Execute | Verified |
+| DIST-07 | P1: Rodar, AC 2 | Execute | Verified |
+| DIST-08 | P1: Rodar, AC 3 | Execute | Verified |
+| DIST-09 | P1: README, AC 1 | Execute | Verified |
+| DIST-10 | P1: README, AC 2 | Execute | Verified |
+| DIST-11 | P1: README, AC 3 | Execute | Verified |
+| DIST-12 | P1: Suíte, AC 1 | Execute | Verified |
 
 **Coverage:** 12 total, 12 mapped to Execute, 0 unmapped.
 
@@ -143,5 +143,5 @@ termina com erro; as outras dimensões não se aplicam a esta fatia.
 
 ## Success Criteria
 
-- [ ] Os três comandos funcionam de um repositório git fora deste, com o pacote instalado do GitHub, no Windows; no Linux, `squad status`.
-- [ ] Suíte de `broker/` passando no Windows e no Linux.
+- [x] Os três comandos funcionam de um repositório git fora deste, com o pacote instalado do GitHub, no Windows; no Linux, `squad status`.
+- [x] Suíte de `broker/` passando no Windows e no Linux.

@@ -102,6 +102,10 @@ fonte dela é [`.specs/features/tui-clicavel/spec.md`](.specs/features/tui-clica
 - [ ] Conferência em terminal real da TUI clicável: RT-08 de
       `.specs/features/tui-clicavel/real-terminal.md`, num terminal Linux. RT-01 a RT-07
       funcionaram no Windows Terminal 1.24.12741.0 em 2026-10-19, segundo o dev.
+- [x] Fatia Distribuição: quem não clonou instala com
+      `bun add -g github:sh4wty1/squad-code-mcp` e roda `squad` de dentro do próprio
+      projeto (`.specs/features/distribuicao/`, AD-023). Fechada em 2026-10-19 no branch
+      `feat/distribuicao`; o README explica só esse caminho.
 
 ## Depois do MVP
 
