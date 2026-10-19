@@ -150,6 +150,15 @@ test("PAP-21: without transcript_path in the payload the log gains a single usag
   expect(usages(b)).toEqual([["worker-1", { session_id: SESSION, model: "unknown", ...ZERO }]]);
 });
 
+// 0 is the number of the standard input of the hook: a read of it is not a read of a transcript
+test("PAP-21: with a transcript_path 0 the log gains a single usage of the model unknown with the four numbers 0", async () => {
+  const { b, env } = await alone();
+  const hook = await runHook("stop.ts", env, payload({ transcript_path: 0 }));
+  expect(hook.code).toBe(0);
+  expect(hook.stdout).toBe("");
+  expect(usages(b)).toEqual([["worker-1", { session_id: SESSION, model: "unknown", ...ZERO }]]);
+});
+
 test("PAP-25: two runs over the same transcripts record the same numbers", async () => {
   const { b, env } = await alone();
   const input = payload({ transcript_path: twoModels() });
@@ -290,23 +299,26 @@ for (const [called, answer] of [
   });
 }
 
-test("PAP-31: with a status 500 for /events the hook does not block and sends the usage, even with a log in which the worker owes a result", async () => {
-  // the log of a real broker where worker-1 owes the result of TKT-13, answered with another status
-  const { b, worker } = await tasked();
-  const server = recorder(async (request) =>
-    request.method === "GET"
-      ? Response.json(await (await fetch(`${b.url}${request.path}`)).json(), { status: 500 })
-      : Response.json({ ok: true, seq: 1 })
-  );
-  const hook = await runHook("stop.ts", session(server.port, worker), payload({ transcript_path: twoModels() }));
-  expect(hook.code).toBe(0);
-  expect(hook.stdout).toBe("");
-  expect(server.requests).toEqual([
-    { method: "GET", path: "/events?after=0", body: null },
-    { method: "POST", path: "/usage", body: { id: worker, session_id: SESSION, model: "claude-opus", ...OPUS } },
-    { method: "POST", path: "/usage", body: { id: worker, session_id: SESSION, model: "claude-sonnet", ...SONNET } },
-  ]);
-});
+// 201 is a status of success that is not 200
+for (const status of [500, 201]) {
+  test(`PAP-31: with a status ${status} for /events the hook does not block and sends the usage, even with a log in which the worker owes a result`, async () => {
+    // the log of a real broker where worker-1 owes the result of TKT-13, answered with another status
+    const { b, worker } = await tasked();
+    const server = recorder(async (request) =>
+      request.method === "GET"
+        ? Response.json(await (await fetch(`${b.url}${request.path}`)).json(), { status })
+        : Response.json({ ok: true, seq: 1 })
+    );
+    const hook = await runHook("stop.ts", session(server.port, worker), payload({ transcript_path: twoModels() }));
+    expect(hook.code).toBe(0);
+    expect(hook.stdout).toBe("");
+    expect(server.requests).toEqual([
+      { method: "GET", path: "/events?after=0", body: null },
+      { method: "POST", path: "/usage", body: { id: worker, session_id: SESSION, model: "claude-opus", ...OPUS } },
+      { method: "POST", path: "/usage", body: { id: worker, session_id: SESSION, model: "claude-sonnet", ...SONNET } },
+    ]);
+  });
+}
 
 test("PAP-32: the worker that declared blocked with its task still owed is not blocked and records the usage", async () => {
   const { b, worker, env } = await tasked();

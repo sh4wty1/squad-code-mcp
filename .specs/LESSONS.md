@@ -113,8 +113,8 @@ Corroborated across multiple features. Safe to apply as guidance.
 ### L-080 - When a layer reshapes its input before a rule about that input applies, test the rule at the entry of the layer with an input the reshaping changes
 - signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `broker tests` · harmful: 0
 - features: papeis, tui-clicavel
-- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests) (+1 more)
-- last seen: 2026-10-14T16:15:56Z
+- evidence: F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests) (+3 more)
+- last seen: 2026-10-18T18:22:10Z
 
 ## Candidates (under observation - do NOT load as guidance yet)
 
@@ -513,8 +513,8 @@ Seen once or not yet corroborated. Tracked, not trusted.
 ### L-084 - When a surviving mutant gets a test, give the same case to every other place that has the same check
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
 - features: papeis
-- evidence: K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)
-- last seen: 2026-10-12T11:29:27Z
+- evidence: K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks) (+1 more)
+- last seen: 2026-10-18T18:22:10Z
 
 ### L-085 - Test a shutdown with each external dependency already gone, and assert every cleanup that must still happen
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `server` · harmful: 0
@@ -599,6 +599,162 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: gate
 - evidence: V27 broker/tui/screens/gate.ts:28 (GAT-43) (tui)
 - last seen: 2026-10-14T23:08:57Z
+
+### L-099 - Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: W12 broker/launch.ts:97 (PAP-39) (launcher) (+11 more)
+- last seen: 2026-10-17T19:53:25Z
+
+### L-100 - Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: W17 broker/launch.ts:184 (PAP-37) (launcher)
+- last seen: 2026-10-16T15:08:17Z
+
+### L-101 - Test every way a process can end that must still clean up, signals included, on the platform where that way runs
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `server` · harmful: 0
+- features: papeis
+- evidence: W2 broker/server.ts:400 (PAP-07) (server) (+1 more)
+- last seen: 2026-10-16T15:49:01Z
+
+### L-102 - Test a deadline with an answer that arrives after it, not only with one that never arrives: a bound on the exit time lets a longer deadline pass
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `launcher` · harmful: 0
+- features: papeis
+- evidence: Y9 broker/launch.ts:186 (PAP-37) (launcher)
+- last seen: 2026-10-16T15:49:02Z
+
+### L-103 - Fence a suffix rule on a name in one go on its four sides, the dot, the anchor at the end, the case and the place in the path, instead of one side per round
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks) (+2 more)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-104 - Run the tests of a file-system layer on Linux too: a mutant on the case of a directory name lives on the case-insensitive file system of Windows
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: Q7 plugin/hooks/usage.ts:82 (PAP-18) (hooks)
+- last seen: 2026-10-16T18:05:43Z
+
+### L-105 - Fence a suffix rule on a name also with a name that ends in a shorter start of the suffix, such as .json for .jsonl
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: R1, R2, R4 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)
+- last seen: 2026-10-16T23:13:15Z
+
+### L-106 - Test that one unreadable entry does not hide the others with an entry that fails already at stat, such as a dangling link, not only with one that fails at read
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: R17 plugin/hooks/usage.ts:85 (PAP-18) (hooks)
+- last seen: 2026-10-16T23:13:15Z
+
+### L-107 - To test a sort of directory entries, create the files in an order that is neither the sorted one nor its reverse: tmpfs lists the newest first
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: R5 plugin/hooks/usage.ts:85 (PAP-18, design.md:117) (hooks)
+- last seen: 2026-10-16T23:13:15Z
+
+### L-108 - Fence a suffix rule on a name also with a name whose extension only starts with the suffix, such as .jsonld for .jsonl
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U1, U2 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-109 - Give a rule on a file extension a name whose stem has dots of its own, such as agent.2.jsonl, so a rule that cuts at the first dot fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U4, U5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-110 - Test that an unreadable file counts nothing also with a regular file without read permission, the one a stat check before the read lets through
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U9, U13 plugin/hooks/usage.ts:90-94 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-111 - Test a directory that is listed for its entries also when the path is a regular file, so a check that it exists before listing it fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U8 plugin/hooks/usage.ts:84-88 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-112 - Give a rule on the entries of a directory a subdirectory with a matching file inside, so a recursive listing fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U12 plugin/hooks/usage.ts:85 (PAP-18) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-113 - When files are read in the order of their names, say whether the order is by code unit or by locale, and test it with names that differ in case
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U6 plugin/hooks/usage.ts:85 (PAP-18, design.md:117) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-114 - When a spec selects files by a pattern such as *.jsonl, say whether a name that starts with a dot matches
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: U7 plugin/hooks/usage.ts:85 (PAP-18, spec.md:106) (hooks)
+- last seen: 2026-10-17T19:53:26Z
+
+### L-115 - Give a rule that takes every matching entry of a directory an entry with the name of the file the directory belongs to, so a filter that drops that name fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N7 plugin/hooks/usage.ts:85 (PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-116 - Test a rule over every file of a directory with more files than any other case reads, so a cap on how many are read fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N12 plugin/hooks/usage.ts:89 (PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-117 - Test a sum over several files with two files of the same text, so a dedup of the texts fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N14 plugin/hooks/usage.ts:96 (PAP-15, PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-118 - Test that the files next to a main file add to it also when the main file counts nothing, so a shortcut on an empty main fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N15 plugin/hooks/usage.ts:81-82 (PAP-18, PAP-19) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-119 - Test that an unreadable entry is skipped with an error code the other cases do not raise, such as a link loop, so a list of the codes let through fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N16, N17 plugin/hooks/usage.ts:86, :92 (PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-120 - When files are read in the order of their names, say whether the extension is part of the name compared, and test it with a stem that is a prefix of another
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: N13 plugin/hooks/usage.ts:85, design.md:117 (PAP-18) (hooks)
+- last seen: 2026-10-17T22:01:11Z
+
+### L-121 - When test names are generated, generate the stem too, with a space and a letter outside ASCII, so a filter on the characters of the name fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: validation.md volta 11, G4, G25 (plugin/hooks/usage.ts:85) (hooks)
+- last seen: 2026-10-18T18:22:10Z
+
+### L-122 - Test a rule over every line of every file with a file of the size a real one reaches, so a cap on the bytes or the lines read fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: validation.md volta 11, G8, G9 (plugin/hooks/usage.ts:54, :90-91) (hooks)
+- last seen: 2026-10-18T18:22:10Z
+
+### L-123 - Test an entry without id next to an entry whose id is the text of a small number, so a counter key that can equal a real id fails
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `hooks` · harmful: 0
+- features: papeis
+- evidence: validation.md volta 11, G2 (plugin/hooks/usage.ts:56) (hooks)
+- last seen: 2026-10-18T18:22:10Z
+
+### L-124 - State the text encoding of every file a spec reads, and test it with a value outside ASCII
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: papeis
+- evidence: validation.md volta 11, G10 (plugin/hooks/usage.ts:91) (spec)
+- last seen: 2026-10-18T18:22:11Z
 
 ## Quarantined (failed when applied - ignore)
 

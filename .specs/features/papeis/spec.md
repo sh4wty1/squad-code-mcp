@@ -73,6 +73,7 @@ skills de protocolo), o `roles.json` e o launcher que sobe cada sessão no lugar
 | O que a primeira volta do Verifier pediu ao texto | PAP-08 diz o que se observa em "do mesmo jeito"; PAP-31 diz que um status diferente de 200 é leitura que falhou, como PAP-13 e PAP-27 | Volta 1, 2026-10-12: dois mutantes vivos apontavam para um caso que o AC não nomeava. O código já fazia os dois; mudou o texto e entraram os testes (T25, T26). Confirmado pelo dev em 2026-10-12 | y |
 | O que a segunda volta do Verifier pediu ao texto | A definição de "feature aberta, para o launcher" diz o que é uma leitura que falha, com as mesmas três causas de PAP-31 | Volta 2, 2026-10-12: um mutante vivo em `launch.ts` apontava para `events` que não é lista, caso que a definição não nomeava. O código já tratava; mudou o texto e entrou o teste (T30). Confirmado pelo dev em 2026-10-12 | y |
 | A fatia fecha com FAIL na terceira volta do Verifier? | Fecha, com o resíduo registrado: sete requisitos com lacuna de teste e um com texto a reforçar, na tabela de rastreabilidade e nos Fix 1 a Fix 9 de `validation.md` | Decidido pelo dev em 2026-10-12, no limite de três voltas da skill. As três voltas falharam do mesmo jeito (os testes usam só a forma mais comum da entrada) e nenhuma achou defeito de produção. `validate_state.py papeis` continua saindo com 1 | y |
+| A fatia fecha com FAIL na décima primeira volta do Verifier? | Fecha, sem décima segunda volta. Do Fix 25 entram só G3, G8, G9 e G2 (T58 a T60), e ficam aceitos cinco mutantes de `plugin/hooks/usage.ts` que mudam o que PAP-18 conta em nomes que os testes não geram: G4 e G25 (`:85`, um nome de `subagents` com espaço ou letra fora do ASCII antes do `.jsonl`, `"agent 1.jsonl"` e `agente-ç.jsonl`, deixaria de contar), G23 (`:82`, `"s1 .jsonl"` leria `s1/subagents`) e G6 e G7 (`:85`, `:82`, uma normalização NFKC tomaria `ｊｓｏｎｌ` e `．` em largura cheia por `.jsonl`). As duas lacunas de precisão ficam como o código faz: N13, a ordem dos nomes de `subagents` é a de `sort()` sobre o nome inteiro, com a extensão; e G10, os transcripts são lidos como UTF-8 | Decidido pelo dev em 2026-10-18, na oitava volta seguida em PAP-18, nenhuma com defeito de produção. Entrou o que derruba o hook ou conta errado numa sessão real: o `catch` do principal (G3), os tetos de tamanho e de linhas (G8, G9) e o id `"0"` (G2). Os aceitos dependem de um filtro de caracteres que o código não tem. `validate_state.py papeis` continua saindo com 1 | y |
 | Quais variáveis `CLAUDE*` ficam no ambiente da sessão | `CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_OAUTH_TOKEN` e `CLAUDE_CODE_GIT_BASH_PATH`, pelo nome exato; todas as outras saem | Achado F1 da revisão do PR 12, decidido pelo dev em 2026-10-12. O prefixo inteiro tirava também o que o dev configura: com `CLAUDE_CONFIG_DIR` exportado, a sessão do squad subia no diretório de configuração default, com outro login ou nenhum. As três não aparecem entre as que uma sessão do Claude Code deixa para os processos dela, que são o alvo da limpeza | y |
 | Dois `squad start worker` seguidos, o segundo antes do `ready` do primeiro | Os dois recebem `worker-1` e o mesmo worktree, e o `ready` do segundo termina em `name_taken`. O launcher não reserva o nome: o README manda esperar o worker anterior ficar online ou dar o nome | Achado F2 da revisão do PR 12, decidido pelo dev em 2026-10-12. A escolha de PAP-38 lê a presença do log, e a sessão só entra nele depois dos dois diálogos e do `ready`. A reserva fica para quando o launcher abrir várias sessões ele mesmo | y |
 | Eventos acumulados num turno marcam um `turn_started` só? | Não resolvido; a regra de "em turno" funciona com um ou com vários | Pergunta deixada pelo spike B. Fica em `real-sessions.md` como não exercitado se nenhuma sessão real mostrar | y |
@@ -100,10 +101,10 @@ Valem as das specs anteriores. Mais:
 - **Arquivo de credencial** de um nome: o caminho de `SQUAD_DB` (default `<home>/.squad-code-mcp.db`) seguido de `.<nome>.id`.
 - **Checkout principal**: a primeira árvore de trabalho de `git worktree list --porcelain`, de onde quer que o comando rode.
 - **Diretório de worktrees**: `SQUAD_WORKTREES`, ou `<pai do checkout principal>/<nome do diretório do checkout principal>.squad`.
-- **Feature aberta, para o launcher**: a feature sem `feature_closed` em `GET /events?after=0`, lido com prazo de 2000 ms. Se a leitura falha não há feature aberta e ninguém está online. A leitura falha quando não responde no prazo, responde com status diferente de 200 ou responde algo que não é um objeto com `events` lista.
+- **Feature aberta, para o launcher**: a feature sem `feature_closed` em `GET /events?after=0`, lido com prazo de 2000 ms. Se a leitura falha não há feature aberta e ninguém está online. A leitura falha quando não responde no prazo, responde com status diferente de 200 ou responde algo que não é um objeto com `events` lista. A leitura que não responde no prazo é abandonada nele: depois de a sessão sair, nada dela segura o launcher, que sai com o código da sessão (PAP-37).
 - **Tools do squad de um papel**: `ready` mais as de `toolsFor(papel)` de `broker/tools.ts`, cada uma com o prefixo `mcp__plugin_squad_squad__`.
 - **Linha contada** de um transcript: linha que é um objeto JSON com `type` `assistant`, `message.usage` objeto e `message.model` texto não vazio diferente de `<synthetic>`.
-- **Transcripts da sessão**: o arquivo de `transcript_path` e todo `*.jsonl` de `<transcript_path sem a extensão .jsonl>/subagents/`.
+- **Transcripts da sessão**: o arquivo de `transcript_path` e todo `*.jsonl` de `<transcript_path sem a extensão .jsonl>/subagents/`, com a caixa contando em `.jsonl`, como nos nomes `CLAUDE` de PAP-39: `agent-a.JSONL` não é `*.jsonl`, e `s1.JSONL` não tem a extensão `.jsonl` para tirar, então os subagentes dele são os de `s1.JSONL/subagents/`.
 - **Fim de turno hipotético**: o log de `GET /events?after=0` mais um `usage` do nome com `seq` e `ts` depois dos últimos.
 - **Raiz do squad**: o diretório que contém `broker/` e `plugin/`.
 
@@ -150,7 +151,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 
 **Acceptance Criteria**:
 
-1. **PAP-01** O repositório SHALL ter `plugin/.claude-plugin/plugin.json` com `name` igual a `squad`, e nenhum arquivo do plugin dentro de `broker/`.
+1. **PAP-01** O repositório SHALL ter `plugin/.claude-plugin/plugin.json` com `name` igual a `squad`, e nenhum arquivo do plugin dentro de `broker/`: nem `.claude-plugin`, nem `hooks`, nem `skills`, nem `roles.json`. O `broker/.mcp.json` é o servidor solto do upstream, não do plugin, e fica.
 2. **PAP-02** `plugin/.mcp.json` SHALL declarar em `mcpServers` um único servidor, `squad`, com `command` `bun` e `args` `["${CLAUDE_PLUGIN_ROOT}/../broker/server.ts"]`.
 3. **PAP-03** `plugin/hooks/hooks.json` SHALL declarar em `hooks` exatamente `UserPromptSubmit` e `Stop`, cada um com um único hook de `type` `command`: `bun "${CLAUDE_PLUGIN_ROOT}/hooks/turn-started.ts"` com `timeout` 10, e `bun "${CLAUDE_PLUGIN_ROOT}/hooks/stop.ts"` com `timeout` 20.
 4. **PAP-04** O plugin SHALL ter exatamente quatro skills, `plugin/skills/<papel>/SKILL.md` para `mother`, `leader`, `worker` e `judge`.
@@ -203,10 +204,10 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 **Acceptance Criteria**:
 
 1. **PAP-14** WHEN o uso de uma sessão é calculado THEN o cálculo SHALL dar, para cada `message.model` das linhas contadas dos transcripts da sessão, a soma de `input`, `output`, `cache_write` e `cache_read`, lidos de `message.usage.input_tokens`, `output_tokens`, `cache_creation_input_tokens` e `cache_read_input_tokens`.
-2. **PAP-15** WHEN várias linhas contadas dos transcripts da sessão têm o mesmo `message.id` THEN o cálculo SHALL contar só a última delas, na ordem do arquivo; uma linha contada sem `message.id` SHALL ser contada sozinha.
+2. **PAP-15** WHEN várias linhas contadas dos transcripts da sessão têm o mesmo `message.id` THEN o cálculo SHALL contar só a última delas, na ordem do arquivo; uma linha contada sem `message.id`, ou com um `message.id` que não é texto não vazio, SHALL ser contada sozinha.
 3. **PAP-16** IF um dos quatro campos de `message.usage` está ausente ou não é inteiro de zero ou mais THEN o cálculo SHALL contá-lo como 0.
 4. **PAP-17** IF uma linha de um transcript não é JSON válido ou não é uma linha contada THEN o cálculo SHALL ignorá-la e seguir com as outras.
-5. **PAP-18** WHEN o diretório `subagents` da sessão tem arquivos `*.jsonl` THEN o cálculo SHALL somar as linhas contadas deles às do transcript principal, com a regra de PAP-15 valendo entre todos os arquivos.
+5. **PAP-18** WHEN o diretório `subagents` da sessão tem arquivos `*.jsonl` THEN o cálculo SHALL somar as linhas contadas deles às do transcript principal, com a regra de PAP-15 valendo entre todos os arquivos; um arquivo de `subagents` que não pode ser lido SHALL não contar nada, e os outros contam.
 6. **PAP-19** IF o transcript principal não existe ou não pode ser lido THEN o cálculo SHALL dar nenhum modelo, sem falhar.
 7. **PAP-23** WHEN `plugin/hooks/stop.ts` encerra um turno (PAP-30 e PAP-32) THEN o hook SHALL fazer um `POST /usage` por modelo calculado, em ordem crescente do nome do modelo, cada um com `{ id, session_id, model, input, output, cache_write, cache_read }`, em que `session_id` é o do payload do hook, e sair com código 0 sem escrever na saída padrão.
 8. **PAP-24** IF o cálculo dá nenhum modelo THEN `stop.ts` SHALL fazer um único `POST /usage` com `model` `unknown` e os quatro números iguais a 0.
@@ -244,7 +245,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 
 **Acceptance Criteria**:
 
-1. **PAP-33** WHEN o `roles.json` é lido THEN o leitor SHALL aceitá-lo só se for um objeto com `roles` lista, em que cada item tem `name` igual a um dos quatro papéis e sem repetição, `when_to_use` texto não vazio, `skills` lista de textos não vazios e, se presente, `workflows` objeto cujas chaves são só `tlc` e `matt-pocock` e cujos valores são listas de textos não vazios; em qualquer outro caso SHALL falhar com uma mensagem que contém o caminho do arquivo.
+1. **PAP-33** WHEN o `roles.json` é lido THEN o leitor SHALL aceitá-lo só se for um objeto com `roles` lista, em que cada item tem `name` igual a um dos quatro papéis e sem repetição, `when_to_use` texto não vazio, `skills` lista de textos não vazios e, se a chave `workflows` está presente, qualquer que seja o valor, inclusive `null`, `workflows` objeto cujas chaves são só `tlc` e `matt-pocock` e cujos valores são listas de textos não vazios; em qualquer outro caso SHALL falhar com uma mensagem que contém o caminho do arquivo.
 2. **PAP-34** The `plugin/roles.json` SHALL ter os quatro papéis com: `mother`, `skills` `the-fool` e `create-adr`, `tlc` `tlc-discover`, `matt-pocock` `grill-with-docs` e `to-spec`; `leader`, `skills` `help-me` e `the-jury`, `tlc` `tlc-plan`, `matt-pocock` `to-tickets`; `worker`, `skills` `coding-guidelines`, `ponytail`, `write-commit` e `codenavi`, `tlc` `tlc-implement`, `matt-pocock` `implement`; `judge`, `skills` `spec-driven-eval`, `ponytail-review`, `security-best-practices`, `break-ui`, `web-quality-audit` e `review-animations`, sem `workflows`.
 3. **PAP-35** WHERE `SQUAD_ROLES` está definido THEN o launcher SHALL ler o `roles.json` desse caminho; sem ele SHALL ler `<raiz do squad>/plugin/roles.json`.
 4. **PAP-36** IF o `roles.json` lido é válido e não tem o papel lançado THEN o launcher SHALL falhar como em PAP-42.
@@ -263,10 +264,10 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 
 1. **PAP-37** WHEN `squad start <papel> [nome] [--skip-permissions]` roda com um papel dos quatro THEN o launcher SHALL abrir um único processo, o comando de `SQUAD_CLAUDE` ou `claude` sem ele, com entrada, saída e erro herdados do terminal, e sair com o código de saída desse processo.
 2. **PAP-38** WHEN o nome não é dado THEN o launcher SHALL usar o próprio papel para `mother`, `leader` e `judge`, e para `worker` o primeiro de `worker-1`, `worker-2` e `worker-3` cujo último evento de presença no log não é `peer_joined`; se a leitura do log falha SHALL usar `worker-1`.
-3. **PAP-39** WHEN o launcher abre a sessão THEN o ambiente do processo SHALL ser o do launcher sem nenhuma variável cujo nome começa com `CLAUDE` a não ser `CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_OAUTH_TOKEN` e `CLAUDE_CODE_GIT_BASH_PATH`, com `SQUAD_NAME` igual ao nome e `SQUAD_ROLE` igual ao papel, e as outras variáveis sem mudança.
+3. **PAP-39** WHEN o launcher abre a sessão THEN o ambiente do processo SHALL ser o do launcher sem nenhuma variável cujo nome começa com `CLAUDE` a não ser `CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_OAUTH_TOKEN` e `CLAUDE_CODE_GIT_BASH_PATH`, com a caixa contando no nome (`claude_home` não começa com `CLAUDE` e fica), com `SQUAD_NAME` igual ao nome e `SQUAD_ROLE` igual ao papel, e as outras variáveis sem mudança.
 4. **PAP-40** WHEN o launcher abre a sessão sem `--skip-permissions` THEN os argumentos SHALL ser, nesta ordem: `--plugin-dir`, `<raiz do squad>/plugin`, `--dangerously-load-development-channels`, `plugin:squad@inline`, `--permission-mode`, `acceptEdits`, `--allowedTools`, cada item da lista de permitidos (PAP-43 e PAP-44) como um argumento, `--append-system-prompt`, o texto de PAP-46 e, por último, `/squad:<papel>`.
 5. **PAP-41** WHEN o launcher falha antes de abrir a sessão THEN o launcher SHALL escrever na saída de erro uma linha que começa com `squad: ` e diz a causa, não abrir processo algum e sair com código 1.
-6. **PAP-42** IF o papel está ausente ou não é um dos quatro, há mais de um argumento posicional depois do papel, há uma opção que não é `--skip-permissions`, o nome dado não é um dos nomes do papel (`mother`, `leader`, `judge`, ou `worker-1` a `worker-3` para `worker`), os três nomes de worker estão online e nenhum nome foi dado, o diretório atual não está num repositório git, ou o `roles.json` não é válido ou não tem o papel THEN o launcher SHALL falhar como em PAP-41 sem criar worktree nem copiar arquivo.
+6. **PAP-42** IF o papel está ausente ou não é um dos quatro, há mais de um argumento posicional depois do papel, há uma opção que não é `--skip-permissions` (opção é todo argumento que começa com `-`, em qualquer posição, e nunca é lida como papel nem como nome; `--skip-permissions` vale em qualquer posição), o nome dado não é um dos nomes do papel (`mother`, `leader`, `judge`, ou `worker-1` a `worker-3` para `worker`), os três nomes de worker estão online e nenhum nome foi dado, o diretório atual não está num repositório git, ou o `roles.json` não é válido ou não tem o papel THEN o launcher SHALL falhar como em PAP-41 sem criar worktree nem copiar arquivo.
 7. **PAP-43** The lista de permitidos SHALL começar pelas tools do squad do papel, na ordem `ready` e depois a de `toolsFor(papel)`, e não conter tool do squad de outro papel.
 8. **PAP-44** The lista de permitidos SHALL ter, depois das tools do squad, uma regra `Bash(<comando>:*)` para cada comando git do papel, nesta ordem: `git status`, `git diff`, `git log`, `git show`, `git rev-parse` para todos; depois `git switch`, `git add`, `git commit` para `worker`, `leader` e `mother`, e só `git switch` para `judge`; depois `git merge` para `leader`.
 9. **PAP-45** WHERE a plataforma é `win32` THEN a lista de permitidos SHALL ter, depois das regras `Bash`, as mesmas regras na mesma ordem com `PowerShell(` no lugar de `Bash(`; em outra plataforma SHALL não ter regra `PowerShell`.
@@ -291,7 +292,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 3. **PAP-53** WHEN o worktree de um `worker` ou `judge` não existe THEN o launcher SHALL criá-lo com HEAD destacado no commit da ponta do branch da feature aberta, ou no `HEAD` do checkout principal quando não há feature aberta ou o branch dela não existe no repositório.
 4. **PAP-54** WHEN o worktree do `leader` não existe THEN o launcher SHALL criá-lo no branch da feature aberta, ou com HEAD destacado no `HEAD` do checkout principal quando não há feature aberta ou o branch dela não existe no repositório.
 5. **PAP-55** WHEN o diretório do worktree já existe THEN o launcher SHALL usá-lo como está, sem rodar comando git que escreva e sem copiar arquivo.
-6. **PAP-56** WHEN o launcher cria um worktree THEN o launcher SHALL copiar para a raiz dele cada arquivo regular da raiz do checkout principal cujo nome começa com `.env` e que o git não versiona, com o mesmo nome e conteúdo, sem sobrescrever arquivo que já esteja lá.
+6. **PAP-56** WHEN o launcher cria um worktree THEN o launcher SHALL copiar para a raiz dele cada arquivo regular da raiz do checkout principal cujo nome começa com `.env` e que o git não versiona, com o mesmo nome e conteúdo, sem sobrescrever arquivo que já esteja lá; um link simbólico, mesmo para um arquivo regular, não é arquivo regular e não é copiado.
 7. **PAP-57** IF `git worktree add` falha THEN o launcher SHALL falhar como em PAP-41 com a mensagem do git na linha, sem copiar arquivo.
 8. **PAP-58** WHEN `squad start` roda de dentro de um worktree do repositório THEN o launcher SHALL resolver o checkout principal e o diretório de worktrees como se rodasse do checkout principal.
 
@@ -329,7 +330,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 6. **PAP-65** A seção `Credentials` de cada skill SHALL mandar, quando falta uma credencial, declarar `blocked` e fazer uma pergunta bloqueante que diz onde a credencial deve ser colocada e pede a confirmação; e SHALL proibir pedir o valor e escrever um segredo em qualquer mensagem.
 7. **PAP-66** A seção `Irreversible actions` das skills de `worker`, `leader` e `judge` SHALL listar merge ou push no branch base, deploy, migração de dados, apagar algo fora do worktree e chamada externa com efeito, e mandar não executar nenhuma delas sem resposta a uma pergunta bloqueante ao nível de cima.
 8. **PAP-67** A seção `When the feature closes` de cada skill SHALL dizer que um `feature_closed` encerra as perguntas da feature, inclusive a bloqueante de que o agente espera resposta, e mandar parar o trabalho da feature sem enviar mais nada sobre ela.
-9. **PAP-68** A seção `Your work` do `worker` SHALL mandar: ao receber `task`, criar o branch do ticket a partir do branch da feature com `git switch -c`; trabalhar com as skills base do papel e as do `loadout`; fazer commit; enviar `send_result` ao `judge` com `ticket_ref`, `task_seq` do `task` mais recente, `branch` e `commit`; nunca fazer merge nem push; num `task` de rework, seguir no mesmo branch e citar o `task_seq` novo; responder com `answer` a pergunta do judge; e parar depois do `result`, porque o veredito não chega ao worker.
+9. **PAP-68** A seção `Your work` do `worker` SHALL mandar: ao receber `task`, criar o branch do ticket a partir do branch da feature com `git switch -c`; trabalhar com as skills base do papel e as do `loadout`; fazer commit; enviar `send_result` ao `judge` com `ticket_ref`, `task_seq` do `task` mais recente, `branch` e `commit`; nunca fazer merge nem push, nem com a resposta a uma pergunta de PAP-66 que os autorize; num `task` de rework, seguir no mesmo branch e citar o `task_seq` novo; responder com `answer` a pergunta do judge; e parar depois do `result`, porque o veredito não chega ao worker.
 10. **PAP-69** A seção `Your work` do `judge` SHALL mandar: ao receber `result`, ir ao commit com `git switch --detach`; ler com `history` o `task` do ticket e as perguntas e respostas dele; avaliar o commit contra os critérios do ticket e essas respostas; enviar `send_verdict` ao `leader` com `result_seq` do `result` mais recente, `outcome` e um item de `criteria` por critério; em `stale_reference`, julgar o `result` mais recente; e perguntar ao worker dono do ticket em caso de dúvida sobre a entrega.
 11. **PAP-70** A seção `Your work` do `leader` SHALL mandar: no kickoff, trocar para o branch da feature com `git switch` e enviar o `plan` antes do primeiro `task`; enviar `send_task` com `ticket_ref`, `loadout` e `criteria`, um ticket por worker e só depois de aprovadas as dependências; num `approve`, integrar o branch do ticket no branch da feature com `git merge`; num `rework`, enviar novo `task` ao mesmo worker; em `rework_limit`, fazer uma pergunta bloqueante à mother e, com a resposta, marcar o ticket `dropped` no `plan`; responder as perguntas dos workers ou escalar; e, com todos os tickets aprovados, enviar um único `send_result` à mother, sem reportar ticket a ticket.
 12. **PAP-71** A seção `Your work` da `mother` SHALL mandar: fazer a descoberta com o dev no terminal, fora do broker; criar o branch da feature a partir do branch base, commitar a spec nele e voltar ao branch base antes de `open_feature`; enviar o kickoff ao leader com `send_task`; responder as perguntas que souber, mesclar as iguais com `merge_question` quando têm o mesmo `blocking`, e escalar as outras ao dev; e mandar ao leader, com `send_task`, o trabalho novo que uma resposta do dev pedir.
@@ -373,21 +374,21 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-04 | P1: Plugin em diretório próprio | T19 | Verified |
 | PAP-05 | P1: Plugin em diretório próprio | T3 | Verified |
 | PAP-06 | P1: Credencial da sessão para os hooks | T2 | Verified |
-| PAP-07 | P1: Credencial da sessão para os hooks | T2 | Needs Fix (Fix 2 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-07 | P1: Credencial da sessão para os hooks | T2, T33, T40, T45 | Verified (sexta volta, 2026-10-16: K13, W2 e Y1 morrem pela T33, pela T40 e pela T45, os dois últimos no Linux) |
 | PAP-08 | P1: Credencial da sessão para os hooks | T2 | Verified |
 | PAP-09 | P1: Credencial da sessão para os hooks | T2 | Verified |
 | PAP-10 | P1: Início de turno | T7, T22 | Verified |
 | PAP-11 | P1: Início de turno | T7 | Verified |
 | PAP-12 | P1: Início de turno | T6, T7, T9 | Verified |
 | PAP-13 | P1: Início de turno | T7 | Verified |
-| PAP-14 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-15 | P1: Uso no fim do turno | T5 | Verified |
+| PAP-14 | P1: Uso no fim do turno | T5, T59 | Verified |
+| PAP-15 | P1: Uso no fim do turno | T5, T57, T60, T61 | Verified, no fechamento (T61): G2 morre pelo caso da T60, conferido numa cópia fora do repositório, sem volta independente do Verifier |
 | PAP-16 | P1: Uso no fim do turno | T5 | Verified |
 | PAP-17 | P1: Uso no fim do turno | T5 | Verified |
-| PAP-18 | P1: Uso no fim do turno | T5 | Needs Fix (Fix 4 de `validation.md`): lacuna de teste, aceita pelo dev |
-| PAP-19 | P1: Uso no fim do turno | T5 | Verified |
+| PAP-18 | P1: Uso no fim do turno | T5, T35, T41, T46, T47, T50, T51, T52, T53, T54, T55, T56, T57, T59, T61 | Verified com resíduo aceito, no fechamento (T61): os onze do Fix 24 morrem pela T55 a T57 na volta 11, e G8 e G9 pela T59, conferidos numa cópia fora do repositório; G4, G25, G23, G6 e G7 ficam aceitos em "Assumptions", por decisão do dev de 2026-10-18 |
+| PAP-19 | P1: Uso no fim do turno | T5, T58, T61 | Verified, no fechamento (T61): G3 e as variantes com `ELOOP` e `EACCES` morrem pelos casos da T58, conferidos numa cópia fora do repositório, sem volta independente do Verifier |
 | PAP-20 | Edge case | T6 | Verified |
-| PAP-21 | Edge case | T5, T9 | Needs Fix (Fix 7 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-21 | Edge case | T5, T9, T37 | Verified (reverificação de 2026-10-16: K9 morre pela T37) |
 | PAP-22 | Edge case | T8, T9 | Verified |
 | PAP-23 | P1: Uso no fim do turno | T9, T22 | Verified |
 | PAP-24 | P1: Uso no fim do turno | T9 | Verified |
@@ -397,15 +398,15 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-28 | P1: Devolver ao trabalho quem para devendo | T8, T9, T22 | Verified |
 | PAP-29 | P1: Devolver ao trabalho quem para devendo | T8 | Verified |
 | PAP-30 | P1: Devolver ao trabalho quem para devendo | T9 | Verified |
-| PAP-31 | P1: Devolver ao trabalho quem para devendo | T9 | Needs Fix (Fix 1 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-31 | P1: Devolver ao trabalho quem para devendo | T9, T32 | Verified (reverificação de 2026-10-16: K16 e S10 morrem pela T32) |
 | PAP-32 | P1: Devolver ao trabalho quem para devendo | T8, T9 | Verified |
 | PAP-33 | P1: `roles.json` | T10 | Verified |
 | PAP-34 | P1: `roles.json` | T11 | Verified |
 | PAP-35 | P1: `roles.json` | T1, T14 | Verified |
 | PAP-36 | P1: `roles.json` | T14 | Verified |
-| PAP-37 | P1: Lançar uma sessão | T1, T14, T22 | Verified, com texto e teste a reforçar (Fix 8 de `validation.md`) |
+| PAP-37 | P1: Lançar uma sessão | T1, T14, T22, T38, T44, T49 | Verified (sexta volta, 2026-10-16: A10, W17 e Y9 morrem pela T38, pela T44 e pela T49) |
 | PAP-38 | P1: Lançar uma sessão | T14 | Verified |
-| PAP-39 | P1: Lançar uma sessão | T12 | Texto mudado na revisão do PR 12 (as três variáveis que ficam), com o teste do Fix 5 de `validation.md` junto; sem volta do Verifier depois disso |
+| PAP-39 | P1: Lançar uma sessão | T12, T42, T48 | Verified (sexta volta, 2026-10-16: K2, W12 e Y7 morrem pelo teste de `e9bb908`, pela T42 e pela T48) |
 | PAP-40 | P1: Lançar uma sessão | T12, T22 | Verified |
 | PAP-41 | P1: Lançar uma sessão | T14 | Verified |
 | PAP-42 | P1: Lançar uma sessão | T12, T14 | Verified |
@@ -419,10 +420,10 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-50 | P1: Lançar uma sessão | T14, T15 | Verified |
 | PAP-51 | P1: Worktree por papel | T14 | Verified |
 | PAP-52 | P1: Worktree por papel | T14 | Verified |
-| PAP-53 | P1: Worktree por papel | T13 | Needs Fix (Fix 6 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-53 | P1: Worktree por papel | T13, T36 | Verified (reverificação de 2026-10-16: A2 morre pela T36, para worker e judge) |
 | PAP-54 | P1: Worktree por papel | T13 | Verified |
 | PAP-55 | P1: Worktree por papel | T13, T14 | Verified |
-| PAP-56 | P1: Worktree por papel | T13 | Needs Fix (Fix 3 de `validation.md`): lacuna de teste, aceita pelo dev |
+| PAP-56 | P1: Worktree por papel | T13, T34, T43 | Verified (quinta volta, 2026-10-16: K1, W15 e Y8 morrem pela T34 e pela T43) |
 | PAP-57 | P1: Worktree por papel | T13 | Verified |
 | PAP-58 | P1: Worktree por papel | T13, T14 | Verified |
 | PAP-59 | P1: Comando `squad` | T15 | Verified |
@@ -443,7 +444,7 @@ as tools citadas e os comandos literais. Se o agente segue o texto, só RS-10 e 
 | PAP-74 | P1: Skills de protocolo | T23 | Verified |
 | PAP-75 | P1: Skills de protocolo | T23 | Verified |
 
-**Coverage:** 75 total, 75 mapped to tasks, 0 unmapped. PAP-74 e PAP-75 vieram das sessões reais (T22) e foram implementados na T23. Depois da terceira volta do Verifier (`validation.md`, FAIL, sem defeito de produção): 68 `Verified` e 7 com lacuna de teste, em que o código faz o que o requisito diz e nenhum teste distingue um mutante do trecho. O dev aceitou a fatia com essas lacunas em 2026-10-12.
+**Coverage:** 75 total, 75 mapped to tasks, 0 unmapped. PAP-74 e PAP-75 vieram das sessões reais (T22) e foram implementados na T23. Depois da terceira volta do Verifier (`validation.md`, FAIL, sem defeito de produção): 68 `Verified` e 7 com lacuna de teste, em que o código faz o que o requisito diz e nenhum teste distingue um mutante do trecho. O dev aceitou a fatia com essas lacunas em 2026-10-12. Em 2026-10-16 o resíduo foi aplicado (T32 a T39) e reverificado (`validation.md`, FAIL, sem defeito de produção): os oito mutantes do resíduo morrem, PAP-21, PAP-31 e PAP-53 passam a `Verified`, e cinco mutações novas deixam PAP-07, PAP-18, PAP-37, PAP-39 e PAP-56 com lacuna de teste (Fix 10 a Fix 14): 70 `Verified` e 5 `Needs Fix`. Os Fix 10 a Fix 14 entraram na T40 a T44, e a quinta volta (`validation.md`, FAIL, sem defeito de produção) matou os cinco mutantes deles, deu PAP-56 por `Verified` e achou cinco mutações novas vivas em PAP-07, PAP-18, PAP-37 e PAP-39 (Fix 15 a Fix 19): 71 `Verified` e 4 `Needs Fix`. Os Fix 15 a Fix 19 entraram na T45 a T49, e a sexta volta (`validation.md`, FAIL, sem defeito de produção) matou os cinco mutantes deles e deu PAP-07, PAP-37 e PAP-39 por `Verified`; em PAP-18 sobrevivem duas mutações da caixa de `.jsonl` (Fix 20): 74 `Verified` e 1 `Needs Fix`. O Fix 20 entrou na T50, com a caixa contando em `.jsonl` na definição "Transcripts da sessão", e a sétima volta (`validation.md`, FAIL, sem defeito de produção) matou Z4 e Z11 e achou duas mutações novas vivas em PAP-18, o último `.jsonl` do caminho e o `jsonl` sem o ponto (Fix 21): 74 `Verified` e 1 `Needs Fix`. Os Fix 21 a 24 entraram nas T51 a T57, e a décima primeira volta (`validation.md`, FAIL, sem defeito de produção) matou os onze mutantes do Fix 24 e achou nove novos, em PAP-18, PAP-15 e PAP-19 (Fix 25): 72 `Verified` e 3 `Needs Fix`. O dev decidiu em 2026-10-18 fechar a fatia sem décima segunda volta: G3, G8, G9 e G2 entraram nas T58 a T60, e G4, G25, G23, G6 e G7 ficam aceitos em "Assumptions". No fechamento (T61): 75 `Verified`, PAP-18 com o resíduo aceito, e PAP-15, PAP-18 e PAP-19 sem volta independente depois das T58 a T60.
 
 ---
 

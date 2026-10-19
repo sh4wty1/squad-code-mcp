@@ -339,6 +339,22 @@ test("PAP-38: without a name a worker is worker-1 when the broker does not answe
   expect(ms).toBeLessThan(5000);
 }, SLOW);
 
+test("PAP-38: without a name a worker is worker-1 when the log with worker-1 online comes 500 ms after the 2000 ms", async () => {
+  const { main } = namesRepo();
+  // a fetch that answers at 2500 ms and minds the signal
+  const fetch: Deps["fetch"] = (_url, init) =>
+    new Promise<Response>((done, fail) => {
+      const timer = setTimeout(() => done(Response.json({ events: [joined(1, "worker-1")], last_seq: 1 })), 2500);
+      init.signal.addEventListener("abort", () => {
+        clearTimeout(timer);
+        fail(new DOMException("The operation was aborted.", "AbortError"));
+      });
+    });
+  const { code, spawned } = await run(["worker"], main, { fetch });
+  expect(spawned.map(session)).toEqual([["worker-1", "worker"]]);
+  expect(code).toBe(7);
+}, SLOW);
+
 test("PAP-49: a name that is given and is online in the log opens the session all the same", async () => {
   const { main, worktrees } = namesRepo();
   const log = [joined(1, "worker-1"), joined(2, "worker-2"), joined(3, "worker-3")];

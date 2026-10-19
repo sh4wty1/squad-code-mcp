@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 99,
+  "next_id": 125,
   "lessons": [
     {
       "id": "L-001",
@@ -1513,10 +1513,12 @@
       "harmful": 0,
       "evidence": [
         "F6 - PAP-41, PAP-57 - broker/launch.ts:146 (broker tests)",
-        "M31 broker/tui.ts:182 (validation.md volta 1) (tui input)"
+        "M31 broker/tui.ts:182 (validation.md volta 1) (tui input)",
+        "N2, N8 plugin/hooks/usage.ts:82, :85 (PAP-18, volta 10) (hooks)",
+        "validation.md volta 11, G6, G7, G23 (plugin/hooks/usage.ts:82, :85) (broker tests)"
       ],
       "created": "2026-10-12T09:24:37Z",
-      "last_seen": "2026-10-14T16:15:56Z"
+      "last_seen": "2026-10-18T18:22:10Z"
     },
     {
       "id": "L-081",
@@ -1587,10 +1589,11 @@
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)"
+        "K16 plugin/hooks/stop.ts:27 (PAP-31) (hooks)",
+        "validation.md volta 11, G3 (plugin/hooks/usage.ts:79-81) (hooks)"
       ],
       "created": "2026-10-12T11:29:27Z",
-      "last_seen": "2026-10-12T11:29:27Z"
+      "last_seen": "2026-10-18T18:22:10Z"
     },
     {
       "id": "L-085",
@@ -1843,6 +1846,488 @@
       ],
       "created": "2026-10-14T23:08:57Z",
       "last_seen": "2026-10-14T23:08:57Z"
+    },
+    {
+      "id": "L-099",
+      "key": "surviving_mutant::test each word of a rule that narrows its input regular file the case of a prefix the extension a path loses with an input only that word leaves out",
+      "text": "Test each word of a rule that narrows its input (regular file, the case of a prefix, the extension a path loses) with an input only that word leaves out",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "W12 broker/launch.ts:97 (PAP-39) (launcher)",
+        "W15 broker/launch.ts:157 (PAP-56) (launcher)",
+        "W5 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "Y5 plugin/hooks/usage.ts:82 (PAP-18) (launcher)",
+        "Y6 plugin/hooks/usage.ts:85 (PAP-18) (launcher)",
+        "Y7 broker/launch.ts:97 (PAP-39) (launcher)",
+        "Z4 plugin/hooks/usage.ts:85 (PAP-18) (hooks)",
+        "Z11 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "Q2 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "Q5 plugin/hooks/usage.ts:85 (PAP-18) (hooks)",
+        "R1, R2, R4 plugin/hooks/usage.ts:82, :85 (PAP-18) (launcher)",
+        "U1, U2, U4, U5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-16T15:08:16Z",
+      "last_seen": "2026-10-17T19:53:25Z"
+    },
+    {
+      "id": "L-100",
+      "key": "surviving_mutant::bound a test of a deadline by the deadline plus a margin not by several times the time measured a wide bound lets a late abort pass",
+      "text": "Bound a test of a deadline by the deadline plus a margin, not by several times the time measured: a wide bound lets a late abort pass",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "W17 broker/launch.ts:184 (PAP-37) (launcher)"
+      ],
+      "created": "2026-10-16T15:08:17Z",
+      "last_seen": "2026-10-16T15:08:17Z"
+    },
+    {
+      "id": "L-101",
+      "key": "surviving_mutant::test every way a process can end that must still clean up signals included on the platform where that way runs",
+      "text": "Test every way a process can end that must still clean up, signals included, on the platform where that way runs",
+      "signal": "surviving_mutant",
+      "scope": "server",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "W2 broker/server.ts:400 (PAP-07) (server)",
+        "Y1 broker/server.ts:399 (PAP-07) (server)"
+      ],
+      "created": "2026-10-16T15:08:17Z",
+      "last_seen": "2026-10-16T15:49:01Z"
+    },
+    {
+      "id": "L-102",
+      "key": "surviving_mutant::test a deadline with an answer that arrives after it not only with one that never arrives a bound on the exit time lets a longer deadline pass",
+      "text": "Test a deadline with an answer that arrives after it, not only with one that never arrives: a bound on the exit time lets a longer deadline pass",
+      "signal": "surviving_mutant",
+      "scope": "launcher",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Y9 broker/launch.ts:186 (PAP-37) (launcher)"
+      ],
+      "created": "2026-10-16T15:49:02Z",
+      "last_seen": "2026-10-16T15:49:02Z"
+    },
+    {
+      "id": "L-103",
+      "key": "surviving_mutant::fence a suffix rule on a name in one go on its four sides the dot the anchor at the end the case and the place in the path instead of one side per round",
+      "text": "Fence a suffix rule on a name in one go on its four sides, the dot, the anchor at the end, the case and the place in the path, instead of one side per round",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Q2, Q5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)",
+        "U3 plugin/hooks/usage.ts:82 (PAP-18) (hooks)",
+        "N6, N20, N21 plugin/hooks/usage.ts:82, :85 (PAP-18, volta 10) (hooks)"
+      ],
+      "created": "2026-10-16T18:05:43Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-104",
+      "key": "surviving_mutant::run the tests of a file system layer on linux too a mutant on the case of a directory name lives on the case insensitive file system of windows",
+      "text": "Run the tests of a file-system layer on Linux too: a mutant on the case of a directory name lives on the case-insensitive file system of Windows",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Q7 plugin/hooks/usage.ts:82 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-16T18:05:43Z",
+      "last_seen": "2026-10-16T18:05:43Z"
+    },
+    {
+      "id": "L-105",
+      "key": "surviving_mutant::fence a suffix rule on a name also with a name that ends in a shorter start of the suffix such as json for jsonl",
+      "text": "Fence a suffix rule on a name also with a name that ends in a shorter start of the suffix, such as .json for .jsonl",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R1, R2, R4 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-16T23:13:15Z",
+      "last_seen": "2026-10-16T23:13:15Z"
+    },
+    {
+      "id": "L-106",
+      "key": "surviving_mutant::test that one unreadable entry does not hide the others with an entry that fails already at stat such as a dangling link not only with one that fails at read",
+      "text": "Test that one unreadable entry does not hide the others with an entry that fails already at stat, such as a dangling link, not only with one that fails at read",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R17 plugin/hooks/usage.ts:85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-16T23:13:15Z",
+      "last_seen": "2026-10-16T23:13:15Z"
+    },
+    {
+      "id": "L-107",
+      "key": "spec_precision_gap::to test a sort of directory entries create the files in an order that is neither the sorted one nor its reverse tmpfs lists the newest first",
+      "text": "To test a sort of directory entries, create the files in an order that is neither the sorted one nor its reverse: tmpfs lists the newest first",
+      "signal": "spec_precision_gap",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R5 plugin/hooks/usage.ts:85 (PAP-18, design.md:117) (hooks)"
+      ],
+      "created": "2026-10-16T23:13:15Z",
+      "last_seen": "2026-10-16T23:13:15Z"
+    },
+    {
+      "id": "L-108",
+      "key": "surviving_mutant::fence a suffix rule on a name also with a name whose extension only starts with the suffix such as jsonld for jsonl",
+      "text": "Fence a suffix rule on a name also with a name whose extension only starts with the suffix, such as .jsonld for .jsonl",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U1, U2 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-109",
+      "key": "surviving_mutant::give a rule on a file extension a name whose stem has dots of its own such as agent 2 jsonl so a rule that cuts at the first dot fails",
+      "text": "Give a rule on a file extension a name whose stem has dots of its own, such as agent.2.jsonl, so a rule that cuts at the first dot fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U4, U5 plugin/hooks/usage.ts:82, :85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-110",
+      "key": "surviving_mutant::test that an unreadable file counts nothing also with a regular file without read permission the one a stat check before the read lets through",
+      "text": "Test that an unreadable file counts nothing also with a regular file without read permission, the one a stat check before the read lets through",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U9, U13 plugin/hooks/usage.ts:90-94 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-111",
+      "key": "surviving_mutant::test a directory that is listed for its entries also when the path is a regular file so a check that it exists before listing it fails",
+      "text": "Test a directory that is listed for its entries also when the path is a regular file, so a check that it exists before listing it fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U8 plugin/hooks/usage.ts:84-88 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-112",
+      "key": "surviving_mutant::give a rule on the entries of a directory a subdirectory with a matching file inside so a recursive listing fails",
+      "text": "Give a rule on the entries of a directory a subdirectory with a matching file inside, so a recursive listing fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U12 plugin/hooks/usage.ts:85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-113",
+      "key": "spec_precision_gap::when files are read in the order of their names say whether the order is by code unit or by locale and test it with names that differ in case",
+      "text": "When files are read in the order of their names, say whether the order is by code unit or by locale, and test it with names that differ in case",
+      "signal": "spec_precision_gap",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U6 plugin/hooks/usage.ts:85 (PAP-18, design.md:117) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-114",
+      "key": "spec_precision_gap::when a spec selects files by a pattern such as jsonl say whether a name that starts with a dot matches",
+      "text": "When a spec selects files by a pattern such as *.jsonl, say whether a name that starts with a dot matches",
+      "signal": "spec_precision_gap",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "U7 plugin/hooks/usage.ts:85 (PAP-18, spec.md:106) (hooks)"
+      ],
+      "created": "2026-10-17T19:53:26Z",
+      "last_seen": "2026-10-17T19:53:26Z"
+    },
+    {
+      "id": "L-115",
+      "key": "surviving_mutant::give a rule that takes every matching entry of a directory an entry with the name of the file the directory belongs to so a filter that drops that name fails",
+      "text": "Give a rule that takes every matching entry of a directory an entry with the name of the file the directory belongs to, so a filter that drops that name fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N7 plugin/hooks/usage.ts:85 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-116",
+      "key": "surviving_mutant::test a rule over every file of a directory with more files than any other case reads so a cap on how many are read fails",
+      "text": "Test a rule over every file of a directory with more files than any other case reads, so a cap on how many are read fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N12 plugin/hooks/usage.ts:89 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-117",
+      "key": "surviving_mutant::test a sum over several files with two files of the same text so a dedup of the texts fails",
+      "text": "Test a sum over several files with two files of the same text, so a dedup of the texts fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N14 plugin/hooks/usage.ts:96 (PAP-15, PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-118",
+      "key": "surviving_mutant::test that the files next to a main file add to it also when the main file counts nothing so a shortcut on an empty main fails",
+      "text": "Test that the files next to a main file add to it also when the main file counts nothing, so a shortcut on an empty main fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N15 plugin/hooks/usage.ts:81-82 (PAP-18, PAP-19) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-119",
+      "key": "surviving_mutant::test that an unreadable entry is skipped with an error code the other cases do not raise such as a link loop so a list of the codes let through fails",
+      "text": "Test that an unreadable entry is skipped with an error code the other cases do not raise, such as a link loop, so a list of the codes let through fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N16, N17 plugin/hooks/usage.ts:86, :92 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-120",
+      "key": "spec_precision_gap::when files are read in the order of their names say whether the extension is part of the name compared and test it with a stem that is a prefix of another",
+      "text": "When files are read in the order of their names, say whether the extension is part of the name compared, and test it with a stem that is a prefix of another",
+      "signal": "spec_precision_gap",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N13 plugin/hooks/usage.ts:85, design.md:117 (PAP-18) (hooks)"
+      ],
+      "created": "2026-10-17T22:01:11Z",
+      "last_seen": "2026-10-17T22:01:11Z"
+    },
+    {
+      "id": "L-121",
+      "key": "surviving_mutant::when test names are generated generate the stem too with a space and a letter outside ascii so a filter on the characters of the name fails",
+      "text": "When test names are generated, generate the stem too, with a space and a letter outside ASCII, so a filter on the characters of the name fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md volta 11, G4, G25 (plugin/hooks/usage.ts:85) (hooks)"
+      ],
+      "created": "2026-10-18T18:22:10Z",
+      "last_seen": "2026-10-18T18:22:10Z"
+    },
+    {
+      "id": "L-122",
+      "key": "surviving_mutant::test a rule over every line of every file with a file of the size a real one reaches so a cap on the bytes or the lines read fails",
+      "text": "Test a rule over every line of every file with a file of the size a real one reaches, so a cap on the bytes or the lines read fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md volta 11, G8, G9 (plugin/hooks/usage.ts:54, :90-91) (hooks)"
+      ],
+      "created": "2026-10-18T18:22:10Z",
+      "last_seen": "2026-10-18T18:22:10Z"
+    },
+    {
+      "id": "L-123",
+      "key": "surviving_mutant::test an entry without id next to an entry whose id is the text of a small number so a counter key that can equal a real id fails",
+      "text": "Test an entry without id next to an entry whose id is the text of a small number, so a counter key that can equal a real id fails",
+      "signal": "surviving_mutant",
+      "scope": "hooks",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md volta 11, G2 (plugin/hooks/usage.ts:56) (hooks)"
+      ],
+      "created": "2026-10-18T18:22:10Z",
+      "last_seen": "2026-10-18T18:22:10Z"
+    },
+    {
+      "id": "L-124",
+      "key": "spec_precision_gap::state the text encoding of every file a spec reads and test it with a value outside ascii",
+      "text": "State the text encoding of every file a spec reads, and test it with a value outside ASCII",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "papeis"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md volta 11, G10 (plugin/hooks/usage.ts:91) (spec)"
+      ],
+      "created": "2026-10-18T18:22:11Z",
+      "last_seen": "2026-10-18T18:22:11Z"
     }
   ]
 }

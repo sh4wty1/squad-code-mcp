@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/papeis/design.md`
-**Status**: Done. T1 a T31 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`)
+**Status**: Done. T1 a T52 commitadas. A terceira volta do Verifier deu FAIL sem defeito de produção, e o dev aceitou a fatia em 2026-10-12 com o resíduo registrado (Fix 1 a Fix 9 de `validation.md`). Em 2026-10-16 o dev decidiu aplicar o resíduo: a fase 9, T32 a T39, só de teste e de texto, com a reverificação dos requisitos afetados no fim de `validation.md`; o que a reverificação achou, a fase 10, T40 a T44; e o que a quinta volta achou, a fase 11, T45 a T49; e o que a sexta volta achou, a fase 12, T50; e o que a sétima volta achou, a fase 13, T51; e o que a oitava volta achou, a fase 14, T52
 
 Regras do repositório que valem para toda tarefa:
 
@@ -122,6 +122,78 @@ O que o Verifier pediu na segunda volta: quatro testes que não matavam um mutan
 
 ```
 T27 → T28 → T29 → T30 → T31
+```
+
+### Phase 9: O resíduo da volta 3
+
+Os Fix 1 a Fix 9 de `validation.md`, decididos pelo dev em 2026-10-16: um caso ou uma asserção por mutante vivo, o texto de PAP-37 e as leituras da spec levadas aos ACs. Nenhum código de produção muda. O Fix 5 (PAP-39, K2) não tem tarefa: o teste entrou com a revisão do PR 12 (`e9bb908`), e a T39 confere que ele mata o K2.
+
+```
+T32 → T33 → T34 → T35 → T36 → T37 → T38 → T39
+```
+
+### Phase 10: O que a reverificação do resíduo achou
+
+Os Fix 10 a Fix 14 da reverificação de 2026-10-16 em `validation.md`, decididos pelo dev no mesmo dia: um caso ou uma asserção por mutante vivo, só de teste, e duas frases da spec. Em PAP-39 a caixa conta, como o código faz. Nenhum código de produção muda.
+
+```
+T40 → T41 → T42 → T43 → T44
+```
+
+### Phase 11: O que a quinta volta achou
+
+Os Fix 15 a Fix 19 da quinta volta em `validation.md`, decididos pelo dev em 2026-10-16: um caso ou uma asserção por mutante vivo, só de teste. Nenhum código de produção muda, nem texto da spec.
+
+```
+T45 → T46 → T47 → T48 → T49
+```
+
+### Phase 12: O que a sexta volta achou
+
+O Fix 20 da sexta volta em `validation.md`, decidido pelo dev em 2026-10-16: dois casos de teste e uma frase na definição "Transcripts da sessão". Em `.jsonl` a caixa conta, como o código faz e como PAP-39 diz para os nomes `CLAUDE`. Nenhum código de produção muda.
+
+```
+T50
+```
+
+### Phase 13: O que a sétima volta achou
+
+O Fix 21 da sétima volta em `validation.md`, decidido pelo dev em 2026-10-16: dois casos de teste. Nenhum código de produção e nenhuma frase da spec mudam: a definição "Transcripts da sessão" já diz `*.jsonl` e o `.jsonl` do fim.
+
+```
+T51
+```
+
+### Phase 14: O que a oitava volta achou
+
+O Fix 22 da oitava volta em `validation.md`, decidido pelo dev em 2026-10-17: três casos de teste, e a ordem de escrita do caso da ordem dos nomes, recomendada fora do veredito. Nenhum código de produção e nenhuma frase da spec mudam: a definição "Transcripts da sessão" já diz `*.jsonl` e o `.jsonl` do fim, e PAP-18 já diz que um arquivo ilegível não conta e os outros contam.
+
+```
+T52
+```
+
+### Phase 15: O que a nona volta achou
+
+O Fix 23 da nona volta em `validation.md`, decidido pelo dev em 2026-10-17, inteiro: primeiro os três mutantes que fazem `sessionUsage` lançar e derrubariam o hook em `plugin/hooks/stop.ts:50` (T53), depois as formas novas do nome, com os casos de um nome trocados por listas de nomes, como o Verifier sugeriu, para cortar a sequência de voltas (T54). Nenhum código de produção e nenhuma frase da spec mudam.
+
+```
+T53 → T54
+```
+
+### Phase 16: O que a décima volta achou
+
+O Fix 24 da décima volta em `validation.md`, decidido pelo dev em 2026-10-18, inteiro e com as duas sugestões do Verifier para cortar a sequência de voltas. Primeiro os caminhos de erro, com um `fs` que lança `EIO` além dos links para si mesmos (T55). Depois os nomes, gerados por combinação e não mais listados (T56). Por fim o que nenhuma volta testou, os textos iguais e o principal que não conta nada (T57). Nenhum código de produção e nenhuma frase da spec mudam.
+
+```
+T55 → T56 → T57
+```
+
+### Phase 17: O que a décima primeira volta achou, e o fechamento
+
+Do Fix 25 da décima primeira volta em `validation.md`, o dev decidiu em 2026-10-18 aplicar só o que derruba o hook ou conta errado em uso real: G3 (T58), G8 e G9 (T59) e G2 (T60). Depois a fatia fecha sem décima segunda volta. G4, G25, G23, G6 e G7 ficam registrados em "Assumptions" da spec, com uma nota de fechamento em `validation.md` (T61), como na Gate. Nenhum código de produção muda.
+
+```
+T58 → T59 → T60 → T61
 ```
 
 ---
@@ -849,10 +921,629 @@ Não injetadas: o modo `0600` de `server.ts:292`, cuja asserção é pulada no W
 
 ---
 
+### T32: `/events` respondido com outro 2xx
+
+**What**: Fix 1. O caso de PAP-31 do log em que `worker-1` deve, respondido também com status 201.
+**Where**: `broker/test/integration/hook-stop.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O caso de 500 da T26, que vira um laço sobre 500 e 201
+**Requirement**: PAP-31
+
+**Done when**:
+
+- [x] Com `/events` respondendo 201 com o log de um broker real em que `worker-1` deve o `result`, a saída padrão do hook é vazia, os dois `POST /usage` são feitos e o código é 0
+- [x] Morre, conferido e desfeito, o K16 (`!res.ok` no lugar de `res.status !== 200` em `plugin/hooks/stop.ts`); o S10 continua morto
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T33: A sessão fecha com o broker fora
+
+**What**: Fix 2. Um caso de PAP-07 em que a sessão registra, o broker é encerrado e só então a sessão fecha.
+**Where**: `broker/test/integration/server-credential.test.ts`
+**Depends on**: T32
+**Reuses**: `worker` e o caso de PAP-08 do mesmo arquivo
+**Requirement**: PAP-07
+
+**Done when**:
+
+- [x] Registrada a sessão e encerrado o broker, ao fechar a sessão o arquivo de credencial some e o processo sai com 0 sozinho
+- [x] Morre, conferido e desfeito, o K13 (o `rmSync` dentro do `try` do `unregister` em `broker/server.ts`); o V6 continua morto
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T34: Um `.env*` que não é `.env` nem `.env.<algo>`
+
+**What**: Fix 3. Um `.envrc` e um `.env-production` não versionados no caso de PAP-56 dos arquivos copiados.
+**Where**: `broker/test/unit/launch-worktree.test.ts`
+**Depends on**: T33
+**Reuses**: O caso de PAP-56 dos arquivos regulares da raiz
+**Requirement**: PAP-56
+
+**Done when**:
+
+- [x] `.envrc` e `.env-production` não versionados chegam ao worktree com o conteúdo
+- [x] Morre, conferido e desfeito, o K1 (só `.env` e `.env.<algo>` copiados em `broker/launch.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T35: Um arquivo de subagente com outro nome
+
+**What**: Fix 4. Um `sidechain-7.jsonl` em `subagents/` no caso de PAP-18 da soma.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T34
+**Reuses**: O primeiro caso de PAP-18 do arquivo
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] As linhas de um `*.jsonl` de `subagents/` cujo nome não começa com `agent-` entram na soma
+- [x] Morre, conferido e desfeito, o K15 (só `agent-*.jsonl` lido em `plugin/hooks/usage.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T36: Um branch de nome curto `refs/heads/<branch da feature>`
+
+**What**: Fix 6. Um repositório com um branch cujo nome curto é o ref inteiro do branch da feature, no `HEAD` do checkout principal, para o worker e para o judge.
+**Where**: `broker/test/unit/launch-worktree.test.ts`
+**Depends on**: T35
+**Reuses**: Os casos da tag e do branch `null` da T31
+**Requirement**: PAP-53
+
+**Done when**:
+
+- [x] Com esse branch noutro commit, o worktree do `worker` e o do `judge` nascem destacados na ponta do branch da feature
+- [x] Morre, conferido e desfeito, o A2 (sem `--detach` na ponta do branch em `broker/launch.ts`); a linha dele na tabela da T31 já diz que não é equivalente
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T37: `transcript_path` que é um número de descritor
+
+**What**: Fix 7. `stop.ts` como processo com `transcript_path` `0`.
+**Where**: `broker/test/integration/hook-stop.test.ts`
+**Depends on**: T36
+**Reuses**: O caso de PAP-21 sem `transcript_path`
+**Requirement**: PAP-21
+
+**Done when**:
+
+- [x] Com `transcript_path` `0` o log ganha um único `usage` de `unknown` com os quatro números 0, e o hook sai com 0 sem escrever na saída padrão
+- [x] Morre, conferido e desfeito, o K9 (sem a guarda de `transcript_path` que não é texto em `plugin/hooks/usage.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T38: O launcher sai quando a sessão sai, com o broker sem responder
+
+**What**: Fix 8. A frase na definição de "feature aberta, para o launcher" e um `squad start` com um broker que aceita a conexão e nunca responde.
+**Where**: `broker/test/integration/cli.test.ts`, `.specs/features/papeis/spec.md`
+**Depends on**: T37
+**Reuses**: `startWith` com `git` no lugar da sessão
+**Requirement**: PAP-37
+
+**Done when**:
+
+- [x] A definição diz que a leitura que não responde no prazo é abandonada nele e que nada dela segura o launcher depois de a sessão sair
+- [x] Com um servidor que aceita a conexão e nunca responde, `start mother` sai com 129, o código da sessão, em menos de 10 s, e o servidor recebeu a conexão
+- [x] Morre, conferido e desfeito, o A10 (sem `abort.abort()` em `broker/launch.ts`): o launcher fica preso além do prazo do teste
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T39: Documentos
+
+**What**: Fix 9. As seis leituras de "Leituras da spec" que a spec deveria dizer ela mesma, no texto dos ACs.
+**Where**: `.specs/features/papeis/spec.md`, `.specs/features/papeis/tasks.md`
+**Depends on**: T38
+**Reuses**: "Leituras da spec" desta lista
+**Requirement**: PAP-01, PAP-15, PAP-18, PAP-33, PAP-42, PAP-66, PAP-68
+
+**Done when**:
+
+- [x] PAP-01 diz quais são os arquivos do plugin; PAP-15, o `message.id` que não é texto não vazio; PAP-18, o arquivo de `subagents` que não pode ser lido; PAP-33, `workflows: null`; PAP-42, o que é uma opção e em que posição vem; PAP-68, que nenhuma resposta autoriza merge ou push ao worker
+- [x] As linhas dessas seis em "Leituras da spec" dizem que o texto agora está no AC
+- [x] O K2 do Fix 5 morre com o teste de `e9bb908`, conferido e desfeito
+- [x] As outras três partes do Fix 9 já estavam feitas: a confirmação de `spec.md:74` (2026-10-12), o `Status` deste arquivo e os três pacotes do Linux no Handoff
+- [x] Nenhum código de produção muda
+- [x] Gate build passa
+
+**Tests**: none
+**Gate**: build
+
+---
+
+### T40: A sessão encerrada por `SIGTERM`
+
+**What**: Fix 10. Um caso de PAP-07 em que a sessão registrada recebe `SIGTERM`, pulado no Windows, onde o sinal termina o processo sem ouvinte.
+**Where**: `broker/test/integration/server-credential.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: `worker` e o caso de PAP-07 da T33
+**Requirement**: PAP-07
+
+**Done when**:
+
+- [x] No Linux, com a sessão registrada encerrada por `SIGTERM`, o processo sai com 0 sozinho e o arquivo de credencial some
+- [x] Morre no Linux, conferido e desfeito num contêiner `oven/bun:1.4.2`, o W2 (sem `process.on("SIGTERM", cleanup)` em `broker/server.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T41: Um `transcript_path` que não termina em `.jsonl`
+
+**What**: Fix 11. Um transcript `s1.txt` com `s1/subagents/agent-a.jsonl` ao lado.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T40
+**Reuses**: Os casos de PAP-18 do arquivo
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] Com `transcript_path` `s1.txt`, os subagentes de `s1/` não contam: só o principal entra na soma, como a definição de "Transcripts da sessão" diz
+- [x] Morre, conferido e desfeito, o W5 (o diretório `subagents` achado tirando qualquer extensão em `plugin/hooks/usage.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T42: A caixa no nome das variáveis `CLAUDE`
+
+**What**: Fix 12. `claude_home` e `Claude_Code_Entrypoint` no caso de PAP-39 das três variáveis do dev, e a frase da caixa em PAP-39.
+**Where**: `broker/test/unit/launch-args.test.ts`
+**Depends on**: T41
+**Reuses**: O caso de PAP-39 de `e9bb908`
+**Requirement**: PAP-39
+
+**Done when**:
+
+- [x] PAP-39 diz que a caixa conta no nome: `claude_home` não começa com `CLAUDE` e fica
+- [x] `claude_home` e `Claude_Code_Entrypoint` ficam no ambiente da sessão
+- [x] Morre, conferido e desfeito, o W12 (o prefixo conferido sem caixa em `broker/launch.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T43: Um `.env*` que é link simbólico
+
+**What**: Fix 13. Um `.env.link` que é link simbólico para um arquivo regular fora da raiz, pulado onde o link não pode ser criado, e a frase do link em PAP-56.
+**Where**: `broker/test/unit/launch-worktree.test.ts`
+**Depends on**: T42
+**Reuses**: Os casos de PAP-56 do arquivo
+**Requirement**: PAP-56
+
+**Done when**:
+
+- [x] PAP-56 diz que um link simbólico, mesmo para um arquivo regular, não é arquivo regular e não é copiado
+- [x] O worktree não recebe o `.env.link`; o `.env` ao lado é copiado
+- [x] Morre, conferido e desfeito, o W15 (`file.isDirectory()` no lugar de `!file.isFile()` em `broker/launch.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T44: O launcher sai no prazo, não depois dele
+
+**What**: Fix 14. O caso de PAP-37 da T38 mede só o processo do CLI e passa a pedir menos de 5000 ms.
+**Where**: `broker/test/integration/cli.test.ts`
+**Depends on**: T43
+**Reuses**: `runCli`, que passa a devolver quanto o CLI levou
+**Requirement**: PAP-37
+
+**Done when**:
+
+- [x] Com um broker que aceita a conexão e nunca responde, `start mother` sai com 129 em menos de 5000 ms, contados do início ao fim do processo do CLI
+- [x] Morre, conferido e desfeito, o W17 (a leitura abortada 4000 ms depois do prazo em `broker/launch.ts`): o CLI sai aos 6,2 s; o A10 segue morto
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T45: A sessão encerrada por `SIGINT`
+
+**What**: Fix 15. O caso de `SIGTERM` da T40 vira um laço sobre `SIGTERM` e `SIGINT`, pulado no Windows.
+**Where**: `broker/test/integration/server-credential.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O caso de PAP-07 da T40
+**Requirement**: PAP-07
+
+**Done when**:
+
+- [x] No Linux, com a sessão registrada encerrada por `SIGINT`, o processo sai com 0 sozinho e o arquivo de credencial some
+- [x] Morre no Linux, conferido e desfeito num contêiner `oven/bun:1.4.2`, o Y1 (sem `process.on("SIGINT", cleanup)` em `broker/server.ts`); o W2 segue morto
+- [x] Nenhum código de produção muda
+- [x] Gate full passa
+
+**Tests**: integration
+**Gate**: full
+
+---
+
+### T46: Uma pasta com `.jsonl` no nome
+
+**What**: Fix 16. Um transcript `logs.jsonl.d/s1.jsonl` com `logs.jsonl.d/s1/subagents/agent-a.jsonl`.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T45
+**Reuses**: Os casos de PAP-18 do arquivo
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] O subagente de `logs.jsonl.d/s1/subagents/` entra na soma: só o `.jsonl` do fim sai do caminho
+- [x] Morre, conferido e desfeito, o Y5 (`/\.jsonl/` sem `$` em `plugin/hooks/usage.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T47: Um nome de `subagents/` que só tem `.jsonl` dentro
+
+**What**: Fix 17. Um `agent-d.jsonl.bak` no caso de PAP-18 da soma.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T46
+**Reuses**: O primeiro caso de PAP-18 do arquivo
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] `agent-d.jsonl.bak` não entra na soma: não é `*.jsonl`
+- [x] Morre, conferido e desfeito, o Y6 (todo nome que contém `.jsonl` contado em `plugin/hooks/usage.ts`)
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T48: Uma das três variáveis do dev em outra caixa
+
+**What**: Fix 18. `CLAUDE_config_dir` no caso de PAP-39 das três variáveis do dev, fora do esperado.
+**Where**: `broker/test/unit/launch-args.test.ts`
+**Depends on**: T47
+**Reuses**: O caso de PAP-39 da T42
+**Requirement**: PAP-39
+
+**Done when**:
+
+- [x] `CLAUDE_config_dir` sai do ambiente da sessão: com a caixa contando, começa com `CLAUDE` e não é uma das três
+- [x] Morre, conferido e desfeito, o Y7 (as três comparadas sem caixa em `broker/launch.ts`); o W12 segue morto
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T49: O log que chega depois do prazo
+
+**What**: Fix 19. Um `fetch` que obedece ao sinal e responde aos 2500 ms um log em que `worker-1` está online.
+**Where**: `broker/test/unit/launch.test.ts`
+**Depends on**: T48
+**Reuses**: O caso de PAP-38 dos 2000 ms
+**Requirement**: PAP-37, PAP-38
+
+**Done when**:
+
+- [x] `start worker` abre a sessão como `worker-1`: a leitura que não respondeu em 2000 ms falhou, e ninguém está online
+- [x] Morre, conferido e desfeito, o Y9 (o prazo de 1,5 × 2000 ms em `broker/launch.ts`): a sessão abre como `worker-2`; W17 e A10 seguem mortos pelo caso da T44
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T50: A caixa de `.jsonl`
+
+**What**: Fix 20. Um `agent-e.JSONL` no caso de PAP-18 da soma, fora dela; um caso com o transcript `s1.JSONL` e `s1/subagents/agent-a.jsonl`, em que só o principal conta; e a frase da caixa na definição "Transcripts da sessão".
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O primeiro caso de PAP-18 do arquivo e o caso de `s1.txt` da T41
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] A definição "Transcripts da sessão" diz que a caixa conta em `.jsonl`, como PAP-39 diz para os nomes `CLAUDE`
+- [x] `agent-e.JSONL` não entra na soma: não é `*.jsonl`
+- [x] Com `transcript_path` `s1.JSONL`, os subagentes de `s1/` não contam: só o principal entra na soma
+- [x] Morrem, conferidos e desfeitos num clone fora do repositório, o Z4 (o nome de `subagents/` conferido sem caixa em `plugin/hooks/usage.ts`) e o Z11 (`/\.jsonl$/i` em `plugin/hooks/usage.ts`); Y5, Y6, W5 e K15 seguem mortos
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T51: O ponto e o fim do sufixo `.jsonl`
+
+**What**: Fix 21. Um `agent-fjsonl` no caso de PAP-18 da soma, fora dela; e um caso com o transcript `s1.jsonl.bak` e `s1/subagents/agent-a.jsonl`, em que só o principal conta.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O primeiro caso de PAP-18 do arquivo e o caso de `s1.JSONL` da T50
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] `agent-fjsonl` não entra na soma: termina em `jsonl`, mas não é `*.jsonl`
+- [x] Com `transcript_path` `s1.jsonl.bak`, os subagentes de `s1/` não contam: só o principal entra na soma, 1 em cada campo
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o Q2 (`lastIndexOf(".jsonl")` em `plugin/hooks/usage.ts`) e o Q5 (`endsWith("jsonl")` em `plugin/hooks/usage.ts`), que sem os casos novos passam; Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T52: As letras do sufixo `.jsonl` e o link sem alvo
+
+**What**: Fix 22. Um `agent-g.json` no caso de PAP-18 da soma, fora dela; um caso com o transcript `s1.json` e `s1/subagents/agent-a.jsonl`, em que só o principal conta; e, no caso do ilegível, um `agent-z.jsonl` que é um link sem alvo. E, recomendado fora do veredito, os três arquivos do caso da ordem escritos na ordem b, c, a (R5).
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O primeiro caso de PAP-18 do arquivo, o caso de `s1.jsonl.bak` da T51 e o caso do ilegível
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] `agent-g.json` não entra na soma: é o começo de `.jsonl`, mas não é `*.jsonl`
+- [x] Com `transcript_path` `s1.json`, os subagentes de `s1/` não contam: só o principal entra na soma, 1 em cada campo
+- [x] Um `agent-z.jsonl` que é um link sem alvo, criado com `symlinkSync(..., "junction")`, não conta, e `agent-b.jsonl` segue contando 5, 6, 7, 8
+- [x] O caso da ordem escreve `agent-b`, `agent-c` e `agent-a`, nessa ordem, e o resultado segue o de `agent-c`
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o R1 (`/\.jsonl?$/` em `:82`), o R2 (`/\.jsonl?$/.test(name)` em `:85`), o R4 (`.jsonl` ou `.json` em `:85`), o R17 (`statSync(...).isFile()` no filtro de `:85`) e o R5 (sem o `.sort()`), que sem os casos novos passam; Q2, Q5, Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T53: O que não pode ser lido sem derrubar o hook
+
+**What**: Fix 23, itens 1 e 2, os que fazem `sessionUsage` lançar e o hook sair em `plugin/hooks/stop.ts:50`. Um caso com um `agent-y.jsonl` de modo `0o000` ao lado de `agent-b.jsonl`, e com um `subagents` de modo `0o000`, só fora do Windows e fora do root; e um caso com `s1/subagents` que é um arquivo regular.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O caso do ilegível e o skip de PAP-06 em `test/integration/server-credential.test.ts:57`
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] Um `agent-y.jsonl` sem permissão de leitura não conta, `agent-b.jsonl` segue contando 5, 6, 7, 8 e o principal 10, 20, 30, 40, sem lançar
+- [x] Um `subagents` sem permissão de leitura não tem arquivo que conte: só o principal, 1 em cada campo, sem lançar; o modo volta a `0o755` para o diretório do teste sair
+- [x] O caso das permissões tem `test.skipIf(process.platform === "win32" || process.getuid?.() === 0)`: no Windows `chmod` não tira a leitura e o root lê assim mesmo
+- [x] Um `subagents` que é arquivo regular não tem arquivo que conte: só o principal, 1 em cada campo, sem lançar, nas duas plataformas
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o U8 (`existsSync` no lugar do `try` de `:84`), o U9 (`statSync(...)?.isFile()` no lugar do `try` de `:90`) e o U13 (o `catch` de `:92` relança o que não é `EISDIR` nem `ENOENT`), e uma variante do U8 em que o `catch` de `:86` relança o que não é `ENOENT` nem `ENOTDIR`, que sem os casos novos passam; R1, R2, R4, R17, R5, Q2, Q5, Z4, Z11, Y5, Y6, W5, K15 e Q1 seguem mortos
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T54: As formas do nome em listas
+
+**What**: Fix 23, itens 3 a 5, com a sugestão do Verifier de trocar os casos de um nome por laços. No caso da soma, os nomes de `subagents/` que não contam viram uma lista, com `agent-h.jsonld`, `nested/agent-n.jsonl` e `jsonl`; um caso com `agent.2.jsonl`, que conta; e os casos de transcript viram dois laços: os nomes que perdem o `.jsonl` do fim (`s1.jsonl`, `logs.jsonl.d/s1.jsonl`, `s1.v2.jsonl`, com os subagentes do nome cortado no primeiro ponto ao lado, que não contam) e os que não têm a extensão `.jsonl` (`s1.txt`, `s1.JSONL`, `s1.jsonl.bak`, `s1.json`, `s1.jsonld`, `s1-jsonl`), em que só o principal conta.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T53
+**Reuses**: O caso da soma e os casos de transcript das T41, T46, T50, T51 e T52
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] `agent-h.jsonld`, `nested/agent-n.jsonl` e `jsonl` não entram na soma, com os nomes que já não entravam; o `expect` da soma não muda
+- [x] `agent.2.jsonl` conta: 101 em cada campo com o principal
+- [x] Cada nome de transcript que termina em `.jsonl` tem os subagentes do nome sem esse `.jsonl`, 101 em cada campo; cada um que não termina tem só o principal, 1 em cada campo
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o U1 (`/\.jsonl\w*$/` em `:82`), o U2 (`/\.jsonl\w*$/` em `:85`), o U3 (`/.jsonl$/` em `:82`), o U4 (`/^[^.]+\.jsonl$/` em `:85`), o U5 (o nome do transcript cortado no primeiro ponto em `:82`) e o U12 (`readdirSync` recursivo em `:85`), que sem os casos novos passam; R1, R2, R4, R17, R5, Q2, Q5, Z4, Z11, Y5, Y6, W5, K15, Q1, U8, U9 e U13 seguem mortos; e dois nomes a mais das listas matam o que pretendem: `jsonl` em `subagents/` mata `name.split(".").pop() === "jsonl"`, e `s1.jsonl.jsonl` mata `/\.jsonl/g`
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T55: Um erro qualquer do disco sem derrubar o hook
+
+**What**: Fix 24, item 6, com a sugestão do Verifier para a classe inteira. Um caso com um `agent-l.jsonl` que é link para si mesmo, ao lado de `agent-b.jsonl`, e com um `s1/subagents` que é link para si mesmo, com o skip de link de `test/unit/launch-worktree.test.ts:302`; e dois casos com o `readdirSync` e o `readFileSync` de `node:fs` trocados por `spyOn`, só neles, por um que lança `EIO`.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O caso do ilegível, o `canLink` de `test/unit/launch-worktree.test.ts:302`
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] Um `agent-l.jsonl` que é link para si mesmo não conta, `agent-b.jsonl` segue contando 5, 6, 7, 8 e o principal 10, 20, 30, 40, sem lançar; um `subagents` que é link para si mesmo não tem arquivo que conte: só o principal, 1 em cada campo, sem lançar
+- [x] O caso dos links tem `test.skipIf(!canLink)`: no Windows sem o modo de desenvolvedor não se cria link
+- [x] Com o `readdirSync` lançando `EIO`, só o principal conta, 1 em cada campo, sem lançar; com o `readFileSync` lançando `EIO` só para `agent-a.jsonl`, `agent-b.jsonl` conta 5, 6, 7, 8 e o principal 10, 20, 30, 40, sem lançar; o `spyOn` é desfeito em `finally`
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N16 (o `catch` de `:86` relança o que não é `ENOENT`, `ENOTDIR` nem `EACCES`) e o N17 (o `catch` de `:92` relança o que não é `EISDIR`, `ENOENT` nem `EACCES`), e as variantes dos dois que deixam passar também `ELOOP`, que sem os casos novos passam; uma lista que já tem `EIO` segue viva, como toda lista fixa tem a próxima
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T56: As formas do nome geradas
+
+**What**: Fix 24, itens 1 a 3, com a sugestão do Verifier de gerar os nomes. As formas do fim de um nome são separador (vazio, `.`, `-`) × `jsonl` em três formas (`jsonl`, `JSONL`, `json`) × o que vem depois (vazio, `d`, `.bak`, `.jsonl` e, fora do Windows, espaço, `\n` e `\nx`). Um laço de transcripts `s1<forma>`, com os subagentes de cada nome que um erro de leitura tiraria (o nome sem um pedaço que tem `json`), que não contam. E um caso de `subagents/` com `agent<forma>` e `s1.jsonl`, o nome do principal.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T55
+**Reuses**: Os laços de transcript e o caso dos pontos da T54
+**Requirement**: PAP-18
+
+**Done when**:
+
+- [x] Cada transcript `s1<forma>` que termina em `.jsonl`, com o ponto e em minúsculas, tem os subagentes do nome sem esse `.jsonl`, 101 em cada campo; cada um que não termina tem só o principal, 1 em cada campo; em nenhum os subagentes de outro nome sem um pedaço com `json` contam
+- [x] Em `subagents/`, os onze nomes que terminam em `.jsonl` contam, `s1.jsonl` entre eles, 1101 em cada campo com o principal, escrito com o literal; os outros não contam
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N2 (`trim()` em `:82`), o N6 (`/\.?jsonl$/` em `:82`), o N20 (`/\.jsonl$/m` em `:82`), o N7 (o nome do principal fora em `:85`), o N8 (`trim()` em `:85`), o N21 (`/\.jsonl$/m` em `:85`) e o N12 (um teto de três arquivos, e de dez), que sem os casos novos passam; U1, U2, U3, R1, Z11, Q2, Q5 e Z4 seguem mortos
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T57: Os textos iguais e o principal que não conta nada
+
+**What**: Fix 24, itens 4 e 5. Um caso com dois arquivos de `subagents/` de texto igual, uma linha contada sem `message.id`; um com o principal só com a linha `USER`, e um com o principal vazio, cada um com um `agent-a.jsonl` de 100.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T56
+**Reuses**: O caso da soma
+**Requirement**: PAP-15, PAP-18
+
+**Done when**:
+
+- [x] Dois arquivos de texto igual contam os dois: 201 em cada campo com o principal (PAP-15: uma linha sem `message.id` conta sozinha)
+- [x] Um principal que não conta nada, só `USER` ou vazio, não tira os subagentes: 100 em cada campo
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o N14 (`new Set` sobre os textos em `:96`) e o N15 (`return {}` quando o principal não conta nada), que sem os casos novos passam
+- [x] Nenhum código de produção muda
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+
+**Tests**: unit
+**Gate**: build
+
+---
+
+### T58: O principal que não pode ser lido, com qualquer erro
+
+**What**: Fix 25, item 1. Nos casos de PAP-19, três casos novos com um `s1/subagents/agent-a.jsonl` ao lado: um principal que é link para si mesmo (`test.skipIf(!canLink)`), um de modo `0o000` (fora do Windows e do root), e um cujo `readFileSync` lança `EIO` só no caminho do principal, por `spyOn`.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: None (a fase anterior inteira)
+**Reuses**: O `canLink`, o `EIO` e o `spyOn` da T55; o skip de permissão da T53
+**Requirement**: PAP-19
+
+**Done when**:
+
+- [x] Nos três, `sessionUsage` dá `{}` sem lançar, mesmo com o subagente ao lado
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o G3 (o `catch` de `:79` relança o que não é `ENOENT` nem `EISDIR`) e as variantes dele que deixam passar também `ELOOP`, ou `ELOOP` e `EACCES`, que sem os casos novos passam
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T59: Um transcript do tamanho de uma sessão real
+
+**What**: Fix 25, item 4. Um caso com um principal de 100 000 linhas e um arquivo de `subagents` de mais de 8 MiB, cada um com a linha contada no fim.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T58
+**Reuses**: O caso da soma
+**Requirement**: PAP-14, PAP-18
+
+**Done when**:
+
+- [x] A linha do fim de cada um conta, com o `toEqual` escrito com o literal
+- [x] Morrem, conferidos e desfeitos numa cópia fora do repositório, o G8 (um teto de 64 KiB por arquivo) e o G9 (um teto de 1000 linhas por transcript), que sem o caso novo passam
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T60: Um `message.id` `"0"` ao lado de uma linha sem id
+
+**What**: Fix 25, item 5. No caso de PAP-15 da linha sem id, uma linha de `message.id` `"0"` ao lado de uma linha sem id.
+**Where**: `broker/test/unit/hook-usage.test.ts`
+**Depends on**: T59
+**Reuses**: Os casos de PAP-15
+**Requirement**: PAP-15
+
+**Done when**:
+
+- [x] As duas linhas contam, cada uma sozinha
+- [x] Morre, conferido e desfeito numa cópia fora do repositório, o G2 (`String(alone++)` em `:56`), que sem o caso novo passa
+- [x] Nenhum código de produção muda
+- [x] Gate quick passa: `bun test test/unit`
+
+**Tests**: unit
+**Gate**: quick
+
+---
+
+### T61: O fechamento da fatia
+
+**What**: A linha de "Assumptions" da spec com os mutantes aceitos (G4, G25, G23, G6 e G7) e as lacunas de precisão N13 e G10; a rastreabilidade de PAP-15, PAP-18 e PAP-19; a nota de fechamento no fim de `validation.md`; o item do Fix 25 em `ROADMAP.md`.
+**Where**: `.specs/features/papeis/spec.md`, `.specs/features/papeis/validation.md`
+**Depends on**: T60
+**Reuses**: A nota de fechamento da Gate em `.specs/features/gate/validation.md`
+**Requirement**: PAP-15, PAP-18, PAP-19
+
+**Done when**:
+
+- [x] "Assumptions" diz que a fatia fecha sem décima segunda volta por decisão do dev de 2026-10-18, com os cinco mutantes aceitos e o que cada um muda
+- [x] A nota de fechamento diz o que T58 a T60 mataram, conferido numa cópia, e o que ficou sem reverificação independente
+- [x] Gate build passa: `bun node_modules/typescript/bin/tsc --noEmit && bun test`
+
+**Tests**: none
+**Gate**: build
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11 → Phase 12 → Phase 13 → Phase 14 → Phase 15 → Phase 16 → Phase 17
 
 Phase 1:  T1 → T2 → T3 → T4
 Phase 2:  T5 → T6 → T7 → T8 → T9
@@ -862,6 +1553,15 @@ Phase 5:  T20 → T21
 Phase 6:  T22, T23 (sem ordem entre as duas no diagrama: a T23 nasce da T22 e é commitada antes de ela fechar)
 Phase 7:  T24 → T25 → T26
 Phase 8:  T27 → T28 → T29 → T30 → T31
+Phase 9:  T32 → T33 → T34 → T35 → T36 → T37 → T38 → T39
+Phase 10: T40 → T41 → T42 → T43 → T44
+Phase 11: T45 → T46 → T47 → T48 → T49
+Phase 12: T50
+Phase 13: T51
+Phase 14: T52
+Phase 15: T53 → T54
+Phase 16: T55 → T56 → T57
+Phase 17: T58 → T59 → T60 → T61
 ```
 
 Lotes de execução (fases inteiras, perto de 7 tarefas por worker): fases 1 e 2 (9 tarefas); fase 3 (6); fases 4 e 5 (6). A fase 6 não vai para um worker: precisa do login do dev, do ConPTY e de julgamento sobre o que a tela mostra, e fica com o orquestrador.
@@ -872,21 +1572,21 @@ Depois da última tarefa, fora da lista: a suíte no Linux (contêiner `oven/bun
 
 ## Leituras da spec
 
-Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
+Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC. As seis leituras do Fix 9 de `validation.md`, sete linhas (a de `--skip-permissions` entrou em PAP-42 com a da opção), foram levadas ao texto dos ACs na T39, sem mudar o que dizem.
 
 | Ponto | Leitura | Tarefa |
 | ----- | ------- | ------ |
-| `workflows: null` no `roles.json` (PAP-33, "se presente") | Recusado: a chave está presente e o valor não é objeto | T10 |
-| `--skip-permissions` antes do papel (PAP-37 mostra depois) | Aceito em qualquer posição | T12 |
-| "Arquivo do plugin dentro de `broker/`" (PAP-01) | `.claude-plugin`, `hooks`, `skills` e `roles.json`. O `broker/.mcp.json` do upstream não é do plugin e fica | T4 |
+| `workflows: null` no `roles.json` (PAP-33, "se presente") | Recusado: a chave está presente e o valor não é objeto. Desde a T39, no texto de PAP-33 | T10 |
+| `--skip-permissions` antes do papel (PAP-37 mostra depois) | Aceito em qualquer posição. Desde a T39, no texto de PAP-42 | T12 |
+| "Arquivo do plugin dentro de `broker/`" (PAP-01) | `.claude-plugin`, `hooks`, `skills` e `roles.json`. O `broker/.mcp.json` do upstream não é do plugin e fica. Desde a T39, no texto de PAP-01 | T4 |
 | Tool de gate que a skill da mother não cita (PAP-72) | Nenhum texto entre crases com `gate` no nome | T19 |
-| `message.id` que não é texto não vazio (PAP-15, "sem `message.id`") | Linha sem id: conta sozinha | T5 |
+| `message.id` que não é texto não vazio (PAP-15, "sem `message.id`") | Linha sem id: conta sozinha. Desde a T39, no texto de PAP-15 | T5 |
 | `message.usage` que é uma lista (PAP-17, "`message.usage` objeto") | Não é objeto: a linha é ignorada | T5 |
-| Arquivo de `subagents/` que não pode ser lido (PAP-18; PAP-19 só fala do principal) | Não conta nada; o principal e os outros arquivos contam | T5 |
-| O que é uma opção em `squad start` (PAP-42, "uma opção que não é `--skip-permissions`") | Todo argumento que começa com `-`; nunca é lido como papel nem como nome | T12 |
+| Arquivo de `subagents/` que não pode ser lido (PAP-18; PAP-19 só fala do principal) | Não conta nada; o principal e os outros arquivos contam. Desde a T39, no texto de PAP-18 | T5 |
+| O que é uma opção em `squad start` (PAP-42, "uma opção que não é `--skip-permissions`") | Todo argumento que começa com `-`; nunca é lido como papel nem como nome. Desde a T39, no texto de PAP-42 | T12 |
 | Leitura do log pelo launcher que responde outro status, ou algo sem `events` lista ("se a leitura falha", na definição de feature aberta para o launcher) | Leitura que falhou, como em PAP-31: sem feature aberta e ninguém online | T14 |
 | Tool do squad "citada entre crases" e literal de uma seção (PAP-61, PAP-62, PAP-68 a PAP-72) | Proibida: todo identificador de um trecho entre crases, ou de uma linha de bloco cercado, que é nome de tool de outro papel (`kind="answer"` conta na skill do judge). Exigida: um trecho entre crases que é só o nome. Um comando literal vale no trecho que é o literal ou começa por ele | T16 |
-| Merge ou push pedido a um worker com resposta que autoriza (PAP-66 lista os dois, PAP-68 diz nunca) | Continua proibido: a skill do worker diz que nenhuma resposta levanta a regra de `Your work` | T16 |
+| Merge ou push pedido a um worker com resposta que autoriza (PAP-66 lista os dois, PAP-68 diz nunca) | Continua proibido: a skill do worker diz que nenhuma resposta levanta a regra de `Your work`. Desde a T39, no texto de PAP-68 | T16 |
 | Como o teste confere "antes de `open_feature`" (PAP-71) | Em `Your work` da mother, a primeira citação de `git switch -c`, a de `git commit`, a de `git switch <base_branch>` e a de `open_feature`, nessa ordem | T19 |
 | Tool de gate nas skills de worker, leader e judge (PAP-72 só fala da mother) | A mesma regra nas quatro: nenhuma tool de gate existe para papel algum | T19 |
 
@@ -927,6 +1627,27 @@ Pontos em que a tarefa fixa o que a spec deixa sem dizer. Nenhum muda um AC.
 | T29: Mensagem do git com mais de uma linha | 1 arquivo: `launch-worktree.test.ts` | ✅ Granular |
 | T30: `events` que não é lista na leitura do launcher | 1 arquivo: `launch.test.ts` | ✅ Granular |
 | T31: Varredura de mutantes do launcher e do comando | testes dos quatro arquivos do launcher e do comando, um método | ⚠️ Coeso |
+| T32: `/events` respondido com outro 2xx | 1 arquivo: `hook-stop.test.ts` | ✅ Granular |
+| T33: A sessão fecha com o broker fora | 1 arquivo: `server-credential.test.ts` | ✅ Granular |
+| T34: Um `.env*` que não é `.env` nem `.env.<algo>` | 1 arquivo: `launch-worktree.test.ts` | ✅ Granular |
+| T35: Um arquivo de subagente com outro nome | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T36: Um branch de nome curto `refs/heads/<branch da feature>` | 1 arquivo: `launch-worktree.test.ts` | ✅ Granular |
+| T37: `transcript_path` que é um número de descritor | 1 arquivo: `hook-stop.test.ts` | ✅ Granular |
+| T38: O launcher sai quando a sessão sai, com o broker sem responder | 1 frase da spec e o teste dela em `cli.test.ts` | ⚠️ Coeso |
+| T39: Documentos | seis ACs de `spec.md` | ✅ Granular |
+| T40: A sessão encerrada por `SIGTERM` | 1 arquivo: `server-credential.test.ts` | ✅ Granular |
+| T41: Um `transcript_path` que não termina em `.jsonl` | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T42: A caixa no nome das variáveis `CLAUDE` | 1 frase da spec e o teste dela em `launch-args.test.ts` | ✅ Granular |
+| T43: Um `.env*` que é link simbólico | 1 frase da spec e o teste dela em `launch-worktree.test.ts` | ✅ Granular |
+| T44: O launcher sai no prazo, não depois dele | 1 arquivo: `cli.test.ts` | ✅ Granular |
+| T45: A sessão encerrada por `SIGINT` | 1 arquivo: `server-credential.test.ts` | ✅ Granular |
+| T46: Uma pasta com `.jsonl` no nome | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T47: Um nome de `subagents/` que só tem `.jsonl` dentro | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T48: Uma das três variáveis do dev em outra caixa | 1 arquivo: `launch-args.test.ts` | ✅ Granular |
+| T49: O log que chega depois do prazo | 1 arquivo: `launch.test.ts` | ✅ Granular |
+| T50: A caixa de `.jsonl` | 1 arquivo: `hook-usage.test.ts`, e uma frase da spec | ✅ Granular |
+| T51: O ponto e o fim do sufixo `.jsonl` | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
+| T52: As letras do sufixo `.jsonl` e o link sem alvo | 1 arquivo: `hook-usage.test.ts` | ✅ Granular |
 
 Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.json`, T12 no `export` de `namesOf` em `peers.ts`, T15 em `broker/package.json` e T16 no conferidor de `skills.test.ts`. É a ligação do que a própria tarefa cria. T4 e T12 ficam inteiras: os três JSON só valem juntos como um plugin, e as cinco funções de T12 são uma linha cada sobre a mesma entrada.
 
@@ -967,6 +1688,27 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T29 | T28 | T28 → T29 | ✅ Match |
 | T30 | T29 | T29 → T30 | ✅ Match |
 | T31 | T30 | T30 → T31 | ✅ Match |
+| T32 | None (a fase anterior inteira) | início da fase 9 | ✅ Match |
+| T33 | T32 | T32 → T33 | ✅ Match |
+| T34 | T33 | T33 → T34 | ✅ Match |
+| T35 | T34 | T34 → T35 | ✅ Match |
+| T36 | T35 | T35 → T36 | ✅ Match |
+| T37 | T36 | T36 → T37 | ✅ Match |
+| T38 | T37 | T37 → T38 | ✅ Match |
+| T39 | T38 | T38 → T39 | ✅ Match |
+| T40 | None (a fase anterior inteira) | início da fase 10 | ✅ Match |
+| T41 | T40 | T40 → T41 | ✅ Match |
+| T42 | T41 | T41 → T42 | ✅ Match |
+| T43 | T42 | T42 → T43 | ✅ Match |
+| T44 | T43 | T43 → T44 | ✅ Match |
+| T45 | None (a fase anterior inteira) | início da fase 11 | ✅ Match |
+| T46 | T45 | T45 → T46 | ✅ Match |
+| T47 | T46 | T46 → T47 | ✅ Match |
+| T48 | T47 | T47 → T48 | ✅ Match |
+| T49 | T48 | T48 → T49 | ✅ Match |
+| T50 | None (a fase anterior inteira) | início da fase 12 | ✅ Match |
+| T51 | None (a fase anterior inteira) | início da fase 13 | ✅ Match |
+| T52 | None (a fase anterior inteira) | início da fase 14 | ✅ Match |
 
 ---
 
@@ -1005,3 +1747,24 @@ Quatro tarefas mexem também num arquivo de ligação: T4 em `broker/tsconfig.js
 | T29: Mensagem do git com mais de uma linha | Launcher | unit | unit | ✅ OK |
 | T30: `events` que não é lista na leitura do launcher | Launcher | unit | unit | ✅ OK |
 | T31: Varredura de mutantes do launcher e do comando | Launcher | unit | unit | ✅ OK |
+| T32: `/events` respondido com outro 2xx | Hook, processo | integration | integration | ✅ OK |
+| T33: A sessão fecha com o broker fora | Servidor MCP | integration | integration | ✅ OK |
+| T34: Um `.env*` que não é `.env` nem `.env.<algo>` | Launcher | unit | unit | ✅ OK |
+| T35: Um arquivo de subagente com outro nome | Hook, parte pura | unit | unit | ✅ OK |
+| T36: Um branch de nome curto `refs/heads/<branch da feature>` | Launcher | unit | unit | ✅ OK |
+| T37: `transcript_path` que é um número de descritor | Hook, processo | integration | integration | ✅ OK |
+| T38: O launcher sai quando a sessão sai, com o broker sem responder | CLI | integration | integration | ✅ OK |
+| T39: Documentos | Documentação | none | none | ✅ OK |
+| T40: A sessão encerrada por `SIGTERM` | Servidor MCP | integration | integration | ✅ OK |
+| T41: Um `transcript_path` que não termina em `.jsonl` | Hook, parte pura | unit | unit | ✅ OK |
+| T42: A caixa no nome das variáveis `CLAUDE` | Launcher | unit | unit | ✅ OK |
+| T43: Um `.env*` que é link simbólico | Launcher | unit | unit | ✅ OK |
+| T44: O launcher sai no prazo, não depois dele | CLI | integration | integration | ✅ OK |
+| T45: A sessão encerrada por `SIGINT` | Servidor MCP | integration | integration | ✅ OK |
+| T46: Uma pasta com `.jsonl` no nome | Hook, parte pura | unit | unit | ✅ OK |
+| T47: Um nome de `subagents/` que só tem `.jsonl` dentro | Hook, parte pura | unit | unit | ✅ OK |
+| T48: Uma das três variáveis do dev em outra caixa | Launcher | unit | unit | ✅ OK |
+| T49: O log que chega depois do prazo | Launcher | unit | unit | ✅ OK |
+| T50: A caixa de `.jsonl` | Hook, parte pura | unit | unit | ✅ OK |
+| T51: O ponto e o fim do sufixo `.jsonl` | Hook, parte pura | unit | unit | ✅ OK |
+| T52: As letras do sufixo `.jsonl` e o link sem alvo | Hook, parte pura | unit | unit | ✅ OK |

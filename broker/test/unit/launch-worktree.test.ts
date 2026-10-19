@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mainCheckout, worktree } from "../../launch.ts";
@@ -193,6 +193,28 @@ test("PAP-54: without an open feature a branch called null is not taken for one:
   expect(branch(dir)).toBe("");
 }, SLOW);
 
+// A branch whose short name is the whole ref of the branch of the feature, at the HEAD of the
+// main checkout: git reads a name as a short name of a branch before it reads it as a ref
+function shortNamed(main: string) {
+  feature(main);
+  git(main, "branch", `refs/heads/${FEATURE}`, "main");
+  expect(git(main, "rev-parse", `refs/heads/refs/heads/${FEATURE}`)).toBe(head(main));
+  expect(tip(main)).not.toBe(head(main));
+}
+
+for (const role of ["worker", "judge"] as const) {
+  const name = role === "worker" ? "worker-1" : "judge";
+
+  test(`PAP-53: with a branch whose short name is refs/heads/<branch of the feature>, the worktree of the ${role} is born detached at the tip of the branch of the feature`, () => {
+    const { main } = repo();
+    shortNamed(main);
+
+    const dir = worktree(main, name, role, FEATURE, {});
+    expect(head(dir)).toBe(tip(main));
+    expect(branch(dir)).toBe("");
+  }, SLOW);
+}
+
 test("PAP-48: with the branch of the feature checked out in the main checkout the worktree of the leader fails with the message of git, and nothing is copied", () => {
   const { main, worktrees } = repo();
   feature(main);
@@ -258,6 +280,9 @@ test("PAP-56: the regular files of the root that start with .env and git does no
   // one ignored, one merely untracked
   writeFileSync(join(main, ".env"), "KEY=1\nOTHER=two words\n");
   writeFileSync(join(main, ".env.local"), "LOCAL=1\n");
+  // names that start with .env and are neither .env nor .env.<something>
+  writeFileSync(join(main, ".envrc"), "RC=1\n");
+  writeFileSync(join(main, ".env-production"), "PRODUCTION=1\n");
   // what does not count: a directory, a name that does not start with .env, a file below the root
   mkdirSync(join(main, ".env.d"));
   writeFileSync(join(main, ".env.d", "inner"), "INNER=1\n");
@@ -266,9 +291,35 @@ test("PAP-56: the regular files of the root that start with .env and git does no
   writeFileSync(join(main, "sub", ".env"), "SUB=1\n");
 
   const dir = worktree(main, "worker-1", "worker", null, {});
-  expect(readdirSync(dir).sort()).toEqual([".env", ".env.local", ".git", ".gitignore", "README.md"]);
+  expect(readdirSync(dir).sort()).toEqual([".env", ".env-production", ".env.local", ".envrc", ".git", ".gitignore", "README.md"]);
   expect(readFileSync(join(dir, ".env"), "utf8")).toBe("KEY=1\nOTHER=two words\n");
   expect(readFileSync(join(dir, ".env.local"), "utf8")).toBe("LOCAL=1\n");
+  expect(readFileSync(join(dir, ".envrc"), "utf8")).toBe("RC=1\n");
+  expect(readFileSync(join(dir, ".env-production"), "utf8")).toBe("PRODUCTION=1\n");
+}, SLOW);
+
+// Windows creates a symbolic link only with the developer mode or as an administrator
+const canLink = (() => {
+  const dir = mkdtempSync(join(tmpdir(), "squad-link-"));
+  try {
+    writeFileSync(join(dir, "target"), "");
+    symlinkSync(join(dir, "target"), join(dir, "link"), "file");
+    return true;
+  } catch {
+    return false;
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+})();
+
+test.skipIf(!canLink)("PAP-56: a .env* that is a symbolic link to a regular file is not a regular file, and is not copied", () => {
+  const { parent, main } = repo();
+  writeFileSync(join(parent, "secret"), "SECRET=1\n");
+  symlinkSync(join(parent, "secret"), join(main, ".env.link"), "file");
+  writeFileSync(join(main, ".env"), "KEY=1\n");
+
+  const dir = worktree(main, "worker-1", "worker", null, {});
+  expect(readdirSync(dir).sort()).toEqual([".env", ".git", "README.md"]);
 }, SLOW);
 
 test("PAP-56: a tracked .env.example is not copied over the one that came with the checkout", () => {
