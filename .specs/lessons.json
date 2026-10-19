@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 125,
+  "next_id": 127,
   "lessons": [
     {
       "id": "L-001",
@@ -2328,6 +2328,42 @@
       ],
       "created": "2026-10-18T18:22:11Z",
       "last_seen": "2026-10-18T18:22:11Z"
+    },
+    {
+      "id": "L-125",
+      "key": "surviving_mutant::test what a package ships by comparing the full file list of the built artifact with the expected list not by probing chosen paths",
+      "text": "Test what a package ships by comparing the full file list of the built artifact with the expected list, not by probing chosen paths",
+      "signal": "surviving_mutant",
+      "scope": "packaging",
+      "status": "candidate",
+      "features": [
+        "distribuicao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md S6, S7; broker/test/unit/package.test.ts:32 (packaging)"
+      ],
+      "created": "2026-10-19T15:31:07Z",
+      "last_seen": "2026-10-19T15:31:07Z"
+    },
+    {
+      "id": "L-126",
+      "key": "spec_precision_gap::when an ac says a program opens state what it draws first and how it exits",
+      "text": "When an AC says a program opens, state what it draws first and how it exits",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "distribuicao"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "DIST-08 (spec)"
+      ],
+      "created": "2026-10-19T15:31:07Z",
+      "last_seen": "2026-10-19T15:31:07Z"
     }
   ]
 }

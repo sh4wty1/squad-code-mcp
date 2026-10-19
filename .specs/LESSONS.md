@@ -756,6 +756,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md volta 11, G10 (plugin/hooks/usage.ts:91) (spec)
 - last seen: 2026-10-18T18:22:11Z
 
+### L-125 - Test what a package ships by comparing the full file list of the built artifact with the expected list, not by probing chosen paths
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `packaging` · harmful: 0
+- features: distribuicao
+- evidence: validation.md S6, S7; broker/test/unit/package.test.ts:32 (packaging)
+- last seen: 2026-10-19T15:31:07Z
+
+### L-126 - When an AC says a program opens, state what it draws first and how it exits
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: distribuicao
+- evidence: DIST-08 (spec)
+- last seen: 2026-10-19T15:31:07Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
