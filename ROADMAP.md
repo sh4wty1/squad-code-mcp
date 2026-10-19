@@ -105,7 +105,7 @@ fonte dela é [`.specs/features/tui-clicavel/spec.md`](.specs/features/tui-clica
 - [x] Fatia Distribuição: quem não clonou instala com
       `bun add -g github:sh4wty1/squad-code-mcp` e roda `squad` de dentro do próprio
       projeto (`.specs/features/distribuicao/`, AD-023). Fechada em 2026-10-19 no branch
-      `feat/distribuicao`; o README explica só esse caminho.
+      `feat/distribuicao`, [PR 18](https://github.com/sh4wty1/squad-code-mcp/pull/18); o README explica só esse caminho.
 
 ## Depois do MVP
 
