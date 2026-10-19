@@ -7,11 +7,6 @@
   "bin": {
     "squad": "broker/cli.ts"
   },
-  "files": [
-    "broker",
-    "!broker/test",
-    "plugin"
-  ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.0"
   }
